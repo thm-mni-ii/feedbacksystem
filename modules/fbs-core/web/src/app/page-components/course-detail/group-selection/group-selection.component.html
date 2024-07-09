@@ -16,9 +16,8 @@
       <th>{{ "course.select-group" | i18nextEager }}</th>
       <th>{{ "course.group" | i18nextEager }}</th>
       <th>{{ "course.group-membership" | i18nextEager }}</th>
-      <!--<th>Mitglieder</th>-->
     </tr>
-    <tr *ngFor="let group of groups | async; let i = index">
+    <tr *ngFor="let group of groups$ | async; let i = index">
       <td>
         <input
           type="radio"
@@ -29,8 +28,7 @@
         />
       </td>
       <td>{{ group.name }}</td>
-      <td>{{ group.membership }}</td>
-      <!--<td><td>{{ group.members.join(', ') }}</td> >-->
+      <td>{{ group.currentMembership }} / {{ group.membership }}</td>
     </tr>
   </table>
   <button

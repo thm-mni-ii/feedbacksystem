@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { AuthService } from "../../../service/auth.service";
-import { Observable } from "rxjs";
+import { forkJoin, Observable } from "rxjs";
 import { Requirement } from "../../../model/Requirement";
 import { MatDialog } from "@angular/material/dialog";
 import { Roles } from "../../../model/Roles";
@@ -9,6 +9,7 @@ import { NewGroupDialogComponent } from "../../../dialogs/new-group-dialog/new-g
 import { Group } from "../../../model/Group";
 import { GroupService } from "../../../service/group.service";
 import { GroupRegistrationService } from "../../../service/group-registration.sevice";
+import { map, mergeMap } from "rxjs/operators";
 
 @Component({
   selector: "app-group-selection",
@@ -18,7 +19,7 @@ import { GroupRegistrationService } from "../../../service/group-registration.se
 export class GroupSelectionComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;
 
-  groups: Observable<Group[]>;
+  groups$: Observable<(Group & { currentMembership: number })[]>;
   selectedGroup: Group;
   courseId: number;
   editGroups: boolean = false;
@@ -51,7 +52,21 @@ export class GroupSelectionComponent implements OnInit {
   }
 
   loadGroups(): void {
-    this.groups = this.groupService.getGroupList(this.courseId);
+    this.groups$ = this.groupService
+      .getGroupList(this.courseId)
+      .pipe(
+        mergeMap((groups: Group[]) =>
+          forkJoin(
+            groups.map((group) =>
+              this.groupRegistrationService
+                .getGroupMembership(this.courseId, group.id)
+                .pipe(
+                  map((currentMembership) => ({ ...group, currentMembership }))
+                )
+            )
+          )
+        )
+      );
   }
 
   createGroup() {
