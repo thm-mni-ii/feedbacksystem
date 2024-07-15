@@ -151,9 +151,10 @@ export async function getAllQuestionsFromCatalogs(questionInCatalogCollection: m
     return accesibaleQuestions;
 }
 
-export function createQuestionResponse(newQuestionId: mongoDB.ObjectId, newQuestion: any) {
+export function createQuestionResponse(newQuestion: any) {
+    console.log(newQuestion);
     const returnQuestion: ReturnQuestion = {
-        id: newQuestionId,
+        id: newQuestion._id,
         questiontext: newQuestion.questiontext,
         questiontype: newQuestion.questiontype,
         answers: []

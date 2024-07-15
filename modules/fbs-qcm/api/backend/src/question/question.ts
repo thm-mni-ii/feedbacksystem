@@ -171,6 +171,7 @@ export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: strin
     if(!access) {
         return -1;
     }
+    console.log("HIUERRRRRRRRRRRR");
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
@@ -192,7 +193,7 @@ export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: strin
     if(newQuestion == null) {
         return -1;
     }
-    return createQuestionResponse(newQuestionId, newQuestion);
+    return createQuestionResponse(newQuestion);
 }
 
 

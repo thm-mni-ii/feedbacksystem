@@ -151,7 +151,7 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
     if(allConnections == null || allConnections.length == 0) {
         return -1;
     }
-    const convertedFirstQuestion = createQuestionResponse(firstQuestion._id, firstQuestion);
+    const convertedFirstQuestion = createQuestionResponse(firstQuestion);
     let treeArray: treeArray = [[[convertedFirstQuestion]]];
     const allQuestions = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
     if (allQuestions == null || allQuestions == -1) {
@@ -194,7 +194,7 @@ function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions:
             } else {
                 for(let k = 0; k < allQuestions.length; k++) {
                     if(allQuestions[k]._id.equals(connections[key])) {
-                        entry.push(createQuestionResponse(allQuestions[k]._id, allQuestions[k])); 
+                        entry.push(createQuestionResponse(allQuestions[k])); 
                         break;
                     }
                 }
