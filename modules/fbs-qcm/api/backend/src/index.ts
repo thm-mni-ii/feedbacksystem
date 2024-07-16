@@ -7,7 +7,7 @@ import { getStudentCourses, getTeacherCourses } from "./course/course";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "./utils/enum";
-import { startSession } from "./session/session";
+import { pauseSession, startSession } from "./session/session";
 
 interface User {
     username: string;
@@ -510,6 +510,27 @@ async function startServer() {
                 console.log("result");
                 console.log(result);
                 res.send(result);
+            }
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.put("/api_v1/pauseSession", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+                return;
+            }
+            if(req.user === undefined) {
+                res.sendStatus(403);
+                return;
+            }
+            const requestData = req.body;
+            const catalogId = requestData.catalog;
+            const courseId = requestData.course;
+            if(req.user !== undefined) {
+                await pauseSession(req.user, catalogId, courseId); 
+                res.sendStatus(200);
             }
         } catch (error) {
             res.sendStatus(500);
