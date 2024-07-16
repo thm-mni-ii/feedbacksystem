@@ -221,9 +221,9 @@ async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Co
     }
     const evaluation = lastSubmission[0].evaluation; 
     const questionQuery = {
-        _id: lastSubmission[0].question
+        question: lastSubmission[0].question
     }
-    const priorQuestion = await questionCollection.findOne(questionQuery); 
+    const priorQuestion = await questionInCatalogCollection.findOne(questionQuery); 
     if(priorQuestion == null) {
         return 0;
     }
