@@ -119,7 +119,7 @@ const startSession = (catalog: Catalog) => {
       )
       .then((result: boolean) => {
         if (result) {
-          router.push(`/session?catalogId=${catalog.id}`)
+          router.push(`/catalogSession/${catalog.id}`)
         } else {
           console.log('Cancel')
         }

@@ -6,7 +6,7 @@ import { Question } from '../services/question.service.ts'
 const question = ref('')
 const answers = ref<Answer[]>([{ text: '', isCorrect: false, position: 1 }])
 const course = ref(['MIB 13 Datenbanken', 'Anderer Kurs', 'Netzwerksicherheit'])
-const competence = ref(['SERM', 'SQL', 'Relationen'])
+const category = ref(['SERM', 'SQL', 'Relationen'])
 
 const addAnswer = () => {
   answers.value.push({
@@ -18,6 +18,11 @@ const addAnswer = () => {
 
 const handleSubmit = () => {
   console.log(answers.value)
+}
+
+const deleteAnswer = (index) => {
+  console.log(answers.value)
+  answers.value.splice(index, 1)
 }
 </script>
 
@@ -41,8 +46,8 @@ const handleSubmit = () => {
           ></v-select>
 
           <v-select
-            label="Competence"
-            :items="competence"
+            label="Category"
+            :items="category"
             variant="solo-filled"
             class="m-4 pl-2"
           ></v-select>
@@ -50,7 +55,7 @@ const handleSubmit = () => {
         <v-slider
           class="pr-4"
           show-ticks="always"
-          width="400"
+          width="90%"
           label="Difficulty"
           thumb-label
           step="1"
@@ -69,7 +74,7 @@ const handleSubmit = () => {
           width="800"
           required
         ></v-textarea>
-        <div v-for="(answer, index) in answers" :key="index" class="d-flex my-4">
+        <div v-for="(answer, index) in answers" :key="index" class="d-flex my-4 align-center">
           <v-text-field
             auto-grow
             v-model="answer.text"
@@ -77,8 +82,18 @@ const handleSubmit = () => {
             hide-details
             required
           ></v-text-field>
+          <v-btn
+            icon="mdi-delete-outline"
+            @click="deleteAnswer(index)"
+            class="ml-10"
+            variant="text"
+            color="red"
+          >
+            <v-tooltip activator="parent" location="end">Delete</v-tooltip>
+            <v-icon icon="mdi-delete-outline" size="small"> </v-icon>
+          </v-btn>
           <v-checkbox v-model="answer.isCorrect" class="ml-10" color="green" hide-details>
-            <v-tooltip activator="parent" location="end">Correct answer?</v-tooltip>
+            <v-tooltip activator="parent" location="end">Correct answer</v-tooltip>
           </v-checkbox>
         </div>
       </v-responsive>
