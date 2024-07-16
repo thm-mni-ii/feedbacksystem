@@ -8,13 +8,13 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     const userCourses = getUserCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
     const timestamp = Date.now();
     const questionId = new mongoDB.ObjectId(requestData.question);
     const catalog = await checkQuestionAccess(questionId, userCourses, 
-                                              courseCollection, catalogCollection);
+                                              catalogInCourseCollection, catalogCollection);
     if(catalog === false) {
         return -1;
     }

@@ -31,6 +31,7 @@ async function createDatabaseAndCollection() {
     const submissionCollection: mongoDB.Collection = db.collection("submission");
     const userCollection: mongoDB.Collection = db.collection("user");
     const questionInCatalogCollection: mongoDB.Collection = db.collection("questionInCatalog");
+    const cataloginCourseCollection: mongoDB.Collection = db.collection("catalogInCourse");
     await questionCollection.insertOne({
         "_id": new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
       "questiontext": "Wie viele Bits sind ein Byte",
@@ -97,9 +98,17 @@ async function createDatabaseAndCollection() {
             {
       "_id": new mongoDB.ObjectId("663a51d228d8781d96050905"),
       "name": "Grundlagen",
-      "requirements": []
     });
-    await courseCollection.insertOne({ "courseId": 187, "catalogs": [new mongoDB.ObjectId("663a51d228d8781d96050905")]});
+    await courseCollection.insertOne(
+        {
+        "_id": new mongoDB.ObjectId("6696827f0642c847d4953925"),
+        "courseId": 187
+        });
+    await cataloginCourseCollection.insertOne({ 
+        "course": 187,
+        "catalog": new mongoDB.ObjectId("663a51d228d8781d96050905"),
+        "requirements": []
+    }); 
     await userCollection.insertOne({
       "_id": new mongoDB.ObjectId("664b08e0448b1678f0393a7e"),
       "id": 1,
@@ -483,15 +492,22 @@ async function startServer() {
         try {
             if(req.user === undefined) {
                 res.sendStatus(401);
+                return;
             }
             if(req.user === undefined) {
                 res.sendStatus(403);
+                return;
             }
             const requestData = req.body;
             const catalogId = requestData.catalog;
             const courseId = requestData.course;
             if(req.user !== undefined) {
                 const result = await startSession(req.user, catalogId, courseId); 
+                if(result === -1) {
+                    res.sendStatus(403);
+                    return;
+                }
+                console.log("result");
                 console.log(result);
                 res.send(result);
             }

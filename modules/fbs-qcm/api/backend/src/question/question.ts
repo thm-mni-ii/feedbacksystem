@@ -19,9 +19,9 @@ export async function getQuestionById(questionId: string, tokenData: JwtPayload)
     };
     const database: mongoDB.Db = await connect();
     const collection: mongoDB.Collection = database.collection("question");
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, courseCollection, questionInCatalogCollection);
+    const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, catalogInCourseCollection, questionInCatalogCollection);
     if(catalogWithQuestion === false) {
         return -1;
     }
@@ -37,9 +37,9 @@ export async function addQuestionToCatalog(questionId: string, tokenData: JwtPay
     const questionIdObject = new mongoDB.ObjectId(questionId);
     const catalogIdObject = new mongoDB.ObjectId(catalogId);
     const database: mongoDB.Db = await connect();
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const access = await checkQuestionAccess(questionIdObject, adminCourses, courseCollection, questionInCatalogCollection);
+    const access = await checkQuestionAccess(questionIdObject, adminCourses, catalogInCourseCollection, questionInCatalogCollection);
     if(!access) {
         return -1;
     }
@@ -67,9 +67,9 @@ export async function removeQuestionFromCatalog(questionId: string, tokenData: J
     const questionIdObject = new mongoDB.ObjectId(questionId);
     const catalogIdObject = new mongoDB.ObjectId(catalogId);
     const database: mongoDB.Db = await connect();
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const access = await checkQuestionAccess(questionIdObject, adminCourses, courseCollection, questionInCatalogCollection);
+    const access = await checkQuestionAccess(questionIdObject, adminCourses, catalogInCourseCollection, questionInCatalogCollection);
     if(!access) {
         return -1;
     }
@@ -84,10 +84,10 @@ export async function deleteQuestionById(questionId: string, tokenData: JwtPaylo
     };
     const database: mongoDB.Db = await connect();
     const collection: mongoDB.Collection = database.collection("question");
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, courseCollection, catalogCollection);
+    const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, catalogInCourseCollection, catalogCollection);
     if(catalogWithQuestion === false) {
         return -1;
     }
@@ -132,7 +132,7 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
     if (!courseResult) {
         return -1;
     }
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const questionCollection: mongoDB.Collection = database.collection("question");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
@@ -143,7 +143,7 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
     };
     const result = await questionInCatalogCollection.findOne(catalogQuery);
     if (result == null || result.length === 0) {
-        const move = await moveQuestionInCatalogs(adminCourses, courseCollection, questionIdObject, catalogIdObject, questionInCatalogCollection);
+        const move = await moveQuestionInCatalogs(adminCourses, catalogInCourseCollection, questionIdObject, catalogIdObject, questionInCatalogCollection);
         if( move === -1) {
             return -1;
         }
@@ -242,9 +242,9 @@ async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Co
     return -1;
 }
 
-async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection,
+async function moveQuestionInCatalogs(adminCourses: number[], catalogInCourseCollection: mongoDB.Collection,
                                       questionIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId, questionInCatalogCollection: mongoDB.Collection) {
-    const catalogWithQuestion: any = checkQuestionAccess(questionIdObject, adminCourses, courseCollection, questionInCatalogCollection);
+    const catalogWithQuestion: any = checkQuestionAccess(questionIdObject, adminCourses, catalogInCourseCollection, questionInCatalogCollection);
     if(catalogWithQuestion === false) {
         return -1;
     }

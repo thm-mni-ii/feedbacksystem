@@ -10,8 +10,8 @@ interface ReturnQuestion {
 }
 
 export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
-                                  courseCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection) {
-    const allCatalogs: any = await getAllCatalogs(adminCourses, courseCollection);
+                                  catalogInCourseCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection) {
+    const allCatalogs: any = await getAllCatalogs(adminCourses, catalogInCourseCollection);
     const catalogIds: mongoDB.ObjectId[] = [];
     for (let index = 0; index < allCatalogs.length; index++) {
         catalogIds.push(new mongoDB.ObjectId(allCatalogs[index]));
@@ -29,11 +29,11 @@ export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, ad
     return true;
 }
 
-export async function getAllCatalogs(courses: number[], courseCollection: mongoDB.Collection) {
+export async function getAllCatalogs(courses: number[], catalogInCourseCollection: mongoDB.Collection) {
     const courseQuery = {
         courseId: {$in: courses}
     }
-    const catalogs = await courseCollection.find(courseQuery).toArray();
+    const catalogs = await catalogInCourseCollection.find(courseQuery).toArray();
     const allCatalogs: string[] = [];
 
     catalogs.forEach(obj => {
@@ -73,14 +73,12 @@ export async function getCatalogPermission(adminCourses: number[], catalog: stri
     const database: mongoDB.Db = await connect();
     const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
     const courseQuery = {
-        courseId: {$in: adminCourses},
-        catalogs: catalogId
+        course: {$in: adminCourses},
+        catalog: catalogId
     }
-    console.log("courseQuery");
-    console.log(courseQuery);
-    const courseCollection: mongoDB.Collection = database.collection("course");
-    const courseResult = await courseCollection.findOne(courseQuery);
-    if( courseResult != null && courseResult.length > 0) {
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
+    const courseResult = await catalogInCourseCollection.findOne(courseQuery);
+    if( courseResult != null) {
         return true;
     }
     return false;
