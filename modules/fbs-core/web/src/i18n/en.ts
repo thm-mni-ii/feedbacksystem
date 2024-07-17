@@ -370,4 +370,12 @@ export const englishTranslation = {
   "sql-playground.db-schema.tables.label.constraints": "Constraints:",
   "sql-playground.db-schema.tables.label.constraint-name": "Name",
   "sql-playground.db-schema.tables.label.constraint-clause": "Clause",
+  "group.deregister": "Leave Group",
+  "group.deregister.message":
+    "Do you want to leave this group? All your submissions might be lost!",
+  "group.deregister.all": "Deregister all members",
+  "group.deregister.all.message":
+    "Really deregister all members? Their submissions might be lost!",
+  "group.delete": "Delete Group",
+  "group.delete.message": ", really delete this group?",
 };

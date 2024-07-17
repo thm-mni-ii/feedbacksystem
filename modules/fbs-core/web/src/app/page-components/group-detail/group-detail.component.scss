@@ -1,9 +1,23 @@
 @import "../../../colors";
 
-.group-details {
-  .mat-icon {
-    color: $cPrimary;
-    margin-top: 100px;
-    transform: scale(10);
-  }
+.container {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 30px;
+  padding: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+app-menu-bar mat-icon {
+  cursor: pointer;
+  color: #333333;
+}
+
+.kanban-button mat-icon {
+  color: $cPrimary;
+  transform: scale(10);
+  margin-top: 100px;
 }

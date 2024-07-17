@@ -1,5 +1,43 @@
-<div class="group-details">
-  <button mat-icon-button color="primary">
+<div class="container">
+  <app-menu-bar *ngIf="role || isAuthorized()">
+    <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
+    <span>
+      <span *ngIf="role === 'DOCENT'">{{ "role.docent" | i18nextEager }}</span>
+      <span *ngIf="role === 'TUTOR'">{{ "role.tutor" | i18nextEager }}</span>
+      <span *ngIf="role === 'STUDENT'">{{
+        "role.student" | i18nextEager
+      }}</span>
+    </span>
+
+    <span class="spacer"></span>
+
+    <button
+      mat-icon-button
+      *ngIf="isAuthorized() || role"
+      [matMenuTriggerFor]="settings"
+      matTooltip="{{ 'course.settings' | i18nextEager }}"
+    >
+      <mat-icon>settings</mat-icon>
+    </button>
+    <mat-menu #settings="matMenu">
+      <button
+        mat-menu-item
+        *ngIf="isAuthorized()"
+        (click)="derigisterAllMembers()"
+      >
+        <mat-icon> group_remove </mat-icon
+        >{{ "group.deregister.all" | i18nextEager }}
+      </button>
+      <button mat-menu-item color="warn" *ngIf="role" (click)="exitGroup()">
+        <mat-icon>exit_to_app</mat-icon>{{ "group.deregister" | i18nextEager }}
+      </button>
+      <button mat-menu-item *ngIf="isAuthorized()" (click)="deleteGroup()">
+        <mat-icon>delete</mat-icon>{{ "group.delete" | i18nextEager }}
+      </button>
+    </mat-menu>
+  </app-menu-bar>
+
+  <button mat-icon-button class="kanban-button">
     <mat-icon (click)="navigateToKanban()">view_kanban</mat-icon>
   </button>
 </div>

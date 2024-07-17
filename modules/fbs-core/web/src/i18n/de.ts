@@ -377,4 +377,12 @@ export const germanTranslation = {
   "sql-playground.db-schema.tables.label.constraints": "Constraints:",
   "sql-playground.db-schema.tables.label.constraint-name": "Name",
   "sql-playground.db-schema.tables.label.constraint-clause": "Clause",
+  "group.deregister": "Gruppe verlassen",
+  "group.deregister.message":
+    "Wollen Sie diese Gruppe verlassen? Alle Ihre Abgaben könnten verloren gehen!",
+  "group.deregister.all": "Mitglieder entfernen",
+  "group.deregister.all.message":
+    "Wirklich alle Mitglieder entfernen? Ihre Abgaben könnten verloren gehen!",
+  "group.delete": "Gruppe löschen",
+  "group.delete.message": " wirklich löschen?",
 };
