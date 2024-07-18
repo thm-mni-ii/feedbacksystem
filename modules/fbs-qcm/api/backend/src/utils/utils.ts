@@ -1,6 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import * as mongoDB from "mongodb";
+import { SessionStatus } from "./enum";
 
 interface ReturnQuestion {
     id: mongoDB.ObjectId;
@@ -185,4 +186,15 @@ export async function getAllQuestionInCatalog(questionInCatalogCollection: mongo
     const allQuestions = await questionCollection.find(allQuestionsQuery).toArray();
     console.log(allQuestions);
     return allQuestions
+}
+
+export async function getCurrentSession(user: number) {
+    const query = {
+        id: user,
+        status: SessionStatus.ongoing
+    }
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    const result: any = sessionCollection.find(query).sort({ date: -1 }).limit(1).toArray();
+    return result[0];
 }

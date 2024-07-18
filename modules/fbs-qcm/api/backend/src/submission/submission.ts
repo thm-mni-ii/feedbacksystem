@@ -1,8 +1,14 @@
 import { JwtPayload } from "jsonwebtoken";
-import { checkQuestionAccess, getUserCourseRoles} from "../utils/utils";
+import { checkQuestionAccess, getCurrentSession, getUserCourseRoles} from "../utils/utils";
 import { connect } from "../mongo/mongo";
 import { AnswerScore } from "../utils/enum";
 import * as mongoDB from "mongodb";
+
+export async function submitSessionAnswer(tokenData: JwtPayload, requestData: any) {
+    const session = getCurrentSession(tokenData.user);
+    return -1;
+
+}
 
 export async function submit(tokenData: JwtPayload, requestData: any) {
     const userCourses = getUserCourseRoles(tokenData);

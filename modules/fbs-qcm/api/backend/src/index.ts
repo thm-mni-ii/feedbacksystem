@@ -1,13 +1,13 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import { postCatalog, getCatalog, deleteCatalog, putCatalog, getCatalogScore, getUser, getQuestionTree } from "./catalog/catalog";
-import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion, addQuestionToCatalog } from "./question/question";
-import { submit } from "./submission/submission";
+import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion, addQuestionToCatalog, getCurrentSessionQuestion } from "./question/question";
+import { submit, submitSessionAnswer } from "./submission/submission";
 import { getStudentCourses, getTeacherCourses } from "./course/course";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "./utils/enum";
-import { pauseSession, startSession } from "./session/session";
+import { endSession, pauseSession, startSession } from "./session/session";
 
 interface User {
     username: string;
@@ -521,17 +521,77 @@ async function startServer() {
                 res.sendStatus(401);
                 return;
             }
-            if(req.user === undefined) {
-                res.sendStatus(403);
-                return;
-            }
             const requestData = req.body;
             const catalogId = requestData.catalog;
             const courseId = requestData.course;
             if(req.user !== undefined) {
                 await pauseSession(req.user, catalogId, courseId); 
                 res.sendStatus(200);
+                return;
             }
+            res.sendStatus(500);
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.put("/api_v1/endSession", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+                return;
+            }
+            const requestData = req.body;
+            const catalogId = requestData.catalog;
+            const courseId = requestData.course;
+            if(req.user !== undefined) {
+                await endSession(req.user, catalogId, courseId); 
+                res.sendStatus(200);
+                return;
+            }
+            res.sendStatus(500);
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.get("/api_v1/currentSessionQuestion", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+                return;
+            }
+            if(req.user === undefined) {
+                res.send(401);
+                return;
+            }
+            const result = await getCurrentSessionQuestion(req.user);
+            if(result === -1) {
+                res.send(500);
+                return;
+            }
+            res.send(result);
+            
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.get("/api_v1/submitSessionQuestion", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+                return;
+            }
+            if(req.user === undefined) {
+                res.send(401);
+                return;
+            }
+            const requestData = req.body;
+            const result = await submitSessionAnswer(req.user, requestData);
+            if(result === -1) {
+                res.send(500);
+                return;
+            }
+            res.send(result);
+            
         } catch (error) {
             res.sendStatus(500);
         }

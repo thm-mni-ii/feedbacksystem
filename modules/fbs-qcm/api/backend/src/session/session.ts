@@ -63,6 +63,29 @@ export async function pauseSession(tokenData: JwtPayload, catalogId: string, cou
     await sessionCollection.insertOne(sessionEntry);
 }
 
+export async function endSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
+    const userCourses = getUserCourseRoles(tokenData);
+    if(userCourses.length == 0) {
+        return -1;
+    }
+    const catalogObjectId = new mongoDB.ObjectId(catalogId)
+    const courseObjectId = new mongoDB.ObjectId(courseId)
+    if(await checkifSessionIsNotFinished(tokenData.user, catalogObjectId, courseObjectId)) {
+        return -1;
+    }
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    const sessionEntry = {
+        user: tokenData.id,
+        time: new Date,
+        status: SessionStatus.finished,
+        catalogId: catalogObjectId,
+        courseId: courseObjectId,
+    }
+    await sessionCollection.insertOne(sessionEntry);
+
+}
+
 async function checkIfSessionIsOngoing(user: number, catalogObjectId: mongoDB.ObjectId, courseObjectId: mongoDB.ObjectId) {
     const query = {
         user: user,
@@ -71,16 +94,36 @@ async function checkIfSessionIsOngoing(user: number, catalogObjectId: mongoDB.Ob
     }
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
-    const result = await sessionCollection.findOne(query);
+    const result = await sessionCollection.find(query).sort({ date: -1 }).limit(1).toArray();
     if(result === null) {
         return false;
     }
-    if(result.ongoing === SessionStatus.ongoing) {
+    if(result[0].ongoing === SessionStatus.ongoing) {
         return true;
     }
     return false;
 }
 
+async function checkifSessionIsNotFinished(user: number, catalogObjectId: mongoDB.ObjectId, courseObjectId: mongoDB.ObjectId) {
+    const query = {
+        user: user,
+        catalogId: catalogObjectId,
+        courseId: courseObjectId
+    }
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    const result = await sessionCollection.find(query).sort({ date: -1 }).limit(1).toArray();
+    if(result === null) {
+        return false;
+    }
+    if(result[0].ongoing === SessionStatus.ongoing) {
+        return true;
+    }
+    if(result[0].ongoing === SessionStatus.paused) {
+        return true;
+    }
+    return false;
+}
 async function checkForOpenSessions(tokenData: JwtPayload) {
     return false;
 }

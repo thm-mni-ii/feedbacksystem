@@ -1,9 +1,9 @@
 import { Jwt, JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getAdminCourseRoles, getAllQuestionsFromCatalogs, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles, getFirstQuestionInCatalog,
-createQuestionResponse} from "../utils/utils";
+createQuestionResponse, getCurrentSession} from "../utils/utils";
 import * as mongoDB from "mongodb";
-import { AnswerScore } from "../utils/enum";
+import { AnswerScore, SessionStatus } from "../utils/enum";
 
 interface ReturnQuestion {
     id: mongoDB.ObjectId;
@@ -256,5 +256,13 @@ async function moveQuestionInCatalogs(adminCourses: number[], catalogInCourseCol
     };
     await questionInCatalogCollection.updateOne(filter, update);
     return 0;
+}
+
+export async function getCurrentSessionQuestion(tokenData: JwtPayload) {
+    const session = await getCurrentSession(tokenData.id);
+    if(session === null) {
+        return -1;
+    }
+    return getCurrentQuestion(tokenData, session.catalog);    
 }
 
