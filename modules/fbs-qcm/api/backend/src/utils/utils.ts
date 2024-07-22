@@ -198,3 +198,16 @@ export async function getCurrentSession(user: number) {
     const result: any = sessionCollection.find(query).sort({ date: -1 }).limit(1).toArray();
     return result[0];
 }
+
+export async function getSessionStatusAsText(status: SessionStatus) {
+    switch(status) {
+        case SessionStatus.ongoing:
+            return "ongoing";
+        case SessionStatus.finished:
+            return "finished";
+        case SessionStatus.paused:
+            return "paused";
+        default:
+            return "error";
+    }
+}

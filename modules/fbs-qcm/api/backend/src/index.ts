@@ -7,10 +7,11 @@ import { getStudentCourses, getTeacherCourses } from "./course/course";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "./utils/enum";
-import { endSession, pauseSession, startSession } from "./session/session";
+import { endSession, getOngoingSessions, getOpenSessions, getPausedSessions, pauseSession, startSession } from "./session/session";
 
 interface User {
     username: string;
+    id: number
 }
 
 declare global {
@@ -580,13 +581,60 @@ async function startServer() {
                 res.sendStatus(401);
                 return;
             }
-            if(req.user === undefined) {
-                res.send(401);
-                return;
-            }
             const requestData = req.body;
             const result = await submitSessionAnswer(req.user, requestData);
             if(result === -1) {
+                res.send(500);
+                return;
+            }
+            res.send(result);
+            
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.get("/api_v1/getOngoingSessions", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+                return;
+            }
+            const result = await getOngoingSessions(req.user.id);
+            if(result === 0) {
+                res.send(500);
+                return;
+            }
+            res.send(result);
+            
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.get("/api_v1/getPausedSessions", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+                return;
+            }
+            const result = await getPausedSessions(req.user.id);
+            if(result === 0) {
+                res.send(500);
+                return;
+            }
+            res.send(result);
+            
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.get("/api_v1/getOpenSessions", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+                return;
+            }
+            const result = await getOpenSessions(req.user.id);
+            if(result === 0) {
                 res.send(500);
                 return;
             }
