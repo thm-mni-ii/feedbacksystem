@@ -1,6 +1,9 @@
+import type QuestionType from '../enums/QuestionType.ts'
+
 export interface Question {
   id: number
-  text: string
-  type: string
-  questionData: Object
+  questiontext?: string
+  questiontags: string[]
+  questiontype: QuestionType
+  questionconfiguration: Choice | FillInTheBlanks | SQL
 }

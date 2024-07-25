@@ -50,7 +50,7 @@ const currentQuestionIndex = ref(0)
 
 const catalog = ref<Catalog>({
   id: route.params.catalogId,
-  name: 'Catalog Questions',
+  name: 'Datenbanken - SQL',
   difficulty: 1,
   passed: false,
   questions: questions.value.map((question) => question.id),

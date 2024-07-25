@@ -25,7 +25,6 @@ const selectedAnswers = ref([])
         ></v-checkbox>
       </v-card>
     </div>
-    {{ selectedAnswers }}
   </div>
 
   <v-btn
