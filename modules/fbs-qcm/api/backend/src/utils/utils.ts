@@ -13,6 +13,8 @@ interface ReturnQuestion {
 export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
                                   catalogInCourseCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection) {
     const allCatalogs: any = await getAllCatalogs(adminCourses, catalogInCourseCollection);
+    console.log("allCatalogs");
+    console.log(allCatalogs);
     const catalogIds: mongoDB.ObjectId[] = [];
     for (let index = 0; index < allCatalogs.length; index++) {
         catalogIds.push(new mongoDB.ObjectId(allCatalogs[index]));
@@ -22,7 +24,7 @@ export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, ad
         catalog : {$in : catalogIds}
     }
     console.log(ownCatalogQuery);
-    const catalogWithQuestion = await questionInCatalogCollection.findOne(ownCatalogQuery);
+    const catalogWithQuestion = await questionInCatalogCollection.find(ownCatalogQuery).toArray();
     console.log(catalogWithQuestion);
     if (catalogWithQuestion == null) {
         return false;
@@ -32,16 +34,23 @@ export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, ad
 
 export async function getAllCatalogs(courses: number[], catalogInCourseCollection: mongoDB.Collection) {
     const courseQuery = {
-        courseId: {$in: courses}
+        course: {$in: courses}
     }
+    console.log("query");
+    console.log(courseQuery);
     const catalogs = await catalogInCourseCollection.find(courseQuery).toArray();
+    console.log(catalogs);
     const allCatalogs: string[] = [];
 
-    catalogs.forEach(obj => {
-        obj.catalogs.forEach((catalog: string) => {
-            allCatalogs.push(catalog);
-        });
-    });
+    for(let i = 0; i < catalogs.length; i++) {
+        console.log("HALLO");
+        console.log(catalogs);
+        console.log(catalogs[i]);
+        console.log(catalogs[i].catalog);
+        allCatalogs.push(catalogs[i].catalog);
+    }
+    console.log("AllACTALOGS");
+    console.log(allCatalogs);
     return allCatalogs;
 }
 

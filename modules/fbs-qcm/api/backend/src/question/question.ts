@@ -101,20 +101,25 @@ export async function deleteQuestionById(questionId: string, tokenData: JwtPaylo
 
 export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: string, children: string[], weigthing: number) {
     const adminCourses = getAdminCourseRoles(tokenData);
+    console.log(adminCourses);
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
     const searchQuery = {
-        courseId: {$in: adminCourses}, 
-        catalogs: catalogIdObject
+        course: {$in: adminCourses}, 
+        catalog: catalogIdObject
     };
+    console.log(searchQuery);
     const database: mongoDB.Db = await connect();
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const result = await courseCollection.find(searchQuery).toArray();
-    if (result.length > 0) {
-        const collection_question: mongoDB.Collection = database.collection("question");
-        const response = await collection_question.insertOne(data);
+    const result = await catalogInCourseCollection.findOne(searchQuery);
+    console.log(result);
+    if (result !== null) {
+        const questionCollection: mongoDB.Collection = database.collection("question");
+        console.log(data);
+        const result = await questionCollection.insertOne(data);
         const entry = {
             catalog: catalogIdObject,
+            question: result.insertedId,
             weigthing: weigthing,
             children: children
         };
@@ -122,7 +127,7 @@ export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: s
     } else {
         return -1;
     }
-    return data;
+    return 1;
 }
 
 export async function putQuestion(questionId: string, data: JSON, tokenData: JwtPayload, catalog: string) {

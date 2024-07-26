@@ -182,6 +182,8 @@ async function startServer() {
             }
             if(req.user !== undefined) {
                 const data = await getQuestionById(questionId, req.user);
+                console.log("data");
+                console.log(data);
                 if(data !== null && Object.keys(data).length > 0) {
                     res.send(data);
                 } else {
@@ -238,6 +240,7 @@ async function startServer() {
                 res.sendStatus(401);
             }
             if(req.user !== undefined) {
+                console.log(req.body);
                 const requestData = req.body;
                 const catalog = requestData.catalog;
                 const children = requestData.children;
@@ -248,7 +251,7 @@ async function startServer() {
                 const data = await postQuestion(requestData, req.user, catalog, children, weighting); 
                 if(data === -1) {
                     res.sendStatus(403);
-                }else if(data !== null && Object.keys(data).length > 0) {
+                }else if(data === 1) {
                     res.sendStatus(201);
                 } else {
                     res.sendStatus(403);
