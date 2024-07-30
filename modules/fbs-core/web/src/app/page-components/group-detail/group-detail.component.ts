@@ -10,14 +10,11 @@ import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dia
 import { MatDialog } from "@angular/material/dialog";
 import { GroupRegistrationService } from "../../service/group-registration.sevice";
 import { Group } from "../../model/Group";
-import {
-  I18NEXT_SERVICE,
-  I18NextPipe,
-  ITranslationService,
-} from "angular-i18next";
+import { I18NextPipe } from "angular-i18next";
 import { mergeMap } from "rxjs/operators";
 import { Course } from "../../model/Course";
 import { CourseService } from "../../service/course.service";
+import { NewGroupDialogComponent } from "../../dialogs/new-group-dialog/new-group-dialog.component";
 
 @Component({
   selector: "app-group-detail",
@@ -34,13 +31,13 @@ export class GroupDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private titlebar: TitlebarService,
-    private i18NextPipe: I18NextPipe,
-    @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
+    private i18NextPipe: I18NextPipe
   ) {}
   courseID: number;
   groupID: number;
   group$: Observable<Group> = of();
   role: string = null;
+  student: boolean = true;
   course$: Observable<Course> = of();
 
   ngOnInit(): void {
@@ -52,30 +49,33 @@ export class GroupDetailComponent implements OnInit {
     this.role = this.auth.getToken().courseRoles[this.courseID];
   }
 
-  derigisterAllMembers(): void {
-    const title = this.i18NextPipe.transform("group.deregister.all") + "?";
-    const message = this.i18NextPipe.transform("group.deregister.all.message");
-
-    this.dialog
-      .open(ConfirmDialogComponent, {
-        data: {
-          title: title,
-          message: message,
-        },
-      })
-      .afterClosed()
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          this.groupRegistrationService
-            .deregisterAll(this.courseID, this.groupID)
-            .subscribe(
-              () => {
-                this.router.navigate(["/groups"]).then();
+  updateGroup() {
+    this.groupService
+      .getGroup(this.courseID, this.groupID)
+      .pipe(
+        mergeMap((group) =>
+          this.dialog
+            .open(NewGroupDialogComponent, {
+              width: "50%",
+              height: "auto",
+              data: {
+                cid: this.courseID,
+                gid: this.groupID,
+                student: this.student,
+                isUpdateDialog: true,
               },
-              (error) => console.error(error)
-            );
-        }
-      });
+            })
+            .afterClosed()
+        )
+      )
+      .subscribe(
+        (confirm) => {
+          if (confirm.success) {
+            this.loadGroup();
+          }
+        },
+        (error) => console.error(error)
+      );
   }
 
   exitGroup(): void {
@@ -106,38 +106,6 @@ export class GroupDetailComponent implements OnInit {
             );
         }
       });
-  }
-
-  deleteGroup() {
-    this.group$.subscribe((group) => {
-      const groupName = group.name;
-      const title = this.i18NextPipe.transform("group.delete") + "?";
-      const message =
-        groupName + this.i18NextPipe.transform("group.delete.message");
-      this.dialog
-        .open(ConfirmDialogComponent, {
-          data: {
-            title: title,
-            message: message,
-          },
-        })
-        .afterClosed()
-        .pipe(
-          mergeMap((confirmed) => {
-            if (confirmed) {
-              return this.groupService.deleteGroup(this.courseID, this.groupID);
-            } else {
-              return of();
-            }
-          })
-        )
-        .subscribe(
-          () => {
-            this.router.navigate(["/groups"]).then();
-          },
-          (error) => console.error(error)
-        );
-    });
   }
 
   loadGroup(): void {

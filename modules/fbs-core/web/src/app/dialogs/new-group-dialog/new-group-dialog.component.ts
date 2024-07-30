@@ -13,14 +13,39 @@ export class NewGroupDialogComponent {
   name = new UntypedFormControl("", [Validators.required]);
   membership = new UntypedFormControl("", [Validators.required]);
   isVisible = true;
-  isUpdateDialog = false;
+  isUpdateDialog: boolean;
+  student: boolean;
   pending: boolean = false;
 
   constructor(
     private groupService: GroupService,
     public dialogRef: MatDialogRef<NewGroupDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { cid: number }
-  ) {}
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      cid: number;
+      gid?: number;
+      student?: boolean;
+      isUpdateDialog: boolean;
+    }
+  ) {
+    this.isUpdateDialog = data.isUpdateDialog;
+    this.student = data.student;
+    /**if (data.student) {*/
+    this.loadGroupData();
+    /**  }*/
+  }
+
+  loadGroupData() {
+    if (this.data.gid) {
+      this.groupService
+        .getGroup(this.data.cid, this.data.gid)
+        .subscribe((group) => {
+          this.name.setValue(group.name);
+          this.membership.setValue(group.membership);
+          this.isVisible = group.visible;
+        });
+    }
+  }
 
   createGroup() {
     if (!this.isInputValid()) {
@@ -37,7 +62,17 @@ export class NewGroupDialogComponent {
     this.pending = true;
 
     if (this.isUpdateDialog) {
-      // update DB
+      this.groupService
+        .updateGroup(this.data.cid, this.data.gid, group)
+        .subscribe(
+          () => {
+            this.dialogRef.close({ success: true });
+          },
+          (error) => {
+            console.log(error);
+            this.dialogRef.close({ success: false });
+          }
+        );
     } else {
       this.groupService.createGroup(this.data.cid, group).subscribe(
         () => {

@@ -20,23 +20,15 @@
       <mat-icon>settings</mat-icon>
     </button>
     <mat-menu #settings="matMenu">
-      <button
-        mat-menu-item
-        *ngIf="isAuthorized()"
-        (click)="derigisterAllMembers()"
-      >
-        <mat-icon> group_remove </mat-icon
-        >{{ "group.deregister.all" | i18nextEager }}
+      <button mat-menu-item *ngIf="role" (click)="updateGroup()">
+        <mat-icon>title</mat-icon>
+        {{ "dialog.group.new.edit-group-name" | i18nextEager }}
       </button>
       <button mat-menu-item color="warn" *ngIf="role" (click)="exitGroup()">
         <mat-icon>exit_to_app</mat-icon>{{ "group.deregister" | i18nextEager }}
       </button>
-      <button mat-menu-item *ngIf="isAuthorized()" (click)="deleteGroup()">
-        <mat-icon>delete</mat-icon>{{ "group.delete" | i18nextEager }}
-      </button>
     </mat-menu>
   </app-menu-bar>
-
   <button mat-icon-button class="kanban-button">
     <mat-icon (click)="navigateToKanban()">view_kanban</mat-icon>
   </button>

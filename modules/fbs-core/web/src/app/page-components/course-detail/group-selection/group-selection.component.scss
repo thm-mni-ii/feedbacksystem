@@ -17,6 +17,13 @@ td {
   text-align: left;
 }
 
-button {
+.invisible {
+  font-weight: bold;
+  color: #cccccc;
+  padding: 5px;
+}
+
+.selection-button {
+  float: right;
   margin-top: 10px;
 }

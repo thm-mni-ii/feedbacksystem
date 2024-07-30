@@ -1,4 +1,7 @@
 <div class="container">
+  <div *ngIf="isUpdateDialog" matDialogTitle>
+    {{ "dialog.group.new.edit-group" | i18nextEager }}
+  </div>
   <div *ngIf="!isUpdateDialog" matDialogTitle>
     {{ "dialog.group.new.create-group" | i18nextEager }}
   </div>
@@ -22,7 +25,7 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field>
+      <mat-form-field *ngIf="!student">
         <mat-label>{{
           "dialog.group.new.group-membership" | i18nextEager
         }}</mat-label>
@@ -39,7 +42,7 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-slide-toggle [(ngModel)]="isVisible"
+      <mat-slide-toggle *ngIf="!student" [(ngModel)]="isVisible"
         ><p *ngIf="isVisible">
           {{ "dialog.group.new.showGroup" | i18nextEager }}
         </p>
