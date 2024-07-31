@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Observable, of } from "rxjs";
 
 import { GroupService } from "../../service/group.service";
