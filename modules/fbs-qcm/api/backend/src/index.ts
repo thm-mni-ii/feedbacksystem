@@ -202,6 +202,8 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const data = await getQuestionById(questionId, req.user);
+        console.log("data");
+        console.log(data);
         if (data !== null && Object.keys(data).length > 0) {
           res.send(data);
         } else {
@@ -262,6 +264,7 @@ async function startServer() {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
+        console.log(req.body);
         const requestData = req.body;
         const catalog = requestData.catalog;
         const children = requestData.children;
@@ -278,7 +281,7 @@ async function startServer() {
         );
         if (data === -1) {
           res.sendStatus(403);
-        } else if (data !== null && Object.keys(data).length > 0) {
+        } else if (data === 1) {
           res.sendStatus(201);
         } else {
           res.sendStatus(403);
@@ -298,7 +301,6 @@ async function startServer() {
         res.send(data);
       }
     } catch (error) {
-      console.log(error);
       res.sendStatus(500);
     }
   });
@@ -700,8 +702,7 @@ async function startServer() {
     }
     jwt.verify(
       token,
-      //   process.env.JWT_SECRET as string,
-      "wwwa",
+      process.env.JWT_SECRET as string,
       (err: any, user: any) => {
         if (err) {
           console.log(req);
