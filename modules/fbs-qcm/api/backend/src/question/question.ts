@@ -163,9 +163,9 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
 export async function getAllQuestions(tokenData: JwtPayload) {
     const adminCourses = getAdminCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
-    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const allCatalogs = await getAllCatalogs(adminCourses, courseCollection); 
+    const allCatalogs = await getAllCatalogs(adminCourses, catalogInCourseCollection); 
     const allQuestion = await getAllQuestionsFromCatalogs(questionInCatalogCollection , allCatalogs);
     return allQuestion;
 }

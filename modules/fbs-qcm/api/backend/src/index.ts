@@ -271,6 +271,7 @@ async function startServer() {
                 res.send(data);
             }
         } catch (error) {
+            console.log(error);
             res.sendStatus(500);
         }
     });

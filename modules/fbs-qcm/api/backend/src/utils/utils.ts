@@ -7,7 +7,7 @@ interface ReturnQuestion {
     id: mongoDB.ObjectId;
     questiontext: string;
     questiontype: string;
-    answers: string[]; // Array of strings for hobbies
+    answers: string[]; 
 }
 
 export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
@@ -33,6 +33,7 @@ export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, ad
 }
 
 export async function getAllCatalogs(courses: number[], catalogInCourseCollection: mongoDB.Collection) {
+    console.log(courses);
     const courseQuery = {
         course: {$in: courses}
     }
