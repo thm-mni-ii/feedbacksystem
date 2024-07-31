@@ -1,19 +1,19 @@
 import type Question from '../Question.ts'
 
 export default interface Choice extends Question {
-  multiple: boolean
-  optionColumns: OptionColumn[]
+  multipleRow: boolean
+  multipleColumn: boolean
+  answerColumns: OptionColumn[] // 1 = true/false, mehr = matrix
+  optionRows: OptionRow[]
 }
 
 interface OptionColumn {
   id: string
   name: string
-  multiple: boolean
-  options: Option[]
   correctAnswers: number[]
 }
 
-interface Option {
+interface OptionRow {
   id: string
   text: string
 }
