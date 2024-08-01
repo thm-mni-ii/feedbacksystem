@@ -37,11 +37,13 @@
       </v-expansion-panel>
     </v-expansion-panels>
   </v-sheet>
+
+  <v-btn color="primary" variant="tonal" @click="testRequest">Test Request</v-btn>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-// import axios from 'axios'
+import axios from 'axios'
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import { useRouter } from 'vue-router'
 
@@ -127,18 +129,24 @@ const startSession = (catalog: Catalog) => {
   }
 }
 
-// const testRequest = async () => {
-//   await axios
-//     .post('api_v1/allquestions', {
-//       headers: {
-//         Authorization:
-//           'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3Vyc2VSb2xlcyI6IntcIjE4N1wiOlwiVFVUT1JcIn0iLCJpZCI6MSwiaWF0IjoxNzE1MDQ5MDIyfQ.HtvksRvlL3ttT5MuaZvh7D4NgfuscJ-ZJ5vuIa77EWM'
-//       }
-//     })
-//     .then((response) => {
-//       console.log(response)
-//     })
-// }
+const testRequest = async () => {
+  await axios
+    .post('api_v1/question', {
+      headers: {
+        Authorization:
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3Vyc2VSb2xlcyI6IntcIjE4N1wiOlwiVFVUT1JcIn0iLCJpZCI6MSwiaWF0IjoxNzE1MDQ5MDIyfQ.HtvksRvlL3ttT5MuaZvh7D4NgfuscJ-ZJ5vuIa77EWM'
+      },
+      data: {
+        questiontext: 'string',
+        questiontype: 'Single-Choice',
+        questionconfiguratin: 'string',
+        catalog: '187'
+      }
+    })
+    .then((response) => {
+      console.log(response)
+    })
+}
 </script>
 
 <style scoped lang="scss"></style>

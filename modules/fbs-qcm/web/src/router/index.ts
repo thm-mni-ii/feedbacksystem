@@ -15,9 +15,9 @@ const router = createRouter({
       component: () => import('../views/CategoryView.vue')
     },
     {
-      path: '/form',
-      name: 'form',
-      component: () => import('../views/FormView.vue')
+      path: '/newQuestion',
+      name: 'newQuestion',
+      component: () => import('../views/NewQuestionView.vue')
     },
     {
       path: '/catalogSession/:catalogId',
