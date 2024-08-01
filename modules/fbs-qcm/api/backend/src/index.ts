@@ -337,15 +337,19 @@ async function startServer() {
             if(req.user !== undefined) {
                 const requestData = req.body;
                 const course = requestData.course;
-                const questionId = req.query.ID as string;
+                const catalogId = req.query.ID as string;
                 delete requestData.course;
-                const data = await putCatalog(questionId, requestData, req.user, course);
+                const data = await putCatalog(catalogId, requestData, req.user, course);
                 if(data == -1) {
                     res.sendStatus(403);
+                } else if( data === 0) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(500);
                 }
-                res.sendStatus(200);
             }
-        } catch {
+        } catch (error) {
+            console.log(error);
             res.sendStatus(500);
         }
     });
@@ -359,8 +363,8 @@ async function startServer() {
                 const course = requestData.course;
                 delete requestData.course;
                 const data = await postCatalog(requestData, req.user, course); 
-                if(data == 0) {
-                    res.sendStatus(201);
+                if(data !== -1) {
+                    res.send(data);
                 } else {
                     res.sendStatus(403);
                 }

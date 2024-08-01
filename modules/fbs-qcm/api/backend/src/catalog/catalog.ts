@@ -5,8 +5,16 @@ import { getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission,
 import * as mongoDB from "mongodb";
     
 type treeArray = any[][][];
+interface catalog {
+    name: string,
+    questions: string[],
+    requirements: string[]
+}
 
-export async function postCatalog(data: JSON, tokenData: JwtPayload, course: string) {
+export async function postCatalog(data: catalog, tokenData: JwtPayload, course: string) {
+    console.log(data);
+    console.log(tokenData);
+    console.log(course);
     const adminCourses = getAdminCourseRoles(tokenData);
     const courseIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(course);
     const searchQuery = {
@@ -16,18 +24,25 @@ export async function postCatalog(data: JSON, tokenData: JwtPayload, course: str
     const database: mongoDB.Db = await connect();
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    const questionInCatalogCollectionCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const result = await courseCollection.find(searchQuery).toArray();
     if(result.length > 0) {
-       const res = await catalogCollection.insertOne(data); 
-       const filter = {
-           _id: courseIdObject
-       }
-       const update = {
-            $push: { catalogs: res.insertedId } as mongoDB.UpdateFilter<any>
-       } 
-       const res2 = await courseCollection.updateOne(filter, update);
-       return 0;
+        const catalogEntry = {
+            "name": data.name
+        };
+        const res = await catalogCollection.insertOne(catalogEntry); 
+        console.log(res);
+        const entry = {
+             "course": result[0].courseId,
+             "catalog": res.insertedId,
+             "requirements": data.requirements
+        }
+        await catalogInCourseCollection.insertOne(entry);
+        return {"catalog": res.insertedId};
     } else {
+        console.log("no Courses found");
         return -1;
     }
 }
@@ -41,6 +56,7 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const catalogPermission = await getCatalogPermission(adminCourses, catalogId);
     if(!catalogPermission) {
+        console.log("No Permission to Catalog");
         return -1;
     }
     const data = await catalogCollection.findOne(query);
@@ -55,10 +71,12 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
     };
     const database: mongoDB.Db = await connect();
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const courseCollection: mongoDB.Collection = database.collection("course");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogPermission: any = await getCatalogPermission(adminCourses, catalogId);
     if(!catalogPermission) {
+        console.log("No Permission to Catalog");
         return -1;
     }
     const data = await catalogCollection.deleteOne(query);
@@ -66,9 +84,10 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
         _id: catalogPermission._id
     }
     const deleteConnections = {
-        cataolg: catalogIdObject
+        catalog: catalogIdObject
     }
     await questionInCatalogCollection.deleteMany(deleteConnections);
+    await catalogInCourseCollection.deleteMany(deleteConnections);
     const update = {
         $pull: { catalogs: catalogIdObject } as mongoDB.UpdateFilter<any>
     };
@@ -76,33 +95,50 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
     return data;
 }
 
-export async function putCatalog(catalogId: string, data: JSON, tokenData: JwtPayload, courseId: string) {
+export async function putCatalog(catalogId: string, data: catalog, tokenData: JwtPayload, courseId: string) {
     const adminCourses = getAdminCourseRoles(tokenData); 
     const database: mongoDB.Db = await connect();
     const courseResult = await getCatalogPermission(adminCourses, catalogId);
     if (!courseResult) {
+        console.log("No Permission to Catalog");
         return -1;
     }
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const courseIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(courseId);
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
     const catalogQuery = {
         _id: courseIdObject,
         catalogs: catalogIdObject
     };
-    const result = await catalogCollection.find(catalogQuery).toArray();
-    if (result.length === 0) {
-        const move = await moveCatalogInCourses(adminCourses, courseCollection, courseIdObject, catalogIdObject);
-        if( move === -1) {
-            return -1;
-        }
+    await catalogCollection.find(catalogQuery).toArray();
+    const getCourseNumberQuery = {
+        _id: courseIdObject
+    }
+    const courseNumber = await courseCollection.findOne(getCourseNumberQuery)
+    if(courseNumber === null) {
+        console.log("course does not exist");
+        return -1;
     }
     const filter = {
         _id: catalogIdObject
     }
-    const res = await catalogCollection.replaceOne(filter, data); 
-    return res;
+    const update = {
+         $set: {name: data.name}
+    }
+    await catalogCollection.updateMany(filter, update); 
+    const filter2 = {
+        catalog: catalogIdObject,
+        course: courseNumber.courseId
+    }
+    const update2 = {
+        $set: {
+           requirements: data.requirements,
+        }
+    }
+    await catalogInCourseCollection.updateOne(filter2, update2); 
+    return 0;
 }
 
 export async function getUser(tokenData: JwtPayload) {
@@ -220,29 +256,26 @@ function findConnection(question: any, allConnections: any[]) {
     return -1;
 }
 
-async function moveCatalogInCourses(adminCourses: number[], courseCollection: mongoDB.Collection,
+async function moveCatalogInCourses(adminCourses: number[], catalogInCourseCollection: mongoDB.Collection,
                                      courseIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId) {
     const checkQuery = {
-        courseId: {$in: adminCourses},
-        catalogs: catalogIdObject
+        course: {$in: adminCourses},
+        catalog: catalogIdObject
     }
-    const res = await courseCollection.findOne(checkQuery);
+    const res = await catalogInCourseCollection.findOne(checkQuery);
     if(res == null || res.length == 0) {
         return -1;
     }
-    const filter = {
-        _id: res._id
-    };
-    const change = {
-        $pull: {catalogs: catalogIdObject} as mongoDB.UpdateFilter<any> 
-    };        
-    await courseCollection.updateOne(filter, change);
-    const filter2 = {
-        _id: courseIdObject
+    const notChangedQuery = {
+        course: courseIdObject,
+        catalog: catalogIdObject
     }
-    const change2 = {
-        $push: {catalogs: catalogIdObject} as mongoDB.UpdateFilter<any> 
-    };        
-    await courseCollection.updateOne(filter2, change2);
+    const alreadyExist = catalogInCourseCollection.findOne(notChangedQuery);
+    console.log("alreadyExist");
+    console.log(alreadyExist);
+    if( alreadyExist !== null) {
+        return 0;
+    }
+
     return 0;
 }
