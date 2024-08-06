@@ -1,7 +1,7 @@
 import * as mongoDB from "mongodb";
 
 export async function connect() {
-  const uri = "mongodb://localhost:27018/"; // process.env.MONGODB_URL;
+  const uri = process.env.MONGODB_URL;
   if (uri == undefined) {
     console.error("Could not get MongoDB address");
     process.exit(1);
