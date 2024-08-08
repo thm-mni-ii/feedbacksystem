@@ -10,7 +10,7 @@ export default interface Choice extends Question {
 interface OptionColumn {
   id: string
   name: string
-  correctAnswers: number[]
+  correctAnswers: number[] // ID option row
 }
 
 interface OptionRow {
