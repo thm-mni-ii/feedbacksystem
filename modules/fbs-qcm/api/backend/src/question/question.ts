@@ -4,6 +4,8 @@ import { getAdminCourseRoles, getAllQuestionsFromCatalogs, getCatalogPermission,
 createQuestionResponse, getCurrentSession} from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { AnswerScore, SessionStatus } from "../utils/enum";
+import { Question } from "../model/Question";
+type questionInsertionType = Omit<Question, 'id'>;
 
 interface ReturnQuestion {
     id: mongoDB.ObjectId;
@@ -99,7 +101,7 @@ export async function deleteQuestionById(questionId: string, tokenData: JwtPaylo
     return data;
 }
 
-export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: string, children: string[], weigthing: number) {
+export async function postQuestion(question: Question, tokenData: JwtPayload, catalog: string, children: string[]) {
     const adminCourses = getAdminCourseRoles(tokenData);
     console.log(adminCourses);
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
@@ -115,12 +117,12 @@ export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: s
     console.log(result);
     if (result !== null) {
         const questionCollection: mongoDB.Collection = database.collection("question");
-        console.log(data);
-        const result = await questionCollection.insertOne(data);
+        const questionInsertion: questionInsertionType= question;
+        questionInsertion.owner = tokenData.user;
+        const result = await questionCollection.insertOne(questionInsertion);
         const entry = {
             catalog: catalogIdObject,
             question: result.insertedId,
-            weigthing: weigthing,
             children: children
         };
         questionInCatalogCollection.insertOne(entry);

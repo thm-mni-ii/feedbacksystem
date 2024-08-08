@@ -32,6 +32,8 @@ import {
   pauseSession,
   startSession,
 } from "./session/session";
+import  Choice  from "./model/questionTypes/Choice";
+import { Question } from "./model/Question";
 
 interface User {
   username: string;
@@ -265,19 +267,18 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         console.log(req.body);
-        const requestData = req.body;
+        const requestData= req.body;
         const catalog = requestData.catalog;
         const children = requestData.children;
-        const weighting = requestData.weighting;
-        delete requestData.weighting;
         delete requestData.children;
         delete requestData.catalog;
+        const question: Question = requestData;
+        console.log(question);
         const data = await postQuestion(
-          requestData,
+          question,
           req.user,
           catalog,
-          children,
-          weighting
+          children
         );
         if (data === -1) {
           res.sendStatus(403);
