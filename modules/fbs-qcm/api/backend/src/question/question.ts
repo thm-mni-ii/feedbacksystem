@@ -102,35 +102,17 @@ export async function deleteQuestionById(questionId: string, tokenData: JwtPaylo
     return data;
 }
 
-export async function postQuestion(question: Question, tokenData: JwtPayload, catalog: string, children: string[]) {
+export async function postQuestion(question: Question, tokenData: JwtPayload) {
     const adminCourses = getAdminCourseRoles(tokenData);
-    console.log(adminCourses);
-    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
-    const searchQuery = {
-        course: {$in: adminCourses}, 
-        catalog: catalogIdObject
-    };
-    console.log(searchQuery);
-    const database: mongoDB.Db = await connect();
-    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
-    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const result = await catalogInCourseCollection.findOne(searchQuery);
-    console.log(result);
-    if (result !== null) {
-        const questionCollection: mongoDB.Collection = database.collection("question");
-        const questionInsertion: questionInsertionType= question;
-        questionInsertion.owner = tokenData.user;
-        const result = await questionCollection.insertOne(questionInsertion);
-        const entry = {
-            catalog: catalogIdObject,
-            question: result.insertedId,
-            children: children
-        };
-        questionInCatalogCollection.insertOne(entry);
-    } else {
+    if(adminCourses === null) {
         return -1;
     }
-    return 1;
+    const database: mongoDB.Db = await connect();
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    const questionInsertion: questionInsertionType= question;
+    questionInsertion.owner = tokenData.user;
+    const result = await questionCollection.insertOne(questionInsertion);
+    return result.insertedId;
 }
 
 export async function putQuestion(question: Question, tokenData: JwtPayload) {

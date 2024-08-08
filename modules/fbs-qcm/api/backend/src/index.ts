@@ -267,24 +267,16 @@ async function startServer() {
       if (req.user !== undefined) {
         console.log(req.body);
         const requestData = req.body;
-        const catalog = requestData.catalog;
-        const children = requestData.children;
-        delete requestData.children;
-        delete requestData.catalog;
         const question: Question = requestData;
         console.log(question);
         const data = await postQuestion(
           question,
           req.user,
-          catalog,
-          children
         );
         if (data === -1) {
           res.sendStatus(403);
-        } else if (data === 1) {
-          res.sendStatus(201);
         } else {
-          res.sendStatus(403);
+          res.send(data);
         }
       }
     } catch (error) {
