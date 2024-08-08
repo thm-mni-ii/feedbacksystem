@@ -1,7 +1,8 @@
 import { Jwt, JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getAdminCourseRoles, getAllQuestionsFromCatalogs, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles, getFirstQuestionInCatalog,
-createQuestionResponse, getCurrentSession} from "../utils/utils";
+createQuestionResponse, getCurrentSession,
+IsOwner} from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { AnswerScore, SessionStatus } from "../utils/enum";
 import { Question } from "../model/Question";
@@ -132,33 +133,17 @@ export async function postQuestion(question: Question, tokenData: JwtPayload, ca
     return 1;
 }
 
-export async function putQuestion(questionId: string, data: JSON, tokenData: JwtPayload, catalog: string) {
-    const adminCourses = getAdminCourseRoles(tokenData); 
+export async function putQuestion(question: Question, tokenData: JwtPayload) {
     const database: mongoDB.Db = await connect();
-    const courseResult = await getCatalogPermission(adminCourses, catalog);
-    if (!courseResult) {
+    const questionCollection = database.collection("question");
+    if( ! await IsOwner(question, tokenData, questionCollection)) {
         return -1;
     }
-    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
-    const questionCollection: mongoDB.Collection = database.collection("question");
-    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
-    const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);
-    const catalogQuery = {
-        catalog: catalogIdObject,
-        question: questionIdObject
-    };
-    const result = await questionInCatalogCollection.findOne(catalogQuery);
-    if (result == null || result.length === 0) {
-        const move = await moveQuestionInCatalogs(adminCourses, catalogInCourseCollection, questionIdObject, catalogIdObject, questionInCatalogCollection);
-        if( move === -1) {
-            return -1;
-        }
-    }
     const filter = {
-        _id: questionIdObject
+        _id: new mongoDB.ObjectId(question.id)
     }
-    const res = await questionCollection.replaceOne(filter, data); 
+    const questionWithoutId: questionInsertionType = question; 
+    const res = await questionCollection.replaceOne(filter, questionWithoutId); 
     return res;
 }
 

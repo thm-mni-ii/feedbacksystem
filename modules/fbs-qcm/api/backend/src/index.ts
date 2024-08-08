@@ -240,15 +240,14 @@ async function startServer() {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
+        console.log(req.body);
         const requestData = req.body;
-        const catalog = requestData.catalog;
-        const questionId = req.query.questionID as string;
+        delete requestData.children;
         delete requestData.catalog;
+        const question: Question = requestData;
         const data = await putQuestion(
-          questionId,
-          requestData,
+          question,
           req.user,
-          catalog
         );
         if (data === -1) {
           res.sendStatus(403);
@@ -267,7 +266,7 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         console.log(req.body);
-        const requestData= req.body;
+        const requestData = req.body;
         const catalog = requestData.catalog;
         const children = requestData.children;
         delete requestData.children;

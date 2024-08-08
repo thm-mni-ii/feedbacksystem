@@ -2,6 +2,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import * as mongoDB from "mongodb";
 import { SessionStatus } from "./enum";
+import { Question } from "../model/Question";
 
 interface ReturnQuestion {
     id: mongoDB.ObjectId;
@@ -220,4 +221,22 @@ export async function getSessionStatusAsText(status: SessionStatus) {
         default:
             return "error";
     }
+}
+
+export async function IsOwner(question: Question, tokenData: JwtPayload, questionCollection: mongoDB.Collection) {
+    const filter = {
+        _id: new mongoDB.ObjectId(question.id)
+    }
+    const result = await questionCollection.findOne(filter);
+    if(result === null) {
+        return false;
+    }
+   if(result.owner === tokenData.user) {
+       return true;
+   }
+   console.log(question.owner);
+   console.log(typeof question.owner);
+   console.log(tokenData.user);
+   console.log(typeof tokenData.user);
+   return false;
 }
