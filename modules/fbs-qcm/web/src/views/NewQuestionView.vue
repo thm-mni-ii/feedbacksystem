@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import axios, { type AxiosResponse } from 'axios'
 import type { Answers } from '../model/Answers'
-import type { Question } from '../model/Question.ts'
+import type Question from '../model/Question.ts'
 import QuestionType from '../enums/QuestionType'
-import { Choice } from '../model/questionTypes/Choice'
+
 const questionTypes = Object.values(QuestionType)
 
 const question = ref<Question>({
-  id: null,
-  owner: null,
+  id: '',
+  owner: -1,
   questiontext: '',
   questiontags: [],
   questiontype: QuestionType.Choice,
@@ -17,24 +18,34 @@ const question = ref<Question>({
     correctAnswer: 0
   }
 })
-const answers = ref<Answer[]>([{ text: '', isCorrect: false, position: 1 }])
+const answers = ref<Answers[]>([{ id: -1, questionId: -1, text: '', isCorrect: false }])
 
 const addAnswer = () => {
   answers.value.push({
+    id: -1,
+    questionId: -1,
     text: '',
-    isCorrect: false,
-    position: answers.value.length + 1
+    isCorrect: false
   })
 }
 
 const handleSubmit = () => {
   console.log(answers.value)
   console.log(question.value)
+  axios
+    // Token mitsenden
+    .post('/api_v1/questions', question)
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err))
 }
 
-const deleteAnswer = (index) => {
+const deleteAnswer = (index: number) => {
   console.log(answers.value)
   answers.value.splice(index, 1)
+}
+
+const removeTag = (item: string) => {
+  question.value.questiontags.splice(question.value.questiontags.indexOf(item), 1)
 }
 </script>
 
@@ -51,7 +62,7 @@ const deleteAnswer = (index) => {
         <h2 class="text-h4 my-8 font-weight-black text-primary">Add new Question</h2>
         <v-select
           label="Fragetyp"
-          v-model="question.questionType"
+          v-model="question.questiontype"
           :items="questionTypes"
           variant="solo-filled"
           class="m-4 pr-2"
@@ -66,7 +77,7 @@ const deleteAnswer = (index) => {
           min="1"
           max="10"
         ></v-slider>
-        <div v-if="question.questionType === 'Choice'">
+        <div v-if="question.questiontype === 'Choice'">
           <v-textarea
             single-line
             class="mt-4"
@@ -87,14 +98,8 @@ const deleteAnswer = (index) => {
             clearable
             multiple
           >
-            <template v-slot:selection="{ attrs, item, select, selected }">
-              <v-chip
-                v-bind="question.questiontags"
-                :model-value="selected"
-                closable
-                @click="select"
-                @click:close="remove(item)"
-              >
+            <template v-slot:selection="{ item }">
+              <v-chip v-bind="question.questiontags" closable @click:close="removeTag(item)">
                 <strong>{{ item }}</strong
                 >&nbsp;
                 <span>(interest)</span>
@@ -117,7 +122,7 @@ const deleteAnswer = (index) => {
               variant="text"
               color="red"
             >
-              <v-tooltip activator="parent" location="end">Delete</v-tooltip>
+              <v-tooltip activator="parent" location="end">Delete </v-tooltip>
               <v-icon icon="mdi-delete-outline" size="small"> </v-icon>
             </v-btn>
             <v-checkbox v-model="answer.isCorrect" class="ml-10" color="green" hide-details>
