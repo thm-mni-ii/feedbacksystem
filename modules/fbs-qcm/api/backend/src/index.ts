@@ -64,65 +64,80 @@ async function createDatabaseAndCollection() {
       db.collection("catalogInCourse");
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
-      questiontext: "Wie viele Bits sind ein Byte",
-      answers: [
+      owner: 1,
+      questiontext: "WAS IST DAS",
+      questiontype: "Choice",
+      questionconfiguration: "string",
+      multiplerow: true,
+      multiplecolumn: true,
+      answercolumns: [
         {
-          text: "8",
-          isCorrect: true,
-          position: -1,
-        },
-        {
-          text: "16",
-          isCorrect: false,
-          position: -1,
-        },
+          id: "string",
+          name: "string",
+          correctAnswers: [
+            0
+          ]
+        }
       ],
-      weighting: 1,
-      questiontype: "Single-Choice",
-      questionconfiguratin: "none",
-    });
+      Optionrows: [
+        {
+          "id": 0,
+          "text": "string"
+        }
+      ]
+        });
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
-      questiontext: "TEST",
-      answers: [
-        {
-          text: "string",
-          isCorrect: true,
-          position: 0,
-        },
-      ],
-      weighting: 0,
-      questiontype: "Single-Choice",
-      questionconfiguratin: "goar keine",
-    });
+      owner: 1,
+      questiontext: "string",
+      questiontype: "Fill in the Blanks",
+      questionconfiguration: "string",
+      showBlanks: true,
+      Part: [
+    {
+         order: 1,
+         text: "Hallo",
+         isBlank: false
+    },
+    {
+         order: 2,
+         text: "wie",
+         isBlank: false
+    },
+    {
+         order: 3,
+         text: "geht",
+         isBlank: false
+    },
+    {
+         order: 4,
+         text: "es",
+         isBlank: true
+    }
+    ]});
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
-      questiontext: "Was ist mehr als ein KiloByte",
-      answers: [
+      owner: 1,
+      questiontext: "WAS IST DAS",
+      questiontype: "Choice",
+      questionconfiguration: "string",
+      multiplerow: true,
+      multiplecolumn: true,
+      answercolumns: [
         {
-          text: "Byte",
-          isCorrect: false,
-          position: -1,
-        },
-        {
-          text: "MegaByte",
-          isCorrect: true,
-          position: -1,
-        },
-        {
-          text: "GigaByte",
-          isCorrect: true,
-          position: -1,
-        },
-        {
-          text: "PetaByte",
-          isCorrect: true,
-          position: -1,
-        },
+          id: "string",
+          name: "string",
+          correctAnswers: [
+            0
+          ]
+        }
       ],
-      weighting: 1,
-      questiontype: "Multiple-Choice",
-      questionconfiguratin: "none",
+      Optionrows: [
+        {
+          "id": 0,
+          "text": "string"
+        }
+      ]
     });
     await catalogCollection.insertOne({
       _id: new mongoDB.ObjectId("663a51d228d8781d96050905"),
