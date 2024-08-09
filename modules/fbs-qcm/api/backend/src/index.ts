@@ -18,6 +18,7 @@ import {
   getCurrentQuestion,
   addQuestionToCatalog,
   getCurrentSessionQuestion,
+  removeQuestionFromCatalog,
 } from "./question/question";
 import { submit, submitSessionAnswer } from "./submission/submission";
 import { getStudentCourses, getTeacherCourses } from "./course/course";
@@ -296,6 +297,51 @@ async function startServer() {
       res.sendStatus(500);
     }
   });
+  app.put("/api_v1/removeQuestionToCatalog", authenticateToken, async (req, res) => {
+    try {
+        if (req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if (req.user !== undefined) {
+            const requestData = req.body;
+            const questionId: string = requestData.question;
+            const catalog: string = requestData.catalog;
+            const result = await removeQuestionFromCatalog(req.user, questionId, catalog);
+            if(result == -1) {
+                res.send(403);
+            } else {
+                res.sendStatus(200);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/addQuestionToCatalog", authenticateToken, async (req, res) => {
+    try {
+        if (req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if (req.user !== undefined) {
+            const requestData = req.body;
+            const questionId: string = requestData.question;
+            const catalog: string = requestData.catalog;
+            const children = requestData.children;
+            const result = await addQuestionToCatalog(req.user, questionId, catalog, children);
+            if(result == -1) {
+                res.send(403);
+            } else if(result == -2) {
+                res.send(400);
+            } else {
+                res.sendStatus(201);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
   app.get("/api_v1/catalog", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
@@ -491,42 +537,6 @@ async function startServer() {
       res.sendStatus(500);
     }
   });
-  app.put(
-    "/api_v1/addQuestionToCatalog",
-    authenticateToken,
-    async (req, res) => {
-      try {
-        if (req.user === undefined) {
-          res.sendStatus(401);
-        }
-        if (req.user !== undefined) {
-          const requestData = req.body;
-          const questionId = requestData.question;
-          const catalogId = requestData.catalog;
-          const result = await addQuestionToCatalog(
-            questionId,
-            req.user,
-            catalogId
-          );
-          if (result === -1) {
-            res.sendStatus(403);
-            return;
-          }
-          if (result === -2) {
-            res.sendStatus(400);
-            return;
-          }
-          if (result === 1) {
-            res.sendStatus(200);
-            return;
-          }
-          res.sendStatus(500);
-        }
-      } catch (error) {
-        res.sendStatus(500);
-      }
-    }
-  );
   app.post("/api_v1/startSession", authenticateToken, async (req, res) => {
     try {
       if (req.user === undefined) {
