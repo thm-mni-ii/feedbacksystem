@@ -19,6 +19,8 @@ import {
   addQuestionToCatalog,
   getCurrentSessionQuestion,
   removeQuestionFromCatalog,
+  copyQuestion,
+  copyQuestionToCatalog,
 } from "./question/question";
 import { submit, submitSessionAnswer } from "./submission/submission";
 import { getStudentCourses, getTeacherCourses } from "./course/course";
@@ -296,7 +298,59 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/copyQuestionToCatalog", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      if (req.user !== undefined) {
+        console.log(req.body);
+        const requestData = req.body;
+        const questionId: string = requestData.question;
+        const catalogId: string = requestData.catalog;
+        const children: string[] = requestData.children;
+        const data = await copyQuestionToCatalog(
+          req.user,
+          questionId,
+          catalogId,
+          children
+        );
+        if (data === -1) {
+            res.sendStatus(403);
+        } else {
+            res.send({"id": data});
+        }
+      }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/copyQuestion", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      if (req.user !== undefined) {
+        console.log(req.body);
+        const requestData = req.body;
+        const questionId = requestData.question;
+        const data = await copyQuestion(
+          req.user,
+          questionId
+        );
+        if(data === -2) {
+            res.sendStatus(400);
+        }
+        res.send({"id": data});
+      }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.get("/api_v1/allquestions", authenticateToken, async (req, res) => {
@@ -399,7 +453,6 @@ async function startServer() {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        const requestData = req.body;
         const catalogId = req.query.ID as string;
         const data = await getQuestionTree(req.user, catalogId);
         res.send(data);
@@ -453,7 +506,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.post("/api_v1/submission", authenticateToken, async (req, res) => {

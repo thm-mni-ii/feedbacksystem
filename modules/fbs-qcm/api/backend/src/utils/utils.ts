@@ -84,6 +84,8 @@ export function getElementFromArray(array: mongoDB.ObjectId[], element: mongoDB.
 export async function getCatalogPermission(adminCourses: number[], catalog: string) {
     const database: mongoDB.Db = await connect();
     const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
+    console.log(catalogId);
+    console.log(adminCourses);
     const courseQuery = {
         course: {$in: adminCourses},
         catalog: catalogId

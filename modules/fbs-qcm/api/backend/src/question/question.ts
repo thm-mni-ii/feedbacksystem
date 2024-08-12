@@ -223,6 +223,59 @@ async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Co
     return -1;
 }
 
+export async function copyQuestion(tokenData: JwtPayload, questionId: string) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);
+    console.log(questionId);
+    console.log(questionIdObject);
+    const database: mongoDB.Db = await connect();
+    const questionCollection = database.collection("question");
+    const questionQuery = {
+        _id: questionIdObject
+    }
+    console.log(questionQuery);
+    const question: any = await questionCollection.findOne(questionQuery);
+    if(question === null) {
+        return -2;
+    }
+    console.log(question);
+    question.owner = tokenData.user;
+    delete question._id;
+    console.log(question);
+    const data = await questionCollection.insertOne(question);
+    console.log(data);
+    return data.insertedId;
+}
+
+export async function copyQuestionToCatalog(tokenData: JwtPayload, questionId: string, catalogId: string, children: string[]) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);
+    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
+    const permission = await getCatalogPermission(adminCourses, catalogId);
+    if(!permission) {
+        return -1;
+    }
+    const database: mongoDB.Db = await connect();
+    const questionCollection = database.collection("question");
+    const questionInCatalogCollection = database.collection("questionInCatalog");
+    const questionQuery = {
+        _id: questionIdObject
+    }
+    const question: any = await questionCollection.findOne(questionQuery);
+    question.owner = tokenData.user;
+    delete question._id;
+    console.log(question);
+    const data = await questionCollection.insertOne(question);
+    console.log(data);
+    const entry = {
+        catalog: catalogIdObject,
+        question: data.insertedId,
+        children: children
+    }
+    const result = await questionInCatalogCollection.insertOne(entry);
+    console.log(result);
+    return data.insertedId;
+}
 async function moveQuestionInCatalogs(adminCourses: number[], catalogInCourseCollection: mongoDB.Collection,
                                       questionIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId, questionInCatalogCollection: mongoDB.Collection) {
     const catalogWithQuestion: any = checkQuestionAccess(questionIdObject, adminCourses, catalogInCourseCollection, questionInCatalogCollection);
