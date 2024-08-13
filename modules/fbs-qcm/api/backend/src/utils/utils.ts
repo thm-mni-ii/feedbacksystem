@@ -56,6 +56,21 @@ export async function getAllCatalogs(courses: number[], catalogInCourseCollectio
     return allCatalogs;
 }
 
+
+export function getDocentCourseRoles(tokenData: JwtPayload) {
+    let coursesAdmin: number[] = [];
+    const courseRolesObject = JSON.parse(tokenData.courseRoles);
+    for (const courseId in courseRolesObject) {
+        if (courseRolesObject.hasOwnProperty(courseId)) {
+            const role = courseRolesObject[courseId];
+            if(role == "DOCENT") {
+                coursesAdmin.push(parseInt(courseId));
+        }
+      }
+    }
+    return coursesAdmin;
+}
+
 export function getAdminCourseRoles(tokenData: JwtPayload) {
     let coursesAdmin: number[] = [];
     const courseRolesObject = JSON.parse(tokenData.courseRoles);

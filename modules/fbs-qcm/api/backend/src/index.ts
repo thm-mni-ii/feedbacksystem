@@ -92,7 +92,7 @@ async function createDatabaseAndCollection() {
       _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
       owner: 1,
       questiontext: "string",
-      questiontype: "Fill in the Blanks",
+      questiontype: "FillInTheBlanks",
       questionconfiguration: "string",
       showBlanks: true,
       textParts: [
@@ -360,6 +360,9 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const data = await getAllQuestions(req.user);
+        if(data === -1) {
+            res.sendStatus(403);
+        }
         res.send(data);
       }
     } catch (error) {

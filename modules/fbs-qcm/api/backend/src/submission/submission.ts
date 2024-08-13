@@ -6,6 +6,7 @@ import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
 import QuestionType from "../enums/QuestionType";
 import FillInTheBlanks from "../model/questionTypes/FillInTheBlanks";
+import Choice from "../model/questionTypes/Choice";
 
 export async function submitSessionAnswer(tokenData: JwtPayload, requestData: any) {
     const session = getCurrentSession(tokenData.user);
@@ -28,8 +29,9 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
         return -1;
     }
     const correct = await checkAnswer(requestData, questionId, questionCollection);
+    console.log(timestamp);
     const submission = {
-        user: tokenData.id,
+        user: tokenData.user,
         question: questionId,
         answer: requestData.answer,
         evaluation: correct,
@@ -61,7 +63,7 @@ function checkSubmission(answer: any[], question: Question) {
     console.log(questionType);
     console.log(QuestionType.FillInTheBlanks);
     if(questionType == QuestionType.Choice) {
-        return checkChoice(answer[0], question);
+        return checkChoice(answer[0], question as Choice);
     } else if(questionType == QuestionType.FillInTheBlanks) {
         return checkClozeText(answer, question as FillInTheBlanks);
     } else if(questionType == QuestionType.SQL) {
@@ -75,17 +77,8 @@ function checkSQL(answer: any, question: Question) {
     return 0;
 }
 
-function checkChoice(answer: any, question: any) {
-    for(let i = 0; i < question.answers.length; i++) {
-        if(question.answers[i].text == answer) {
-            if( question.answers[i].isCorrect) {
-                return AnswerScore.correct;
-            } else {
-                return AnswerScore.incorrect
-            }
-        }
-    }
-    return AnswerScore.correct;
+function checkChoice(answer: any, question: Choice) {
+
 }
 
 function checkMultipleChoice(answer: any[], question: any) {

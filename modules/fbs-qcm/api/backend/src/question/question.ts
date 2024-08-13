@@ -2,7 +2,8 @@ import { Jwt, JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getAdminCourseRoles, getAllQuestionsFromCatalogs, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles, getFirstQuestionInCatalog,
 createQuestionResponse, getCurrentSession,
-IsOwner} from "../utils/utils";
+IsOwner,
+getDocentCourseRoles} from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { AnswerScore, SessionStatus } from "../utils/enum";
 import { Question } from "../model/Question";
@@ -137,7 +138,18 @@ export async function putQuestion(question: Question, tokenData: JwtPayload) {
 }
 
 export async function getAllQuestions(tokenData: JwtPayload) {
+    const docentcourses = getDocentCourseRoles(tokenData);
+    if(docentcourses.length > 0) {
+        const database: mongoDB.Db = await connect();
+        const questionCollection: mongoDB.Collection = database.collection("question");
+        const allQuestion = await questionCollection.find().toArray();
+        console.log(allQuestion);
+        return allQuestion;
+    }
     const adminCourses = getAdminCourseRoles(tokenData);
+    if(adminCourses.length === 0) {
+        return -1;
+    }
     const database: mongoDB.Db = await connect();
     const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
