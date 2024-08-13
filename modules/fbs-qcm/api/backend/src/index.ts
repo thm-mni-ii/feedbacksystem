@@ -18,6 +18,9 @@ import {
   getCurrentQuestion,
   addQuestionToCatalog,
   getCurrentSessionQuestion,
+  removeQuestionFromCatalog,
+  copyQuestion,
+  copyQuestionToCatalog,
 } from "./question/question";
 import { submit, submitSessionAnswer } from "./submission/submission";
 import { getStudentCourses, getTeacherCourses } from "./course/course";
@@ -63,65 +66,80 @@ async function createDatabaseAndCollection() {
       db.collection("catalogInCourse");
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
-      questiontext: "Wie viele Bits sind ein Byte",
-      answers: [
+      owner: 1,
+      questiontext: "WAS IST DAS",
+      questiontype: "Choice",
+      questionconfiguration: "string",
+      multiplerow: true,
+      multiplecolumn: true,
+      answercolumns: [
         {
-          text: "8",
-          isCorrect: true,
-          position: -1,
-        },
-        {
-          text: "16",
-          isCorrect: false,
-          position: -1,
-        },
+          id: "string",
+          name: "string",
+          correctAnswers: [
+            0
+          ]
+        }
       ],
-      weighting: 1,
-      questiontype: "Single-Choice",
-      questionconfiguratin: "none",
-    });
+      Optionrows: [
+        {
+          "id": 0,
+          "text": "string"
+        }
+      ]
+        });
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
-      questiontext: "TEST",
-      answers: [
-        {
-          text: "string",
-          isCorrect: true,
-          position: 0,
-        },
-      ],
-      weighting: 0,
-      questiontype: "Single-Choice",
-      questionconfiguratin: "goar keine",
-    });
+      owner: 1,
+      questiontext: "string",
+      questiontype: "FillInTheBlanks",
+      questionconfiguration: "string",
+      showBlanks: true,
+      textParts: [
+    {
+         order: 1,
+         text: "Hallo",
+         isBlank: false
+    },
+    {
+         order: 2,
+         text: "wie",
+         isBlank: false
+    },
+    {
+         order: 3,
+         text: "geht",
+         isBlank: false
+    },
+    {
+         order: 4,
+         text: "es",
+         isBlank: true
+    }
+    ]});
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
-      questiontext: "Was ist mehr als ein KiloByte",
-      answers: [
+      owner: 1,
+      questiontext: "WAS IST DAS",
+      questiontype: "Choice",
+      questionconfiguration: "string",
+      multiplerow: true,
+      multiplecolumn: true,
+      answercolumns: [
         {
-          text: "Byte",
-          isCorrect: false,
-          position: -1,
-        },
-        {
-          text: "MegaByte",
-          isCorrect: true,
-          position: -1,
-        },
-        {
-          text: "GigaByte",
-          isCorrect: true,
-          position: -1,
-        },
-        {
-          text: "PetaByte",
-          isCorrect: true,
-          position: -1,
-        },
+          id: "string",
+          name: "string",
+          correctAnswers: [
+            0
+          ]
+        }
       ],
-      weighting: 1,
-      questiontype: "Multiple-Choice",
-      questionconfiguratin: "none",
+      Optionrows: [
+        {
+          "id": 0,
+          "text": "string"
+        }
+      ]
     });
     await catalogCollection.insertOne({
       _id: new mongoDB.ObjectId("663a51d228d8781d96050905"),
@@ -274,7 +292,59 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/copyQuestionToCatalog", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      if (req.user !== undefined) {
+        console.log(req.body);
+        const requestData = req.body;
+        const questionId: string = requestData.question;
+        const catalogId: string = requestData.catalog;
+        const children: string[] = requestData.children;
+        const data = await copyQuestionToCatalog(
+          req.user,
+          questionId,
+          catalogId,
+          children
+        );
+        if (data === -1) {
+            res.sendStatus(403);
+        } else {
+            res.send({"id": data});
+        }
+      }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/copyQuestion", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      if (req.user !== undefined) {
+        console.log(req.body);
+        const requestData = req.body;
+        const questionId = requestData.question;
+        const data = await copyQuestion(
+          req.user,
+          questionId
+        );
+        if(data === -2) {
+            res.sendStatus(400);
+        }
+        res.send({"id": data});
+      }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.get("/api_v1/allquestions", authenticateToken, async (req, res) => {
@@ -284,10 +354,58 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const data = await getAllQuestions(req.user);
+        if(data === -1) {
+            res.sendStatus(403);
+        }
         res.send(data);
       }
     } catch (error) {
       res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/removeQuestionToCatalog", authenticateToken, async (req, res) => {
+    try {
+        if (req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if (req.user !== undefined) {
+            const requestData = req.body;
+            const questionId: string = requestData.question;
+            const catalog: string = requestData.catalog;
+            const result = await removeQuestionFromCatalog(req.user, questionId, catalog);
+            if(result == -1) {
+                res.send(403);
+            } else {
+                res.sendStatus(200);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/addQuestionToCatalog", authenticateToken, async (req, res) => {
+    try {
+        if (req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if (req.user !== undefined) {
+            const requestData = req.body;
+            const questionId: string = requestData.question;
+            const catalog: string = requestData.catalog;
+            const children = requestData.children;
+            const result = await addQuestionToCatalog(req.user, questionId, catalog, children);
+            if(result == -1) {
+                res.send(403);
+            } else if(result == -2) {
+                res.send(400);
+            } else {
+                res.sendStatus(201);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.get("/api_v1/catalog", authenticateToken, async (req, res) => {
@@ -332,7 +450,6 @@ async function startServer() {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        const requestData = req.body;
         const catalogId = req.query.ID as string;
         const data = await getQuestionTree(req.user, catalogId);
         res.send(data);
@@ -381,7 +498,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.post("/api_v1/submission", authenticateToken, async (req, res) => {
@@ -480,42 +598,6 @@ async function startServer() {
       res.sendStatus(500);
     }
   });
-  app.put(
-    "/api_v1/addQuestionToCatalog",
-    authenticateToken,
-    async (req, res) => {
-      try {
-        if (req.user === undefined) {
-          res.sendStatus(401);
-        }
-        if (req.user !== undefined) {
-          const requestData = req.body;
-          const questionId = requestData.question;
-          const catalogId = requestData.catalog;
-          const result = await addQuestionToCatalog(
-            questionId,
-            req.user,
-            catalogId
-          );
-          if (result === -1) {
-            res.sendStatus(403);
-            return;
-          }
-          if (result === -2) {
-            res.sendStatus(400);
-            return;
-          }
-          if (result === 1) {
-            res.sendStatus(200);
-            return;
-          }
-          res.sendStatus(500);
-        }
-      } catch (error) {
-        res.sendStatus(500);
-      }
-    }
-  );
   app.post("/api_v1/startSession", authenticateToken, async (req, res) => {
     try {
       if (req.user === undefined) {

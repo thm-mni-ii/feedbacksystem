@@ -80,18 +80,11 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
         return -1;
     }
     const data = await catalogCollection.deleteOne(query);
-     const filter = {
-        _id: catalogPermission._id
-    }
     const deleteConnections = {
         catalog: catalogIdObject
     }
     await questionInCatalogCollection.deleteMany(deleteConnections);
     await catalogInCourseCollection.deleteMany(deleteConnections);
-    const update = {
-        $pull: { catalogs: catalogIdObject } as mongoDB.UpdateFilter<any>
-    };
-    const res = await courseCollection.updateOne(filter, update);
     return data;
 }
 
