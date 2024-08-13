@@ -95,7 +95,7 @@ async function createDatabaseAndCollection() {
       questiontype: "Fill in the Blanks",
       questionconfiguration: "string",
       showBlanks: true,
-      Part: [
+      textParts: [
     {
          order: 1,
          text: "Hallo",

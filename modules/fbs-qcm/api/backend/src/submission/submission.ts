@@ -57,6 +57,9 @@ async function checkAnswer(answer: any[], questionId: mongoDB.ObjectId,
 
 function checkSubmission(answer: any[], question: Question) {
     const questionType = question.questiontype;
+    console.log("VIBE-CHECK");
+    console.log(questionType);
+    console.log(QuestionType.FillInTheBlanks);
     if(questionType == QuestionType.Choice) {
         return checkChoice(answer[0], question);
     } else if(questionType == QuestionType.FillInTheBlanks) {
@@ -107,17 +110,21 @@ function checkMultipleChoice(answer: any[], question: any) {
     }
 }
 
-function checkClozeText(answer: any[], question: FillInTheBlanks) {
+function checkClozeText(answer: any, question: FillInTheBlanks) {
     let blankFields = [];
     let results = [];
     let numberOfCorrectAnswers = 0;
+    console.log(question.textParts);
+    console.log(question);
     for(let i = 0; i < question.textParts.length; i++) {
         if(question.textParts[i].isBlank === true) {
             blankFields.push(question.textParts[i]);
         }
     }
+    console.log("blankFields");
+    console.log(blankFields);
     for(let j = 0; j < blankFields.length; j++) {
-        const res = checkSingleWord(answer, blankFields[j]);
+        const res = checkSingleWord(answer.answer, blankFields[j]);
         if(res) {
             numberOfCorrectAnswers++;
         }
@@ -125,11 +132,19 @@ function checkClozeText(answer: any[], question: FillInTheBlanks) {
     }
     console.log(results);
     console.log(numberOfCorrectAnswers);
+    if(results.length === numberOfCorrectAnswers) {
+        return true;
+    }
+    return false;
 }
 
 function checkSingleWord(answer: any[], blankFields: any) {
+    console.log("ANFANG");
+    console.log(answer);
+    console.log(blankFields);
     for(let k = 0; k < answer.length; k++) {
-        if(answer[k].text === blankFields.text) {
+        console.log(answer[k]);
+        if(answer[k].text === blankFields.text && answer[k].order === blankFields.order) {
             return true;
         }
     }
