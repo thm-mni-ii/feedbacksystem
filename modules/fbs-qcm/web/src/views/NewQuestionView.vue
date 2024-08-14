@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import axios, { type AxiosResponse } from 'axios'
-import type { Answers } from '../model/Answers'
+import axios from 'axios'
 import type Question from '../model/Question.ts'
+import type Choice from '../model/questionTypes/Choice.ts'
 import QuestionType from '../enums/QuestionType'
 
 const questionTypes = Object.values(QuestionType)
@@ -14,38 +14,76 @@ const question = ref<Question>({
   questiontags: [],
   questiontype: QuestionType.Choice,
   questionconfiguration: {
-    options: [],
-    correctAnswer: 0
-  }
+    multipleRow: false,
+    multipleColumn: false,
+    answerColumns: [{ id: 1, name: '', correctAnswers: [] }],
+    optionRows: [{ id: 0, text: '' }]
+  } as Choice
 })
-const answers = ref<Answers[]>([{ id: -1, questionId: -1, text: '', isCorrect: false }])
 
-const addAnswer = () => {
-  answers.value.push({
-    id: -1,
-    questionId: -1,
-    text: '',
-    isCorrect: false
+const addOptionRow = () => {
+  question.value.questionconfiguration.optionRows.push({
+    id: question.value.questionconfiguration.optionRows.length,
+    text: ''
   })
 }
 
-const handleSubmit = () => {
-  console.log(answers.value)
-  console.log(question.value)
-  axios
-    // Token mitsenden
-    .post('/api_v1/questions', question)
-    .then((res) => console.log(res))
-    .catch((err) => console.log(err))
+const addOptionCol = () => {
+  question.value.questionconfiguration.answerColumns.push({
+    id: question.value.questionconfiguration.answerColumns.length,
+    name: '',
+    correctAnswers: []
+  })
 }
 
-const deleteAnswer = (index: number) => {
-  console.log(answers.value)
-  answers.value.splice(index, 1)
+const deleteOption = (index: number) => {
+  question.value.questionconfiguration.optionRows.splice(index, 1)
+}
+
+const deleteAnswerColumn = () => {
+  if (question.value.questionconfiguration.answerColumns.length > 0) {
+    question.value.questionconfiguration.answerColumns.pop()
+  }
+}
+
+const toggleCorrectAnswer = (columnIndex: number, optionIndex: number, isSelected: boolean) => {
+  const correctAnswers =
+    question.value.questionconfiguration.answerColumns[columnIndex].correctAnswers
+  const index = correctAnswers.indexOf(optionIndex)
+
+  if (isSelected && index === -1) {
+    correctAnswers.push(optionIndex)
+  } else if (!isSelected && index !== -1) {
+    correctAnswers.splice(index, 1)
+  }
+}
+
+const isCorrectAnswer = (columnIndex: number, optionIndex: number) => {
+  return question.value.questionconfiguration.answerColumns[columnIndex].correctAnswers.includes(
+    optionIndex
+  )
 }
 
 const removeTag = (item: string) => {
   question.value.questiontags.splice(question.value.questiontags.indexOf(item), 1)
+}
+
+const handleSubmit = async () => {
+  if (question.value.questionconfiguration.answerColumns[0].correctAnswers.length > 1) {
+    question.value.questionconfiguration.multipleRow = true
+  }
+  const token = localStorage.getItem('token')
+
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  }
+  console.log('CONFIG:', config)
+  console.log('QUESTION:', question.value)
+  axios
+    // Token mitsenden
+    .post('/api_v1/question', question.value, config)
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err))
 }
 </script>
 
@@ -55,7 +93,7 @@ const removeTag = (item: string) => {
       class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
       elevation="4"
       height="auto"
-      width="70%"
+      width="85%"
       rounded
     >
       <v-responsive class="mx-auto" width="85%">
@@ -80,13 +118,12 @@ const removeTag = (item: string) => {
         <div v-if="question.questiontype === 'Choice'">
           <v-textarea
             single-line
-            class="mt-4"
+            class="my-4 mr-2"
             v-model="question.questiontext"
             maxlength="130"
             auto-grow
             counter
             label="Question"
-            width="800"
             required
           ></v-textarea>
           <v-combobox
@@ -94,6 +131,7 @@ const removeTag = (item: string) => {
             label="Tags"
             prepend-icon="mdi-tag"
             variant="solo"
+            class="mr-2"
             chips
             clearable
             multiple
@@ -106,34 +144,77 @@ const removeTag = (item: string) => {
               </v-chip>
             </template>
           </v-combobox>
-
-          <div v-for="(answer, index) in answers" :key="index" class="d-flex my-4 align-center">
+          <div class="justify-space-between d-flex flex-row">
+            <v-switch
+              class="ml-4"
+              v-model="question.questionconfiguration.multipleColumn"
+              :label="`Multi-Select Matrix`"
+              color="primary"
+              hide-details
+            ></v-switch>
+            <div v-if="question.questionconfiguration.multipleColumn === true">
+              <v-btn icon="mdi-plus" class="my-4 mr-2" size="small" @click="addOptionCol"></v-btn>
+            </div>
+          </div>
+          <div
+            v-for="(option, optionIndex) in question.questionconfiguration.optionRows"
+            :key="optionIndex"
+            class="d-flex my-4 align-center"
+          >
             <v-text-field
               auto-grow
-              v-model="answer.text"
-              :label="'Answer ' + (index + 1)"
+              v-model="option.text"
+              :label="'Answer ' + (optionIndex + 1)"
               hide-details
               required
             ></v-text-field>
             <v-btn
               icon="mdi-delete-outline"
-              @click="deleteAnswer(index)"
               class="ml-10"
               variant="text"
               color="red"
+              @click="deleteOption(optionIndex)"
             >
-              <v-tooltip activator="parent" location="end">Delete </v-tooltip>
+              <v-tooltip activator="parent" location="end">Delete Row</v-tooltip>
               <v-icon icon="mdi-delete-outline" size="small"> </v-icon>
             </v-btn>
-            <v-checkbox v-model="answer.isCorrect" class="ml-10" color="green" hide-details>
-              <v-tooltip activator="parent" location="end">Correct answer</v-tooltip>
+            <v-checkbox
+              v-for="(column, columnIndex) in question.questionconfiguration.answerColumns"
+              :key="columnIndex"
+              :model-value="isCorrectAnswer(columnIndex, optionIndex)"
+              class="ml-10 mr-2"
+              color="green"
+              hide-details
+              @update:model-value="
+                (newValue) => toggleCorrectAnswer(columnIndex, optionIndex, newValue)
+              "
+            >
+              <v-tooltip activator="parent" location="end">Correct Answer</v-tooltip>
             </v-checkbox>
           </div>
-          <v-btn icon="mdi-plus" @click="addAnswer" class="my-4" size="small"></v-btn>
+          <div class="d-flex justify-space-between">
+            <v-btn
+              icon="mdi-plus"
+              class="my-4 ml-2"
+              size="small"
+              @click="addOptionRow"
+              v-tooltip:end="'Add Answer'"
+            ></v-btn>
+            <v-btn
+              icon="mdi-delete-outline"
+              class="ml-10 mr-1"
+              variant="text"
+              color="red"
+              @click="deleteAnswerColumn"
+            >
+              <v-tooltip activator="parent" location="end">Delete Last Column</v-tooltip>
+              <v-icon icon="mdi-delete-outline" size="small"></v-icon>
+            </v-btn>
+          </div>
         </div>
       </v-responsive>
       <v-btn variant="outlined" class="mx-auto my-8" type="submit" prepend-icon="mdi-check-circle">
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon color="success"></v-icon>
         </template>
         Submit</v-btn

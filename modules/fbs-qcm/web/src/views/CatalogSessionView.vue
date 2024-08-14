@@ -5,9 +5,24 @@ import CatalogSession from '../components/CatalogSession.vue'
 
 import type Catalog from '../model/Catalog'
 import type Question from '../model/Question'
+import axios from 'axios'
+
 // import type UserAnswers from '../model/UserAnswers'
 
 const route = useRoute()
+
+const getQuestion = async () => {
+  const token = localStorage.getItem('token')
+
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  }
+  axios
+    // Token mitsenden
+    .get('/api_v1/question?ID=66bb2be02d85c62c9a53796b', config)
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err))
+}
 
 const questions = ref<Question[]>([
   { id: 1, text: 'wieviel Bits hat 1 Byte?', answers: [14, 8, 64], type: 'multiple choice' },
@@ -32,17 +47,6 @@ const questions = ref<Question[]>([
     id: 4,
     text: 'Welche der folgenden SQL-Kommandos können genutzt werden, um Datenbankstrukturen zu ändern?',
     answers: ['CREATE', 'SELECT', 'DROP'],
-    type: 'multiple choice'
-  },
-  {
-    id: 5,
-    text: 'Welche der folgenden Aussagen treffen auf Primärschlüssel zu? ',
-    answers: [
-      'Sie können NULL-Werte enthalten',
-      'Sie müssen eindeutig sein',
-      'Sie dienen als eindeutiger Identifikator für Datensätze',
-      'Es kann mehrere Primärschlüssel in einer Tabelle geben'
-    ],
     type: 'multiple choice'
   }
 ])
@@ -69,6 +73,7 @@ const submitAnswer = (selectedAnswers) => {
 
 onMounted(() => {
   console.log(route.params.catalogId)
+  getQuestion()
 })
 </script>
 
@@ -104,6 +109,10 @@ onMounted(() => {
       </v-responsive>
     </v-sheet>
   </v-form>
+  <div>
+    <h2>QUESTION DATA</h2>
+    <h3>{{}}</h3>
+  </div>
 </template>
 
 <style scoped lang="scss"></style>

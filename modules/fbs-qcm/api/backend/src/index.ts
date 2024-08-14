@@ -36,7 +36,7 @@ import {
   pauseSession,
   startSession,
 } from "./session/session";
-import  Choice  from "./model/questionTypes/Choice";
+import Choice from "./model/questionTypes/Choice";
 import { Question } from "./model/Question";
 import { getAllQuestionInCatalog } from "./utils/utils";
 
@@ -265,10 +265,7 @@ async function startServer() {
         delete requestData.children;
         delete requestData.catalog;
         const question: Question = requestData;
-        const data = await putQuestion(
-          question,
-          req.user,
-        );
+        const data = await putQuestion(question, req.user);
         if (data === -1) {
           res.sendStatus(403);
         } else {
@@ -289,10 +286,7 @@ async function startServer() {
         const requestData = req.body;
         const question: Question = requestData;
         console.log(question);
-        const data = await postQuestion(
-          question,
-          req.user,
-        );
+        const data = await postQuestion(question, req.user);
         if (data === -1) {
           res.sendStatus(403);
         } else {
@@ -514,12 +508,7 @@ async function startServer() {
         const course = requestData.course;
         const catalogId = req.query.ID as string;
         delete requestData.course;
-        const data = await putCatalog(
-          catalogId,
-          requestData,
-          req.user,
-          course
-        );
+        const data = await putCatalog(catalogId, requestData, req.user, course);
         if (data == -1) {
           res.sendStatus(403);
         }
