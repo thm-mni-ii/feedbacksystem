@@ -96,6 +96,74 @@ export function getElementFromArray(array: mongoDB.ObjectId[], element: mongoDB.
     return index; 
 }
 
+export async function checkCourseAccess(tokenData: JwtPayload, courseId: string)  {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    console.log(adminCourses);
+    const courseIdObject = new mongoDB.ObjectId(courseId);
+    console.log(courseIdObject);
+    const query = {
+        _id: courseIdObject,
+        courseId: {$in: adminCourses}
+    }
+    console.log(query);
+    const database: mongoDB.Db = await connect();
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const data = await courseCollection.findOne(query); 
+    console.log(data);
+    if(data === null) {
+        return false;
+    }
+    return true;
+}
+
+export async function getAllQuestionsInCourse(courseId: string) {
+    const database: mongoDB.Db = await connect();
+    const courseIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(courseId);
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    const courseQuery = {
+        _id: courseIdObject
+    }
+    const course = await courseCollection.findOne(courseQuery);
+    console.log(course);
+    if(course === null) {
+        return -1;
+    }
+    const catalogQuery = {
+        course: course.courseId
+    }
+    const catalogs = await catalogInCourseCollection.find(catalogQuery).toArray();
+    console.log(catalogs);
+    let catalogList = [];
+    for(let i = 0; i < catalogs.length; i++) {
+        catalogList.push(catalogs[i].catalog);
+    }
+    const questionQuery = {
+        catalog: {$in : catalogList}
+    }
+    console.log(questionQuery);
+    const questions = await questionInCatalogCollection.find(questionQuery).toArray();
+    console.log("questions");
+    console.log(questions);
+    let questionIds = [];
+    for(let i = 0; i < questions.length; i++) {
+        questionIds.push(questions[i].question);
+    }
+    console.log("questionIds");
+    console.log(questionIds);
+    const allQuestionQuery = {
+        _id: {$in: questionIds}
+    }
+    const data = await questionCollection.find(allQuestionQuery).toArray();
+    console.log(data);
+    if(data === null) {
+        return -1;
+    }
+    return data;
+}
+
 export async function getCatalogPermission(adminCourses: number[], catalog: string) {
     const database: mongoDB.Db = await connect();
     const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
@@ -105,6 +173,7 @@ export async function getCatalogPermission(adminCourses: number[], catalog: stri
         course: {$in: adminCourses},
         catalog: catalogId
     }
+    console.log(courseQuery);
     const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const courseResult = await catalogInCourseCollection.findOne(courseQuery);
     if( courseResult != null) {

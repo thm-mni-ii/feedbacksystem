@@ -234,6 +234,23 @@ function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions:
     return newLayer;
 }
 
+export async function allQuestionsInCatalog(tokenData: JwtPayload, catalogId: string) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const permission = await getCatalogPermission(adminCourses, catalogId);
+    if(!permission) {
+        console.log("OOOF");
+        return -1;
+    }
+    const database: mongoDB.Db = await connect();
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    const data = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
+    if(data === null) {
+        return -1;
+    }
+    return data;
+}
+
 function findConnection(question: any, allConnections: any[]) {
     if(question == "empty") {
         return -2;

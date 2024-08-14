@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getUserCourseRoles } from "../utils/utils";
+import { checkCourseAccess, getAdminCourseRoles, getAllQuestionsInCourse, getUserCourseRoles } from "../utils/utils";
 import * as mongoDB from "mongodb";
 
 export async function getTeacherCourses(tokenData: JwtPayload) {
@@ -28,4 +28,18 @@ export async function getStudentCourses(tokenData: JwtPayload) {
         return -1;
     }
     return courses;
+}
+
+export async function allQuestionInCourse(tokenData: JwtPayload, courseId: string) {
+    const permission = await checkCourseAccess(tokenData, courseId);
+    if(!permission) {
+        return -1;
+    }
+    console.log(4);
+    const data = await getAllQuestionsInCourse(courseId);
+    if(data === null) {
+        return -1;
+    }
+    return data;
+
 }

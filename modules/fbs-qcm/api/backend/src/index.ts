@@ -8,6 +8,7 @@ import {
   getCatalogScore,
   getUser,
   getQuestionTree,
+  allQuestionsInCatalog,
 } from "./catalog/catalog";
 import {
   postQuestion,
@@ -23,7 +24,7 @@ import {
   copyQuestionToCatalog,
 } from "./question/question";
 import { submit, submitSessionAnswer } from "./submission/submission";
-import { getStudentCourses, getTeacherCourses } from "./course/course";
+import { allQuestionInCourse, getStudentCourses, getTeacherCourses } from "./course/course";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "./utils/enum";
@@ -37,6 +38,7 @@ import {
 } from "./session/session";
 import  Choice  from "./model/questionTypes/Choice";
 import { Question } from "./model/Question";
+import { getAllQuestionInCatalog } from "./utils/utils";
 
 interface User {
   username: string;
@@ -353,23 +355,58 @@ async function startServer() {
         res.sendStatus(500);
     }
   });
-  app.get("/api_v1/allquestions", authenticateToken, async (req, res) => {
+  app.get("/api_v1/allquestionsInCatalog", authenticateToken, async (req, res) => {
     try {
-      if (req.user == undefined) {
-        res.sendStatus(401);
-      }
-      if (req.user !== undefined) {
-        const data = await getAllQuestions(req.user);
-        if(data === -1) {
-            res.sendStatus(403);
+        if (req.user == undefined) {
+            res.sendStatus(401);
         }
-        res.send(data);
-      }
+        if (req.user !== undefined) {
+            const questionId = req.query.ID as string;
+            const data = await allQuestionsInCatalog(req.user, questionId);
+            if(data === -1) {
+                res.sendStatus(403);
+            }
+            res.send(data);
+        }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
-  app.put("/api_v1/removeQuestionToCatalog", authenticateToken, async (req, res) => {
+  app.get("/api_v1/allquestionsInCourse", authenticateToken, async (req, res) => {
+    try {
+        if (req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if (req.user !== undefined) {
+            const courseId = req.query.ID as string;
+            const data = await allQuestionInCourse(req.user, courseId);
+            if(data === -1) {
+                res.sendStatus(403);
+            }
+        res.send(data);
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
+  });
+  app.get("/api_v1/allquestions", authenticateToken, async (req, res) => {
+    try {
+        if (req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if (req.user !== undefined) {
+            const data = await getAllQuestions(req.user);
+            if(data === -1) {
+                res.sendStatus(403);
+            }
+        res.send(data);
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/removeQuestionFromCatalog", authenticateToken, async (req, res) => {
     try {
         if (req.user == undefined) {
             res.sendStatus(401);
