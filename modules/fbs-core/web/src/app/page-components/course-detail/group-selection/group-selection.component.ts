@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { AuthService } from "../../../service/auth.service";
-import { forkJoin, Observable, of } from "rxjs";
+import { forkJoin, Observable } from "rxjs";
 import { Requirement } from "../../../model/Requirement";
 import { MatDialog } from "@angular/material/dialog";
 import { Roles } from "../../../model/Roles";
