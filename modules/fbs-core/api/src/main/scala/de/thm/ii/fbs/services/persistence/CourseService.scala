@@ -100,4 +100,16 @@ class CourseService {
       Some(tmp)
     }
   }
+
+  /**
+   * Update only the group selection of a course
+   *
+   * @param cid The course id
+   * @param groupSelection The new group selection status
+   * @return True if successful
+   */
+  def updateGroupSelection(cid: Int, groupSelection: Boolean): Boolean = {
+    1 == DB.update("UPDATE course SET group_selection = ? WHERE course_id = ?",
+      groupSelection, cid)
+  }
 }
