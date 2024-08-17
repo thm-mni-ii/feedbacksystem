@@ -4,4 +4,5 @@ export interface Course {
   description?: string;
   visible?: boolean;
   semesterId?: number;
+  groupSelection?: boolean;
 }
