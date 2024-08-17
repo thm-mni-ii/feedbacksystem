@@ -34,6 +34,8 @@ export const germanTranslation = {
   "course.group-membership": "Mitgliederanzahl",
   "course.save-selected-group": "Wahl speichern",
   "course.remove-selected-group": "Meine Wahl entfernen",
+  "course.open.selection": "Einwahl öffnen",
+  "course.hide.selection": "Einwahl schließen",
   "course.progress-title": "Mein Kurs Fortschritt",
   "course.progress-no-conditions": "Dieser Kurs hat keine Voraussetzungen",
   "course.progress-complete": "Du hast den Kurs erfolgreich abgeschlossen",
@@ -300,6 +302,8 @@ export const germanTranslation = {
   "dialog.group.new.hideGroup": "Gruppe verbergen",
   "dialog.group.new.cancel": "Abbrechen",
   "dialog.group.new.create": "Speichern",
+  "dialog.group.deregister.remove": "Mitglied entfernen",
+  "dialog.group.deregister.add": "Mitglied hinzufügen",
   "task.detail.tooltip.backToCourse": "Zurück zum Kurs",
   "task.detail.tooltip.exportTask": "Aufgabe Exportieren",
   "task.detail.tooltip.configureCheck": "Überprüfung konfigurieren",
@@ -383,9 +387,11 @@ export const germanTranslation = {
   "group.deregister": "Gruppe verlassen",
   "group.deregister.message":
     "Wollen Sie diese Gruppe verlassen? Alle Ihre Abgaben könnten verloren gehen!",
+  "group.deregister.member": "Mitglied entfernen",
   "group.deregister.all": "Mitglieder entfernen",
   "group.deregister.all.message":
     "Wirklich alle Mitglieder entfernen? Ihre Abgaben könnten verloren gehen!",
+  "group.add.member": "Mitglied hinzufügen",
   "group.delete": "Gruppe löschen",
   "group.delete.message": " wirklich löschen?",
 };

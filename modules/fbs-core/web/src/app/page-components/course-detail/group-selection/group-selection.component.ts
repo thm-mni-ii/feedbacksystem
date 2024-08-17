@@ -12,6 +12,9 @@ import { GroupRegistrationService } from "../../../service/group-registration.se
 import { map, mergeMap, tap } from "rxjs/operators";
 import { ConfirmDialogComponent } from "../../../dialogs/confirm-dialog/confirm-dialog.component";
 import { I18NextPipe } from "angular-i18next";
+import { GroupDeregisterDialogComponent } from "../../../dialogs/group-deregister-dialog/group-deregister-dialog.component";
+import { Participant } from "../../../model/Participant";
+import { CourseService } from "../../../service/course.service";
 
 @Component({
   selector: "app-group-selection",
@@ -22,18 +25,25 @@ export class GroupSelectionComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;
   @Output() valueChosen: EventEmitter<any> = new EventEmitter();
 
-  groups$: Observable<(Group & { currentMembership: number })[]>;
-  preselectedGroup: Group;
+  groups$: Observable<
+    (Group & { currentMembership: number } & { participants: Participant[] })[]
+  >;
+  preselectedGroup: Group & { currentMembership: number } & {
+    participants: Participant[];
+  };
   courseId: number;
   editGroups: boolean = false;
   role: string = null;
   student: boolean = false;
   preselectionExists: boolean = false;
+  selectionIsOpen: boolean;
+  userId: number;
 
   constructor(
     private route: ActivatedRoute,
     private auth: AuthService,
     private dialog: MatDialog,
+    private courseService: CourseService,
     private groupService: GroupService,
     private groupRegistrationService: GroupRegistrationService,
     private i18NextPipe: I18NextPipe
@@ -43,13 +53,31 @@ export class GroupSelectionComponent implements OnInit {
     this.route.params.subscribe((param) => {
       this.courseId = param.id;
     });
+    this.userId = this.auth.getToken().id;
     this.loadGroups();
     this.role = this.auth.getToken().courseRoles[this.courseId];
     this.choose(this.preselectedGroup);
+    this.getSelectionPossibility();
   }
 
   choose(value: Group): void {
     this.valueChosen.emit(value);
+  }
+
+  getSelectionPossibility(): void {
+    this.courseService
+      .getCourse(this.courseId)
+      .pipe(
+        map((course) => {
+          const selection = course.groupSelection;
+          if (selection) {
+            this.selectionIsOpen = selection;
+          } else {
+            this.selectionIsOpen = false;
+          }
+        })
+      )
+      .subscribe();
   }
 
   public isAuthorized(ignoreTutor: boolean = false) {
@@ -69,29 +97,35 @@ export class GroupSelectionComponent implements OnInit {
       mergeMap((groups: Group[]) =>
         forkJoin(
           groups.map((group) =>
-            this.groupRegistrationService
-              .getGroupMembership(this.courseId, group.id)
-              .pipe(
-                map((currentMembership) => ({ ...group, currentMembership }))
-              )
+            forkJoin({
+              currentMembership:
+                this.groupRegistrationService.getGroupMembership(
+                  this.courseId,
+                  group.id
+                ),
+              participants: this.groupRegistrationService.getGroupParticipants(
+                this.courseId,
+                group.id
+              ),
+            }).pipe(
+              map(({ currentMembership, participants }) => ({
+                ...group,
+                currentMembership,
+                participants,
+              }))
+            )
           )
-        ).pipe(
-          tap((groups) => {
-            const savedGroupId = this.getSavedGroupId(
-              `selectedGroupId_${this.courseId}`
-            );
-            if (savedGroupId) {
-              this.preselectedGroup = groups.find(
-                (group) => group.id === savedGroupId
-              );
-              this.preselectionExists = !!this.preselectedGroup;
-            } else {
-              this.preselectedGroup = null;
-              this.preselectionExists = false;
-            }
-          })
         )
-      )
+      ),
+      tap((groups) => {
+        const groupWithPreselection = groups.find((group) =>
+          group.participants.some(
+            (participant) => participant.user.id === this.userId
+          )
+        );
+        this.preselectionExists = !!groupWithPreselection;
+        this.preselectedGroup = groupWithPreselection || null;
+      })
     );
   }
 
@@ -113,13 +147,15 @@ export class GroupSelectionComponent implements OnInit {
       );
   }
 
+  manageSelection() {
+    this.courseService
+      .updateGroupSelection(this.courseId, !this.selectionIsOpen)
+      .subscribe();
+    this.getSelectionPossibility();
+  }
+
   joinGroup(): void {
     if (this.preselectedGroup) {
-      localStorage.setItem(
-        `selectedGroupId_${this.courseId}`,
-        this.preselectedGroup.id.toString()
-      );
-      this.preselectionExists = true;
       this.groupRegistrationService
         .registerGroup(
           this.courseId,
@@ -137,7 +173,6 @@ export class GroupSelectionComponent implements OnInit {
 
   removeGroup(): void {
     if (this.preselectedGroup) {
-      localStorage.removeItem(`selectedGroupId_${this.courseId}`);
       this.groupRegistrationService
         .deregisterGroup(
           this.courseId,
@@ -153,11 +188,6 @@ export class GroupSelectionComponent implements OnInit {
           (error) => console.error(error)
         );
     } else console.error("No group pre-selected");
-  }
-
-  getSavedGroupId(key: string): number {
-    let data = localStorage.getItem(key) || "";
-    return data ? parseInt(data, 10) : null;
   }
 
   updateGroup(group: Group) {
@@ -178,6 +208,26 @@ export class GroupSelectionComponent implements OnInit {
           if (confirm.success) {
             this.loadGroups();
           }
+        },
+        (error) => console.error(error)
+      );
+  }
+
+  deregisterMember(group: Group): void {
+    this.dialog
+      .open(GroupDeregisterDialogComponent, {
+        width: "25%",
+        height: "auto",
+        data: {
+          cid: group.courseId,
+          gid: group.id,
+          adding: false,
+        },
+      })
+      .afterClosed()
+      .subscribe(
+        () => {
+          this.loadGroups();
         },
         (error) => console.error(error)
       );
@@ -207,6 +257,26 @@ export class GroupSelectionComponent implements OnInit {
             );
         }
       });
+  }
+
+  addMember(group: Group): void {
+    this.dialog
+      .open(GroupDeregisterDialogComponent, {
+        width: "25%",
+        height: "auto",
+        data: {
+          cid: group.courseId,
+          gid: group.id,
+          adding: true,
+        },
+      })
+      .afterClosed()
+      .subscribe(
+        () => {
+          this.loadGroups();
+        },
+        (error) => console.error(error)
+      );
   }
 
   deleteGroup(group: Group): void {

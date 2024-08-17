@@ -31,6 +31,7 @@
             [value]="group"
             [(ngModel)]="preselectedGroup"
             (ngModelChange)="choose($event)"
+            [class.disabled-style]="!selectionIsOpen"
           />
         </td>
         <td>{{ group.name }}</td>
@@ -56,10 +57,26 @@
             <button
               mat-menu-item
               *ngIf="isAuthorized()"
+              (click)="deregisterMember(group)"
+            >
+              <mat-icon> person_remove </mat-icon
+              >{{ "group.deregister.member" | i18nextEager }}
+            </button>
+            <button
+              mat-menu-item
+              *ngIf="isAuthorized()"
               (click)="derigisterAllMembers(group)"
             >
               <mat-icon> group_remove </mat-icon
               >{{ "group.deregister.all" | i18nextEager }}
+            </button>
+            <button
+              mat-menu-item
+              *ngIf="isAuthorized()"
+              (click)="addMember(group)"
+            >
+              <mat-icon> person_add </mat-icon
+              >{{ "group.add.member" | i18nextEager }}
             </button>
             <button
               mat-menu-item
@@ -73,21 +90,41 @@
       </tr>
     </ng-container>
   </table>
-  <button
-    class="selection-button"
-    mat-raised-button
-    color="primary"
-    (click)="preselectionExists ? removeGroup() : joinGroup()"
-    matTooltip="{{
-      preselectionExists
-        ? ('course.remove-selected-group' | i18nextEager)
-        : ('course.save-selected-group' | i18nextEager)
-    }}"
-  >
-    {{
-      preselectionExists
-        ? ("course.remove-selected-group" | i18nextEager)
-        : ("course.save-selected-group" | i18nextEager)
-    }}
-  </button>
+  <div class="button-container">
+    <button
+      class="selection-button"
+      mat-raised-button
+      color="primary"
+      (click)="preselectionExists ? removeGroup() : joinGroup()"
+      matTooltip="{{
+        preselectionExists
+          ? ('course.remove-selected-group' | i18nextEager)
+          : ('course.save-selected-group' | i18nextEager)
+      }}"
+      [class.disabled-style]="!selectionIsOpen"
+    >
+      {{
+        preselectionExists
+          ? ("course.remove-selected-group" | i18nextEager)
+          : ("course.save-selected-group" | i18nextEager)
+      }}
+    </button>
+    <button
+      *ngIf="isAuthorized()"
+      mat-raised-button
+      color="primary"
+      (click)="manageSelection()"
+      matTooltip="{{
+        selectionIsOpen
+          ? ('course.hide.selection' | i18nextEager)
+          : ('course.open.selection' | i18nextEager)
+      }}"
+    >
+      {{
+        selectionIsOpen
+          ? ("course.hide.selection" | i18nextEager)
+          : ("course.open.selection" | i18nextEager)
+      }}
+    </button>
+  </div>
 </div>
