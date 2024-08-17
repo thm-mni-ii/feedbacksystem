@@ -122,6 +122,7 @@ import { GroupSelectionComponent } from "./page-components/course-detail/group-s
 import { NewGroupDialogComponent } from "./dialogs/new-group-dialog/new-group-dialog.component";
 import { GroupPreviewComponent } from "./page-components/group-preview/group-preview.component";
 import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
+import { GroupDeregisterDialogComponent } from "./dialogs/group-deregister-dialog/group-deregister-dialog.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -228,6 +229,7 @@ export const httpInterceptorProviders = [
     GroupPreviewComponent,
     GroupPreviewComponent,
     GroupDetailComponent,
+    GroupDeregisterDialogComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Observable, of } from "rxjs";
 
 import { GroupService } from "../../service/group.service";
@@ -11,7 +11,6 @@ import { MatDialog } from "@angular/material/dialog";
 import { GroupRegistrationService } from "../../service/group-registration.sevice";
 import { Group } from "../../model/Group";
 import { I18NextPipe } from "angular-i18next";
-import { mergeMap } from "rxjs/operators";
 import { Course } from "../../model/Course";
 import { CourseService } from "../../service/course.service";
 import { NewGroupDialogComponent } from "../../dialogs/new-group-dialog/new-group-dialog.component";
@@ -50,24 +49,18 @@ export class GroupDetailComponent implements OnInit {
   }
 
   updateGroup() {
-    this.groupService
-      .getGroup(this.courseID, this.groupID)
-      .pipe(
-        mergeMap((group) =>
-          this.dialog
-            .open(NewGroupDialogComponent, {
-              width: "50%",
-              height: "auto",
-              data: {
-                cid: this.courseID,
-                gid: this.groupID,
-                student: this.student,
-                isUpdateDialog: true,
-              },
-            })
-            .afterClosed()
-        )
-      )
+    this.dialog
+      .open(NewGroupDialogComponent, {
+        width: "50%",
+        height: "auto",
+        data: {
+          cid: this.courseID,
+          gid: this.groupID,
+          student: this.student,
+          isUpdateDialog: true,
+        },
+      })
+      .afterClosed()
       .subscribe(
         (confirm) => {
           if (confirm.success) {
