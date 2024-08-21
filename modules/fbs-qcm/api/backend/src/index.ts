@@ -546,6 +546,9 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const requestData = req.body;
+        console.log("---------------------------------------------------_");
+        console.log(requestData);
+        console.log("---------------------------------------------------_");
         const response = await submit(req.user, requestData);
         if (response == -1) {
           res.sendStatus(403);
