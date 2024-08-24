@@ -165,7 +165,6 @@ class CourseController {
     }
   }
 
-
   /**
    * Update only the group selection of a course
    *
