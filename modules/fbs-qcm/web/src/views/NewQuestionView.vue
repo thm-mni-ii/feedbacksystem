@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
+// import VueIntersect from 'vue-intersect'
 import type Question from '../model/Question.ts'
 import type Choice from '../model/questionTypes/Choice.ts'
 import QuestionType from '../enums/QuestionType'
 
 const questionTypes = Object.values(QuestionType)
+// const columnDialog = ref(false)
 
 const question = ref<Question>({
   id: '',
@@ -17,13 +19,13 @@ const question = ref<Question>({
     multipleRow: false,
     multipleColumn: false,
     answerColumns: [{ id: 1, name: '', correctAnswers: [] }],
-    optionRows: [{ id: 0, text: '' }]
+    optionRows: [{ id: 1, text: '' }]
   } as Choice
 })
 
 const addOptionRow = () => {
   question.value.questionconfiguration.optionRows.push({
-    id: question.value.questionconfiguration.optionRows.length,
+    id: question.value.questionconfiguration.optionRows.length + 1,
     text: ''
   })
 }
@@ -40,9 +42,9 @@ const deleteOption = (index: number) => {
   question.value.questionconfiguration.optionRows.splice(index, 1)
 }
 
-const deleteAnswerColumn = () => {
+const deleteAnswerColumn = (index: number) => {
   if (question.value.questionconfiguration.answerColumns.length > 0) {
-    question.value.questionconfiguration.answerColumns.pop()
+    question.value.questionconfiguration.answerColumns.splice(index, 1)
   }
 }
 
@@ -105,16 +107,6 @@ const handleSubmit = async () => {
           variant="solo-filled"
           class="m-4 pr-2"
         ></v-select>
-        <v-slider
-          class="pr-4"
-          show-ticks="always"
-          width="90%"
-          label="Difficulty"
-          thumb-label
-          step="1"
-          min="1"
-          max="10"
-        ></v-slider>
         <div v-if="question.questiontype === 'Choice'">
           <v-textarea
             single-line
@@ -200,16 +192,66 @@ const handleSubmit = async () => {
               @click="addOptionRow"
               v-tooltip:end="'Add Answer'"
             ></v-btn>
-            <v-btn
-              icon="mdi-delete-outline"
-              class="ml-10 mr-1"
-              variant="text"
-              color="red"
-              @click="deleteAnswerColumn"
-            >
-              <v-tooltip activator="parent" location="end">Delete Last Column</v-tooltip>
-              <v-icon icon="mdi-delete-outline" size="small"></v-icon>
-            </v-btn>
+            <div class="d-flex flex-row">
+              <div
+                class="d-flex flex-column"
+                v-for="(column, columnIndex) in question.questionconfiguration.answerColumns"
+                :key="columnIndex"
+              >
+                <v-text-field
+                  v-model="column.name"
+                  :label="'Column ' + (columnIndex + 1) + ' Name'"
+                  hide-details
+                  class="ml-10"
+                  required
+                ></v-text-field>
+
+                <v-btn
+                  icon="mdi-delete-outline"
+                  class="ml-9 mr-1"
+                  variant="text"
+                  color="red"
+                  @click="deleteAnswerColumn(columnIndex)"
+                >
+                  <v-tooltip activator="parent" location="end">Delete Column</v-tooltip>
+                  <v-icon icon="mdi-delete-outline" size="small"></v-icon>
+                </v-btn>
+
+                <!-- <v-dialog
+                  v-if="question.questionconfiguration.multipleColumn == true"
+                  v-model="columnDialog"
+                  max-width="600"
+                >
+                  <template v-slot:activator="{ props: activatorProps }">
+                    <v-btn
+                      class="text-none ml-9 mr-1 px-0"
+                      icon="mdi-pencil"
+                      color="black"
+                      variant="text"
+                      v-bind="activatorProps"
+                    >
+                      <v-tooltip activator="parent" location="end">{{ column.name }}</v-tooltip>
+                    </v-btn>
+                  </template>
+                  <v-card prepend-icon="mdi-pencil" title="Enter a Name for this Column">
+                    <v-card-text>
+                      <v-text-field label="Column name" v-model="column.name"></v-text-field>
+                      <v-divider></v-divider>
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn text="Close" variant="plain" @click="columnDialog = false"></v-btn>
+                        <v-btn
+                          color="primary"
+                          text="Save"
+                          variant="tonal"
+                          @click="columnDialog = false"
+                        ></v-btn>
+                      </v-card-actions>
+                    </v-card-text>
+                  </v-card>
+                </v-dialog> -->
+              </div>
+            </div>
           </div>
         </div>
       </v-responsive>

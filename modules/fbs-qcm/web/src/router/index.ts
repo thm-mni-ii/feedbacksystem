@@ -28,6 +28,16 @@ const router = createRouter({
       path: '/addCat',
       name: 'addCat',
       component: () => import('../views/NewCatView.vue')
+    },
+    {
+      path: '/question',
+      name: 'question',
+      component: () => import('../views/QuestionView.vue')
+    },
+    {
+      path: '/deleteQuestion',
+      name: 'delete',
+      component: () => import('../views/DeleteQuestionView.vue')
     }
     // {
     //   path: "/:pathMatch(.*)*",

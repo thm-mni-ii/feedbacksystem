@@ -4,71 +4,36 @@ import { useRoute } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
 
 import type Catalog from '../model/Catalog'
-import type Question from '../model/Question'
 import axios from 'axios'
-
-// import type UserAnswers from '../model/UserAnswers'
-
+const questionId = ref('66c48bd422d64ed1f1b513fa')
+const questionData = ref(null)
 const route = useRoute()
 
 const getQuestion = async () => {
   const token = localStorage.getItem('token')
-
   const config = {
     headers: { Authorization: `Bearer ${token}` }
   }
-  axios
-    // Token mitsenden
-    .get('/api_v1/question?ID=66bb2be02d85c62c9a53796b', config)
-    .then((res) => console.log(res))
-    .catch((err) => console.log(err))
-}
-
-const questions = ref<Question[]>([
-  { id: 1, text: 'wieviel Bits hat 1 Byte?', answers: [14, 8, 64], type: 'multiple choice' },
-  {
-    id: 2,
-    text: 'Welche SQL-Anweisung wird verwendet, um Daten in eine Datenbanktabelle einzufügen?',
-    answers: ['INSERT', 'ADD', 'UPDATE', 'PUT'],
-    type: 'multiple choice'
-  },
-  {
-    id: 3,
-    text: 'Was sind Vorteile der Normalisierung in Datenbanken?',
-    answers: [
-      'Minimierung von Datenredundanz',
-      'Verbesserung der Abfragegeschwindigkeit',
-      'Erleichterung der Wartung',
-      'Vereinfachung der Datenbankstruktur'
-    ],
-    type: 'multiple choice'
-  },
-  {
-    id: 4,
-    text: 'Welche der folgenden SQL-Kommandos können genutzt werden, um Datenbankstrukturen zu ändern?',
-    answers: ['CREATE', 'SELECT', 'DROP'],
-    type: 'multiple choice'
+  try {
+    const res = await axios.get('/api_v1/question', { ...config, params: { ID: questionId.value } })
+    console.log('One Question:', res)
+    questionData.value = res.data
+  } catch (err) {
+    console.log(err)
   }
-])
-const currentQuestionIndex = ref(0)
+}
 
 const catalog = ref<Catalog>({
   id: route.params.catalogId,
   name: 'Datenbanken - SQL',
   difficulty: 1,
   passed: false,
-  questions: questions.value.map((question) => question.id),
   requirements: null
 })
 
-const submitAnswer = (selectedAnswers) => {
-  // console.log('Selected Answers:' + selectedAnswers.value)
-  if (currentQuestionIndex.value < catalog.value.questions.length - 1) {
-    currentQuestionIndex.value += 1
-  }
-  console.log('current Index: ' + currentQuestionIndex.value)
-  console.log('question length: ' + catalog.value.questions.length)
-  console.log(selectedAnswers)
+const submitAnswer = (arr) => {
+  getQuestion()
+  console.log('selected Answers: ', arr)
 }
 
 onMounted(() => {
@@ -93,26 +58,23 @@ onMounted(() => {
         <div class="d-flex flex-row mb-8">
           <v-progress-linear
             min="0"
-            :max="questions.length"
+            :max="8"
             color="primary"
             height="8"
-            :model-value="currentQuestionIndex + 1"
+            :model-value="1"
             stream
             rounded
           ></v-progress-linear>
         </div>
 
         <CatalogSession
-          :question="questions[currentQuestionIndex]"
-          :current-question-index="currentQuestionIndex"
+          v-if="questionData"
+          :question="questionData"
+          @submitAnswer="(a) => submitAnswer(a)"
         />
       </v-responsive>
     </v-sheet>
   </v-form>
-  <div>
-    <h2>QUESTION DATA</h2>
-    <h3>{{}}</h3>
-  </div>
 </template>
 
 <style scoped lang="scss"></style>
