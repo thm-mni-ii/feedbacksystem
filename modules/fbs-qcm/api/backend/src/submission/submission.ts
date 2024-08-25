@@ -8,6 +8,26 @@ import QuestionType from "../enums/QuestionType";
 import FillInTheBlanks from "../model/questionTypes/FillInTheBlanks";
 import Choice from "../model/questionTypes/Choice";
 
+interface FillInTheBlanksAnswer {
+    answer: [
+        {
+            text: string,
+            order: number
+        }
+    ]
+}
+
+interface entry  {
+    text: string,
+    id: number
+}
+
+interface ChoiceAnswer {
+    rows: entry[],
+    columns: entry[],
+    matrix: number[][]
+}
+
 export async function submitSessionAnswer(tokenData: JwtPayload, requestData: any) {
     const session = getCurrentSession(tokenData.user);
     return -1;
@@ -28,7 +48,10 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     if(catalog === false) {
         return -1;
     }
-    const correct = await checkAnswer(requestData, questionId, questionCollection);
+    console.log("----------------------");
+    console.log(requestData.answer);
+    console.log("----------------------");
+    const correct = await checkAnswer(requestData.answer, questionId, questionCollection);
     console.log(timestamp);
     const submission = {
         user: tokenData.user,
@@ -41,8 +64,9 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     return correct;
 }
 
-async function checkAnswer(answer: any[], questionId: mongoDB.ObjectId,
+async function checkAnswer(answer: any, questionId: mongoDB.ObjectId,
                            questionCollection: mongoDB.Collection) {
+    console.log(answer);
     const questionQuery = {
         _id: questionId
     }
@@ -57,15 +81,16 @@ async function checkAnswer(answer: any[], questionId: mongoDB.ObjectId,
     }
 }
 
-function checkSubmission(answer: any[], question: Question) {
+function checkSubmission(answer: any, question: Question) {
     const questionType = question.questiontype;
     console.log("VIBE-CHECK");
     console.log(questionType);
     console.log(QuestionType.FillInTheBlanks);
+    console.log(QuestionType.Choice);
     if(questionType == QuestionType.Choice) {
-        return checkChoice(answer[0], question as Choice);
+        return checkChoice(answer, question as Choice);
     } else if(questionType == QuestionType.FillInTheBlanks) {
-        return checkClozeText(answer, question as FillInTheBlanks);
+        return checkClozeText(answer as FillInTheBlanksAnswer, question as FillInTheBlanks);
     } else if(questionType == QuestionType.SQL) {
         return checkSQL(answer, question);
     } else {
@@ -77,10 +102,18 @@ function checkSQL(answer: any, question: Question) {
     return 0;
 }
 
-function checkChoice(answer: any, question: Choice) {
-
+function checkChoice(answer: ChoiceAnswer, question: Choice) {
+    console.log(answer);
+    let rows: number[] = [];
+    for(let i = 0; i < answer.rows.length; i++) {
+        rows.push(answer.rows[i].id);
+    }
+    console.log(rows);
+    console.log(11111);
+    const newMatrix = orderRows(answer.matrix, rows); 
+    return 0;
 }
-
+ 
 function checkMultipleChoice(answer: any[], question: any) {
     let correctInQuestion = 0;
     let correctInAnswer = 0;
@@ -103,7 +136,25 @@ function checkMultipleChoice(answer: any[], question: any) {
     }
 }
 
-function checkClozeText(answer: any, question: FillInTheBlanks) {
+function orderRows(matrix: number[][], order: number[]) {
+    console.log(1);
+    let newMatrix: number[][] = [[]];
+    console.log(2);
+    let newMatrix2: number[][] = [];
+    console.log(3);
+    for(let i = 0; i < order.length; i++) {
+        console.log(matrix[order[i]]);
+        console.log("order");
+        console.log(order[i]);
+        newMatrix2[order[i]] = (matrix[i]);
+    }
+    console.log(4);
+    console.log(newMatrix);
+    console.log(newMatrix2);
+    return newMatrix;
+}
+
+function checkClozeText(answer: FillInTheBlanksAnswer, question: FillInTheBlanks) {
     let blankFields = [];
     let results = [];
     let numberOfCorrectAnswers = 0;
