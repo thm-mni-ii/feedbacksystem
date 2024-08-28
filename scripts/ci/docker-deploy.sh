@@ -6,11 +6,11 @@ function dockerPush() {
     tag=$1
     echo "tag is: "$tag
     
-    docker tag feedbacksystem_runner thmmniii/fbs-runner:$tag
-    docker tag feedbacksystem_core thmmniii/fbs-core:$tag
-    docker tag feedbacksystem_runtime-bash thmmniii/fbs-runtime-bash:$tag
-    docker tag feedbacksystem_sql-checker thmmniii/fbs-sql-checker:$tag
-    docker tag feedbacksystem_dashboard thmmniii/fbs-eat:$tag
+    docker tag feedbacksystem-runner thmmniii/fbs-runner:$tag
+    docker tag feedbacksystem-core thmmniii/fbs-core:$tag
+    docker tag feedbacksystem-runtime-bash thmmniii/fbs-runtime-bash:$tag
+    docker tag feedbacksystem-sql-checker thmmniii/fbs-sql-checker:$tag
+    docker tag feedbacksystem-dashboard thmmniii/fbs-eat:$tag
     
     docker push thmmniii/fbs-core:$tag
     docker push thmmniii/fbs-runner:$tag
@@ -36,7 +36,7 @@ tag=$(generateDockerTag)
 
 echo "START DOCKER BUILD"
 
-docker-compose build
+docker compose build
 
 echo "START DOCKER DEPLOY"
 
