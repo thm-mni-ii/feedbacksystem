@@ -82,6 +82,7 @@ class AstBuilder(val eq: MathParser.EqContext) {
             factor.expr() !== null -> buildExpr(factor.expr())
             factor.NUMBER() !== null -> Num(germanFormat.parse(factor.NUMBER().text.replace("{,}", ",")))
             factor.VAR() !== null -> Var(factor.VAR().text)
+            factor.EMPTY_CURLY_BRACKETS() !== null -> Num(1)
             else -> throw IllegalArgumentException("not a legal factor: ${factor.text}")
         }
 
