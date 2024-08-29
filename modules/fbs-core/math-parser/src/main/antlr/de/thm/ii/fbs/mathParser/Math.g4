@@ -25,13 +25,14 @@ mulFactor   : expo // higher presedence!
             | mulFactor ' '* expo
             ;
 
-expo        : expo ' '* EXP ' '*  SUB? factor
+expo        : expo ' '* EXP ' '* SUB? factor
             | expo unicode_expo
             | factor
             ;
 
 factor      : LEFT? OPENING_ROUND_BRACKET ' '* expr ' '* RIGHT? CLOSING_ROUND_BRACKET
             | OPENING_CURLY_BRACKET ' '* expr ' '* CLOSING_CURLY_BRACKET
+            | EMPTY_CURLY_BRACKETS
             | (NUMBER|VAR)
             ;
 
@@ -63,6 +64,7 @@ OPENING_ROUND_BRACKET: '(';
 CLOSING_ROUND_BRACKET: ')';
 OPENING_CURLY_BRACKET: '{';
 CLOSING_CURLY_BRACKET: '}';
+EMPTY_CURLY_BRACKETS: '{}';
 OPENING_SQUARE_BRACKET: '[';
 CLOSING_SQUARE_BRACKET: ']';
 LEFT: '\\left';
