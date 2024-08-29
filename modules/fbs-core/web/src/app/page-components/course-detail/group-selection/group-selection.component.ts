@@ -9,7 +9,7 @@ import { NewGroupDialogComponent } from "../../../dialogs/new-group-dialog/new-g
 import { Group } from "../../../model/Group";
 import { GroupService } from "../../../service/group.service";
 import { GroupRegistrationService } from "../../../service/group-registration.sevice";
-import { map, mergeMap, tap } from "rxjs/operators";
+import { delay, map, mergeMap, tap } from "rxjs/operators";
 import { ConfirmDialogComponent } from "../../../dialogs/confirm-dialog/confirm-dialog.component";
 import { I18NextPipe } from "angular-i18next";
 import { GroupDeregisterDialogComponent } from "../../../dialogs/group-deregister-dialog/group-deregister-dialog.component";
@@ -150,8 +150,10 @@ export class GroupSelectionComponent implements OnInit {
   manageSelection() {
     this.courseService
       .updateGroupSelection(this.courseId, !this.selectionIsOpen)
-      .subscribe();
-    this.getSelectionPossibility();
+      .pipe(
+        delay(250) // To make sure database has been updated
+      )
+      .subscribe(() => this.getSelectionPossibility());
   }
 
   joinGroup(): void {

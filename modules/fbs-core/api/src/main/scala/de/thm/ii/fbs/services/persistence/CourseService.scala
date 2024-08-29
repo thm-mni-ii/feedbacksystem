@@ -45,7 +45,7 @@ class CourseService {
     * @return The found course
     */
   def find(id: Int): Option[Course] = DB.query(
-    "SELECT course_id, semester_id, name, description, visible FROM course WHERE course_id = ?",
+    "SELECT course_id, semester_id, name, description, visible, group_selection FROM course WHERE course_id = ?",
     (res, _) => parseResult(res), id).headOption
 
   /**
@@ -86,6 +86,7 @@ class CourseService {
 
   private def parseResult(res: ResultSet): Course = Course(
     semesterId = maybeInt(res, "semester_id"),
+    groupSelection = maybeBoolean(res, "group_selection"),
     name = res.getString("name"),
     description = res.getString("description"),
     visible = res.getBoolean("visible"),
@@ -94,6 +95,15 @@ class CourseService {
 
   private def maybeInt(res: ResultSet, columnName: String): Option[Int] = {
     val tmp = res.getInt(columnName)
+    if (res.wasNull()) {
+      null
+    } else {
+      Some(tmp)
+    }
+  }
+
+  private def maybeBoolean(res: ResultSet, columnName: String): Option[Boolean] = {
+    val tmp = res.getBoolean(columnName)
     if (res.wasNull()) {
       null
     } else {
