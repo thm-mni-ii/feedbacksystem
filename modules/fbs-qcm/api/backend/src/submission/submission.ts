@@ -112,12 +112,48 @@ function checkChoice(answer: ChoiceAnswer, question: Choice) {
     for(let i = 0; i < answer.columns.length; i++) {
         columns.push(answer.columns[i].id);
     }
-    console.log(rows);
-    console.log(11111);
     const newMatrix = orderRows(answer.matrix, rows); 
     const newMatrix2 = orderColumns(newMatrix, columns);
     console.log(newMatrix2);
-    return 0;
+    const answerColumns = question.answerColumns;
+    let correctAnswers = 0;
+    let falseAnswers = 0;
+    let falsePositives = 0;
+    let falseNegatives = 0;
+    for(let i = 0; i < answerColumns.length; i++) {
+        for(let j = 0; j < newMatrix2[i].length; j++) {
+            console.log(`richtige Antworten: ${answerColumns[i].correctAnswers}`);
+            if(newMatrix2[i][j] === 1) {
+                console.log(`${j} ist wahr`);
+                if(answerColumns[i].correctAnswers.includes(j)) {
+                    console.log("correct");
+                    correctAnswers++;
+                } else {
+                    console.log("incorrect");
+                    falseAnswers++;
+                    falsePositives++;
+                }
+            } else {
+                console.log(`${j} ist falsch`);
+                if(answerColumns[i].correctAnswers.includes(j)) {
+                    console.log("incorrect");
+                    falseAnswers++;
+                    falseNegatives++;
+                } else {
+                    console.log("correct");
+                    correctAnswers++;
+                }
+            }
+        }
+    }
+    console.log(`falseAnswers: ${falseAnswers}`);
+    console.log(`correctAnswers: ${correctAnswers}`);
+    console.log(`falsePositives: ${falsePositives}`);
+    console.log(`falseNegatives: ${falseNegatives}`);
+    if(falseAnswers === 0 ) {
+        return true;
+    }
+    return false;
 }
  
 function checkMultipleChoice(answer: any[], question: any) {
