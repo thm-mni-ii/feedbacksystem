@@ -108,9 +108,15 @@ function checkChoice(answer: ChoiceAnswer, question: Choice) {
     for(let i = 0; i < answer.rows.length; i++) {
         rows.push(answer.rows[i].id);
     }
+    let columns: number[] = [];
+    for(let i = 0; i < answer.columns.length; i++) {
+        columns.push(answer.columns[i].id);
+    }
     console.log(rows);
     console.log(11111);
     const newMatrix = orderRows(answer.matrix, rows); 
+    const newMatrix2 = orderColumns(newMatrix, columns);
+    console.log(newMatrix2);
     return 0;
 }
  
@@ -137,20 +143,21 @@ function checkMultipleChoice(answer: any[], question: any) {
 }
 
 function orderRows(matrix: number[][], order: number[]) {
-    console.log(1);
-    let newMatrix: number[][] = [[]];
-    console.log(2);
     let newMatrix2: number[][] = [];
-    console.log(3);
     for(let i = 0; i < order.length; i++) {
-        console.log(matrix[order[i]]);
-        console.log("order");
-        console.log(order[i]);
-        newMatrix2[order[i]] = (matrix[i]);
+        newMatrix2[order[i] - 1] = (matrix[i]);
     }
-    console.log(4);
-    console.log(newMatrix);
-    console.log(newMatrix2);
+    return newMatrix2;
+}
+
+function orderColumns(matrix: number[][], order: number[]) {
+    let newMatrix: number[][] = JSON.parse(JSON.stringify(matrix));
+    for(let i = 0; i < order.length; i++) {
+       for(let j = 0; j < matrix.length; j++) {
+           console.log(matrix);
+            newMatrix[j][order[i]-1] = matrix[j][i]; 
+       }
+    }
     return newMatrix;
 }
 
