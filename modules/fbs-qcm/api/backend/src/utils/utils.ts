@@ -255,6 +255,7 @@ export function createQuestionResponse(newQuestion: any) {
         questiontype: newQuestion.questiontype,
         answers: []
     }
+    
     for(let i = 0; i < newQuestion.answers.length; i++) {
         returnQuestion.answers.push(newQuestion.answers[i].text);
     }

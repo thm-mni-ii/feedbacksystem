@@ -63,7 +63,9 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
     }
     const data = await catalogCollection.findOne(query);
     const tree = getQuestionTree(tokenData, catalogId);
-   return data;
+    console.log(data);
+    console.log(tree);
+    return tree;
 }
 
 export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
@@ -167,39 +169,55 @@ export async function getCatalogScore(tokenData: JwtPayload, catalogId: string) 
 
 export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
+    console.log(1);
     const course = getCatalogPermission(adminCourses, catalogId);
+    console.log(2);
     if (!course) {
         return -1;
     }
+    console.log(3);
     const database: mongoDB.Db = await connect();
     const questionCollection = database.collection("question");
     const questionInCatalogCollection = database.collection("questionInCatalog");
+    console.log(4);
     const firstQuestion: any = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
     if (firstQuestion == null || firstQuestion == -1) {
         return -1;
     }
+    console.log(5);
     const catalogArray: string[] = [catalogId];
     const allConnections = await getAllQuestionsFromCatalogs(questionInCatalogCollection, catalogArray);
     if (allConnections == null || allConnections.length == 0) {
         return -1;
     }
-    const convertedFirstQuestion = createQuestionResponse(firstQuestion);
-    let treeArray: treeArray = [[[convertedFirstQuestion]]];
+    console.log(6);
+    let treeArray: treeArray = [[[firstQuestion]]];
+    console.log("treeArray");
+    console.log(treeArray);
     const allQuestions = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
+    console.log("allQuestions");
+    console.log(allQuestions);
+    console.log(7);
     if (allQuestions == null || allQuestions == -1) {
         return -1;
     }
     const result = await addTreeLayer_v2(treeArray, questionCollection, allConnections, allQuestions);
+    console.log(result);
+    console.log(8);
     return result;
 }
 
 async function addTreeLayer_v2(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) {
     let i = 0;
     while (true) {
+        console.log("treeArray[i]");
+        console.log(treeArray[i]);
         if (treeArray[i] == undefined) {
             break;
         }
         const layer = createTreeLayer(treeArray[i], allConnections, allQuestions);
+        console.log("layer");
+        console.log(layer);
         if (i == 5) {
             break;
         }
@@ -211,22 +229,32 @@ async function addTreeLayer_v2(treeArray: treeArray, questionCollection: mongoDB
 
 function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions: any[]) {
     const data = layer.flat();
+    console.log("data");
+    console.log(data);
     let newLayer: Object[][] = [];
     let index = 0;
     for (let i = 0; i < data.length; i++) {
         index++;
         let entry: Object[] = [];
+        console.log(data);
+        console.log(data[0]);
+        console.log(i);
+        console.log(data[i]);
         const connections = findConnection(data[i], allConnections);
+        console.log("connections");
+        console.log(connections);
         if (connections == -1 || connections == -2) {
             continue;
         }
         for (const key in connections) {
+            console.log("NETRY");
+            console.log(connections[key]);
             if (connections[key] == "") {
                 continue;
             } else {
                 for (let k = 0; k < allQuestions.length; k++) {
                     if (allQuestions[k]._id.equals(connections[key])) {
-                        entry.push(createQuestionResponse(allQuestions[k]));
+                        entry.push(allQuestions[k]);
                         break;
                     }
                 }
@@ -261,8 +289,10 @@ function findConnection(question: any, allConnections: any[]) {
     if (question == "") {
         return -1;
     }
+    console.log("allConnections");
+    console.log(allConnections);
     for (let i = 0; i < allConnections.length; i++) {
-        if (allConnections[i].question.equals(question.id)) {
+        if (allConnections[i].question.equals(question._id)) {
             return allConnections[i].children;
         }
     }

@@ -460,7 +460,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.delete("/api_v1/catalog", authenticateToken, async (req, res) => {
