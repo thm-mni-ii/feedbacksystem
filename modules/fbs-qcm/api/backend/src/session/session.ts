@@ -1,5 +1,5 @@
 import * as mongoDB from "mongodb";
-import { getSessionStatusAsText, getUserCourseRoles } from "../utils/utils";
+import { getFirstQuestionInCatalog, getSessionStatusAsText, getUserCourseRoles } from "../utils/utils";
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
@@ -14,7 +14,7 @@ export async function startSession(tokenData: JwtPayload, catalogId: string, cou
     }
     const catalogObjectId = new mongoDB.ObjectId(catalogId)
     const courseObjectId = new mongoDB.ObjectId(courseId)
-    if( await checkForOpenSessions(tokenData)) {
+    if( await checkifSessionIsNotFinished(tokenData.id, catalogObjectId, courseObjectId)) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
@@ -35,23 +35,31 @@ export async function getSessionQuestion(catalogId: string, tokenData: JwtPayloa
     if(userCourses.length === 0) {
         return -1;
     }
-    const question = await getCurrentQuestion(tokenData, catalogId);
+    const database: mongoDB.Db = await connect();
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const question = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
     console.log(question);
     console.log("HALLLLOOOOOOOOOOOOOOOOOOOOOOOOOOO");
     return question;
 }
 
 export async function pauseSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
+    console.log(1);
     const userCourses = getUserCourseRoles(tokenData);
+    console.log(2);
     if(userCourses.length == 0) {
         return -1;
     }
+    console.log(3);
     const catalogObjectId = new mongoDB.ObjectId(catalogId)
     const courseObjectId = new mongoDB.ObjectId(courseId)
-    if(await checkIfSessionIsOngoing(tokenData.user, catalogObjectId, courseObjectId)) {
+    console.log(4);
+    if(await checkIfSessionIsOngoing(tokenData.id, catalogObjectId, courseObjectId)) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
+    console.log(5);
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
     const sessionEntry = {
         user: tokenData.id,
@@ -60,7 +68,9 @@ export async function pauseSession(tokenData: JwtPayload, catalogId: string, cou
         catalogId: catalogObjectId,
         courseId: courseObjectId,
     }
+    console.log(6);
     await sessionCollection.insertOne(sessionEntry);
+    return 1;
 }
 
 export async function endSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
@@ -83,7 +93,35 @@ export async function endSession(tokenData: JwtPayload, catalogId: string, cours
         courseId: courseObjectId,
     }
     await sessionCollection.insertOne(sessionEntry);
+    return 1;
+}
 
+export async function unpauseSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
+    console.log(1);
+    const userCourses = getUserCourseRoles(tokenData);
+    if(userCourses.length == 0) {
+        return -1;
+    }
+    console.log(2);
+    const catalogObjectId = new mongoDB.ObjectId(catalogId)
+    const courseObjectId = new mongoDB.ObjectId(courseId)
+    if(await checkifSessionIsNotPaused(tokenData.id, catalogObjectId, courseObjectId)) {
+        return -1;
+    }
+    console.log(3);
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    console.log(4);
+    const sessionEntry = {
+        user: tokenData.id,
+        time: new Date,
+        status: SessionStatus.ongoing,
+        catalogId: catalogObjectId,
+        courseId: courseObjectId,
+    }
+    await sessionCollection.insertOne(sessionEntry);
+    console.log(5);
+    return 1;
 }
 
 async function checkIfSessionIsOngoing(user: number, catalogObjectId: mongoDB.ObjectId, courseObjectId: mongoDB.ObjectId) {
@@ -92,9 +130,12 @@ async function checkIfSessionIsOngoing(user: number, catalogObjectId: mongoDB.Ob
         catalogId: catalogObjectId,
         courseId: courseObjectId
     }
+    console.log("query");
+    console.log(query);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
     const result = await sessionCollection.find(query).sort({ time: -1 }).limit(1).toArray();
+    console.log(result);
     if(result === null) {
         return false;
     }
@@ -104,6 +145,29 @@ async function checkIfSessionIsOngoing(user: number, catalogObjectId: mongoDB.Ob
     return false;
 }
 
+async function checkifSessionIsNotPaused(user: number, catalogObjectId: mongoDB.ObjectId, courseObjectId: mongoDB.ObjectId) {
+    const query = {
+        user: user,
+        catalogId: catalogObjectId,
+        courseId: courseObjectId
+    }
+    console.log("query");
+    console.log(query);
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    const result = await sessionCollection.find(query).sort({ time: -1 }).limit(1).toArray();
+    console.log(result);
+    if(result === null) {
+        return true;
+    }
+    if(result[0].ongoing === SessionStatus.ongoing) {
+        return true;
+    }
+    if(result[0].ongoing === SessionStatus.finished) {
+        return true;
+    }
+    return false;
+}
 async function checkifSessionIsNotFinished(user: number, catalogObjectId: mongoDB.ObjectId, courseObjectId: mongoDB.ObjectId) {
     const query = {
         user: user,
@@ -122,10 +186,6 @@ async function checkifSessionIsNotFinished(user: number, catalogObjectId: mongoD
     if(result[0].ongoing === SessionStatus.paused) {
         return true;
     }
-    return false;
-}
-
-async function checkForOpenSessions(tokenData: JwtPayload) {
     return false;
 }
 

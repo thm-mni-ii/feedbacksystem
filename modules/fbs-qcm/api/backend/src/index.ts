@@ -35,6 +35,7 @@ import {
   getPausedSessions,
   pauseSession,
   startSession,
+  unpauseSession,
 } from "./session/session";
 import Choice from "./model/questionTypes/Choice";
 import { Question } from "./model/Question";
@@ -233,7 +234,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.delete("/api_v1/question", authenticateToken, async (req, res) => {
@@ -251,7 +253,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.put("/api_v1/question/", authenticateToken, async (req, res) => {
@@ -273,7 +276,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.post("/api_v1/question", authenticateToken, async (req, res) => {
@@ -667,6 +671,7 @@ async function startServer() {
     }
   });
   app.put("/api_v1/pauseSession", authenticateToken, async (req, res) => {
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     try {
       if (req.user === undefined) {
         res.sendStatus(401);
@@ -677,6 +682,29 @@ async function startServer() {
       const courseId = requestData.course;
       if (req.user !== undefined) {
         await pauseSession(req.user, catalogId, courseId);
+        res.sendStatus(200);
+        return;
+      }
+      res.sendStatus(500);
+    } catch (error) {
+      res.sendStatus(500);
+    }
+  });
+  app.put("/api_v1/unpauseSession", authenticateToken, async (req, res) => {
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    try {
+      if (req.user === undefined) {
+        res.sendStatus(401);
+        return;
+      }
+      const requestData = req.body;
+      const catalogId = requestData.catalog;
+      const courseId = requestData.course;
+      if (req.user !== undefined) {
+        const result = await unpauseSession(req.user, catalogId, courseId);
+        if(result === -1) {
+            res.sendStatus(400);
+        }
         res.sendStatus(200);
         return;
       }

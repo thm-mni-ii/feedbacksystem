@@ -151,9 +151,9 @@ function checkChoice(answer: ChoiceAnswer, question: Choice) {
     console.log(`falsePositives: ${falsePositives}`);
     console.log(`falseNegatives: ${falseNegatives}`);
     if(falseAnswers === 0 ) {
-        return true;
+        return AnswerScore.correct;
     }
-    return false;
+    return AnswerScore.incorrect;
 }
  
 function checkMultipleChoice(answer: any[], question: any) {
