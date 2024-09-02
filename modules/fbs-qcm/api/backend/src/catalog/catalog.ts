@@ -14,9 +14,6 @@ interface catalog {
 }
 
 export async function postCatalog(data: catalog, tokenData: JwtPayload, course: string) {
-    console.log(data);
-    console.log(tokenData);
-    console.log(course);
     const adminCourses = getAdminCourseRoles(tokenData);
     const courseIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(course);
     const searchQuery = {
@@ -35,7 +32,6 @@ export async function postCatalog(data: catalog, tokenData: JwtPayload, course: 
             "name": data.name
         };
         const res = await catalogCollection.insertOne(catalogEntry);
-        console.log(res);
         const entry = {
             "course": result[0].courseId,
             "catalog": res.insertedId,
@@ -62,10 +58,12 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
         return -1;
     }
     const data = await catalogCollection.findOne(query);
-    const tree = getQuestionTree(tokenData, catalogId);
-    console.log(data);
-    console.log(tree);
-    return tree;
+    const tree = await getQuestionTree(tokenData, catalogId);
+    const res = {
+        catalog: data,
+        questions: tree
+    };
+    return res;
 }
 
 export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
@@ -158,7 +156,6 @@ export async function getCatalogScore(tokenData: JwtPayload, catalogId: string) 
         id: tokenData.id,
         [`catalogscores.${catalogId}`]: { $exists: true }
     };
-    console.log(query);
     const res: any = await userCollection.findOne(query);
     const score = {
         score: res.catalogscores[catalogId]
@@ -169,86 +166,65 @@ export async function getCatalogScore(tokenData: JwtPayload, catalogId: string) 
 
 export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
-    console.log(1);
     const course = getCatalogPermission(adminCourses, catalogId);
-    console.log(2);
     if (!course) {
         return -1;
     }
-    console.log(3);
     const database: mongoDB.Db = await connect();
     const questionCollection = database.collection("question");
     const questionInCatalogCollection = database.collection("questionInCatalog");
-    console.log(4);
     const firstQuestion: any = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
     if (firstQuestion == null || firstQuestion == -1) {
         return -1;
     }
-    console.log(5);
     const catalogArray: string[] = [catalogId];
     const allConnections = await getAllQuestionsFromCatalogs(questionInCatalogCollection, catalogArray);
     if (allConnections == null || allConnections.length == 0) {
         return -1;
     }
-    console.log(6);
     let treeArray: treeArray = [[[firstQuestion]]];
-    console.log("treeArray");
-    console.log(treeArray);
     const allQuestions = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
-    console.log("allQuestions");
-    console.log(allQuestions);
-    console.log(7);
     if (allQuestions == null || allQuestions == -1) {
         return -1;
     }
     const result = await addTreeLayer_v2(treeArray, questionCollection, allConnections, allQuestions);
-    console.log(result);
-    console.log(8);
     return result;
 }
 
 async function addTreeLayer_v2(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) {
     let i = 0;
     while (true) {
-        console.log("treeArray[i]");
+        console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+        console.log(i);
         console.log(treeArray[i]);
-        if (treeArray[i] == undefined) {
+        console.log(treeArray[i].length);
+        console.log(treeArray[i].every(item => Array.isArray(item) && item.length === 0));
+        console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+        if (treeArray[i] == undefined || treeArray[i].length === 0 || treeArray[i].every(item => Array.isArray(item) && item.length === 0)) {
             break;
         }
         const layer = createTreeLayer(treeArray[i], allConnections, allQuestions);
-        console.log("layer");
-        console.log(layer);
         if (i == 5) {
             break;
         }
         treeArray[i + 1] = layer;
-        i += 3;
+        i += 1;
     }
     return treeArray;
 }
 
 function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions: any[]) {
     const data = layer.flat();
-    console.log("data");
-    console.log(data);
     let newLayer: Object[][] = [];
     let index = 0;
     for (let i = 0; i < data.length; i++) {
         index++;
         let entry: Object[] = [];
-        console.log(data);
-        console.log(data[0]);
-        console.log(i);
-        console.log(data[i]);
         const connections = findConnection(data[i], allConnections);
-        console.log("connections");
-        console.log(connections);
         if (connections == -1 || connections == -2) {
             continue;
         }
         for (const key in connections) {
-            console.log("NETRY");
-            console.log(connections[key]);
             if (connections[key] == "") {
                 continue;
             } else {
@@ -289,8 +265,6 @@ function findConnection(question: any, allConnections: any[]) {
     if (question == "") {
         return -1;
     }
-    console.log("allConnections");
-    console.log(allConnections);
     for (let i = 0; i < allConnections.length; i++) {
         if (allConnections[i].question.equals(question._id)) {
             return allConnections[i].children;
