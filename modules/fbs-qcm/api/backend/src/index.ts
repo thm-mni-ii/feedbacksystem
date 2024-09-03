@@ -627,7 +627,8 @@ async function startServer() {
         res.send(result);
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.get("/api_v1/user", authenticateToken, async (req, res) => {

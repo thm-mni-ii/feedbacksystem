@@ -3,8 +3,9 @@ import { connect } from "../mongo/mongo";
 import * as mongoDB from "mongodb";
 import { SessionStatus } from "./enum";
 import { Question } from "../model/Question";
+import QuestionType from "../enums/QuestionType";
 
-interface ReturnQuestion {
+interface ReturnChoiceQuestion {
     id: mongoDB.ObjectId;
     questiontext: string;
     questiontype: string;
@@ -217,6 +218,8 @@ export async function getFirstQuestionInCatalog(questionCollection: mongoDB.Coll
         catalog: catalogIdObject
     }
     const firstQuestion = await questionInCatalogCollection.findOne(findFirstQuestion);
+    console.log("firstQuestion");
+    console.log(firstQuestion);
     if( firstQuestion == null || firstQuestion.length == 0) {
         return -1;
     }
@@ -249,17 +252,28 @@ export async function getAllQuestionsFromCatalogs(questionInCatalogCollection: m
 
 export function createQuestionResponse(newQuestion: any) {
     console.log(newQuestion);
-    const returnQuestion: ReturnQuestion = {
-        id: newQuestion._id,
-        questiontext: newQuestion.questiontext,
-        questiontype: newQuestion.questiontype,
-        answers: []
+    if(newQuestion.questiontype === QuestionType.Choice) {
+        const returnQuestion = newQuestion;
+        delete returnQuestion.owner;
+        for(let i = 0; i < returnQuestion.answerColumns.length; i++) {
+           delete returnQuestion.answerColumns[i].correctAnswers;
+        }
+        return returnQuestion
+    }
+    if(newQuestion.questiontype === QuestionType.FillInTheBlanks) {
+        const returnQuestion = newQuestion;
+        delete returnQuestion.owner;
+        for(let i = 0; i < returnQuestion.textParts.length; i++) {
+            if(returnQuestion.textParts[i].isBlank) {
+                returnQuestion.textParts[i].text = "";
+            }
+        }
+        console.log("returnQuestion");
+        console.log(returnQuestion);
+        return returnQuestion;
     }
     
-    for(let i = 0; i < newQuestion.answers.length; i++) {
-        returnQuestion.answers.push(newQuestion.answers[i].text);
-    }
-    return returnQuestion;
+    return newQuestion;
 }
 
 
