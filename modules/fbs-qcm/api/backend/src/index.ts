@@ -40,6 +40,7 @@ import {
 import Choice from "./model/questionTypes/Choice";
 import { Question } from "./model/Question";
 import { getAllQuestionInCatalog } from "./utils/utils";
+import { createTag } from "./tag/tag";
 
 interface User {
   username: string;
@@ -823,7 +824,29 @@ async function startServer() {
       }
       res.send(result);
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  app.post("/api_v1/createTag", authenticateToken, async (req, res) => {
+    try {
+      if (req.user === undefined) {
+        res.sendStatus(401);
+        return;
+      }
+        const requestData = req.body;
+        const tagname = requestData.tag;
+        const result = await createTag(req.user, tagname);
+        if(result === -1) {
+            res.send(403);
+        }
+        if(result === -2) {
+            res.send(400);
+        }
+        res.send(result);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   function authenticateToken(req: Request, res: Response, next: NextFunction) {
