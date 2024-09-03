@@ -8,12 +8,12 @@ export default interface Choice extends Question {
 }
 
 interface OptionColumn {
-  id: string
+  id: number
   name: string
   correctAnswers: number[]
 }
 
 interface OptionRow {
-  id: string
+  id: number
   text: string
 }
