@@ -2,15 +2,22 @@ import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import {
     getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission, getFirstQuestionInCatalog, getAllQuestionInCatalog,
-    createQuestionResponse
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
+import { Question } from "../model/Question";
 
-type treeArray = any[][][];
 interface catalog {
     name: string,
     questions: string[],
     requirements: string[]
+}
+interface QuestionTreeObject {
+    question: Question,
+    children: child[] 
+}
+interface child {
+    requirement: string,
+    child: QuestionTreeObject
 }
 
 export async function postCatalog(data: catalog, tokenData: JwtPayload, course: string) {
@@ -24,8 +31,6 @@ export async function postCatalog(data: catalog, tokenData: JwtPayload, course: 
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const courseCollection: mongoDB.Collection = database.collection("course");
     const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
-    const questionCollection: mongoDB.Collection = database.collection("question");
-    const questionInCatalogCollectionCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const result = await courseCollection.find(searchQuery).toArray();
     if (result.length > 0) {
         const catalogEntry = {
@@ -75,7 +80,6 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
     const database: mongoDB.Db = await connect();
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
-    const courseCollection: mongoDB.Collection = database.collection("course");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogPermission: any = await getCatalogPermission(adminCourses, catalogId);
     if (!catalogPermission) {
@@ -182,35 +186,44 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
     if (allConnections == null || allConnections.length == 0) {
         return -1;
     }
-    let treeArray: treeArray = [[[firstQuestion]]];
+    let tree: QuestionTreeObject = {
+        question: firstQuestion,
+        children: await createChildrenObjects(firstQuestion, allConnections)
+    };
     const allQuestions = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
     if (allQuestions == null || allQuestions == -1) {
         return -1;
     }
-    const result = await addTreeLayer_v2(treeArray, questionCollection, allConnections, allQuestions);
-    return result;
+    return tree;
 }
 
-async function addTreeLayer_v2(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) {
-    let i = 0;
-    while (true) {
-        console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-        console.log(i);
-        console.log(treeArray[i]);
-        console.log(treeArray[i].length);
-        console.log(treeArray[i].every(item => Array.isArray(item) && item.length === 0));
-        console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-        if (treeArray[i] == undefined || treeArray[i].length === 0 || treeArray[i].every(item => Array.isArray(item) && item.length === 0)) {
-            break;
+async function createChildrenObjects(question: any, allConnections: any[]) {
+    const connections = findConnection(question, allConnections);
+    let children: child[] = [];
+    const database: mongoDB.Db = await connect();
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    for (const key in connections) {
+        if(connections[key] === "") {
+            continue;
         }
-        const layer = createTreeLayer(treeArray[i], allConnections, allQuestions);
-        if (i == 5) {
-            break;
+        const questionFind = {
+            _id: connections[key]
         }
-        treeArray[i + 1] = layer;
-        i += 1;
+        const data: Question = await questionCollection.findOne(questionFind) as unknown as Question;
+        if(data === null) {
+            continue;
+        }
+        const newQuestion: QuestionTreeObject = {
+            question: data,
+            children: await createChildrenObjects(data, allConnections)
+        }
+        let child: child = {
+            requirement: key,
+            child: newQuestion 
+        }
+        children.push(child);
     }
-    return treeArray;
+    return children
 }
 
 function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions: any[]) {

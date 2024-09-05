@@ -286,15 +286,12 @@ export async function getAllQuestionInCatalog(questionInCatalogCollection: mongo
     for(let i = 0; i < connections.length; i++) {
         questionIds.push(connections[i].question);
     }
-    console.log("QUESTION IDS");
-    console.log(questionIds);
     if(questionIds == null) {
         return -1;
     }
     const allQuestionsQuery = {
         _id: {$in: questionIds}
     }
-    console.log("All Questions");
     const allQuestions = await questionCollection.find(allQuestionsQuery).toArray();
     console.log(allQuestions);
     return allQuestions
