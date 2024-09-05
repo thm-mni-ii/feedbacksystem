@@ -84,7 +84,6 @@ export async function removeQuestionFromCatalog(tokenData: JwtPayload, questionI
     const result = await questionInCatalogCollection.deleteOne(query);
     console.log(result);
     return result;
-    //check catalog access 
 }
 
 export async function deleteQuestionById(questionId: string, tokenData: JwtPayload) {

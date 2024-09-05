@@ -6,7 +6,6 @@ import { getCurrentQuestion } from "../question/question";
 import { SessionStatus } from "../utils/enum";
 
 export async function startSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
-    console.log(tokenData);
     const userCourses = getUserCourseRoles(tokenData);
     console.log(userCourses);
     if ( userCourses.length == 0) {
@@ -174,16 +173,18 @@ async function checkifSessionIsNotFinished(user: number, catalogObjectId: mongoD
         catalogId: catalogObjectId,
         courseId: courseObjectId
     }
+    console.log(query);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
     const result = await sessionCollection.find(query).sort({ time: -1 }).limit(1).toArray();
-    if(result === null) {
+    console.log(result);
+    if(result.length === 0) {
         return false;
     }
-    if(result[0].ongoing === SessionStatus.ongoing) {
+    if(result[0].status === SessionStatus.ongoing) {
         return true;
     }
-    if(result[0].ongoing === SessionStatus.paused) {
+    if(result[0].status === SessionStatus.paused) {
         return true;
     }
     return false;

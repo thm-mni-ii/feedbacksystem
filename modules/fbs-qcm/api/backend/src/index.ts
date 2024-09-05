@@ -669,7 +669,8 @@ async function startServer() {
         res.send(result);
       }
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.put("/api_v1/pauseSession", authenticateToken, async (req, res) => {
