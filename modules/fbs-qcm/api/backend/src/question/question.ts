@@ -158,6 +158,9 @@ export async function getAllQuestions(tokenData: JwtPayload) {
 }
 
 export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: string) {
+    console.log("------------------------------------------------------------------------------------------------------------------------------");
+    console.log(tokenData);
+    console.log(catalogId);
     const userCourses = getUserCourseRoles(tokenData);
     const access = await getCatalogPermission(userCourses, catalogId);
     if(!access) {
@@ -304,10 +307,14 @@ async function moveQuestionInCatalogs(adminCourses: number[], catalogInCourseCol
 }
 
 export async function getCurrentSessionQuestion(tokenData: JwtPayload) {
+    console.log(tokenData);
     const session = await getCurrentSession(tokenData.id);
+    console.log(session);
     if(session === null) {
         return -1;
     }
-    return getCurrentQuestion(tokenData, session.catalog);    
+    console.log(session);
+    console.log("--------------------------------------------------------------------------------------------------------------");
+    return getCurrentQuestion(tokenData, session.catalogId);    
 }
 

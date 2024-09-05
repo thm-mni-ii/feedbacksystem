@@ -299,12 +299,14 @@ export async function getAllQuestionInCatalog(questionInCatalogCollection: mongo
 
 export async function getCurrentSession(user: number) {
     const query = {
-        id: user,
+        user: user,
         status: SessionStatus.ongoing
     }
+    console.log(query);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
-    const result: any = sessionCollection.find(query).sort({ date: -1 }).limit(1).toArray();
+    const result: any = await sessionCollection.find(query).sort({ date: -1 }).limit(1).toArray();
+    console.log(result);
     return result[0];
 }
 

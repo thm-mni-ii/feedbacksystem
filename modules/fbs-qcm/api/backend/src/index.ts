@@ -736,7 +736,7 @@ async function startServer() {
     }
   });
   app.get(
-    "/api_v1/currentSessionQuestion",
+      "/api_v1/currentSessionQuestion",
     authenticateToken,
     async (req, res) => {
       try {
@@ -744,10 +744,7 @@ async function startServer() {
           res.sendStatus(401);
           return;
         }
-        if (req.user === undefined) {
-          res.send(401);
-          return;
-        }
+        console.log("Start");
         const result = await getCurrentSessionQuestion(req.user);
         if (result === -1) {
           res.send(500);
