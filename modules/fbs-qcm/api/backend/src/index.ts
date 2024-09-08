@@ -756,8 +756,8 @@ async function startServer() {
       }
     }
   );
-  app.get(
-    "/api_v1/submitSessionQuestion",
+  app.post(
+    "/api_v1/submitSessionAnswer",
     authenticateToken,
     async (req, res) => {
       try {
@@ -773,7 +773,8 @@ async function startServer() {
         }
         res.send(result);
       } catch (error) {
-        res.sendStatus(500);
+            console.log(error);
+            res.sendStatus(500);
       }
     }
   );
