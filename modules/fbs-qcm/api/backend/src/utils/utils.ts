@@ -310,7 +310,9 @@ export async function getCurrentSession(user: number) {
     return result[0];
 }
 
-export async function getSessionStatusAsText(status: SessionStatus) {
+export function getSessionStatusAsText(status: SessionStatus) {
+    console.log(status);
+    console.log("----------------------");
     switch(status) {
         case SessionStatus.ongoing:
             return "ongoing";

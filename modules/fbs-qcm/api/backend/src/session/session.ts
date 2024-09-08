@@ -196,10 +196,12 @@ async function getDurationOfSession(user: number, catalog: string, course: strin
         catalogId: catalog,
         courseId: course
     }
+    console.log(1);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
     const result = await sessionCollection.find(query).sort({ time: 1}).toArray();
     let lastFinished = -1;
+    console.log(2);
     for(let i = 0; i < result.length - 1; i++) {
        if(result[i].status === SessionStatus.finished) {
            lastFinished = i;
@@ -207,9 +209,12 @@ async function getDurationOfSession(user: number, catalog: string, course: strin
     }
     let j: number = lastFinished + 1;
     let durationStart: Date = new Date;
+    console.log(3);
     let duration = 0;
     let currentStatus: SessionStatus = SessionStatus.finished;
+    console.log(4);
     while(true) {
+        console.log(5);
         if(j >= result.length) {
             if(currentStatus === SessionStatus.ongoing) {
                 const currentTime = new Date;
@@ -221,28 +226,37 @@ async function getDurationOfSession(user: number, catalog: string, course: strin
                 break;
             }
         }
+        console.log(6);
+        console.log(result[j].status);
         if(result[j].status === SessionStatus.ongoing) {
+            console.log(61);
             if(currentStatus === SessionStatus.ongoing) {
+                console.log(62);
                 return -2;
             }
+            console.log(63);
             durationStart = result[j].time;
-            j+=1;
             currentStatus = SessionStatus.ongoing;
         }
         if(result[j].status === SessionStatus.paused || result[j].status === SessionStatus.finished) {
+            console.log(66);
             if(currentStatus === SessionStatus.paused) {
                 return -2;
             }
             const tmpDuration = result[j].time.getTime() - durationStart.getTime();
+            console.log(67);
             if(tmpDuration < 0) {
                 return -2;
             }
             duration += tmpDuration;
             durationStart = new Date;
-            j+=1;
+            console.log(68);
             currentStatus = SessionStatus.paused;
         }
+        j+=1;
+        console.log(1111);
     }
+    console.log(7);
     return duration;
 }
 
@@ -276,7 +290,9 @@ export async function getOngoingSessions(user: number) {
     const query = {
         user: user,
     }
+    console.log(query);
     const result = await getSessionData(query);
+    console.log(result);
     let pausedOrFinishedSessions: any[] = [];
     let ongoingSessions: any[] = [];
     if(result === null) {
@@ -289,15 +305,28 @@ export async function getOngoingSessions(user: number) {
        if(pausedOrFinishedSessions.find(obj => obj.catalogId === result[i].catalogId && obj.courseId === result[i].courseId)) {
            continue;
        }
-       const entry = createSessionReturn(result[i]);
+       const entry = await createSessionReturn(result[i]);
        if(result[i].status === SessionStatus.finished  || result[i].status === SessionStatus.paused) {
             pausedOrFinishedSessions.push(entry)
        } else {
             ongoingSessions.push(entry);
        }
     }
+    for(let j = 0; j < pausedOrFinishedSessions.length; j++) {
+    }
+    // nach Pause oder finish letztes Ongoing suchen und beenden
+    ongoingSessions = removeMatchingObjects(ongoingSessions, pausedOrFinishedSessions)
+    console.log("ongoingSessions");
+    console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHSSSSSSSSSSSSSSSSSSSS");
+    console.log(ongoingSessions);
     return ongoingSessions;
 }
+
+function removeMatchingObjects(arr1: any[], arr2: any[]) { 
+    return arr1.filter(item1 => 
+                       !arr2.some(item2 => item1.catalogId === item2.catalogId 
+                                  && item1.courseId === item2.courseId ) ); }
+
 export async function getPausedSessions(user: number) {
     const query = {
         user: user,
@@ -331,14 +360,17 @@ async function getSessionData(query: any) {
     return result;
 }
 
-function createSessionReturn(session: any) {
+async function createSessionReturn(session: any) {
+    console.log(session);
+    console.log(getSessionStatusAsText(session.status));
     const sessionReturn = {
         user: session.user,
         catalogId: session.catalogId,
         courseId: session.courseId,
         status: getSessionStatusAsText(session.status),
         score: session.score,
-        time: getDurationOfSession(session.user, session.catalogId, session.courseId)
+        time: await getDurationOfSession(session.user, session.catalogId, session.courseId)
     }
+    console.log(sessionReturn);
     return sessionReturn;
 }
