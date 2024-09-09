@@ -1,15 +1,3 @@
-<template>
-  <v-dialog v-model="deleteDialog" width="500px">
-    <v-card :title="deleteTitle" :text="deleteMessage">
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" @click="_cancel"> Close </v-btn>
-        <v-btn variant="text" @click="_confirm"> {{ deleteConfirmBtnText }} </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 
@@ -58,3 +46,14 @@ defineExpose({
 </script>
 
 <style scoped></style>
+<template>
+  <v-dialog v-model="deleteDialog" width="500px">
+    <v-card :title="deleteTitle" :text="deleteMessage">
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" @click="_cancel"> Close!!!JEJIJI </v-btn>
+        <v-btn variant="text" @click="_confirm"> {{ deleteConfirmBtnText }} </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</template>

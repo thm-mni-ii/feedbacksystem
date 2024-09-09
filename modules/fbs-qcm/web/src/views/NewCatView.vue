@@ -25,7 +25,7 @@ const items = [
 </script>
 
 <template>
-  <v-form>
+  <v-form class="mt-16">
     <v-sheet
       class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
       elevation="4"

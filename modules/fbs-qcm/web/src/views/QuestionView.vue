@@ -21,9 +21,9 @@ const getQuestion = async () => {
 }
 </script>
 <template>
-  <div class="mx-16">
+  <div class="mx-16 mt-16">
     <div class="d-flex my-4 align-center">
-      <v-form @submit.prevent="getQuestion" class="w-25">
+      <v-form @submit.prevent="getQuestion" class="w-50">
         <v-text-field v-model="questionId" label="Question ID"></v-text-field>
         <v-btn type="submit">get question</v-btn>
       </v-form>

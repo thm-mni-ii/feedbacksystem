@@ -38,6 +38,16 @@ const router = createRouter({
       path: '/deleteQuestion',
       name: 'delete',
       component: () => import('../views/DeleteQuestionView.vue')
+    },
+    {
+      path: '/editQuestion',
+      name: 'edit',
+      component: () => import('../views/EditQuestionView.vue')
+    },
+    {
+      path: '/allQuestions',
+      name: 'allQuestions',
+      component: () => import('../views/AllQuestionsView.vue')
     }
     // {
     //   path: "/:pathMatch(.*)*",

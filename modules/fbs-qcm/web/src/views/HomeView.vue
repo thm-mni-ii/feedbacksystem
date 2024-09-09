@@ -1,6 +1,6 @@
 <template>
   <DialogConfirmVue ref="dialogConfirm" />
-  <v-sheet class="pa-10">
+  <v-sheet class="pa-10 mt-12">
     <v-expansion-panels>
       <v-expansion-panel v-for="course in myCourses" :key="course.id">
         <v-expansion-panel-title> {{ course.name }} </v-expansion-panel-title>

@@ -2,37 +2,43 @@
 import { ref } from 'vue'
 import axios from 'axios'
 const token = localStorage.getItem('token')
-const questionId = ref('')
-const questionData = ref(null)
+const questionId = ref<string>('')
+const questionData = ref<any>(null)
+const message = ref<string>('')
 
 const config = {
   headers: { Authorization: `Bearer ${token}` }
 }
 
 const deleteQuestion = async () => {
-  axios
-    .get('/api_v1/question', { ...config, params: { ID: questionId.value } })
-    .then((res) => {
-      console.log('One Question:', res), (questionData.value = res.data)
+  try {
+    const getResponse = await axios.get('/api_v1/question', {
+      ...config,
+      params: { ID: questionId.value }
     })
-    .catch((err) => console.log(err))
+    questionData.value = getResponse.data
+    console.log('One Question:', getResponse.data)
 
-  axios
-    .delete('/api_v1/question', { ...config, params: { ID: questionId.value } })
-    .then((res) => {
-      console.log('Question Deleted:', res), (questionData.value = res.data)
+    await axios.delete('/api_v1/question', {
+      ...config,
+      params: { ID: questionId.value }
     })
-    .catch((err) => console.log(err))
+    console.log('Question Deleted:', questionData.value.questiontext)
+    message.value = 'Question deleted successfully!'
+  } catch (err) {
+    console.error('Error:', err)
+    message.value = 'Failed to delete question.'
+  }
 }
 </script>
 <template>
-  <div class="mx-16">
+  <div class="mx-16 mt-16">
     <div class="d-flex my-4 align-center">
-      <v-form class="w-25">
+      <v-form class="w-25" @submit.prevent="deleteQuestion">
         <v-text-field v-model="questionId" label="Question ID"></v-text-field>
-        <v-btn @click="deleteQuestion">delete question</v-btn>
+        <v-btn type="submit">delete question</v-btn>
       </v-form>
     </div>
-    <CatalogSession v-if="questionData" :question="questionData" />
+    <div v-if="message" class="my-2">{{ message }}</div>
   </div>
 </template>

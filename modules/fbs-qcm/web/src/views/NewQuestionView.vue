@@ -75,6 +75,7 @@ const handleSubmit = async () => {
     question.value.questionconfiguration.multipleRow = true
   }
   const token = localStorage.getItem('token')
+  console.log('Token:', token)
 
   const config = {
     headers: { Authorization: `Bearer ${token}` }
@@ -90,7 +91,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <v-form @submit.prevent="handleSubmit">
+  <v-form @submit.prevent="handleSubmit" class="mt-16">
     <v-sheet
       class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
       elevation="4"
@@ -216,40 +217,6 @@ const handleSubmit = async () => {
                   <v-tooltip activator="parent" location="end">Delete Column</v-tooltip>
                   <v-icon icon="mdi-delete-outline" size="small"></v-icon>
                 </v-btn>
-
-                <!-- <v-dialog
-                  v-if="question.questionconfiguration.multipleColumn == true"
-                  v-model="columnDialog"
-                  max-width="600"
-                >
-                  <template v-slot:activator="{ props: activatorProps }">
-                    <v-btn
-                      class="text-none ml-9 mr-1 px-0"
-                      icon="mdi-pencil"
-                      color="black"
-                      variant="text"
-                      v-bind="activatorProps"
-                    >
-                      <v-tooltip activator="parent" location="end">{{ column.name }}</v-tooltip>
-                    </v-btn>
-                  </template>
-                  <v-card prepend-icon="mdi-pencil" title="Enter a Name for this Column">
-                    <v-card-text>
-                      <v-text-field label="Column name" v-model="column.name"></v-text-field>
-                      <v-divider></v-divider>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn text="Close" variant="plain" @click="columnDialog = false"></v-btn>
-                        <v-btn
-                          color="primary"
-                          text="Save"
-                          variant="tonal"
-                          @click="columnDialog = false"
-                        ></v-btn>
-                      </v-card-actions>
-                    </v-card-text>
-                  </v-card>
-                </v-dialog> -->
               </div>
             </div>
           </div>

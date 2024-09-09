@@ -1,13 +1,19 @@
 <template>
-  <div>
-    <v-btn @click="router.push('/')" class="ma-2">Home</v-btn>
-    <v-btn @click="router.push('/categories')" class="ma-2">Category</v-btn>
-    <v-btn @click="router.push('/newQuestion')" class="ma-2">new Question</v-btn>
-    <v-btn @click="router.push('/addCat')" class="ma-2">new Category</v-btn>
-    <v-btn @click="router.push('/Question')" class="ma-2">Get Question</v-btn>
-    <v-btn @click="router.push('/deleteQuestion')" class="ma-2">Delete Question</v-btn>
-  </div>
-  <RouterView />
+  <v-app>
+    <v-app-bar app color="primary" class="mb-16">
+      <v-tabs class="d-flex justify-between">
+        <v-tab @click="router.push('/')">Home</v-tab>
+        <v-tab @click="router.push('/categories')">Categories</v-tab>
+        <v-tab @click="router.push('/addCat')">new Category</v-tab>
+        <v-tab @click="router.push('/newQuestion')">new Question</v-tab>
+        <v-tab @click="router.push('/Question')">Get Question</v-tab>
+        <v-tab @click="router.push('/deleteQuestion')">Delete Question</v-tab>
+        <v-tab @click="router.push('/editQuestion')">Edit Question</v-tab>
+        <v-tab @click="router.push('/allQuestions')">All Questions</v-tab>
+      </v-tabs>
+    </v-app-bar>
+    <RouterView />
+  </v-app>
 </template>
 
 <script setup lang="ts">
