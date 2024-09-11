@@ -73,7 +73,7 @@ async function createDatabaseAndCollection() {
       owner: 1,
       questiontext: "WAS IST DAS",
       questiontype: "Choice",
-      questionconfiguration: "string",
+      questionconfiguration: {
       multiplerow: true,
       multiplecolumn: true,
       answercolumns: [
@@ -91,14 +91,14 @@ async function createDatabaseAndCollection() {
           "text": "string"
         }
       ]
-        });
+      }});
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
       owner: 1,
       questiontext: "string",
       questiontype: "FillInTheBlanks",
-      questionconfiguration: "string",
       showBlanks: true,
+      questionconfiguration: {
       textParts: [
     {
          order: 1,
@@ -120,13 +120,14 @@ async function createDatabaseAndCollection() {
          text: "es",
          isBlank: true
     }
-    ]});
+    ]}});
+    
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
       owner: 1,
       questiontext: "WAS IST DAS",
       questiontype: "Choice",
-      questionconfiguration: "string",
+      questionconfiguration: {
       multiplerow: true,
       multiplecolumn: true,
       answercolumns: [
@@ -144,7 +145,7 @@ async function createDatabaseAndCollection() {
           "text": "string"
         }
       ]
-    });
+    }});
     await catalogCollection.insertOne({
       _id: new mongoDB.ObjectId("663a51d228d8781d96050905"),
       name: "Grundlagen",

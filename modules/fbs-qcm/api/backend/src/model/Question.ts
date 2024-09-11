@@ -1,4 +1,6 @@
 import type QuestionType from '../enums/QuestionType.ts'
+import Choice from './questionTypes/Choice.js'
+import FillInTheBlanks from './questionTypes/FillInTheBlanks.js'
 
 export interface Question {
   id: number
@@ -6,5 +8,5 @@ export interface Question {
   questiontext?: string
   questiontags: string[]
   questiontype: QuestionType
-  questionconfiguration: QuestionType.Choice | QuestionType.FillInTheBlanks | QuestionType.SQL
+  questionconfiguration: Choice | FillInTheBlanks | QuestionType.SQL
 }

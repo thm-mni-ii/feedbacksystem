@@ -1,6 +1,6 @@
 import { Question } from '../Question'
 
-export default interface Choice extends Question {
+export default interface Choice {
   multipleRow: boolean
   multipleColumn: boolean
   answerColumns: OptionColumn[] // 1 = true/false, mehr = matrix

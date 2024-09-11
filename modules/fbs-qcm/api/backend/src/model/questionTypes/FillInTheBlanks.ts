@@ -1,6 +1,6 @@
 import type { Question } from '../Question.ts'
 
-export default interface FillInTheBlanks extends Question {
+export default interface FillInTheBlanks {
   showBlanks: boolean
   textParts: Part[]
 }

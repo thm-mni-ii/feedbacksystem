@@ -4,6 +4,8 @@ import * as mongoDB from "mongodb";
 import { SessionStatus } from "./enum";
 import { Question } from "../model/Question";
 import QuestionType from "../enums/QuestionType";
+import Choice from "../model/questionTypes/Choice";
+import FillInTheBlanks from "../model/questionTypes/FillInTheBlanks";
 
 interface ReturnChoiceQuestion {
     id: mongoDB.ObjectId;
@@ -254,18 +256,20 @@ export function createQuestionResponse(newQuestion: any) {
     console.log(newQuestion);
     if(newQuestion.questiontype === QuestionType.Choice) {
         const returnQuestion = newQuestion;
+        const configuration = newQuestion.questionconfiguration as any;
         delete returnQuestion.owner;
-        for(let i = 0; i < returnQuestion.answerColumns.length; i++) {
-           delete returnQuestion.answerColumns[i].correctAnswers;
+        for(let i = 0; i < configuration.answerColumns.length; i++) {
+           delete configuration.answerColumns[i].correctAnswers;
         }
         return returnQuestion
     }
     if(newQuestion.questiontype === QuestionType.FillInTheBlanks) {
         const returnQuestion = newQuestion;
+        const configuration = newQuestion.questionconfiguration as FillInTheBlanks;
         delete returnQuestion.owner;
-        for(let i = 0; i < returnQuestion.textParts.length; i++) {
-            if(returnQuestion.textParts[i].isBlank) {
-                returnQuestion.textParts[i].text = "";
+        for(let i = 0; i < configuration.textParts.length; i++) {
+            if(configuration.textParts[i].isBlank) {
+                configuration.textParts[i].text = "";
             }
         }
         console.log("returnQuestion");

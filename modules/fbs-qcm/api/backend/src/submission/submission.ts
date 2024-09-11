@@ -89,9 +89,9 @@ function checkSubmission(answer: any, question: Question) {
     console.log(QuestionType.FillInTheBlanks);
     console.log(QuestionType.Choice);
     if(questionType == QuestionType.Choice) {
-        return checkChoice(answer, question as Choice);
+        return checkChoice(answer, question);
     } else if(questionType == QuestionType.FillInTheBlanks) {
-        return checkClozeText(answer as FillInTheBlanksAnswer[], question as FillInTheBlanks);
+        return checkClozeText(answer as FillInTheBlanksAnswer[], question);
     } else if(questionType == QuestionType.SQL) {
         return checkSQL(answer, question);
     } else {
@@ -103,7 +103,7 @@ function checkSQL(answer: any, question: Question) {
     return 0;
 }
 
-function checkChoice(answer: ChoiceAnswer, question: Choice) {
+function checkChoice(answer: ChoiceAnswer, question: Question) {
     console.log(answer);
     let rows: number[] = [];
     for(let i = 0; i < answer.rows.length; i++) {
@@ -116,7 +116,8 @@ function checkChoice(answer: ChoiceAnswer, question: Choice) {
     const newMatrix = orderRows(answer.matrix, rows); 
     const newMatrix2 = orderColumns(newMatrix, columns);
     console.log(newMatrix2);
-    const answerColumns = question.answerColumns;
+    const configuration = question.questionconfiguration as Choice;
+    const answerColumns = configuration.answerColumns;
     let correctAnswers = 0;
     let falseAnswers = 0;
     let falsePositives = 0;
@@ -176,18 +177,19 @@ function orderColumns(matrix: number[][], order: number[]) {
     return newMatrix;
 }
 
-function checkClozeText(answer: FillInTheBlanksAnswer[], question: FillInTheBlanks) {
+function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
     console.log("---------------------------------------------------------------------------------------------------------------------");
     console.log(answer);
     console.log("---------------------------------------------------------------------------------------------------------------------");
     let blankFields = [];
     let results = [];
     let numberOfCorrectAnswers = 0;
-    console.log(question.textParts);
+    const configuration = question.questionconfiguration as FillInTheBlanks;
+    console.log(configuration.textParts);
     console.log(question);
-    for(let i = 0; i < question.textParts.length; i++) {
-        if(question.textParts[i].isBlank === true) {
-            blankFields.push(question.textParts[i]);
+    for(let i = 0; i < configuration.textParts.length; i++) {
+        if(configuration.textParts[i].isBlank === true) {
+            blankFields.push(configuration.textParts[i]);
         }
     }
     console.log("blankFields");
