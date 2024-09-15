@@ -119,7 +119,7 @@ export async function postQuestion(question: Question, tokenData: JwtPayload) {
     const questionInsertion: questionInsertionType= question;
     questionInsertion.owner = tokenData.user;
     const result = await questionCollection.insertOne(questionInsertion);
-    return result.insertedId;
+    return {id: result.insertedId};
 }
 
 export async function putQuestion(question: Question, tokenData: JwtPayload) {
