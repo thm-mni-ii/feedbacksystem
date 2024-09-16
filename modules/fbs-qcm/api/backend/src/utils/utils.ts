@@ -168,6 +168,9 @@ export async function getAllQuestionsInCourse(courseId: string) {
 }
 
 export async function getCatalogPermission(adminCourses: number[], catalog: string) {
+    console.log("permissio");
+    console.log(adminCourses);
+    console.log(catalog);
     const database: mongoDB.Db = await connect();
     const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
     console.log(catalogId);
@@ -222,7 +225,7 @@ export async function getFirstQuestionInCatalog(questionCollection: mongoDB.Coll
     const firstQuestion = await questionInCatalogCollection.findOne(findFirstQuestion);
     console.log("firstQuestion");
     console.log(firstQuestion);
-    if( firstQuestion == null || firstQuestion.length == 0) {
+    if( firstQuestion == null || firstQuestion == undefined) {
         return -1;
     }
     const firstQuestionQuery = {
@@ -257,15 +260,17 @@ export function createQuestionResponse(newQuestion: any) {
     if(newQuestion.questiontype === QuestionType.Choice) {
         const returnQuestion = newQuestion;
         const configuration = newQuestion.questionconfiguration as any;
+        console.log(configuration);
         delete returnQuestion.owner;
-        for(let i = 0; i < configuration.answerColumns.length; i++) {
-           delete configuration.answerColumns[i].correctAnswers;
+        for(let i = 0; i < configuration.answercolumns.length; i++) {
+           delete configuration.answercolumns[i].correctAnswers;
         }
         return returnQuestion
     }
     if(newQuestion.questiontype === QuestionType.FillInTheBlanks) {
         const returnQuestion = newQuestion;
         const configuration = newQuestion.questionconfiguration as FillInTheBlanks;
+        console.log(configuration);
         delete returnQuestion.owner;
         for(let i = 0; i < configuration.textParts.length; i++) {
             if(configuration.textParts[i].isBlank) {

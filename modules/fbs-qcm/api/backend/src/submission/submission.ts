@@ -49,14 +49,14 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
         return -1;
     }
     console.log("----------------------");
-    console.log(requestData.answer);
+    console.log(requestData.answers);
     console.log("----------------------");
-    const correct = await checkAnswer(requestData.answer, questionId, questionCollection);
+    const correct = await checkAnswer(requestData.answers, questionId, questionCollection);
     console.log(timestamp);
     const submission = {
         user: tokenData.user,
         question: questionId,
-        answer: requestData.answer,
+        answer: requestData.answers,
         evaluation: correct,
         timeStamp: timestamp
     }

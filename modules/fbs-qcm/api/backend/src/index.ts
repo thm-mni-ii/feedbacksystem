@@ -61,6 +61,7 @@ async function createDatabaseAndCollection() {
     const courseCollection: mongoDB.Collection = db.collection("course");
     const catalogCollection: mongoDB.Collection = db.collection("catalog");
     const questionCollection: mongoDB.Collection = db.collection("question");
+    const tagCollection: mongoDB.Collection = db.collection("tag");
     const submissionCollection: mongoDB.Collection =
       db.collection("submission");
     const userCollection: mongoDB.Collection = db.collection("user");
@@ -206,8 +207,12 @@ async function createDatabaseAndCollection() {
         PARTIAL: "",
       },
     });
+    await tagCollection.insertOne({
+  "_id": new mongoDB.ObjectId("66e83f0f8b382a419cb023fa"),
+  "text": "SQL"
+    });
   } catch (err) {
-    console.error(`Error creating database or collection: ${err}`);
+        console.error(`Error  creating database or collection: ${err}`);
   }
 }
 
@@ -361,8 +366,8 @@ async function startServer() {
             res.sendStatus(401);
         }
         if (req.user !== undefined) {
-            const questionId = req.query.ID as string;
-            const data = await allQuestionsInCatalog(req.user, questionId);
+            const catalogId = req.query.catalogId as string;
+            const data = await allQuestionsInCatalog(req.user, catalogId);
             if(data === -1) {
                 res.sendStatus(403);
             }
@@ -379,7 +384,7 @@ async function startServer() {
             res.sendStatus(401);
         }
         if (req.user !== undefined) {
-            const courseId = req.query.ID as string;
+            const courseId = req.query.courseId as string;
             const data = await allQuestionInCourse(req.user, courseId);
             if(data === -1) {
                 res.sendStatus(403);
@@ -488,23 +493,6 @@ async function startServer() {
       res.sendStatus(500);
     }
   });
-  app.get("/api_v1/question_tree", authenticateToken, async (req, res) => {
-    try {
-      if (req.user == undefined) {
-        res.sendStatus(401);
-      }
-      if (req.user !== undefined) {
-        const catalogId = req.query.ID as string;
-        const data = await getQuestionTree(req.user, catalogId);
-        res.send(data);
-        if (data == -1) {
-          res.sendStatus(403);
-        }
-      }
-    } catch {
-      res.sendStatus(500);
-    }
-  });
   app.put("/api_v1/catalog", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
@@ -553,9 +541,6 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const requestData = req.body;
-        console.log("---------------------------------------------------_");
-        console.log(requestData);
-        console.log("---------------------------------------------------_");
         const response = await submit(req.user, requestData);
         if (response == -1) {
           res.sendStatus(403);
@@ -613,6 +598,7 @@ async function startServer() {
         res.send(result);
       }
     } catch (error) {
+        console.log(error);
       res.sendStatus(500);
     }
   });
@@ -623,7 +609,6 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const catalogId = req.query.ID as string;
-        console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
         const result = await getCurrentQuestion(req.user, catalogId);
         console.log(result);
         res.send(result);
@@ -675,7 +660,6 @@ async function startServer() {
     }
   });
   app.put("/api_v1/pauseSession", authenticateToken, async (req, res) => {
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     try {
       if (req.user === undefined) {
         res.sendStatus(401);
@@ -767,6 +751,7 @@ async function startServer() {
           return;
         }
         const requestData = req.body;
+        console.log(requestData);
         const result = await submitSessionAnswer(req.user, requestData);
         if (result === -1) {
           res.send(500);
@@ -857,7 +842,7 @@ async function startServer() {
         return;
       }
         const requestData = req.body;
-        const tagname = requestData.tagName;
+        const tagname = requestData.tag;
         const tagId = requestData.tagId;
         const result = await editTag(req.user, tagId, tagname);
         if(result === -1) {
@@ -868,6 +853,7 @@ async function startServer() {
             res.send(200);
             return
         }
+        console.log(result);
         res.send(400);
     } catch (error) {
         console.log(error);

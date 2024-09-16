@@ -10,7 +10,7 @@ export async function createTag(tokenData: JwtPayload, tagName: string) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const tagCollection: mongoDB.Collection = database.collection("Tags");
+    const tagCollection: mongoDB.Collection = database.collection("tag");
     const insert = {
         text: tagName
     };
@@ -32,7 +32,7 @@ export async function findTag(tokenData: JwtPayload, tagName: string) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const tagCollection: mongoDB.Collection = database.collection("Tags");
+    const tagCollection: mongoDB.Collection = database.collection("tag");
     const search = {
         text: tagName
     };
@@ -46,7 +46,7 @@ export async function searchTag(tokenData: JwtPayload, tagName: string) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const tagCollection: mongoDB.Collection = database.collection("Tags");
+    const tagCollection: mongoDB.Collection = database.collection("tag");
     console.log(tagName);
     const search = {
         text: { 
@@ -66,7 +66,7 @@ export async function editTag(tokenData: JwtPayload, tagId: string, newtext: str
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const tagCollection: mongoDB.Collection = database.collection("Tags");
+    const tagCollection: mongoDB.Collection = database.collection("tag");
     const questionCollection: mongoDB.Collection = database.collection("question");
     const tagIdObject = new mongoDB.ObjectId(tagId);
     const query = {
@@ -98,7 +98,7 @@ export async function deleteTag(tokenData: JwtPayload, tagId: string) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const tagCollection: mongoDB.Collection = database.collection("Tags");
+    const tagCollection: mongoDB.Collection = database.collection("tag");
     const questionCollection: mongoDB.Collection = database.collection("question");
     const tagIdObject = new mongoDB.ObjectId(tagId);
     const query = {
