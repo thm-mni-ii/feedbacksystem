@@ -24,7 +24,7 @@ class CourseService {
     * @return List of courses
     */
   def getAll(ignoreHidden: Boolean = true): List[Course] = DB.query(
-    "SELECT course_id, semester_id, name, description, visible FROM course" + (if (ignoreHidden) " WHERE visible = 1" else ""),
+    "SELECT course_id, group_selection, semester_id, name, description, visible FROM course" + (if (ignoreHidden) " WHERE visible = 1" else ""),
     (res, _) => parseResult(res))
 
   /**
@@ -35,7 +35,7 @@ class CourseService {
     * @return List of courses
     */
   def findByPattern(pattern: String, ignoreHidden: Boolean = true): List[Course] = DB.query(
-    "SELECT course_id, semester_id, name, description, visible FROM course WHERE name like ?" + (if (ignoreHidden) " AND visible = 1" else ""),
+    "SELECT course_id, group_selection, semester_id, name, description, visible FROM course WHERE name like ?" + (if (ignoreHidden) " AND visible = 1" else ""),
     (res, _) => parseResult(res), "%" + pattern + "%")
 
   /**
@@ -45,7 +45,7 @@ class CourseService {
     * @return The found course
     */
   def find(id: Int): Option[Course] = DB.query(
-    "SELECT course_id, semester_id, name, description, visible, group_selection FROM course WHERE course_id = ?",
+    "SELECT course_id, group_selection, semester_id, name, description, visible, group_selection FROM course WHERE course_id = ?",
     (res, _) => parseResult(res), id).headOption
 
   /**
