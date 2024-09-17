@@ -243,7 +243,28 @@ function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
     return list;
 }
 
-export async function getAllQuestionsFromCatalogs(questionInCatalogCollection: mongoDB.Collection, catalogs: string[]) {
+export async function getAllQuestionsFromCatalogs(questionInCatalogCollection: mongoDB.Collection, questionCollection: mongoDB.Collection, catalogs: string[]) {
+    const catalogIds: mongoDB.ObjectId[] = [];
+    for (let index = 0; index < catalogs.length; index++) {
+        catalogIds.push(new mongoDB.ObjectId(catalogs[index]));
+    }
+    const findQuestions = {
+        catalog: {$in: catalogIds}
+    }
+    const accessibleQuestions = await questionInCatalogCollection.find(findQuestions).toArray();
+    let questionIds: mongoDB.ObjectId[] = [];
+    for(let i = 0; i < accessibleQuestions.length; i++) {
+        questionIds.push(new mongoDB.ObjectId(accessibleQuestions[i].question));
+    }
+    const questionQuery = {
+       _id: {$in: questionIds} 
+    };
+    console.log(questionQuery);
+    const questions = questionCollection.find(questionQuery).toArray();
+    console.log(questions);
+    return questions;
+}
+export async function getAllQuestionsConnectionsFromCatalogs(questionInCatalogCollection: mongoDB.Collection, catalogs: string[]) {
     const catalogIds: mongoDB.ObjectId[] = [];
     for (let index = 0; index < catalogs.length; index++) {
         catalogIds.push(new mongoDB.ObjectId(catalogs[index]));

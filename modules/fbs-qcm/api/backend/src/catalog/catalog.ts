@@ -2,6 +2,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import {
     getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission, getFirstQuestionInCatalog, getAllQuestionInCatalog,
+    getAllQuestionsConnectionsFromCatalogs,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
@@ -182,7 +183,7 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
         return -1;
     }
     const catalogArray: string[] = [catalogId];
-    const allConnections = await getAllQuestionsFromCatalogs(questionInCatalogCollection, catalogArray);
+    const allConnections = await getAllQuestionsConnectionsFromCatalogs(questionInCatalogCollection, catalogArray);
     if (allConnections == null || allConnections.length == 0) {
         return -1;
     }
