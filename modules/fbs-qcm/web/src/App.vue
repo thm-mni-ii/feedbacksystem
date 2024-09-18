@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app color="primary" class="mb-16">
+    <v-app-bar app color="primary">
       <v-tabs class="d-flex justify-between">
         <v-tab @click="router.push('/')">Home</v-tab>
         <v-tab @click="router.push('/categories')">Categories</v-tab>

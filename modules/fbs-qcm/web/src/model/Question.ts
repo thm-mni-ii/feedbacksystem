@@ -1,7 +1,7 @@
 import type QuestionType from '../enums/QuestionType.ts'
 
 export default interface Question {
-  id: string
+  _id: string
   owner: number
   questiontext?: string
   questiontags: string[]

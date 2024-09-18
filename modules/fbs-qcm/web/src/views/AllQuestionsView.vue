@@ -26,14 +26,27 @@ const getAllQuestions = async () => {
     .catch((err) => console.log(err))
 }
 
-const editQuestion = () => {
+const editQuestion = (question: Question) => {
   if (dialogEditQuestion.value) {
-    dialogEditQuestion.value.openDialog('HEYOOOOOO!!').then((result: boolean) => {
+    console.log(question)
+    dialogEditQuestion.value.openDialog(question).then((result: boolean) => {
       if (result) {
         // router.push(`/catalogSession/${catalog.id}`)
-        console.log('CONFIRMED!!')
+        console.log(`Update Question ${question._id} successful`)
       } else {
-        console.log('Cancel')
+        console.log(`Update Question ${question._id} Cancelled`)
+      }
+    })
+  }
+}
+const addQuestion = () => {
+  if (dialogEditQuestion.value) {
+    dialogEditQuestion.value.openDialog().then((result: boolean) => {
+      if (result) {
+        // router.push(`/catalogSession/${catalog.id}`)
+        console.log(`Create new Question Successful`)
+      } else {
+        console.log(`Create new Question Cancelled`)
       }
     })
   }
@@ -58,9 +71,19 @@ onMounted(() => {
   <h2 class="mx-auto mt-16 text-primary text-center">All Questions</h2>
   <v-list class="mx-auto" max-width="400">
     <v-list-item v-for="question in allQuestions" :key="question._id" :v-bind="question">
-      <v-card @click="editQuestion()" class="mx-auto text-center px-8 py-4">
+      <v-card @click="editQuestion(question)" class="mx-auto text-center px-8 py-4">
         {{ question._id }}
       </v-card>
     </v-list-item>
   </v-list>
+  <v-btn
+    icon="mdi-plus"
+    class="mx-auto row-btn"
+    variant="tonal"
+    color="primary"
+    @click="addQuestion()"
+  >
+    <v-tooltip activator="parent" location="end">Create New Question</v-tooltip>
+    <v-icon icon="mdi-plus" size="small"></v-icon>
+  </v-btn>
 </template>

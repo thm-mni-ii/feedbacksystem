@@ -10,17 +10,17 @@ const questionTypes = Object.values(QuestionType)
 // const columnDialog = ref(false)
 
 const question = ref<Question>({
-  id: '',
+  _id: '',
   owner: -1,
   questiontext: '',
-  questiontags: [],
+  questiontags: [] as string[],
   questiontype: QuestionType.Choice,
-  questionconfiguration: {
-    multipleRow: false,
-    multipleColumn: false,
-    answerColumns: [{ id: 1, name: '', correctAnswers: [] }],
-    optionRows: [{ id: 1, text: '' }]
-  } as Choice
+  questionconfiguration: {}
+  //   multipleRow: false,
+  //   multipleColumn: false,
+  //   answerColumns: [{ id: 1, name: '', correctAnswers: [] }],
+  //   optionRows: [{ id: 1, text: '' }]
+  // } as Choice
 })
 
 const addOptionRow = () => {
@@ -108,35 +108,35 @@ const handleSubmit = async () => {
           variant="solo-filled"
           class="m-4 pr-2"
         ></v-select>
+        <v-textarea
+          single-line
+          class="my-4 mr-2"
+          v-model="question.questiontext"
+          maxlength="130"
+          auto-grow
+          counter
+          label="Question"
+          required
+        ></v-textarea>
+        <v-combobox
+          v-model="question.questiontags"
+          label="Tags"
+          prepend-icon="mdi-tag"
+          variant="solo"
+          class="mr-2"
+          chips
+          clearable
+          multiple
+        >
+          <template v-slot:selection="{ item }">
+            <v-chip v-bind="question.questiontags" closable @click:close="removeTag(item)">
+              <strong>{{ item }}</strong
+              >&nbsp;
+              <span>(interest)</span>
+            </v-chip>
+          </template>
+        </v-combobox>
         <div v-if="question.questiontype === 'Choice'">
-          <v-textarea
-            single-line
-            class="my-4 mr-2"
-            v-model="question.questiontext"
-            maxlength="130"
-            auto-grow
-            counter
-            label="Question"
-            required
-          ></v-textarea>
-          <v-combobox
-            v-model="question.questiontags"
-            label="Tags"
-            prepend-icon="mdi-tag"
-            variant="solo"
-            class="mr-2"
-            chips
-            clearable
-            multiple
-          >
-            <template v-slot:selection="{ item }">
-              <v-chip v-bind="question.questiontags" closable @click:close="removeTag(item)">
-                <strong>{{ item }}</strong
-                >&nbsp;
-                <span>(interest)</span>
-              </v-chip>
-            </template>
-          </v-combobox>
           <div class="justify-space-between d-flex flex-row">
             <v-switch
               class="ml-4"

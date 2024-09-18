@@ -24,7 +24,11 @@ import {
   copyQuestionToCatalog,
 } from "./question/question";
 import { submit, submitSessionAnswer } from "./submission/submission";
-import { allQuestionInCourse, getStudentCourses, getTeacherCourses } from "./course/course";
+import {
+  allQuestionInCourse,
+  getStudentCourses,
+  getTeacherCourses,
+} from "./course/course";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "./utils/enum";
@@ -75,24 +79,23 @@ async function createDatabaseAndCollection() {
       questiontext: "WAS IST DAS",
       questiontype: "Choice",
       questionconfiguration: {
-      multiplerow: true,
-      multiplecolumn: true,
-      answercolumns: [
-        {
-          id: "string",
-          name: "string",
-          correctAnswers: [
-            0
-          ]
-        }
-      ],
-      Optionrows: [
-        {
-          "id": 0,
-          "text": "string"
-        }
-      ]
-      }});
+        multiplerow: true,
+        multiplecolumn: true,
+        answercolumns: [
+          {
+            id: "string",
+            name: "string",
+            correctAnswers: [0],
+          },
+        ],
+        Optionrows: [
+          {
+            id: 0,
+            text: "string",
+          },
+        ],
+      },
+    });
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
       owner: 1,
@@ -100,53 +103,54 @@ async function createDatabaseAndCollection() {
       questiontype: "FillInTheBlanks",
       showBlanks: true,
       questionconfiguration: {
-      textParts: [
-    {
-         order: 1,
-         text: "Hallo",
-         isBlank: false
-    },
-    {
-         order: 2,
-         text: "wie",
-         isBlank: false
-    },
-    {
-         order: 3,
-         text: "geht",
-         isBlank: false
-    },
-    {
-         order: 4,
-         text: "es",
-         isBlank: true
-    }
-    ]}});
-    
+        textParts: [
+          {
+            order: 1,
+            text: "Hallo",
+            isBlank: false,
+          },
+          {
+            order: 2,
+            text: "wie",
+            isBlank: false,
+          },
+          {
+            order: 3,
+            text: "geht",
+            isBlank: false,
+          },
+          {
+            order: 4,
+            text: "es",
+            isBlank: true,
+          },
+        ],
+      },
+    });
+
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
       owner: 1,
       questiontext: "WAS IST DAS",
       questiontype: "Choice",
       questionconfiguration: {
-      multiplerow: true,
-      multiplecolumn: true,
-      answercolumns: [
-        {
-          id: "string",
-          name: "string",
-          correctAnswers: [
-            0
-          ]
-        }
-      ],
-      Optionrows: [
-        {
-          "id": 0,
-          "text": "string"
-        }
-      ]
-    }});
+        multiplerow: true,
+        multiplecolumn: true,
+        answercolumns: [
+          {
+            id: "string",
+            name: "string",
+            correctAnswers: [0],
+          },
+        ],
+        Optionrows: [
+          {
+            id: 0,
+            text: "string",
+          },
+        ],
+      },
+    });
     await catalogCollection.insertOne({
       _id: new mongoDB.ObjectId("663a51d228d8781d96050905"),
       name: "Grundlagen",
@@ -208,11 +212,11 @@ async function createDatabaseAndCollection() {
       },
     });
     await tagCollection.insertOne({
-  "_id": new mongoDB.ObjectId("66e83f0f8b382a419cb023fa"),
-  "text": "SQL"
+      _id: new mongoDB.ObjectId("66e83f0f8b382a419cb023fa"),
+      text: "SQL",
     });
   } catch (err) {
-        console.error(`Error  creating database or collection: ${err}`);
+    console.error(`Error  creating database or collection: ${err}`);
   }
 }
 
@@ -241,8 +245,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.delete("/api_v1/question", authenticateToken, async (req, res) => {
@@ -260,8 +264,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.put("/api_v1/question/", authenticateToken, async (req, res) => {
@@ -283,8 +287,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.post("/api_v1/question", authenticateToken, async (req, res) => {
@@ -305,38 +309,42 @@ async function startServer() {
         }
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
-  app.put("/api_v1/copyQuestionToCatalog", authenticateToken, async (req, res) => {
-    try {
-      if (req.user == undefined) {
-        res.sendStatus(401);
-      }
-      if (req.user !== undefined) {
-        console.log(req.body);
-        const requestData = req.body;
-        const questionId: string = requestData.question;
-        const catalogId: string = requestData.catalog;
-        const children: string[] = requestData.children;
-        const data = await copyQuestionToCatalog(
-          req.user,
-          questionId,
-          catalogId,
-          children
-        );
-        if (data === -1) {
-            res.sendStatus(403);
-        } else {
-            res.send({"id": data});
+  app.put(
+    "/api_v1/copyQuestionToCatalog",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        if (req.user == undefined) {
+          res.sendStatus(401);
         }
-      }
-    } catch (error) {
+        if (req.user !== undefined) {
+          console.log(req.body);
+          const requestData = req.body;
+          const questionId: string = requestData.question;
+          const catalogId: string = requestData.catalog;
+          const children: string[] = requestData.children;
+          const data = await copyQuestionToCatalog(
+            req.user,
+            questionId,
+            catalogId,
+            children
+          );
+          if (data === -1) {
+            res.sendStatus(403);
+          } else {
+            res.send({ id: data });
+          }
+        }
+      } catch (error) {
         console.log(error);
         res.sendStatus(500);
+      }
     }
-  });
+  );
   app.put("/api_v1/copyQuestion", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
@@ -346,116 +354,138 @@ async function startServer() {
         console.log(req.body);
         const requestData = req.body;
         const questionId = requestData.question;
-        const data = await copyQuestion(
-          req.user,
-          questionId
-        );
-        if(data === -2) {
-            res.sendStatus(400);
+        const data = await copyQuestion(req.user, questionId);
+        if (data === -2) {
+          res.sendStatus(400);
         }
-        res.send({"id": data});
+        res.send({ id: data });
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
-  app.get("/api_v1/allquestionsInCatalog", authenticateToken, async (req, res) => {
-    try {
+  app.get(
+    "/api_v1/allquestionsInCatalog",
+    authenticateToken,
+    async (req, res) => {
+      try {
         if (req.user == undefined) {
-            res.sendStatus(401);
+          res.sendStatus(401);
         }
         if (req.user !== undefined) {
-            const catalogId = req.query.catalogId as string;
-            const data = await allQuestionsInCatalog(req.user, catalogId);
-            if(data === -1) {
-                res.sendStatus(403);
-            }
-            res.send(data);
+          const catalogId = req.query.catalogId as string;
+          const data = await allQuestionsInCatalog(req.user, catalogId);
+          if (data === -1) {
+            res.sendStatus(403);
+          }
+          res.send(data);
         }
-    } catch (error) {
+      } catch (error) {
         console.log(error);
         res.sendStatus(500);
+      }
     }
-  });
-  app.get("/api_v1/allquestionsInCourse", authenticateToken, async (req, res) => {
-    try {
+  );
+  app.get(
+    "/api_v1/allquestionsInCourse",
+    authenticateToken,
+    async (req, res) => {
+      try {
         if (req.user == undefined) {
-            res.sendStatus(401);
+          res.sendStatus(401);
         }
         if (req.user !== undefined) {
-            const courseId = req.query.courseId as string;
-            const data = await allQuestionInCourse(req.user, courseId);
-            if(data === -1) {
-                res.sendStatus(403);
-            }
-        res.send(data);
+          const courseId = req.query.courseId as string;
+          const data = await allQuestionInCourse(req.user, courseId);
+          if (data === -1) {
+            res.sendStatus(403);
+          }
+          res.send(data);
         }
-    } catch (error) {
+      } catch (error) {
         res.sendStatus(500);
+      }
     }
-  });
+  );
   app.get("/api_v1/allquestions", authenticateToken, async (req, res) => {
     try {
-        if (req.user == undefined) {
-            res.sendStatus(401);
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      if (req.user !== undefined) {
+        const data = await getAllQuestions(req.user);
+        if (data === -1) {
+          res.sendStatus(403);
         }
-        if (req.user !== undefined) {
-            const data = await getAllQuestions(req.user);
-            if(data === -1) {
-                res.sendStatus(403);
-            }
         res.send(data);
-        }
+      }
     } catch (error) {
-        res.sendStatus(500);
+      res.sendStatus(500);
     }
   });
-  app.put("/api_v1/removeQuestionFromCatalog", authenticateToken, async (req, res) => {
-    try {
+  app.put(
+    "/api_v1/removeQuestionFromCatalog",
+    authenticateToken,
+    async (req, res) => {
+      try {
         if (req.user == undefined) {
-            res.sendStatus(401);
+          res.sendStatus(401);
         }
         if (req.user !== undefined) {
-            const requestData = req.body;
-            const questionId: string = requestData.question;
-            const catalog: string = requestData.catalog;
-            const result = await removeQuestionFromCatalog(req.user, questionId, catalog);
-            if(result == -1) {
-                res.send(403);
-            } else {
-                res.sendStatus(200);
-            }
+          const requestData = req.body;
+          const questionId: string = requestData.question;
+          const catalog: string = requestData.catalog;
+          const result = await removeQuestionFromCatalog(
+            req.user,
+            questionId,
+            catalog
+          );
+          if (result == -1) {
+            res.send(403);
+          } else {
+            res.sendStatus(200);
+          }
         }
-    } catch (error) {
+      } catch (error) {
         console.log(error);
         res.sendStatus(500);
+      }
     }
-  });
-  app.put("/api_v1/addQuestionToCatalog", authenticateToken, async (req, res) => {
-    try {
+  );
+  app.put(
+    "/api_v1/addQuestionToCatalog",
+    authenticateToken,
+    async (req, res) => {
+      try {
         if (req.user == undefined) {
-            res.sendStatus(401);
+          res.sendStatus(401);
         }
         if (req.user !== undefined) {
-            const requestData = req.body;
-            const questionId: string = requestData.question;
-            const catalog: string = requestData.catalog;
-            const children = requestData.children;
-            const result = await addQuestionToCatalog(req.user, questionId, catalog, children);
-            if(result == -1) {
-                res.send(403);
-            } else if(result == -2) {
-                res.send(400);
-            } else {
-                res.sendStatus(201);
-            }
+          const requestData = req.body;
+          const questionId: string = requestData.question;
+          const catalog: string = requestData.catalog;
+          const children = requestData.children;
+          const result = await addQuestionToCatalog(
+            req.user,
+            questionId,
+            catalog,
+            children
+          );
+          if (result == -1) {
+            res.send(403);
+          } else if (result == -2) {
+            res.send(400);
+          } else {
+            res.sendStatus(201);
+          }
         }
-    } catch (error) {
+      } catch (error) {
         console.log(error);
         res.sendStatus(500);
+      }
     }
-  });
+  );
   app.get("/api_v1/catalog", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
@@ -471,8 +501,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.delete("/api_v1/catalog", authenticateToken, async (req, res) => {
@@ -530,8 +560,8 @@ async function startServer() {
         }
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.post("/api_v1/submission", authenticateToken, async (req, res) => {
@@ -598,7 +628,7 @@ async function startServer() {
         res.send(result);
       }
     } catch (error) {
-        console.log(error);
+      console.log(error);
       res.sendStatus(500);
     }
   });
@@ -614,8 +644,8 @@ async function startServer() {
         res.send(result);
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.get("/api_v1/user", authenticateToken, async (req, res) => {
@@ -655,8 +685,8 @@ async function startServer() {
         res.send(result);
       }
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.put("/api_v1/pauseSession", authenticateToken, async (req, res) => {
@@ -690,8 +720,8 @@ async function startServer() {
       const courseId = requestData.course;
       if (req.user !== undefined) {
         const result = await unpauseSession(req.user, catalogId, courseId);
-        if(result === -1) {
-            res.sendStatus(400);
+        if (result === -1) {
+          res.sendStatus(400);
         }
         res.sendStatus(200);
         return;
@@ -721,7 +751,7 @@ async function startServer() {
     }
   });
   app.get(
-      "/api_v1/currentSessionQuestion",
+    "/api_v1/currentSessionQuestion",
     authenticateToken,
     async (req, res) => {
       try {
@@ -759,8 +789,8 @@ async function startServer() {
         }
         res.send(result);
       } catch (error) {
-            console.log(error);
-            res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
       }
     }
   );
@@ -777,8 +807,8 @@ async function startServer() {
       }
       res.send(result);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.get("/api_v1/getPausedSessions", authenticateToken, async (req, res) => {
@@ -810,8 +840,8 @@ async function startServer() {
       }
       res.send(result);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.post("/api_v1/createTag", authenticateToken, async (req, res) => {
@@ -820,19 +850,19 @@ async function startServer() {
         res.sendStatus(401);
         return;
       }
-        const requestData = req.body;
-        const tagname = requestData.tag;
-        const result = await createTag(req.user, tagname);
-        if(result === -1) {
-            res.send(403);
-        }
-        if(result === -2) {
-            res.send(400);
-        }
-        res.send(result);
+      const requestData = req.body;
+      const tagname = requestData.tag;
+      const result = await createTag(req.user, tagname);
+      if (result === -1) {
+        res.send(403);
+      }
+      if (result === -2) {
+        res.send(400);
+      }
+      res.send(result);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.put("/api_v1/editTag", authenticateToken, async (req, res) => {
@@ -841,23 +871,23 @@ async function startServer() {
         res.sendStatus(401);
         return;
       }
-        const requestData = req.body;
-        const tagname = requestData.tag;
-        const tagId = requestData.tagId;
-        const result = await editTag(req.user, tagId, tagname);
-        if(result === -1) {
-            res.send(403);
-            return;
-        }
-        if(result.modifiedCount === 1) {
-            res.send(200);
-            return
-        }
-        console.log(result);
-        res.send(400);
+      const requestData = req.body;
+      const tagname = requestData.tag;
+      const tagId = requestData.tagId;
+      const result = await editTag(req.user, tagId, tagname);
+      if (result === -1) {
+        res.send(403);
+        return;
+      }
+      if (result.modifiedCount === 1) {
+        res.send(200);
+        return;
+      }
+      console.log(result);
+      res.send(400);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.delete("/api_v1/deleteTag", authenticateToken, async (req, res) => {
@@ -866,22 +896,22 @@ async function startServer() {
         res.sendStatus(401);
         return;
       }
-        const tagId = req.query.tagId as string;
-        console.log(req.body);
-        console.log(tagId);
-        const result = await deleteTag(req.user, tagId);
-        if(result === -1) {
-            res.send(403);
-            return;
-        }
-        if(result.deletedCount === 1) {
-            res.send(200);
-            return;
-        }
-        res.send(400);
+      const tagId = req.query.tagId as string;
+      console.log(req.body);
+      console.log(tagId);
+      const result = await deleteTag(req.user, tagId);
+      if (result === -1) {
+        res.send(403);
+        return;
+      }
+      if (result.deletedCount === 1) {
+        res.send(200);
+        return;
+      }
+      res.send(400);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.get("/api_v1/findTag", authenticateToken, async (req, res) => {
@@ -890,15 +920,15 @@ async function startServer() {
         res.sendStatus(401);
         return;
       }
-        const tagname = req.query.tag as string;
-        const result = await findTag(req.user, tagname);
-        if(result === -1) {
-            res.send(403);
-        }
-        res.send(result);
+      const tagname = req.query.tag as string;
+      const result = await findTag(req.user, tagname);
+      if (result === -1) {
+        res.send(403);
+      }
+      res.send(result);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.get("/api_v1/searchTag", authenticateToken, async (req, res) => {
@@ -907,20 +937,21 @@ async function startServer() {
         res.sendStatus(401);
         return;
       }
-        const tagname = req.query.tag as string;
-        const result = await searchTag(req.user, tagname);
-        if(result === -1) {
-            res.send(403);
-        }
-        res.send(result);
+      const tagname = req.query.tag as string;
+      const result = await searchTag(req.user, tagname);
+      if (result === -1) {
+        res.send(403);
+      }
+      res.send(result);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   function authenticateToken(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
+    console.log(token);
     if (token == null) {
       console.log("no token");
       return res.sendStatus(401);
