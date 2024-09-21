@@ -110,7 +110,7 @@ function checkChoice(answer: ChoiceAnswer, question: Question) {
         rows.push(answer.rows[i].id);
     }
     let columns: number[] = [];
-    for(let i = 0; i < answer.columns.length; i++) {
+    for(let i = 0; i < answer.columns.length; i++) :G{
         columns.push(answer.columns[i].id);
     }
     const newMatrix = orderRows(answer.matrix, rows); 

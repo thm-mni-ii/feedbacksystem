@@ -18,13 +18,6 @@ import { AnswerScore, SessionStatus } from "../utils/enum";
 import { Question } from "../model/Question";
 type questionInsertionType = Omit<Question, "_id">;
 
-interface ReturnQuestion {
-  id: mongoDB.ObjectId;
-  questiontext: string;
-  questiontype: string;
-  answers: string[]; // Array of strings for hobbies
-}
-
 export async function getQuestionById(
   questionId: string,
   tokenData: JwtPayload
