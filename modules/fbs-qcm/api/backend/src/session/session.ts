@@ -5,6 +5,15 @@ import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
 import { SessionStatus } from "../utils/enum";
 
+interface Session {
+    user: string,
+    time: Date,
+    starttime: Date,
+    status: number,
+    catalogId: string,
+    courseId: string,
+    duration: number,
+}
 export async function startSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
     const userCourses = getUserCourseRoles(tokenData);
     console.log(userCourses);
@@ -21,9 +30,11 @@ export async function startSession(tokenData: JwtPayload, catalogId: string, cou
     const sessionEntry = {
         user: tokenData.id,
         time: new Date,
+        starttime: new Date,
         status: SessionStatus.ongoing,
         catalogId: catalogObjectId,
         courseId: courseObjectId,
+        duration: 0
     }
     await sessionCollection.insertOne(sessionEntry);
     return await getSessionQuestion(catalogId, tokenData);
@@ -44,32 +55,48 @@ export async function getSessionQuestion(catalogId: string, tokenData: JwtPayloa
 }
 
 export async function pauseSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
-    console.log(1);
     const userCourses = getUserCourseRoles(tokenData);
-    console.log(2);
     if(userCourses.length == 0) {
         return -1;
     }
-    console.log(3);
-    const catalogObjectId = new mongoDB.ObjectId(catalogId)
-    const courseObjectId = new mongoDB.ObjectId(courseId)
-    console.log(4);
-    if(await checkIfSessionIsOngoing(tokenData.id, catalogObjectId, courseObjectId)) {
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    const session = await getLastSession(sessionCollection, catalogId, courseId, tokenData.id);
+    if(session.status !== SessionStatus.ongoing) {
         return -1;
     }
-    const database: mongoDB.Db = await connect();
-    console.log(5);
-    const sessionCollection: mongoDB.Collection = database.collection("sessions");
-    const sessionEntry = {
-        user: tokenData.id,
-        time: new Date,
-        status: SessionStatus.paused,
-        catalogId: catalogObjectId,
-        courseId: courseObjectId,
+    const currentTime = new Date;
+    const time = currentTime.getTime() - session.time.getTime();
+    const newDuration = session.duration + time;
+    const find = {
+        _id: session._id
     }
-    console.log(6);
-    await sessionCollection.insertOne(sessionEntry);
+    const update = {
+        $set :{
+            time: new Date,
+            duration: newDuration,
+            status: SessionStatus.paused
+        }
+    }
+    session.time = new Date;
+    session.duration += time;
+    session.status = SessionStatus.paused;
+    await sessionCollection.updateOne(find,update);
     return 1;
+}
+
+async function getLastSession(sessionCollection: mongoDB.Collection, catalogId: string, courseId: string, id: number) {
+    const catalogObjectId: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
+    const courseObjectId: mongoDB.ObjectId = new mongoDB.ObjectId(courseId);
+    const sessionQuery = {
+        catalogId: catalogObjectId, 
+        courseId: courseObjectId,
+        user: id
+    }
+    const sessionList = await sessionCollection.find(sessionQuery).sort({ time: -1 }).limit(1).toArray();
+    const session = sessionList[0];
+    console.log(session);
+    return session;
 }
 
 export async function endSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
@@ -77,50 +104,71 @@ export async function endSession(tokenData: JwtPayload, catalogId: string, cours
     if(userCourses.length == 0) {
         return -1;
     }
-    const catalogObjectId = new mongoDB.ObjectId(catalogId)
-    const courseObjectId = new mongoDB.ObjectId(courseId)
-    if(await checkifSessionIsNotFinished(tokenData.user, catalogObjectId, courseObjectId)) {
-        return -1;
-    }
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
-    const sessionEntry = {
-        user: tokenData.id,
-        time: new Date,
-        status: SessionStatus.finished,
-        catalogId: catalogObjectId,
-        courseId: courseObjectId,
+    const session = await getLastSession(sessionCollection, catalogId, courseId, tokenData.id);
+    if(session.status === SessionStatus.finished) {
+        return -1;
     }
-    await sessionCollection.insertOne(sessionEntry);
+    const finder = {
+        _id: session._id
+    };
+    let duration = session.duration;
+    console.log("session.status");
+    console.log(session.status);
+    if(session.status === SessionStatus.ongoing) {
+        const currentTime = new Date;
+        duration = currentTime.getTime() - session.time.getTime() + duration;    
+        const update = {
+            $set: {
+                time: currentTime,
+                duration: duration,
+                status: SessionStatus.finished
+            }
+        }
+        const result = await sessionCollection.updateOne(finder, update);
+        console.log(result);
+    } else {
+        const currentTime = new Date;
+        const update = {
+            $set: {
+                time: currentTime,
+                status: SessionStatus.finished
+            }
+        }
+        console.log(update);
+        const result = await sessionCollection.updateOne(finder, update);
+        console.log(result);
+    }
     return 1;
 }
 
 export async function unpauseSession(tokenData: JwtPayload, catalogId: string, courseId: string) {
-    console.log(1);
     const userCourses = getUserCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;
     }
-    console.log(2);
-    const catalogObjectId = new mongoDB.ObjectId(catalogId)
-    const courseObjectId = new mongoDB.ObjectId(courseId)
-    if(await checkifSessionIsNotPaused(tokenData.id, catalogObjectId, courseObjectId)) {
-        return -1;
-    }
-    console.log(3);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
-    console.log(4);
-    const sessionEntry = {
-        user: tokenData.id,
-        time: new Date,
-        status: SessionStatus.ongoing,
-        catalogId: catalogObjectId,
-        courseId: courseObjectId,
+    const session = await getLastSession(sessionCollection, catalogId, courseId, tokenData.id);
+    if(session.status !== SessionStatus.paused) {
+        return -1;
     }
-    await sessionCollection.insertOne(sessionEntry);
-    console.log(5);
-    return 1;
+    console.log(session);
+    const filter = {
+        _id: session._id
+    };
+    console.log(filter);
+    const update = {
+        $set: {
+            time: new Date,
+            status: SessionStatus.ongoing
+        }
+    }
+    console.log(update)
+    const result = await sessionCollection.updateOne(filter, update);
+    console.log(result);
+    return result;
 }
 
 async function checkIfSessionIsOngoing(user: number, catalogObjectId: mongoDB.ObjectId, courseObjectId: mongoDB.ObjectId) {
@@ -190,76 +238,6 @@ async function checkifSessionIsNotFinished(user: number, catalogObjectId: mongoD
     return false;
 }
 
-async function getDurationOfSession(user: number, catalog: string, course: string) {
-    const query = {
-        user: user,
-        catalogId: catalog,
-        courseId: course
-    }
-    console.log(1);
-    const database: mongoDB.Db = await connect();
-    const sessionCollection: mongoDB.Collection = database.collection("sessions");
-    const result = await sessionCollection.find(query).sort({ time: 1}).toArray();
-    let lastFinished = -1;
-    console.log(2);
-    for(let i = 0; i < result.length - 1; i++) {
-       if(result[i].status === SessionStatus.finished) {
-           lastFinished = i;
-       }
-    }
-    let j: number = lastFinished + 1;
-    let durationStart: Date = new Date;
-    console.log(3);
-    let duration = 0;
-    let currentStatus: SessionStatus = SessionStatus.finished;
-    console.log(4);
-    while(true) {
-        console.log(5);
-        if(j >= result.length) {
-            if(currentStatus === SessionStatus.ongoing) {
-                const currentTime = new Date;
-                const tmpDuration = currentTime.getTime() - durationStart.getTime();
-                if(tmpDuration < 0) {
-                    return -2;
-                }
-                duration += tmpDuration;
-                break;
-            }
-        }
-        console.log(6);
-        console.log(result[j].status);
-        if(result[j].status === SessionStatus.ongoing) {
-            console.log(61);
-            if(currentStatus === SessionStatus.ongoing) {
-                console.log(62);
-                return -2;
-            }
-            console.log(63);
-            durationStart = result[j].time;
-            currentStatus = SessionStatus.ongoing;
-        }
-        if(result[j].status === SessionStatus.paused || result[j].status === SessionStatus.finished) {
-            console.log(66);
-            if(currentStatus === SessionStatus.paused) {
-                return -2;
-            }
-            const tmpDuration = result[j].time.getTime() - durationStart.getTime();
-            console.log(67);
-            if(tmpDuration < 0) {
-                return -2;
-            }
-            duration += tmpDuration;
-            durationStart = new Date;
-            console.log(68);
-            currentStatus = SessionStatus.paused;
-        }
-        j+=1;
-        console.log(1111);
-    }
-    console.log(7);
-    return duration;
-}
-
 export async function getOpenSessions(user: number) {
     const query = {
         user: user,
@@ -313,6 +291,7 @@ export async function getOngoingSessions(user: number) {
        }
     }
     for(let j = 0; j < pausedOrFinishedSessions.length; j++) {
+
     }
     // nach Pause oder finish letztes Ongoing suchen und beenden
     ongoingSessions = removeMatchingObjects(ongoingSessions, pausedOrFinishedSessions)
@@ -369,7 +348,7 @@ async function createSessionReturn(session: any) {
         courseId: session.courseId,
         status: getSessionStatusAsText(session.status),
         score: session.score,
-        time: await getDurationOfSession(session.user, session.catalogId, session.courseId)
+        time: session.duration
     }
     console.log(sessionReturn);
     return sessionReturn;

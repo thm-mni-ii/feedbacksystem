@@ -699,13 +699,18 @@ async function startServer() {
       const catalogId = requestData.catalog;
       const courseId = requestData.course;
       if (req.user !== undefined) {
-        await pauseSession(req.user, catalogId, courseId);
+        const result = await pauseSession(req.user, catalogId, courseId);
+        if(result === -1) {
+            res.sendStatus(500);
+            return;
+        }
         res.sendStatus(200);
         return;
       }
       res.sendStatus(500);
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.put("/api_v1/unpauseSession", authenticateToken, async (req, res) => {
@@ -741,13 +746,18 @@ async function startServer() {
       const catalogId = requestData.catalog;
       const courseId = requestData.course;
       if (req.user !== undefined) {
-        await endSession(req.user, catalogId, courseId);
+        const result = await endSession(req.user, catalogId, courseId);
+        if(result === -1) {
+            res.sendStatus(500);
+            return;
+        }
         res.sendStatus(200);
         return;
       }
       res.sendStatus(500);
     } catch (error) {
-      res.sendStatus(500);
+        console.log(error);
+        res.sendStatus(500);
     }
   });
   app.get(
