@@ -1,5 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
+import axios from 'axios';
 import {
   postCatalog,
   getCatalog,
@@ -983,3 +984,8 @@ async function startServer() {
   app.listen(3000, () => console.log("LISTENING on port 3000"));
 }
 startServer().catch(console.error);
+function getCourses() {
+    const user = process.env.FBS_USER;
+    const pw = process.env.FBS_PW;
+    const response = axios.get("feedback.mni.thm.de/courses");
+}
