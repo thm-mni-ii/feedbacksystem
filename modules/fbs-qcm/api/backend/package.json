@@ -12,8 +12,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "frontend": "../../web",
+    "axios": "^1.7.7",
     "express": "^4.19.2",
+    "frontend": "../../web",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.5.0"
   },
