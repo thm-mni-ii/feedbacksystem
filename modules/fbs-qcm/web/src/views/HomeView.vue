@@ -96,8 +96,6 @@ const getCourses = () => {
 }
 
 const loadCatalogs = (courseId: number) => {
-  console.log('loadCatalogs', courseId)
-
   const course = myCourses.value.find((course) => course.id === courseId)
   if (course && !course.catalogs) {
     axios
