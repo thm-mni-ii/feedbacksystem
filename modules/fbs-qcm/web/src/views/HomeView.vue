@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <template>
   <DialogEditCatalog ref="dialogEditCatalog" />
   <DialogConfirmVue ref="dialogConfirm" />
@@ -47,8 +46,6 @@
   </v-sheet>
 </template>
 
-=======
->>>>>>> 8187ab839fdd5b11d400f093911e71aaf935f28f
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
@@ -163,47 +160,5 @@ const startSession = (catalog: Catalog) => {
   }
 }
 </script>
-<template>
-  <DialogConfirmVue ref="dialogConfirm" />
-  <v-sheet class="pa-10 mt-12">
-    <v-expansion-panels>
-      <v-expansion-panel v-for="course in myCourses" :key="course.id">
-        <v-expansion-panel-title> {{ course.name }} </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <v-list>
-            <v-list-subheader>Catalogs</v-list-subheader>
-            <v-list-item v-for="catalog in getCatalogsFromCourse(course.id)" :key="catalog.id">
-              <v-list-item-content>
-                <v-list-item-title class="d-flex align-center justify-space-between">
-                  <span>{{ catalog.name }}</span>
-
-                  <v-chip class="ml-3" :color="getDifficultyColor(catalog.difficulty)">
-                    {{ catalog.difficulty }}
-                  </v-chip>
-
-                  <v-spacer></v-spacer>
-
-                  <v-btn color="primary" variant="tonal" @click="startSession(catalog)"
-                    >Start Session</v-btn
-                  >
-                </v-list-item-title>
-              </v-list-item-content>
-              <v-list-item-action> </v-list-item-action>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title class="d-flex align-center justify-space-between">
-                  <v-btn color="primary" variant="outlined">Add new Catalog</v-btn>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
-  </v-sheet>
-
-  <v-btn color="primary" variant="tonal" @click="testRequest">Test Request</v-btn>
-</template>
 
 <style scoped lang="scss"></style>

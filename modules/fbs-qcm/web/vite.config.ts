@@ -52,7 +52,7 @@ export default defineConfig({
         secure: false
       },
       '/core': {
-        target: 'http://localhost:4200/',
+        target: 'https://localhost/',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/core/, '/api/v1')
