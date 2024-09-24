@@ -19,25 +19,25 @@ const emit = defineEmits<{
 
 const questionTypes = Object.values(QuestionType)
 
-const question = ref<Question>({
-  _id: '',
-  owner: -1,
-  questiontext: '',
-  questiontags: [] as string[],
-  questiontype: QuestionType.Choice,
-  questionconfiguration: {
-    multipleRow: false,
-    multipleColumn: false,
-    answercolumns: [{ id: 1, name: '', correctAnswers: [] }],
-    Optionrows: [{ id: 1, text: '' }]
-  }
-})
-
-const snackbar = ref<boolean>(false)
-const snackbarText = ref<string>('')
+const question = ref<Question>({} as Question)
 
 onMounted(() => {
-  if (props.inputQuestion) {
+  console.log(props.isNew)
+  console.log(props.inputQuestion)
+  if (props.isNew) {
+    question.value = {
+      owner: -1,
+      questiontext: '',
+      questiontags: [] as string[],
+      questiontype: QuestionType.Choice,
+      questionconfiguration: {
+        multipleRow: false,
+        multipleColumn: false,
+        answercolumns: [{ id: 1, name: '', correctAnswers: [] }],
+        Optionrows: [{ id: 1, text: '' }]
+      }
+    }
+  } else if (props.inputQuestion) {
     question.value = props.inputQuestion
   }
 })
@@ -136,26 +136,12 @@ const handleSubmit = async () => {
       })
       .catch((err) => {
         console.log(err)
-        openSnackbar(err)
       })
   }
-}
-
-const openSnackbar = (text: string) => {
-  snackbar.value = true
-  snackbarText.value = text
 }
 </script>
 
 <template>
-  <v-snackbar v-model="snackbar" :timeout="4000">
-    {{ snackbarText }}
-
-    <template v-slot:actions>
-      <v-btn color="blue" variant="text" @click="snackbar = false"> Close </v-btn>
-    </template>
-  </v-snackbar>
-
   <v-card>
     <v-card-title class="text-h4 font-weight-bold text-center text-primary">{{
       isNew ? 'Add new Question' : 'Update Question'
@@ -302,8 +288,10 @@ const openSnackbar = (text: string) => {
     </v-card-text>
 
     <v-card-actions>
-      <v-btn @click="$emit('cancel')">Cancel</v-btn>
-      <v-btn @click="handleSubmit">{{ isNew ? 'Save' : 'Update' }}</v-btn>
+      <v-btn color="red" variant="tonal" class="mx-4 mb-4" @click="$emit('cancel')">Cancel</v-btn>
+      <v-btn color="primary" variant="tonal" class="mx-4 mb-4" @click="handleSubmit">{{
+        isNew ? 'Save' : 'Update'
+      }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>

@@ -18,6 +18,7 @@ const openDialog = (editQuestion?: Question) => {
   } else {
     isNew.value = true
   }
+
   editQuestionDialog.value = true
 
   return new Promise((resolve) => {

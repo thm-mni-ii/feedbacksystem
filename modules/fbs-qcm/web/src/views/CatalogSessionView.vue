@@ -5,7 +5,7 @@ import CatalogSession from '../components/CatalogSession.vue'
 
 import type Catalog from '../model/Catalog'
 import axios from 'axios'
-const questionId = ref('66c48bd422d64ed1f1b513fa')
+const questionId = ref('6638fbdb7cbf615381a90abe')
 const questionData = ref(null)
 const route = useRoute()
 
@@ -43,7 +43,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-form @submit.prevent="submitAnswer" class="mt-12">
+  <v-form class="mt-12" @submit.prevent="submitAnswer">
     <v-sheet
       class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
       elevation="4"

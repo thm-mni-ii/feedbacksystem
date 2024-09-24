@@ -1,4 +1,4 @@
-export interface Catalog {
+export default interface Catalog {
   id: string
   name: string
   difficulty: number
