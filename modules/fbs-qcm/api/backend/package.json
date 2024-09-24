@@ -16,7 +16,8 @@
     "express": "^4.19.2",
     "frontend": "../../web",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.5.0"
+    "mongodb": "^6.5.0",
+    "axios": "^1.7.7"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

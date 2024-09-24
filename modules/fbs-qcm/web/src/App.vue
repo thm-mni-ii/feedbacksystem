@@ -5,10 +5,8 @@
         <v-tab @click="router.push('/')">Home</v-tab>
         <v-tab @click="router.push('/categories')">Categories</v-tab>
         <v-tab @click="router.push('/addCat')">new Category</v-tab>
-        <v-tab @click="router.push('/newQuestion')">new Question</v-tab>
         <v-tab @click="router.push('/Question')">Get Question</v-tab>
         <v-tab @click="router.push('/deleteQuestion')">Delete Question</v-tab>
-        <v-tab @click="router.push('/editQuestion')">Edit Question</v-tab>
         <v-tab @click="router.push('/allQuestions')">All Questions</v-tab>
       </v-tabs>
     </v-app-bar>

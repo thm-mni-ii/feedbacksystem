@@ -51,8 +51,10 @@ defineExpose({
     <v-card :title="deleteTitle" :text="deleteMessage">
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click="_cancel"> Close!!!JEJIJI </v-btn>
-        <v-btn variant="text" @click="_confirm"> {{ deleteConfirmBtnText }} </v-btn>
+        <v-btn variant="text" @click="_cancel" color="red"> Cancel </v-btn>
+        <v-btn variant="text" @click="_confirm" color="primary">
+          {{ deleteConfirmBtnText }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

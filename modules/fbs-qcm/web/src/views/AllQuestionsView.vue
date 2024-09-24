@@ -33,8 +33,10 @@ const editQuestion = (question: Question) => {
       if (result) {
         // router.push(`/catalogSession/${catalog.id}`)
         console.log(`Update Question ${question._id} successful`)
+        openSnackbar(`Update Question ${question._id} successful`)
       } else {
         console.log(`Update Question ${question._id} Cancelled`)
+        openSnackbar('Create / Edit Quesion Cancelled')
       }
     })
   }
@@ -45,8 +47,10 @@ const addQuestion = () => {
       if (result) {
         // router.push(`/catalogSession/${catalog.id}`)
         console.log(`Create new Question Successful`)
+        openSnackbar('Create / Edit Question Successful')
       } else {
         console.log(`Create new Question Cancelled`)
+        openSnackbar('Create / Edit Quesion Cancelled')
       }
     })
   }
@@ -61,12 +65,26 @@ const closeDialog = () => {
   // dialogEditQuestion.value = false
   console.log(dialogEditQuestion.value)
 }
+const snackbar = ref<boolean>(false)
+const snackbarText = ref<string>('')
+const openSnackbar = (text: string) => {
+  snackbar.value = true
+  snackbarText.value = text
+}
 
 onMounted(() => {
   getAllQuestions()
 })
 </script>
 <template>
+  <v-snackbar v-model="snackbar" :timeout="4000">
+    {{ snackbarText }}
+
+    <template v-slot:actions>
+      <v-btn color="primary" variant="text" @click="snackbar = false"> Close </v-btn>
+    </template>
+  </v-snackbar>
+
   <DialogEditQuestion ref="dialogEditQuestion" />
   <h2 class="mx-auto mt-16 text-primary text-center">All Questions</h2>
   <v-list class="mx-auto" max-width="400">
