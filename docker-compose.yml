@@ -269,7 +269,7 @@ services:
     networks:
       - fbs
     environment:
-      - JWT_SECRET=wwwa
+      - JWT_SECRET=8Dsupersecurekeydf0
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
     depends_on:
       - mongodb_qcm

@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
-import axios from 'axios';
+import axios from "axios";
 import {
   postCatalog,
   getCatalog,
@@ -10,6 +10,7 @@ import {
   getUser,
   getQuestionTree,
   allQuestionsInCatalog,
+  getCatalogs,
 } from "./catalog/catalog";
 import {
   postQuestion,
@@ -506,6 +507,27 @@ async function startServer() {
       res.sendStatus(500);
     }
   });
+  // get all catalogs from a course with the course id as a path parameter
+  app.get("/api_v1/catalogs/:courseId", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      const courseId = req.params.courseId as unknown as number;
+      if (req.user !== undefined) {
+        const data = await getCatalogs(req.user, courseId);
+        if (data == -1) {
+          res.sendStatus(403);
+        } else {
+          res.send(data);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+    }
+  });
+
   app.delete("/api_v1/catalog", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
@@ -701,17 +723,17 @@ async function startServer() {
       const courseId = requestData.course;
       if (req.user !== undefined) {
         const result = await pauseSession(req.user, catalogId, courseId);
-        if(result === -1) {
-            res.sendStatus(500);
-            return;
+        if (result === -1) {
+          res.sendStatus(500);
+          return;
         }
         res.sendStatus(200);
         return;
       }
       res.sendStatus(500);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.put("/api_v1/unpauseSession", authenticateToken, async (req, res) => {
@@ -748,17 +770,17 @@ async function startServer() {
       const courseId = requestData.course;
       if (req.user !== undefined) {
         const result = await endSession(req.user, catalogId, courseId);
-        if(result === -1) {
-            res.sendStatus(500);
-            return;
+        if (result === -1) {
+          res.sendStatus(500);
+          return;
         }
         res.sendStatus(200);
         return;
       }
       res.sendStatus(500);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   app.get(
@@ -985,7 +1007,7 @@ async function startServer() {
 }
 startServer().catch(console.error);
 function getCourses() {
-    const user = process.env.FBS_USER;
-    const pw = process.env.FBS_PW;
-    const response = axios.get("feedback.mni.thm.de/courses");
+  const user = process.env.FBS_USER;
+  const pw = process.env.FBS_PW;
+  const response = axios.get("feedback.mni.thm.de/courses");
 }

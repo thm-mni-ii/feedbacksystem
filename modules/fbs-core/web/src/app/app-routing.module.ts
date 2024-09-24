@@ -20,6 +20,7 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -91,6 +92,12 @@ const routes: Routes = [
       {
         path: "modelling",
         component: FbsModellingComponent,
+        canActivate: [AuthGuard],
+      },
+      // Questionary
+      {
+        path: "questionary",
+        component: FbsQuestionaryComponent,
         canActivate: [AuthGuard],
       },
 

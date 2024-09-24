@@ -1,20 +1,25 @@
 <template>
+  <DialogEditCatalog ref="dialogEditCatalog" />
   <DialogConfirmVue ref="dialogConfirm" />
   <v-sheet class="pa-10 mt-12">
     <v-expansion-panels>
-      <v-expansion-panel v-for="course in myCourses" :key="course.id">
+      <v-expansion-panel
+        v-for="course in myCourses"
+        :key="course.id"
+        @group:selected="loadCatalogs(course.id)"
+      >
         <v-expansion-panel-title> {{ course.name }} </v-expansion-panel-title>
         <v-expansion-panel-text>
           <v-list>
             <v-list-subheader>Catalogs</v-list-subheader>
-            <v-list-item v-for="catalog in getCatalogsFromCourse(course.id)" :key="catalog.id">
+            <v-list-item v-for="catalog in course.catalogs" :key="catalog.id">
               <v-list-item-content>
                 <v-list-item-title class="d-flex align-center justify-space-between">
                   <span>{{ catalog.name }}</span>
 
-                  <v-chip class="ml-3" :color="getDifficultyColor(catalog.difficulty)">
+                  <!-- <v-chip class="ml-3" :color="getDifficultyColor(catalog.difficulty)">
                     {{ catalog.difficulty }}
-                  </v-chip>
+                  </v-chip> -->
 
                   <v-spacer></v-spacer>
 
@@ -28,7 +33,9 @@
             <v-list-item>
               <v-list-item-content>
                 <v-list-item-title class="d-flex align-center justify-space-between">
-                  <v-btn color="primary" variant="outlined">Add new Catalog</v-btn>
+                  <v-btn color="primary" variant="outlined" @click="createNewCatalog(course.id)"
+                    >Add new Catalog</v-btn
+                  >
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -37,79 +44,103 @@
       </v-expansion-panel>
     </v-expansion-panels>
   </v-sheet>
-
-  <v-btn color="primary" variant="tonal" @click="testRequest">Test Request</v-btn>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
-import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import { useRouter } from 'vue-router'
+
+import DialogConfirmVue from '../dialog/DialogConfirm.vue'
+import DialogEditCatalog from '@/dialog/DialogEditCatalog.vue'
 
 import type Course from '../model/Course'
 import type Catalog from '../model/Catalog'
 
 const dialogConfirm = ref<typeof DialogConfirmVue>()
+const dialogEditCatalog = ref<typeof DialogEditCatalog>()
 const router = useRouter()
 
-const myCourses = ref<Course[]>([
-  { id: 1, name: 'Course 1' },
-  { id: 2, name: 'Course 2' },
-  { id: 3, name: 'Course 3' }
-])
+const myCourses = ref<Course[]>([])
 
-const getCatalogsFromCourse = (courseId: number) => {
-  // return axiox.get(`api_v1/catalogs/${courseId}`).then((response) => {
-  //   return response.data as Catalog[]
-  // })
+onMounted(async () => {
+  await writeJsessionidToLocalStorage()
 
-  // TODO: Call API to get catalogs from course
-  switch (courseId) {
-    case 1:
-      return [
-        { id: 1, name: 'A-Catalog 1', requirements: [], difficulty: 1, passed: true },
-        {
-          id: 2,
-          name: 'A-Catalog ich bin länger 2',
-          requirements: [1],
-          difficulty: 2,
-          passed: false
-        },
-        { id: 3, name: 'A-Catalog 3', requirements: [2, 1], difficulty: 3, passed: false }
-      ] as Catalog[]
+  getCourses()
+    .then((response) => {
+      myCourses.value = response.data as Course[]
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+})
 
-    case 2:
-      return [
-        { id: 4, name: 'B-Catalog 1', requirements: [], difficulty: 1, passed: true },
-        { id: 5, name: 'B-Catalog 2', requirements: [1], difficulty: 2, passed: true },
-        { id: 6, name: 'B-Catalog 3', requirements: [2, 1], difficulty: 3, passed: false }
-      ] as Catalog[]
-
-    case 3:
-      return [
-        { id: 7, name: 'C-Catalog 1', requirements: [], difficulty: 1, passed: true },
-        { id: 8, name: 'C-Catalog 2', requirements: [1], difficulty: 2, passed: true },
-        { id: 9, name: 'C-Catalog 3', requirements: [2, 1], difficulty: 3, passed: true }
-      ] as Catalog[]
-
-    default:
-      break
+// async func to write jsessionid to local storage
+const writeJsessionidToLocalStorage = async () => {
+  //get jsessionid from params
+  const jsessionid = router.currentRoute.value.query.jsessionid?.toString()
+  if (jsessionid) {
+    // write jsessionid to local storage
+    localStorage.setItem('jsessionid', jsessionid)
+  } else {
+    console.log('No jsessionid found in params')
   }
 }
 
-const getDifficultyColor = (difficulty: number) => {
-  switch (difficulty) {
-    case 1:
-      return 'green'
-    case 2:
-      return 'orange'
-    case 3:
-      return 'red'
-    default:
-      return 'grey'
+const getCourses = () => {
+  return axios.get('core/courses', {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+    }
+  })
+}
+
+const loadCatalogs = (courseId: number) => {
+  console.log('loadCatalogs', courseId)
+
+  const course = myCourses.value.find((course) => course.id === courseId)
+  if (course && !course.catalogs) {
+    axios
+      .get(`api_v1/catalogs/${courseId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
+      })
+      .then((response) => {
+        console.log(response.data)
+        course.catalogs = response.data as Catalog[]
+      })
+      .catch((error) => {
+        console.log(error)
+        course.catalogs = []
+      })
   }
 }
+
+const createNewCatalog = (courseId: number) => {
+  if (dialogEditCatalog.value) {
+    dialogEditCatalog.value.openDialog(courseId).then((result: boolean) => {
+      if (result) {
+        console.log('Create new catalog')
+      } else {
+        console.log('Cancel')
+      }
+    })
+  }
+}
+
+// const getDifficultyColor = (difficulty: number) => {
+//   switch (difficulty) {
+//     case 1:
+//       return 'green'
+//     case 2:
+//       return 'orange'
+//     case 3:
+//       return 'red'
+//     default:
+//       return 'grey'
+//   }
+// }
 
 const startSession = (catalog: Catalog) => {
   if (dialogConfirm.value) {
@@ -127,25 +158,6 @@ const startSession = (catalog: Catalog) => {
         }
       })
   }
-}
-
-const testRequest = async () => {
-  await axios
-    .post('api_v1/question', {
-      headers: {
-        Authorization:
-          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3Vyc2VSb2xlcyI6IntcIjE4N1wiOlwiVFVUT1JcIn0iLCJpZCI6MSwiaWF0IjoxNzE1MDQ5MDIyfQ.HtvksRvlL3ttT5MuaZvh7D4NgfuscJ-ZJ5vuIa77EWM'
-      },
-      data: {
-        questiontext: 'string',
-        questiontype: 'Single-Choice',
-        questionconfiguratin: 'string',
-        catalog: '187'
-      }
-    })
-    .then((response) => {
-      console.log(response)
-    })
 }
 </script>
 

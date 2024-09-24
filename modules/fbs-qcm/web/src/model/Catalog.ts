@@ -1,8 +1,9 @@
-export interface Catalog {
+import type Question from './Question'
+
+export default interface Catalog {
   id: string
   name: string
-  difficulty: number
-  passed: boolean
-  questions?: number[]
-  requirements: number[]
+  questions?: Question[]
+  course?: number
+  reqirements?: number[]
 }
