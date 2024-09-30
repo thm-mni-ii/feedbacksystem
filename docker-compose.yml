@@ -271,6 +271,8 @@ services:
     environment:
       - JWT_SECRET=8Dsupersecurekeydf0
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
+      - FBS_USER=qcm
+      - FBS_PW=d8eb166e366d5e8f79e266a608aa09ff
     depends_on:
       - mongodb_qcm
 

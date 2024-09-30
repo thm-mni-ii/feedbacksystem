@@ -63,6 +63,10 @@ declare global {
 
 async function createDatabaseAndCollection() {
   try {
+    console.log("AAAAAAAAAAAAAAAA");
+    console.log(1);
+    console.log(await getCourses());
+    console.log(2);
     const db = await connect();
     const courseCollection: mongoDB.Collection = db.collection("course");
     const catalogCollection: mongoDB.Collection = db.collection("catalog");
@@ -1006,8 +1010,12 @@ async function startServer() {
   app.listen(3000, () => console.log("LISTENING on port 3000"));
 }
 startServer().catch(console.error);
-function getCourses() {
+async function getCourses() {
   const user = process.env.FBS_USER;
+  console.log(user);
   const pw = process.env.FBS_PW;
-  const response = axios.get("feedback.mni.thm.de/courses");
+  console.log(pw);
+  console.log(await axios.get("google.com/"));
+  const response = axios.get("localhost/courses");
+  return response;
 }
