@@ -8,6 +8,8 @@ import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
 from mask_aliases import SQLAliasMasker
+import distance.distance_calc as d
+
 
 rightStatements = []
 rightTables = []
@@ -89,6 +91,10 @@ def parse_single_stat_upload_db(data, client):
             # Save tables, selAttributes, proAttributes and strings to DB
             if parse_query(data["submission"], client) is not False:
                 insert_tables(mydb, data, my_uuid, client)
+        
+        # check and remove duplicates
+        flag_duplicates(client, task_nr)
+        
         # Check if it is a new solution and characteristics are right
         (
             tables2,
@@ -133,6 +139,8 @@ def parse_single_stat_upload_db(data, client):
             client,
             time,
         )
+
+
         # save JSON to DB
         mycollection.insert_one(record)
     except Exception as e:
@@ -144,6 +152,33 @@ def parse_single_stat_upload_db(data, client):
         insert_not_parsable(my_uuid, user_data[3], client)
         record = prod_json_not_parsable(my_uuid, course_id, task_nr, time)
         mycollection.insert_one(record)
+
+
+# Idea of a function to flag duplicate queries from the database
+def flag_duplicates(client, task_nr):
+    mydb = client.get_default_database()
+    mycol = mydb["Solutions"]
+    # set all queries to not duplicate
+    mycol.update_many({"taskNumber": task_nr}, {"$set": {"duplicate": False}})
+    queries = list(mycol.find({"taskNumber": task_nr}))
+    
+    # list to keep track of queries to flag
+    duplicates = []
+
+    # Compare each document with every other document
+    n = len(queries)
+    for i in range(n):
+        for j in range(i + 1, n):  # Start from i + 1 to avoid comparing with itself and re-comparing
+            query1 = queries[i]
+            query2 = queries[j]
+            
+            if d.get_distance(query1["statement"], query2["statement"]) == 0:
+                duplicates.append(query2["_id"])
+
+    # Flag duplicates based on gathered IDs
+    for id in set(duplicates):
+        mycol.update_one({"_id": id}, {"$set": {"duplicate": True}}, upsert=True)
+
 
 
 # Check if it is a new solution; check if tables, attributes etc. are right
@@ -175,10 +210,29 @@ def check_solution_chars(
     ) = (False, False, False, False, False, False, False, False, False)
     mydb = client.get_default_database()
     mycol = mydb["Solutions"]
+
+    min_distance = float('inf')  # Set to positive infinity
+    closest_solution = None
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
         # Extract Tables, Attributes etc. (cut out for better overview)
-        id = x["id"]  # pylint: disable=W0622)
+        # compare the distance between the solution and the submission only if it is not a duplicate
+        if not x.get("duplicate", False):
+
+            distance = d.get_distance(x["statement"], data["submission"])
+
+            # insert distance to the solution
+            #mycol.update_one({"_id": x["_id"]}, {"$set": {"distance": distance}}, upsert=True)
+
+            # check for min distance and use the corresponding solution
+            if distance < min_distance:
+                min_distance = distance
+                closest_solution = x["id"]  # choose the id of solution if it has the lowest distance
+
+    # save the distance of the closest solution
+    mycol.update_one({"_id": closest_solution}, {"$set": {"distance":min_distance}},upsert=True)
+
+    if closest_solution:
         (
             tables,  # pylint: disable=W0621
             pro_attributes,
@@ -198,6 +252,7 @@ def check_solution_chars(
             [],
             [],
         )
+        id = closest_solution # use closest solution as reference
         mycol = mydb["Tables"]
         for y in mycol.find({"id": id}, {"table": 1}):
             tables.append(y["table"])
