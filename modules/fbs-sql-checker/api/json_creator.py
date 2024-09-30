@@ -139,6 +139,8 @@ def parse_single_stat_upload_db(data, client):
             client,
             time,
         )
+
+
         # save JSON to DB
         mycollection.insert_one(record)
     except Exception as e:
@@ -216,16 +218,20 @@ def check_solution_chars(
         # Extract Tables, Attributes etc. (cut out for better overview)
         # compare the distance between the solution and the submission only if it is not a duplicate
         if not x.get("duplicate", False):
+
             distance = d.get_distance(x["statement"], data["submission"])
 
             # insert distance to the solution
-            mycol.update_one({"_id": x["_id"]}, {"$set": {"distance": distance}}, upsert=True)
+            #mycol.update_one({"_id": x["_id"]}, {"$set": {"distance": distance}}, upsert=True)
 
             # check for min distance and use the corresponding solution
             if distance < min_distance:
                 min_distance = distance
                 closest_solution = x["id"]  # choose the id of solution if it has the lowest distance
-    
+
+    # save the distance of the closest solution
+    mycol.update_one({"_id": closest_solution}, {"$set": {"distance":min_distance}},upsert=True)
+
     if closest_solution:
         (
             tables,  # pylint: disable=W0621
