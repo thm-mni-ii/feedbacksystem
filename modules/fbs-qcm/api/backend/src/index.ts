@@ -63,10 +63,6 @@ declare global {
 
 async function createDatabaseAndCollection() {
   try {
-    console.log("AAAAAAAAAAAAAAAA");
-    console.log(1);
-    console.log(await getCourses());
-    console.log(2);
     const db = await connect();
     const courseCollection: mongoDB.Collection = db.collection("course");
     const catalogCollection: mongoDB.Collection = db.collection("catalog");
@@ -224,6 +220,7 @@ async function createDatabaseAndCollection() {
   } catch (err) {
     console.error(`Error  creating database or collection: ${err}`);
   }
+  console.log("ENDE");
 }
 
 async function startServer() {
@@ -1015,7 +1012,8 @@ async function getCourses() {
   console.log(user);
   const pw = process.env.FBS_PW;
   console.log(pw);
-  console.log(await axios.get("google.com/"));
-  const response = axios.get("localhost/courses");
+  const response = await axios.get("https://localhost/courses");
+  console.log(response);
+  console.log("HEEELO ");
   return response;
 }

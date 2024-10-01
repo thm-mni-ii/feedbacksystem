@@ -83,13 +83,19 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
 
 // get all catalogs from courseid(in params)
 export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
+    console.log(courseId);
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
+  const request = {
+    course: Number(courseId)
+  };
+  console.log(request);
   const courseResult = await catalogInCourseCollection
-    .find({ course: courseId })
+    .find(request)
     .toArray();
+    console.log(courseResult);
   if (courseResult.length === 0) {
     console.log("no catalogs found");
     return -1;
