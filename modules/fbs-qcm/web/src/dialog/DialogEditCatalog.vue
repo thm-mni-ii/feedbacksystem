@@ -3,7 +3,6 @@ import { onMounted, ref } from 'vue'
 import type Catalog from '@/model/Catalog'
 import axios from 'axios'
 import type Course from '@/model/Course'
-import type Question from '@/model/Question'
 
 const editCatalogDialog = ref(false)
 
@@ -58,6 +57,7 @@ const changeCourse = () => {
 }
 
 const createCatalog = () => {
+  catalog.value.course = 187
   axios
     .post('api_v1/catalog', catalog.value, {
       headers: {
