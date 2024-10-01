@@ -51,5 +51,18 @@ export class CourseService {
     return this.http.delete<void>(`/api/v1/courses/${cid}`);
   }
 
+  /**
+   * Update only the group selection of a course
+   * @param cid Course id
+   * @param groupSelection The group selection status to update
+   */
+  updateGroupSelection(cid: number, groupSelection: boolean): Observable<void> {
+    const requestBody = { groupSelection: groupSelection };
+    return this.http.put<void>(
+      `/api/v1/courses/${cid}/groupSelection`,
+      requestBody
+    );
+  }
+
   // TODO: export a course as zip format
 }

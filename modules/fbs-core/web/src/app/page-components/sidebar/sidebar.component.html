@@ -35,6 +35,11 @@
           <p>{{ "sidebar.label.allCourses" | i18nextEager }}</p>
         </a>
 
+        <a mat-list-item routerLink="/groups" routerLinkActive="selected">
+          <mat-icon>groups</mat-icon>
+          <p>{{ "sidebar.label.myGroups" | i18nextEager }}</p>
+        </a>
+
         <a
           mat-list-item
           *ngIf="isAdmin"

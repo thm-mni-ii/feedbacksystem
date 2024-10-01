@@ -164,4 +164,31 @@ class CourseController {
       case _ => throw new ForbiddenException()
     }
   }
+
+  /**
+   * Update only the group selection of a course
+   *
+   * @param cid  Course id
+   * @param req  http request
+   * @param res  http response
+   * @param body Request Body
+   */
+  @PutMapping(value = Array("/{cid}/groupSelection"))
+  def updateGroupSelection(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse,
+             @RequestBody body: JsonNode): Unit = {
+    val user = authService.authorize(req, res)
+    val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
+
+    (user.globalRole, someCourseRole) match {
+      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
+        (
+          body.retrive("groupSelection").asBool(),
+        ) match {
+          case (Some(groupSelection)) =>
+            courseService.updateGroupSelection(cid, groupSelection)
+          case _ => throw new BadRequestException("Malformed Request Body")
+        }
+      case _ => throw new ForbiddenException()
+    }
+  }
 }

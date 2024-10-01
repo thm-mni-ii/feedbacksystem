@@ -1,0 +1,6 @@
+<div class="container">
+  <app-group-preview
+    *ngFor="let group of groups | async"
+    [data]="group"
+  ></app-group-preview>
+</div>
