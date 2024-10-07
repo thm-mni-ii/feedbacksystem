@@ -50,6 +50,7 @@
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import courseService from '@/services/course.service'
 
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogEditCatalog from '@/dialog/DialogEditCatalog.vue'
@@ -66,7 +67,8 @@ const myCourses = ref<Course[]>([])
 onMounted(async () => {
   await writeJsessionidToLocalStorage()
 
-  getCourses()
+  courseService
+    .getMyCourses()
     .then((response) => {
       myCourses.value = response.data as Course[]
     })
@@ -82,17 +84,28 @@ const writeJsessionidToLocalStorage = async () => {
   if (jsessionid) {
     // write jsessionid to local storage
     localStorage.setItem('jsessionid', jsessionid)
+    // write userId to local storage from jwt token
+
+    localStorage.setItem('userId', parseJwt(jsessionid).id)
   } else {
     console.log('No jsessionid found in params')
   }
 }
 
-const getCourses = () => {
-  return axios.get('core/courses', {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-    }
-  })
+const parseJwt = (token: string) => {
+  var base64Url = token.split('.')[1]
+  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+  var jsonPayload = decodeURIComponent(
+    window
+      .atob(base64)
+      .split('')
+      .map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      })
+      .join('')
+  )
+
+  return JSON.parse(jsonPayload)
 }
 
 const loadCatalogs = (courseId: number) => {
