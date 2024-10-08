@@ -271,6 +271,7 @@ services:
     environment:
       - JWT_SECRET=8Dsupersecurekeydf0
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
+      - FBS_BASE_URL=https://core:443
     depends_on:
       - mongodb_qcm
 

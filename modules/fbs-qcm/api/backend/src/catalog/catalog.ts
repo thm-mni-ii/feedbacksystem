@@ -41,7 +41,11 @@ export async function postCatalog(
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
   const courses = await getCourses(token);
+  if(courses === -1) {
+    return -1;
+  }
   const couresExist = courses.some((obj: any)=> obj.id === course);
+  console.log(couresExist);
   if(!couresExist) {
       return -1;
   }
@@ -54,6 +58,7 @@ export async function postCatalog(
     catalog: catalogInsert.insertedId,
     requirements: data.requirements
   }
+  console.log(catalogInCourse);
   const catalogInCourseInsert = catalogInCourseCollection.insertOne(catalogInCourse);
   return {catalogId: catalogInsert.insertedId};
 }
