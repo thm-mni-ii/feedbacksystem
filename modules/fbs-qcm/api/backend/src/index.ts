@@ -64,7 +64,6 @@ declare global {
 async function createDatabaseAndCollection() {
   try {
     const db = await connect();
-    const courseCollection: mongoDB.Collection = db.collection("course");
     const catalogCollection: mongoDB.Collection = db.collection("catalog");
     const questionCollection: mongoDB.Collection = db.collection("question");
     const tagCollection: mongoDB.Collection = db.collection("tag");
@@ -157,10 +156,6 @@ async function createDatabaseAndCollection() {
       _id: new mongoDB.ObjectId("663a51d228d8781d96050905"),
       name: "Grundlagen",
     });
-    await courseCollection.insertOne({
-      _id: new mongoDB.ObjectId("6696827f0642c847d4953925"),
-      courseId: 187,
-    });
     await cataloginCourseCollection.insertOne({
       course: 187,
       catalog: new mongoDB.ObjectId("663a51d228d8781d96050905"),
@@ -220,7 +215,6 @@ async function createDatabaseAndCollection() {
   } catch (err) {
     console.error(`Error  creating database or collection: ${err}`);
   }
-  console.log("ENDE");
 }
 
 async function startServer() {
@@ -554,10 +548,12 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const requestData = req.body;
+        const authHeader = req.headers["authorization"];
+        const token: any = authHeader && authHeader.split(" ")[1];
         const course = requestData.course;
         const catalogId = req.query.ID as string;
         delete requestData.course;
-        const data = await putCatalog(catalogId, requestData, req.user, course);
+        const data = await putCatalog(catalogId, token, requestData, req.user, course);
         if (data == -1) {
           res.sendStatus(403);
         }
@@ -568,15 +564,18 @@ async function startServer() {
     }
   });
   app.post("/api_v1/catalog", authenticateToken, async (req, res) => {
+      console.log("ANFANG");
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
+        const authHeader = req.headers["authorization"];
+        const token: any = authHeader && authHeader.split(" ")[1];
         const requestData = req.body;
         const course = requestData.course;
         delete requestData.course;
-        const data = await postCatalog(requestData, req.user, course);
+        const data = await postCatalog(requestData, token, req.user, course);
         if (data !== -1) {
           res.send(data);
         } else {
@@ -618,7 +617,9 @@ async function startServer() {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        const result = await getTeacherCourses(req.user);
+        const authHeader = req.headers["authorization"];
+        const token: any = authHeader && authHeader.split(" ")[1];
+        const result = await getTeacherCourses(token, req.user);
         console.log("HI");
         console.log(result);
         res.send(result);
@@ -633,7 +634,9 @@ async function startServer() {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        const result = await getStudentCourses(req.user);
+        const authHeader = req.headers["authorization"];
+        const token: any = authHeader && authHeader.split(" ")[1];
+        const result = await getStudentCourses(token, req.user);
         console.log(result);
         res.send(result);
       }
@@ -985,7 +988,6 @@ async function startServer() {
   function authenticateToken(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
-    console.log(token);
     if (token == null) {
       console.log("no token");
       return res.sendStatus(401);
@@ -1007,13 +1009,3 @@ async function startServer() {
   app.listen(3000, () => console.log("LISTENING on port 3000"));
 }
 startServer().catch(console.error);
-async function getCourses() {
-  const user = process.env.FBS_USER;
-  console.log(user);
-  const pw = process.env.FBS_PW;
-  console.log(pw);
-  const response = await axios.get("https://localhost/courses");
-  console.log(response);
-  console.log("HEEELO ");
-  return response;
-}

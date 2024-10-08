@@ -128,6 +128,7 @@ export async function checkCourseAccess(
   console.log(query);
   const database: mongoDB.Db = await connect();
   const courseCollection: mongoDB.Collection = database.collection("course");
+  // Feedbacksystem anbinden!!!
   const data = await courseCollection.findOne(query);
   console.log(data);
   if (data === null) {
@@ -150,6 +151,7 @@ export async function getAllQuestionsInCourse(courseId: string) {
     _id: courseIdObject,
   };
   const course = await courseCollection.findOne(courseQuery);
+  //FEEDBACK!!!
   console.log(course);
   if (course === null) {
     return -1;
