@@ -159,6 +159,7 @@ const handleSubmit = async () => {
           maxlength="130"
           auto-grow
           counter
+          rows="3"
           label="Question"
           required
         ></v-textarea>
@@ -172,7 +173,7 @@ const handleSubmit = async () => {
           clearable
           multiple
         >
-          <template v-slot:selection="{ item }">
+          <template #selection="{ item }">
             <v-chip v-bind="question.questiontags" closable @click:close="removeTag(item)">
               <strong>{{ item }}</strong
               >&nbsp;
@@ -255,9 +256,9 @@ const handleSubmit = async () => {
 
               <div class="d-flex flex-row flex-nowrap">
                 <div
-                  class="d-flex flex-column align-center"
                   v-for="(column, columnIndex) in question.questionconfiguration.answercolumns"
                   :key="columnIndex"
+                  class="d-flex flex-column align-center"
                 >
                   <v-responsive width="120">
                     <v-text-field
@@ -284,6 +285,7 @@ const handleSubmit = async () => {
             </div>
           </div>
         </div>
+        <div v-if="question.questiontype === 'FillInTheBlanks'">HAHOOERR</div>
       </v-form>
     </v-card-text>
 

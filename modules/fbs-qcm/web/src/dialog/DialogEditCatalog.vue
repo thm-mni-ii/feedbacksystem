@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import type Catalog from '@/model/Catalog'
 import axios from 'axios'
 import type Course from '@/model/Course'
+import courseService from '@/services/course.service'
 
 const editCatalogDialog = ref(false)
 
@@ -11,8 +12,15 @@ const allCourses = ref<Course[]>([])
 const allCatalogs = ref<Catalog[]>([])
 const isNew = ref<boolean>(true)
 
+const snackbar = ref({
+  show: false,
+  text: '',
+  color: 'red',
+  timeout: 5000
+})
+
 onMounted(() => {
-  getCourses()
+  courseService.getMyCourses()
     .then((response) => {
       allCourses.value = response.data as Course[]
       console.log(allCourses.value)
@@ -23,14 +31,6 @@ onMounted(() => {
 
   updateCatalogs()
 })
-
-const getCourses = () => {
-  return axios.get('core/courses', {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-    }
-  })
-}
 
 const updateCatalogs = () => {
   // get all catalogs from the course selected
@@ -57,7 +57,6 @@ const changeCourse = () => {
 }
 
 const createCatalog = () => {
-  catalog.value.course = 187
   axios
     .post('api_v1/catalog', catalog.value, {
       headers: {
@@ -70,7 +69,13 @@ const createCatalog = () => {
     })
     .catch((error) => {
       console.log(error)
+      openSnackbar('Error creating catalog: ' + error.response.data)
     })
+}
+
+const openSnackbar = (text: string) => {
+  snackbar.value.text = text
+  snackbar.value.show = true
 }
 
 // Promise resolve
@@ -108,6 +113,19 @@ defineExpose({
 </script>
 
 <template>
+  <v-snackbar
+    v-model="snackbar.show"
+    :timeout="snackbar.timeout"
+    :color="snackbar.color"
+    multi-line
+  >
+    {{ snackbar.text }}
+
+    <template #actions>
+      <v-btn color="gray" variant="text" @click="snackbar.show = false"> Close </v-btn>
+    </template>
+  </v-snackbar>
+
   <v-dialog v-model="editCatalogDialog" width="500px">
     <v-card>
       <v-card-title>
