@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import { ref } from 'vue's
-import { category } from '../services/category.service.ts'
+// import { category } from '../services/category.service.ts'
 const course = 'MIB20 Netzwerksicherheit'
 const difficultyLabels = {
   1: 'Easy',
@@ -59,7 +59,7 @@ const items = [
         <v-list :items="items"></v-list>
       </v-sheet>
       <v-btn variant="outlined" class="mx-auto my-8" type="submit" prepend-icon="mdi-check-circle">
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon color="success"></v-icon>
         </template>
         Submit</v-btn

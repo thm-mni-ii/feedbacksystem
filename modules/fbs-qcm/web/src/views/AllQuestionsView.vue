@@ -9,7 +9,7 @@ const dialogConfirm = ref<typeof DialogConfirmVue>()
 const selectedQuestionId = ref<string | null>(null)
 const dialogEditQuestion = ref<typeof DialogEditQuestion>()
 
-const token = localStorage.getItem('token')
+const token = localStorage.getItem('jsessionid')
 const config = {
   headers: { Authorization: `Bearer ${token}` }
 }
