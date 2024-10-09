@@ -615,6 +615,7 @@ async function startServer() {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
+        return;
       }
       if (req.user !== undefined) {
         const authHeader = req.headers["authorization"];
@@ -623,6 +624,7 @@ async function startServer() {
         console.log("HI");
         console.log(result);
         res.send(result);
+        return;
       }
     } catch (error) {
       res.sendStatus(500);
@@ -632,6 +634,7 @@ async function startServer() {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
+        return;
       }
       if (req.user !== undefined) {
         const authHeader = req.headers["authorization"];
@@ -639,6 +642,7 @@ async function startServer() {
         const result = await getStudentCourses(token, req.user);
         console.log(result);
         res.send(result);
+        return;
       }
     } catch (error) {
       res.sendStatus(500);

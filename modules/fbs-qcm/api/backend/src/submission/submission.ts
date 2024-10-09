@@ -203,6 +203,7 @@ function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
     }
     console.log(results);
     console.log(numberOfCorrectAnswers);
+    const score: number = numberOfCorrectAnswers / results.length;
     if(results.length === numberOfCorrectAnswers) {
         return true;
     }
