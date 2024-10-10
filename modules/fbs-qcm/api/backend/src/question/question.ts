@@ -182,17 +182,16 @@ export async function putQuestion(question: Question, tokenData: JwtPayload) {
 }
 
 export async function getAllQuestions(tokenData: JwtPayload) {
-  console.log(tokenData);
-  const docentcourses = getDocentCourseRoles(tokenData);
-  const adminCourses = getAdminCourseRoles(tokenData);
-  if (docentcourses.length > 0 || adminCourses.length > 0) {
+  //const docentcourses = getDocentCourseRoles(tokenData);
+  //const adminCourses = getAdminCourseRoles(tokenData);
+  //if (docentcourses.length > 0 || adminCourses.length > 0) {
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection =
       database.collection("question");
     const allQuestion = await questionCollection.find().toArray();
     console.log(allQuestion);
     return allQuestion;
-  }
+  /*}
   const adminCourses2 = getAdminCourseRoles(tokenData);
   if (adminCourses.length === 0) {
     return -1;
@@ -214,6 +213,7 @@ export async function getAllQuestions(tokenData: JwtPayload) {
     allCatalogs
   );
   return allQuestion;
+  */
 }
 
 export async function getCurrentQuestion(
