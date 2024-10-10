@@ -80,7 +80,7 @@ onMounted(() => {
   <v-snackbar v-model="snackbar" :timeout="4000">
     {{ snackbarText }}
 
-    <template v-slot:actions>
+    <template #actions>
       <v-btn color="primary" variant="text" @click="snackbar = false"> Close </v-btn>
     </template>
   </v-snackbar>
@@ -89,7 +89,7 @@ onMounted(() => {
   <h2 class="mx-auto mt-16 text-primary text-center">All Questions</h2>
   <v-list class="mx-auto" max-width="400">
     <v-list-item v-for="question in allQuestions" :key="question._id" :v-bind="question">
-      <v-card @click="editQuestion(question)" class="mx-auto text-center px-8 py-4">
+      <v-card class="mx-auto text-center px-8 py-4" @click="editQuestion(question)">
         {{ question._id }}
       </v-card>
     </v-list-item>
