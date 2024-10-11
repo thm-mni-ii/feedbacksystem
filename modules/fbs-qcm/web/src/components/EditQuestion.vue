@@ -114,7 +114,7 @@ const handleSubmit = async () => {
   if (question.value.questionconfiguration.answercolumns[0].correctAnswers.length > 1) {
     question.value.questionconfiguration.multipleRow = true
   }
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('jsessionid')
   console.log('Token:', token)
 
   const config = {
