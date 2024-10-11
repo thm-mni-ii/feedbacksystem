@@ -33,31 +33,31 @@ const showAnswers = () => {
   </div>
   <div v-if="question.questionconfiguration.multipleColumn == false" class="d-flex flex-column">
     <div
-      v-for="option in question.questionconfiguration.Optionrows"
+      v-for="option in question.questionconfiguration.optionRows"
       :key="option.id"
       class="d-flex justify-end"
     >
-      <v-card color="primary" variant="outlined" class="w-50 pa-1 mt-5" hide-details hover>
-        <v-checkbox
-          v-model="selectedAnswers"
-          :label="`${option.text}`"
-          :value="option.text"
-          class="ml-12 py-auto pr-12"
-          hide-details
-          @change="showAnswers()"
-        ></v-checkbox>
-      </v-card>
+      <v-checkbox
+        v-model="selectedAnswers"
+        :label="`${option.text}`"
+        :value="option.text"
+        class="ml-12 py-auto pr-12"
+        hide-details
+        @change="showAnswers()"
+      >
+        <template v-slot:label>
+          <div>{{ option.text }}</div>
+        </template>
+      </v-checkbox>
     </div>
   </div>
 
-  <div class="d-flex flex-column">
-    <div v-for="option in question.questionconfiguration.Optionrows" :key="option.id" class="mb-6">
+  <div v-if="question.questionconfiguration.multipleColumn == true" class="d-flex flex-column">
+    <div v-for="option in question.questionconfiguration.optionRows" :key="option.id" class="mb-6">
       <v-card color="primary" variant="outlined" class="pa-4">
-        <p class="mb-4">{{ option.text }}</p>
-
         <div class="d-flex flex-col justify-start">
           <v-checkbox
-            v-for="column in question.questionconfiguration.answercolumns"
+            v-for="column in question.questionconfiguration.answerColumns"
             :key="column.id"
             v-model="selectedAnswers"
             :value="{ rowId: option.id, colId: column.id }"
@@ -70,6 +70,9 @@ const showAnswers = () => {
       </v-card>
     </div>
   </div>
+  <p v-for="option in question.questionconfiguration.optionRows" :key="option.id">
+    {{ option.text }}
+  </p>
 
   <v-btn
     variant="tonal"

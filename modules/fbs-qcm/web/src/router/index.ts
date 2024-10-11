@@ -10,9 +10,9 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/categories',
-      name: 'categories',
-      component: () => import('../views/CategoryView.vue')
+      path: '/answerQuestion',
+      name: 'answerQuestion',
+      component: () => import('../views/CatalogSessionView.vue')
     },
     {
       path: '/newQuestion',

@@ -4,9 +4,13 @@ import { useRoute } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
 
 import type Catalog from '../model/Catalog'
+import type Choice from '@/model/questionTypes/Choice'
+import type Question from '@/model/Question'
+import type QuestionType from '@/enums/QuestionType'
 import axios from 'axios'
+
 const questionId = ref('6638fbdb7cbf615381a90abe')
-const questionData = ref(null)
+//const questionData = ref(null)
 const route = useRoute()
 
 const getQuestion = async () => {
@@ -21,6 +25,38 @@ const getQuestion = async () => {
   } catch (err) {
     console.log(err)
   }
+}
+
+const questionData: Question = {
+  _id: '6638fbdb7cbf615381a90abe',
+  owner: 1,
+  questiontext: 'Was ist 2 + 57?',
+  questiontags: ['komplex', 'frage'],
+  questiontype: 'Choice' as QuestionType,
+  questionconfiguration: {
+    multipleRow: true,
+    multipleColumn: false,
+    answerColumns: [
+      {
+        id: 1,
+        name: ''
+      }
+    ],
+    optionRows: [
+      {
+        id: 0,
+        text: 'erste Antwort'
+      },
+      {
+        id: 1,
+        text: 'zweite Antwort'
+      },
+      {
+        id: 2,
+        text: 'dritte antworttt'
+      }
+    ]
+  } as Choice
 }
 
 const catalog = ref<Catalog>({
@@ -38,7 +74,7 @@ const submitAnswer = (arr) => {
 
 onMounted(() => {
   console.log(route.params.catalogId)
-  getQuestion()
+  //  getQuestion()
 })
 </script>
 

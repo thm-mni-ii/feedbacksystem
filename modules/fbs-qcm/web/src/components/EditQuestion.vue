@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import axios from 'axios'
 // import VueIntersect from 'vue-intersect'
 import type Question from '../model/Question'
-import type Choice from '../model/questionTypes/Choice'
+// import type Choice from '../model/questionTypes/Choice'
 import QuestionType from '../enums/QuestionType'
 import { onMounted } from 'vue'
 
@@ -149,8 +149,8 @@ const handleSubmit = async () => {
     <v-card-text>
       <v-form>
         <v-select
-          label="Fragetyp"
           v-model="question.questiontype"
+          label="Fragetyp"
           :items="questionTypes"
           variant="solo-filled"
         ></v-select>
@@ -185,8 +185,8 @@ const handleSubmit = async () => {
         <div v-if="question.questiontype === 'Choice'">
           <div class="justify-space-between d-flex flex-row">
             <v-switch
-              class="ml-4"
               v-model="question.questionconfiguration.multipleColumn"
+              class="ml-4"
               :label="`Multi-Select Matrix`"
               color="primary"
               hide-details
@@ -246,11 +246,11 @@ const handleSubmit = async () => {
             <div class="d-flex flex-row flex-nowrap justify-space-between align-center my-4">
               <v-responsive width="480">
                 <v-btn
+                  v-tooltip:end="'Add Answer'"
                   icon="mdi-plus"
                   class="ml-2 mb-2"
                   size="small"
                   @click="addOptionRow"
-                  v-tooltip:end="'Add Answer'"
                 ></v-btn>
               </v-responsive>
 
