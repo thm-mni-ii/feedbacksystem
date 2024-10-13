@@ -412,9 +412,9 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const data = await getAllQuestions(req.user);
-        if (data === -1) {
+        /*if (data === -1) {
           res.sendStatus(403);
-        }
+        }*/
         res.send(data);
       }
     } catch (error) {

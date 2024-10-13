@@ -152,6 +152,8 @@ function checkChoice(answer: ChoiceAnswer, question: Question) {
     console.log(`correctAnswers: ${correctAnswers}`);
     console.log(`falsePositives: ${falsePositives}`);
     console.log(`falseNegatives: ${falseNegatives}`);
+    const score = correctAnswers / (correctAnswers + falseAnswers);
+    console.log(score);
     if(falseAnswers === 0 ) {
         return AnswerScore.correct;
     }
@@ -204,6 +206,7 @@ function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
     console.log(results);
     console.log(numberOfCorrectAnswers);
     const score: number = numberOfCorrectAnswers / results.length;
+    console.log(score);
     if(results.length === numberOfCorrectAnswers) {
         return true;
     }
