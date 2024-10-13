@@ -54,7 +54,7 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     const correct = await checkAnswer(requestData.answers, questionId, questionCollection);
     console.log(timestamp);
     const submission = {
-        user: tokenData.user,
+        user: tokenData.id,
         question: questionId,
         answer: requestData.answers,
         evaluation: correct,
@@ -224,4 +224,8 @@ function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
         }
     }
     return false;
+}
+
+function findFirstFalseAnswerInSession(tokenData: JwtPayload, catalog: string, course: string) {
+
 }
