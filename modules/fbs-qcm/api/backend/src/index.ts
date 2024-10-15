@@ -483,12 +483,12 @@ async function startServer() {
       }
     }
   );
-  app.get("/api_v1/catalog", authenticateToken, async (req, res) => {
+  app.get("/api_v1/catalog/:id", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
       }
-      const catalogId = req.query.ID as string;
+      const catalogId = req.params.id as string;
       if (req.user !== undefined) {
         const data = await getCatalog(req.user, catalogId);
         if (data == -1) {
@@ -523,12 +523,12 @@ async function startServer() {
     }
   });
 
-  app.delete("/api_v1/catalog", authenticateToken, async (req, res) => {
+  app.delete("/api_v1/catalog/:id", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
       }
-      const catalogId = req.query.ID as string;
+      const catalogId = req.params.id as unknown as string;
       if (req.user !== undefined) {
         const data = await deleteCatalog(req.user, catalogId);
         if (data == -1) {
@@ -541,7 +541,7 @@ async function startServer() {
       res.sendStatus(500);
     }
   });
-  app.put("/api_v1/catalog", authenticateToken, async (req, res) => {
+  app.put("/api_v1/catalog/:id", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
@@ -551,9 +551,15 @@ async function startServer() {
         const authHeader = req.headers["authorization"];
         const token: any = authHeader && authHeader.split(" ")[1];
         const course = requestData.course;
-        const catalogId = req.query.ID as string;
+        const catalogId = req.params.id as string;
         delete requestData.course;
-        const data = await putCatalog(catalogId, token, requestData, req.user, course);
+        const data = await putCatalog(
+          catalogId,
+          token,
+          requestData,
+          req.user,
+          course
+        );
         if (data == -1) {
           res.sendStatus(403);
         }
@@ -564,7 +570,6 @@ async function startServer() {
     }
   });
   app.post("/api_v1/catalog", authenticateToken, async (req, res) => {
-      console.log("ANFANG");
     try {
       if (req.user == undefined) {
         res.sendStatus(401);

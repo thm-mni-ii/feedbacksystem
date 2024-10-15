@@ -10,7 +10,9 @@
         <v-tab @click="router.push('/allQuestions')">All Questions</v-tab>
       </v-tabs>
     </v-app-bar>
-    <RouterView />
+    <v-main>
+      <RouterView />
+    </v-main>
   </v-app>
 </template>
 

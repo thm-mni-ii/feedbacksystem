@@ -1,117 +1,3 @@
-<script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import type Catalog from '@/model/Catalog'
-import axios from 'axios'
-import type Course from '@/model/Course'
-import courseService from '@/services/course.service'
-
-const editCatalogDialog = ref(false)
-
-const catalog = ref<Catalog>({} as Catalog)
-const allCourses = ref<Course[]>([])
-const allCatalogs = ref<Catalog[]>([])
-const isNew = ref<boolean>(true)
-
-const snackbar = ref({
-  show: false,
-  text: '',
-  color: 'red',
-  timeout: 5000
-})
-
-onMounted(() => {
-  courseService.getMyCourses()
-    .then((response) => {
-      allCourses.value = response.data as Course[]
-      console.log(allCourses.value)
-    })
-    .catch((error) => {
-      console.log(error)
-    })
-
-  updateCatalogs()
-})
-
-const updateCatalogs = () => {
-  // get all catalogs from the course selected
-  if (catalog.value.course) {
-    axios
-      .get(`api_v1/catalogs/${catalog.value.course}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-        }
-      })
-      .then((response) => {
-        allCatalogs.value = response.data as Catalog[]
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }
-}
-
-const changeCourse = () => {
-  catalog.value.reqirements = [] as number[]
-
-  updateCatalogs()
-}
-
-const createCatalog = () => {
-  axios
-    .post('api_v1/catalog', catalog.value, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-      }
-    })
-    .then((response) => {
-      console.log(response)
-      _confirm()
-    })
-    .catch((error) => {
-      console.log(error)
-      openSnackbar('Error creating catalog: ' + error.response.data)
-    })
-}
-
-const openSnackbar = (text: string) => {
-  snackbar.value.text = text
-  snackbar.value.show = true
-}
-
-// Promise resolve
-const resolvePromise = ref<Function | undefined>(undefined)
-
-const openDialog = (courseId: number, editCatalog?: Catalog) => {
-  if (editCatalog !== undefined) {
-    catalog.value = editCatalog
-    isNew.value = false
-  } else {
-    isNew.value = true
-    catalog.value.course = courseId
-  }
-  editCatalogDialog.value = true
-
-  return new Promise((resolve) => {
-    resolvePromise.value = resolve
-  })
-}
-
-const _confirm = () => {
-  editCatalogDialog.value = false
-  resolvePromise.value && resolvePromise.value(true)
-}
-
-const _cancel = () => {
-  editCatalogDialog.value = false
-  resolvePromise.value && resolvePromise.value(false)
-}
-
-// define expose
-defineExpose({
-  openDialog
-})
-</script>
-
 <template>
   <v-snackbar
     v-model="snackbar.show"
@@ -148,7 +34,7 @@ defineExpose({
               <v-text-field v-model="catalog.name" label="Name"></v-text-field>
 
               <v-select
-                v-model="catalog.reqirements"
+                v-model="catalog.requirements"
                 :items="allCatalogs"
                 item-title="name"
                 item-value="id"
@@ -160,8 +46,133 @@ defineExpose({
       </v-card-text>
       <v-card-actions>
         <v-btn @click="_cancel">Cancel</v-btn>
-        <v-btn @click="createCatalog">Create</v-btn>
+        <v-btn v-if="isNew" @click="createCatalog">Create</v-btn>
+        <v-btn v-else @click="updateCatalog">Update</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import type Catalog from '@/model/Catalog'
+import axios from 'axios'
+import type Course from '@/model/Course'
+import courseService from '@/services/course.service'
+import catalogService from '@/services/catalog.service'
+
+const editCatalogDialog = ref(false)
+
+const catalog = ref<Catalog>({} as Catalog)
+const allCourses = ref<Course[]>([])
+const allCatalogs = ref<Catalog[]>([])
+const isNew = ref<boolean>(true)
+
+const snackbar = ref({
+  show: false,
+  text: '',
+  color: 'red',
+  timeout: 5000
+})
+
+const getMyCourses = () => {
+  courseService
+    .getMyCourses()
+    .then((response) => {
+      allCourses.value = response.data as Course[]
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}
+
+const updateCatalogs = () => {
+  // get all catalogs from the course selected
+  if (catalog.value.course) {
+    axios
+      .get(`api_v1/catalogs/${catalog.value.course}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
+      })
+      .then((response) => {
+        allCatalogs.value = response.data as Catalog[]
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+}
+
+const changeCourse = () => {
+  catalog.value.requirements = [] as number[]
+
+  updateCatalogs()
+}
+
+const createCatalog = () => {
+  catalogService
+    .postCatalog(catalog.value)
+    .then(() => {
+      _confirm()
+    })
+    .catch((error) => {
+      console.log(error)
+      openSnackbar('Error creating catalog: ' + error.response.data)
+    })
+}
+
+const updateCatalog = () => {
+  catalogService
+    .putCatalog(catalog.value)
+    .then(() => {
+      _confirm()
+    })
+    .catch((error) => {
+      console.log(error)
+      openSnackbar('Error updating catalog: ' + error.response.data)
+    })
+}
+
+const openSnackbar = (text: string) => {
+  snackbar.value.text = text
+  snackbar.value.show = true
+}
+
+// Promise resolve
+const resolvePromise = ref<Function | undefined>(undefined)
+
+const openDialog = (courseId: number, editCatalog?: Catalog) => {
+  if (editCatalog !== undefined) {
+    //as new instance
+    catalog.value = { ...editCatalog }
+    isNew.value = false
+  } else {
+    isNew.value = true
+    catalog.value.course = courseId
+  }
+  editCatalogDialog.value = true
+
+  getMyCourses()
+  updateCatalogs()
+
+  return new Promise((resolve) => {
+    resolvePromise.value = resolve
+  })
+}
+
+const _confirm = () => {
+  editCatalogDialog.value = false
+  resolvePromise.value && resolvePromise.value(true)
+}
+
+const _cancel = () => {
+  editCatalogDialog.value = false
+  resolvePromise.value && resolvePromise.value(false)
+}
+
+// define expose
+defineExpose({
+  openDialog
+})
+</script>

@@ -1,43 +1,64 @@
 <template>
   <DialogEditCatalog ref="dialogEditCatalog" />
   <DialogConfirmVue ref="dialogConfirm" />
-  <v-sheet class="pa-10 mt-12">
+  <v-sheet class="pa-10">
     <v-expansion-panels>
       <v-expansion-panel
         v-for="course in myCourses"
         :key="course.id"
-        @group:selected="loadCatalogs(course.id)"
+        @group:selected="loadCatalogsFromCourse(course.id)"
       >
         <v-expansion-panel-title> {{ course.name }} </v-expansion-panel-title>
         <v-expansion-panel-text>
           <v-list>
             <v-list-subheader>Catalogs</v-list-subheader>
             <v-list-item v-for="catalog in course.catalogs" :key="catalog.id">
-              <v-list-item-content>
-                <v-list-item-title class="d-flex align-center justify-space-between">
-                  <span>{{ catalog.name }}</span>
+              <v-list-item-title class="d-flex align-center justify-space-between">
+                <span>{{ catalog.name }}</span>
 
-                  <!-- <v-chip class="ml-3" :color="getDifficultyColor(catalog.difficulty)">
-                    {{ catalog.difficulty }}
-                  </v-chip> -->
+                <v-spacer></v-spacer>
 
-                  <v-spacer></v-spacer>
+                <v-btn color="primary" variant="tonal" class="mr-2" @click="startSession(catalog)">
+                  Start Session
+                </v-btn>
+                <!-- manage questions with icon -->
+                <v-btn
+                  prepend-icon="mdi-cog"
+                  color="dark-grey"
+                  variant="outlined"
+                  class="mr-2"
+                  @click="manageQuestions(catalog)"
+                >
+                  Manage
+                </v-btn>
+                <v-btn
+                  icon="mdi-pencil"
+                  color="dark-grey"
+                  variant="outlined"
+                  size="x-small"
+                  class="mr-2"
+                  @click="editCatalog(course.id, catalog)"
+                >
+                </v-btn>
+                <v-btn
+                  icon="mdi-delete"
+                  color="error"
+                  variant="outlined"
+                  size="x-small"
+                  class="mr-2"
+                  @click="deleteCatalog(course.id, catalog)"
+                >
+                </v-btn>
+              </v-list-item-title>
 
-                  <v-btn color="primary" variant="tonal" @click="startSession(catalog)"
-                    >Start Session</v-btn
-                  >
-                </v-list-item-title>
-              </v-list-item-content>
               <v-list-item-action> </v-list-item-action>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title class="d-flex align-center justify-space-between">
-                  <v-btn color="primary" variant="outlined" @click="createNewCatalog(course.id)"
-                    >Add new Catalog</v-btn
-                  >
-                </v-list-item-title>
-              </v-list-item-content>
+              <v-list-item-title class="d-flex align-center justify-space-between">
+                <v-btn color="primary" variant="outlined" @click="createNewCatalog(course.id)"
+                  >Add new Catalog</v-btn
+                >
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-expansion-panel-text>
@@ -57,6 +78,7 @@ import DialogEditCatalog from '@/dialog/DialogEditCatalog.vue'
 
 import type Course from '../model/Course'
 import type Catalog from '../model/Catalog'
+import catalogService from '@/services/catalog.service'
 
 const dialogConfirm = ref<typeof DialogConfirmVue>()
 const dialogEditCatalog = ref<typeof DialogEditCatalog>()
@@ -108,9 +130,9 @@ const parseJwt = (token: string) => {
   return JSON.parse(jsonPayload)
 }
 
-const loadCatalogs = (courseId: number) => {
+const loadCatalogsFromCourse = (courseId: number) => {
   const course = myCourses.value.find((course) => course.id === courseId)
-  if (course && !course.catalogs) {
+  if (course) {
     axios
       .get(`api_v1/catalogs/${courseId}`, {
         headers: {
@@ -118,7 +140,6 @@ const loadCatalogs = (courseId: number) => {
         }
       })
       .then((response) => {
-        console.log(response.data)
         course.catalogs = response.data as Catalog[]
       })
       .catch((error) => {
@@ -133,6 +154,19 @@ const createNewCatalog = (courseId: number) => {
     dialogEditCatalog.value.openDialog(courseId).then((result: boolean) => {
       if (result) {
         console.log('Create new catalog')
+        loadCatalogsFromCourse(courseId)
+      } else {
+        console.log('Cancel')
+      }
+    })
+  }
+}
+const editCatalog = (courseId: number, catalog: Catalog) => {
+  if (dialogEditCatalog.value) {
+    dialogEditCatalog.value.openDialog(courseId, catalog).then((result: boolean) => {
+      if (result) {
+        console.log('Edit catalog')
+        loadCatalogsFromCourse(courseId)
       } else {
         console.log('Cancel')
       }
@@ -140,18 +174,31 @@ const createNewCatalog = (courseId: number) => {
   }
 }
 
-// const getDifficultyColor = (difficulty: number) => {
-//   switch (difficulty) {
-//     case 1:
-//       return 'green'
-//     case 2:
-//       return 'orange'
-//     case 3:
-//       return 'red'
-//     default:
-//       return 'grey'
-//   }
-// }
+const deleteCatalog = (courseId: number, catalog: Catalog) => {
+  if (dialogConfirm.value) {
+    dialogConfirm.value
+      .openDialog(
+        `Do you want to delete catalog ${catalog.name}?`,
+        'With the confirmation you will delete the catalog.',
+        'Confirm'
+      )
+      .then((result: boolean) => {
+        if (result) {
+          console.log('Delete catalog')
+          catalogService.deleteCatalog(catalog.id).then(() => {
+            loadCatalogsFromCourse(courseId)
+          })
+        } else {
+          console.log('Cancel')
+        }
+      })
+  }
+}
+
+const manageQuestions = (catalog: Catalog) => {
+  console.log(catalog.id)
+  router.push(`/manageCatalog/${catalog.id}`)
+}
 
 const startSession = (catalog: Catalog) => {
   if (dialogConfirm.value) {
