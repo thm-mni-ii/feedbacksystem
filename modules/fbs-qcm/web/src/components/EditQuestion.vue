@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import axios from 'axios'
 // import VueIntersect from 'vue-intersect'
 import type Question from '../model/Question'
-// import type Choice from '../model/questionTypes/Choice'
+import type Choice from '../model/questionTypes/Choice'
 import QuestionType from '../enums/QuestionType'
 import { onMounted } from 'vue'
 
@@ -33,8 +33,8 @@ onMounted(() => {
       questionconfiguration: {
         multipleRow: false,
         multipleColumn: false,
-        answercolumns: [{ id: 1, name: '', correctAnswers: [] }],
-        Optionrows: [{ id: 1, text: '' }]
+        answerColumns: [{ id: 1, name: '', correctAnswers: [] }],
+        optionRows: [{ id: 1, text: '' }]
       }
     }
   } else if (props.inputQuestion) {

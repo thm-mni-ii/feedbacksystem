@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits } from 'vue'
 import type Question from '../model/Question.ts'
-import type { Choice } from '../model/questionTypes/Choice.ts'
+// import type { Choice } from '../model/questionTypes/Choice.ts'
 import QuestionType from '../enums/QuestionType'
 
 const props = defineProps<{
