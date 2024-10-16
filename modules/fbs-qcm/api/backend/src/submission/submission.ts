@@ -54,7 +54,7 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     const correct = await checkAnswer(requestData.answers, questionId, questionCollection);
     console.log(timestamp);
     const submission = {
-        user: tokenData.user,
+        user: tokenData.id,
         question: questionId,
         answer: requestData.answers,
         evaluation: correct,
@@ -152,6 +152,8 @@ function checkChoice(answer: ChoiceAnswer, question: Question) {
     console.log(`correctAnswers: ${correctAnswers}`);
     console.log(`falsePositives: ${falsePositives}`);
     console.log(`falseNegatives: ${falseNegatives}`);
+    const score = correctAnswers / (correctAnswers + falseAnswers);
+    console.log(score);
     if(falseAnswers === 0 ) {
         return AnswerScore.correct;
     }
@@ -204,6 +206,7 @@ function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
     console.log(results);
     console.log(numberOfCorrectAnswers);
     const score: number = numberOfCorrectAnswers / results.length;
+    console.log(score);
     if(results.length === numberOfCorrectAnswers) {
         return true;
     }
@@ -221,4 +224,8 @@ function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
         }
     }
     return false;
+}
+
+function findFirstFalseAnswerInSession(tokenData: JwtPayload, catalog: string, course: string) {
+
 }

@@ -10,9 +10,14 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/answerQuestion',
-      name: 'answerQuestion',
-      component: () => import('../views/CatalogSessionView.vue')
+      path: '/manageCatalog/:catalogId',
+      name: 'manageCatalog',
+      component: () => import('../views/ManageCatalogView.vue')
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: () => import('../views/CategoryView.vue')
     },
     {
       path: '/newQuestion',
