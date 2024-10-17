@@ -1,5 +1,5 @@
 import type QuestionType from '../enums/QuestionType.ts'
-import type Choice from './questionTypes/Choice.js'
+import type { Choice } from './questionTypes/Choice.js'
 import type FillInTheBlanks from './questionTypes/FillInTheBlanks.js'
 
 export default interface Question {
