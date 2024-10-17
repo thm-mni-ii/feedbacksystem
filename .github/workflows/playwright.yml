@@ -25,8 +25,9 @@ jobs:
       run: npm i -D allure-playwright
     - name: Run Playwright tests with Allure
       run: |
+        working-directory: ./modules/fbs-core/web
         export PW_ALLURE_RESULTS_DIR=allure-results
-        playwright test --reporter=line,allure-playwright
+        npx playwright test --reporter=line,allure-playwright
     - name: Generate Allure Report
       run: |
         npx allure generate allure-results --clean -o allure-report
