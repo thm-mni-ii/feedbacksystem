@@ -24,8 +24,8 @@ jobs:
     - name: Install Allure dependencies
       run: npm i -D allure-playwright
     - name: Run Playwright tests with Allure
+      working-directory: ./modules/fbs-core/web
       run: |
-        working-directory: ./modules/fbs-core/web
         export PW_ALLURE_RESULTS_DIR=allure-results
         npx playwright test --reporter=line,allure-playwright
     - name: Generate Allure Report
