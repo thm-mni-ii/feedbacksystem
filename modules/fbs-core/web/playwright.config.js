@@ -2,7 +2,7 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './modules/fbs-core/web/tests',
+  testDir: './tests',
   timeout: 30000,
   retries: 0,
   
