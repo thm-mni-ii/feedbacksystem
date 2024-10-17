@@ -26,7 +26,7 @@ jobs:
     - name: Run Playwright tests with Allure
       run: |
         export PW_ALLURE_RESULTS_DIR=allure-results
-        npx playwright test --reporter=line,allure-playwright
+        playwright test --reporter=line,allure-playwright
     - name: Generate Allure Report
       run: |
         npx allure generate allure-results --clean -o allure-report
