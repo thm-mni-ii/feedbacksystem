@@ -13,22 +13,26 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+    - name: Install Docker
+      run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io docker-compose
+          docker-compose --version
+    - name: Start Docker containers
+      working-directory: ./feedbacksystem
+      run: docker-compose up -d --build
     - name: Install dependencies
       run: npm ci
+    - name: Start Application
+      working-directory:  ./modules/fbs-core/web
+      run: npm run start &
+    - name: Wait for services to be ready
+      run: sleep 30
     - name: Clean previous Allure results
       working-directory: ./modules/fbs-core/web
       run: |
         rm -rf allure-results
         rm -rf allure-report
-    - name: Install Docker
-      run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-          sudo apt-get install -y docker-compose
-    - name: Start Docker containers
-      run: docker-compose -f docker-compose.yml up -d
-    - name: Wait for services to be ready
-      run: sleep 30
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Install Allure dependencies
