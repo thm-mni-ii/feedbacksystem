@@ -12,7 +12,7 @@ test.describe('E2E-Test im Feedbacksystem von Anmeldung bis zur Abgabe einer Auf
         allure.label('Name:', 'Kompletter Prozess von Anmeldung bis Abmeldung');
       
 
-        const username = 'Awed23';
+        const username = 'awed';
         const password = 'Awed12345';
         const courseName = 'Datenbank';
         const taskName = 'Aufgabe 1';
@@ -33,12 +33,12 @@ test.describe('E2E-Test im Feedbacksystem von Anmeldung bis zur Abgabe einer Auf
             allure.parameter('Vorbedingung :', 'Benutzer muss die Anmeldeseite des Feedbacksystems öffnen');
             allure.parameter('Testdaten: ', `Benutzername: ${username}, Passwort: *****`);
 
-            await loginPage.navigateTo(config.test);
+            await loginPage.navigateTo(config.local);
             await loginPage.login(username, password);
 
             allure.parameter('Erwartung: ', 'Nach erfolgreichem Anmelden, soll die Kursseite geöffnet werden');
             try {
-                await expect(page).toHaveURL('https://fk-feedback-test.mni.thm.de/courses');
+                await expect(page).toHaveURL('http://localhost:4200/courses');
                 allure.parameter('Tatsächliches Ergebnis :', 'Benutzer wurde erfolgreich zur Kursseite weitergeleitet.');
             } catch (error) {
                 allure.parameter('Tatsächliches Ergebnis: ', 'Unerwartetes Problem während der Anmeldung.');

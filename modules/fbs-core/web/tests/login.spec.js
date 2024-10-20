@@ -16,6 +16,8 @@ test.describe('Loginseite Test', () => {
         await loginPage.navigateTo(config.local);
         await loginPage.login('awed', 'Awed12345');
         await expect(page).toHaveURL('http://localhost:4200/courses');
+        await page.getByLabel('User Menu').click(); //logout
+         await page.getByRole('menuitem', { name: 'Logout' }).click();
     });
 
     test('Anmeldung ist fehlgeschlagen, da entweder Nutzername oder Passwort falsch eingegben wurde', async ({ page }) => {

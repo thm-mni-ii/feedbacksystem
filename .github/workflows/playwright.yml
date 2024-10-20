@@ -13,8 +13,20 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
+    - name: Install Docker Compose
+      run: sudo apt-get install -y docker-compose
+    - name: Set up Docker environment
+      run: |
+        cd feedbacksystem
+        docker-compose up -d --build
+        cd modules/fbs-core/web
+        npm install
+    - name: Verify local environment
+      run: |
+          cd modules/fbs-core/web
+          npm run start &
+          sleep 10
+          curl -s http://localhost:4200 || exit 1
     - name: Clean previous Allure results
       run: |
         rm -rf allure-results
