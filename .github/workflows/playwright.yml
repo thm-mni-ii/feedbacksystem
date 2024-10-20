@@ -13,11 +13,6 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-    - name: Install Docker
-      run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io docker-compose
-          docker-compose --version
     - name: Start Docker containers
       working-directory: ./feedbacksystem
       run: docker-compose up -d --build
