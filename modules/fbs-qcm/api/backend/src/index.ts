@@ -82,9 +82,9 @@ async function createDatabaseAndCollection() {
       questionconfiguration: {
         multiplerow: true,
         multiplecolumn: true,
-        answercolumns: [
+        answerColumns: [
           {
-            id: "string",
+            id: 0,
             name: "string",
             correctAnswers: [0],
           },
@@ -137,9 +137,9 @@ async function createDatabaseAndCollection() {
       questionconfiguration: {
         multiplerow: true,
         multiplecolumn: true,
-        answercolumns: [
+        answerColumns: [
           {
-            id: "string",
+            id: 0,
             name: "string",
             correctAnswers: [0],
           },
@@ -594,7 +594,7 @@ async function startServer() {
       }
       if (req.user !== undefined) {
         const requestData = req.body;
-        const response = await submit(req.user, requestData);
+        const response = await submit(req.user, requestData, "");
         if (response == -1) {
           res.sendStatus(403);
           return;

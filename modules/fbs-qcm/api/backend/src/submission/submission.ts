@@ -1,7 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
 import { checkQuestionAccess, getCurrentSession, getUserCourseRoles} from "../utils/utils";
 import { connect } from "../mongo/mongo";
-import { AnswerScore } from "../utils/enum";
+import { AnswerScore, SessionStatus } from "../utils/enum";
 import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
 import QuestionType from "../enums/QuestionType";
@@ -19,9 +19,9 @@ interface entry  {
 }
 
 interface ChoiceAnswer {
-    rows: entry[],
-    columns: entry[],
-    matrix: number[][]
+    questionId: number,
+    text: string,
+    rows: number[]
 }
 
 export async function submitSessionAnswer(tokenData: JwtPayload, requestData: any) {
@@ -30,11 +30,11 @@ export async function submitSessionAnswer(tokenData: JwtPayload, requestData: an
     if(session == null || session == undefined) {
         return -1;
     }
-    const submitResult = await submit(tokenData, requestData);
+    const submitResult = await submit(tokenData, requestData, session);
     return submitResult;
 }
 
-export async function submit(tokenData: JwtPayload, requestData: any) {
+export async function submit(tokenData: JwtPayload, requestData: any, session: string) {
     const userCourses = getUserCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
@@ -53,12 +53,17 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     console.log("----------------------");
     const correct = await checkAnswer(requestData.answers, questionId, questionCollection);
     console.log(timestamp);
+    let sessionObject: any = "";
+    if(session !== "") {
+        sessionObject = new mongoDB.ObjectId(session);
+    }
     const submission = {
         user: tokenData.id,
         question: questionId,
         answer: requestData.answers,
         evaluation: correct,
-        timeStamp: timestamp
+        timeStamp: timestamp,
+        session: sessionObject
     }
     submissionCollection.insertOne(submission);
     return correct;
@@ -103,9 +108,17 @@ function checkSQL(answer: any, question: Question) {
     return 0;
 }
 
+function checkChoice2(answer: ChoiceAnswer, question: Question) {
+    let correctAnswers = 0;
+    let falseAnswers = 0;
+    let falsePositives = 0;
+    let falseNegatives = 0;
+}
+
 function checkChoice(answer: ChoiceAnswer, question: Question) {
     console.log(answer);
     let rows: number[] = [];
+    console.log(1);
     for(let i = 0; i < answer.rows.length; i++) {
         rows.push(answer.rows[i].id);
     }
@@ -113,16 +126,28 @@ function checkChoice(answer: ChoiceAnswer, question: Question) {
     for(let i = 0; i < answer.columns.length; i++) {
         columns.push(answer.columns[i].id);
     }
-    const newMatrix = orderRows(answer.matrix, rows); 
-    const newMatrix2 = orderColumns(newMatrix, columns);
-    console.log(newMatrix2);
+    console.log(2);
+    let newMatrix2: number[][] = [];
+    if(answer.matrix.length > 1) {
+        const newMatrix = orderRows(answer.matrix, rows); 
+        newMatrix2 = orderColumns(newMatrix, columns);
+    } else {
+        newMatrix2 = answer.matrix;
+    }
     const configuration = question.questionconfiguration as Choice;
-    const answerColumns = configuration.answerColumns;
+    const answerColumns = configuration.answerColumns; 
+    console.log(answerColumns);   
+    console.log(configuration);
+    console.log(3);
+    console.log(newMatrix2);
     let correctAnswers = 0;
     let falseAnswers = 0;
     let falsePositives = 0;
     let falseNegatives = 0;
+    console.log(4);
+
     for(let i = 0; i < answerColumns.length; i++) {
+        console.log(5);
         for(let j = 0; j < newMatrix2[i].length; j++) {
             console.log(`richtige Antworten: ${answerColumns[i].correctAnswers}`);
             if(newMatrix2[i][j] === 1) {
@@ -226,6 +251,30 @@ function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
     return false;
 }
 
-function findFirstFalseAnswerInSession(tokenData: JwtPayload, catalog: string, course: string) {
+async function findFirstFalseAnswerInSession(tokenData: JwtPayload, catalog: string, course: string) {
+    const id = tokenData.id;
+    const catalogIdOject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
+    const courseIdOject: mongoDB.ObjectId = new mongoDB.ObjectId(course);
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = await database.collection("session");
+    const submissionCollection: mongoDB.Collection = await database.collection("submission");
+    const request = {
+        course: courseIdOject,
+        catalog: catalogIdOject,
+        user: id,
+        status: SessionStatus.ongoing
+    }
+    const session = await sessionCollection.findOne(request);
+    console.log(session);
+    if(session === null) {
+        return -1;
+    }
+    const falseSubmissionRequest = {
+        session: session._id,
+        evaluation: false
+    }
+    const falseAnswers: any[] = await submissionCollection.find(falseSubmissionRequest).toArray();
+    console.log(falseAnswers);
 
 }
+
