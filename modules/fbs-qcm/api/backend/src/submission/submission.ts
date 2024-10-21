@@ -19,9 +19,14 @@ interface entry  {
 }
 
 interface ChoiceAnswer {
-    questionId: number,
-    text: string,
-    rows: number[]
+    id: number,
+    text: string
+    entries: entry[]
+}
+
+interface entry {
+    id: number,
+    text: string
 }
 
 export async function submitSessionAnswer(tokenData: JwtPayload, requestData: any) {
@@ -42,12 +47,13 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
     const timestamp = Date.now();
-    const questionId = new mongoDB.ObjectId(requestData.question);
+    const questionId = new mongoDB.ObjectId(requestData.questionId);
     const catalog = await checkQuestionAccess(questionId, userCourses, 
                                               catalogInCourseCollection, catalogCollection);
     if(catalog === false) {
         return -1;
     }
+    console.log(requestData);
     console.log("----------------------");
     console.log(requestData.answers);
     console.log("----------------------");
@@ -65,7 +71,7 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
         timeStamp: timestamp,
         session: sessionObject
     }
-    submissionCollection.insertOne(submission);
+    await submissionCollection.insertOne(submission);
     return correct;
 }
 
@@ -75,7 +81,11 @@ async function checkAnswer(answer: any, questionId: mongoDB.ObjectId,
     const questionQuery = {
         _id: questionId
     }
+    console.log("questionQuery");   
+    console.log(questionQuery);
+
     const result: any  = await questionCollection.findOne(questionQuery);
+    console.log(result);
     if(result === null) {
         return -1;
     }
@@ -94,7 +104,7 @@ function checkSubmission(answer: any, question: Question) {
     console.log(QuestionType.FillInTheBlanks);
     console.log(QuestionType.Choice);
     if(questionType == QuestionType.Choice) {
-        return checkChoice(answer, question);
+        return checkChoice2(answer, question);
     } else if(questionType == QuestionType.FillInTheBlanks) {
         return checkClozeText(answer as FillInTheBlanksAnswer[], question);
     } else if(questionType == QuestionType.SQL) {
@@ -108,13 +118,59 @@ function checkSQL(answer: any, question: Question) {
     return 0;
 }
 
-function checkChoice2(answer: ChoiceAnswer, question: Question) {
+function checkChoice2(answer: ChoiceAnswer[], question: Question) {
     let correctAnswers = 0;
     let falseAnswers = 0;
     let falsePositives = 0;
     let falseNegatives = 0;
+    const configuration = question.questionconfiguration as Choice;
+    const answerRows: number[][] = getSelectedIds(answer);
+    console.log(configuration);
+    for(let i = 0; i < configuration.optionRows.length; i++) {
+        const correctList = configuration.optionRows[i].correctAnswers;
+        const answerList = answerRows[i];
+        const result = compareNumberLists(correctList, answerList);
+        console.log(result);
+        correctAnswers += result.inBothLists.length;
+        falseAnswers += result.onlyInList1.length + result.onlyInList2.length;
+        falsePositives += result.onlyInList2.length;
+        falseNegatives += result.onlyInList1.length;
+    }
+    console.log(`falseAnswers: ${falseAnswers}`);
+    console.log(`correctAnswers: ${correctAnswers}`);
+    console.log(`falsePositives: ${falsePositives}`);
+    console.log(`falseNegatives: ${falseNegatives}`);
+    const score = correctAnswers / (correctAnswers + falseAnswers);
+    console.log(score);
+    if(falseAnswers === 0 ) {
+        return AnswerScore.correct;
+    }
+    return AnswerScore.incorrect;
 }
 
+function getSelectedIds(answer: ChoiceAnswer[]) {
+    let result: number[][] = [];
+    for(let i = 0; i < answer.length; i++) {
+        result[answer[i].id] = [];
+        for(let j = 0; j < answer[i].entries.length; j++) {
+            result[answer[i].id][j] = (answer[i].entries[j].id);
+        }
+    }
+    console.log(result);
+    return result;
+}
+
+function compareNumberLists(list1: number[], list2: number[]) {
+    const inBothLists = list1.filter(num => list2.includes(num));
+    const onlyInList1 = list1.filter(num => !list2.includes(num));
+    const onlyInList2 = list2.filter(num => !list1.includes(num));
+    return {
+        inBothLists,
+        onlyInList1,
+        onlyInList2
+    };
+}
+/*
 function checkChoice(answer: ChoiceAnswer, question: Question) {
     console.log(answer);
     let rows: number[] = [];
@@ -184,7 +240,7 @@ function checkChoice(answer: ChoiceAnswer, question: Question) {
     }
     return AnswerScore.incorrect;
 }
- 
+ */
 function orderRows(matrix: number[][], order: number[]) {
     let newMatrix2: number[][] = [];
     for(let i = 0; i < order.length; i++) {

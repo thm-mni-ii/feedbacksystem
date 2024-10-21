@@ -86,13 +86,36 @@ async function createDatabaseAndCollection() {
           {
             id: 0,
             name: "string",
-            correctAnswers: [0],
+          },
+          {
+            id: 1,
+            name: "Wurst",
+          },
+          {
+            id: 3,
+            name: "agg",
           },
         ],
-        Optionrows: [
+        optionRows: [
           {
             id: 0,
             text: "string",
+            correctAnswers: [0],
+          },
+          {
+            id: 1,
+            text: "stgsdsring",
+            correctAnswers: [0,1],
+          },
+          {
+            id: 2,
+            text: "sawttring",
+            correctAnswers: [2],
+          },
+          {
+            id: 3,
+            text: "as",
+            correctAnswers: [1,2],
           },
         ],
       },
@@ -141,13 +164,17 @@ async function createDatabaseAndCollection() {
           {
             id: 0,
             name: "string",
-            correctAnswers: [0],
+          },
+          {
+            id: 1,
+            name: "satring",
           },
         ],
-        Optionrows: [
+        optionRows: [
           {
             id: 0,
             text: "string",
+            correctAnswers: [1],
           },
         ],
       },
@@ -600,6 +627,7 @@ async function startServer() {
       if (req.user !== undefined) {
         const requestData = req.body;
         const response = await submit(req.user, requestData, "");
+        console.log(response);
         if (response == -1) {
           res.sendStatus(403);
           return;
@@ -701,10 +729,6 @@ async function startServer() {
     try {
       if (req.user === undefined) {
         res.sendStatus(401);
-        return;
-      }
-      if (req.user === undefined) {
-        res.sendStatus(403);
         return;
       }
       const requestData = req.body;

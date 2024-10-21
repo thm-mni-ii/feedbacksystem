@@ -10,10 +10,10 @@ export default interface Choice {
 interface OptionColumn {
   id: number
   name: string
-  correctAnswers: number[]
 }
 
 interface OptionRow {
   id: number
   text: string
+  correctAnswers: number[]
 }
