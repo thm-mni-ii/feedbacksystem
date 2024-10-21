@@ -86,7 +86,7 @@ onMounted(() => {
   </v-snackbar>
 
   <DialogEditQuestion ref="dialogEditQuestion" />
-  <h2 class="mx-auto mt-16 text-primary text-center">All Questions</h2>
+  <h2 class="mx-auto mt-8 text-primary text-center">All Questions</h2>
   <v-list class="mx-auto" max-width="400">
     <v-list-item v-for="question in allQuestions" :key="question._id" :v-bind="question">
       <v-card class="mx-auto text-center px-8 py-4" @click="editQuestion(question)">
@@ -94,14 +94,16 @@ onMounted(() => {
       </v-card>
     </v-list-item>
   </v-list>
-  <v-btn
-    icon="mdi-plus"
-    class="mx-auto row-btn"
-    variant="tonal"
-    color="primary"
-    @click="addQuestion()"
-  >
-    <v-tooltip activator="parent" location="end">Create New Question</v-tooltip>
-    <v-icon icon="mdi-plus" size="small"></v-icon>
-  </v-btn>
+  <div class="d-flex justify-center">
+    <v-btn
+      icon="mdi-plus"
+      class="mx-auto row-btn mx-8 align-center"
+      variant="tonal"
+      color="primary"
+      @click="addQuestion()"
+    >
+      <v-tooltip activator="parent" location="end">Create New Question</v-tooltip>
+      <v-icon icon="mdi-plus" size="small" class="mx-auto"></v-icon>
+    </v-btn>
+  </div>
 </template>

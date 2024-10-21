@@ -3,7 +3,7 @@ import type Question from './Question'
 export default interface Catalog {
   id: string
   name: string
-  questions?: Question[]
+  questions?: any[]
   course?: number
-  reqirements?: number[]
+  requirements?: number[]
 }

@@ -11,6 +11,7 @@ import {
 import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
 import { getCourses } from "../course/course";
+import { Catalog } from "../model/Catalog";
 
 interface catalog {
   name: string;
@@ -33,36 +34,36 @@ export async function postCatalog(
   course: number
 ) {
   const adminCourses = getAdminCourseRoles(tokenData);
-  if(adminCourses.length === 0) {
-      return -1;
+  if (adminCourses.length === 0) {
+    return -1;
   }
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
   const courses = await getCourses(token);
-  if(courses === -1) {
+  if (courses === -1) {
     return -1;
   }
-  const couresExist = courses.some((obj: any)=> obj.id === course);
+  const couresExist = courses.some((obj: any) => obj.id === course);
   console.log(couresExist);
-  if(!couresExist) {
-      return -1;
+  if (!couresExist) {
+    return -1;
   }
   const catalog = {
-    name: data.name
-  }
+    name: data.name,
+  };
   const catalogInsert = await catalogCollection.insertOne(catalog);
   const catalogInCourse = {
     course: course,
     catalog: catalogInsert.insertedId,
-    requirements: data.requirements
-  }
+    requirements: data.requirements,
+  };
   console.log(catalogInCourse);
-  const catalogInCourseInsert = catalogInCourseCollection.insertOne(catalogInCourse);
-  return {catalogId: catalogInsert.insertedId};
+  const catalogInCourseInsert =
+    catalogInCourseCollection.insertOne(catalogInCourse);
+  return { catalogId: catalogInsert.insertedId };
 }
-
 
 export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
   const adminCourses = getAdminCourseRoles(tokenData);
@@ -71,35 +72,46 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
   };
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
+  const catalogInCourseCollection: mongoDB.Collection =
+    database.collection("catalogInCourse");
   const catalogPermission = await getCatalogPermission(adminCourses, catalogId);
   if (!catalogPermission) {
     console.log("No Permission to Catalog");
     return -1;
   }
-  const data = await catalogCollection.findOne(query);
+  let data = await catalogCollection.findOne(query);
   const tree = await getQuestionTree(tokenData, catalogId);
-  const res = {
-    catalog: data,
-    questions: tree,
-  };
-  return res;
+  const catalogInCourse = await catalogInCourseCollection.findOne({
+    catalog: new mongoDB.ObjectId(catalogId),
+  });
+
+  if (data != null) {
+    const res: Catalog = {
+      id: data._id as unknown as string,
+      name: data.name as string,
+      questions: tree ? [tree] : [],
+      requirements: catalogInCourse ? catalogInCourse.requirements : [],
+      course: catalogInCourse ? catalogInCourse.course : -1,
+    };
+    return res;
+  } else {
+    return -1;
+  }
 }
 
 // get all catalogs from courseid(in params)
 export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
-    console.log(courseId);
+  console.log(courseId);
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
   const request = {
-    course: Number(courseId)
+    course: Number(courseId),
   };
   console.log(request);
-  const courseResult = await catalogInCourseCollection
-    .find(request)
-    .toArray();
-    console.log(courseResult);
+  const courseResult = await catalogInCourseCollection.find(request).toArray();
+  console.log(courseResult);
   if (courseResult.length === 0) {
     console.log("no catalogs found");
     return -1;
@@ -107,7 +119,21 @@ export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
   const catalogs = await catalogCollection
     .find({ _id: { $in: courseResult.map((x) => x.catalog) } })
     .toArray();
-  return catalogs;
+
+  // Modify the response to replace _id with id and include courseId
+  const modifiedCatalogs: Catalog[] = catalogs.map((catalog) => {
+    const catalogInCourse = courseResult.find((x) =>
+      x.catalog.equals(catalog._id)
+    );
+    return {
+      id: catalog._id as unknown as string,
+      name: catalog.name,
+      requirements: catalogInCourse ? catalogInCourse.requirements : [],
+      course: catalogInCourse ? catalogInCourse.course : -1,
+    };
+  });
+
+  return modifiedCatalogs;
 }
 
 export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
@@ -149,6 +175,8 @@ export async function putCatalog(
   const adminCourses = getAdminCourseRoles(tokenData);
   const database: mongoDB.Db = await connect();
   const courseResult = await getCatalogPermission(adminCourses, catalogId);
+  console.log(courseResult);
+
   if (!courseResult) {
     console.log("No Permission to Catalog");
     return -1;
@@ -167,9 +195,9 @@ export async function putCatalog(
     _id: courseIdObject,
   };
   const courses = await getCourses(token);
-  const couresExist = courses.some((obj: any)=> obj.id === course);
-  if(!couresExist) {
-      return -1;
+  const couresExist = courses.some((obj: any) => obj.id === course);
+  if (!couresExist) {
+    return -1;
   }
   const filter = {
     _id: catalogIdObject,

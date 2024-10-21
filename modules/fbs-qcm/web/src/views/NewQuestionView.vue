@@ -15,7 +15,7 @@ const question = ref<Question>({
   questiontext: '',
   questiontags: [] as string[],
   questiontype: QuestionType.Choice,
-  questionconfiguration: {}
+  questionconfiguration: {} as Choice
   //   multipleRow: false,
   //   multipleColumn: false,
   //   answerColumns: [{ id: 1, name: '', correctAnswers: [] }],

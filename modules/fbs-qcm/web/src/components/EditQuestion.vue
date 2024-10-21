@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import axios from 'axios'
 // import VueIntersect from 'vue-intersect'
 import type Question from '../model/Question'
-import type Choice from '../model/questionTypes/Choice'
+import type { Choice } from '../model/questionTypes/Choice'
 import QuestionType from '../enums/QuestionType'
 import { onMounted } from 'vue'
 
@@ -33,8 +33,8 @@ onMounted(() => {
       questionconfiguration: {
         multipleRow: false,
         multipleColumn: false,
-        answercolumns: [{ id: 1, name: '', correctAnswers: [] }],
-        Optionrows: [{ id: 1, text: '' }]
+        answerColumns: [{ id: 1, name: '' }],
+        optionRows: [{ id: 1, text: '', correctAnswers: [] }]
       }
     }
   } else if (props.inputQuestion) {
@@ -42,68 +42,74 @@ onMounted(() => {
   }
 })
 
+const checkMultipleRows = () => {
+  const optionRows = question.value.questionconfiguration.optionRows
+  const rowsWithAnswers = optionRows.filter((row) => row.correctAnswers.length > 0)
+  if (rowsWithAnswers.length > 1) {
+    question.value.questionconfiguration.multipleRow = true
+  }
+}
+
 const addOptionRow = () => {
   console.log('add option row triggered')
-  if (!question.value.questionconfiguration.Optionrows) {
-    question.value.questionconfiguration.Optionrows = []
+  if (!question.value.questionconfiguration.optionRows) {
+    question.value.questionconfiguration.optionRows = []
   }
 
-  question.value.questionconfiguration.Optionrows.push({
-    id: question.value.questionconfiguration.Optionrows.length + 1,
-    text: ''
+  question.value.questionconfiguration.optionRows.push({
+    id: question.value.questionconfiguration.optionRows.length + 1,
+    text: '',
+    correctAnswers: []
   })
 }
 
 const addOptionCol = () => {
-  const answercolumns = question.value.questionconfiguration.answercolumns
+  const answerColumns = question.value.questionconfiguration.answerColumns
 
-  if (!Array.isArray(answercolumns)) {
+  if (!Array.isArray(answerColumns)) {
     console.error('answerColumns is not initialized or is not an array')
     return
   }
 
-  answercolumns.push({
-    id: answercolumns.length,
-    name: '',
-    correctAnswers: []
+  answerColumns.push({
+    id: answerColumns.length,
+    name: ''
   })
 
-  console.log('Updated answerColumns:', answercolumns)
+  console.log('Updated answerColumns:', answerColumns)
 }
 
 const deleteOption = (index: number) => {
-  question.value.questionconfiguration.Optionrows.splice(index, 1)
+  question.value.questionconfiguration.optionRows.splice(index, 1)
 }
 
 const deleteAnswerColumn = (index: number) => {
-  if (question.value.questionconfiguration.answercolumns.length > 0) {
-    question.value.questionconfiguration.answercolumns.splice(index, 1)
+  if (question.value.questionconfiguration.answerColumns.length > 0) {
+    question.value.questionconfiguration.answerColumns.splice(index, 1)
   }
 }
 
 const toggleCorrectAnswer = (columnIndex: number, optionIndex: number, isSelected: boolean) => {
-  const answercolumns = question.value.questionconfiguration.answercolumns
-  if (!answercolumns || !answercolumns[columnIndex]) {
+  const optionRows = question.value.questionconfiguration.optionRows
+  if (!optionRows || !optionRows[optionIndex]) {
     return
   }
-  const correctAnswers = answercolumns[columnIndex].correctAnswers || []
-  const index = correctAnswers.indexOf(optionIndex)
+  const correctAnswers = optionRows[optionIndex].correctAnswers || []
+  const index = correctAnswers.indexOf(columnIndex)
   if (isSelected && index === -1) {
-    correctAnswers.push(optionIndex)
+    correctAnswers.push(columnIndex)
   } else if (!isSelected && index !== -1) {
     correctAnswers.splice(index, 1)
   }
-  question.value.questionconfiguration.answercolumns[columnIndex].correctAnswers = [
-    ...correctAnswers
-  ]
+  optionRows[optionIndex].correctAnswers = [...correctAnswers]
 }
 
 const isCorrectAnswer = (columnIndex: number, optionIndex: number) => {
-  const answercolumns = question.value.questionconfiguration.answercolumns
-  if (!answercolumns || !answercolumns[columnIndex] || !answercolumns[columnIndex].correctAnswers) {
+  const optionRows = question.value.questionconfiguration.optionRows
+  if (!optionRows || !optionRows[optionIndex] || !optionRows[optionIndex].correctAnswers) {
     return false
   }
-  return answercolumns[columnIndex].correctAnswers.includes(optionIndex)
+  return optionRows[optionIndex].correctAnswers.includes(columnIndex)
 }
 
 const removeTag = (item: string) => {
@@ -111,9 +117,7 @@ const removeTag = (item: string) => {
 }
 
 const handleSubmit = async () => {
-  if (question.value.questionconfiguration.answercolumns[0].correctAnswers.length > 1) {
-    question.value.questionconfiguration.multipleRow = true
-  }
+  checkMultipleRows()
   const token = localStorage.getItem('jsessionid')
   console.log('Token:', token)
 
@@ -199,7 +203,7 @@ const handleSubmit = async () => {
 
           <div class="overflow-x-auto">
             <div
-              v-for="(option, optionIndex) in question.questionconfiguration.Optionrows"
+              v-for="(option, optionIndex) in question.questionconfiguration.optionRows"
               :key="optionIndex"
               class="d-flex flex-row flex-nowrap align-center my-4 justify-space-between"
             >
@@ -228,7 +232,7 @@ const handleSubmit = async () => {
               </v-responsive>
               <div class="d-flex flex-row flex-nowrap mx-auto">
                 <v-checkbox
-                  v-for="(column, columnIndex) in question.questionconfiguration.answercolumns"
+                  v-for="(column, columnIndex) in question.questionconfiguration.answerColumns"
                   :key="columnIndex"
                   :model-value="isCorrectAnswer(columnIndex, optionIndex)"
                   class="d-flex justify-center column-items mx-auto"
@@ -256,7 +260,7 @@ const handleSubmit = async () => {
 
               <div class="d-flex flex-row flex-nowrap">
                 <div
-                  v-for="(column, columnIndex) in question.questionconfiguration.answercolumns"
+                  v-for="(column, columnIndex) in question.questionconfiguration.answerColumns"
                   :key="columnIndex"
                   class="d-flex flex-column align-center"
                 >

@@ -4,16 +4,24 @@ import { useRoute } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
 
 import type Catalog from '../model/Catalog'
+import type { Choice, OptionColumn } from '@/model/questionTypes/Choice'
+import type Question from '@/model/Question'
+import type QuestionType from '@/enums/QuestionType'
 import axios from 'axios'
+
 const questionId = ref('6638fbdb7cbf615381a90abe')
-const questionData = ref(null)
 const route = useRoute()
 
+export interface SelectedAnswers {
+  rowId: number
+  colId: number | string
+}
+
+const token = localStorage.getItem('token')
+const config = {
+  headers: { Authorization: `Bearer ${token}` }
+}
 const getQuestion = async () => {
-  const token = localStorage.getItem('token')
-  const config = {
-    headers: { Authorization: `Bearer ${token}` }
-  }
   try {
     const res = await axios.get('/api_v1/question', { ...config, params: { ID: questionId.value } })
     console.log('One Question:', res)
@@ -23,6 +31,49 @@ const getQuestion = async () => {
   }
 }
 
+const questionData = ref<Question>({
+  _id: '6638fbdb7cbf615381a90abe',
+  owner: 1,
+  questiontext: 'Was ist 2 + 57?',
+  questiontags: ['komplex', 'frage'],
+  questiontype: 'Choice' as QuestionType,
+  questionconfiguration: {
+    multipleRow: true,
+    multipleColumn: true,
+    answerColumns: [
+      {
+        id: 1,
+        name: 'first col',
+        correctAnswers: [0, 2]
+      },
+      {
+        id: 2,
+        name: 'second col',
+        correctAnswers: [1]
+      },
+      {
+        id: 3,
+        name: 'third Col',
+        correctAnswers: [1, 2]
+      }
+    ],
+    optionRows: [
+      {
+        id: 0,
+        text: 'erste Antwort'
+      },
+      {
+        id: 1,
+        text: 'zweite Antwort'
+      },
+      {
+        id: 2,
+        text: 'dritte antworttt'
+      }
+    ]
+  } as Choice
+})
+
 const catalog = ref<Catalog>({
   id: route.params.catalogId,
   name: 'Datenbanken - SQL',
@@ -31,9 +82,11 @@ const catalog = ref<Catalog>({
   requirements: null
 })
 
-const submitAnswer = (arr) => {
-  getQuestion()
-  console.log('selected Answers: ', arr)
+const submitAnswer = (answer: SelectedAnswers[]) => {
+  console.log('Selected Answers:', answer)
+  // axios.post('/api_v1/submitSessionAnswer', selectedAnswers, config)
+  //     .then((res) => console.log(res))
+  //     .catch((err) => console.log(err))
 }
 
 onMounted(() => {
@@ -70,11 +123,9 @@ onMounted(() => {
         <CatalogSession
           v-if="questionData"
           :question="questionData"
-          @submitAnswer="(a) => submitAnswer(a)"
+          @submit-answer="(a) => submitAnswer(a)"
         />
       </v-responsive>
     </v-sheet>
   </v-form>
 </template>
-
-<style scoped lang="scss"></style>
