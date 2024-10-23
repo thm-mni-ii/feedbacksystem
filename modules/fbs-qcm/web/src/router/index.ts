@@ -20,7 +20,8 @@ const router = createRouter({
       component: () => import('../views/NewQuestionView.vue')
     },
     {
-      path: '/catalogSession/:catalogId',
+      path: '/catalogSession',
+      // :catalogId
       name: 'catalogSession',
       component: () => import('../views/CatalogSessionView.vue')
     },

@@ -2,33 +2,20 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
+import questionService from '@/services/question.service'
 
 import type Catalog from '../model/Catalog'
-import type { Choice, OptionColumn } from '@/model/questionTypes/Choice'
+import type { Choice } from '@/model/questionTypes/Choice'
 import type Question from '@/model/Question'
 import type QuestionType from '@/enums/QuestionType'
-import axios from 'axios'
 
-const questionId = ref('6638fbdb7cbf615381a90abe')
 const route = useRoute()
+
+const secondQuestion = questionService.getQuestion('6711ef0ac939e62058234a2c')
 
 export interface SelectedAnswers {
   rowId: number
   colId: number | string
-}
-
-const token = localStorage.getItem('token')
-const config = {
-  headers: { Authorization: `Bearer ${token}` }
-}
-const getQuestion = async () => {
-  try {
-    const res = await axios.get('/api_v1/question', { ...config, params: { ID: questionId.value } })
-    console.log('One Question:', res)
-    questionData.value = res.data
-  } catch (err) {
-    console.log(err)
-  }
 }
 
 const questionData = ref<Question>({
@@ -91,7 +78,8 @@ const submitAnswer = (answer: SelectedAnswers[]) => {
 
 onMounted(() => {
   console.log(route.params.catalogId)
-  getQuestion()
+  console.log(secondQuestion)
+  questionService.getQuestion('6710d767c939e62058234a2b')
 })
 </script>
 

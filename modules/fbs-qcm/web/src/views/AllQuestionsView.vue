@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
 import type Question from '@/model/Question'
+import questionService from '@/services/question.service'
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
 
@@ -9,22 +9,7 @@ const dialogConfirm = ref<typeof DialogConfirmVue>()
 const selectedQuestionId = ref<string | null>(null)
 const dialogEditQuestion = ref<typeof DialogEditQuestion>()
 
-const token = localStorage.getItem('jsessionid')
-const config = {
-  headers: { Authorization: `Bearer ${token}` }
-}
-
 const allQuestions = ref<Question[]>([])
-
-const getAllQuestions = async () => {
-  axios
-    .get('/api_v1/allquestions', config)
-    .then((res) => {
-      console.log(res.data)
-      allQuestions.value = res.data
-    })
-    .catch((err) => console.log(err))
-}
 
 const editQuestion = (question: Question) => {
   if (dialogEditQuestion.value) {
@@ -73,7 +58,10 @@ const openSnackbar = (text: string) => {
 }
 
 onMounted(() => {
-  getAllQuestions()
+  questionService.getAllQuestions().then((res) => {
+    console.log(res.data)
+    allQuestions.value = res.data
+  })
 })
 </script>
 <template>
@@ -97,7 +85,7 @@ onMounted(() => {
   <div class="d-flex justify-center">
     <v-btn
       icon="mdi-plus"
-      class="mx-auto row-btn mx-8 align-center"
+      class="mx-auto row-btn mx-8 mb-8 align-center"
       variant="tonal"
       color="primary"
       @click="addQuestion()"

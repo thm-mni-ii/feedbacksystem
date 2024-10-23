@@ -3,9 +3,10 @@ import { ref } from 'vue'
 import axios from 'axios'
 // import VueIntersect from 'vue-intersect'
 import type Question from '../model/Question'
-import type { Choice } from '../model/questionTypes/Choice'
+//import type { Choice } from '../model/questionTypes/Choice'
+import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
-import { onMounted } from 'vue'
+import { onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps<{
   inputQuestion?: Question
@@ -19,14 +20,21 @@ const emit = defineEmits<{
 
 const questionTypes = Object.values(QuestionType)
 
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    emit('cancel')
+  }
+}
+
 const question = ref<Question>({} as Question)
 
 onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
   console.log(props.isNew)
   console.log(props.inputQuestion)
   if (props.isNew) {
     question.value = {
-      owner: -1,
+      owner: 1,
       questiontext: '',
       questiontags: [] as string[],
       questiontype: QuestionType.Choice,
@@ -40,6 +48,10 @@ onMounted(() => {
   } else if (props.inputQuestion) {
     question.value = props.inputQuestion
   }
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 
 const checkMultipleRows = () => {
@@ -118,29 +130,22 @@ const removeTag = (item: string) => {
 
 const handleSubmit = async () => {
   checkMultipleRows()
-  const token = localStorage.getItem('jsessionid')
-  console.log('Token:', token)
-
-  const config = {
-    headers: { Authorization: `Bearer ${token}` }
-  }
-  console.log('CONFIG:', config)
-  console.log('QUESTION:', question.value)
   if (props.isNew) {
-    axios.post('/api_v1/question', question.value, config).then((res) => {
-      console.log(res)
-      emit('update')
-    })
-  } else {
-    axios
-      .put('/api_v1/question', question.value, config)
+    questionService
+      .createQuestion(question.value)
       .then((res) => {
         console.log(res)
         emit('update')
       })
-      .catch((err) => {
-        console.log(err)
+      .catch((err) => console.log(err))
+  } else {
+    questionService
+      .updateQuestion(question.value)
+      .then((res) => {
+        console.log(res)
+        emit('update')
       })
+      .catch((err) => console.log(err))
   }
 }
 </script>

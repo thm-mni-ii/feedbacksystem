@@ -157,10 +157,10 @@ export async function postQuestion(question: Question, tokenData: JwtPayload) {
   const questionCollection: mongoDB.Collection =
     database.collection("question");
   console.log(tokenData);
-  question.owner = tokenData.id;
   let questionInsertion: any = question;
-  delete questionInsertion.id;  
+  delete questionInsertion.id;
   delete questionInsertion._id;
+  questionInsertion.owner = tokenData.id;
   console.log(questionInsertion);
   const result = await questionCollection.insertOne(questionInsertion);
   return { id: result.insertedId };
@@ -185,12 +185,12 @@ export async function getAllQuestions(tokenData: JwtPayload) {
   //const docentcourses = getDocentCourseRoles(tokenData);
   //const adminCourses = getAdminCourseRoles(tokenData);
   //if (docentcourses.length > 0 || adminCourses.length > 0) {
-    const database: mongoDB.Db = await connect();
-    const questionCollection: mongoDB.Collection =
-      database.collection("question");
-    const allQuestion = await questionCollection.find().toArray();
-    console.log(allQuestion);
-    return allQuestion;
+  const database: mongoDB.Db = await connect();
+  const questionCollection: mongoDB.Collection =
+    database.collection("question");
+  const allQuestion = await questionCollection.find().toArray();
+  console.log(allQuestion);
+  return allQuestion;
   /*}
   const adminCourses2 = getAdminCourseRoles(tokenData);
   if (adminCourses.length === 0) {
