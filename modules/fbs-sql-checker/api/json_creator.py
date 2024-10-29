@@ -34,7 +34,7 @@ def parse_single_stat_upload_db(data, client):
         strings2,
         task_nr,
         is_sol,
-        my_uuid,
+        my_uuid,                #submission primary key
         course_id,
         order_by2,
         group_by2,
@@ -106,6 +106,11 @@ def parse_single_stat_upload_db(data, client):
             joins2,
             having2,
             wildcards2,
+            #new
+            closest_solution2,
+            min_distance2,
+            closestID2,
+
         ) = check_solution_chars(
             data,
             task_nr,
@@ -120,6 +125,7 @@ def parse_single_stat_upload_db(data, client):
             having2,
             client,
         )
+
         # produce a JSON
         record = return_json(
             data,
@@ -138,6 +144,10 @@ def parse_single_stat_upload_db(data, client):
             wildcards2,
             client,
             time,
+            closest_solution2,
+            min_distance2,
+            closestID2,
+
         )
 
 
@@ -207,9 +217,15 @@ def check_solution_chars(
         joins_right,
         having_right,
         wildcards,
-    ) = (False, False, False, False, False, False, False, False, False)
+        #new
+        closest_solution,
+        min_distance,
+        closestID,
+    ) = (False, False, False, False, False, False, False, False, False,False,False,False)
     mydb = client.get_default_database()
+
     mycol = mydb["Solutions"]
+    mysub = mydb["Queries"]
 
     min_distance = float('inf')  # Set to positive infinity
     closest_solution = None
@@ -221,16 +237,15 @@ def check_solution_chars(
 
             distance = d.get_distance(x["statement"], data["submission"])
 
-            # insert distance to the solution
-            #mycol.update_one({"_id": x["_id"]}, {"$set": {"distance": distance}}, upsert=True)
-
             # check for min distance and use the corresponding solution
             if distance < min_distance:
                 min_distance = distance
                 closest_solution = x["id"]  # choose the id of solution if it has the lowest distance
 
     # save the distance of the closest solution
-    mycol.update_one({"_id": closest_solution}, {"$set": {"distance":min_distance}},upsert=True)
+    #mysub.update_one({"id": str(my_uuid)}, {"$set": {"distance":min_distance, "solutionID":closest_solution}},upsert=True)
+
+    closestID = str(my_uuid)
 
     if closest_solution:
         (
@@ -350,7 +365,7 @@ def check_solution_chars(
         if new_solution is True:
             # Upload as a new Solution to DB
             parse_single_stat_upload_solution(data, task_nr, my_uuid, client)
-        return (True, True, True, True, True, True, True, True, True)
+        return (True, True, True, True, True, True, True, True, True, closest_solution,min_distance,closestID)
     # return if characteristics are True or False
     return (
         tables_right,
@@ -362,6 +377,10 @@ def check_solution_chars(
         joins_right,
         having_right,
         wildcards,
+        #new
+        closest_solution,
+        min_distance,
+        closestID,
     )
 
 
@@ -391,6 +410,10 @@ def return_json(  # pylint: disable=R1710
     wildcards,
     client,
     time,
+    closest_solution,
+    min_distance,
+    closestID,
+
 ):
     # Extract informations from a sql-query-json
     if "passed" in elem:
@@ -418,6 +441,10 @@ def return_json(  # pylint: disable=R1710
                 having_right,
                 wildcards,
                 time,
+                closest_solution,
+                min_distance,
+                closestID,
+
             )
             return record
         # produce a json if the sql-query is not parsable
@@ -576,6 +603,10 @@ def prod_json(
     having_right,
     wildcards,
     time,
+    closest_solution,
+    min_distance,
+    closestID,
+
 ):
     # save data if it is a manual solution
     if is_sol is True:
@@ -583,7 +614,7 @@ def prod_json(
         user_data.extend([0])
         user_data.extend([0])
     value = {
-        "id": str(_id),
+        "id": str(closestID),
         "courseId": course_id,
         "taskNumber": task_nr,
         "statement": test_sql,
@@ -602,6 +633,10 @@ def prod_json(
         "havingRight": having_right,
         "wildcards": wildcards,
         "time": time,
+        "solutionID":closest_solution,
+        "distance":min_distance,
+
+
     }
     user_data.clear()
     AWC.literal = []

@@ -91,6 +91,8 @@ services:
     environment:
       POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
     volumes:
       - ./data/postgres2:/var/lib/postgresql/data
     networks:
@@ -211,6 +213,7 @@ services:
       SQL_PLAYGROUND_SHARE_PSQL_SERVER_URL: jdbc:postgresql://psql-sharing:5432/?allowMultiQueries=true
       SQL_PLAYGROUND_SHARE_PSQL_SERVER_PASSWORD: R!7pWqY@K5zE3Xt&g9L1MfD
       SQL_PLAYGROUND_SHARE_PSQL_SERVER_USERNAME: postgres
+      RUNNER_DOCKER_DISABLE_REMOVE: "true"
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock

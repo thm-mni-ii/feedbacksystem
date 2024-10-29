@@ -136,7 +136,7 @@ def _extract_keyword(ident, distinct_list):
         distinct_list.append(result)
     else:
         # remove trailing alias or distinct keyword to add only the attribute to the map
-        updated_value = f.format_distinct((f.format_alias(ident)))
+        updated_value = f.format_distinct((f.format_alias(str(ident))))
         distinct_list.append(updated_value)
 
 

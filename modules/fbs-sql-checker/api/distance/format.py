@@ -7,6 +7,7 @@ def format_alias(ident: str):
     # check ident with pattern to get the alias keyword and alias name
     regex = re.compile(c.ALIAS_REGEX, re.IGNORECASE)
     match = regex.search(ident)
+
     if match:
         # flag is used for case sensitivity
         ident = re.sub(c.ALIAS_REGEX, "", ident).strip()

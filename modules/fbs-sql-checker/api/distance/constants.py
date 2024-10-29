@@ -16,6 +16,9 @@ NOT = "not"
 IN = "in"
 EXIST = "exist"
 SELECT = "select"
+AND = "and"
+OR = "or"
+NOT = "not"
 
 # SELECT COMMANDS
 SELECT_CMDS = [
