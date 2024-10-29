@@ -22,6 +22,7 @@ import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-pla
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
+import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -108,7 +109,12 @@ const routes: Routes = [
         component: FbsModellingComponent,
         canActivate: [AuthGuard],
       },
-
+      // Kanban
+      {
+        path: "kanban",
+        component: FbsKanbanComponent,
+        canActivate: [AuthGuard],
+      },
       // Admin
       {
         path: "admin/user-management",

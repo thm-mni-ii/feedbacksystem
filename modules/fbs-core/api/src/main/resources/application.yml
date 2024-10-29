@@ -10,7 +10,7 @@ compile:
 jwt:
   secret: ${JWT_SECRET:8Dsupersecurekeydf0}
   expiration:
-    time: 300
+    time: 43200
 ldap:
   enabled: ${LDAP_ENABLED:false}
   allowLogin: ${LDAP_ALLOW_LOGIN:false}
