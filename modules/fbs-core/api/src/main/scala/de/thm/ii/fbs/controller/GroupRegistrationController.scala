@@ -7,7 +7,7 @@ import de.thm.ii.fbs.services.security.AuthService
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
+import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 
 /**
@@ -141,5 +141,18 @@ class GroupRegistrationController {
     } else {
       throw new ForbiddenException()
     }
+  }
+
+  /**
+   * Get current number of members of a group
+   *
+   * @param cid Course id
+   * @param gid Group id
+   * @return Number of members
+   */
+  @GetMapping(Array("/courses/{cid}/groups/{gid}/membership"))
+  def getGroupMembership(@PathVariable("cid") cid: Integer, @PathVariable("gid") gid: Int): ResponseEntity[Int] = {
+    val membership = groupRegistrationService.getGroupMembership(cid, gid)
+    ResponseEntity.ok(membership)
   }
 }

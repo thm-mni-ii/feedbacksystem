@@ -144,160 +144,171 @@
 
   <div class="description">{{ (course | async)?.description }}</div>
 
-  <div class="create-task" *ngIf="!editTasks">
-    <button
-      mat-raised-button
-      color="accent"
-      *ngIf="isAuthorized()"
-      (click)="createTask()"
-      matTooltip="{{ 'course.create-task' | i18nextEager }}"
-    >
-      <mat-icon>add</mat-icon>&nbsp;{{ "course.create-task" | i18nextEager }}
-    </button>
-  </div>
-
-  <div class="select-all-container">
-    <section *ngIf="editTasks">
-      <mat-checkbox
-        [ngModel]="isAllSelected()"
-        (ngModelChange)="changeAllSelections()"
-      >
-        <span *ngIf="!isAllSelected()">{{
-          "course.edit-multiple-tasks-select-all" | i18nextEager
-        }}</span>
-        <span *ngIf="isAllSelected()">{{
-          "course.edit-multiple-tasks-de-select-all" | i18nextEager
-        }}</span>
-      </mat-checkbox>
-    </section>
-
-    <button
-      mat-raised-button
-      class="edit-multiple-tasks-btn"
-      color="accent"
-      *ngIf="editTasks"
-      (click)="updateMultipleTaskDetails(selectedTasks)"
-      matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
-    >
-      <mat-icon>edit_note</mat-icon>&nbsp;{{
-        "course.edit-multiple-tasks" | i18nextEager
-      }}
-    </button>
-  </div>
-
-  <!-- Johannes approach for progres bar -->
-  <mat-card class="progress-card">
-    <mat-card-content>
-      <div class="title" *ngIf="requirements">
-        <h2>{{ "course.progress-title" | i18nextEager }}</h2>
-        <!-- if coursePassed show badge -->
-        <mat-chip-list *ngIf="(requirements | async).length === 0">
-          <mat-chip class="badget-chip">
-            <mat-icon
-              matTooltip="{{ 'course.progress-no-conditions' | i18nextEager }}"
-            >
-              question_mark
-            </mat-icon>
-          </mat-chip>
-        </mat-chip-list>
-        <mat-chip-list *ngIf="(requirements | async).length > 0">
-          <mat-chip class="badget-chip">
-            <mat-icon
-              [ngClass]="{
-                'badget-icon-passed': coursePassed,
-                'badget-icon-gray': !coursePassed
-              }"
-              [matTooltip]="
-                coursePassed
-                  ? ('course.progress-complete' | i18nextEager)
-                  : ('course.progress-no-complete' | i18nextEager)
-              "
-            >
-              military_tech
-            </mat-icon>
-          </mat-chip>
-
-          <mat-chip class="badget-chip">
-            <mat-icon
-              [ngClass]="{
-                'badget-icon-passed': calculatedBonusPoints > 0,
-                'badget-icon-gray': calculatedBonusPoints <= 0
-              }"
-              [matTooltip]="
-                calculatedBonusPoints > 0
-                  ? ('course.progress-bonus-pre' | i18nextEager) +
-                    calculatedBonusPoints +
-                    ('course.progress-bonus-seq' | i18nextEager)
-                  : ('course.progress-no-bonus' | i18nextEager)
-              "
-            >
-              stars
-            </mat-icon>
-          </mat-chip>
-        </mat-chip-list>
+  <mat-tab-group>
+    <mat-tab label="{{ 'course.tabs.tasks' | i18nextEager }}">
+      <div class="create-task" *ngIf="!editTasks">
+        <button
+          mat-raised-button
+          color="accent"
+          *ngIf="isAuthorized()"
+          (click)="createTask()"
+          matTooltip="{{ 'course.create-task' | i18nextEager }}"
+        >
+          <mat-icon>add</mat-icon>&nbsp;{{
+            "course.create-task" | i18nextEager
+          }}
+        </button>
       </div>
 
-      <!-- little widgets -->
-      <!-- Bearbeitete Pflichtaufgaben / Bearbeitetet Bonusaufgaben / Bearbeitete Übungsaufgaben -->
-      <div class="progress-widget">
-        <div class="progress-widget-item">
-          <mat-icon>priority_high</mat-icon>
-          <span>{{ courseProgressBar.mandatory.done }}</span>
-          <span>/</span>
-          <span>{{ courseProgressBar.mandatory.sum }}</span>
-        </div>
-        <div class="progress-widget-item">
-          <mat-icon>star</mat-icon>
-          &nbsp;
-          <span>{{ courseProgressBar.optional.done }}</span>
-          <span>/</span>
-          <span>{{ courseProgressBar.optional.sum }}</span>
-          <!-- <span>&nbsp;&nbsp;Bonuspunkte: {{ calculatedBonusPoints }}</span> -->
-        </div>
-        <div class="progress-widget-item">
-          <mat-icon>school</mat-icon>
-          &nbsp;&nbsp;
-          <span>{{ courseProgressBar.practice.done }}</span>
-          <span>/</span>
-          <span>{{ courseProgressBar.practice.sum }}</span>
-        </div>
+      <div class="select-all-container">
+        <section *ngIf="editTasks">
+          <mat-checkbox
+            [ngModel]="isAllSelected()"
+            (ngModelChange)="changeAllSelections()"
+          >
+            <span *ngIf="!isAllSelected()">{{
+              "course.edit-multiple-tasks-select-all" | i18nextEager
+            }}</span>
+            <span *ngIf="isAllSelected()">{{
+              "course.edit-multiple-tasks-de-select-all" | i18nextEager
+            }}</span>
+          </mat-checkbox>
+        </section>
+
+        <button
+          mat-raised-button
+          class="edit-multiple-tasks-btn"
+          color="accent"
+          *ngIf="editTasks"
+          (click)="updateMultipleTaskDetails(selectedTasks)"
+          matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
+        >
+          <mat-icon>edit_note</mat-icon>&nbsp;{{
+            "course.edit-multiple-tasks" | i18nextEager
+          }}
+        </button>
       </div>
 
-      <section class="progress-section">
-        <mat-progress-bar
-          mode="buffer"
-          [value]="courseProgressBar.mandatory.done_percent"
-          [bufferValue]="courseProgressBar.mandatory.failed_percent"
-        >
-        </mat-progress-bar>
-        <mat-progress-bar
-          mode="buffer"
-          [value]="courseProgressBar.optional.done_percent"
-          [bufferValue]="courseProgressBar.optional.failed_percent"
-        >
-        </mat-progress-bar>
-        <mat-progress-bar
-          mode="buffer"
-          [value]="courseProgressBar.practice.done_percent"
-          [bufferValue]="courseProgressBar.practice.failed_percent"
-        >
-        </mat-progress-bar>
-      </section>
-    </mat-card-content>
-  </mat-card>
+      <!-- Johannes approach for progres bar -->
+      <mat-card class="progress-card">
+        <mat-card-content>
+          <div class="title" *ngIf="requirements">
+            <h2>{{ "course.progress-title" | i18nextEager }}</h2>
+            <!-- if coursePassed show badge -->
+            <mat-chip-list *ngIf="(requirements | async).length === 0">
+              <mat-chip class="badget-chip">
+                <mat-icon
+                  matTooltip="{{
+                    'course.progress-no-conditions' | i18nextEager
+                  }}"
+                >
+                  question_mark
+                </mat-icon>
+              </mat-chip>
+            </mat-chip-list>
+            <mat-chip-list *ngIf="(requirements | async).length > 0">
+              <mat-chip class="badget-chip">
+                <mat-icon
+                  [ngClass]="{
+                    'badget-icon-passed': coursePassed,
+                    'badget-icon-gray': !coursePassed
+                  }"
+                  [matTooltip]="
+                    coursePassed
+                      ? ('course.progress-complete' | i18nextEager)
+                      : ('course.progress-no-complete' | i18nextEager)
+                  "
+                >
+                  military_tech
+                </mat-icon>
+              </mat-chip>
 
-  <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
-  <div class="task-list">
-    <div *ngFor="let task of tasks">
-      <app-task-preview
-        [courseId]="courseID"
-        [task]="task"
-        [taskResult]="taskResults[task.id]"
-        [isSelectable]="editTasks"
-        (selectionChanged)="toggleSelection($event, task)"
-        [isSelected]="isInSelectedTasks(task)"
-      >
-      </app-task-preview>
-    </div>
-  </div>
+              <mat-chip class="badget-chip">
+                <mat-icon
+                  [ngClass]="{
+                    'badget-icon-passed': calculatedBonusPoints > 0,
+                    'badget-icon-gray': calculatedBonusPoints <= 0
+                  }"
+                  [matTooltip]="
+                    calculatedBonusPoints > 0
+                      ? ('course.progress-bonus-pre' | i18nextEager) +
+                        calculatedBonusPoints +
+                        ('course.progress-bonus-seq' | i18nextEager)
+                      : ('course.progress-no-bonus' | i18nextEager)
+                  "
+                >
+                  stars
+                </mat-icon>
+              </mat-chip>
+            </mat-chip-list>
+          </div>
+
+          <!-- little widgets -->
+          <!-- Bearbeitete Pflichtaufgaben / Bearbeitetet Bonusaufgaben / Bearbeitete Übungsaufgaben -->
+          <div class="progress-widget">
+            <div class="progress-widget-item">
+              <mat-icon>priority_high</mat-icon>
+              <span>{{ courseProgressBar.mandatory.done }}</span>
+              <span>/</span>
+              <span>{{ courseProgressBar.mandatory.sum }}</span>
+            </div>
+            <div class="progress-widget-item">
+              <mat-icon>star</mat-icon>
+              &nbsp;
+              <span>{{ courseProgressBar.optional.done }}</span>
+              <span>/</span>
+              <span>{{ courseProgressBar.optional.sum }}</span>
+              <!-- <span>&nbsp;&nbsp;Bonuspunkte: {{ calculatedBonusPoints }}</span> -->
+            </div>
+            <div class="progress-widget-item">
+              <mat-icon>school</mat-icon>
+              &nbsp;&nbsp;
+              <span>{{ courseProgressBar.practice.done }}</span>
+              <span>/</span>
+              <span>{{ courseProgressBar.practice.sum }}</span>
+            </div>
+          </div>
+
+          <section class="progress-section">
+            <mat-progress-bar
+              mode="buffer"
+              [value]="courseProgressBar.mandatory.done_percent"
+              [bufferValue]="courseProgressBar.mandatory.failed_percent"
+            >
+            </mat-progress-bar>
+            <mat-progress-bar
+              mode="buffer"
+              [value]="courseProgressBar.optional.done_percent"
+              [bufferValue]="courseProgressBar.optional.failed_percent"
+            >
+            </mat-progress-bar>
+            <mat-progress-bar
+              mode="buffer"
+              [value]="courseProgressBar.practice.done_percent"
+              [bufferValue]="courseProgressBar.practice.failed_percent"
+            >
+            </mat-progress-bar>
+          </section>
+        </mat-card-content>
+      </mat-card>
+
+      <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
+      <div class="task-list">
+        <div *ngFor="let task of tasks">
+          <app-task-preview
+            [courseId]="courseID"
+            [task]="task"
+            [taskResult]="taskResults[task.id]"
+            [isSelectable]="editTasks"
+            (selectionChanged)="toggleSelection($event, task)"
+            [isSelected]="isInSelectedTasks(task)"
+          >
+          </app-task-preview>
+        </div>
+      </div>
+    </mat-tab>
+    <mat-tab label="{{ 'course.tabs.groups' | i18nextEager }}">
+      <app-group-selection></app-group-selection>
+    </mat-tab>
+  </mat-tab-group>
 </div>
