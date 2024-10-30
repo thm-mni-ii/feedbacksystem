@@ -133,14 +133,8 @@ class GroupRegistrationController {
   @GetMapping(value = Array("/courses/{cid}/groups/{gid}/participants"))
   @ResponseBody
   def getMembers(@PathVariable("cid") cid: Integer, @PathVariable("gid") gid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Participant] = {
-    val user = authService.authorize(req, res)
-    val hasGlobalPrivileges = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-    val hasCoursePrivileges = courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)  == CourseRole.DOCENT
-    if (hasGlobalPrivileges || hasCoursePrivileges) {
-      groupRegistrationService.getMembers(cid, gid)
-    } else {
-      throw new ForbiddenException()
-    }
+    authService.authorize(req, res)
+    groupRegistrationService.getMembers(cid, gid)
   }
 
   /**
