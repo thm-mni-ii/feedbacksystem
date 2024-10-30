@@ -43,10 +43,8 @@ class GroupController{
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
     (user.globalRole, someCourseRole) match {
-      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
-        val groupList = groupService.getAll(cid, ignoreHidden = false)
-        groupList
-      case _ => throw new ForbiddenException()
+      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) => groupService.getAll(cid, ignoreHidden = false)
+      case _ => groupService.getAll(cid)
     }
   }
 
