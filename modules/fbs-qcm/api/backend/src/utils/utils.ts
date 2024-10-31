@@ -99,6 +99,20 @@ export function getAdminCourseRoles(tokenData: JwtPayload) {
   return coursesAdmin;
 }
 
+export function getTutorCourseRoles(tokenData: JwtPayload) {
+  let coursesAdmin: number[] = [];
+  const courseRolesObject = JSON.parse(tokenData.courseRoles);
+  for (const courseId in courseRolesObject) {
+    if (courseRolesObject.hasOwnProperty(courseId)) {
+      const role = courseRolesObject[courseId];
+      if (role == "TUTOR") {
+        coursesAdmin.push(parseInt(courseId));
+      }
+    }
+  }
+  return coursesAdmin;
+}
+
 export function getElementFromArray(
   array: mongoDB.ObjectId[],
   element: mongoDB.ObjectId
