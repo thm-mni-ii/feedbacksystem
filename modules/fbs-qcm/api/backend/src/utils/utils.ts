@@ -419,12 +419,12 @@ export function getSessionStatusAsText(status: SessionStatus) {
 }
 
 export async function IsOwner(
-  question: Question,
+  questionId: string,
   tokenData: JwtPayload,
   questionCollection: mongoDB.Collection
 ) {
   const filter = {
-    _id: new mongoDB.ObjectId(question._id),
+    _id: new mongoDB.ObjectId(questionId),
   };
   const result = await questionCollection.findOne(filter);
   if (result === null) {
@@ -433,8 +433,6 @@ export async function IsOwner(
   if (result.owner === tokenData.id) {
     return true;
   }
-  console.log(question.owner);
-  console.log(typeof question.owner);
   console.log(tokenData.id);
   console.log(typeof tokenData.id);
   return false;

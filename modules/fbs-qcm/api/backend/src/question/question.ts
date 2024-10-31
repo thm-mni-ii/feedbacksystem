@@ -10,8 +10,8 @@ import {
   getFirstQuestionInCatalog,
   createQuestionResponse,
   getCurrentSession,
-  IsOwner,
   getDocentCourseRoles,
+  IsOwner,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { AnswerScore, SessionStatus } from "../utils/enum";
@@ -22,16 +22,23 @@ export async function getQuestionById(
   questionId: string,
   tokenData: JwtPayload
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
-  const query = {
-    _id: new mongoDB.ObjectId(questionId),
-  };
   const database: mongoDB.Db = await connect();
   const collection: mongoDB.Collection = database.collection("question");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
+  const query = {
+    _id: new mongoDB.ObjectId(questionId),
+  };
+  if(tokenData.globalRole === "ADMIN" || tokenData.globalRole === "MODERATOR") {
+    const data = await collection.findOne(query);
+    if (data !== null) {
+      return data;
+    }
+    return -1;
+  }
+  const adminCourses = getAdminCourseRoles(tokenData);
   const catalogWithQuestion = await checkQuestionAccess(
     new mongoDB.ObjectId(questionId),
     adminCourses,
@@ -41,11 +48,7 @@ export async function getQuestionById(
   if (catalogWithQuestion === false) {
     return -1;
   }
-  const data = await collection.findOne(query);
-  if (data !== null) {
-    return data;
-  }
-  return -1;
+ 
 }
 
 export async function addQuestionToCatalog(
@@ -129,15 +132,10 @@ export async function deleteQuestionById(
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
+  const questionCollection: mongoDB.Collection = database.collection("question");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  const catalogWithQuestion = await checkQuestionAccess(
-    new mongoDB.ObjectId(questionId),
-    adminCourses,
-    catalogInCourseCollection,
-    catalogCollection
-  );
-  if (catalogWithQuestion === false) {
+  if(!IsOwner(questionId, tokenData, questionCollection)) {
     return -1;
   }
   const questionInCatalogQuery = {
@@ -149,9 +147,8 @@ export async function deleteQuestionById(
 }
 
 export async function postQuestion(question: Question, tokenData: JwtPayload) {
-  const adminCourses = getAdminCourseRoles(tokenData);
-  if (adminCourses === null) {
-    return -1;
+  if(tokenData.globalRole === "USER") {
+    return 1;
   }
   const database: mongoDB.Db = await connect();
   const questionCollection: mongoDB.Collection =
@@ -168,8 +165,11 @@ export async function postQuestion(question: Question, tokenData: JwtPayload) {
 
 export async function putQuestion(question: Question, tokenData: JwtPayload) {
   const database: mongoDB.Db = await connect();
+  if(tokenData.globalRole === "USER") {
+    return 1;
+  }
   const questionCollection = database.collection("question");
-  if (!(await IsOwner(question, tokenData, questionCollection))) {
+  if (!(await IsOwner(question._id as unknown as string, tokenData, questionCollection))) {
     return -1;
   }
   const filter = {
@@ -182,17 +182,15 @@ export async function putQuestion(question: Question, tokenData: JwtPayload) {
 }
 
 export async function getAllQuestions(tokenData: JwtPayload) {
-  //const docentcourses = getDocentCourseRoles(tokenData);
-  //const adminCourses = getAdminCourseRoles(tokenData);
-  //if (docentcourses.length > 0 || adminCourses.length > 0) {
-  const database: mongoDB.Db = await connect();
-  const questionCollection: mongoDB.Collection =
-    database.collection("question");
-  const allQuestion = await questionCollection.find().toArray();
-  console.log(allQuestion);
-  return allQuestion;
-  /*}
-  const adminCourses2 = getAdminCourseRoles(tokenData);
+  if(tokenData.globalRole === "ADMIN"  || tokenData.globalRole === "MODERATOR") {
+    const database: mongoDB.Db = await connect();
+    const questionCollection: mongoDB.Collection =
+      database.collection("question");
+    const allQuestion = await questionCollection.find().toArray();
+    console.log(allQuestion);
+    return allQuestion;
+  }
+  const adminCourses = getAdminCourseRoles(tokenData);
   if (adminCourses.length === 0) {
     return -1;
   }
@@ -213,7 +211,7 @@ export async function getAllQuestions(tokenData: JwtPayload) {
     allCatalogs
   );
   return allQuestion;
-  */
+  
 }
 
 export async function getCurrentQuestion(
