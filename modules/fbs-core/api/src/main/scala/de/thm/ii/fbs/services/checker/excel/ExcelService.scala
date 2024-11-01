@@ -124,7 +124,9 @@ class ExcelService {
 
   private def getCell(sheet: XSSFSheet, cell: String) = {
     val cords = this.parseCellAddress(cell)
-    val col = sheet.getRow(cords.row).getCell(cords.col)
+    val row = sheet.getRow(cords.row)
+    if (row == null) throw new Exception(cords.row, cords.col, s"Cell '$cell' Not Found")
+    val col = row.getCell(cords.col)
     if (col == null) throw new Exception(cords.row, cords.col, s"Cell '$cell' Not Found")
 
     col

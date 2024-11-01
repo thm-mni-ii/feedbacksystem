@@ -170,7 +170,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   }
 
   private def generateCheckResultError(errorMsg: String, args: Any*): CheckResultTask = {
-    CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg.format(args))))
+    CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg.format(args: _*))))
   }
 
   private def storeError(submissionID: Int, cc: CheckrunnerConfiguration, errorMsg: String): Unit = {
