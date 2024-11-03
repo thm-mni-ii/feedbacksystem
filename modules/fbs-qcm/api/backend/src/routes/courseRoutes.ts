@@ -42,13 +42,13 @@ router.get("/api_v1/teacher_course", authenticateToken, async (req, res) => {
       res.sendStatus(500);
     }
   });
-  router.get("/api_v1/catalog_score", authenticateToken, async (req, res) => {
+  router.get("/api_v1/catalog_score/:id", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        const catalogId = req.query.ID as string;
+        const catalogId = req.params.id as string;
         const result = await getCatalogScore(req.user, catalogId);
         res.send(result);
       }

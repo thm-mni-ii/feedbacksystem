@@ -6,9 +6,9 @@ import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
  // get all catalogs from a course with the course id as a path parameter
  const router = Router();
-router.get("/api_v1/question", authenticateToken, async (req, res) => {
+router.get("/api_v1/question/:id", authenticateToken, async (req, res) => {
     try {
-      const questionId = req.query.ID as string;
+      const questionId = req.params.id as string;
       if (req.user == undefined) {
         res.sendStatus(401);
       }
@@ -27,9 +27,9 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
       res.sendStatus(500);
     }
   });
-  router.delete("/api_v1/question", authenticateToken, async (req, res) => {
+  router.delete("/api_v1/question/:id", authenticateToken, async (req, res) => {
     try {
-      const questionId = req.query.ID as string;
+      const questionId = req.params.id as string;
       if (req.user == undefined) {
         res.sendStatus(401);
       }
@@ -123,7 +123,7 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
       }
     }
   );
-  router.put("/api_v1/copyQuestion", authenticateToken, async (req, res) => {
+  router.put("/api_v1/copyQuestion/:id", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
@@ -131,7 +131,7 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
       if (req.user !== undefined) {
         console.log(req.body);
         const requestData = req.body;
-        const questionId = requestData.question;
+        const questionId = req.params.id as string;
         const data = await copyQuestion(req.user, questionId);
         if (data === -2) {
           res.sendStatus(400);
@@ -144,7 +144,7 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
     }
   });
   router.get(
-    "/api_v1/allquestionsInCatalog",
+    "/api_v1/allquestionsInCatalog/:id",
     authenticateToken,
     async (req, res) => {
       try {
@@ -152,7 +152,7 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
           res.sendStatus(401);
         }
         if (req.user !== undefined) {
-          const catalogId = req.query.catalogId as string;
+          const catalogId = req.params.id as string;
           const data = await allQuestionsInCatalog(req.user, catalogId);
           if (data === -1) {
             res.sendStatus(403);
@@ -166,7 +166,7 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
     }
   );
   router.get(
-    "/api_v1/allquestionsInCourse",
+    "/api_v1/allquestionsInCourse/:id",
     authenticateToken,
     async (req, res) => {
       try {
@@ -174,7 +174,7 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
           res.sendStatus(401);
         }
         if (req.user !== undefined) {
-          const courseId = req.query.courseId as string;
+          const courseId = req.params.id as string;
           const data = await allQuestionInCourse(req.user, courseId);
           if (data === -1) {
             res.sendStatus(403);
@@ -264,24 +264,6 @@ router.get("/api_v1/question", authenticateToken, async (req, res) => {
       }
     }
   );
-  router.get("/api_v1/catalog/:id", authenticateToken, async (req, res) => {
-    try {
-      if (req.user == undefined) {
-        res.sendStatus(401);
-      }
-      const catalogId = req.params.id as string;
-      if (req.user !== undefined) {
-        const data = await getCatalog(req.user, catalogId);
-        if (data == -1) {
-          res.sendStatus(403);
-        } else {
-          res.send(data);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      res.sendStatus(500);
-    }
-  });
+  
 
   export default router; 

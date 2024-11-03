@@ -1,14 +1,14 @@
-import { deleteCatalog, getCatalogs, postCatalog, putCatalog } from "../catalog/catalog";
+import { deleteCatalog, getCatalog, getCatalogs, postCatalog, putCatalog } from "../catalog/catalog";
 import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
  // get all catalogs from a course with the course id as a path parameter
  const router = Router();
- router.get("/api_v1/catalogs/:courseId", authenticateToken, async (req, res) => {
+ router.get("/api_v1/catalogs/:id", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
         res.sendStatus(401);
       }
-      const courseId = req.params.courseId as unknown as number;
+      const courseId = req.params.id as unknown as number;
       if (req.user !== undefined) {
         const data = await getCatalogs(req.user, courseId);
         if (data == -1) {
@@ -92,5 +92,24 @@ import { authenticateToken } from "../authenticateToken";
       res.sendStatus(500);
     }
   });
-
+  
+  router.get("/api_v1/catalog/:id", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      const catalogId = req.params.id as string;
+      if (req.user !== undefined) {
+        const data = await getCatalog(req.user, catalogId);
+        if (data == -1) {
+          res.sendStatus(403);
+        } else {
+          res.send(data);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+    }
+  });
   export default router; 
