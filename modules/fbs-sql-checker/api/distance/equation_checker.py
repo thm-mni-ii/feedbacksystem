@@ -1,5 +1,5 @@
-from . import constants as c
 import sympy as s
+from . import constants as c
 
 
 def check_equation(ref, query):
@@ -15,3 +15,5 @@ def check_equation(ref, query):
     except Exception:
         moves += c.OBJECT_MULT
         return moves
+
+    return None  # Inserted while lint fixing preserves prefix behavior but might indicate an error

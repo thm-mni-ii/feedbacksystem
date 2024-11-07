@@ -1,22 +1,18 @@
-from inspect import trace
-
+import traceback
+import sqlparse
 from . import attribute_check as att_check
 from . import table_check as tab_check
 from . import result_log as log
 from . import format as f
-import sqlparse
-import traceback
-
 
 # first argument is always the solution
 def get_distance(ref, query):
     try:
-        r = f.format_query(ref.lower())
-        q = f.format_query(query.lower())
-
+        formated_ref = f.format_query(ref.lower())
+        formated_query = f.format_query(query.lower())
         # query parsing
-        parsed_ref = _parse_query(r)
-        parsed_query = _parse_query(q)
+        parsed_ref = _parse_query(formated_ref)
+        parsed_query = _parse_query(formated_query)
 
         # distance calculation
         attribute_distance = att_check.extract_attributes(parsed_ref, parsed_query)

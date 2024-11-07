@@ -1,7 +1,7 @@
+import re
 from . import constants as c
 from . import db_connection as db
 from . import equation_checker as ec
-import re
 
 
 def get_from_clause_distance(ref: list, query: list, ref_join: list, query_join: list):
@@ -13,8 +13,8 @@ def get_from_clause_distance(ref: list, query: list, ref_join: list, query_join:
     if len(ref_join) != len(query_join):
         moves += abs(len(ref_join) - len(query_join)) * c.OBJECT_MULT
     else:
-        for r, q in zip(sorted(ref_join), sorted(query_join)):
-            if r != q:
+        for ref_item, query_item in zip(sorted(ref_join), sorted(query_join)):
+            if ref_item != query_item:
                 moves += c.STRUCT_MULT
     # test if both queries yield the same results
     moves += _join_queries_distance(ref, query, ref_join, query_join)
@@ -91,11 +91,13 @@ def comparison_distance(ref: list[str], query: list[str]):
         # Multiply the difference by a predefined constant (OBJECT_MULT) and add to the moves counter
         moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
     else:
-        for r, q in zip(sorted(ref), sorted(query)):
-            if re.match(c.SYMBOL_REGEX, r) and re.match(c.SYMBOL_REGEX, q):
-                moves += ec.check_equation(r, q)
+        for ref_item, query_item in zip(sorted(ref), sorted(query)):
+            if re.match(c.SYMBOL_REGEX, ref_item) and re.match(
+                c.SYMBOL_REGEX, query_item
+            ):
+                moves += ec.check_equation(ref_item, query_item)
             else:
-                if r != q:
+                if ref_item != query_item:
                     # Increment the moves counter by OBJECT_MULT for each differing pair
                     moves += c.OBJECT_MULT
     # Return the total number of moves calculated
@@ -106,15 +108,15 @@ def group_and_order_by_distance(ref: list[str], query: list[str]):
     moves = 0
     # Check if both lists contain the same elements, irrespective of order
     if sorted(ref) == sorted(query):
-        for r in ref:
+        for ref_item in ref:
             # Check if the corresponding element in the query list is at a different position
-            if query[ref.index(r)] != r:
+            if query[ref.index(ref_item)] != ref_item:
                 # Increment the moves counter by the order multiplier
                 moves += c.ORDER_MULT
                 # Remove the element from its current position in the query list
-                query.remove(r)
+                query.remove(ref_item)
                 # Insert the element at its correct position based on the reference list
-                query.insert(ref.index(r), r)
+                query.insert(ref.index(ref_item), ref_item)
     # Check if the lengths of the two lists are different
     elif len(ref) != len(query):
         # Increment the moves counter by the object multiplier times the difference in length
@@ -122,9 +124,9 @@ def group_and_order_by_distance(ref: list[str], query: list[str]):
     # If the lists are of the same length but have different elements
     else:
         # Iterate through each pair of elements in the sorted lists
-        for r, q in zip(sorted(ref), sorted(query)):
+        for ref_item, query_item in zip(sorted(ref), sorted(query)):
             # Check if the elements are different
-            if r != q:
+            if ref_item != query_item:
                 # Increment the moves counter by the object multiplier for each differing pair
                 moves += c.OBJECT_MULT
     return moves

@@ -13,7 +13,7 @@ def write_to_log(message: str):
 
     # Write message to the log file
     try:
-        with open(c.LOG_PATH, "a") as log_file:
+        with open(c.LOG_PATH, "a", encoding="utf-8") as log_file:
             log_file.write(message + "\n")
     except Exception as e:
         print(f"FileError: {e}")

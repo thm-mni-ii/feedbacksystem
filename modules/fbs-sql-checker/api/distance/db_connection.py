@@ -1,20 +1,24 @@
+import os
 import psycopg2
 from dotenv import load_dotenv
-import os
 
 
 def setup_db(att_list):
     connection = None
 
     load_dotenv()
-    HOSTNAME = os.getenv("HOSTNAME")
-    DB_NAME = os.getenv("DB_NAME")
-    USERNAME = os.getenv("DB_USERNAME")
-    PASSWORD = os.getenv("PASSWORD")
-    PORT_ID = os.getenv("PORT_ID")
+    hostname = os.getenv("HOSTNAME")
+    db_name = os.getenv("DB_NAME")
+    db_username = os.getenv("DB_USERNAME")
+    db_password = os.getenv("PASSWORD")
+    port_id = os.getenv("PORT_ID")
 
     with psycopg2.connect(
-        host=HOSTNAME, dbname=DB_NAME, user=USERNAME, password=PASSWORD, port=PORT_ID
+        host=hostname,
+        dbname=db_name,
+        user=db_username,
+        password=db_password,
+        port=port_id,
     ) as connection:
         cursor = connection.cursor()
         _create_db(att_list, cursor)
@@ -25,10 +29,13 @@ def setup_db(att_list):
 
 def _create_db(att_list, cursor):
     # Iterate over the attribute list
-    for i, att in enumerate(att_list):
+    for i, _att in enumerate(att_list):
         # Generate SQL script to create a table for each attribute
         # Tables are named A, B, C, etc., with unique constraints on column 'x'
-        sql_script = f"CREATE TABLE IF NOT EXISTS {chr(65 + i)} (x INTEGER, CONSTRAINT {chr(97 + i)}_unique_x UNIQUE (x));"
+        sql_script = (
+            f"CREATE TABLE IF NOT EXISTS {chr(65 + i)} "
+            f"(x INTEGER, CONSTRAINT {chr(97 + i)}_unique_x UNIQUE (x));"
+        )
         cursor.execute(sql_script)  # Execute the SQL script
 
 

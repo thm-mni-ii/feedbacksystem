@@ -15,7 +15,7 @@ def format_alias(ident: str):
 
 
 def format_distinct(ident: str):
-    if ident.__contains__(c.DISTINCT):
+    if c.DISTINCT in ident:
         ident = ident.replace(c.DISTINCT, "").strip()
     return ident
 

@@ -1,8 +1,8 @@
+import re
 import sqlparse
 from . import constants as c
 from . import table_distance as tab_dist
 from . import format as f
-import re
 from . import result_log as log
 
 
@@ -89,7 +89,9 @@ def extract_tables(ref, query):
     )
 
     log.write_to_log(
-        f"Distance: table and data retrieval clause = {from_distance}, comparison equations = {comparison_distance}, group by = {group_by_distance}, having = {having_distance}, order by = {order_distance}\n"
+        f"Distance: table and data retrieval clause = {from_distance}, comparison equations = "
+        f"{comparison_distance}, group by = {group_by_distance}, having = {having_distance},"
+        f" order by = {order_distance}\n"
     )
 
     return (
@@ -165,10 +167,10 @@ def _token_iteration(
             # check and extract the comparison equations after ON condition
             if token.ttype == sqlparse.tokens.Keyword and token.value == c.ON:
                 extracted_on = _extract_on(tokens, i, comp_list)
-                if extracted_on != None:
-                    for onToken in extracted_on:
+                if extracted_on is not None:
+                    for on_token in extracted_on:
                         _token_iteration(
-                            onToken,
+                            on_token,
                             tab_map,
                             name_list,
                             join_list,
@@ -180,10 +182,10 @@ def _token_iteration(
             # check and extract the WHERE keyword and comparison equations after it
             if isinstance(token, sqlparse.sql.Where):
                 extracted_where = _extract_where(token, comp_list, join_list)
-                for whereToken in extracted_where:
-                    if isinstance(whereToken, sqlparse.sql.Parenthesis):
+                for where_token in extracted_where:
+                    if isinstance(where_token, sqlparse.sql.Parenthesis):
                         _token_iteration(
-                            whereToken.tokens,
+                            where_token.tokens,
                             tab_map,
                             name_list,
                             join_list,
@@ -202,9 +204,9 @@ def _token_iteration(
 
 def _search_for_subqueries(tokens):
     subquery_list = []
-    for curToken in tokens:
-        if isinstance(curToken, sqlparse.sql.Parenthesis):
-            subquery_list.append(curToken)
+    for cur_token in tokens:
+        if isinstance(cur_token, sqlparse.sql.Parenthesis):
+            subquery_list.append(cur_token)
     return subquery_list
 
 
@@ -262,6 +264,7 @@ def _extract_on(tokens, i, comp_list):
                     in_like_str += tokens[k].value
                 comp_list.append(in_like_str)
         return query_list
+    return None
 
 
 def _extract_where(token, comp_list, join_list):
@@ -280,16 +283,16 @@ def _extract_where(token, comp_list, join_list):
             # print(f"PARA {t.tokens}")
             comp_list.append(f.format_like(f.format_parenthesis(t.value)))
         if t.value == c.BETWEEN:
-            str = ""
+            res_str = ""
             for j in range(i - 2, i + 7):
-                str += token.tokens[j].value
-            comp_list.append(str)
-        if t.value == c.IN or t.value == c.LIKE:
-            str = ""
+                res_str += token.tokens[j].value
+            comp_list.append(res_str)
+        if t.value in [c.IN, c.LIKE]:
+            res_str = ""
             print("start")
             for j in range(i - 2, i + 2):
-                str += token.tokens[j].value
-            comp_list.append(str)
+                res_str += token.tokens[j].value
+            comp_list.append(res_str)
     # append where keyword to the list of clauses MAYBE CHANGE IN DIFFERENT ARRAYS
     join_list.append(token.token_first().value)
 
@@ -323,7 +326,7 @@ def _extract_group_by(tokens, i, group_list, having_list):
             # This can be an ORDER BY or HAVING keyword, or a semicolon indicating the end of the query
             if (
                 t.ttype == sqlparse.tokens.Keyword
-                and (t.value == c.ORDER_BY or t.value == c.HAVING)
+                and (t.value in [c.ORDER_BY, c.HAVING])
             ) or (t.ttype == sqlparse.tokens.Punctuation and t.value == ";"):
                 break
         j += 1

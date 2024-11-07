@@ -6,7 +6,7 @@ from table_checker import extract_tables
 from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
-from model import *  # pylint: disable=W0401
+import model
 from mask_aliases import SQLAliasMasker
 import distance.distance_calc as d
 
@@ -109,7 +109,7 @@ def parse_single_stat_upload_db(data, client):
             # new
             closest_solution2,
             min_distance2,
-            closestID2,
+            closest_id_2,
         ) = check_solution_chars(
             data,
             task_nr,
@@ -145,7 +145,7 @@ def parse_single_stat_upload_db(data, client):
             time,
             closest_solution2,
             min_distance2,
-            closestID2,
+            closest_id_2,
         )
 
         # save JSON to DB
@@ -173,10 +173,10 @@ def flag_duplicates(client, task_nr):
     duplicates = []
 
     # Compare each document with every other document
-    n = len(queries)
-    for i in range(n):
+    query_length = len(queries)
+    for i in range(query_length):
         for j in range(
-            i + 1, n
+            i + 1, query_length
         ):  # Start from i + 1 to avoid comparing with itself and re-comparing
             query1 = queries[i]
             query2 = queries[j]
@@ -185,8 +185,10 @@ def flag_duplicates(client, task_nr):
                 duplicates.append(query2["_id"])
 
     # Flag duplicates based on gathered IDs
-    for id in set(duplicates):
-        mycol.update_one({"_id": id}, {"$set": {"duplicate": True}}, upsert=True)
+    for duplicate_id in set(duplicates):
+        mycol.update_one(
+            {"_id": duplicate_id}, {"$set": {"duplicate": True}}, upsert=True
+        )
 
 
 # Check if it is a new solution; check if tables, attributes etc. are right
@@ -218,7 +220,7 @@ def check_solution_chars(
         # new
         closest_solution,
         min_distance,
-        closestID,
+        closest_id,
     ) = (
         False,
         False,
@@ -236,7 +238,7 @@ def check_solution_chars(
     mydb = client.get_default_database()
 
     mycol = mydb["Solutions"]
-    mysub = mydb["Queries"]
+    _mysub = mydb["Queries"]
 
     min_distance = float("inf")  # Set to positive infinity
     closest_solution = None
@@ -283,21 +285,20 @@ def check_solution_chars(
             [],
             [],
         )
-        id = closest_solution  # use closest solution as reference
         mycol = mydb["Tables"]
-        for y in mycol.find({"id": id}, {"table": 1}):
+        for y in mycol.find({"id": closest_solution}, {"table": 1}):
             tables.append(y["table"])
         mycol = mydb["ProAttributes"]
-        for y in mycol.find({"id": id}, {"proAttribute": 1}):
+        for y in mycol.find({"id": closest_solution}, {"proAttribute": 1}):
             pro_attributes.append(y["proAttribute"])
         mycol = mydb["SelAttributes"]
-        for y in mycol.find({"id": id}, {"selAttribute": 1}):
+        for y in mycol.find({"id": closest_solution}, {"selAttribute": 1}):
             sel_attributes.append(y["selAttribute"])
         mycol = mydb["Strings"]
-        for y in mycol.find({"id": id}, {"string": 1}):
+        for y in mycol.find({"id": closest_solution}, {"string": 1}):
             strings.append(y["string"])
         mycol = mydb["OrderBy"]
-        for y in mycol.find({"id": id}, {"orderBy": 1, "sort": 1}):
+        for y in mycol.find({"id": closest_solution}, {"orderBy": 1, "sort": 1}):
             order_by_value = [y["orderBy"]]
             if (
                 "sort" in y
@@ -307,10 +308,12 @@ def check_solution_chars(
                 order_by_value.append("asc")
             order_by.append(order_by_value)
         mycol = mydb["GroupBy"]
-        for y in mycol.find({"id": id}, {"groupBy": 1}):
+        for y in mycol.find({"id": closest_solution}, {"groupBy": 1}):
             group_by.append(y["groupBy"])
         mycol = mydb["Joins"]
-        for y in mycol.find({"id": id}, {"type": 1, "attr1": 1, "attr2": 1}):
+        for y in mycol.find(
+            {"id": closest_solution}, {"type": 1, "attr1": 1, "attr2": 1}
+        ):
             join_value = [y["type"]]
             if (
                 "attr1" in y and "attr2" in y
@@ -321,7 +324,7 @@ def check_solution_chars(
                 join_value.append("Empty")
             joins.append(join_value)
         mycol = mydb["Having"]
-        for y in mycol.find({"id": id}, {"havingAttribute": 1}):
+        for y in mycol.find({"id": closest_solution}, {"havingAttribute": 1}):
             having_value = y["havingAttribute"]
             having.append(having_value)
         if len(joins) == 0:
@@ -393,7 +396,7 @@ def check_solution_chars(
             True,
             closest_solution,
             min_distance,
-            closestID,
+            closest_id,
         )
     # return if characteristics are True or False
     return (
@@ -409,7 +412,7 @@ def check_solution_chars(
         # new
         closest_solution,
         min_distance,
-        closestID,
+        closest_id,
     )
 
 
@@ -417,7 +420,7 @@ def check_solution_chars(
 def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
     mydb = client.get_default_database()
     mycollection = mydb["Solutions"]
-    record = prod_solution_json(data, my_uuid, task_nr)
+    record = model.prod_solution_json(data, my_uuid, task_nr)
     mycollection.insert_one(record)
 
 
@@ -441,7 +444,7 @@ def return_json(  # pylint: disable=R1710
     time,
     closest_solution,
     min_distance,
-    closestID,
+    closest_id,
 ):
     # Extract informations from a sql-query-json
     if "passed" in elem:
@@ -471,7 +474,7 @@ def return_json(  # pylint: disable=R1710
                 time,
                 closest_solution,
                 min_distance,
-                closestID,
+                closest_id,
             )
             return record
         # produce a json if the sql-query is not parsable
@@ -520,12 +523,12 @@ def insert_tables(mydb, elem, my_uuid, client):
         joins.append("Empty")
     if len(tables) == 1:
         mycollection = mydb["Tables"]
-        record = json_table(my_uuid, tables[0])
+        record = model.json_table(my_uuid, tables[0])
         mycollection.insert_one(record)
         if joins[0] != "Empty":
             try:
                 mycollection = mydb["Joins"]
-                record = json_join_attribute(my_uuid, joins)
+                record = model.json_join_attribute(my_uuid, joins)
                 mycollection.insert_one(record)
             except Exception:
                 print("Error while reading joins.")
@@ -534,70 +537,70 @@ def insert_tables(mydb, elem, my_uuid, client):
     ):
         mycollection = mydb["Tables"]
         for val in tables:
-            record = json_table(my_uuid, val)
+            record = model.json_table(my_uuid, val)
             mycollection.insert_one(record)
         if joins[0] != "Empty":
             try:
                 mycollection = mydb["Joins"]
                 for y in joins:
-                    record = json_join_attribute(my_uuid, y)
+                    record = model.json_join_attribute(my_uuid, y)
                     mycollection.insert_one(record)
             except Exception:
                 print("Error while reading joins.")
     pro_attributes = extract_pro_attributes(elem["submission"], client)
     if len(pro_attributes) == 1:
         mycollection = mydb["ProAttributes"]
-        record = json_pro_attribute(my_uuid, pro_attributes[0])
+        record = model.json_pro_attribute(my_uuid, pro_attributes[0])
         mycollection.insert_one(record)
     elif len(pro_attributes) > 1 and not isinstance(pro_attributes, str):
         mycollection = mydb["ProAttributes"]
         for val in pro_attributes:
-            record = json_pro_attribute(my_uuid, val)
+            record = model.json_pro_attribute(my_uuid, val)
             mycollection.insert_one(record)
     sel_attributes = AWC.extract_sel_attributes(elem["submission"], client)
     if len(sel_attributes) == 1:
         mycollection = mydb["SelAttributes"]
-        record = json_sel_attribute(my_uuid, sel_attributes[0])
+        record = model.json_sel_attribute(my_uuid, sel_attributes[0])
         mycollection.insert_one(record)
     elif len(sel_attributes) > 1 and not isinstance(sel_attributes, str):
         mycollection = mydb["SelAttributes"]
         for val in sel_attributes:
-            record = json_sel_attribute(my_uuid, val)
+            record = model.json_sel_attribute(my_uuid, val)
             mycollection.insert_one(record)
     if len(list(set(AWC.literal))) == 1:
         mycollection = mydb["Strings"]
-        record = json_string(my_uuid, list(set(AWC.literal))[0])
+        record = model.json_string(my_uuid, list(set(AWC.literal))[0])
         mycollection.insert_one(record)
     elif len(list(set(AWC.literal))) > 1 and not isinstance(
         list(set(AWC.literal)), str
     ):
         mycollection = mydb["Strings"]
         for val in list(set(AWC.literal)):
-            record = json_string(my_uuid, val)
+            record = model.json_string(my_uuid, val)
             mycollection.insert_one(record)
     order_by = AWC.extract_order_by(elem["submission"], client)
     if len(order_by) == 1:
         mycollection = mydb["OrderBy"]
-        record = json_order_by_attribute(my_uuid, order_by[0])
+        record = model.json_order_by_attribute(my_uuid, order_by[0])
         mycollection.insert_one(record)
     elif len(order_by) > 1 and not isinstance(order_by, str):
         mycollection = mydb["OrderBy"]
         for val in order_by:
-            record = json_order_by_attribute(my_uuid, val)
+            record = model.json_order_by_attribute(my_uuid, val)
             mycollection.insert_one(record)
     group_by = AWC.extract_group_by(elem["submission"], client)
     if len(group_by) == 1:
         mycollection = mydb["GroupBy"]
-        record = json_group_by_attribute(my_uuid, group_by[0])
+        record = model.json_group_by_attribute(my_uuid, group_by[0])
         mycollection.insert_one(record)
     elif len(group_by) > 1 and not isinstance(group_by, str):
         mycollection = mydb["GroupBy"]
         for val in AWC.extract_group_by(elem["submission"], client):
-            record = json_group_by_attribute(my_uuid, val)
+            record = model.json_group_by_attribute(my_uuid, val)
             mycollection.insert_one(record)
     if len(AWC.extract_having(elem["submission"], client)) == 1:
         mycollection = mydb["Having"]
-        record = json_having_attribute(
+        record = model.json_having_attribute(
             my_uuid, AWC.extract_having(elem["submission"], client)[0]
         )
         mycollection.insert_one(record)
@@ -606,7 +609,7 @@ def insert_tables(mydb, elem, my_uuid, client):
     ):
         mycollection = mydb["Having"]
         for val in AWC.extract_having(elem["submission"], client):
-            record = json_having_attribute(my_uuid, val)
+            record = model.json_having_attribute(my_uuid, val)
             mycollection.insert_one(record)
     AWC.literal = []
     user_data.clear()
@@ -632,7 +635,7 @@ def prod_json(
     time,
     closest_solution,
     min_distance,
-    closestID,
+    closest_id,
 ):
     # save data if it is a manual solution
     if is_sol is True:
@@ -640,7 +643,7 @@ def prod_json(
         user_data.extend([0])
         user_data.extend([0])
     value = {
-        "id": str(closestID),
+        "id": str(closest_id),
         "courseId": course_id,
         "taskNumber": task_nr,
         "statement": test_sql,
@@ -670,7 +673,7 @@ def prod_json(
 def insert_not_parsable(my_uuid, submission, client):
     mydb = client.get_default_database()
     mycollection = mydb["NotParsable"]
-    record = json_not_parsable(my_uuid, submission)
+    record = model.json_not_parsable(my_uuid, submission)
     mycollection.insert_one(record)
 
 

@@ -1,28 +1,28 @@
 import re
-from . import constants as c
 import uuid
+from . import constants as c
 from . import format as f
 
 
 def get_attributes_distance(ref: list[str], query: list[str]):
     moves = 0
     # distance is equal to 0 if * is used
-    if ref.__contains__("*"):
+    if "*" in ref:
         return 0
     # check for order of attributes and add RMU
-    elif sorted(ref) == sorted(query):
-        for r in ref:
-            if query[ref.index(r)] != r:
+    if sorted(ref) == sorted(query):
+        for ref_item in ref:
+            if query[ref.index(ref_item)] != ref_item:
                 moves += c.ORDER_MULT
-                query.remove(r)
-                query.insert(ref.index(r), r)
+                query.remove(ref_item)
+                query.insert(ref.index(ref_item), ref_item)
     # check for missing elements and add the OMU if true
     elif len(ref) != len(query):
         moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
     else:
         # compare each element used, if discrepency was found, OMU is added
-        for r, q in zip(sorted(ref), sorted(query)):
-            if r != q:
+        for ref_item, query_item in zip(sorted(ref), sorted(query)):
+            if ref_item != query_item:
                 moves += c.OBJECT_MULT
     # get operation distance
     op_dist = _get_operation_distance(ref, query)
@@ -37,8 +37,8 @@ def get_command_distance(ref: list[str], query: list[str]):
         moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
     # check for each element and if there difference SMU is added
     elif set(ref) != set(query):
-        for r, q in zip(sorted(ref), sorted(query)):
-            if r != q:
+        for ref_item, query_item in zip(sorted(ref), sorted(query)):
+            if ref_item != query_item:
                 moves += c.STRUCT_MULT
     return moves
 
@@ -71,16 +71,16 @@ def _get_operation_distance(ref_list: list[str], query_list: list[str]):
 def _calculate_expression_similarity(ref_exp: list[str], query_exp: list[str]):
     operation_map: dict[str, str, str] = {}
     diff = 0
-    for r, q in zip(ref_exp, query_exp):
+    for ref_item, query_item in zip(ref_exp, query_exp):
         # Parenthesis formatting
-        ref_set = set(f.format_parenthesis(r))
-        query_set = set(f.format_parenthesis(q))
+        ref_set = set(f.format_parenthesis(ref_item))
+        query_set = set(f.format_parenthesis(query_item))
         intersection = len(ref_set.intersection(query_set))
         union = len(ref_set.union(query_set))
         if union != 0:
             # Jaccard Similarity Coefficient: 1 - J(A,B)
             similarity_coeffiecient = 1 - (intersection / union)
-            _add_to_op_map(operation_map, r, q, similarity_coeffiecient)
+            _add_to_op_map(operation_map, ref_item, query_item, similarity_coeffiecient)
             diff += similarity_coeffiecient * c.STRUCT_MULT
     return diff
 

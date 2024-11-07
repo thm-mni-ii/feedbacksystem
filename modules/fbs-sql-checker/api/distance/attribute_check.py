@@ -24,7 +24,8 @@ def extract_attributes(ref, query):
     )
 
     log.write_to_log(
-        f"attribute aliases: reference: {ref_map}; query: {query_map}\n\nattributes before order: reference: {ref_pro_att}; query: {query_pro_att}\n"
+        f"attribute aliases: reference: {ref_map}; query: {query_map}\n\n"
+        f"attributes before order: reference: {ref_pro_att}; query: {query_pro_att}\n"
     )
 
     attribute_distance = att_dist.get_attributes_distance(ref_pro_att, query_pro_att)
@@ -57,10 +58,7 @@ def _token_iteration(tokens, map_dict, pro_att_list, cmd_list, distinct_list):
     for i, token in enumerate(tokens):
         if isinstance(token, sqlparse.sql.Token):
             # bypass token if it represents a whitespace or a newline
-            if (
-                token.ttype == sqlparse.tokens.Whitespace
-                or token.ttype == sqlparse.tokens.Newline
-            ):
+            if token.ttype in [sqlparse.tokens.Whitespace, sqlparse.tokens.Newline]:
                 continue
             # check if token represents distinct
             if token.ttype == sqlparse.tokens.Keyword and token.value == c.DISTINCT:
@@ -121,7 +119,7 @@ def _extract_parenthesis(token, map_dict, pro_att_list, cmd_list, distinct_list)
 
 def _extract_identifier(token, map_dict, pro_att_list, cmd_list, distinct_list):
     # commands with aliases are considered as identifier and can only be extracted this way
-    if str(token.get_real_name()) in [cmd for cmd in c.SELECT_CMDS]:
+    if str(token.get_real_name()) in c.SELECT_CMDS:
         # save alias
         _extract_alias(token, map_dict)
         # save used command
@@ -133,7 +131,7 @@ def _extract_identifier(token, map_dict, pro_att_list, cmd_list, distinct_list):
             )
         )
         # check for distinct keyword and save the attributes used after it
-        if token.value.__contains__(c.DISTINCT):
+        if c.DISTINCT in token.value:
             _extract_keyword(f.format_command(token), distinct_list)
     else:
         pro_att_list.append(f.format_distinct((f.format_alias(token.value))))
@@ -146,13 +144,13 @@ def _extract_functions(token, map_dict, pro_att_list, cmd_list, distinct_list):
         # save command used to list
         cmd_list.append(str(token.get_real_name()))
         # save attribute or attributes used inside the command
-        for p in token.tokens[1]:
-            if isinstance(p, sqlparse.sql.Identifier):
-                pro_att_list.append(p.value)
-            elif isinstance(p, sqlparse.sql.IdentifierList):
-                pro_att_list.append(f.format_whitespace(p.value))
+        for part in token.tokens[1]:
+            if isinstance(part, sqlparse.sql.Identifier):
+                pro_att_list.append(part.value)
+            elif isinstance(part, sqlparse.sql.IdentifierList):
+                pro_att_list.append(f.format_whitespace(part.value))
         # check for distinct keyword and save the attributes used after it
-        if token.value.__contains__(c.DISTINCT):
+        if c.DISTINCT in token.value:
             _extract_keyword(f.format_command(token), distinct_list)
 
 
