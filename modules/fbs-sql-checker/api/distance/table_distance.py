@@ -22,13 +22,14 @@ def get_from_clause_distance(ref: list, query: list, ref_join: list, query_join:
     return moves
 
 
-
 def _join_queries_distance(ref, query, ref_join, query_join):
     moves = 0
     # Check if the WHERE clause is not present in
     if c.WHERE not in ref_join and c.WHERE not in query_join:
-        # check if different JOINS clauses were used 
-        if any(rj in c.JOIN_TYPES for rj in ref_join) and any(qj in c.JOIN_TYPES for qj in query_join):
+        # check if different JOINS clauses were used
+        if any(rj in c.JOIN_TYPES for rj in ref_join) and any(
+            qj in c.JOIN_TYPES for qj in query_join
+        ):
             mapped_ref, mapped_query = _map_values(ref, query)
             # Format the join part of the SQL script for both reference and query
             ref_script = _format_join_script(mapped_ref, ref_join)
@@ -74,11 +75,12 @@ def _format_join_script(tab_name: list, join_list: list):
             join_type = join_list[i - 1] if i - 1 < len(join_list) else ""
             # Append the join type and current table name to the script
             # Also include the ON clause to specify the join condition
-            script += f" {join_type} {tab_name[i]} ON {tab_name[i - 1]}.x = {tab_name[i]}.x"
+            script += (
+                f" {join_type} {tab_name[i]} ON {tab_name[i - 1]}.x = {tab_name[i]}.x"
+            )
     # Complete the SQL script with a semicolon
     script += ";"
     return script
-
 
 
 def comparison_distance(ref: list[str], query: list[str]):
@@ -94,11 +96,10 @@ def comparison_distance(ref: list[str], query: list[str]):
                 moves += ec.check_equation(r, q)
             else:
                 if r != q:
-                # Increment the moves counter by OBJECT_MULT for each differing pair
+                    # Increment the moves counter by OBJECT_MULT for each differing pair
                     moves += c.OBJECT_MULT
     # Return the total number of moves calculated
     return moves
-
 
 
 def group_and_order_by_distance(ref: list[str], query: list[str]):
@@ -115,9 +116,9 @@ def group_and_order_by_distance(ref: list[str], query: list[str]):
                 # Insert the element at its correct position based on the reference list
                 query.insert(ref.index(r), r)
     # Check if the lengths of the two lists are different
-    elif len(ref) != len(query):   
+    elif len(ref) != len(query):
         # Increment the moves counter by the object multiplier times the difference in length
-        moves += abs(len(ref) - len(query)) * c.OBJECT_MULT 
+        moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
     # If the lists are of the same length but have different elements
     else:
         # Iterate through each pair of elements in the sorted lists

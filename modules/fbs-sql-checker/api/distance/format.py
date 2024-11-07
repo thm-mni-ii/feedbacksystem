@@ -22,11 +22,13 @@ def format_distinct(ident: str):
 
 def format_command(ident: sqlparse.sql.Identifier):
     # get_real_name() function returns the select command and will get removed along the alias and the 'as' keyword
-    formatted = ident.value.replace(ident.get_real_name(), "").replace("(", "").replace(")", "")
+    formatted = (
+        ident.value.replace(ident.get_real_name(), "").replace("(", "").replace(")", "")
+    )
     return formatted
 
 
-# remove database name e.g.: db.id and special characters 
+# remove database name e.g.: db.id and special characters
 def format_query(ident: str):
     return re.sub(c.FORMATTING_REGEX, "", ident).strip().lower()
 
@@ -41,7 +43,7 @@ def format_whitespace(ident: str):
 
 def format_like(ident: str):
     if f"{c.NOT} {c.LIKE}" in ident:
-        ident = ident.replace(f"{c.NOT} {c.LIKE}", '!=')
+        ident = ident.replace(f"{c.NOT} {c.LIKE}", "!=")
     elif c.LIKE in ident:
-        ident = ident.replace(c.LIKE, '=')
+        ident = ident.replace(c.LIKE, "=")
     return ident

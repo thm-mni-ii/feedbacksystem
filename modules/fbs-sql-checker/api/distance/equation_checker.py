@@ -12,6 +12,6 @@ def check_equation(ref, query):
             # Increment the moves counter if they are not equal
             return moves
         # Return the total number of moves calculated
-    except Exception: 
+    except Exception:
         moves += c.OBJECT_MULT
         return moves

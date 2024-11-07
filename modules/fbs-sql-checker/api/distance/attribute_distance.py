@@ -17,10 +17,10 @@ def get_attributes_distance(ref: list[str], query: list[str]):
                 query.remove(r)
                 query.insert(ref.index(r), r)
     # check for missing elements and add the OMU if true
-    elif len(ref) != len(query):   
-        moves += abs(len(ref) - len(query)) * c.OBJECT_MULT 
+    elif len(ref) != len(query):
+        moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
     else:
-    # compare each element used, if discrepency was found, OMU is added
+        # compare each element used, if discrepency was found, OMU is added
         for r, q in zip(sorted(ref), sorted(query)):
             if r != q:
                 moves += c.OBJECT_MULT
@@ -47,7 +47,7 @@ def get_keyword_distance(ref_list: list, query_list: list):
     moves = 0
     if set(ref_list) != set(query_list):
         moves += c.OBJECT_MULT
-        #print("distinct", moves)
+        # print("distinct", moves)
     return moves
 
 
@@ -63,15 +63,16 @@ def _get_operation_distance(ref_list: list[str], query_list: list[str]):
     for exp in query_list:
         if re.findall(c.MATH_EXP_REGEX, exp):
             query_op_list.append(exp)
-    #print("ref op , qur op", ref_op_list, query_op_list)
+    # print("ref op , qur op", ref_op_list, query_op_list)
     return _calculate_expression_similarity(ref_op_list, query_op_list)
+
 
 # Jaccard index may not be the best method to measure the distance of two mathematical expressions
 def _calculate_expression_similarity(ref_exp: list[str], query_exp: list[str]):
     operation_map: dict[str, str, str] = {}
     diff = 0
     for r, q in zip(ref_exp, query_exp):
-        # Parenthesis formatting 
+        # Parenthesis formatting
         ref_set = set(f.format_parenthesis(r))
         query_set = set(f.format_parenthesis(q))
         intersection = len(ref_set.intersection(query_set))
@@ -88,8 +89,4 @@ def _add_to_op_map(op_map, ref, query, sim):
     generated_uuid = str(uuid.uuid4())
     short_id = generated_uuid[:4]  # Take the first 8 characters as the short ID
     new_entry_key = f"{short_id}"
-    op_map[new_entry_key] = {
-        "ref": ref,
-        "query": query,
-        "similarity": sim
-    }
+    op_map[new_entry_key] = {"ref": ref, "query": query, "similarity": sim}

@@ -8,8 +8,8 @@ WHERE = "where"
 GROUP_BY = "group by"
 HAVING = "having"
 ORDER_BY = "order by"
-DESC = r'(?i)desc'
-ASC = r'(?i)asc'
+DESC = r"(?i)desc"
+ASC = r"(?i)asc"
 BETWEEN = "between"
 LIKE = "like"
 NOT = "not"
@@ -38,7 +38,7 @@ SELECT_CMDS = [
     "floor",
     "power",
     "convert",
-    "time_to_sec"
+    "time_to_sec",
 ]
 
 # JOIN TYPES
@@ -49,7 +49,7 @@ JOIN_TYPES = [
     "full join",
     "self join",
     "natural join",
-    "join"
+    "join",
 ]
 
 # REGULAR EXPRESSIONS
