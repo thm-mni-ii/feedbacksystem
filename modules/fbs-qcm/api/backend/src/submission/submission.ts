@@ -12,6 +12,17 @@ interface FillInTheBlanksAnswer {
     text: string,
     order: number
 }
+interface FillInTheBlanksResponse {
+    score: number,
+    texts: FillInTheBlanksIndividual[]
+}
+
+interface FillInTheBlanksIndividual {
+    text: string,
+    order: number,
+    correct: boolean
+}
+
 
 interface entry  {
     text: string,
@@ -27,6 +38,18 @@ interface ChoiceAnswer {
 interface entry {
     id: number,
     text: string
+}
+
+interface ChoiceReply {
+    score: number,
+    row: ChoiceReplyRow[]
+}
+
+interface ChoiceReplyRow {
+    id:number,
+    text: string,
+    entries: entry[],
+    correct: number[]
 }
 
 export async function submitSessionAnswer(tokenData: JwtPayload, requestData: any) {
@@ -104,7 +127,7 @@ function checkSubmission(answer: any, question: Question) {
     console.log(QuestionType.FillInTheBlanks);
     console.log(QuestionType.Choice);
     if(questionType == QuestionType.Choice) {
-        return checkChoice2(answer, question);
+        return checkChoice(answer, question);
     } else if(questionType == QuestionType.FillInTheBlanks) {
         return checkClozeText(answer as FillInTheBlanksAnswer[], question);
     } else if(questionType == QuestionType.SQL) {
@@ -118,18 +141,24 @@ function checkSQL(answer: any, question: Question) {
     return 0;
 }
 
-function checkChoice2(answer: ChoiceAnswer[], question: Question) {
+function checkChoice(answer: ChoiceAnswer[], question: Question) {
     let correctAnswers = 0;
     let falseAnswers = 0;
     let falsePositives = 0;
     let falseNegatives = 0;
     const configuration = question.questionconfiguration as Choice;
     const answerRows: number[][] = getSelectedIds(answer);
+    let response: ChoiceReply = {} as ChoiceReply;
     console.log(configuration);
     for(let i = 0; i < configuration.optionRows.length; i++) {
         const correctList = configuration.optionRows[i].correctAnswers;
         const answerList = answerRows[i];
         const result = compareNumberLists(correctList, answerList);
+        let replyRow: ChoiceReplyRow = {} as ChoiceReplyRow;
+        replyRow.id = configuration.optionRows[i].id;
+        replyRow.text = configuration.optionRows[i].text;
+        replyRow.correct = result.inBothLists;
+        response.row[response.row.length] = replyRow;
         console.log(result);
         correctAnswers += result.inBothLists.length;
         falseAnswers += result.onlyInList1.length + result.onlyInList2.length;
@@ -141,11 +170,13 @@ function checkChoice2(answer: ChoiceAnswer[], question: Question) {
     console.log(`falsePositives: ${falsePositives}`);
     console.log(`falseNegatives: ${falseNegatives}`);
     const score = correctAnswers / (correctAnswers + falseAnswers);
+    response.score = score;
     console.log(score);
-    if(falseAnswers === 0 ) {
-        return AnswerScore.correct;
-    }
-    return AnswerScore.incorrect;
+    return response;
+}
+
+function createResponse() {
+
 }
 
 function getSelectedIds(answer: ChoiceAnswer[]) {
@@ -170,141 +201,50 @@ function compareNumberLists(list1: number[], list2: number[]) {
         onlyInList2
     };
 }
-/*
-function checkChoice(answer: ChoiceAnswer, question: Question) {
-    console.log(answer);
-    let rows: number[] = [];
-    console.log(1);
-    for(let i = 0; i < answer.rows.length; i++) {
-        rows.push(answer.rows[i].id);
-    }
-    let columns: number[] = [];
-    for(let i = 0; i < answer.columns.length; i++) {
-        columns.push(answer.columns[i].id);
-    }
-    console.log(2);
-    let newMatrix2: number[][] = [];
-    if(answer.matrix.length > 1) {
-        const newMatrix = orderRows(answer.matrix, rows); 
-        newMatrix2 = orderColumns(newMatrix, columns);
-    } else {
-        newMatrix2 = answer.matrix;
-    }
-    const configuration = question.questionconfiguration as Choice;
-    const answerColumns = configuration.answerColumns; 
-    console.log(answerColumns);   
-    console.log(configuration);
-    console.log(3);
-    console.log(newMatrix2);
-    let correctAnswers = 0;
-    let falseAnswers = 0;
-    let falsePositives = 0;
-    let falseNegatives = 0;
-    console.log(4);
-
-    for(let i = 0; i < answerColumns.length; i++) {
-        console.log(5);
-        for(let j = 0; j < newMatrix2[i].length; j++) {
-            console.log(`richtige Antworten: ${answerColumns[i].correctAnswers}`);
-            if(newMatrix2[i][j] === 1) {
-                console.log(`${j} ist wahr`);
-                if(answerColumns[i].correctAnswers.includes(j)) {
-                    console.log("correct");
-                    correctAnswers++;
-                } else {
-                    console.log("incorrect");
-                    falseAnswers++;
-                    falsePositives++;
-                }
-            } else {
-                console.log(`${j} ist falsch`);
-                if(answerColumns[i].correctAnswers.includes(j)) {
-                    console.log("incorrect");
-                    falseAnswers++;
-                    falseNegatives++;
-                } else {
-                    console.log("correct");
-                    correctAnswers++;
-                }
-            }
-        }
-    }
-    console.log(`falseAnswers: ${falseAnswers}`);
-    console.log(`correctAnswers: ${correctAnswers}`);
-    console.log(`falsePositives: ${falsePositives}`);
-    console.log(`falseNegatives: ${falseNegatives}`);
-    const score = correctAnswers / (correctAnswers + falseAnswers);
-    console.log(score);
-    if(falseAnswers === 0 ) {
-        return AnswerScore.correct;
-    }
-    return AnswerScore.incorrect;
-}
- */
-function orderRows(matrix: number[][], order: number[]) {
-    let newMatrix2: number[][] = [];
-    for(let i = 0; i < order.length; i++) {
-        newMatrix2[order[i] - 1] = (matrix[i]);
-    }
-    return newMatrix2;
-}
-
-function orderColumns(matrix: number[][], order: number[]) {
-    let newMatrix: number[][] = JSON.parse(JSON.stringify(matrix));
-    for(let i = 0; i < order.length; i++) {
-       for(let j = 0; j < matrix.length; j++) {
-           console.log(matrix);
-            newMatrix[j][order[i]-1] = matrix[j][i]; 
-       }
-    }
-    return newMatrix;
-}
 
 function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
-    console.log("---------------------------------------------------------------------------------------------------------------------");
-    console.log(answer);
-    console.log("---------------------------------------------------------------------------------------------------------------------");
     let blankFields = [];
-    let results = [];
     let numberOfCorrectAnswers = 0;
+    let FillInTheBlanksResponse: FillInTheBlanksResponse = {} as FillInTheBlanksResponse;
     const configuration = question.questionconfiguration as FillInTheBlanks;
-    console.log(configuration.textParts);
-    console.log(question);
     for(let i = 0; i < configuration.textParts.length; i++) {
         if(configuration.textParts[i].isBlank === true) {
             blankFields.push(configuration.textParts[i]);
         }
     }
-    console.log("blankFields");
-    console.log(blankFields);
+
     for(let j = 0; j < blankFields.length; j++) {
         const res = checkSingleWord(answer, blankFields[j]);
-        if(res) {
+        FillInTheBlanksResponse.texts.push(res);
+        if(res.correct) {
             numberOfCorrectAnswers++;
+
         }
-        results.push(res);
     }
-    console.log(results);
-    console.log(numberOfCorrectAnswers);
-    const score: number = numberOfCorrectAnswers / results.length;
-    console.log(score);
-    if(results.length === numberOfCorrectAnswers) {
-        return true;
-    }
-    return false;
+
+    const score: number = numberOfCorrectAnswers / blankFields.length;
+    FillInTheBlanksResponse.score = score;
+    return FillInTheBlanksResponse;
 }
 
 function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
-    console.log("ANFANG");
-    console.log(answer);
-    console.log(blankFields);
+    let evaluation: FillInTheBlanksIndividual = {} as FillInTheBlanksIndividual;
     for(let k = 0; k < answer.length; k++) {
         console.log(answer[k]);
         if(answer[k].text === blankFields.text && answer[k].order === blankFields.order) {
-            return true;
+            evaluation.text = answer[k].text;
+            evaluation.order = answer[k].order;
+            evaluation.correct = true;
+            return evaluation;
+        }
+        if(answer[k].order === blankFields.order) {
+            evaluation.text = answer[k].text;
+            evaluation.order = answer[k].order;
+            evaluation.correct = false;
+            return evaluation;
         }
     }
-    return false;
+    return evaluation;
 }
 
 async function findFirstFalseAnswerInSession(tokenData: JwtPayload, catalog: string, course: string) {
