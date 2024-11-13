@@ -2,7 +2,6 @@ import sqlparse
 from . import constants as c
 from . import table_distance as tab_dist
 from . import format as f
-from . import distance_calc as distance_calc
 import re
 from . import result_log as log
 
@@ -10,28 +9,28 @@ from . import result_log as log
 def extract_tables(ref, query):
     ref_tab_name: list[str] = []
     query_tab_name: list[str] = []
-    
+
     ref_alias_map: dict[str, str] = {}
     query_alias_map: dict[str, str] = {}
-    
+
     ref_join_list: list[str] = []
     query_join_list: list[str] = []
-    
+
     ref_comp_list: list[str] = []
     query_comp_list: list[str] = []
-    
+
     ref_order_list: list[str] = []
     query_order_list: list[str] = []
-    
+
     ref_group_list: list[str] = []
     query_group_list: list[str] = []
-    
+
     ref_having_list: list[str] = []
     query_having_list: list[str] = []
-    _token_iteration(ref, ref_alias_map, ref_tab_name, ref_join_list, 
+    _token_iteration(ref, ref_alias_map, ref_tab_name, ref_join_list,
                      ref_comp_list, ref_order_list, ref_group_list,
                      ref_having_list)
-    _token_iteration(query, query_alias_map, query_tab_name, 
+    _token_iteration(query, query_alias_map, query_tab_name,
                      query_join_list, query_comp_list, query_order_list,
                      query_group_list, query_having_list)
 
@@ -46,7 +45,7 @@ def extract_tables(ref, query):
     log.write_to_log(f"order by attributes: reference: {ref_order_list}; query: {query_order_list}\n")
 
     comparison_distance = tab_dist.comparison_distance(ref_comp_list, query_comp_list)
-    
+
     order_distance = tab_dist.group_and_order_by_distance(ref_order_list, query_order_list)
 
     group_by_distance = tab_dist.group_and_order_by_distance(ref_group_list, query_group_list)
@@ -67,30 +66,31 @@ def _token_iteration(tokens: sqlparse.sql.Statement, tab_map: dict, name_list: l
                 _token_iteration(token,tab_map,name_list,join_list,comp_list,order_list,group_list,having_list)
             # check and extract tables used after the FROM keyword
             if token.ttype == sqlparse.tokens.Keyword and token.value == c.FROM:
-                extractedFrom = _extract_from(tokens, i, tab_map, name_list)
-                for fromToken in extractedFrom:
+                extracted_from = _extract_from(tokens, i, tab_map, name_list)
+                for from_token in extracted_from:
                     #check if FROM contains subquery
-                    if isinstance(fromToken,sqlparse.sql.Parenthesis):
+                    if isinstance(from_token,sqlparse.sql.Parenthesis):
                         #call the method recursively to iterate through the tokens of the subquery
-                        _token_iteration(fromToken.tokens, tab_map, name_list, join_list, comp_list, order_list, group_list, having_list)
+                        _token_iteration(from_token.tokens, tab_map, name_list, join_list, comp_list, order_list, group_list, having_list)
             # check and extract the JOIN keywords and tables used after it
             if token.ttype == sqlparse.tokens.Keyword and token.value in c.JOIN_TYPES:
-                extractedJoin = _extract_join(token, tokens, i, tab_map, name_list, join_list)
+                extracted_join = _extract_join(token, tokens, i, tab_map, name_list, join_list)
                 #check if JOIN contains subquery
-                for subquery in extractedJoin:
+                for subquery in extracted_join:
                     if isinstance(subquery,sqlparse.sql.Parenthesis):
                         #call the method recursively to iterate through the tokens of the subquery
                         _token_iteration(subquery.tokens, tab_map, name_list, join_list, comp_list, order_list, group_list, having_list)
 
             # check and extract the comparison equations after ON condition
             if token.ttype == sqlparse.tokens.Keyword and token.value == c.ON:
-                extractedOn = _extract_on(tokens, i, comp_list)
-                for onToken in extractedOn:
-                    _token_iteration(onToken, tab_map, name_list, join_list, comp_list, order_list, group_list,having_list)
+                extracted_on = _extract_on(tokens, i, comp_list)
+                if(extracted_on != None):
+                    for onToken in extracted_on:
+                        _token_iteration(onToken, tab_map, name_list, join_list, comp_list, order_list, group_list,having_list)
             # check and extract the WHERE keyword and comparison equations after it
             if isinstance(token, sqlparse.sql.Where):
-                extractedWhere = _extract_where(token, comp_list, join_list)
-                for whereToken in extractedWhere:
+                extracted_where = _extract_where(token, comp_list, join_list)
+                for whereToken in extracted_where:
                     if isinstance(whereToken, sqlparse.sql.Parenthesis):
                         _token_iteration(whereToken.tokens, tab_map, name_list, join_list, comp_list, order_list,group_list, having_list)
             # check and extract attributes and iterate through group by clause
@@ -101,22 +101,30 @@ def _token_iteration(tokens: sqlparse.sql.Statement, tab_map: dict, name_list: l
                 _extract_order_by(tokens, i, order_list)
 
 
+def _search_for_subqueries(tokens):
+    subquery_list = []
+    for curToken in tokens:
+        if isinstance(curToken,sqlparse.sql.Parenthesis):
+            subquery_list.append(curToken)
+    return subquery_list
+
+
 def _extract_from(tokens, i, tab_map, name_list):
     next_token = tokens[i + 2] # +2 to bypass whitespace token
     #List for all subqueries
-    subQueryList = []
+    subquery_list = []
     # if singular table used, append it to list
     if isinstance(next_token, sqlparse.sql.Identifier):
         _extract_table_elements(next_token, tab_map, name_list)
-        subQueryList += _search_for_subqueries(next_token.tokens)
+        subquery_list += _search_for_subqueries(next_token.tokens)
 
     # if multiple tables used, iterate through them and save them to list
     elif isinstance(next_token, sqlparse.sql.IdentifierList):
         for t in list[sqlparse.sql.Identifier](next_token.get_identifiers()):
             _extract_table_elements(t, tab_map, name_list)
-            subQueryList += _search_for_subqueries(t.tokens)
+            subquery_list += _search_for_subqueries(t.tokens)
     #return list of subqueries
-    return subQueryList
+    return subquery_list
 
 
 
@@ -132,39 +140,64 @@ def _extract_on(tokens, i, comp_list):
     if isinstance(next_token, sqlparse.sql.Comparison):
         # If it is a Comparison, format it to remove whitespaces
         # The formatted comparison is appended to comp_list
-        queryList = _search_for_subqueries(next_token.tokens)
+        query_list = _search_for_subqueries(next_token.tokens)
         comp_list.append(f.format_like(f.format_whitespace(next_token.value)))
 
-        #check if AND exists
-        if(len(tokens)>i+4):
+        #check if AND or OR exists
+        if len(tokens)>i+4:
             next_token = tokens[i+4]
-            if(next_token.value == c.AND):
-                queryList+= _extract_on(tokens, i+4,comp_list)
-            elif (next_token.value == c.OR):
-                queryList += _extract_on(tokens, i + 4, comp_list)
-        return queryList
+            if next_token.value == c.AND:
+                query_list+= _extract_on(tokens, i+4,comp_list)
+            elif next_token.value == c.OR:
+                query_list += _extract_on(tokens, i + 4, comp_list)
+
+        for j, token in enumerate(tokens):
+            if token.value == c.BETWEEN:
+                between_str = ""
+                for k in range(j - 2, j + 7):  # BETWEEN Bereich festlegen
+                    between_str += tokens[k].value
+                comp_list.append(between_str)
+
+            elif token.value in {c.IN, c.LIKE}:
+                in_like_str = ""
+                for k in range(j - 2, j + 2):  # IN und LIKE Bereich festlegen
+                    in_like_str += tokens[k].value
+                comp_list.append(in_like_str)
+        return query_list
+
 
 
 def _extract_where(token, comp_list, join_list):
     _extract_and_format_between(token, comp_list)
-    wherelist = []
-
-    for t in token.tokens:
+    where_list = []
+    print(token)
+    for i, t in enumerate(token.tokens):
+        print(t)
         # add comparison to the list if found
         if isinstance(t, sqlparse.sql.Comparison):
             #print("extr token comp ", t.tokens)
             comp_list.append(f.format_like(f.format_whitespace(t.value)))
-            wherelist.append(_search_for_subqueries(t.tokens));
+            where_list.append(_search_for_subqueries(t.tokens))
         # save everything inside a parenthesis
         if isinstance(t, sqlparse.sql.Parenthesis):
             #print(f"PARA {t.tokens}")
             comp_list.append(f.format_like(f.format_parenthesis(t.value)))
-
+        if t.value == c.BETWEEN:
+            str = ""
+            for j in range(i-2,i+7):
+                str+=token.tokens[j].value
+            comp_list.append(str)
+        if(t.value == c.IN or t.value == c.LIKE):
+            str = ""
+            print("start")
+            for j in range(i-2,i+2):
+                str += token.tokens[j].value
+            comp_list.append(str)
     # append where keyword to the list of clauses MAYBE CHANGE IN DIFFERENT ARRAYS
     join_list.append(token.token_first().value)
 
 
-    return wherelist
+    return where_list
 
 
 def _extract_group_by(tokens, i, group_list, having_list):
@@ -175,8 +208,8 @@ def _extract_group_by(tokens, i, group_list, having_list):
         if isinstance(t, sqlparse.sql.Token):
             # Check if the token is of a type that can be part of a GROUP BY clause
             if isinstance(tokens[j], (
-                    sqlparse.sql.IdentifierList, sqlparse.sql.Identifier, 
-                    sqlparse.sql.Operation, sqlparse.sql.Function, 
+                    sqlparse.sql.IdentifierList, sqlparse.sql.Identifier,
+                    sqlparse.sql.Operation, sqlparse.sql.Function,
                     sqlparse.sql.Parenthesis)):
                 # If so, extract the attributes from the token and add them to the group_list
                 _extract_group_by_attributes(tokens[j], group_list)
@@ -262,7 +295,7 @@ def _extract_table_elements(token, tab_map, name_list: list):
 def _extract_order_by_attributes(token, order_list: list):
     # Check if the token is of a type that can be part of an ORDER BY clause
     if isinstance(token, (
-            sqlparse.sql.Identifier, sqlparse.sql.Operation, sqlparse.sql.Function, 
+            sqlparse.sql.Identifier, sqlparse.sql.Operation, sqlparse.sql.Function,
             sqlparse.sql.Parenthesis, sqlparse.sql.Comparison)):
         # Check if the token contains the DESC (descending order) keyword
         if re.search(c.DESC, token.value):
@@ -282,7 +315,7 @@ def _extract_order_by_attributes(token, order_list: list):
 
 def _extract_group_by_attributes(token, group_list: list):
     # Check if the token is one of the types that can be part of a GROUP BY clause
-    if isinstance(token, (sqlparse.sql.Identifier, sqlparse.sql.Operation, 
+    if isinstance(token, (sqlparse.sql.Identifier, sqlparse.sql.Operation,
                           sqlparse.sql.Function, sqlparse.sql.Parenthesis)):
         # If it is, format its value to remove excess whitespace and add it to the list
         group_list.append(f.format_whitespace(token.value))
@@ -310,12 +343,6 @@ def _extract_and_format_between(token, comp_list: list):
 
 
 
-def _search_for_subqueries(tokens):
-    subQueryList = []
-    for curToken in tokens:
-        if isinstance(curToken,sqlparse.sql.Parenthesis):
-            subQueryList.append(curToken)
-    return subQueryList
 
 
 
