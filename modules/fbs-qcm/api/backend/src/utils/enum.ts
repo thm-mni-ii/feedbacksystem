@@ -13,7 +13,14 @@ export enum SessionStatus {
 
 export enum Access {
     student = 0,
-    tutorInCourse = 1,
+    tutor = 1,
     moderator = 2,
+    admin = 3
+}
+
+export enum CourseAccess {
+    studentInCourse = 0,
+    tutorInCourse = 1,
+    docentInCourse = 2,
     admin = 3
 }
