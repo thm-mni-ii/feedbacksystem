@@ -18,22 +18,15 @@ export async function getTeacherCourses(token: string, tokenData: JwtPayload) {
 export async function getCourses(token: string) {
     try {
         const url = process.env.FBS_BASE_URL
-        console.log("------------------------------------------------");
-        console.log(token);
-        console.log("------------------------------------------------");
         const agent = new https.Agent({  
             rejectUnauthorized: false
           });
-        const token2 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRfYXV0aGVudGljYXRpb24iLCJpZCI6OTczLCJ1c2VybmFtZSI6Impod3M0MiIsImdsb2JhbFJvbGUiOiJVU0VSIiwiY291cnNlUm9sZXMiOiJ7XCIxODdcIjpcIlRVVE9SXCJ9IiwiaWF0IjoxNzI4MzE2OTI2LCJleHAiOjE3MjgzMTcyMjZ9.BdpzQb-VzEE7iI5G-ZqOqOp7wN5R1ZT1VmHWLfvWBXg";
         const response = await axios.get(`${url}/api/v1/courses`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }, 
             httpsAgent: agent
         });
-        console.log("------------------------------------------------");
-        console.log(response.data);
-        console.log("------------------------------------------------");
         return response.data;
     } catch (error) {
         console.log(error);

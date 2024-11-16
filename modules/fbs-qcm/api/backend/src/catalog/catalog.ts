@@ -12,6 +12,8 @@ import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
 import { getCourses } from "../course/course";
 import { Catalog } from "../model/Catalog";
+import { authenticateInCourse } from "../authenticate";
+import { CourseAccess } from "../utils/enum";
 
 interface catalog {
   name: string;
@@ -99,9 +101,10 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
   }
 }
 
-// get all catalogs from courseid(in params)
 export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
-  console.log(courseId);
+  if(!authenticateInCourse(tokenData, CourseAccess.docentInCourse, courseId)) {
+    return -1; 
+  }
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =

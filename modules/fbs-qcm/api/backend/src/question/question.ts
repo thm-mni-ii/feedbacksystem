@@ -14,8 +14,9 @@ import {
   IsOwner,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
-import { AnswerScore, SessionStatus } from "../utils/enum";
+import { Access, AnswerScore, SessionStatus } from "../utils/enum";
 import { Question } from "../model/Question";
+import { authenticate } from "../authenticate";
 type questionInsertionType = Omit<Question, "_id">;
 
 export async function getQuestionById(
@@ -31,7 +32,7 @@ export async function getQuestionById(
   const query = {
     _id: new mongoDB.ObjectId(questionId),
   };
-  if(tokenData.globalRole === "ADMIN" || tokenData.globalRole === "MODERATOR") {
+  if(authenticate(tokenData, Access.moderator)) {
     const data = await collection.findOne(query);
     if (data !== null) {
       return data;
@@ -48,7 +49,6 @@ export async function getQuestionById(
   if (catalogWithQuestion === false) {
     return -1;
   }
- 
 }
 
 export async function addQuestionToCatalog(
@@ -147,7 +147,7 @@ export async function deleteQuestionById(
 }
 
 export async function postQuestion(question: Question, tokenData: JwtPayload) {
-  if(tokenData.globalRole === "USER") {
+  if(!authenticate(tokenData, Access.moderator)) {
     return 1;
   }
   const database: mongoDB.Db = await connect();
@@ -165,12 +165,11 @@ export async function postQuestion(question: Question, tokenData: JwtPayload) {
 
 export async function putQuestion(question: Question, tokenData: JwtPayload) {
   const database: mongoDB.Db = await connect();
-  if(tokenData.globalRole === "USER") {
-    return 1;
-  }
   const questionCollection = database.collection("question");
-  if (!(await IsOwner(question._id as unknown as string, tokenData, questionCollection))) {
-    return -1;
+  if(!(await IsOwner(question._id as unknown as string, tokenData, questionCollection))) {
+      if(!authenticate(tokenData, Access.admin)) {
+          return -1;
+      }
   }
   const filter = {
     _id: new mongoDB.ObjectId(question._id),
@@ -182,7 +181,7 @@ export async function putQuestion(question: Question, tokenData: JwtPayload) {
 }
 
 export async function getAllQuestions(tokenData: JwtPayload) {
-  if(tokenData.globalRole === "ADMIN"  || tokenData.globalRole === "MODERATOR") {
+  if(authenticate(tokenData, Access.moderator)) {
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection =
       database.collection("question");
@@ -218,17 +217,11 @@ export async function getCurrentQuestion(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  console.log(
-    "------------------------------------------------------------------------------------------------------------------------------"
-  );
-  console.log(tokenData);
-  console.log(catalogId);
   const userCourses = getUserCourseRoles(tokenData);
   const access = await getCatalogPermission(userCourses, catalogId);
   if (!access) {
     return -1;
   }
-  console.log("HIUERRRRRRRRRRRR");
   const database: mongoDB.Db = await connect();
   const questionCollection: mongoDB.Collection =
     database.collection("question");
@@ -277,15 +270,12 @@ async function getQuestion(
   const catalogQuery = {
     catalog: catalogIdObject,
   };
-  console.log(catalogQuery);
   const catalog: any = await questionInCatalogCollection
     .find(catalogQuery)
     .toArray();
-  console.log(catalog);
   const questions: mongoDB.ObjectId[] = catalog.map(
     (entry: any) => entry.question
   );
-  console.log(questions);
   const query = {
     user: tokenData.id,
     question: { $in: questions },
@@ -295,8 +285,6 @@ async function getQuestion(
     .sort({ timestamp: -1 })
     .limit(1)
     .toArray();
-  console.log("lastSubmission");
-  console.log(lastSubmission);
   if (lastSubmission == null || lastSubmission.length == 0) {
     return 0;
   }
@@ -314,8 +302,6 @@ async function getQuestion(
   if (forwarding == null || forwarding.length == 0) {
     return -1;
   }
-  console.log(forwarding);
-  console.log(evaluation);
   if (evaluation == AnswerScore.correct) {
     return forwarding[AnswerScore.correct];
   }
