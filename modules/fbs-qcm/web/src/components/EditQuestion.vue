@@ -56,7 +56,7 @@ onBeforeUnmount(() => {
 
 const checkMultipleRows = () => {
   const optionRows = question.value.questionconfiguration.optionRows
-  const rowsWithAnswers = optionRows.filter((row) => row.correctAnswers.length > 0)
+  const rowsWithAnswers = optionRows.filter((row: any) => row.correctAnswers.length > 0)
   if (rowsWithAnswers.length > 1) {
     question.value.questionconfiguration.multipleRow = true
   }
@@ -84,7 +84,7 @@ const addOptionCol = () => {
   }
 
   answerColumns.push({
-    id: answerColumns.length,
+    id: answerColumns.length + 1,
     name: ''
   })
 

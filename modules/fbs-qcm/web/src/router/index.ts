@@ -20,8 +20,7 @@ const router = createRouter({
       component: () => import('../views/NewQuestionView.vue')
     },
     {
-      path: '/catalogSession',
-      // :catalogId
+      path: '/catalogSession/:courseId?/:catalogId?',
       name: 'catalogSession',
       component: () => import('../views/CatalogSessionView.vue')
     },
@@ -39,11 +38,6 @@ const router = createRouter({
       path: '/deleteQuestion',
       name: 'delete',
       component: () => import('../views/DeleteQuestionView.vue')
-    },
-    {
-      path: '/editQuestion',
-      name: 'edit',
-      component: () => import('../views/EditQuestionView.vue')
     },
     {
       path: '/allQuestions',
