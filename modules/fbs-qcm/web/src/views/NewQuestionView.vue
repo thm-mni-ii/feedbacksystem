@@ -32,7 +32,7 @@ const addOptionRow = () => {
 
 const addOptionCol = () => {
   question.value.questionconfiguration.answerColumns.push({
-    id: question.value.questionconfiguration.answerColumns.length,
+    id: question.value.questionconfiguration.answerColumns.length + 1,
     name: '',
     correctAnswers: []
   })

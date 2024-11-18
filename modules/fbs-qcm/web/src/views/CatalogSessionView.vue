@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
 import questionService from '@/services/question.service'
+import sessionService from '@/services/session.service'
 
 import type Catalog from '../model/Catalog'
 import type { Choice } from '@/model/questionTypes/Choice'
@@ -11,55 +12,14 @@ import type QuestionType from '@/enums/QuestionType'
 
 const route = useRoute()
 
-const secondQuestion = questionService.getQuestion('6711ef0ac939e62058234a2c')
+const showErrorPage = ref<Boolean>(false)
+
+const questionData = ref<Question | undefined>(undefined)
 
 export interface SelectedAnswers {
   rowId: number
-  colId: number | string
+  selectedColumns: number[]
 }
-
-const questionData = ref<Question>({
-  _id: '6638fbdb7cbf615381a90abe',
-  owner: 1,
-  questiontext: 'Was ist 2 + 57?',
-  questiontags: ['komplex', 'frage'],
-  questiontype: 'Choice' as QuestionType,
-  questionconfiguration: {
-    multipleRow: true,
-    multipleColumn: true,
-    answerColumns: [
-      {
-        id: 1,
-        name: 'first col',
-        correctAnswers: [0, 2]
-      },
-      {
-        id: 2,
-        name: 'second col',
-        correctAnswers: [1]
-      },
-      {
-        id: 3,
-        name: 'third Col',
-        correctAnswers: [1, 2]
-      }
-    ],
-    optionRows: [
-      {
-        id: 0,
-        text: 'erste Antwort'
-      },
-      {
-        id: 1,
-        text: 'zweite Antwort'
-      },
-      {
-        id: 2,
-        text: 'dritte antworttt'
-      }
-    ]
-  } as Choice
-})
 
 const catalog = ref<Catalog>({
   id: route.params.catalogId,
@@ -69,7 +29,7 @@ const catalog = ref<Catalog>({
   requirements: null
 })
 
-const submitAnswer = (answer: SelectedAnswers[]) => {
+const submitAnswer = (answer: any[]) => {
   console.log('Selected Answers:', answer)
   // axios.post('/api_v1/submitSessionAnswer', selectedAnswers, config)
   //     .then((res) => console.log(res))
@@ -77,14 +37,36 @@ const submitAnswer = (answer: SelectedAnswers[]) => {
 }
 
 onMounted(() => {
-  console.log(route.params.catalogId)
-  console.log(secondQuestion)
-  questionService.getQuestion('6710d767c939e62058234a2b')
+  // TODO: Check for ongoing session
+  // TODO: no ongoing session > check parameter
+  questionService
+    .getQuestion('6736fcf441f1abde09dc8c88')
+    .then((response) => {
+      questionData.value = response.data
+      console.log('Question Data set:', questionData.value)
+    })
+    .catch((error) => {
+      console.error('Fehler beim Abrufen der Frage:', error)
+    })
+  sessionService.startSession('6710d767c939e62058234a2b', 1).then((res) => console.log(res))
+  console.log(questionData)
+  if (route.params.catalogId && route.params.courseId) {
+    console.log(route.params.catalogId)
+    // Start-session
+  } else {
+    // show keine aktive session - starte session über katalog
+    console.log('error view anzeigen')
+    showErrorPage.value = true
+  }
+  console.log(route.params.courseId)
 })
 </script>
 
 <template>
-  <v-form class="mt-12" @submit.prevent="submitAnswer">
+  <v-card v-if="showErrorPage" class="h-52 mx-auto">
+    <h2>Error: Could not find the page you're looking for</h2>
+  </v-card>
+  <v-form v-else class="mt-12" @submit.prevent="submitAnswer">
     <v-sheet
       class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
       elevation="4"
@@ -111,7 +93,7 @@ onMounted(() => {
         <CatalogSession
           v-if="questionData"
           :question="questionData"
-          @submit-answer="(a) => submitAnswer(a)"
+          @submit-answer="(a) => submitAnswer(a.selectedAnswers)"
         />
       </v-responsive>
     </v-sheet>

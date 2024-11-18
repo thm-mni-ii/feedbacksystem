@@ -1,37 +1,19 @@
 <script setup lang="ts">
 import { ref, defineProps } from 'vue'
-import type { SelectedAnswers } from '@/views/CatalogSessionView.vue'
-
 defineProps({
   question: { type: Object, required: true },
   currentQuestionIndex: { type: Number, default: 0 }
 })
 
 const emit = defineEmits(['submit-answer'])
-const selectedAnswers = ref<SelectedAnswers[]>([])
-
-const toggleAnswer = (rowId: number, colId: number | string) => {
-  const index = selectedAnswers.value.findIndex(
-    (answer) => answer.rowId === rowId && answer.colId === colId
-  )
-  if (index === -1) {
-    selectedAnswers.value.push({ rowId, colId })
-    showAnswers()
-  } else {
-    selectedAnswers.value.splice(index, 1)
-    showAnswers()
-  }
-}
-
-const isChecked = (rowId: number, colId: number | string) => {
-  return selectedAnswers.value.some((answer) => answer.rowId == rowId && answer.colId === colId)
-}
+const selectedAnswers = ref([])
 
 const showAnswers = () => {
   console.log(selectedAnswers.value)
 }
 
 const submitAnswer = () => {
+  console.log(selectedAnswers.value)
   emit('submit-answer', selectedAnswers.value)
 }
 </script>
@@ -52,7 +34,7 @@ const submitAnswer = () => {
         <v-checkbox
           v-model="selectedAnswers"
           :label="`${option.text}`"
-          :value="option.text"
+          :value="option.id"
           color="primary"
           class="mx-auto py-auto"
           hide-details
@@ -83,18 +65,15 @@ const submitAnswer = () => {
       <tbody>
         <tr v-for="option in question.questionconfiguration.optionRows" :key="option.id">
           <td class="text-left">{{ option.text }}</td>
-          <td
-            v-for="column in question.questionconfiguration.answerColumns"
-            :key="column.id"
-            :messages="false"
-          >
+          <td v-for="column in question.questionconfiguration.answerColumns" :key="column.id">
             <label>
               <v-checkbox
-                :input-value="isChecked(option.id, column.id)"
+                v-model="selectedAnswers"
                 color="primary"
                 class="mx-auto"
-                :hide-details="true"
-                @click="toggleAnswer(option.id, column.id)"
+                hide-details
+                :value="{ row: option.id, col: column.id }"
+                @change="showAnswers()"
               ></v-checkbox>
             </label>
           </td>
