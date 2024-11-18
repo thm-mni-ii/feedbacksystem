@@ -184,10 +184,12 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
       "OK"
     } else {
       val correct = results.count(c => c.success)
-      val hints = results.zip(excelMediaInformation.tasks)
-        .filter(t => !t._1.success)
-        .map(t => buildTaskResultText(t._1, t._2))
-        .mkString("\n")
+      val hints = if (!excelMediaInformation.disableFeedback) {
+        results.zip(excelMediaInformation.tasks)
+          .filter(t => !t._1.success)
+          .map(t => buildTaskResultText(t._1, t._2))
+          .mkString("\n")
+      } else {""}
       val res = f"$correct von ${results.length} Unteraufgaben richtig."
 
       if (hints.nonEmpty) {
