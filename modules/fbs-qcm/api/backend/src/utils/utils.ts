@@ -151,7 +151,7 @@ export async function checkCourseAccess(
   return true;
 }
 
-export async function getAllQuestionsInCourse(courseId: string) {
+export async function getAllQuestionsInCourse(courseId: number) {
   const database: mongoDB.Db = await connect();
   const courseIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(courseId);
   const courseCollection: mongoDB.Collection = database.collection("course");
@@ -209,13 +209,8 @@ export async function getCatalogPermission(
   adminCourses: number[],
   catalog: string
 ) {
-  console.log("permissio");
-  console.log(adminCourses);
-  console.log(catalog);
   const database: mongoDB.Db = await connect();
   const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
-  console.log(catalogId);
-  console.log(adminCourses);
   const courseQuery = {
     course: { $in: adminCourses },
     catalog: catalogId,

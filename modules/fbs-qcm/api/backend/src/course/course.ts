@@ -4,6 +4,8 @@ import { checkCourseAccess, getAdminCourseRoles, getAllQuestionsInCourse, getUse
 import * as mongoDB from "mongodb";
 import axios from "axios";
 import https from "https";
+import { authenticateInCourse } from "../authenticate";
+import { CourseAccess } from "../utils/enum";
 
 
 //i don't know what's going on
@@ -55,12 +57,10 @@ function findMatchingCourses(coursesEnrolled: number[], allCourses: any[]) {
     return courses;
 }
 
-export async function allQuestionInCourse(tokenData: JwtPayload, courseId: string) {
-    const permission = await checkCourseAccess(tokenData, courseId);
-    if(!permission) {
+export async function allQuestionInCourse(tokenData: JwtPayload, courseId: number) {
+    if(!authenticateInCourse(tokenData, CourseAccess.tutorInCourse, courseId)) {
         return -1;
     }
-    console.log(4);
     const data = await getAllQuestionsInCourse(courseId);
     if(data === null) {
         return -1;

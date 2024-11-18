@@ -12,8 +12,8 @@ import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
 import { getCourses } from "../course/course";
 import { Catalog } from "../model/Catalog";
-import { authenticateInCourse } from "../authenticate";
-import { CourseAccess } from "../utils/enum";
+import { authenticate, authenticateInCourse } from "../authenticate";
+import { Access, CourseAccess } from "../utils/enum";
 
 interface catalog {
   name: string;
@@ -35,8 +35,7 @@ export async function postCatalog(
   tokenData: JwtPayload,
   course: number
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
-  if (adminCourses.length === 0) {
+  if(!authenticate(tokenData, Access.moderator)) {
     return -1;
   }
   const database: mongoDB.Db = await connect();
@@ -86,7 +85,6 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
   const catalogInCourse = await catalogInCourseCollection.findOne({
     catalog: new mongoDB.ObjectId(catalogId),
   });
-
   if (data != null) {
     const res: Catalog = {
       id: data._id as unknown as string,
@@ -194,9 +192,6 @@ export async function putCatalog(
     catalogs: catalogIdObject,
   };
   await catalogCollection.find(catalogQuery).toArray();
-  const getCourseNumberQuery = {
-    _id: courseIdObject,
-  };
   const courses = await getCourses(token);
   const couresExist = courses.some((obj: any) => obj.id === course);
   if (!couresExist) {
@@ -326,38 +321,6 @@ async function createChildrenObjects(question: any, allConnections: any[]) {
   return children;
 }
 
-function createTreeLayer(
-  layer: Object[][],
-  allConnections: any[],
-  allQuestions: any[]
-) {
-  const data = layer.flat();
-  let newLayer: Object[][] = [];
-  let index = 0;
-  for (let i = 0; i < data.length; i++) {
-    index++;
-    let entry: Object[] = [];
-    const connections = findConnection(data[i], allConnections);
-    if (connections == -1 || connections == -2) {
-      continue;
-    }
-    for (const key in connections) {
-      if (connections[key] == "") {
-        continue;
-      } else {
-        for (let k = 0; k < allQuestions.length; k++) {
-          if (allQuestions[k]._id.equals(connections[key])) {
-            entry.push(allQuestions[k]);
-            break;
-          }
-        }
-      }
-    }
-    newLayer.push(entry);
-  }
-  return newLayer;
-}
-
 export async function allQuestionsInCatalog(
   tokenData: JwtPayload,
   catalogId: string
@@ -365,7 +328,7 @@ export async function allQuestionsInCatalog(
   const adminCourses = getAdminCourseRoles(tokenData);
   const permission = await getCatalogPermission(adminCourses, catalogId);
   if (!permission) {
-    console.log("OOOF");
+    console.log("No permissions to catalog");
     return -1;
   }
   const database: mongoDB.Db = await connect();
@@ -397,32 +360,4 @@ function findConnection(question: any, allConnections: any[]) {
     }
   }
   return -1;
-}
-
-async function moveCatalogInCourses(
-  adminCourses: number[],
-  catalogInCourseCollection: mongoDB.Collection,
-  courseIdObject: mongoDB.ObjectId,
-  catalogIdObject: mongoDB.ObjectId
-) {
-  const checkQuery = {
-    course: { $in: adminCourses },
-    catalog: catalogIdObject,
-  };
-  const res = await catalogInCourseCollection.findOne(checkQuery);
-  if (res == null || res.length == 0) {
-    return -1;
-  }
-  const notChangedQuery = {
-    course: courseIdObject,
-    catalog: catalogIdObject,
-  };
-  const alreadyExist = catalogInCourseCollection.findOne(notChangedQuery);
-  console.log("alreadyExist");
-  console.log(alreadyExist);
-  if (alreadyExist !== null) {
-    return 0;
-  }
-
-  return 0;
 }

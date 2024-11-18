@@ -122,16 +122,13 @@ export async function deleteQuestionById(
   questionId: string,
   tokenData: JwtPayload
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
   const questionIdObject = new mongoDB.ObjectId(questionId);
   const query = {
     _id: new mongoDB.ObjectId(questionId),
   };
   const database: mongoDB.Db = await connect();
   const collection: mongoDB.Collection = database.collection("question");
-  const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
-  const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const questionCollection: mongoDB.Collection = database.collection("question");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
@@ -229,9 +226,8 @@ export async function getCurrentQuestion(
     database.collection("submission");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  let newQuestionId = await getQuestion(
+  let newQuestionId = await getQuestionId(
     tokenData,
-    questionCollection,
     submissionCollection,
     catalogId,
     questionInCatalogCollection
@@ -259,9 +255,8 @@ export async function getCurrentQuestion(
   return createQuestionResponse(newQuestion);
 }
 
-async function getQuestion(
+async function getQuestionId(
   tokenData: JwtPayload,
-  questionCollection: mongoDB.Collection,
   submissionCollection: mongoDB.Collection,
   catalogId: string,
   questionInCatalogCollection: mongoDB.Collection
@@ -312,10 +307,10 @@ async function getQuestion(
 }
 
 export async function copyQuestion(tokenData: JwtPayload, questionId: string) {
-  const adminCourses = getAdminCourseRoles(tokenData);
+  if(!authenticate(tokenData, Access.moderator)) {
+      return -1;
+  }
   const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);
-  console.log(questionId);
-  console.log(questionIdObject);
   const database: mongoDB.Db = await connect();
   const questionCollection = database.collection("question");
   const questionQuery = {
@@ -341,6 +336,9 @@ export async function copyQuestionToCatalog(
   catalogId: string,
   children: string[]
 ) {
+  if(!authenticate(tokenData, Access.moderator)) {
+      return -1;
+  }
   const adminCourses = getAdminCourseRoles(tokenData);
   const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);
   const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
@@ -369,45 +367,14 @@ export async function copyQuestionToCatalog(
   console.log(result);
   return data.insertedId;
 }
-async function moveQuestionInCatalogs(
-  adminCourses: number[],
-  catalogInCourseCollection: mongoDB.Collection,
-  questionIdObject: mongoDB.ObjectId,
-  catalogIdObject: mongoDB.ObjectId,
-  questionInCatalogCollection: mongoDB.Collection
-) {
-  const catalogWithQuestion: any = checkQuestionAccess(
-    questionIdObject,
-    adminCourses,
-    catalogInCourseCollection,
-    questionInCatalogCollection
-  );
-  if (catalogWithQuestion === false) {
-    return -1;
-  }
-  const filter = {
-    question: questionIdObject,
-  };
-  const update = {
-    $set: { catalog: catalogIdObject } as mongoDB.UpdateFilter<any>,
-  };
-  await questionInCatalogCollection.updateOne(filter, update);
-  return 0;
-}
 
 export async function getCurrentSessionQuestion(tokenData: JwtPayload) {
-  console.log(tokenData);
   const session = await getCurrentSession(tokenData.id);
   if (session.status !== SessionStatus.ongoing) {
     return -1;
   }
-  console.log(session);
   if (session === null) {
     return -1;
   }
-  console.log(session);
-  console.log(
-    "--------------------------------------------------------------------------------------------------------------"
-  );
   return getCurrentQuestion(tokenData, session.catalogId);
 }

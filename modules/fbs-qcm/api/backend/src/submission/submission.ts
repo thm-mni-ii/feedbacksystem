@@ -76,10 +76,6 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
     if(catalog === false) {
         return -1;
     }
-    console.log(requestData);
-    console.log("----------------------");
-    console.log(requestData.answers);
-    console.log("----------------------");
     const correct = await checkAnswer(requestData.answers, questionId, questionCollection);
     console.log(timestamp);
     let sessionObject: any = "";

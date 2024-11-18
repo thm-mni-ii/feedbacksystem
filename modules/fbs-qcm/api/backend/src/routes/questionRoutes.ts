@@ -174,7 +174,7 @@ router.get("/api_v1/question/:id", authenticateToken, async (req, res) => {
           res.sendStatus(401);
         }
         if (req.user !== undefined) {
-          const courseId = req.params.id as string;
+          const courseId = parseInt(req.params.id);
           const data = await allQuestionInCourse(req.user, courseId);
           if (data === -1) {
             res.sendStatus(403);
