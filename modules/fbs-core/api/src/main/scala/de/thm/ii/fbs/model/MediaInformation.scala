@@ -58,7 +58,7 @@ object MediaInformation {
     }
 }
 
-case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation], enableExperimentalFeatures: Boolean = false)
+case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation], enableExperimentalFeatures: Boolean = false, disableFeedback: Boolean = false)
 
 case class ExcelMediaInformation(sheetIdx: Int, changeFields: List[ExcelMediaInformationChange] = List(),
                                  @deprecated("Use checkFields instead") outputFields: String, checkFields: List[ExcelMediaInformationCheck] = List(),
