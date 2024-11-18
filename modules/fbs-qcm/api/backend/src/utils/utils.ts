@@ -225,7 +225,7 @@ export async function getCatalogPermission(
   return false;
 }
 
-export function getUserCourseRoles(tokenData: JwtPayload) {
+export function getStudentCourseRoles(tokenData: JwtPayload) {
   let coursesUser: number[] = [];
   const courseRolesObject = JSON.parse(tokenData.courseRoles);
   for (const courseId in courseRolesObject) {

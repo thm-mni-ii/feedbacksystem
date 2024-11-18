@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { checkCourseAccess, getAdminCourseRoles, getAllQuestionsInCourse, getUserCourseRoles } from "../utils/utils";
+import { checkCourseAccess, getAdminCourseRoles, getAllQuestionsInCourse, getStudentCourseRoles} from "../utils/utils";
 import * as mongoDB from "mongodb";
 import axios from "axios";
 import https from "https";
@@ -37,7 +37,7 @@ export async function getCourses(token: string) {
 }
 
 export async function getStudentCourses(token: string, tokenData: JwtPayload) {
-    const studentCourses = await getUserCourseRoles(tokenData);
+    const studentCourses = getStudentCourseRoles(tokenData);
     const allCourses = await getCourses(token);
     const courses = findMatchingCourses(studentCourses, allCourses);
     return courses;

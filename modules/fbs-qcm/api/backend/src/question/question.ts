@@ -6,12 +6,12 @@ import {
   getCatalogPermission,
   getAllCatalogs,
   checkQuestionAccess,
-  getUserCourseRoles,
   getFirstQuestionInCatalog,
   createQuestionResponse,
   getCurrentSession,
   getDocentCourseRoles,
   IsOwner,
+  getStudentCourseRoles,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { Access, AnswerScore, SessionStatus } from "../utils/enum";
@@ -214,7 +214,7 @@ export async function getCurrentQuestion(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  const userCourses = getUserCourseRoles(tokenData);
+  const userCourses = getStudentCourseRoles(tokenData);
   const access = await getCatalogPermission(userCourses, catalogId);
   if (!access) {
     return -1;

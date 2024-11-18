@@ -1,7 +1,6 @@
 import { JsonWebTokenError, Jwt, JwtPayload } from "jsonwebtoken";
 import { Access, CourseAccess } from "./utils/enum";
-import { getDocentCourseRoles, getTutorCourseRoles, getUserCourseRoles } from "./utils/utils";
-import { getStudentCourses } from "./course/course";
+import { getDocentCourseRoles, getStudentCourseRoles, getTutorCourseRoles} from "./utils/utils";
 
 
 export function authenticate(tokenData: JwtPayload, level: number) {
@@ -32,7 +31,7 @@ function findCourseLevel(tokenData: JwtPayload, course: number) {
     if(tutorList.includes(course)) {
         return CourseAccess.tutorInCourse;
     }
-    const studentList = getUserCourseRoles(tokenData);
+    const studentList = getStudentCourseRoles(tokenData);
     if(studentList.includes(course)) {
         return CourseAccess.studentInCourse;
     }
@@ -50,7 +49,7 @@ function findLevel(tokenData: JwtPayload) {
     if(tutorList.length > 0) {
         return Access.tutor;
     }
-    const studentList = getUserCourseRoles(tokenData);
+    const studentList = getStudentCourseRoles(tokenData);
     if(studentList.length > 0) {
         return CourseAccess.studentInCourse;
     }

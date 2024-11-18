@@ -1,5 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
-import { checkQuestionAccess, getCurrentSession, getUserCourseRoles} from "../utils/utils";
+import { checkQuestionAccess, getCurrentSession, getStudentCourseRoles} from "../utils/utils";
 import { connect } from "../mongo/mongo";
 import { AnswerScore, SessionStatus } from "../utils/enum";
 import * as mongoDB from "mongodb";
@@ -63,7 +63,7 @@ export async function submitSessionAnswer(tokenData: JwtPayload, requestData: an
 }
 
 export async function submit(tokenData: JwtPayload, requestData: any, session: string) {
-    const userCourses = getUserCourseRoles(tokenData);
+    const userCourses = getStudentCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
     const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");

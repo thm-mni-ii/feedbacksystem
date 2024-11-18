@@ -1,5 +1,5 @@
 import * as mongoDB from "mongodb";
-import { getFirstQuestionInCatalog, getSessionStatusAsText, getUserCourseRoles } from "../utils/utils";
+import { getFirstQuestionInCatalog, getSessionStatusAsText, getStudentCourseRoles} from "../utils/utils";
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
@@ -15,7 +15,7 @@ interface Session {
     duration: number,
 }
 export async function startSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
-    const userCourses = getUserCourseRoles(tokenData);
+    const userCourses = getStudentCourseRoles(tokenData);
     console.log(userCourses);
     if ( userCourses.length == 0) {
         return -1;
@@ -40,7 +40,7 @@ export async function startSession(tokenData: JwtPayload, catalogId: string, cou
 }
 
 export async function getSessionQuestion(catalogId: string, tokenData: JwtPayload) {
-    const userCourses = getUserCourseRoles(tokenData);
+    const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length === 0) {
         return -1;
     }
@@ -54,7 +54,7 @@ export async function getSessionQuestion(catalogId: string, tokenData: JwtPayloa
 }
 
 export async function pauseSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
-    const userCourses = getUserCourseRoles(tokenData);
+    const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;
     }
@@ -98,7 +98,7 @@ async function getLastSession(sessionCollection: mongoDB.Collection, catalogId: 
 }
 
 export async function endSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
-    const userCourses = getUserCourseRoles(tokenData);
+    const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;
     }
@@ -142,7 +142,7 @@ export async function endSession(tokenData: JwtPayload, catalogId: string, cours
 }
 
 export async function unpauseSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
-    const userCourses = getUserCourseRoles(tokenData);
+    const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;
     }
