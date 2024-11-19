@@ -1,5 +1,5 @@
 import * as mongoDB from "mongodb";
-import { getFirstQuestionInCatalog, getSessionStatusAsText, getStudentCourseRoles} from "../utils/utils";
+import { getCurrentSession, getFirstQuestionInCatalog, getSessionStatusAsText, getStudentCourseRoles} from "../utils/utils";
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
@@ -350,4 +350,19 @@ async function createSessionReturn(session: any) {
     }
     console.log(sessionReturn);
     return sessionReturn;
+}
+
+export async function getQuestionsNotInSession(tokenData: JwtPayload) {
+    const sessionId = getCurrentSession(tokenData.id);
+    const database: mongoDB.Db = await connect();
+    const submissionCollection: mongoDB.Collection = database.collection("submission");
+    const query = {
+        session: sessionId
+    }
+    const submissions = await submissionCollection.find(query).toArray();
+    let questionIdList: string[] = [];
+    for(let i = 0; i < submissions.length; i++) {
+        questionIdList.push(submissions[i].question);
+    }
+    //get all Questions in Catalog that are not in questionIdList
 }

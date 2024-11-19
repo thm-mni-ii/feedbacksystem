@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
-import { submit } from '../submission/submission';
- // get all catalogs from a course with the course id as a path parameter
- const router = Router();
+import { submitSessionAnswer } from '../submission/submission';
+const router = Router();
 router.post("/api_v1/submission", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {
@@ -10,7 +9,7 @@ router.post("/api_v1/submission", authenticateToken, async (req, res) => {
       }
       if (req.user !== undefined) {
         const requestData = req.body;
-        const response = await submit(req.user, requestData, "");
+        const response = await submitSessionAnswer(req.user, requestData);
         console.log(response);
         if (response == -1) {
           res.sendStatus(403);
