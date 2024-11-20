@@ -6,10 +6,13 @@ class SessionService {
     console.log(localStorage.getItem('jsessionid'))
     console.log(localStorage.getItem('token'))
     return axios
-      .post('/api_v1/startSession', {
-        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` },
-        params: { catalog: catalogId, course: courseId }
-      })
+      .post(
+        '/api_v1/startSession',
+        {},
+        {
+          headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+        }
+      )
       .then((res) => {
         console.log(res.data)
         console.log(res)
@@ -18,10 +21,14 @@ class SessionService {
   }
   submitAnswer(Answer: String[]): Promise<AxiosResponse<any>> {
     return axios
-      .post('/api_v1/submitSessionAnswer', {
-        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` },
-        params: { answers: Answer }
-      })
+      .post(
+        '/api_v1/submitSessionAnswer',
+        {},
+        {
+          headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` },
+          params: { answers: Answer }
+        }
+      )
       .then((res) => {
         console.log(res.data)
         console.log(res)

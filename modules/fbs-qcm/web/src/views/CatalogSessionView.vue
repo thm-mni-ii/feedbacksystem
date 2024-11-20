@@ -31,6 +31,7 @@ const catalog = ref<Catalog>({
 
 const submitAnswer = (answer: any[]) => {
   console.log('Selected Answers:', answer)
+  sessionService.submitAnswer(answer)
   // axios.post('/api_v1/submitSessionAnswer', selectedAnswers, config)
   //     .then((res) => console.log(res))
   //     .catch((err) => console.log(err))
@@ -48,7 +49,13 @@ onMounted(() => {
     .catch((error) => {
       console.error('Fehler beim Abrufen der Frage:', error)
     })
-  sessionService.startSession('6710d767c939e62058234a2b', 1).then((res) => console.log(res))
+  sessionService
+    .startSession('6720d5942e91a503a151e9ea', 1)
+    .then((res) => console.log(res))
+    .catch((error) => {
+      console.error('Fehler beim Abrufen der Frage:', error)
+    })
+
   console.log(questionData)
   if (route.params.catalogId && route.params.courseId) {
     console.log(route.params.catalogId)

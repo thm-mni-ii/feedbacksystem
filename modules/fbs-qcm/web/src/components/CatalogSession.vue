@@ -1,5 +1,16 @@
 <script setup lang="ts">
 import { ref, defineProps } from 'vue'
+interface ChoiceAnswer {
+  id: number
+  text: string
+  entries: Entry[]
+}
+
+interface Entry {
+  id: number
+  text: string
+}
+
 defineProps({
   question: { type: Object, required: true },
   currentQuestionIndex: { type: Number, default: 0 }
@@ -7,9 +18,30 @@ defineProps({
 
 const emit = defineEmits(['submit-answer'])
 const selectedAnswers = ref([])
+const selectedMatrixAnswers = ref<
+  Array<{ rowId: number; rowText: string; colId: number; colText: string }>
+>([])
 
-const showAnswers = () => {
-  console.log(selectedAnswers.value)
+const choiceAnswers = ref<ChoiceAnswer[]>([])
+
+const updateChoiceAnswers = () => {
+  choiceAnswers.value = []
+  selectedMatrixAnswers.value.forEach((answer) => {
+    let existingRow = choiceAnswers.value.find((row) => row.id === answer.rowId)
+
+    if (!existingRow) {
+      existingRow = {
+        id: answer.rowId,
+        text: answer.rowText,
+        entries: []
+      }
+      choiceAnswers.value.push(existingRow)
+    }
+    existingRow.entries.push({
+      id: answer.colId,
+      text: answer.colText
+    })
+  })
 }
 
 const submitAnswer = () => {
@@ -38,7 +70,6 @@ const submitAnswer = () => {
           color="primary"
           class="mx-auto py-auto"
           hide-details
-          @change="showAnswers()"
         >
           <template #label>
             <div>{{ option.text }}</div>
@@ -68,18 +99,24 @@ const submitAnswer = () => {
           <td v-for="column in question.questionconfiguration.answerColumns" :key="column.id">
             <label>
               <v-checkbox
-                v-model="selectedAnswers"
+                v-model="selectedMatrixAnswers"
                 color="primary"
                 class="mx-auto"
                 hide-details
-                :value="{ row: option.id, col: column.id }"
-                @change="showAnswers()"
+                :value="{
+                  rowId: option.id,
+                  rowText: option.text,
+                  colId: column.id,
+                  colText: column.name
+                }"
+                @change="updateChoiceAnswers()"
               ></v-checkbox>
             </label>
           </td>
         </tr>
       </tbody>
     </v-table>
+    <pre>{{ choiceAnswers }}</pre>
   </div>
 
   <v-btn
