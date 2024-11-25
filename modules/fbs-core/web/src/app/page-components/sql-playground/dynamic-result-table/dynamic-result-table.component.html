@@ -1,5 +1,5 @@
 <mat-card-actions>
-  <mat-card *ngIf="tabs.length === 0" class="info-card">
+  <mat-card *ngIf="tabs?.length === 0" class="info-card">
     <mat-card-header>
       <mat-card-title>
         {{ "sql-playground.result-table.create-first-query" | i18nextEager }}
@@ -7,11 +7,11 @@
     </mat-card-header>
   </mat-card>
 
-  <mat-tab-group *ngIf="tabs.length > 0" [(selectedIndex)]="activeResId">
-    <ng-container>
-      <mat-tab *ngFor="let tab of tabs; let index = index">
+  <mat-tab-group *ngIf="tabs?.length > 0" [(selectedIndex)]="activeResId">
+    <ng-container *ngFor="let tab of tabs; let index = index">
+      <mat-tab>
         <ng-template [mat-tab-label]>
-          {{ tab.name }} {{ tab.id + 1 }}
+          {{ tab.name }}
           <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
             <mat-icon>remove_circle_outline</mat-icon>
           </button>
@@ -23,7 +23,10 @@
           <div class="spinner" *ngIf="isQueryPending">
             <mat-spinner [diameter]="100"></mat-spinner>&nbsp;
           </div>
-          <div class="container" *ngIf="tab !== undefined && !isQueryPending">
+          <div
+            class="container"
+            *ngIf="tab !== undefined && isQueryPending === false"
+          >
             <div *ngIf="tab.error === true">
               <mat-card>
                 <mat-card-header>
@@ -47,9 +50,9 @@
               </mat-card>
             </div>
 
-            <div *ngIf="tab.error === false && !isQueryPending">
+            <div *ngIf="tab.error === false && isQueryPending === false">
               <div class="table-container">
-                <table mat-table [dataSource]="tab.dataSource">
+                <table mat-table [dataSource]="getDataSource(tab)">
                   <ng-container
                     matColumnDef="{{ col }}"
                     *ngFor="let col of tab.displayedColumns; let index = index"
@@ -79,16 +82,13 @@
                 </table>
               </div>
               <div class="action-container">
-                <!-- Placeholder for Downloar button -->
-                <!-- <button mat-button><mat-icon>download</mat-icon>&nbsp;Download</button> -->
                 <div></div>
                 <mat-paginator
                   class="custom-paginator"
                   hidePageSize="true"
                   pageSize="9"
                   showFirstLastButtons
-                >
-                </mat-paginator>
+                ></mat-paginator>
               </div>
             </div>
           </div>

@@ -4,8 +4,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
-  OnChanges,
   OnDestroy,
   OnInit,
   Output,
@@ -14,22 +12,22 @@ import {
 } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { Subscription, fromEvent } from "rxjs";
+import { map, distinctUntilChanged, mergeMap } from "rxjs/operators";
 import { PrismService } from "src/app/service/prism.service";
+import { Store } from "@ngrx/store";
+import * as SqlInputTabsActions from "../state/sql-input-tabs.actions";
+import * as fromSqlInputTabs from "../state/sql-input-tabs.selectors";
+import { QueryTab } from "../../../../model/sql_playground/QueryTab";
 
 @Component({
   selector: "app-highlighted-input",
   templateUrl: "./highlighted-input.component.html",
   styleUrls: ["./highlighted-input.component.scss"],
 })
-export class HighlightedInputComponent
-  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy, OnChanges
-{
+export class HighlightedInputComponent implements OnInit, OnDestroy {
   @ViewChild("textArea", { static: true }) textArea!: ElementRef;
   @ViewChild("codeContent", { static: true }) codeContent!: ElementRef;
   @ViewChild("pre", { static: true }) pre!: ElementRef;
-  @Output() update: EventEmitter<any> = new EventEmitter<any>();
-  @Input() tabs: any[];
-  @Input() selectedIndex: number;
 
   sub!: Subscription;
   highlighted = false;
@@ -38,8 +36,12 @@ export class HighlightedInputComponent
   groupForm = new FormGroup({
     content: new FormControl(""),
   });
+  selectedIndex: number;
 
   titleText: any;
+  @Output() update = new EventEmitter<unknown>();
+
+  private lastUpdated: string;
 
   get contentControl() {
     return this.groupForm.get("content")?.value;
@@ -48,21 +50,17 @@ export class HighlightedInputComponent
   constructor(
     private prismService: PrismService,
     private fb: FormBuilder,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private store: Store
   ) {}
 
-  ngOnChanges(changes): void {
-    if (changes.selectedIndex) {
-      this.listenForm();
-    }
-  }
-
   ngOnInit(): void {
+    console.log("init");
     this.listenForm();
     //this.synchronizeScroll();
   }
 
-  ngAfterViewInit() {
+  /*ngAfterViewInit() {
     this.prismService.highlightAll();
   }
 
@@ -71,41 +69,67 @@ export class HighlightedInputComponent
       this.prismService.highlightAll();
       this.highlighted = false;
     }
-  }
+  }*/
 
   ngOnDestroy() {
+    console.log("detroy");
     this.sub?.unsubscribe();
   }
 
-  updateSubmission(event) {
-    let cleanedText = this.cleanText(event);
-
-    if (cleanedText !== event) {
-      this.groupForm.patchValue({ content: cleanedText });
-    }
-
-    this.update.emit({ content: event });
-  }
-
   listenForm() {
-    if (this.tabs[this.selectedIndex].content !== null) {
-      this.groupForm.setValue({
-        content: this.tabs[this.selectedIndex].content,
+    console.log("listen form");
+    this.store
+      .select(fromSqlInputTabs.selectActiveTabIndex)
+      .pipe(
+        mergeMap((activeIndex) => {
+          return this.store
+            .select(fromSqlInputTabs.selectTabs)
+            .pipe(
+              map(
+                (tabs) => [activeIndex, tabs[activeIndex]] as [number, QueryTab]
+              )
+            );
+        })
+      )
+      .subscribe(([tabIndex, activeTab]) => {
+        console.log("tab changed", activeTab);
+        this.selectedIndex = tabIndex;
+        this.groupForm.setValue({
+          content: activeTab?.content ?? "",
+        });
+        console.log("change complete", {
+          value: this.groupForm.value.content,
+          index: this.selectedIndex,
+        });
       });
-    }
-    this.sub = this.groupForm.valueChanges.subscribe((val: any) => {
-      const modifiedContent = this.prismService.convertHtmlIntoString(
-        val.content
-      );
 
-      this.renderer.setProperty(
-        this.codeContent.nativeElement,
-        "innerHTML",
-        modifiedContent
-      );
+    this.sub = this.groupForm.valueChanges
+      .pipe(
+        map((val: any) => val.content),
+        distinctUntilChanged((a, b) => a === b)
+      )
+      .subscribe((content: string) => {
+        /*const modifiedContent =
+          this.prismService.convertHtmlIntoString(content);
 
-      this.highlighted = true;
-    });
+        this.renderer.setProperty(
+          this.codeContent.nativeElement,
+          "innerHTML",
+          modifiedContent
+        );
+
+        this.highlighted = true;*/
+
+        if (content !== this.lastUpdated) {
+          this.lastUpdated = content;
+          this.store.dispatch(
+            SqlInputTabsActions.updateTabContent({
+              index: this.selectedIndex,
+              content: content,
+            })
+          );
+        }
+      });
   }
 
   synchronizeScroll() {

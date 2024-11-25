@@ -1,29 +1,23 @@
 <div class="container">
-  <mat-form-field class="select" appearance="fill">
+  <mat-form-field class="mat-input-element" appearance="fill">
     <mat-label>{{
       "sql-playground.db-control-panel.co-working.select-group" | i18nextEager
     }}</mat-label>
-    <mat-select
-      [(value)]="selectedDbGroup"
-      (selectionChange)="activateGroup($event.value)"
-      [disabled]="!collaborativeMode"
-    >
-      <mat-option *ngFor="let group of groups" [value]="group.id">
-        {{ group.name }}
-      </mat-option>
-    </mat-select>
+    <input
+      type="number"
+      placeholder="Enter Group Code"
+      matInput
+      required
+      [(ngModel)]="groupCode"
+    />
   </mat-form-field>
   <mat-form-field class="select" appearance="fill">
     <mat-label>{{
       "sql-playground.db-control-panel.co-working.select-database"
         | i18nextEager
     }}</mat-label>
-    <mat-select
-      [(value)]="selectedDb"
-      (selectionChange)="activateDb($event.value)"
-      [disabled]="!collaborativeMode"
-    >
-      <mat-option *ngFor="let db of dbs" [value]="db.id">
+    <mat-select [(ngModel)]="selectedDatabase">
+      <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
         {{ db.name }}
       </mat-option>
     </mat-select>

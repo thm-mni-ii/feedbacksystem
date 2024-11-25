@@ -1,10 +1,8 @@
 <div class="container">
   <div>
-    <p class="spinner-wrapper" *ngIf="this.activeDb !== undefined">
+    <p class="spinner-wrapper" *ngIf="activeDb$ | async as activeDb">
       {{ "sql-playground.db-control-panel.overview.version" | i18nextEager }}:
-      <span class="highlight">
-        {{ this.activeDb.version }}
-      </span>
+      <span class="highlight">{{ activeDb[0]?.version }}</span>
       &nbsp;&nbsp;<mat-spinner *ngIf="pending" [diameter]="24"></mat-spinner>
     </p>
   </div>
@@ -15,10 +13,10 @@
     }}</mat-label>
     <mat-select
       [(value)]="selectedDb"
-      (selectionChange)="activateDb($event.value)"
+      (selectionChange)="activateDatabase($event.value)"
       [disabled]="collaborativeMode"
     >
-      <mat-option *ngFor="let db of dbs" [value]="db.id">
+      <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
         {{ db.name }}
       </mat-option>
     </mat-select>
@@ -44,7 +42,6 @@
         "sql-playground.db-control-panel.overview.newDbButton" | i18nextEager
       }}
     </button>
-
     <button
       mat-raised-button
       color="accent"
@@ -57,7 +54,6 @@
           | i18nextEager
       }}
     </button>
-
     <button
       mat-raised-button
       class="url-btn"

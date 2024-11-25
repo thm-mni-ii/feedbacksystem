@@ -87,23 +87,9 @@ import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.c
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
-import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
-import { BorderedContainerComponent } from "./page-components/bordered-container/bordered-container.component";
-import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
-import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
-import { SqlInputTabsComponent } from "./page-components/sql-playground/sql-input-tabs/sql-input-tabs.component";
-import { DbSchemeComponent } from "./page-components/sql-playground/db-scheme/db-scheme.component";
-import { DbSchemeViewsComponent } from "./page-components/sql-playground/db-scheme/db-scheme-views/db-scheme-views.component";
-import { DbSchemeTriggersComponent } from "./page-components/sql-playground/db-scheme/db-scheme-triggers/db-scheme-triggers.component";
-import { DbSchemeRoutinesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-routines/db-scheme-routines.component";
-import { DbSchemeTablesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-tables/db-scheme-tables.component";
-import { DbControlTemplatesComponent } from "./page-components/sql-playground/db-control-panel/db-control-templates/db-control-templates.component";
-import { DbControlCoWorkingComponent } from "./page-components/sql-playground/db-control-panel/db-control-co-working/db-control-co-working.component";
-import { DbControlDbOverviewComponent } from "./page-components/sql-playground/db-control-panel/db-control-db-overview/db-control-db-overview.component";
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
-import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 
 import "mathlive";
 import "@cortex-js/compute-engine";
@@ -117,6 +103,7 @@ import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/l
 import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
+import { SqlPlaygroundModule } from "./page-components/sql-playground/sql-playground.module";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -195,24 +182,10 @@ export const httpInterceptorProviders = [
     SqlCheckerComponent,
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
-    SqlPlaygroundComponent,
     AnalyticsToolComponent,
-    BorderedContainerComponent,
-    DynamicResultTableComponent,
-    DbControlPanelComponent,
-    SqlInputTabsComponent,
-    DbSchemeComponent,
-    DbSchemeViewsComponent,
-    DbSchemeTriggersComponent,
-    DbSchemeRoutinesComponent,
-    DbSchemeTablesComponent,
     NewDbDialogComponent,
-    DbControlTemplatesComponent,
-    DbControlCoWorkingComponent,
-    DbControlDbOverviewComponent,
     NewSqlTemplateComponent,
     ExportTasksDialogComponent,
-    HighlightedInputComponent,
     MathInputComponent,
     SharePlaygroundLinkDialogComponent,
     FbsModellingComponent,
@@ -250,6 +223,7 @@ export const httpInterceptorProviders = [
     MatTableModule,
     MatSortModule,
     I18NextModule.forRoot(),
+    SqlPlaygroundModule,
   ],
   entryComponents: [
     DataprivacyDialogComponent,

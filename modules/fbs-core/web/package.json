@@ -29,6 +29,11 @@
     "@cortex-js/compute-engine": "^0.12.2",
     "@fontsource/material-icons": "^4.5.4",
     "@fontsource/roboto": "^4.5.8",
+    "@hocuspocus/provider": "^2.13.5",
+    "@ngrx/effects": "^14.3.3",
+    "@ngrx/entity": "^14.3.3",
+    "@ngrx/store": "^14.3.3",
+    "@ngrx/store-devtools": "^14.3.3",
     "angular-i18next": "^14.2.0",
     "canvas-datagrid": "^0.4.5",
     "chart.js": "^2.9.4",
@@ -41,6 +46,7 @@
     "ngx-markdown": "^14.0.1",
     "prismjs": "^1.29.0",
     "xlsx": "^0.18.5",
+    "yjs": "^13.6.18",
     "zone.js": "~0.11.7"
   },
   "devDependencies": {
