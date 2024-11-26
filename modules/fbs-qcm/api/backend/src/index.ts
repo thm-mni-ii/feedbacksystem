@@ -45,7 +45,7 @@ import {
 } from "./session/session";
 import Choice from "./model/questionTypes/Choice";
 import { Question } from "./model/Question";
-import { getAllQuestionInCatalog } from "./utils/utils";
+import { getAllQuestionInCatalog, numberOfQuestionsAhead } from "./utils/utils";
 import { createTag, deleteTag, editTag, findTag, searchTag } from "./tag/tag";
 import catalogRoutes from './routes/catalogRoutes';
 import courseRoutes from './routes/courseRoutes';
@@ -268,7 +268,6 @@ async function startServer() {
   app.use('', tagRoutes);
   app.use('', userRoutes);
 
-  
   app.listen(3000, () => console.log("LISTENING on port 3000"));
 }
 startServer().catch(console.error);

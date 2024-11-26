@@ -344,8 +344,8 @@ export function createQuestionResponse(newQuestion: any) {
     const configuration = newQuestion.questionconfiguration as any;
     console.log(configuration);
     delete returnQuestion.owner;
-    for (let i = 0; i < configuration.answercolumns.length; i++) {
-      delete configuration.answercolumns[i].correctAnswers;
+    for (let i = 0; i < configuration.answerColumns.length; i++) {
+      delete configuration.answerColumns[i].correctAnswers;
     }
     return returnQuestion;
   }
@@ -445,4 +445,27 @@ export async function IsOwner(
   console.log(tokenData.id);
   console.log(typeof tokenData.id);
   return false;
+}
+
+export async function numberOfQuestionsAhead(catalogId: string, questionId: string) {
+    // braucht mehr Information, falls eine Frage mehrfach im Katalog erlaubt wird.
+    const database: mongoDB.Db = await connect()
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    let currentId: string = questionId;
+    let counter = 0;
+    while(true) {
+       let query = {
+            question: new mongoDB.ObjectId(currentId),
+            catalog: new mongoDB.ObjectId(catalogId)
+       }
+       const question = await questionInCatalogCollection.findOne(query);
+       if(question === null) {
+           return -1;
+       }
+       if(question.children.TRUE === "") {
+           return counter;
+       }
+       counter++;
+       currentId = question.children.TRUE;
+    }
 }

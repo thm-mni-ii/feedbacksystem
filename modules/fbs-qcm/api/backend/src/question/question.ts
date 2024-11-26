@@ -12,11 +12,12 @@ import {
   getDocentCourseRoles,
   IsOwner,
   getStudentCourseRoles,
+  numberOfQuestionsAhead,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
-import { Access, AnswerScore, SessionStatus } from "../utils/enum";
+import { Access, AnswerScore, CatalogAccess, SessionStatus } from "../utils/enum";
 import { Question } from "../model/Question";
-import { authenticate } from "../authenticate";
+import { authenticate, authenticateInCatalog } from "../authenticate";
 type questionInsertionType = Omit<Question, "_id">;
 
 export async function getQuestionById(
@@ -214,10 +215,8 @@ export async function getCurrentQuestion(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  const userCourses = getStudentCourseRoles(tokenData);
-  const access = await getCatalogPermission(userCourses, catalogId);
-  if (!access) {
-    return -1;
+  if(!authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)) {
+      return -1;
   }
   const database: mongoDB.Db = await connect();
   const questionCollection: mongoDB.Collection =
@@ -237,7 +236,6 @@ export async function getCurrentQuestion(
     return { catalog: "over" };
   }
   if (newQuestionId == 0) {
-    console.log("JUSU");
     newQuestion = await getFirstQuestionInCatalog(
       questionCollection,
       questionInCatalogCollection,
@@ -252,6 +250,7 @@ export async function getCurrentQuestion(
   if (newQuestion == null) {
     return -1;
   }
+  newQuestion.questionsLeft = await numberOfQuestionsAhead(catalogId, newQuestion._id.toString());
   return createQuestionResponse(newQuestion);
 }
 
