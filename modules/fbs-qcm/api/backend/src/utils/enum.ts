@@ -24,3 +24,10 @@ export enum CourseAccess {
     docentInCourse = 2,
     admin = 3
 }
+
+export enum CatalogAccess {
+    studentInCatalog = 0,
+    tutorInCatalog = 1,
+    docentInCatalog = 2,
+    admin = 3
+}

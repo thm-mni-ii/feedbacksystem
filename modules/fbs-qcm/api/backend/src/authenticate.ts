@@ -1,6 +1,8 @@
 import { JsonWebTokenError, Jwt, JwtPayload } from "jsonwebtoken";
 import { Access, CourseAccess } from "./utils/enum";
 import { getDocentCourseRoles, getStudentCourseRoles, getTutorCourseRoles} from "./utils/utils";
+import * as mongoDB from "mongodb";
+import { connect } from "./mongo/mongo";
 
 
 export function authenticate(tokenData: JwtPayload, level: number) {
@@ -15,6 +17,25 @@ export function authenticateInCourse(tokenData: JwtPayload, level: number, cours
     const actualLevel: number = findCourseLevel(tokenData, course);
     if(actualLevel >= level) {
         return true;
+    }
+    return false;
+}
+
+export async function authenticateInCatalog(tokenData: JwtPayload, level: number, catalog: string) {
+    const database: mongoDB.Db = await connect();
+    const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
+    const query = {
+        catalog: new mongoDB.ObjectId(catalog)
+    }
+    const courseInformation = await catalogInCourseCollection.find(query).toArray();
+    let courses: number[] = [];
+    for(let i = 0; i < courseInformation.length; i++) {
+        courses.push(courseInformation[i].course);
+    }
+    for(let j = 0; j < courses.length; j++) {
+        if(authenticateInCourse(tokenData, level, courses[j])) {
+            return true;
+        }
     }
     return false;
 }

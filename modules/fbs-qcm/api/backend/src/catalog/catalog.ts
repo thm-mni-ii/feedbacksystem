@@ -12,8 +12,8 @@ import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
 import { getCourses } from "../course/course";
 import { Catalog } from "../model/Catalog";
-import { authenticate, authenticateInCourse } from "../authenticate";
-import { Access, CourseAccess } from "../utils/enum";
+import { authenticate, authenticateInCatalog, authenticateInCourse } from "../authenticate";
+import { Access, CatalogAccess, CourseAccess } from "../utils/enum";
 
 interface catalog {
   name: string;
@@ -138,7 +138,10 @@ export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
 }
 
 export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
-  const adminCourses = getAdminCourseRoles(tokenData);
+  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    console.log("No Permissions to Catalog");
+    return -1;
+  }
   const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
   const query = {
     _id: catalogIdObject,
@@ -149,14 +152,6 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
     database.collection("catalogInCourse");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  const catalogPermission: any = await getCatalogPermission(
-    adminCourses,
-    catalogId
-  );
-  if (!catalogPermission) {
-    console.log("No Permission to Catalog");
-    return -1;
-  }
   const data = await catalogCollection.deleteOne(query);
   const deleteConnections = {
     catalog: catalogIdObject,
@@ -173,15 +168,11 @@ export async function putCatalog(
   tokenData: JwtPayload,
   course: number
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
-  const database: mongoDB.Db = await connect();
-  const courseResult = await getCatalogPermission(adminCourses, catalogId);
-  console.log(courseResult);
-
-  if (!courseResult) {
-    console.log("No Permission to Catalog");
+  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    console.log("No Permissions to Catalog");
     return -1;
   }
+  const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
@@ -250,9 +241,8 @@ export async function getQuestionTree(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
-  const course = getCatalogPermission(adminCourses, catalogId);
-  if (!course) {
+  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    console.log("No Permissions to Catalog");
     return -1;
   }
   const database: mongoDB.Db = await connect();
@@ -325,10 +315,8 @@ export async function allQuestionsInCatalog(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
-  const permission = await getCatalogPermission(adminCourses, catalogId);
-  if (!permission) {
-    console.log("No permissions to catalog");
+  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    console.log("No Permissions to Catalog");
     return -1;
   }
   const database: mongoDB.Db = await connect();
