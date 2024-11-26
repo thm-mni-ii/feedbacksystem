@@ -7,11 +7,16 @@ export const authenticateToken = (
   next: NextFunction
 ) => {
   const authHeader = req.headers["authorization"];
+  console.log(next);
+  console.log(authHeader);
+  console.log("----------------------------------------------");
+  console.log(req.headers);
+  console.log("----------------------------------------------");
+
+  console.log(authHeader && authHeader.split(" "));
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) {
     console.log("no token");
-    console.log(req.headers);
-    console.log(authHeader);
     return res.sendStatus(401);
   }
   jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
