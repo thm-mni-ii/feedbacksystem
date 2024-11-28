@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.v2.security
 
+import de.thm.ii.fbs.model.v2.GlobalRole
 import de.thm.ii.fbs.model.v2.security.LegacyToken
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
@@ -35,7 +36,7 @@ class TokenV2Service(
     fun verifyLegacyToken(token: String): LegacyToken? =
         try {
             val claims: Claims = Jwts.parser().setSigningKey(jwtSecret.toByteArray()).parseClaimsJws(token).body
-            LegacyToken(claims["id"] as Int, claims["username"] as String)
+            LegacyToken(claims["id"] as Int, claims["username"] as String, GlobalRole.valueOf(claims["globalRole"]as String))
         } catch (e: ExpiredJwtException) {
             null
         }
