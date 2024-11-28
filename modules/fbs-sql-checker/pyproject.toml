@@ -15,7 +15,7 @@ click = "8.0.2"
 random2 = "^1.0.1"
 pre-commit = "^2.20.0"
 pylint = "^2.15.3"
-tqdm = "^4.64.1"
+tqdm = "^4.66.3"
 
 
 [tool.poetry.dev-dependencies]
