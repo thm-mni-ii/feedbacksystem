@@ -7,7 +7,7 @@ import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.security.{AuthService, IpService}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
@@ -52,7 +52,11 @@ class SubmissionController {
   @Autowired
   private val courseService: CourseService = null
   @Autowired
+  private val ipService: IpService = null
+  @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  @Autowired
+  private val request: HttpServletRequest = null
   private val objectMapper = new ObjectMapper();
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -137,6 +141,14 @@ class SubmissionController {
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
              @RequestParam file: MultipartFile, @RequestParam additionalInformation: Optional[String],
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
+    val course = courseService.find(cid)
+    course match {
+      case Some(course) =>
+        if (!ipService.isIpInZone(course.submissionMode, Option(request.getHeader("X-Real-IP")).getOrElse(request.getRemoteAddr))) {
+          throw new ForbiddenException()
+        }
+      case None => throw new ResourceNotFoundException()
+    }
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
     val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN

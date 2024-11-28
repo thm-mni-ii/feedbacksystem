@@ -75,10 +75,13 @@ class CourseController {
       body.retrive("semesterId").asInt(),
       body.retrive("name").asText(),
       body.retrive("description").asText(),
-      body.retrive("visible").asBool()
+      body.retrive("visible").asBool(),
+      body.retrive("submissionMode").asText(),
     ) match {
-      case (semesterId, Some(name), desc, visible) =>
-        courseService.create(Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
+      case (semesterId, Some(name), desc, visible, submissionMode) =>
+        courseService.create(
+          Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId, submissionMode = submissionMode.getOrElse("internet"))
+        )
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }
@@ -128,10 +131,14 @@ class CourseController {
           body.retrive("semesterId").asInt(),
           body.retrive("name").asText(),
           body.retrive("description").asText(),
-          body.retrive("visible").asBool()
+          body.retrive("visible").asBool(),
+          body.retrive("submissionMode").asText(),
         ) match {
-          case (semesterId, Some(name), desc, visible) =>
-            courseService.update(cid, Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
+          case (semesterId, Some(name), desc, visible, submissionMode) =>
+            courseService.update(
+              cid,
+              Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId, submissionMode = submissionMode.getOrElse("internet"))
+            )
           case _ => throw new BadRequestException("Malformed Request Body")
         }
       case _ => throw new ForbiddenException()

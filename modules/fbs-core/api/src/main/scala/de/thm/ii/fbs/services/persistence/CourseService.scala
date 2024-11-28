@@ -35,7 +35,8 @@ class CourseService {
     * @return List of courses
     */
   def findByPattern(pattern: String, ignoreHidden: Boolean = true): List[Course] = DB.query(
-    "SELECT course_id, group_selection, semester_id, name, description, visible FROM course WHERE name like ?" + (if (ignoreHidden) " AND visible = 1" else ""),
+    "SELECT course_id, group_selection, semester_id, name, description, visible, " +
+      "submission_mode FROM course WHERE name like ?" + (if (ignoreHidden) " AND visible = 1" else ""),
     (res, _) => parseResult(res), "%" + pattern + "%")
 
   /**
@@ -45,7 +46,7 @@ class CourseService {
     * @return The found course
     */
   def find(id: Int): Option[Course] = DB.query(
-    "SELECT course_id, group_selection, semester_id, name, description, visible, group_selection FROM course WHERE course_id = ?",
+    "SELECT course_id, group_selection, semester_id, name, description, visible, group_selection, submission_mode FROM course WHERE course_id = ?",
     (res, _) => parseResult(res), id).headOption
 
   /**
@@ -55,8 +56,8 @@ class CourseService {
     * @return The created course with id
     */
   def create(course: Course): Course = {
-    DB.insert("INSERT INTO course (semester_id, name, description, visible) VALUES (?,?,?,?);",
-      course.semesterId.orNull, course.name, course.description, course.visible)
+    DB.insert("INSERT INTO course (semester_id, name, description, visible, submission_mode) VALUES (?,?,?,?,?);",
+      course.semesterId.orNull, course.name, course.description, course.visible, course.submissionMode)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(course) => course
@@ -72,8 +73,8 @@ class CourseService {
     * @return True if successful
     */
   def update(cid: Int, course: Course): Boolean = {
-    1 == DB.update("UPDATE course SET semester_id = ?, name = ?, description = ?, visible = ? WHERE course_id = ?",
-      course.semesterId.orNull, course.name, course.description, course.visible, cid)
+    1 == DB.update("UPDATE course SET semester_id = ?, name = ?, description = ?, visible = ?, submission_mode = ? WHERE course_id = ?",
+      course.semesterId.orNull, course.name, course.description, course.visible, course.submissionMode, cid)
   }
 
   /**
@@ -90,6 +91,7 @@ class CourseService {
     name = res.getString("name"),
     description = res.getString("description"),
     visible = res.getBoolean("visible"),
+    submissionMode = res.getString("submission_mode"),
     id = res.getInt("course_id")
   )
 
