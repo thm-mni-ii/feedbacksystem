@@ -10,7 +10,7 @@ def parse_query(data, client):
     except Exception as e:
         print("Not able to parse the statement " + str(data))
         print(e)
-        mydb = client.get_default_database()
+        mydb = client["sql-checker"]  # client.get_default_database()
         mycollection = mydb["NotParsable"]
         record = data
         mycollection.insert_one(record)

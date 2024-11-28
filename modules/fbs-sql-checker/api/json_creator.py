@@ -1,13 +1,13 @@
 # JSONCreator.py
-
-from parser import parse_query
 from datetime import datetime
+from parser import parse_query
 from table_checker import extract_tables
 from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
 from mask_aliases import SQLAliasMasker
+
 
 rightStatements = []
 rightTables = []
