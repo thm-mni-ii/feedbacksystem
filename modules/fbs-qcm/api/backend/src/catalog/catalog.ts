@@ -67,19 +67,17 @@ export async function postCatalog(
 }
 
 export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
-  const adminCourses = getAdminCourseRoles(tokenData);
-  const query = {
-    _id: new mongoDB.ObjectId(catalogId),
-  };
+  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    return -1;
+  } 
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
-  const catalogPermission = await getCatalogPermission(adminCourses, catalogId);
-  if (!catalogPermission) {
-    console.log("No Permission to Catalog");
-    return -1;
-  }
+
+  const query = {
+    _id: new mongoDB.ObjectId(catalogId),
+  };
   let data = await catalogCollection.findOne(query);
   const tree = await getQuestionTree(tokenData, catalogId);
   const catalogInCourse = await catalogInCourseCollection.findOne({
