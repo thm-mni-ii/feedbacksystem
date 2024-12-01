@@ -58,23 +58,15 @@ export async function addQuestionToCatalog(
   catalogId: string,
   children: any
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
+  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    return -1;
+  }
   const questionIdObject = new mongoDB.ObjectId(questionId);
   const catalogIdObject = new mongoDB.ObjectId(catalogId);
   const database: mongoDB.Db = await connect();
-  const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  const access = await checkQuestionAccess(
-    questionIdObject,
-    adminCourses,
-    catalogInCourseCollection,
-    questionInCatalogCollection
-  );
-  if (!access) {
-    return -1;
-  }
   const checkQuery = {
     catalog: catalogIdObject,
     question: questionIdObject,
@@ -102,14 +94,12 @@ export async function removeQuestionFromCatalog(
   questionId: string,
   catalogId: string
 ) {
-  const adminCourses = getAdminCourseRoles(tokenData);
+  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    return -1;
+  }
   const database: mongoDB.Db = await connect();
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  const permission = getCatalogPermission(adminCourses, catalogId);
-  if (!permission) {
-    return -1;
-  }
   const questionIdObject = new mongoDB.ObjectId(questionId);
   const query = {
     question: questionIdObject,
