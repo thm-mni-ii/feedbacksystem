@@ -75,10 +75,6 @@ export async function addQuestionToCatalog(
   if (entry != null) {
     return -2;
   }
-  const permission = getCatalogPermission(adminCourses, catalogId);
-  if (!permission) {
-    return -1;
-  }
   const insert = {
     catalog: catalogIdObject,
     question: questionIdObject,
