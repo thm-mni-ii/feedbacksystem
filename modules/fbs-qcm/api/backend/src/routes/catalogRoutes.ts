@@ -1,4 +1,4 @@
-import { deleteCatalog, getCatalog, getCatalogs, postCatalog, putCatalog } from "../catalog/catalog";
+import { addChildrenToQuestion, deleteCatalog, getCatalog, getCatalogs, postCatalog, putCatalog } from "../catalog/catalog";
 import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
  // get all catalogs from a course with the course id as a path parameter
@@ -92,7 +92,31 @@ import { authenticateToken } from "../authenticateToken";
       res.sendStatus(500);
     }
   });
-  
+  router.put("/api_v1/addChildrenToQuestion/", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      if (req.user !== undefined) {
+        const requestData = req.body;
+        const catalogId = requestData.catalog;
+        const questionId = requestData.question;
+        const children = requestData.children;
+        delete requestData.catalog;
+        delete requestData.question;
+        delete requestData.children;
+        const result = await addChildrenToQuestion(req.user, catalogId, questionId, children)
+        if(result === -1) {
+          res.sendStatus(400);
+          return
+        }
+        res.sendStatus(200);
+    }
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+    }
+  });
   router.get("/api_v1/catalog/:id", authenticateToken, async (req, res) => {
     try {
       if (req.user == undefined) {

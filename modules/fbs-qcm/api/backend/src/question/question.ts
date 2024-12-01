@@ -58,7 +58,7 @@ export async function addQuestionToCatalog(
   catalogId: string,
   children: any
 ) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     return -1;
   }
   const questionIdObject = new mongoDB.ObjectId(questionId);
@@ -90,7 +90,7 @@ export async function removeQuestionFromCatalog(
   questionId: string,
   catalogId: string
 ) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     return -1;
   }
   const database: mongoDB.Db = await connect();
@@ -201,7 +201,7 @@ export async function getCurrentQuestion(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)) {
+  if(!await authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)) {
       return -1;
   }
   const database: mongoDB.Db = await connect();

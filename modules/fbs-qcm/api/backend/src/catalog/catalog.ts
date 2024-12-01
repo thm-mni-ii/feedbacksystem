@@ -67,7 +67,7 @@ export async function postCatalog(
 }
 
 export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     return -1;
   } 
   const database: mongoDB.Db = await connect();
@@ -136,7 +136,7 @@ export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
 }
 
 export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -166,7 +166,7 @@ export async function putCatalog(
   tokenData: JwtPayload,
   course: number
 ) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -239,7 +239,7 @@ export async function getQuestionTree(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -313,7 +313,7 @@ export async function allQuestionsInCatalog(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  if(!authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -346,4 +346,34 @@ function findConnection(question: any, allConnections: any[]) {
     }
   }
   return -1;
+}
+
+export async function addChildrenToQuestion(tokenData: JwtPayload, catalogId: string, questionId: string, childrenOfQuestion: any) {
+  if(! await authenticateInCatalog(tokenData, CourseAccess.docentInCourse, catalogId)) {
+    return -1;
+  }
+  console.log("-----------------------");
+  console.log(tokenData);
+  console.log(catalogId);
+  console.log(questionId);
+  console.log(childrenOfQuestion);
+  console.log("-----------------------");
+
+  const filter = {
+    question: new mongoDB.ObjectId(questionId),
+    catalog: new mongoDB.ObjectId(catalogId)
+  }
+  const replace = {
+    $set: {
+      children: childrenOfQuestion
+    }
+  }
+  console.log(filter);
+  console.log(replace);
+  const database: mongoDB.Db = await connect();
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  const result = await questionInCatalogCollection.updateOne(filter, replace);
+  console.log(result);
+  console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+  return 0;
 }
