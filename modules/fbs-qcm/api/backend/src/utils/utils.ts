@@ -239,6 +239,17 @@ export function getStudentCourseRoles(tokenData: JwtPayload) {
   return coursesUser;
 }
 
+export function getUserCourseRoles(tokenData: JwtPayload) {
+  let coursesUser: number[] = [];
+  const courseRolesObject = JSON.parse(tokenData.courseRoles);
+  for (const courseId in courseRolesObject) {
+    if (courseRolesObject.hasOwnProperty(courseId)) {
+        coursesUser.push(parseInt(courseId));
+    }
+  }
+  return coursesUser;
+}
+
 export async function getFirstQuestionInCatalog(
   questionCollection: mongoDB.Collection,
   questionInCatalogCollection: mongoDB.Collection,

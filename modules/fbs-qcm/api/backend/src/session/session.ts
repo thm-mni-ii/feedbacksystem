@@ -1,5 +1,5 @@
 import * as mongoDB from "mongodb";
-import { getCurrentSession, getFirstQuestionInCatalog, getSessionStatusAsText, getStudentCourseRoles} from "../utils/utils";
+import { getCurrentSession, getFirstQuestionInCatalog, getSessionStatusAsText, getStudentCourseRoles, getUserCourseRoles} from "../utils/utils";
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
@@ -15,7 +15,7 @@ interface Session {
     duration: number,
 }
 export async function startSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
-    const userCourses = getStudentCourseRoles(tokenData);
+    const userCourses = getUserCourseRoles(tokenData);
     console.log(userCourses);
     if ( userCourses.length == 0) {
         return -1;
@@ -36,11 +36,14 @@ export async function startSession(tokenData: JwtPayload, catalogId: string, cou
         duration: 0
     }
     await sessionCollection.insertOne(sessionEntry);
-    return await getSessionQuestion(catalogId, tokenData);
+    const question =  await getCurrentQuestion(tokenData, catalogId);
+    console.log(question);
+    return question;
 }
 
+
 export async function getSessionQuestion(catalogId: string, tokenData: JwtPayload) {
-    const userCourses = getStudentCourseRoles(tokenData);
+    const userCourses = getUserCourseRoles(tokenData);
     if(userCourses.length === 0) {
         return -1;
     }
