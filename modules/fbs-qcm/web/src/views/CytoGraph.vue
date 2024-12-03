@@ -2,37 +2,7 @@
   <div>
     <h2>Question Flow</h2>
     <div id="cy" style="width: 100%; height: 500px; border: 1px solid black;"></div>
-  </div>
-  <div>
-    <div id="cy" style="width: 100%; height: 500px;"></div>
-    <button @click="openModal">Add Custom Node</button>
-
-    <!-- Modal for Customizing New Node -->
-    <div v-if="showModal" class="modal">
-      <div class="modal-content">
-        <h3>Create a New Node</h3>
-        <form @submit.prevent="createNode">
-          <div>
-            <label for="nodeLabel">Node Label:</label>
-            <input id="nodeLabel" v-model="newNode.label" type="text" required />
-          </div>
-          <div>
-            <label for="nodeX">X Position:</label>
-            <input id="nodeX" v-model.number="newNode.x" type="number" required />
-          </div>
-          <div>
-            <label for="nodeY">Y Position:</label>
-            <input id="nodeY" v-model.number="newNode.y" type="number" required />
-          </div>
-          <div>
-            <label for="nodeColor">Node Color:</label>
-            <input id="nodeColor" v-model="newNode.color" type="color" required />
-          </div>
-          <button type="submit">Create Node</button>
-          <button type="button" @click="closeModal">Cancel</button>
-        </form>
-      </div>
-    </div>
+    <button @click="addNode" style="margin-top: 10px;">Add Question</button>
   </div>
 </template>
 
@@ -72,22 +42,17 @@ export default defineComponent({
         cy.value.on('tap', 'node', (event) => {
             const clickedNode = event.target;
             if (clickedNode.data('label') === '+') {
-              openModal();
               addNode();
             }
         });
     });
-    const openModal = () => {
-      showModal.value = true;
-    };
-
     const addNode = () => {
       if (cy.value) {
         const newNodeId = `question${nodeId.value}`;
         const newNodeLabel = `Question ${nodeId.value}: What is ${nodeId.value + 1} + ${nodeId.value + 1}?`;
         nodeId.value++;
 
-        cy.value.add({ group: 'nodes', data: { id: newNodeId, label: newNodeLabel }, position: { x: 550, y: -120 + (nodeId.value *20) }});
+        cy.value.add({ group: 'nodes', data: { id: newNodeId, label: newNodeLabel }, position: { x: 550, y: -120 + (nodeId.value *20) }, style: {grabbable: false}});
         cy.value.add({ group: 'edges', data: { source: 'center', target: newNodeId, label: '50%' }});
       }
     };

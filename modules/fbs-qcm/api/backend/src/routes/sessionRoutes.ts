@@ -24,6 +24,7 @@ router.post("/api_v1/startSession", authenticateToken, async (req, res) => {
         console.log("result");
         console.log(result);
         res.send(result);
+        return;
       }
     } catch (error) {
       console.log(error);
