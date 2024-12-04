@@ -6,6 +6,30 @@
   <mat-expansion-panel-header>
     <mat-panel-title> {{ routine.name }} </mat-panel-title>
   </mat-expansion-panel-header>
-  <span> {{ routine.type }}</span>
-  <pre class="routine-definition">{{ routine.definition }}</pre>
+  <p class="header">
+    <b>Type: </b>
+    <span>{{ routine.type }}</span>
+  </p>
+  <br />
+
+  <span class="header">
+    <b>Parameter:</b>
+    <i *ngIf="routine.parameters === undefined || routine.parameters === ''">
+      (None)
+    </i>
+  </span>
+  <br />
+
+  <div *ngIf="routine.parameters !== undefined && routine.parameters !== ''">
+    <span
+      class="routine-definition"
+      *ngFor="let param of routine.parameters.split(',')"
+    >
+      {{ param }} <br />
+    </span>
+    <br />
+  </div>
+
+  <p class="header"><b>Definition:</b></p>
+  <pre class="routine-definition overflow">{{ routine.definition }}</pre>
 </mat-expansion-panel>

@@ -1,0 +1,30 @@
+.card {
+  margin: 8px 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.card:hover {
+  background: #e9e9ee;
+}
+
+.card .invisible {
+  font-weight: bold;
+  color: #cccccc;
+}
+
+.passed {
+  font-weight: bold;
+  color: rgba(100,223,89,255);
+}
+
+.failed {
+  font-weight: bold;
+  color: red;
+}
+
+.all {
+  font-weight: bold;
+}

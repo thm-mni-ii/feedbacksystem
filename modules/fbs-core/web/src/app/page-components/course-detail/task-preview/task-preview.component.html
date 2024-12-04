@@ -1,9 +1,17 @@
 <mat-card
-  [routerLink]="['/courses', courseId, 'task', task.id]"
+  [routerLink]="!isSelectable ? ['/courses', courseId, 'task', task.id] : null"
+  (click)="isSelectable ? toggleSelection() : null"
   class="task-container"
   id="{{ task.id }}"
 >
   <div class="task-title">
+    <section *ngIf="isSelectable" (click)="$event.stopPropagation()">
+      <mat-checkbox
+        [ngModel]="isSelected"
+        (ngModelChange)="toggleSelection()"
+      ></mat-checkbox>
+    </section>
+
     <span *ngIf="task.requirementType === 'mandatory'">
       <mat-icon
         class="mandatory"

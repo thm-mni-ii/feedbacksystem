@@ -35,6 +35,11 @@
           <p>{{ "sidebar.label.allCourses" | i18nextEager }}</p>
         </a>
 
+        <a mat-list-item routerLink="/groups" routerLinkActive="selected">
+          <mat-icon>groups</mat-icon>
+          <p>{{ "sidebar.label.myGroups" | i18nextEager }}</p>
+        </a>
+
         <a
           mat-list-item
           *ngIf="isAdmin"
@@ -69,15 +74,15 @@
           <p>{{ "sidebar.label.analyticsPlatform" | i18nextEager }}</p>
         </a>
 
-        <a
-          mat-list-item
-          routerLink="/modelling"
-          routerLinkActive="selected"
-          *ngIf="isAdmin || isModerator"
-        >
-          <mat-icon> format_shapes</mat-icon>
-          <p>FBS Modellierung</p>
-        </a>
+        <button mat-list-item (click)="moveAndHideSidebar('/modelling')">
+          <mat-icon>format_shapes</mat-icon>
+          <p>FBS Modelling</p>
+        </button>
+
+        <button mat-list-item (click)="moveAndHideSidebar('/kanban')">
+          <mat-icon>view_kanban</mat-icon>
+          <p>FBS Kanban</p>
+        </button>
       </mat-nav-list>
 
       <span class="filler"></span>

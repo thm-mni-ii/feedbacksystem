@@ -27,11 +27,22 @@ class AstBuilder(val eq: MathParser.EqContext) {
 
     private fun buildTerm(term: MathParser.TermContext): Expr =
         when {
-            term.MUL() !== null -> Operation(Operator.MUL, buildTerm(term.term()), buildFunct(term.funct()))
-            term.DIV() !== null -> Operation(Operator.DIV, buildTerm(term.term()), buildFunct(term.funct()))
-            term.MOD() !== null -> Operation(Operator.MOD, buildTerm(term.term()), buildFunct(term.funct()))
-            term.funct() !== null -> buildFunct(term.funct())
+            term.MUL() !== null -> Operation(Operator.MUL, buildTerm(term.term()), buildUnary(term.unary()))
+            term.DIV() !== null -> Operation(Operator.DIV, buildTerm(term.term()), buildUnary(term.unary()))
+            term.MOD() !== null -> Operation(Operator.MOD, buildTerm(term.term()), buildUnary(term.unary()))
+            term.unary() !== null -> buildUnary(term.unary())
             else -> throw IllegalArgumentException("not a legal term: ${term.text}")
+        }
+
+    private fun buildUnary(unary: MathParser.UnaryContext): Expr =
+        when {
+            unary.funct() !== null ->
+                if (unary.SUB() !== null) {
+                    UnaryOperation(Operator.SUB, buildFunct(unary.funct()))
+                } else {
+                    buildFunct(unary.funct())
+                }
+            else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
         }
 
     private fun buildFunct(funct: MathParser.FunctContext): Expr =
@@ -47,19 +58,8 @@ class AstBuilder(val eq: MathParser.EqContext) {
             }
             funct.RAD() !== null -> Operation(Operator.RAD, buildExpr(funct.expr(0)), buildExpr(funct.expr(1)))
             funct.LOG() !== null -> Operation(Operator.LOG, buildExpr(funct.expr(0)), buildExpr(funct.expr(1)))
-            funct.unary() !== null -> buildUnary(funct.unary())
+            funct.mulFactor() !== null -> buildMulFactor(funct.mulFactor())
             else -> throw IllegalArgumentException("not a legal function: ${funct.text}")
-        }
-
-    private fun buildUnary(unary: MathParser.UnaryContext): Expr =
-        when {
-            unary.mulFactor() !== null ->
-                if (unary.SUB() !== null) {
-                    UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor()))
-                } else {
-                    buildMulFactor(unary.mulFactor())
-                }
-            else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
         }
 
     private fun buildMulFactor(mulFactor: MathParser.MulFactorContext): Expr =
@@ -73,6 +73,7 @@ class AstBuilder(val eq: MathParser.EqContext) {
         when {
             expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), if (expo.SUB() !== null) UnaryOperation(Operator.SUB, buildFactor(expo.factor())) else buildFactor(expo.factor()))
             expo.factor() !== null -> buildFactor(expo.factor())
+            expo.unicode_expo() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), Num(expo.unicode_expo().text.map { superscriptMap[it] }.joinToString("")))
             else -> throw IllegalArgumentException("not a legal exponential: ${expo.text}")
         }
 
@@ -81,10 +82,12 @@ class AstBuilder(val eq: MathParser.EqContext) {
             factor.expr() !== null -> buildExpr(factor.expr())
             factor.NUMBER() !== null -> Num(germanFormat.parse(factor.NUMBER().text.replace("{,}", ",")))
             factor.VAR() !== null -> Var(factor.VAR().text)
+            factor.EMPTY_CURLY_BRACKETS() !== null -> Num(1)
             else -> throw IllegalArgumentException("not a legal factor: ${factor.text}")
         }
 
     private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+    private val superscriptMap = mapOf('⁰' to '0', '¹' to '1', '²' to '2', '³' to '3', '⁴' to '4', '⁵' to '5', '⁶' to '6', '⁷' to '7', '⁸' to '8', '⁹' to '9')
     init {
         germanFormat.maximumFractionDigits = germanFormat.maximumIntegerDigits
     }

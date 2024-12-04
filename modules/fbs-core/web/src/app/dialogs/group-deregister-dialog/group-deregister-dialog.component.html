@@ -1,0 +1,40 @@
+<div class="container">
+  <div *ngIf="data.adding" matDialogTitle>
+    {{ groupName }} - {{ "group.add.member" | i18nextEager }}
+  </div>
+  <div *ngIf="!data.adding" matDialogTitle>
+    {{ groupName }} - {{ "group.deregister.member" | i18nextEager }}
+  </div>
+  <mat-dialog-content style="max-height: 100%; overflow: hidden">
+    <mat-list>
+      <mat-list-item *ngFor="let member of members$ | async">
+        {{ member.user.prename }} {{ member.user.surname }}
+
+        <span class="spacer"></span>
+        <button
+          *ngIf="data.adding"
+          mat-button
+          color="warn"
+          (click)="addMember(member)"
+          matTooltip="{{ 'dialog.group.deregister.add' | i18nextEager }}"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+        <button
+          *ngIf="!data.adding"
+          mat-button
+          color="warn"
+          (click)="removeMember(member)"
+          matTooltip="{{ 'dialog.group.deregister.remove' | i18nextEager }}"
+        >
+          <mat-icon>remove</mat-icon>
+        </button>
+      </mat-list-item>
+    </mat-list>
+  </mat-dialog-content>
+  <mat-dialog-actions class="actions">
+    <button mat-flat-button color="warn" (click)="closeDialog()">
+      {{ "dialog.group.new.cancel" | i18nextEager }}
+    </button>
+  </mat-dialog-actions>
+</div>

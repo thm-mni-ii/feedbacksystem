@@ -23,7 +23,7 @@ export class TaskPointsDialogComponent implements OnInit {
     private snackbar: MatSnackBar,
     public dialogRef: MatDialogRef<TaskPointsDialogComponent>
   ) {}
-
+  beforeUnloadTimeout: any;
   tasks: Task[];
   allRequirements: Requirement[];
   selected: Requirement;
@@ -128,6 +128,18 @@ export class TaskPointsDialogComponent implements OnInit {
   }
 
   save() {
+    /*window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        function handleBeforeUnload(e) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      
+        clearTimeout(this.beforeUnloadTimeout); // Clear any existing timeout
+      
+        this.beforeUnloadTimeout = setTimeout(() => {
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+        }, 1500);*/
     let checked = true;
     const newReq = [];
     const oldReq = [];

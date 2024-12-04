@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectorRef } from "@angular/core";
 import { AuthService } from "src/app/service/auth.service";
 import { TitlebarService } from "src/app/service/titlebar.service";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
@@ -15,7 +15,8 @@ export class FbsModellingComponent implements OnInit {
   constructor(
     private titlebar: TitlebarService,
     private auth: AuthService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {
     this.token = this.auth.loadToken();
   }
@@ -24,8 +25,9 @@ export class FbsModellingComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const url = `http://localhost:8080/?jsessionid=${this.token}`;
+    const url = `https://fbs-modelling.mni.thm.de/#/login?jsessionid=${this.token}&iframe=true`;
     this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.cdr.detach(); // stops iframe from reloading
     return this.safeUrl;
   }
 }

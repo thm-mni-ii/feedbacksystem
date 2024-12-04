@@ -65,6 +65,8 @@ export class ResultsComponent implements OnInit {
 
   submission: Submission;
 
+  mathResult: Array<[string, string]> | null;
+
   handleSubmission(event): void {
     this.submission = this.allSubmissions.find(
       (item) => this.allSubmissions.indexOf(item) == event.index
@@ -98,9 +100,15 @@ export class ResultsComponent implements OnInit {
     this.resultColumns = [];
     this.expectedDataSource = [];
     this.expectedColumns = [];
+    this.mathResult = null;
 
     submission.results.forEach((res) => {
       const extInfo: any = res.extInfo;
+
+      if (res.checkerType === "spreadsheet") {
+        this.mathResult = Object.entries(extInfo);
+      }
+
       if (extInfo && extInfo.type === "compareTable") {
         this.resultColumns.push(extInfo.result.head);
         const resultSource = new MatTableDataSource<any>();

@@ -1,0 +1,130 @@
+<div class="container">
+  <div class="create-group" *ngIf="!editGroups">
+    <button
+      mat-raised-button
+      color="accent"
+      *ngIf="isAuthorized()"
+      (click)="createGroup()"
+      matTooltip="{{ 'course.create-group' | i18nextEager }}"
+    >
+      <mat-icon>add</mat-icon>&nbsp;{{ "course.create-group" | i18nextEager }}
+    </button>
+  </div>
+
+  <table>
+    <tr>
+      <th>{{ "course.select-group" | i18nextEager }}</th>
+      <th>{{ "course.group" | i18nextEager }}</th>
+      <th>{{ "course.group-membership" | i18nextEager }}</th>
+      <th *ngIf="isAuthorized()">{{ "course.settings" | i18nextEager }}</th>
+    </tr>
+    <ng-container *ngFor="let group of groups$ | async; let i = index">
+      <tr *ngIf="(!student && group.visible) || student">
+        <td>
+          <mat-icon class="invisible" *ngIf="!group.visible"
+            >visibility_off</mat-icon
+          >
+          <input
+            type="radio"
+            [id]="'group' + i"
+            name="group"
+            [value]="group"
+            [(ngModel)]="preselectedGroup"
+            (ngModelChange)="choose($event)"
+            [class.disabled-style]="!selectionIsOpen"
+          />
+        </td>
+        <td>{{ group.name }}</td>
+        <td>{{ group.currentMembership }} / {{ group.membership }}</td>
+        <td *ngIf="isAuthorized()">
+          <button
+            class="table-settings-button"
+            mat-icon-button
+            [matMenuTriggerFor]="settings"
+            matTooltip="{{ 'course.settings' | i18nextEager }}"
+          >
+            <mat-icon>settings</mat-icon>
+          </button>
+          <mat-menu #settings="matMenu">
+            <button
+              mat-menu-item
+              *ngIf="isAuthorized()"
+              (click)="updateGroup(group)"
+            >
+              <mat-icon>edit</mat-icon>
+              {{ "dialog.group.new.edit-group" | i18nextEager }}
+            </button>
+            <button
+              mat-menu-item
+              *ngIf="isAuthorized()"
+              (click)="deregisterMember(group)"
+            >
+              <mat-icon> person_remove </mat-icon
+              >{{ "group.deregister.member" | i18nextEager }}
+            </button>
+            <button
+              mat-menu-item
+              *ngIf="isAuthorized()"
+              (click)="derigisterAllMembers(group)"
+            >
+              <mat-icon> group_remove </mat-icon
+              >{{ "group.deregister.all" | i18nextEager }}
+            </button>
+            <button
+              mat-menu-item
+              *ngIf="isAuthorized()"
+              (click)="addMember(group)"
+            >
+              <mat-icon> person_add </mat-icon
+              >{{ "group.add.member" | i18nextEager }}
+            </button>
+            <button
+              mat-menu-item
+              *ngIf="isAuthorized()"
+              (click)="deleteGroup(group)"
+            >
+              <mat-icon>delete</mat-icon>{{ "group.delete" | i18nextEager }}
+            </button>
+          </mat-menu>
+        </td>
+      </tr>
+    </ng-container>
+  </table>
+  <div class="button-container">
+    <button
+      class="selection-button"
+      mat-raised-button
+      color="primary"
+      (click)="preselectionExists ? removeGroup() : joinGroup()"
+      matTooltip="{{
+        preselectionExists
+          ? ('course.remove-selected-group' | i18nextEager)
+          : ('course.save-selected-group' | i18nextEager)
+      }}"
+      [class.disabled-style]="!selectionIsOpen"
+    >
+      {{
+        preselectionExists
+          ? ("course.remove-selected-group" | i18nextEager)
+          : ("course.save-selected-group" | i18nextEager)
+      }}
+    </button>
+    <button
+      *ngIf="isAuthorized()"
+      mat-raised-button
+      color="primary"
+      (click)="manageSelection()"
+      matTooltip="{{
+        selectionIsOpen
+          ? ('course.hide.selection' | i18nextEager)
+          : ('course.open.selection' | i18nextEager)
+      }}"
+    >
+      {{
+        selectionIsOpen
+          ? ("course.hide.selection" | i18nextEager)
+          : ("course.open.selection" | i18nextEager)
+      }}
+    </button>
+  </div>
+</div>

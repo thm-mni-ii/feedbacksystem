@@ -4,4 +4,5 @@ export interface UserTaskResult {
   maxPoints: number;
   passed: boolean;
   submission: boolean;
+  isPrivate: boolean;
 }

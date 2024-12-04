@@ -83,6 +83,12 @@ app-db-scheme-table {
   }
 }
 
+app-db-scheme-routines {
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+}
+
 
 // Prism.js line numbers plugin
 .line-numbers .line-numbers-rows {

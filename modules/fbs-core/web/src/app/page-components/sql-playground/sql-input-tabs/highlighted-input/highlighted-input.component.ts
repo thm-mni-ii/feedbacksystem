@@ -78,11 +78,12 @@ export class HighlightedInputComponent
   }
 
   updateSubmission(event) {
-    //check if cleanedText is different from event -> prevent infinite loop
-    //if different, update the text area
-    //if (cleanedText !== event) {
-    //this.groupForm.patchValue({ content: cleanedText });
-    //}
+    let cleanedText = this.cleanText(event);
+
+    if (cleanedText !== event) {
+      this.groupForm.patchValue({ content: cleanedText });
+    }
+
     this.update.emit({ content: event });
   }
 
@@ -125,24 +126,6 @@ export class HighlightedInputComponent
     this.sub.add(localSub);
   }
 
-  cleanupTextarea(textToCheck: string) {
-    // rule: max 80 char per line -> if more, add a line break
-
-    const lines = textToCheck.split("\n");
-    let newLines = [];
-
-    lines.forEach((line) => {
-      if (line.length > 80) {
-        const newLine = line.match(/.{1,80}/g);
-        newLines = [...newLines, ...newLine];
-      } else {
-        newLines = [...newLines, line];
-      }
-    });
-
-    return newLines.join("\n");
-  }
-
   onTab(event) {
     event.preventDefault();
     var start = event.target.selectionStart;
@@ -156,5 +139,20 @@ export class HighlightedInputComponent
 
     // put caret at right position again
     event.target.selectionStart = event.target.selectionEnd = start + 1;
+  }
+
+  cleanText(text: string) {
+    console.log(text);
+
+    // allow only caracteres for valid sql query
+    text = text.replace(
+      /[^a-zA-Z0-9üöäÄÖÜß\(\)\[\]\{\}\s\.\,\;\=\+\-\*\/\>\<\!\@\#\$\?\%\^\&\_\~\`´°²³§\:\'\"\|\\]/g,
+      ""
+    );
+
+    // remove (vertical tab), (form feed), (line separator), (paragraph separator), and (narrow no-break space) characters
+    text = text.replace(/[\u000B\u000C\u0085\u2028\u2029]/g, " ");
+
+    return text;
   }
 }

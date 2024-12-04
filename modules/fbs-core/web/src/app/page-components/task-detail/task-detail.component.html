@@ -86,7 +86,7 @@
       </span>
     </div>
     <div class="description">
-      {{ task?.description }}
+      <markdown [data]="task?.description" katex></markdown>
     </div>
     <mat-card-content>
       <div class="user-input">
@@ -116,7 +116,9 @@
               [disabled]="isFirstTask()"
               mat-icon-button
               (click)="goToPreviousUnresolvedTask()"
-              matTooltip="'task.detail.previousUnsolvedTaskTooltip' | i18nextEager"
+              matTooltip="{{
+                'task.detail.previousUnsolvedTaskTooltip' | i18nextEager
+              }}"
             >
               <mat-icon class="material-icons">
                 keyboard_double_arrow_left
@@ -127,7 +129,9 @@
               mat-icon-button
               class="margin-left-4px"
               (click)="goToPreviousTask()"
-              matTooltip="'task.detail.previousTaskTooltip' | i18nextEager"
+              matTooltip="{{
+                'task.detail.previousTaskTooltip' | i18nextEager
+              }}"
             >
               <mat-icon>keyboard_arrow_left</mat-icon>
             </button>
@@ -145,7 +149,7 @@
               [disabled]="isLastTask()"
               mat-icon-button
               (click)="goToNextTask()"
-              matTooltip="'task.detail.tooltip.nextTask' | i18nextEager"
+              matTooltip="{{ 'task.detail.tooltip.nextTask' | i18nextEager }}"
             >
               <mat-icon>keyboard_arrow_right</mat-icon>
             </button>
@@ -154,7 +158,9 @@
               mat-icon-button
               (click)="goToNextUnresolvedTask()"
               class="margin-left-4px"
-              matTooltip="'task.detail.tooltip.nextUnsolvedTask' | i18nextEager"
+              matTooltip="{{
+                'task.detail.tooltip.nextUnsolvedTask' | i18nextEager
+              }}"
             >
               <mat-icon class="material-icons">
                 keyboard_double_arrow_right

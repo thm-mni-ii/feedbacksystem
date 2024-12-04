@@ -1,0 +1,24 @@
+@import "../../../colors";
+
+.container {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 30px;
+  padding: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+app-menu-bar mat-icon {
+  cursor: pointer;
+  color: #333333;
+}
+
+.kanban-button mat-icon {
+  color: $cPrimary;
+  transform: scale(10);
+  margin-top: 150px;
+  margin-left: 80px;
+}

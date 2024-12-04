@@ -36,6 +36,8 @@ services:
     depends_on:
       - mysql1
       - runner
+      - mongodb
+      - minio
     ports:
       - "127.0.0.1:443:443"
       - "127.0.0.1:80:80"
@@ -250,7 +252,7 @@ services:
       context: modules/fbs-eat/eat
     restart: always
     ports:
-      - 5000:8050
+      - 5001:8050
     networks:
       - fbs
     environment:

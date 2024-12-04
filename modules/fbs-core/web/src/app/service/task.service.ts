@@ -1,9 +1,11 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { forkJoin, Observable } from "rxjs";
+import { take, catchError, map } from "rxjs/operators";
 import { Task } from "../model/Task";
 import { HttpClient } from "@angular/common/http";
 import { UserTaskResult } from "../model/UserTaskResult";
 import { saveAs } from "file-saver";
+import { SelectedFormFields } from "../model/SelectedFormFields";
 
 @Injectable({
   providedIn: "root",
@@ -72,6 +74,48 @@ export class TaskService {
    */
   updateTask(cid: number, tid: number, task: Task): Observable<void> {
     return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}`, task);
+  }
+
+  /**
+   * Update multiple existing tasks
+   * @param cid Course id
+   * @param taskIds The ids of the tasks to update
+   * @param task The new task state
+   * @return Observable that succeeds if updated successfully
+   */
+  updateMultipleTasks(
+    cid: number,
+    tasks: Task[],
+    referenceTask: Task,
+    selectedFormFields: SelectedFormFields
+  ): Observable<boolean> {
+    const updateObservables = tasks.map((task) => {
+      if (selectedFormFields.datePicker) {
+        task.deadline = referenceTask.deadline;
+      }
+      if (selectedFormFields.isPrivate) {
+        task.isPrivate = referenceTask.isPrivate;
+      }
+      if (selectedFormFields.mediaType) {
+        task.mediaType = referenceTask.mediaType;
+      }
+      if (selectedFormFields.requirementType) {
+        task.requirementType = referenceTask.requirementType;
+      }
+
+      return this.updateTask(cid, task.id, task).pipe(
+        take(1),
+        catchError((error) => {
+          console.error(`Failed to update task ${task.id}:`, error);
+          return [];
+        })
+      );
+    });
+
+    return forkJoin(updateObservables).pipe(
+      map(() => true),
+      catchError(async () => false)
+    );
   }
 
   /**
