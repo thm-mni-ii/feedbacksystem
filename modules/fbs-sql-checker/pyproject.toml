@@ -17,9 +17,11 @@ pre-commit = "^2.20.0"
 pylint = "^2.15.3"
 tqdm = "^4.64.1"
 sqlparse = "^0.4.2"
-psycopg2 = "^2.9.6"
+psycopg2-binary = "^2.9.10"
 python-dotenv = "^0.21.0"
 sympy = "^1.12"
+mongomock = "^4.3.0"
+typeguard = "^4.4.1"
 
 
 [tool.poetry.dev-dependencies]

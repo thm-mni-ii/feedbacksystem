@@ -3,11 +3,16 @@
 """System module."""
 import sys  # pylint: disable=W0611
 import requests  # pylint: disable=W0611
-from json_creator import parse_single_stat_upload_db
+
+from api.data_store import MongoDataStore
+from api.parser import QueryParser
+from api.pro_attribute_checker import ProAttributeChecker
+from api.query_processor import QueryProcessor, Submission
+from api.sel_attribute_checker import SelAttributeChecker
+from api.table_checker import TableChecker
 
 # The following Code is for productive purposes
 
-CLIENT = sys.argv[2]
 if len(sys.argv) < 3:
     print("Zu wenige Argumente übergeben.")
     print(
@@ -15,7 +20,14 @@ if len(sys.argv) < 3:
         "zu analysierende JSON aufgerufen werden soll."
     )
 else:
-    URL_ANSWER = sys.argv[1]
-    answer = requests.get(URL_ANSWER, verify=False, timeout=25)
-    print(answer.json())
-    parse_single_stat_upload_db(answer.json(), CLIENT)
+    qparser = QueryParser()
+    storage = MongoDataStore.connect(sys.argv[2])
+    qp = QueryProcessor(
+        qparser,
+        TableChecker(qparser),
+        ProAttributeChecker(qparser),
+        SelAttributeChecker(qparser),
+        storage,
+    )
+    answer = requests.get(sys.argv[1], verify=False, timeout=60)
+    qp.process(Submission.from_dict(answer.json()))

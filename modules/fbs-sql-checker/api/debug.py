@@ -1,6 +1,6 @@
 import random  # pylint: disable=W0611
 import string  # pylint: disable=W0611
-from json_creator import parse_single_stat_upload_db
+from query_processor import parse_single_stat_upload_db
 
 
 CLIENT = (

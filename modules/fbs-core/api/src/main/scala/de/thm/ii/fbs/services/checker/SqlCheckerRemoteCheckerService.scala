@@ -112,7 +112,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
         sqlCheckerService.getQuery(task.id, userID) match {
           case Some(query) =>
             if (!query.parsable) {
-              hints ++= "Abfrage nicht parsbar\n"
+              hints ++= "genaues Feedback nicht verfügbar\n"
             } else {
               if (sci.showHints && sci.showHintsAt <= attempts) {
                 if (!query.tablesRight.get) {
