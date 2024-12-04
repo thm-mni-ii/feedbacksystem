@@ -69,11 +69,11 @@ class Submission:
             submission=data["submission"],
             is_solution=data.get("isSol", False),
             passed=data.get("passed", False),
-            user_id=data.get("user_id", None),
+            user_id=data.get("userId", None),
             attempt=data.get("attempt", None),
-            course_id=data.get("course_id", None),
-            task_id=data.get("task_id", None),
-            submission_id=data.get("submission_id", None),
+            course_id=data.get("cid", None),
+            task_id=data.get("tid", None),
+            submission_id=data.get("sid", None),
         )
 
 
@@ -101,11 +101,12 @@ class Result:
     min_distance: int = 0
     closest_id: str = ""
 
-    def to_db_dict(self, user_id = None, attempt = None):
+    def to_db_dict(self, course_id = None, task_id = None, submission_id = None, user_id = None, attempt = None):
         return {
             "id": str(self.closest_id),
-            "courseId": self.course_id,
-            "taskNumber": self.task_nr,
+            "courseId": course_id,
+            "taskNumber": task_id,
+            "submissionId": submission_id,
             "statement": self.query,
             "queryRight": self.passed,
             "parsable": self.parsable,
@@ -627,8 +628,11 @@ class QueryProcessor:
 
     def process(self, submission: Submission):
         result = self._parse_query(submission.submission, submission.is_solution, submission.passed)
-        if result is not None:
-            self._store_query(result.to_db_dict(submission.user_id, submission.attempt))
+        if result is None:
+            raise ValueError('query parsing resulted in none')
+        result.course_id = submission.course_id
+        result.task_nr = submission.task_id
+        self._store_query(result.to_db_dict(course_id=submission.course_id, task_id=submission.task_id, user_id=submission.user_id, submission_id=submission.submission_id, attempt=submission.attempt))
         return result
 
     def _store_query(self, query):

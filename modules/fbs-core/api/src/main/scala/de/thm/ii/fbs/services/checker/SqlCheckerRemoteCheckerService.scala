@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerState, SqlCheckerSubmission, User}
 import de.thm.ii.fbs.model.task.Task
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Submission => FBSSubmission}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SQLCheckerQuery, SqlCheckerInformation, Submission => FBSSubmission}
 import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
@@ -109,41 +109,12 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       case Some(sci: SqlCheckerInformation) =>
         val hints = new mutable.StringBuilder()
         val attempts = submissionService.getAll(userID, task.courseID, task.id).length
-        sqlCheckerService.getQuery(task.id, userID) match {
+        sqlCheckerService.getQuery(submission.id) match {
           case Some(query) =>
             if (!query.parsable) {
               hints ++= "genaues Feedback nicht verfügbar\n"
             } else {
-              if (sci.showHints && sci.showHintsAt <= attempts) {
-                if (!query.tablesRight.get) {
-                  hints ++= "falsche Tabellen verwendet\n"
-                }
-                if (!query.selAttributesRight.get) {
-                  hints ++= "falsche Where-Attribute verwendet\n"
-                }
-                if (!query.proAttributesRight.get) {
-                  hints ++= "falsche Select-Attribute verwendet\n"
-                }
-                if (!query.stringsRight.get) {
-                  if (!query.wildcards.get) {
-                    hints ++= "falsche Zeichenketten verwendet, bitte auch die Wildcards prüfen\n"
-                  } else {
-                    hints ++= "falsche Zeichenketten verwendet\n"
-                  }
-                }
-                if (!query.orderByRight.get) {
-                  hints ++= "falsche Order By verwendet\n"
-                }
-                if (!query.groupByRight.get) {
-                  hints ++= "falsche Group By verwendet\n"
-                }
-                if (!query.joinsRight.get) {
-                  hints ++= "falsche Joins verwendet\n"
-                }
-              }
-              if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
-                //ToDo
-              }
+              formatHint(sci, hints, attempts, query)
             }
             (if (query.queryRight) 0 else 1, hints.toString())
           case _ => (3, "sql-checker hat kein Abfrageobjekt zurückgegeben")
@@ -151,6 +122,44 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       case _ => (2, "Ungültige Checker-Typ-Informationen")
     }
     super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+  }
+
+  private def formatHint(sci: SqlCheckerInformation, hints: StringBuilder, attempts: Int, query: SQLCheckerQuery): Unit = {
+    if (sci.showHints && sci.showHintsAt <= attempts) {
+      if (!query.tablesRight.get) {
+        hints ++= "falsche Tabellen verwendet\n"
+      }
+      if (!query.selAttributesRight.get) {
+        hints ++= "falsche Where-Attribute verwendet\n"
+      }
+      if (!query.proAttributesRight.get) {
+        hints ++= "falsche Select-Attribute verwendet\n"
+      }
+      if (!query.stringsRight.get) {
+        if (!query.wildcards.get) {
+          hints ++= "falsche Zeichenketten verwendet, bitte auch die Wildcards prüfen\n"
+        } else {
+          hints ++= "falsche Zeichenketten verwendet\n"
+        }
+      }
+      if (!query.orderByRight.get) {
+        hints ++= "falsche Order By verwendet\n"
+      }
+      if (!query.groupByRight.get) {
+        hints ++= "falsche Group By verwendet\n"
+      }
+      if (!query.joinsRight.get) {
+        hints ++= "falsche Joins verwendet\n"
+      }
+    }
+    if (query.distance.isPresent) {
+      hints ++= "Distanz zur nächstens Musterlösung: "
+      hints ++= query.distance.get.toString
+      hints ++= "\n"
+    }
+    if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
+      //ToDo
+    }
   }
 
   def formatSubmission(submission: FBSSubmission, checker: CheckrunnerConfiguration, solution: String): Any = {

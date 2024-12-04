@@ -1,5 +1,5 @@
 # inspired by https://github.com/python-poetry/poetry/issues/1178#issuecomment-1238475183
-FROM python:3.10 AS builder
+FROM python:3.11 AS builder
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -11,11 +11,9 @@ COPY . .
 
 RUN poetry install --only main --no-dev
 
-FROM python:3.10-alpine
+FROM python:3.11
 
 WORKDIR "/app"
-
-RUN apk update && apk add libpq
 
 RUN adduser \
   --disabled-password \
