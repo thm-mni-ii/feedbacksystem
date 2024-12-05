@@ -86,7 +86,7 @@
       </span>
     </div>
     <div class="description">
-      {{ task?.description }}
+      <markdown [data]="task?.description" katex></markdown>
     </div>
     <mat-card-content>
       <div class="user-input">

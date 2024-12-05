@@ -34,6 +34,8 @@
     "chart.js": "^2.9.4",
     "file-saver": "^2.0.5",
     "i18next-browser-languagedetector": "^7.1.0",
+    "katex": "^0.16.11",
+    "marked": "^15.0.2",
     "mathlive": "^0.98.5",
     "ng2-charts": "^2.4.3",
     "ngx-cookie-service": "^14.0.1",
