@@ -6,7 +6,8 @@ from sympy import false
 from typeguard import typechecked
 
 from api.data_store import AbstractMongoStore
-from api.query_processor import QueryProcessor, QueryParser, DataStore, Submission
+from api.query_processor import QueryProcessor, QueryParser, DataStore
+from api.datatypes import Submission
 from api.pro_attribute_checker import ProAttributeChecker
 from api.sel_attribute_checker import SelAttributeChecker
 from api.table_checker import TableChecker

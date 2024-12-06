@@ -1,17 +1,22 @@
 # JSONCreator.py
-from dataclasses import dataclass
+from abc import ABCMeta, abstractmethod
+from logging import Logger
 from uuid import uuid4
 from typing import Optional
+from venv import logger
 
 from typeguard import typechecked
 
+from api.comparator.comparator import Comparator
 from api.data_store import DataStore
 from api.parser import QueryParser
 from api.pro_attribute_checker import ProAttributeChecker
 from api.sel_attribute_checker import SelAttributeChecker
+from api.solution_fetcher import SolutionFetcher
 from api.table_checker import TableChecker
 from datetime import datetime
 import model
+from api.datatypes import Submission, Result, ResultV2
 from mask_aliases import SQLAliasMasker
 import distance.distance_calc as d
 
@@ -25,110 +30,43 @@ user_data = []
 tables, selAttributes, proAttributes, strings = [], [], [], []
 """
 
-@dataclass
+
 @typechecked
-class Query:
-    course_id: int
-    test_sql: str
-    task_nr: int
-    is_sol: bool
-    tables_right: bool
-    sel_attributes_right: bool
-    pro_attributes_right: bool
-    strings_right: bool
-    order_by_right: bool
-    group_by_right: bool
-    joins_right: bool
-    having_right: bool
-    wildcards: bool
-    time: int
-    closest_solution: int
-    min_distance: int
-    closest_id: int
+class QueryProcessor(metaclass=ABCMeta):
+    @abstractmethod
+    def process(self, submission) -> Result:
+        pass
 
 
-@dataclass
 @typechecked
-class Submission:
-    submission: str
-    is_solution: bool = False
-    passed: bool = False
-    user_id: Optional[int] = None
-    attempt: Optional[int] = None
-    course_id: Optional[int] = None
-    task_id: Optional[int] = None
-    submission_id: Optional[int] = None
+class QueryProcessorV2(QueryProcessor):
+    def __init__(self, comparator: Comparator, solution_fetcher: SolutionFetcher, log: Optional[Logger] = None):
+        self._comparator = comparator
+        self._solution_fetcher = solution_fetcher
+        if logger is not None:
+            self._logger = Logger(self.__class__.__name__)
+        else:
+            self._logger = logger
 
-    @classmethod
-    def new_solution(cls, query: str, course_id: Optional[int] = None, task_id: Optional[int] = None):
-        return cls(query, is_solution=True, passed=True, course_id=course_id, task_id=task_id)
+    def process(self, submission: Submission) -> Result:
+        result = ResultV2.from_submission(submission)
+        if not submission.is_solution:
+            solution, distance = self._solution_fetcher.fetch_solution(submission.task_id, submission)
+            try:
+                result.errors = self._comparator.compare(solution.statement, submission.submission)
+                result.passed = len(result.errors) == 0
+                result.closest_solution = solution.uuid
+                result.min_distance = distance
+                result.parsable = True
+            except Exception as e:
+                logger.exception(e)
+        else:
+            result.passed = True
 
-    @classmethod
-    def from_dict(cls, data: dict):
-        return cls(
-            submission=data["submission"],
-            is_solution=data.get("isSol", False),
-            passed=data.get("passed", False),
-            user_id=data.get("userId", None),
-            attempt=data.get("attempt", None),
-            course_id=data.get("cid", None),
-            task_id=data.get("tid", None),
-            submission_id=data.get("sid", None),
-        )
-
-
-@dataclass
-@typechecked
-class Result:
-    uuid: str
-    course_id: int = 0
-    query: str = ""
-    passed: bool = False
-    parsable: bool = False
-    task_nr: int = 0
-    is_sol: bool = False
-    tables_right: bool  = False
-    sel_attributes_right: bool = False
-    pro_attributes_right: bool = False
-    strings_right: bool = False
-    order_by_right: bool = False
-    group_by_right: bool = False
-    joins_right: bool = False
-    having_right: bool = False
-    wildcards: bool = False
-    time: str = ""
-    closest_solution: str = ""
-    min_distance: int = 0
-    closest_id: str = ""
-
-    def to_db_dict(self, course_id = None, task_id = None, submission_id = None, user_id = None, attempt = None):
-        return {
-            "id": str(self.closest_id),
-            "courseId": course_id,
-            "taskNumber": task_id,
-            "submissionId": submission_id,
-            "statement": self.query,
-            "queryRight": self.passed,
-            "parsable": self.parsable,
-            "isSolution": self.is_sol,
-            "tablesRight": self.tables_right,
-            "selAttributesRight": self.sel_attributes_right,
-            "proAttributesRight": self.pro_attributes_right,
-            "stringsRight": self.strings_right,
-            "userId": user_id,
-            "attempt": attempt,
-            "orderByRight": self.order_by_right,
-            "groupByRight": self.group_by_right,
-            "joinsRight": self.joins_right,
-            "havingRight": self.having_right,
-            "wildcards": self.wildcards,
-            "time": self.time,
-            "solutionID": self.closest_solution,
-            "distance": self.min_distance,
-        }
+        return result
 
 
-class QueryProcessor:
+class QueryProcessorV1(QueryProcessor):
     def __init__(self, parser: QueryParser, table_checker: TableChecker, pro_attribute_checker: ProAttributeChecker, sel_attribute_checker: SelAttributeChecker, data_store: DataStore):
         self._parser = parser
         self._table_checker = table_checker
@@ -626,12 +564,14 @@ class QueryProcessor:
         record = Result(uuid, course_id=course_id, task_nr=task_nr, time=time)
         return record
 
-    def process(self, submission: Submission):
+    def process(self, submission: Submission) -> Result:
+        print("input", submission)
         result = self._parse_query(submission.submission, submission.is_solution, submission.passed)
         if result is None:
             raise ValueError('query parsing resulted in none')
         result.course_id = submission.course_id
         result.task_nr = submission.task_id
+        print("output", result)
         self._store_query(result.to_db_dict(course_id=submission.course_id, task_id=submission.task_id, user_id=submission.user_id, submission_id=submission.submission_id, attempt=submission.attempt))
         return result
 

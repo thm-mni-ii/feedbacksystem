@@ -1,9 +1,23 @@
 import traceback
+from abc import ABCMeta, abstractmethod
+
 import sqlparse
 from . import attribute_check as att_check
 from . import table_check as tab_check
 from . import result_log as log
 from . import format as f
+
+
+class DistanceCalculator(metaclass=ABCMeta):
+    @abstractmethod
+    def calculate_distance(self, a_query: str, b_query: str) -> float:
+        pass
+
+
+class GetDistanceCalculator(DistanceCalculator):
+    def calculate_distance(self, a_query: str, b_query: str) -> float:
+        return get_distance(a_query, b_query)
+
 
 # first argument is always the solution
 def get_distance(ref, query):

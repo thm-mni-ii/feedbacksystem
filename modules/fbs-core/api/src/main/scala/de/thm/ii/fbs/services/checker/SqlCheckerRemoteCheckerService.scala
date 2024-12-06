@@ -14,8 +14,10 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 
 import java.util.UUID
+import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object SqlCheckerRemoteCheckerService {
   private val isCheckerRun = new ConcurrentHashMap[Int, SqlCheckerState.Value]()
@@ -81,23 +83,26 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                       resultText: String, extInfo: String): Unit = {
     SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, SqlCheckerState.Runner) match {
       case SqlCheckerState.Runner =>
+        println("a")
+        SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Checker)
+        this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
         if (exitCode == 2 && hintsEnabled(checkerConfiguration)) {
-          SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Checker)
+          println("b")
           if (extInfo != null) {
+            println("c")
             SqlCheckerRemoteCheckerService.extInfo.put(submission.id, extInfo)
           }
-          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
         } else {
-          SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
-          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
           super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
         }
       case SqlCheckerState.Checker =>
+        println("e")
         SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
         val extInfo = SqlCheckerRemoteCheckerService.extInfo.remove(submission.id)
         this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
       case SqlCheckerState.Ignore =>
+        println("f")
         SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
     }
   }
@@ -116,7 +121,8 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
             } else {
               formatHint(sci, hints, attempts, query)
             }
-            (if (query.queryRight) 0 else 1, hints.toString())
+            (if (Optional.ofNullable(query.queryRight)
+              .or(() => Optional.ofNullable(query.passed)).flatMap(a => a).get()) {0} else {1}, hints.toString())
           case _ => (3, "sql-checker hat kein Abfrageobjekt zurückgegeben")
         }
       case _ => (2, "Ungültige Checker-Typ-Informationen")
@@ -126,30 +132,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
 
   private def formatHint(sci: SqlCheckerInformation, hints: StringBuilder, attempts: Int, query: SQLCheckerQuery): Unit = {
     if (sci.showHints && sci.showHintsAt <= attempts) {
-      if (!query.tablesRight.get) {
-        hints ++= "falsche Tabellen verwendet\n"
-      }
-      if (!query.selAttributesRight.get) {
-        hints ++= "falsche Where-Attribute verwendet\n"
-      }
-      if (!query.proAttributesRight.get) {
-        hints ++= "falsche Select-Attribute verwendet\n"
-      }
-      if (!query.stringsRight.get) {
-        if (!query.wildcards.get) {
-          hints ++= "falsche Zeichenketten verwendet, bitte auch die Wildcards prüfen\n"
-        } else {
-          hints ++= "falsche Zeichenketten verwendet\n"
-        }
-      }
-      if (!query.orderByRight.get) {
-        hints ++= "falsche Order By verwendet\n"
-      }
-      if (!query.groupByRight.get) {
-        hints ++= "falsche Group By verwendet\n"
-      }
-      if (!query.joinsRight.get) {
-        hints ++= "falsche Joins verwendet\n"
+      if (query.version == Optional.of("v2")) {
+        formatV2(hints, query)
+      } else {
+        formatLegacy(hints, query)
       }
     }
     if (query.distance.isPresent) {
@@ -159,6 +145,46 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     }
     if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
       //ToDo
+    }
+  }
+
+  private def formatV2(hints: StringBuilder, query: SQLCheckerQuery): Unit = {
+    for (error <- query.errors.asScala) {
+      hints ++= "In "
+      hints ++= error.trace.asScala.mkString(", ")
+      hints ++= " expected "
+      hints ++= error.expected
+      hints ++= " but got "
+      hints ++= error.got
+      hints ++= "\n\n"
+    }
+  }
+
+  private def formatLegacy(hints: StringBuilder, query: SQLCheckerQuery): Unit = {
+    if (!query.tablesRight.get) {
+      hints ++= "falsche Tabellen verwendet\n"
+    }
+    if (!query.selAttributesRight.get) {
+      hints ++= "falsche Where-Attribute verwendet\n"
+    }
+    if (!query.proAttributesRight.get) {
+      hints ++= "falsche Select-Attribute verwendet\n"
+    }
+    if (!query.stringsRight.get) {
+      if (!query.wildcards.get) {
+        hints ++= "falsche Zeichenketten verwendet, bitte auch die Wildcards prüfen\n"
+      } else {
+        hints ++= "falsche Zeichenketten verwendet\n"
+      }
+    }
+    if (!query.orderByRight.get) {
+      hints ++= "falsche Order By verwendet\n"
+    }
+    if (!query.groupByRight.get) {
+      hints ++= "falsche Group By verwendet\n"
+    }
+    if (!query.joinsRight.get) {
+      hints ++= "falsche Joins verwendet\n"
     }
   }
 
