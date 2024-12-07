@@ -5,6 +5,7 @@ from uuid import uuid4
 from typing import Optional
 from venv import logger
 
+import sqlparse
 from typeguard import typechecked
 
 from api.comparator.comparator import Comparator
@@ -50,7 +51,7 @@ class QueryProcessorV2(QueryProcessor):
 
     def process(self, submission: Submission) -> Result:
         result = ResultV2.from_submission(submission)
-        if not submission.is_solution:
+        if not (submission.is_solution or submission.passed):
             solution, distance = self._solution_fetcher.fetch_solution(submission.task_id, submission)
             try:
                 result.errors = self._comparator.compare(solution.statement, submission.submission)
@@ -61,7 +62,12 @@ class QueryProcessorV2(QueryProcessor):
             except Exception as e:
                 logger.exception(e)
         else:
-            result.passed = True
+            try:
+                sqlparse.parse(submission.submission)
+                result.parsable = True
+            except Exception as e:
+                pass
+            result.passed = result.parsable
 
         return result
 
