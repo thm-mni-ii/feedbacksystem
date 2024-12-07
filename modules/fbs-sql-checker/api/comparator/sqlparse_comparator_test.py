@@ -13,6 +13,18 @@ class ComparatorTest(unittest.TestCase):
                            "SELECT username, email, password FROM users WHERE username ILIKE 'test%'")
         assert len(errors) == 0
 
+    def test_compare_shorter(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare("SELECT username, email, password FROM users WHERE username ILIKE 'test%'",
+                           "SELECT username, email, password FROM users")
+        assert len(errors) != 0
+
+    def test_compare_shorter_swap(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare("SELECT username, email, password FROM users",
+                                    "SELECT username, email, password FROM users WHERE username ILIKE 'test%'",)
+        assert len(errors) != 0
+
     def test_compare_with_and(self):
         comparator = SqlparseComparator()
         errors = comparator.compare(
