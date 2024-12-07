@@ -83,10 +83,10 @@ class SQLCheckerService {
     mongodbTemplate.upsert(query, solution, SolutionCollectionName)
   }
 
-  def getQuery(taskNumber: Int, userId: Int): Option[SQLCheckerQuery] = {
+  def getQuery(submissionId: Int): Option[SQLCheckerQuery] = {
     val query = new Query()
     query.`with`(Sort.by(Sort.Direction.DESC, "$natural"))
-    query.addCriteria(where("taskNumber").is(taskNumber))
+    query.addCriteria(where("submissionId").is(submissionId))
 
     Option(mongodbTemplate.findOne(query, classOf[SQLCheckerQuery], QueryCollectionName))
   }
