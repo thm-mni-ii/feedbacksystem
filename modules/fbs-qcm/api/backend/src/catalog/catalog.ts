@@ -12,7 +12,11 @@ import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
 import { getCourses } from "../course/course";
 import { Catalog } from "../model/Catalog";
-import { authenticate, authenticateInCatalog, authenticateInCourse } from "../authenticate";
+import {
+  authenticate,
+  authenticateInCatalog,
+  authenticateInCourse,
+} from "../authenticate";
 import { Access, CatalogAccess, CourseAccess } from "../utils/enum";
 
 interface catalog {
@@ -35,7 +39,7 @@ export async function postCatalog(
   tokenData: JwtPayload,
   course: number
 ) {
-  if(!authenticate(tokenData, Access.moderator)) {
+  if (!authenticate(tokenData, Access.moderator)) {
     return -1;
   }
   const database: mongoDB.Db = await connect();
@@ -67,9 +71,15 @@ export async function postCatalog(
 }
 
 export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
-  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.docentInCatalog,
+      catalogId
+    ))
+  ) {
     return -1;
-  } 
+  }
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
@@ -98,8 +108,8 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
 }
 
 export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
-  if(!authenticateInCourse(tokenData, CourseAccess.docentInCourse, courseId)) {
-    return -1; 
+  if (!authenticateInCourse(tokenData, CourseAccess.docentInCourse, courseId)) {
+    return -1;
   }
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
@@ -136,7 +146,13 @@ export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
 }
 
 export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
-  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.docentInCatalog,
+      catalogId
+    ))
+  ) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -166,7 +182,13 @@ export async function putCatalog(
   tokenData: JwtPayload,
   course: number
 ) {
-  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.docentInCatalog,
+      catalogId
+    ))
+  ) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -239,7 +261,13 @@ export async function getQuestionTree(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.docentInCatalog,
+      catalogId
+    ))
+  ) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -313,7 +341,13 @@ export async function allQuestionsInCatalog(
   tokenData: JwtPayload,
   catalogId: string
 ) {
-  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.docentInCatalog,
+      catalogId
+    ))
+  ) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -348,8 +382,19 @@ function findConnection(question: any, allConnections: any[]) {
   return -1;
 }
 
-export async function addChildrenToQuestion(tokenData: JwtPayload, catalogId: string, questionId: string, childrenOfQuestion: any) {
-  if(! await authenticateInCatalog(tokenData, CourseAccess.docentInCourse, catalogId)) {
+export async function addChildrenToQuestion(
+  tokenData: JwtPayload,
+  catalogId: string,
+  questionId: string,
+  childrenOfQuestion: any
+) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CourseAccess.docentInCourse,
+      catalogId
+    ))
+  ) {
     return -1;
   }
   console.log("-----------------------");
@@ -361,17 +406,18 @@ export async function addChildrenToQuestion(tokenData: JwtPayload, catalogId: st
 
   const filter = {
     question: new mongoDB.ObjectId(questionId),
-    catalog: new mongoDB.ObjectId(catalogId)
-  }
+    catalog: new mongoDB.ObjectId(catalogId),
+  };
   const replace = {
     $set: {
-      children: childrenOfQuestion
-    }
-  }
+      children: childrenOfQuestion,
+    },
+  };
   console.log(filter);
   console.log(replace);
   const database: mongoDB.Db = await connect();
-  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  const questionInCatalogCollection: mongoDB.Collection =
+    database.collection("questionInCatalog");
   const result = await questionInCatalogCollection.updateOne(filter, replace);
   console.log(result);
   console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHH");

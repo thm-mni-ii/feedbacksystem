@@ -6,7 +6,6 @@ import questionService from '@/services/question.service'
 import sessionService from '@/services/session.service'
 
 import type Catalog from '../model/Catalog'
-import type { Choice } from '@/model/questionTypes/Choice'
 import type Question from '@/model/Question'
 import type QuestionType from '@/enums/QuestionType'
 
@@ -29,29 +28,24 @@ const catalog = ref<Catalog>({
   requirements: null
 })
 
-const submitAnswer = (answer: any[]) => {
+const submitAnswer = (answer: any) => {
   console.log('Selected Answers:', answer)
-  sessionService.submitAnswer(answer)
-  // axios.post('/api_v1/submitSessionAnswer', selectedAnswers, config)
-  //     .then((res) => console.log(res))
-  //     .catch((err) => console.log(err))
+  const submitAnswer = {
+    questionId: questionData.value._id,
+    answers: answer
+  }
+  sessionService.submitAnswer(submitAnswer)
 }
 
 onMounted(() => {
   // TODO: Check for ongoing session
   // TODO: no ongoing session > check parameter
-  questionService
-    .getQuestion('6736fcf441f1abde09dc8c88')
-    .then((response) => {
-      questionData.value = response.data
-      console.log('Question Data set:', questionData.value)
-    })
-    .catch((error) => {
-      console.error('Fehler beim Abrufen der Frage:', error)
-    })
   sessionService
-    .startSession('6720d5942e91a503a151e9ea', 1)
-    .then((res) => console.log(res))
+    .startSession(187, '663a51d228d8781d96050905')
+    .then((res) => {
+      console.log('START SESSION : ', res)
+      questionData.value = res.data
+    })
     .catch((error) => {
       console.error('Fehler beim Abrufen der Frage:', error)
     })

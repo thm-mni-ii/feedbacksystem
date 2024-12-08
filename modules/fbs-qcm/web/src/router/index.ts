@@ -25,11 +25,6 @@ const router = createRouter({
       component: () => import('../views/CatalogSessionView.vue')
     },
     {
-      path: '/addCat',
-      name: 'addCat',
-      component: () => import('../views/NewCatView.vue')
-    },
-    {
       path: '/question',
       name: 'question',
       component: () => import('../views/QuestionView.vue')

@@ -11,7 +11,9 @@ interface Entry {
   text: string
 }
 
-defineProps({
+const fillInTheBlanksAnswer = ref<string | null>(null)
+
+const props = defineProps({
   question: { type: Object, required: true },
   currentQuestionIndex: { type: Number, default: 0 }
 })
@@ -45,8 +47,20 @@ const updateChoiceAnswers = () => {
 }
 
 const submitAnswer = () => {
-  console.log(selectedAnswers.value)
-  emit('submit-answer', selectedAnswers.value)
+  switch (props.question.questiontype) {
+    case 'Choice':
+      if (props.question.questionconfiguration.multipleColumn) {
+        emit('submit-answer', choiceAnswers)
+      } else {
+        emit('submit-answer', selectedAnswers)
+      }
+      break
+    case 'FillInTheBlanks':
+      emit('submit-answer', fillInTheBlanksAnswer)
+      break
+    default:
+      console.warn('Unsupported question type')
+  }
 }
 </script>
 
@@ -56,7 +70,10 @@ const submitAnswer = () => {
       {{ question.questiontext }}
     </p>
   </div>
-  <div v-if="!question.questionconfiguration.multipleColumn" class="d-flex flex-column">
+  <div
+    v-if="!question.questionconfiguration.multipleColumn && question.questiontype == 'Choice'"
+    class="d-flex flex-column"
+  >
     <div
       v-for="option in question.questionconfiguration.optionRows"
       :key="option.id"
@@ -79,7 +96,10 @@ const submitAnswer = () => {
     </div>
   </div>
 
-  <div v-if="question.questionconfiguration.multipleColumn" class="d-flex flex-column">
+  <div
+    v-if="question.questionconfiguration.multipleColumn && question.questiontype == 'Choice'"
+    class="d-flex flex-column"
+  >
     <v-table>
       <thead>
         <tr>
@@ -117,6 +137,16 @@ const submitAnswer = () => {
       </tbody>
     </v-table>
     <pre>{{ choiceAnswers }}</pre>
+  </div>
+  <div v-if="question.questiontype == 'FillInTheBlanks'">
+    <p>{{ question.questionconfiguration.textParts }}</p>
+    <v-textarea
+      v-model="fillInTheBlanksAnswer"
+      label="Your Answer"
+      rows="3"
+      outlined
+      color="primary"
+    ></v-textarea>
   </div>
 
   <v-btn

@@ -134,7 +134,7 @@ const loadCatalogsFromCourse = (courseId: number) => {
   const course = myCourses.value.find((course) => course.id === courseId)
   if (course) {
     axios
-      .get(`api_v1/catalogs/${courseId}`, {
+      .get(`api_v1/catalogs/187`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
         }
@@ -197,6 +197,7 @@ const deleteCatalog = (courseId: number, catalog: Catalog) => {
 
 const manageQuestions = (catalog: Catalog) => {
   console.log(catalog.id)
+  console.log(catalog)
   router.push(`/manageCatalog/${catalog.id}`)
 }
 

@@ -30,7 +30,7 @@ class QuestionService {
   }
 
   getAllQuestions(): Promise<AxiosResponse<Question[]>> {
-    return axios.get('api_v1/allquestions', {
+    return axios.get('/api_v1/allquestions', {
       headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
     })
   }

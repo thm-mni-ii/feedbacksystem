@@ -34,7 +34,7 @@ const deleteQuestion = async () => {
 <template>
   <div class="mx-16 mt-16">
     <div class="d-flex my-4 align-center">
-      <v-form class="w-25" @submit.prevent="deleteQuestion">
+      <v-form class="w-50" @submit.prevent="deleteQuestion">
         <v-text-field v-model="questionId" label="Question ID"></v-text-field>
         <v-btn type="submit">delete question</v-btn>
       </v-form>

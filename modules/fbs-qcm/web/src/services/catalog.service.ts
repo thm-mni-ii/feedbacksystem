@@ -26,8 +26,8 @@ class CatalogService {
       }
     })
   }
-  putCatalog(data: Catalog): Promise<AxiosResponse<Catalog>> {
-    return axios.put(`/api_v1/catalog/${data.id}`, data, {
+  addQuestion(data: any): Promise<AxiosResponse<Catalog>> {
+    return axios.put(`/api_v1/addQuestionToCatalog`, data, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
       }
