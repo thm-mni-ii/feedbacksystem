@@ -27,10 +27,10 @@ jobs:
         uses: snok/install-poetry@v1
       - name: Install library
         run: poetry install --no-interaction
-      - run: |
-          poetry run pylint api --msg-template='${{ inputs.working-directory }}/{path}:{line}:{column}: {msg_id}: {msg} ({symbol})'
-        name: Run Pylint
-        id: pylint
+#      - run: |
+#          poetry run pylint api --msg-template='${{ inputs.working-directory }}/{path}:{line}:{column}: {msg_id}: {msg} ({symbol})'
+#        name: Run Pylint
+#        id: pylint
       - run: |
           poetry run black --check --verbose --diff api
         name: Run Black

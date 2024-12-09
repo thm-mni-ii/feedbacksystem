@@ -2,7 +2,7 @@
 
 # Check if it is a new solution; check if tables, attributes etc. are right
 def prod_solution_json(elem, my_uuid, task_nr):
-    value = {"id": str(my_uuid), "taskNumber": task_nr, "statement": elem["submission"]}
+    value = {"id": str(my_uuid), "taskNumber": task_nr, "statement": elem}
     return value
 
 
