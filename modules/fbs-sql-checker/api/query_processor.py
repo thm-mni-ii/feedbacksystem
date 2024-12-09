@@ -41,7 +41,12 @@ class QueryProcessor(metaclass=ABCMeta):
 
 @typechecked
 class QueryProcessorV2(QueryProcessor):
-    def __init__(self, comparator: Comparator, solution_fetcher: SolutionFetcher, log: Optional[Logger] = None):
+    def __init__(
+        self,
+        comparator: Comparator,
+        solution_fetcher: SolutionFetcher,
+        log: Optional[Logger] = None,
+    ):
         self._comparator = comparator
         self._solution_fetcher = solution_fetcher
         if logger is not None:
@@ -52,9 +57,13 @@ class QueryProcessorV2(QueryProcessor):
     def process(self, submission: Submission) -> Result:
         result = ResultV2.from_submission(submission)
         if not (submission.is_solution or submission.passed):
-            solution, distance = self._solution_fetcher.fetch_solution(submission.task_id, submission)
+            solution, distance = self._solution_fetcher.fetch_solution(
+                submission.task_id, submission
+            )
             try:
-                result.errors = self._comparator.compare(solution.statement, submission.submission)
+                result.errors = self._comparator.compare(
+                    solution.statement, submission.submission
+                )
                 result.passed = len(result.errors) == 0
                 result.closest_solution = solution.uuid
                 result.min_distance = distance
@@ -73,7 +82,14 @@ class QueryProcessorV2(QueryProcessor):
 
 
 class QueryProcessorV1(QueryProcessor):
-    def __init__(self, parser: QueryParser, table_checker: TableChecker, pro_attribute_checker: ProAttributeChecker, sel_attribute_checker: SelAttributeChecker, data_store: DataStore):
+    def __init__(
+        self,
+        parser: QueryParser,
+        table_checker: TableChecker,
+        pro_attribute_checker: ProAttributeChecker,
+        sel_attribute_checker: SelAttributeChecker,
+        data_store: DataStore,
+    ):
         self._parser = parser
         self._table_checker = table_checker
         self._pro_attribute_checker = pro_attribute_checker
@@ -96,7 +112,7 @@ class QueryProcessorV1(QueryProcessor):
             having2,
             joins2,
             wildcards2,
-            literals
+            literals,
         ) = ([], [], [], [], [], [], [], [], [], [], [], [], [], [])
         try:
             masker = SQLAliasMasker(query)
@@ -116,25 +132,32 @@ class QueryProcessorV1(QueryProcessor):
                         joins2.append("Unknown")
                 else:
                     joins2.append("Empty")
-            extracted_pro_attributes = self._pro_attribute_checker.extract_pro_attributes(
-                masked_query,
-                literals
+            extracted_pro_attributes = (
+                self._pro_attribute_checker.extract_pro_attributes(
+                    masked_query, literals
+                )
             )
             if extracted_pro_attributes != "Unknown":
                 pro_atts2.extend(extracted_pro_attributes)
-            extracted_string = self._sel_attribute_checker.extract_sel_attributes(masked_query, literals)
+            extracted_string = self._sel_attribute_checker.extract_sel_attributes(
+                masked_query, literals
+            )
             if extracted_string != "Unknown":
                 sel_atts2.extend(extracted_string)
-            extracted_order_by = self._sel_attribute_checker.extract_order_by(masked_query)
+            extracted_order_by = self._sel_attribute_checker.extract_order_by(
+                masked_query
+            )
             if extracted_order_by != "Unknown":
                 order_by2.extend(extracted_order_by)
-            extracted_group_by = self._sel_attribute_checker.extract_group_by(masked_query)
+            extracted_group_by = self._sel_attribute_checker.extract_group_by(
+                masked_query
+            )
             if extracted_group_by != "Unknown":
                 group_by2.extend(extracted_group_by)
             extracted_having = self._sel_attribute_checker.extract_having(masked_query)
             if extracted_having != "Unknown":
                 having2.extend(extracted_having)
-            #strings2.extend(list(set(AWC.literal)))
+            # strings2.extend(list(set(AWC.literal)))
             # If TaskID or Submission ID not in data, return
             """
             if "tid" not in data or "sid" not in data:
@@ -151,7 +174,7 @@ class QueryProcessorV1(QueryProcessor):
                 self._insert_tables(query, uuid)
 
             # check and remove duplicates
-            #flag_duplicates(client, task_nr)
+            # flag_duplicates(client, task_nr)
 
             # Check if it is a new solution and characteristics are right
             (
@@ -215,20 +238,20 @@ class QueryProcessorV1(QueryProcessor):
             return record
 
     def _check_solution_chars(
-            self,
-            query: str,
-            is_sol: bool,
-            passed: bool,
-            task_nr,
-            uuid,
-            tables2,
-            pro_atts2,
-            sel_atts2,
-            strings2,
-            order_by2,
-            group_by2,
-            joins2,
-            having2,
+        self,
+        query: str,
+        is_sol: bool,
+        passed: bool,
+        task_nr,
+        uuid,
+        tables2,
+        pro_atts2,
+        sel_atts2,
+        strings2,
+        order_by2,
+        group_by2,
+        joins2,
+        having2,
     ):
         new_solution = True
         (
@@ -280,7 +303,9 @@ class QueryProcessorV1(QueryProcessor):
                         "id"
                     ]  # choose the id of solution if it has the lowest distance
 
-        self._data_store.upsert("Solutions", {"_id": closest_solution}, {"$set": {"distance": min_distance}})
+        self._data_store.upsert(
+            "Solutions", {"_id": closest_solution}, {"$set": {"distance": min_distance}}
+        )
 
         if closest_solution:
             (
@@ -302,38 +327,52 @@ class QueryProcessorV1(QueryProcessor):
                 [],
                 [],
             )
-            for y in self._data_store.query("Tables", {"id": closest_solution}, {"table": 1}):
+            for y in self._data_store.query(
+                "Tables", {"id": closest_solution}, {"table": 1}
+            ):
                 tables.append(y["table"])
-            for y in self._data_store.query("ProAttributes", {"id": closest_solution}, {"proAttribute": 1}):
+            for y in self._data_store.query(
+                "ProAttributes", {"id": closest_solution}, {"proAttribute": 1}
+            ):
                 pro_attributes.append(y["proAttribute"])
-            for y in self._data_store.query("SelAttributes", {"id": closest_solution}, {"selAttribute": 1}):
+            for y in self._data_store.query(
+                "SelAttributes", {"id": closest_solution}, {"selAttribute": 1}
+            ):
                 sel_attributes.append(y["selAttribute"])
-            for y in self._data_store.query("Strings", {"id": closest_solution}, {"string": 1}):
+            for y in self._data_store.query(
+                "Strings", {"id": closest_solution}, {"string": 1}
+            ):
                 strings.append(y["string"])
-            for y in self._data_store.query("OrderBy", {"id": closest_solution}, {"orderBy": 1, "sort": 1}):
+            for y in self._data_store.query(
+                "OrderBy", {"id": closest_solution}, {"orderBy": 1, "sort": 1}
+            ):
                 order_by_value = [y["orderBy"]]
                 if (
-                        "sort" in y
+                    "sort" in y
                 ):  # if there is no order in sort the default "asc" will be used
                     order_by_value.append(y["sort"])
                 else:
                     order_by_value.append("asc")
                 order_by.append(order_by_value)
-            for y in self._data_store.query("GroupBy", {"id": closest_solution}, {"groupBy": 1}):
+            for y in self._data_store.query(
+                "GroupBy", {"id": closest_solution}, {"groupBy": 1}
+            ):
                 group_by.append(y["groupBy"])
-            for y in self._data_store.query("Joins",
-                    {"id": closest_solution}, {"type": 1, "attr1": 1, "attr2": 1}
+            for y in self._data_store.query(
+                "Joins", {"id": closest_solution}, {"type": 1, "attr1": 1, "attr2": 1}
             ):
                 join_value = [y["type"]]
                 if (
-                        "attr1" in y and "attr2" in y
+                    "attr1" in y and "attr2" in y
                 ):  # if there is no order in sort the default "asc" will be used
                     join_value.append(y["attr1"])
                     join_value.append(y["attr2"])
                 else:
                     join_value.append("Empty")
                 joins.append(join_value)
-            for y in self._data_store.query("Having", {"id": closest_solution}, {"havingAttribute": 1}):
+            for y in self._data_store.query(
+                "Having", {"id": closest_solution}, {"havingAttribute": 1}
+            ):
                 having_value = y["havingAttribute"]
                 having.append(having_value)
             if len(joins) == 0:
@@ -352,13 +391,13 @@ class QueryProcessorV1(QueryProcessor):
 
                 # Compare them to tables, proAttributes etc of a given sql-query
                 if (
-                        tables == tables2  # pylint: disable=R0916
-                        and set(pro_attributes) == set(pro_atts2)
-                        and set(sel_attributes) == set(sel_atts2)
-                        and set(strings) == set(strings2)
-                        and order_by == order_by2
-                        and joins == joins2
-                        and having == having2
+                    tables == tables2  # pylint: disable=R0916
+                    and set(pro_attributes) == set(pro_atts2)
+                    and set(sel_attributes) == set(sel_atts2)
+                    and set(strings) == set(strings2)
+                    and order_by == order_by2
+                    and joins == joins2
+                    and having == having2
                 ):
                     # If they alle are same, it is not a new solution
                     new_solution = False
@@ -373,10 +412,10 @@ class QueryProcessorV1(QueryProcessor):
                 if set(strings) == set(strings2):
                     strings_right = True
                 if (
-                        any("%" in s for s in strings)
-                        and not any("%" in s for s in strings2)
-                        or not any("%" in s for s in strings)
-                        and any("%" in s for s in strings2)
+                    any("%" in s for s in strings)
+                    and not any("%" in s for s in strings2)
+                    or not any("%" in s for s in strings)
+                    and any("%" in s for s in strings2)
                 ):
                     wildcards = False
                 else:
@@ -447,7 +486,9 @@ class QueryProcessorV1(QueryProcessor):
                     self._data_store.store("Joins", record)
                 except Exception:
                     print("Error while reading joins.")
-        elif len(tables) > 1 and not isinstance(self._table_checker.extract_tables(query), str):
+        elif len(tables) > 1 and not isinstance(
+            self._table_checker.extract_tables(query), str
+        ):
             for val in tables:
                 record = model.json_table(uuid, val)
                 self._data_store.store("Tables", record)
@@ -459,7 +500,9 @@ class QueryProcessorV1(QueryProcessor):
                 except Exception:
                     print("Error while reading joins.")
 
-        pro_attributes = self._pro_attribute_checker.extract_pro_attributes(query, literals)
+        pro_attributes = self._pro_attribute_checker.extract_pro_attributes(
+            query, literals
+        )
         if len(pro_attributes) == 1:
             record = model.json_pro_attribute(uuid, pro_attributes[0])
             self._data_store.store("ProAttributes", record)
@@ -468,7 +511,9 @@ class QueryProcessorV1(QueryProcessor):
                 record = model.json_pro_attribute(uuid, val)
                 self._data_store.store("ProAttributes", record)
 
-        sel_attributes = self._sel_attribute_checker.extract_sel_attributes(query, literals)
+        sel_attributes = self._sel_attribute_checker.extract_sel_attributes(
+            query, literals
+        )
         if len(sel_attributes) == 1:
             record = model.json_sel_attribute(uuid, sel_attributes[0])
             self._data_store.store("SelAttributes", record)
@@ -513,34 +558,34 @@ class QueryProcessorV1(QueryProcessor):
                 record = model.json_having_attribute(uuid, val)
                 self._data_store.store("Having", record)
 
-        #self._sel_attribute_checker.literal = []
-        #user_data.clear()
+        # self._sel_attribute_checker.literal = []
+        # user_data.clear()
 
     # return JSON to be pasted to DB
     def _return_json(
-            self,
-            query,
-            is_sol,
-            passed,
-            uuid,
-            task_nr,
-            course_id,
-            tables_right,
-            pro_attributes_right,
-            sel_attributes_right,
-            strings_right,
-            order_by_right,
-            group_by_right,
-            joins_right,
-            having_right,
-            wildcards,
-            time,
-            closest_solution,
-            min_distance,
-            closest_id,
+        self,
+        query,
+        is_sol,
+        passed,
+        uuid,
+        task_nr,
+        course_id,
+        tables_right,
+        pro_attributes_right,
+        sel_attributes_right,
+        strings_right,
+        order_by_right,
+        group_by_right,
+        joins_right,
+        having_right,
+        wildcards,
+        time,
+        closest_solution,
+        min_distance,
+        closest_id,
     ):
 
-        #user_data.append(passed)
+        # user_data.append(passed)
         if self._parser.parse_query(query) is not False:
             # produce a json to be pasted to DB
             record = Result(
@@ -572,13 +617,23 @@ class QueryProcessorV1(QueryProcessor):
 
     def process(self, submission: Submission) -> Result:
         print("input", submission)
-        result = self._parse_query(submission.submission, submission.is_solution, submission.passed)
+        result = self._parse_query(
+            submission.submission, submission.is_solution, submission.passed
+        )
         if result is None:
-            raise ValueError('query parsing resulted in none')
+            raise ValueError("query parsing resulted in none")
         result.course_id = submission.course_id
         result.task_nr = submission.task_id
         print("output", result)
-        self._store_query(result.to_db_dict(course_id=submission.course_id, task_id=submission.task_id, user_id=submission.user_id, submission_id=submission.submission_id, attempt=submission.attempt))
+        self._store_query(
+            result.to_db_dict(
+                course_id=submission.course_id,
+                task_id=submission.task_id,
+                user_id=submission.user_id,
+                submission_id=submission.submission_id,
+                attempt=submission.attempt,
+            )
+        )
         return result
 
     def _store_query(self, query):

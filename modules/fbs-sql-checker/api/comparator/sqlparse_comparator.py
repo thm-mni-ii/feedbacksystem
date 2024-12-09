@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from multiprocessing.managers import Token
-from typing import Callable
 
 import sqlparse
 from sqlparse.tokens import Whitespace
@@ -93,7 +91,7 @@ class SqlParseVisitor:
             elif token.__class__ in self._visitors:
                 self._visitors[token.__class__](token)
             else:
-                raise ValueError('unhandled token', token)
+                raise ValueError("unhandled token", token)
 
     def trace_to_str_list(self) -> list[str]:
         return [token_to_str(entry) for entry in self.parent_stack]
@@ -115,11 +113,14 @@ class SqlParserDfs(SqlParseVisitor):
 
 
 class SqlParserCoVisitor(SqlParseVisitor):
-    def __init__(self, solution, message_overrides = None):
+    def __init__(self, solution, message_overrides=None):
         super().__init__()
         self._solution = solution
         self._i = 0
-        self._messages = {'end_of_query': "End of query", 'end_of_token': "End of token"} | (message_overrides or {})
+        self._messages = {
+            "end_of_query": "End of query",
+            "end_of_token": "End of token",
+        } | (message_overrides or {})
         self._error_depth = None
         self.errors = []
 
@@ -127,7 +128,13 @@ class SqlParserCoVisitor(SqlParseVisitor):
         super().visit(tokens)
         if len(self.parent_stack) == 0 and self._i < len(self._solution):
             should, _ = self._solution[self._i]
-            self.errors.append(Error(token_to_str(should), self._messages['end_of_query'], [token_to_str(tokens[0])]))
+            self.errors.append(
+                Error(
+                    token_to_str(should),
+                    self._messages["end_of_query"],
+                    [token_to_str(tokens[0])],
+                )
+            )
 
     def _get_should(self):
         index = self._i
@@ -152,15 +159,37 @@ class SqlParserCoVisitor(SqlParseVisitor):
             end_of_token_error = False
 
         if end_of_token_error:
-            self.errors.append(Error(token_to_str(token), self._messages['end_of_token'], self.trace_to_str_list()))
+            self.errors.append(
+                Error(
+                    token_to_str(token),
+                    self._messages["end_of_token"],
+                    self.trace_to_str_list(),
+                )
+            )
 
         if should is None:
-            self.errors.append(Error(self._messages['end_of_query'], token_to_str(token), self.trace_to_str_list()))
+            self.errors.append(
+                Error(
+                    self._messages["end_of_query"],
+                    token_to_str(token),
+                    self.trace_to_str_list(),
+                )
+            )
         elif should_depth < len(self.parent_stack):
-            self.errors.append(Error(self._messages['end_of_token'], token_to_str(token), self.trace_to_str_list()))
+            self.errors.append(
+                Error(
+                    self._messages["end_of_token"],
+                    token_to_str(token),
+                    self.trace_to_str_list(),
+                )
+            )
             self._i -= 1
         elif not comparator(token, should):
-            self.errors.append(Error(token_to_str(should), token_to_str(token), self.trace_to_str_list()))
+            self.errors.append(
+                Error(
+                    token_to_str(should), token_to_str(token), self.trace_to_str_list()
+                )
+            )
         else:
             return True
         self._error_depth = current_depth
@@ -168,13 +197,19 @@ class SqlParserCoVisitor(SqlParseVisitor):
 
     def recursive_visit(self, token: sqlparse.sql.Statement):
         print(token)
-        self._should_compare(token, lambda is_token, should_token: is_token.__class__ == should_token.__class__)
+        self._should_compare(
+            token,
+            lambda is_token, should_token: is_token.__class__ == should_token.__class__,
+        )
         super().recursive_visit(token)
 
     def visit_literal(self, token: sqlparse.tokens.Token):
         print(token)
         if token.ttype != Whitespace:
-            self._should_compare(token, lambda is_token, should_token: is_token.value == should_token.value)
+            self._should_compare(
+                token,
+                lambda is_token, should_token: is_token.value == should_token.value,
+            )
         super().visit_literal(token)
 
 

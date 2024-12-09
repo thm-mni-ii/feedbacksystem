@@ -11,7 +11,9 @@ class SelAttributeChecker:
         where_attributes = []
         json_file = self._parser.parse_query(json_file)
         try:
-            if (select_where(json_file, literals) is not None) and (select_where(json_file, literals)):
+            if (select_where(json_file, literals) is not None) and (
+                select_where(json_file, literals)
+            ):
                 where_attributes.extend([select_where(json_file, literals)])
         except Exception as e:
             print(e)
@@ -19,7 +21,6 @@ class SelAttributeChecker:
         if len(where_attributes) > 0:
             return list(where_attributes[0])
         return list(where_attributes)
-
 
     def extract_order_by(self, json_file):
         json_file = self._parser.parse_query(json_file)
@@ -47,7 +48,6 @@ class SelAttributeChecker:
             order_by = "Unknown"
         return order_by
 
-
     def extract_group_by(self, json_file):
         json_file = self._parser.parse_query(json_file)
         group_by = []
@@ -62,7 +62,6 @@ class SelAttributeChecker:
             group_by = "Unknown"
         return group_by
 
-
     def extract_having(self, json_file):
         json_file = self._parser.parse_query(json_file)
         all_having = [
@@ -75,14 +74,15 @@ class SelAttributeChecker:
         att_op_compare = []  # gt...
         val_compare = []  # value example 5
         for s in having_list:
-            self._parse_one_cond(s, having, att, att_operator, att_op_compare, val_compare)
+            self._parse_one_cond(
+                s, having, att, att_operator, att_op_compare, val_compare
+            )
         all_having[0].append(having)  # or having_order
         if len(all_having) == 0:
             all_having = "Unknown"
         if all_having == [[[]]]:
             return []
         return all_having
-
 
     def _iterate(self, data, param):
         if isinstance(data, list):
@@ -94,7 +94,6 @@ class SelAttributeChecker:
                     yield item
                 else:
                     yield from self._iterate(item, param)
-
 
     def _parse_one_cond(  # pylint: disable = R1710
         self, s, having, att, att_operator, att_op_compare, val_compare
@@ -117,9 +116,13 @@ class SelAttributeChecker:
                             having.append(values1)
                         if isinstance(values1, dict):
                             key2, values2 = self._get_vals_and_keys(values1)
-                            if not isinstance(key2, dict) and not isinstance(key2, list):
+                            if not isinstance(key2, dict) and not isinstance(
+                                key2, list
+                            ):
                                 having.append(key2)
-                            if isinstance(values2, dict) and not isinstance(values2, list):
+                            if isinstance(values2, dict) and not isinstance(
+                                values2, list
+                            ):
                                 having.append(values2)
             for i in s:  # keys
                 if not isinstance(i, dict) and not isinstance(i, list):
@@ -159,7 +162,6 @@ class SelAttributeChecker:
                                                         val_compare,
                                                     )
             return having
-
 
     def _get_vals_and_keys(s):  # pylint: disable=R1710
         if isinstance(s, dict):

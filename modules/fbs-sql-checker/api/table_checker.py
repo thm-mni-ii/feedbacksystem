@@ -33,9 +33,13 @@ class TableChecker:
                             if val2 == "exists":
                                 if isinstance(json_file["where"][val1][val2], dict):
                                     if (
-                                        self._is_single_from_where(json_file["where"][val1][val2])
+                                        self._is_single_from_where(
+                                            json_file["where"][val1][val2]
+                                        )
                                     ) and (
-                                        self._is_single_from_where(json_file["where"][val1][val2])
+                                        self._is_single_from_where(
+                                            json_file["where"][val1][val2]
+                                        )
                                         not in list_tables
                                     ):
                                         list_tables.extend(
@@ -67,7 +71,6 @@ class TableChecker:
                 if elem not in list_tables:
                     list_tables.append(elem)
         return list_tables
-
 
     def _is_join(self, json_file):  # pylint: disable=R1710
         list_tables = []
@@ -119,7 +122,8 @@ class TableChecker:
                                 not in list_tables
                             )
                             and (
-                                self._is_single_from_where(json_file["from"]["value"]) is not None
+                                self._is_single_from_where(json_file["from"]["value"])
+                                is not None
                             )
                             and (self._is_single_from_where(json_file["from"]["value"]))
                         ):
@@ -130,15 +134,25 @@ class TableChecker:
                         if (
                             (self._is_union(json_file["from"]["value"]) is not None)
                             and (self._is_union(json_file["from"]["value"]))
-                            and (self._is_union(json_file["from"]["value"]) not in list_tables)
+                            and (
+                                self._is_union(json_file["from"]["value"])
+                                not in list_tables
+                            )
                         ):
-                            list_tables.extend(self._is_union(json_file["from"]["value"]))
+                            list_tables.extend(
+                                self._is_union(json_file["from"]["value"])
+                            )
                         if (
                             (self._is_join(json_file["from"]["value"]) is not None)
                             and (self._is_join(json_file["from"]["value"]))
-                            and (self._is_join(json_file["from"]["value"]) not in list_tables)
+                            and (
+                                self._is_join(json_file["from"]["value"])
+                                not in list_tables
+                            )
                         ):
-                            list_tables.extend(self._is_join(json_file["from"]["value"]))
+                            list_tables.extend(
+                                self._is_join(json_file["from"]["value"])
+                            )
             return_list.append(sorted(list(set(list_tables))))
             return_list.append(list_joins)
             return return_list
@@ -150,7 +164,9 @@ class TableChecker:
                 if val == "union":
                     for i in range(len(json_file[val])):
                         if (self._is_single_from_where(json_file[val][i])) is not None:
-                            list_tables.extend(self._is_single_from_where(json_file[val][i]))
+                            list_tables.extend(
+                                self._is_single_from_where(json_file[val][i])
+                            )
                         else:
                             list_tables.append(self._is_join(json_file[val][i]))
                     return sorted(set(list_tables))
@@ -159,9 +175,9 @@ class TableChecker:
     def extract_tables(self, json_file):
         json_file = self._parser.parse_query(json_file)
         try:
-            if self._is_single_from_where(json_file) is not None and self._is_single_from_where(
+            if self._is_single_from_where(
                 json_file
-            ):
+            ) is not None and self._is_single_from_where(json_file):
                 tables = self._is_single_from_where(json_file)
             elif (
                 self._is_join(json_file) is not None

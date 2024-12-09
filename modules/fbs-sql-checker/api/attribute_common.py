@@ -1,5 +1,3 @@
-from typing import Optional
-
 import formatting as f
 
 
@@ -41,8 +39,8 @@ def single_select_dict(json_file):
                             if isinstance(json_file["select"]["value"][val], dict):
                                 if "value" in json_file["select"]["value"][val]:
                                     if (
-                                            "."
-                                            in json_file["select"]["value"][val]["value"]
+                                        "."
+                                        in json_file["select"]["value"][val]["value"]
                                     ):
                                         selects.append(
                                             json_file["select"]["value"][val]["value"]
@@ -55,25 +53,25 @@ def single_select_dict(json_file):
                                         )
                                 for elem in json_file["select"]["value"][val]:
                                     if (elem in select_commands) and (
-                                            isinstance(
-                                                json_file["select"]["value"][val][elem],
-                                                dict,
-                                            )
+                                        isinstance(
+                                            json_file["select"]["value"][val][elem],
+                                            dict,
+                                        )
                                     ):
                                         for elem1 in json_file["select"]["value"][val][
                                             elem
                                         ]:
                                             if elem1 in select_commands and isinstance(
-                                                    json_file["select"]["value"][val][elem][
-                                                        elem1
-                                                    ],
-                                                    str,
+                                                json_file["select"]["value"][val][elem][
+                                                    elem1
+                                                ],
+                                                str,
                                             ):
                                                 if (
-                                                        "."
-                                                        in json_file["select"]["value"][
-                                                    val
-                                                ][elem][elem1]
+                                                    "."
+                                                    in json_file["select"]["value"][
+                                                        val
+                                                    ][elem][elem1]
                                                 ):
                                                     selects.append(
                                                         json_file["select"]["value"][
@@ -103,16 +101,16 @@ def single_select_dict(json_file):
                                 for i in range(len(json_file["select"]["value"][val])):
                                     if "value" in json_file["select"]["value"][val][i]:
                                         if isinstance(
-                                                json_file["select"]["value"][val][i][
-                                                    "value"
-                                                ],
-                                                str,
+                                            json_file["select"]["value"][val][i][
+                                                "value"
+                                            ],
+                                            str,
                                         ):
                                             if (
-                                                    "."
-                                                    in json_file["select"]["value"][val][i][
-                                                "value"
-                                            ]
+                                                "."
+                                                in json_file["select"]["value"][val][i][
+                                                    "value"
+                                                ]
                                             ):
                                                 selects.append(
                                                     json_file["select"]["value"][val][
@@ -128,6 +126,7 @@ def single_select_dict(json_file):
                                                     ]["value"].lower()
                                                 )
     return set(selects)
+
 
 # Returns SelectionAttributes as a list if there is a where
 def select_where(json_file, literal: list[any]):
@@ -162,7 +161,7 @@ def select_where(json_file, literal: list[any]):
                                     else:
                                         list_tables.append(val4.lower())
             if isinstance(json_file["where"][val1], list) and (
-                    len(json_file["where"][val1]) > 1
+                len(json_file["where"][val1]) > 1
             ):
                 if isinstance(json_file["where"][val1][1], dict):
                     if single_select_dict(json_file["where"][val1][1]):
@@ -184,7 +183,7 @@ def select_where(json_file, literal: list[any]):
                             if isinstance(json_file["where"][val1][i][elem], list):
                                 for j in range(len(json_file["where"][val1][i][elem])):
                                     if isinstance(
-                                            json_file["where"][val1][i][elem][j], str
+                                        json_file["where"][val1][i][elem][j], str
                                     ):
                                         if "." in json_file["where"][val1][i][elem][j]:
                                             list_tables.append(
@@ -197,23 +196,23 @@ def select_where(json_file, literal: list[any]):
                                                 json_file["where"][val1][i][elem][j]
                                             )
                                     if isinstance(
-                                            json_file["where"][val1][i][elem][j], dict
+                                        json_file["where"][val1][i][elem][j], dict
                                     ):
                                         for elem1 in json_file["where"][val1][i][elem][
                                             j
                                         ]:
                                             if elem1 in select_commands:
                                                 if isinstance(
-                                                        json_file["where"][val1][i][elem][
-                                                            j
-                                                        ][elem1],
-                                                        str,
+                                                    json_file["where"][val1][i][elem][
+                                                        j
+                                                    ][elem1],
+                                                    str,
                                                 ):
                                                     if (
-                                                            "."
-                                                            in json_file["where"][val1][i][
-                                                        elem
-                                                    ][j][elem1]
+                                                        "."
+                                                        in json_file["where"][val1][i][
+                                                            elem
+                                                        ][j][elem1]
                                                     ):
                                                         list_tables.append(
                                                             json_file["where"][val1][i][

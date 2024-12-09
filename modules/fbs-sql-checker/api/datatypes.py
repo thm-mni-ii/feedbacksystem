@@ -43,8 +43,12 @@ class Submission:
     submission_id: Optional[int] = None
 
     @classmethod
-    def new_solution(cls, query: str, course_id: Optional[int] = None, task_id: Optional[int] = None):
-        return cls(query, is_solution=True, passed=True, course_id=course_id, task_id=task_id)
+    def new_solution(
+        cls, query: str, course_id: Optional[int] = None, task_id: Optional[int] = None
+    ):
+        return cls(
+            query, is_solution=True, passed=True, course_id=course_id, task_id=task_id
+        )
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -105,7 +109,7 @@ class Result:
             time=db_dict["time"],
             closest_solution=db_dict["usedSolutionId"],
             min_distance=db_dict["distance"],
-            version=db_dict["version"]
+            version=db_dict["version"],
         )
 
     def to_db_dict(self):
@@ -131,7 +135,7 @@ class Result:
 class LegacyResult(Result):
     task_nr: int = 0
     is_sol: bool = False
-    tables_right: bool  = False
+    tables_right: bool = False
     sel_attributes_right: bool = False
     pro_attributes_right: bool = False
     strings_right: bool = False
@@ -144,8 +148,8 @@ class LegacyResult(Result):
     def to_db_dict(self):
         return {
             "id": str(self.closest_id),
-            "courseId": self.course_id, #
-            "taskNumber": self.task_id, #
+            "courseId": self.course_id,  #
+            "taskNumber": self.task_id,  #
             "submissionId": self.submission_id,
             "statement": self.statement,
             "queryRight": self.passed,
@@ -181,9 +185,9 @@ class ResultV2(Result):
         }
 
     @classmethod
-    def from_db_dict(cls, dict):
+    def from_db_dict(cls, db_dict):
         return cls(
-            **super().from_db_dict(dict).__dict__,
-            version=dict["version"],
-            errors=[Error.from_db_dict(err) for err in dict["errors"]],
+            **super().from_db_dict(db_dict).__dict__,
+            version=db_dict["version"],
+            errors=[Error.from_db_dict(err) for err in db_dict["errors"]],
         )

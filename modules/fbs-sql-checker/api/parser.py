@@ -8,7 +8,7 @@ from api.error import QueryParsingParserException
 
 
 class QueryParser:
-    def __init__(self, logger = None):
+    def __init__(self, logger=None):
         if logger is None:
             logger = logging.getLogger()
         self._logger = logger
@@ -23,4 +23,3 @@ class QueryParser:
         json_output = json.dumps(parsed_query, indent=4)
         pyt_obj = json.loads(json_output)
         return pyt_obj
-
