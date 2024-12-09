@@ -140,7 +140,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     }
     if (query.distance.isPresent) {
       hints ++= "Distanz zur nächstens Musterlösung: "
-      hints ++= query.distance.get.toString
+      hints ++= Math.round(query.distance.get / 50).toString
       hints ++= "\n"
     }
     if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
