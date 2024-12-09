@@ -196,7 +196,6 @@ class SqlParserCoVisitor(SqlParseVisitor):
         return False
 
     def recursive_visit(self, token: sqlparse.sql.Statement):
-        print(token)
         self._should_compare(
             token,
             lambda is_token, should_token: is_token.__class__ == should_token.__class__,
@@ -204,7 +203,6 @@ class SqlParserCoVisitor(SqlParseVisitor):
         super().recursive_visit(token)
 
     def visit_literal(self, token: sqlparse.tokens.Token):
-        print(token)
         if token.ttype != Whitespace:
             self._should_compare(
                 token,
