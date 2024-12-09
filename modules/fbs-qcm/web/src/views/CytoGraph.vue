@@ -1,19 +1,94 @@
 <template>
   <div>
     <div id="cy" style="width: 100%; height: 1000px; border: 1px solid black;"></div>
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Frage anfügen</h3>
+        <p>Ab wie viel Prozent soll weitergeleitet werden</p>
+        <input
+          type="number"
+          min="0"
+          max="100"
+          v-model="nodeData"
+          placeholder="Update node data"
+        />
+        <p>Auf welche Frage soll verwiesen werden</p>
+        <button @click="updateNode">Update Node</button>
+        <button @click="closeModal">Close</button>
+      </div>
+    </div>
   </div>
 </template>
+<style scoped>
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;  /* Position fixed to cover the whole screen */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);  /* Solid white background with slight transparency */
+  display: flex;
+  justify-content: center;  /* Horizontally center the modal */
+  align-items: center;  /* Vertically center the modal */
+  z-index: 1000;  /* Ensure the modal is above the graph */
+}
+/* Modal Content */
+.modal-content {
+  background: white;  /* White background for the modal */
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;  /* Set a fixed width */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
+  z-index: 1001;  /* Ensure it's above the overlay */
+}
 
+.modal-content h3 {
+  margin-top: 0;
+}
+
+/* Input and Buttons Styling */
+.modal-input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-button.confirm {
+  background-color: #28a745;
+  color: white;
+}
+
+.modal-button.cancel {
+  background-color: #dc3545;
+  color: white;
+}
+</style>
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import cytoscape, { Core } from 'cytoscape';
-
 export default defineComponent({
   name: 'CytoscapeGraph',
   setup() {
     const cy = ref<Core | null>(null); 
     const nodeId = ref(3); 
-
+    const showModal = ref(false); 
     onMounted(() => {
       cy.value = cytoscape({
         container: document.getElementById('cy'),
@@ -42,8 +117,14 @@ export default defineComponent({
         cy.value.on('tap', 'node', (event) => {
             const clickedNode = event.target; // The clicked node
             if (clickedNode.data('label') === '+') {
+              console.log(showModal);
+              showModal.value = true;
               clickedNode.data('label', 'Question'); // Update the label to "Question"
             }
+            if(clickedNode.data('label').startsWith("Question")) {
+               console.log("Hi"); 
+            }
+            
         });
     });
     const addNode = () => {
@@ -57,7 +138,7 @@ export default defineComponent({
       }
     };
 
-    return { addNode };
+    return { addNode, showModal} ;
   },
 });
 </script>
