@@ -10,12 +10,12 @@ const router = createRouter({
       component: HomeView
     },
     {
-        path: '/cytp2',
+        path: '/edi',
         name: '/CytographTest2',
         component: () => import('../views/Updated_CytoGraph.vue')
     },
     {
-        path: '/cytp',
+        path: '/editCatalog/:catalog/:question',
         name: '/CytographTest',
         component: () => import('../views/CytoGraph.vue')
     },

@@ -81,7 +81,9 @@
 }
 </style>
 <script lang="ts">
+import { useRoute } from 'vue-router';
 import { defineComponent, ref, onMounted } from 'vue';
+import catalogService from '@/services/catalog.service'
 import cytoscape, { Core } from 'cytoscape';
 export default defineComponent({
   name: 'CytoscapeGraph',
@@ -89,19 +91,50 @@ export default defineComponent({
     const cy = ref<Core | null>(null); 
     const nodeId = ref(3); 
     const showModal = ref(false); 
-    onMounted(() => {
+    const route = useRoute();
+    const id = route.params;
+    onMounted(async () => {
+      console.log('ID from query parameter:', id.catalog);
+      console.log('ID from query parameter:', id.question);
+      console.log(route);
+      const data = await catalogService.editCatalog(id.catalog, id.question);
+      console.log(data);
+      console.log(data.data);
+      const keys = Object.keys(data.data.children).filter(key => key !== "PARTIAL").map(Number);
+      let maxKey = "+";
+      let minKey = "+";
+      let maxId = null;
+      let minId = null;
+      let maxKeyNumber = "correct";
+      let minKeyNumber = "incorrect";
+      if (keys.length > 0) {        // Find the highest and lowest keys if there are valid keys
+          maxKey = Math.max(...keys);
+          minKey = Math.min(...keys);
+          maxKeyNumber = `${maxKey}%`;
+          minKeyNumber = `${minKey}%`;
+          maxId = data.data.children[maxKey].questionId;
+          maxKey = data.data.children[maxKey].text;
+          minId = data.data.children[minKey].questionId;
+          minKey = data.data.children[minKey].text;
+      }
+      console.log("A");
+      console.log(maxKey);
+      console.log(maxId);
+      console.log(minKey);
+      console.log(minId);
+      console.log("A");
       cy.value = cytoscape({
         container: document.getElementById('cy'),
         elements: [
-          { data: { id: 'center', label: 'Main Question: What is 2+2?' }, position: { x: 400, y: 0 }, grabbable: false},
+          { data: { id: 'center', label: data.data.questionText }, position: { x: 400, y: 0 }, grabbable: false},
           { data: { id: 'left', label: 'Score: 80' }, position: { x: 250, y: 0 }, grabbable: false },
           { data: { source: 'left', target: 'center', label: 'Previous Question' }},
-          { data: { id: 'correct', label: '+' }, position: { x: 550, y: -60 }, grabbable: false  },
-          { data: { source: 'center', target: 'correct', label: 'correct answer' }, grabbable: false },
+          { data: { id: 'correct', label: maxKey, hiddenData: maxId }, position: { x: 550, y: -60 }, grabbable: false  },
+          { data: { source: 'center', target: 'correct', label: maxKeyNumber }, grabbable: false },
           { data: { id: 'medium', label: '+' }, position: { x: 550, y: 0 }, grabbable: false  },
           { data: { source: 'center', target: 'medium', label: 'middle answer' }, grabbable: false },
-          { data: { id: 'incorrect', label: '+' }, position: { x: 550, y: 60 }, grabbable: false  },
-          { data: { source: 'center', target: 'incorrect', label: 'incorrect answer' }, grabbable: false },
+          { data: { id: 'incorrect', label: minKey, hiddenData: minId }, position: { x: 550, y: 60 }, grabbable: false  },
+          { data: { source: 'center', target: 'incorrect', label: minKeyNumber }, grabbable: false },
         ],
         style: [
           { selector: 'node', style: { 'background-color': '#0074D9', label: 'data(label)', shape: 'rectangle', color: '#ff1f3a', 'text-valign': 'center', 'text-halign': 'center', 'border-width': '2px',
@@ -121,8 +154,15 @@ export default defineComponent({
               showModal.value = true;
               clickedNode.data('label', 'Question'); // Update the label to "Question"
             }
-            if(clickedNode.data('label').startsWith("Question")) {
-               console.log("Hi"); 
+            if(clickedNode.data('hiddenData') !== null) {
+            console.log(id.catalog); // Ensure id.catalog is accessible
+            console.log(clickedNode.data);
+            console.log(clickedNode.data('hiddenData')); // Ensure hiddenData is available on clickedNode
+            console.log(`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`);
+
+             //window.location.href = `http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.hiddenData}`
+             window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`;
+             console.log("");
             }
             
         });
@@ -138,7 +178,7 @@ export default defineComponent({
       }
     };
 
-    return { addNode, showModal} ;
+    return { addNode, showModal, id} ;
   },
 });
 </script>

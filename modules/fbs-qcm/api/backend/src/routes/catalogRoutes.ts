@@ -1,4 +1,4 @@
-import { addChildrenToQuestion, deleteCatalog, getCatalog, getCatalogs, postCatalog, putCatalog } from "../catalog/catalog";
+import { addChildrenToQuestion, deleteCatalog, editCatalogInformation, getCatalog, getCatalogs, postCatalog, putCatalog } from "../catalog/catalog";
 import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
  // get all catalogs from a course with the course id as a path parameter
@@ -112,6 +112,26 @@ import { authenticateToken } from "../authenticateToken";
         }
         res.sendStatus(200);
     }
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+    }
+  });
+  router.get("/api_v1/editCatalog/:catalog/:id", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      const questionId = req.params.id as string;
+      const catalogId = req.params.catalog as string;
+      if (req.user !== undefined) {
+        const data = await editCatalogInformation(req.user, catalogId, questionId);
+        if (data == -1) {
+          res.sendStatus(403);
+        } else {
+          res.send(data);
+        }
+      }
     } catch (error) {
       console.log(error);
       res.sendStatus(500);

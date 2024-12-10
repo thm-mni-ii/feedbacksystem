@@ -9,6 +9,7 @@ router.post("/api_v1/submission", authenticateToken, async (req, res) => {
       }
       if (req.user !== undefined) {
         const requestData = req.body;
+        console.log(requestData);
         const response = await submitSessionAnswer(req.user, requestData);
         console.log(response);
         if (response == -1) {
