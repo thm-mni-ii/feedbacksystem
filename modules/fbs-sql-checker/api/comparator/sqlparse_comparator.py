@@ -53,6 +53,8 @@ class SqlParseVisitor:
             sqlparse.sql.Comparison: self.visit_comparison,
             sqlparse.sql.Function: self.visit_function,
             sqlparse.sql.Parenthesis: self.visit_parenthesis,
+            sqlparse.sql.Operation: self.visit_operation,
+            sqlparse.sql.TypedLiteral: self.visit_typed_literal,
         }
 
     def recursive_visit(self, token: sqlparse.sql.TokenList):
@@ -81,8 +83,14 @@ class SqlParseVisitor:
     def visit_parenthesis(self, token: sqlparse.sql.Parenthesis):
         self.recursive_visit(token)
 
+    def visit_operation(self, token: sqlparse.sql.Operation):
+        self.recursive_visit(token)
+
     def visit_literal(self, token: sqlparse.tokens.Token):
         pass
+
+    def visit_typed_literal(self, token: sqlparse.sql.TypedLiteral):
+        self.recursive_visit(token)
 
     def visit(self, tokens: list[sqlparse.sql.Token]):
         for token in tokens:
@@ -94,7 +102,7 @@ class SqlParseVisitor:
                 raise ValueError("unhandled token", token)
 
     def trace_to_str_list(self) -> list[str]:
-        return [token_to_str(entry) for entry in self.parent_stack]
+        return [self._token_to_str(entry) for entry in self.parent_stack]
 
 
 class SqlParserDfs(SqlParseVisitor):
@@ -113,7 +121,7 @@ class SqlParserDfs(SqlParseVisitor):
 
 
 class SqlParserCoVisitor(SqlParseVisitor):
-    def __init__(self, solution, message_overrides=None):
+    def __init__(self, solution, message_overrides=None, token_names_overrides=None):
         super().__init__()
         self._solution = solution
         self._i = 0
@@ -121,6 +129,10 @@ class SqlParserCoVisitor(SqlParseVisitor):
             "end_of_query": "End of query",
             "end_of_token": "End of token",
         } | (message_overrides or {})
+        self._token_names_overrides = {
+            "IdentifierList": "Select Attributes",
+            "TypedLiteral": "Interval",
+        } | (token_names_overrides or {})
         self._error_depth = None
         self.errors = []
 
@@ -130,9 +142,9 @@ class SqlParserCoVisitor(SqlParseVisitor):
             should, _ = self._solution[self._i]
             self.errors.append(
                 Error(
-                    token_to_str(should),
+                    self._token_to_str(should),
                     self._messages["end_of_query"],
-                    [token_to_str(tokens[0])],
+                    [self._token_to_str(tokens[0])],
                 )
             )
 
@@ -161,7 +173,7 @@ class SqlParserCoVisitor(SqlParseVisitor):
         if end_of_token_error:
             self.errors.append(
                 Error(
-                    token_to_str(token),
+                    self._token_to_str(token),
                     self._messages["end_of_token"],
                     self.trace_to_str_list(),
                 )
@@ -171,7 +183,7 @@ class SqlParserCoVisitor(SqlParseVisitor):
             self.errors.append(
                 Error(
                     self._messages["end_of_query"],
-                    token_to_str(token),
+                    self._token_to_str(token),
                     self.trace_to_str_list(),
                 )
             )
@@ -179,7 +191,7 @@ class SqlParserCoVisitor(SqlParseVisitor):
             self.errors.append(
                 Error(
                     self._messages["end_of_token"],
-                    token_to_str(token),
+                    self._token_to_str(token),
                     self.trace_to_str_list(),
                 )
             )
@@ -187,7 +199,7 @@ class SqlParserCoVisitor(SqlParseVisitor):
         elif not comparator(token, should):
             self.errors.append(
                 Error(
-                    token_to_str(should), token_to_str(token), self.trace_to_str_list()
+                    self._token_to_str(should), self._token_to_str(token), self.trace_to_str_list()
                 )
             )
         else:
@@ -210,6 +222,8 @@ class SqlParserCoVisitor(SqlParseVisitor):
             )
         super().visit_literal(token)
 
+    def _map_token_name(self, token_name: str) -> str:
+        return self._token_names_overrides.get(token_name, token_name)
 
-def token_to_str(token: sqlparse.tokens.Token) -> str:
-    return token.__class__.__name__ if token.ttype is None else repr(token.value)
+    def _token_to_str(self, token: sqlparse.tokens.Token) -> str:
+        return self._map_token_name(token.__class__.__name__) if token.ttype is None else repr(token.value)

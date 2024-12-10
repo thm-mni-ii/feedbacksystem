@@ -87,6 +87,62 @@ class ComparatorTest(unittest.TestCase):
         )
         assert len(errors) == 1
 
+    def test_compare_deep(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare(
+            "SELECT email FROM users WHERE username IN (SELECT username FROM users WHERE registration_date > (SELECT AVG(registraion_date) FROM users))",
+            "SELECT email FROM users WHERE username IN (SELECT username FROM users WHERE registration_date > (SELECT MIN(registraion_date) FROM users))",
+        )
+        assert len(errors) == 1
+
+    def test_compare_much_error(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare(
+            "SELECT email FROM users WHERE username IN (SELECT username FROM users WHERE registration_date > (SELECT AVG(registraion_date) FROM users))",
+            "SELECT email FROM users WHERE username IN (SELECT email FROM users WHERE registration_date < (SELECT MAX(registraion_date) FROM users))",
+        )
+        assert len(errors) == 2
+
+    def test_compare_identifier_list(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare(
+            "SELECT username, password FROM users",
+            "SELECT FROM users",
+        )
+        assert len(errors) == 2
+        assert errors[0].expected == "Select Attributes"
+
+    def test_very_complex_query(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare(
+            "SELECT monat, AVG(tage_bis_erstes_gebot) AS durchschnittliche_tage FROM ( SELECT EXTRACT(MONTH FROM Registriert_am) AS monat, EXTRACT(DAY FROM (MIN(Geboten_am) - Registriert_am)) AS tage_bis_erstes_gebot FROM Gebot g JOIN Kunde k ON g.Bieter = k.KNr GROUP BY Bieter, Registriert_am ) AS tage GROUP BY monat ORDER BY monat;",
+            "SELECT monat, AVG(tage_bis_erstes_gebot) AS durchschnittliche_tage FROM ( SELECT EXTRACT(MONTH FROM Registriert_am) AS monat, EXTRACT(DAY FROM (MIN(Geboten_am) - Registriert_am)) AS tage_bis_erstes_gebot FROM Gebot g JOIN Kunde k ON g.Bieter = k.KNr GROUP BY Bieter, Registriert_am ) AS tage GROUP BY monat;"
+        )
+        assert len(errors) == 2
+
+    def test_with_with(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare(
+            "WITH (SELECT username FROM blocked_users) AS bu SELECT * FROM bu",
+            "WITH (SELECT email FROM blocked_users) AS bu SELECT * FROM bu"
+        )
+        assert len(errors) == 1
+
+    def test_very_very_complex_query(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare(
+            "SELECT g.Auktion, g.Bieter, g.Geboten_am, g.Gebotspreis FROM Gebot g JOIN Auktion a ON g.Auktion = a.ANr WHERE g.Geboten_am >= a.Eingestellt_am AND g.Geboten_am <= a.Eingestellt_am + INTERVAL '7 days' AND g.Gebotspreis > COALESCE( ( SELECT MAX(g_prev.Gebotspreis) FROM Gebot g_prev WHERE g_prev.Auktion = g.Auktion AND g_prev.Geboten_am < g.Geboten_am ), a.Startpreis ) ORDER BY g.Auktion, g.Geboten_am;",
+            "SELECT g.Auktion, g.Bieter, g.Geboten_am, g.Gebotspreis FROM Gebot g JOIN Auktion a ON g.Auktion = a.ANr WHERE g.Geboten_am >= a.Eingestellt_am AND g.Geboten_am <= a.Eingestellt_am + INTERVAL '7 days' AND g.Gebotspreis > COALESCE( ( SELECT MAX(g_prev.Gebotspreis) FROM Gebot g_prev WHERE g_prev.Auktion = g.Auktion AND g_prev.Geboten_am < g.Geboten_am ), a.Startpreis ) ORDER BY g.Geboten_am, g.Auktion;"
+        )
+        assert len(errors) == 2
+
+    def test_not_null(self):
+        comparator = SqlparseComparator()
+        errors = comparator.compare(
+            "SELECT username FROM user WHERE banned_at IS NULL",
+            "SELECT username FROM user WHERE banned_at IS NOT NULL"
+        )
+        assert len(errors) == 1
 
 if __name__ == "__main__":
     unittest.main()

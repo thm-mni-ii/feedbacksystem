@@ -83,13 +83,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                       resultText: String, extInfo: String): Unit = {
     SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, SqlCheckerState.Runner) match {
       case SqlCheckerState.Runner =>
-        println("a")
         SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Checker)
         this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
         if (exitCode == 2 && hintsEnabled(checkerConfiguration)) {
-          println("b")
           if (extInfo != null) {
-            println("c")
             SqlCheckerRemoteCheckerService.extInfo.put(submission.id, extInfo)
           }
         } else {
@@ -97,12 +94,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
           super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
         }
       case SqlCheckerState.Checker =>
-        println("e")
         SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
         val extInfo = SqlCheckerRemoteCheckerService.extInfo.remove(submission.id)
         this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
       case SqlCheckerState.Ignore =>
-        println("f")
         SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
     }
   }
@@ -139,9 +134,14 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       }
     }
     if (query.distance.isPresent) {
-      hints ++= "Distanz zur nächstens Musterlösung: "
-      hints ++= Math.round(query.distance.get / 50).toString
-      hints ++= "\n"
+      val steps = Math.round(query.distance.get / 50)
+      if (steps == 0) {
+        hints ++= "Du bist ganz nah an der Lösung, es sind nur noch kleine Änderung notwendig.\n"
+      } else {
+        hints ++= "Es sind "
+        hints ++= steps.toString
+        hints ++= " Änderungen erforderlich, um Deine Lösung an die nächstgelegene Musterlösung anzupassen.\n"
+      }
     }
     if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
       //ToDo
@@ -150,11 +150,9 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
 
   private def formatV2(hints: StringBuilder, query: SQLCheckerQuery): Unit = {
     for (error <- query.errors.asScala) {
-      hints ++= "In "
+      hints ++= "Mistake in "
       hints ++= error.trace.asScala.mkString(", ")
-      hints ++= " expected "
-      hints ++= error.expected
-      hints ++= " but got "
+      hints ++= " where "
       hints ++= error.got
       hints ++= "\n\n"
     }
