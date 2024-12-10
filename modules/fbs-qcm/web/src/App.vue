@@ -6,6 +6,7 @@
         <v-tab @click="router.push('/Question')">Get Question</v-tab>
         <v-tab @click="router.push('/deleteQuestion')">Delete Question</v-tab>
         <v-tab @click="router.push('/allQuestions')">All Questions</v-tab>
+        <v-tab @click="router.push('/editCatalog')">Edit Catalog</v-tab>
       </v-tabs>
     </v-app-bar>
     <v-main>

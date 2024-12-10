@@ -19,6 +19,11 @@ import {
 } from "../authenticate";
 import { Access, CatalogAccess, CourseAccess } from "../utils/enum";
 
+interface QuestionData {
+  questionId: mongoDB.ObjectId;
+  text: string;
+}
+
 interface catalog {
   name: string;
   questions: string[];
@@ -31,6 +36,16 @@ interface QuestionTreeObject {
 interface child {
   requirement: string;
   child: QuestionTreeObject;
+}
+
+interface CatalogQuestionData {
+  _id: mongoDB.ObjectId;
+  catalog: mongoDB.ObjectId;
+  question: mongoDB.ObjectId;
+  weighting: number;
+  children: {
+    [key: string]: mongoDB.ObjectId; // Dynamic keys, each containing an ObjectId
+  };
 }
 
 export async function postCatalog(
@@ -70,6 +85,56 @@ export async function postCatalog(
   return { catalogId: catalogInsert.insertedId };
 }
 
+export async function editCatalogInformation(tokenData: JwtPayload, catalogId: string, questionId: string) {
+  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    //need to add verification specifically for questioninCatalogId
+    return -1;
+  } 
+  const database: mongoDB.Db = await connect();
+  if(questionId === "") {
+
+
+  }
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  const questionCollection: mongoDB.Collection = database.collection("question");
+  const query = {
+      catalog: new mongoDB.ObjectId(catalogId),
+      question: new mongoDB.ObjectId(questionId)
+  }
+  const data: CatalogQuestionData = await questionInCatalogCollection.findOne(query) as any;
+  if(data === null) {
+      return -1;
+  }
+  const children: { [key: string]: QuestionData } = {};
+  console.log(data);
+  for (const [key, value] of Object.entries(data.children)) {
+      console.log(`Key: ${key}, Value: ${value}`);
+      const queryQuestion = {
+          _id: value
+      }
+      const question = await  questionCollection.findOne(queryQuestion);
+      if(question === null) {
+          return -1;
+      }
+      const obj = {
+          questionId: value,
+          text: question.questiontext
+      }
+      children[key] = obj;
+  }
+  const originQueryQuestion = {
+      _id: new mongoDB.ObjectId(questionId)
+  }
+  const originQuestion: Question = await questionCollection.findOne(originQueryQuestion) as any;
+  if(originQuestion === null) {
+      return -1;
+  }
+  const res = {
+      questionText: originQuestion.questiontext,
+      children: children
+  }
+  return res;
+}
 export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
   if (
     !(await authenticateInCatalog(

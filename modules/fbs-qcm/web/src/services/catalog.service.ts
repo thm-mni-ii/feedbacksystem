@@ -12,6 +12,13 @@ class CatalogService {
     })
   }
   // /api_v1/catalog
+  editCatalog(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
+    return axios.get(`/api_v1/editCatalog/${catalog}/${id}`, {
+      headers: {
+        Authorization: ""
+      }
+    })
+  }
   getCatalog(id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/catalog/${id}`, {
       headers: {

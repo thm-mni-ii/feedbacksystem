@@ -16,8 +16,12 @@
     "@mdi/font": "^7.4.47",
     "@types/webfontloader": "^1.6.38",
     "axios": "^1.6.8",
+<<<<<<< HEAD
     "gojs": "^3.0.15",
     "nested-draggable": "^1.0.2",
+=======
+    "cytoscape": "^3.30.4",
+>>>>>>> graph-libraries
     "pinia": "^2.1.7",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-vuetify": "^2.0.3",
