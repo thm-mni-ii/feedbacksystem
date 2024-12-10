@@ -67,6 +67,9 @@ services:
   ids:
     salt: ${ID_SALT:feedbacksystem_id_salt}
     length: ${ID_LENGTH:8}
+  ip:
+    vpnCidrs: ${IP_VPN_CIDR:""}
+    localCidrs: ${IP_LOCAL_CIDR:""}
 spring:
   main:
     allow-bean-definition-overriding: true

@@ -10,4 +10,4 @@ package de.thm.ii.fbs.model
   * @param groupSelection Whether registration for groups is possible
   */
 case class Course(name: String, description: String = "", visible: Boolean = true, id: Int = 0, semesterId: Option[Int] = None,
-                  groupSelection: Option[Boolean] = None)
+                  groupSelection: Option[Boolean] = None, submissionMode: String = "internet")
