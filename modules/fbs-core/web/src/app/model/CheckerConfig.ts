@@ -9,5 +9,6 @@ export interface CheckerConfig {
     showHintsAt: number;
     showExtendedHints: boolean;
     showExtendedHintsAt: number;
+    disableDistance: boolean;
   };
 }

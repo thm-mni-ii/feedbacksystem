@@ -259,6 +259,7 @@ export class TaskNewDialogComponent implements OnInit {
                   showExtendedHintsAt: 0,
                   showHints: false,
                   showHintsAt: 0,
+                  disableDistance: false,
                 },
               };
               const infoFile = new File(

@@ -12,7 +12,7 @@ object CheckerTypeInformation {
     val obj = new JSONObject(json)
     obj.getString("type") match {
       case "sqlCheckerInformation" => SqlCheckerInformation (obj.getString ("solution"), obj.getBoolean ("showHints"),
-        obj.getInt ("showHintsAt"), obj.getBoolean ("showExtendedHints"), obj.getInt ("showExtendedHintsAt") )
+        obj.getInt ("showHintsAt"), obj.getBoolean ("showExtendedHints"), obj.getInt ("showExtendedHintsAt"), obj.getBoolean("disableDistance") )
       case _ => throw new IllegalArgumentException()
     }
   }
@@ -32,6 +32,7 @@ object CheckerTypeInformation {
           .put("showHintsAt", sobj.showHintsAt)
           .put("showExtendedHints", sobj.showExtendedHints)
           .put("showExtendedHintsAt", sobj.showExtendedHintsAt)
+          .put("disableDistance", sobj.disableDistance)
           .toString
       case _ =>
         throw new IllegalArgumentException()
@@ -57,5 +58,6 @@ case class SqlCheckerInformation(
   showHints: Boolean,
   showHintsAt: Int,
   showExtendedHints: Boolean,
-  showExtendedHintsAt: Int
+  showExtendedHintsAt: Int,
+  disableDistance: Boolean,
 ) extends CheckerTypeInformation
