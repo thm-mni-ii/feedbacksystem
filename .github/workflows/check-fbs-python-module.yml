@@ -52,6 +52,6 @@ jobs:
       - name: Install and configure Poetry
         uses: snok/install-poetry@v1
       - name: Install library
-        run: poetry install --no-interaction  --only dev
+        run: poetry install --no-interaction
       - name: Run unittest
         run: poetry run python -m unittest
