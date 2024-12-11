@@ -20,13 +20,14 @@ sqlparse = "^0.4.2"
 psycopg2-binary = "^2.9.10"
 python-dotenv = "^0.21.0"
 sympy = "^1.12"
-mongomock = "^4.3.0"
 typeguard = "^4.4.1"
 
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.15.2"
 black = "^22.8.0"
+mongomock = "^4.3.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
