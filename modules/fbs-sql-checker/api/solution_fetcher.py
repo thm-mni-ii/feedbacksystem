@@ -1,6 +1,6 @@
 import math
 from abc import ABCMeta, abstractmethod
-from typing import Tuple
+from typing import Tuple, Optional
 
 from api.data_store import DataStore
 from api.distance.distance_calc import DistanceCalculator
@@ -11,7 +11,7 @@ class SolutionFetcher(metaclass=ABCMeta):
     @abstractmethod
     def fetch_solution(
         self, task_id: int, submission: Submission
-    ) -> Tuple[Result, float]:
+    ) -> Tuple[Optional[Result], float]:
         pass
 
 
@@ -21,11 +21,12 @@ class FirstSolutionFetcher(SolutionFetcher):
 
     def fetch_solution(
         self, task_id: int, submission: Submission
-    ) -> Tuple[Result, float]:
+    ) -> Tuple[Optional[Result], float]:
+        solution = self._datastore.query("Queries", {"taskId": task_id, "isSolution": True})
+        if len(solution) == 0:
+            return None, 0.0
         return (
-            Result.from_db_dict(
-                self._datastore.query("Queries", {"taskId": task_id, "passed": True})
-            ),
+            Result.from_db_dict(solution[0]),
             1.0,
         )
 
@@ -39,7 +40,7 @@ class NearestSolutionFetcher(SolutionFetcher):
         self, task_id: int, submission: Submission
     ) -> Tuple[Result, float]:
         solutions = self._datastore.query(
-            "Queries", {"taskId": task_id, "passed": True}
+            "Queries", {"taskId": task_id, "isSolution": True}
         )
         solutions = [Result.from_db_dict(solution) for solution in solutions]
         min_distance = math.inf

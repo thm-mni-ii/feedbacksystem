@@ -95,6 +95,16 @@
           </mat-form-field>
         </div>
       </div>
+      <div>
+        <mat-checkbox
+          formControlName="disableDistance"
+          value="false"
+          (change)="showHintsEvent(checkerForm.value)"
+          >{{
+            "dialog.checker.new.disable-distance" | i18nextEager
+          }}</mat-checkbox
+        >
+      </div>
     </div>
   </form>
   <mat-dialog-actions class="actions">

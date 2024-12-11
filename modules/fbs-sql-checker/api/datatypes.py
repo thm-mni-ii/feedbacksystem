@@ -76,6 +76,7 @@ class Result:
     statement: str = ""
     time: str = ""
     passed: bool = False
+    is_solution: bool = False
     parsable: bool = False
     closest_solution: str = ""
     min_distance: int = 0
@@ -92,6 +93,7 @@ class Result:
             attempt=submission.attempt,
             statement=submission.submission,
             time=datetime.now(UTC).isoformat(),
+            is_solution=submission.is_solution and submission.passed,
         )
 
     @classmethod
@@ -123,6 +125,7 @@ class Result:
             "statement": self.statement,
             "passed": self.passed,
             "parsable": self.parsable,
+            "isSolution": self.is_solution,
             "time": self.time,
             "usedSolutionId": self.closest_solution,
             "distance": self.min_distance,
@@ -134,7 +137,6 @@ class Result:
 @typechecked
 class LegacyResult(Result):
     task_nr: int = 0
-    is_sol: bool = False
     tables_right: bool = False
     sel_attributes_right: bool = False
     pro_attributes_right: bool = False
@@ -154,7 +156,7 @@ class LegacyResult(Result):
             "statement": self.statement,
             "queryRight": self.passed,
             "parsable": self.parsable,
-            "isSolution": self.is_sol,
+            "isSolution": self.is_solution,
             "tablesRight": self.tables_right,
             "selAttributesRight": self.sel_attributes_right,
             "proAttributesRight": self.pro_attributes_right,

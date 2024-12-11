@@ -56,27 +56,24 @@ class QueryProcessorV2(QueryProcessor):
 
     def process(self, submission: Submission) -> Result:
         result = ResultV2.from_submission(submission)
-        if not (submission.is_solution or submission.passed):
-            solution, distance = self._solution_fetcher.fetch_solution(
-                submission.task_id, submission
+        solution, distance = self._solution_fetcher.fetch_solution(
+            submission.task_id, submission
+        )
+        if solution is None and result.is_solution:
+            sqlparse.parse(submission.submission)
+            result.passed = True
+            result.parsable = True
+            return result
+        try:
+            result.errors = self._comparator.compare(
+                solution.statement, submission.submission
             )
-            try:
-                result.errors = self._comparator.compare(
-                    solution.statement, submission.submission
-                )
-                result.passed = len(result.errors) == 0
-                result.closest_solution = solution.uuid
-                result.min_distance = distance
-                result.parsable = True
-            except Exception as e:
-                logger.exception(e)
-        else:
-            try:
-                sqlparse.parse(submission.submission)
-                result.parsable = True
-            except Exception as e:
-                pass
-            result.passed = result.parsable
+            result.passed = len(result.errors) == 0
+            result.closest_solution = solution.uuid
+            result.min_distance = distance
+            result.parsable = True
+        except Exception as e:
+            logger.exception(e)
 
         return result
 

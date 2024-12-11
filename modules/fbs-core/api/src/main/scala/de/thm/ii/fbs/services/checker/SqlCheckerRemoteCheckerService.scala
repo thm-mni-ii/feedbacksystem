@@ -133,7 +133,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
         formatLegacy(hints, query)
       }
     }
-    if (query.distance.isPresent) {
+    if (!sci.disableDistance && query.distance.isPresent) {
       val steps = Math.round(query.distance.get / 50)
       if (steps == 0) {
         hints ++= "Du bist ganz nah an der Lösung, es sind nur noch kleine Änderung notwendig.\n"
@@ -192,7 +192,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     val passed = submission.results.headOption.exists(result => result.exitCode == 0)
     new ObjectMapper().createObjectNode()
       .put("passed", passed)
-      .put("isSol", false)
+      .put("isSol", !checker.checkerTypeInformation.get.asInstanceOf[SqlCheckerInformation].disableDistance)
       .put("userId", submission.userID.get)
       .put("cid", task.courseID)
       .put("tid", checker.taskId)
