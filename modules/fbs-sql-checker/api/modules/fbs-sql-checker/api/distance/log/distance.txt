@@ -1,0 +1,4408 @@
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['mail']; query: ['username']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 50, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY mail;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 GROUP BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: ['submissions']; query: ['submissions']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['join', 'where']; query: ['join', 'where']
+
+comparison equations: reference: ['id=userid', 'registrationdate>100']; query: ['id=id', 'registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.user_id WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.id WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: ['registrationdate']; query: ['username']
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 50
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY registration_date;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 ORDER BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['username=tester']; query: ['username=test']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE username = 'tester';
+
+query:
+SELECT username, mail, password FROM user WHERE username = 'test';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: ['users']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 50, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM users WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['mail']; query: ['username']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 50, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY mail;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 GROUP BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: ['submissions']; query: ['submissions']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['join', 'where']; query: ['join', 'where']
+
+comparison equations: reference: ['id=userid', 'registrationdate>100']; query: ['id=id', 'registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.user_id WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.id WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: ['registrationdate']; query: ['username']
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 50
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY registration_date;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 ORDER BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['username=tester']; query: ['username=test']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE username = 'tester';
+
+query:
+SELECT username, mail, password FROM user WHERE username = 'test';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: ['users']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 50, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM users WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['mail']; query: ['username']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 50, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY mail;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 GROUP BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: ['submissions']; query: ['submissions']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['join', 'where']; query: ['join', 'where']
+
+comparison equations: reference: ['id=userid', 'registrationdate>100']; query: ['id=id', 'registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.user_id WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.id WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: ['registrationdate']; query: ['username']
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 50
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY registration_date;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 ORDER BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['username=tester']; query: ['username=test']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE username = 'tester';
+
+query:
+SELECT username, mail, password FROM user WHERE username = 'test';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: ['users']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 50, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM users WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['mail']; query: ['username']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 50, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY mail;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 GROUP BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: ['submissions']; query: ['submissions']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['join', 'where']; query: ['join', 'where']
+
+comparison equations: reference: ['id=userid', 'registrationdate>100']; query: ['id=id', 'registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.user_id WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.id WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: ['registrationdate']; query: ['username']
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 50
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY registration_date;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100 ORDER BY username;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['username=tester']; query: ['username=test']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE username = 'tester';
+
+query:
+SELECT username, mail, password FROM user WHERE username = 'test';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: ['users']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 50, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM users WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['mail']; query: ['username']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 50, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY mail;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY username;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: ['submissions']; query: ['submissions']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['join', 'where']; query: ['join', 'where']
+
+comparison equations: reference: ['id=userid', 'registrationdate>100']; query: ['id=id', 'registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.user_id WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.id WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: ['registrationdate']; query: ['username']
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 50
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY registration_date;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY username;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date < 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['username=tester']; query: ['username=test']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE username = 'tester';
+
+query:
+SELECT username, mail, password FROM user WHERE username = 'test';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: ['users']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 50, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM users WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['mail']; query: ['username']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 50, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY mail;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY username;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: ['submissions']; query: ['submissions']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['join', 'where']; query: ['join', 'where']
+
+comparison equations: reference: ['id=userid', 'registrationdate>100']; query: ['id=id', 'registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.user_id WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.id WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: ['registrationdate']; query: ['username']
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 50
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY registration_date;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY username;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['username=tester']; query: ['username=test']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE username = 'tester';
+
+query:
+SELECT username, mail, password FROM user WHERE username = 'test';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: ['users']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 50, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM users WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdata>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_data > 100;
+
+Distance = 100
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['mail']; query: ['username']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 50, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY mail;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100 GROUP BY username;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: ['submissions']; query: ['submissions']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['join', 'where']; query: ['join', 'where']
+
+comparison equations: reference: ['id=userid', 'registrationdate>100']; query: ['id=id', 'registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.user_id WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user JOIN submissions ON user.id = submission.id WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: ['registrationdate']; query: ['username']
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 50
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY registration_date;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100 ORDER BY username;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'registrationdate']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, registration_date FROM user WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['username=tester']; query: ['username=test']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE username = 'tester';
+
+query:
+SELECT username, mail, password FROM user WHERE username = 'test';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: ['users']
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 50, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM users WHERE registration_date > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdata>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_data > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdata>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_data > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdata>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_data > 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate<100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date < 100;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100;
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > '100';
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100', 'mail like ']; query: ['registrationdate>100', 'mail like ']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 AND mail LIKE '%gmail.com';
+
+query:
+SELECT username, mail, password FROM user WHERE registration_date > 100 OR mail LIKE '%gmail.com';
+
+Distance = 0
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100', 'mail like ']; query: ['registrationdata>100', 'mail like ']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 AND mail LIKE '%gmail.com';
+
+query:
+SELECT username, mail, password FROM user WHERE registration_data > 100 AND mail LIKE '%gmail.com';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+attributes after order: reference: ['username', 'mail', 'password']; query: ['username', 'mail', 'password']
+
+command list: reference: []; query: []
+
+distinct list: reference: []; query []
+
+Distance: attributes = 0, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100', 'mail like ']; query: ['registrationdata>100', 'mail like ']
+
+group by attributes: reference: []; query: []
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 50, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT username, mail, password FROM user WHERE registration_date > 100 AND mail LIKE '%gmail.com';
+
+query:
+SELECT username, mail, password FROM user WHERE registration_data > 100 AND mail LIKE '%gmail.com';
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['registrationdate', 'username']; query: ['registrationdata', 'username']
+
+attributes after order: reference: ['registrationdate', 'username']; query: ['registrationdata', 'username']
+
+command list: reference: ['count']; query: ['count']
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['registrationdate']; query: ['registrationdate']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT registration_date, COUNT(username) FROM user WHERE registration_date > 100 GROUP BY registration_date;
+
+query:
+SELECT registration_data, COUNT(username) FROM user WHERE registration_date > 100 GROUP BY registration_date;
+
+Distance = 50
+------------------------------------------------------------------
+
+
+attribute aliases: reference: {}; query: {}
+
+attributes before order: reference: ['registrationdate', 'username']; query: ['registrationdata', 'username']
+
+attributes after order: reference: ['registrationdate', 'username']; query: ['registrationdata', 'username']
+
+command list: reference: ['count']; query: ['count']
+
+distinct list: reference: []; query []
+
+Distance: attributes = 50, commands = 0, keywords = 0
+
+tables used: reference: []; query: []
+
+reference table aliases: {}; query table aliases {}
+
+data retrieval clause: reference: ['where']; query: ['where']
+
+comparison equations: reference: ['registrationdate>100']; query: ['registrationdate>100']
+
+group by attributes: reference: ['registrationdate']; query: ['registrationdate']
+
+having attributes: reference: []; query: []
+
+order by attributes: reference: []; query: []
+
+Distance: table and data retrieval clause = 0, comparison equations = 0, group by = 0, having = 0, order by = 0
+
+reference:
+SELECT registration_date, COUNT(username) FROM user WHERE registration_date > 100 GROUP BY registration_date;
+
+query:
+SELECT registration_data, COUNT(username) FROM user WHERE registration_date > 100 GROUP BY registration_date;
+
+Distance = 50
+------------------------------------------------------------------
+
+

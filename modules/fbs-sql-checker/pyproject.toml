@@ -16,11 +16,18 @@ random2 = "^1.0.1"
 pre-commit = "^2.20.0"
 pylint = "^2.15.3"
 tqdm = "^4.64.1"
+sqlparse = "^0.4.2"
+psycopg2-binary = "^2.9.10"
+python-dotenv = "^0.21.0"
+sympy = "^1.12"
+typeguard = "^4.4.1"
 
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.15.2"
 black = "^22.8.0"
+mongomock = "^4.3.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

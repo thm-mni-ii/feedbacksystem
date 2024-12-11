@@ -23,6 +23,7 @@ import { AnalyticsToolComponent } from "./page-components/analytics-tool/analyti
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
+import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -113,6 +114,12 @@ const routes: Routes = [
       {
         path: "kanban",
         component: FbsKanbanComponent,
+        canActivate: [AuthGuard],
+      },
+      // Sci-Check
+      {
+        path: "sci-check",
+        component: FbsSciCheckComponent,
         canActivate: [AuthGuard],
       },
       // Admin

@@ -124,6 +124,7 @@ import { GroupPreviewComponent } from "./page-components/group-preview/group-pre
 import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
 import { GroupDeregisterDialogComponent } from "./dialogs/group-deregister-dialog/group-deregister-dialog.component";
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
+import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -232,6 +233,7 @@ export const httpInterceptorProviders = [
     GroupDetailComponent,
     GroupDeregisterDialogComponent,
     FbsKanbanComponent,
+    FbsSciCheckComponent,
   ],
   imports: [
     BrowserModule,
