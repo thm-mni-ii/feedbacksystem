@@ -43,9 +43,12 @@ interface CatalogQuestionData {
   catalog: mongoDB.ObjectId;
   question: mongoDB.ObjectId;
   weighting: number;
-  children: {
-    [key: string]: mongoDB.ObjectId; // Dynamic keys, each containing an ObjectId
-  };
+  children: [
+      {
+          needed_score: number,
+          question: mongoDB.ObjectId
+      }
+  ];
 }
 
 export async function postCatalog(
@@ -92,43 +95,58 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   } 
   const database: mongoDB.Db = await connect();
   if(questionId === "") {
-
-
+    return -1;
   }
   const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
   const questionCollection: mongoDB.Collection = database.collection("question");
+  console.log(1);
   const query = {
-      catalog: new mongoDB.ObjectId(catalogId),
-      question: new mongoDB.ObjectId(questionId)
+      _id: new mongoDB.ObjectId(questionId)
   }
   const data: CatalogQuestionData = await questionInCatalogCollection.findOne(query) as any;
   if(data === null) {
       return -1;
   }
-  const children: { [key: string]: QuestionData } = {};
+  console.log(2);
+  const children: { [key: number]: QuestionData } = {};
   console.log(data);
-  for (const [key, value] of Object.entries(data.children)) {
-      console.log(`Key: ${key}, Value: ${value}`);
+  console.log(data.children.length);
+  for (let i = 0; i < data.children.length; i++) {
+      console.log("DATEN");
+      console.log(data.children[i]);
       const queryQuestion = {
-          _id: value
+          _id: data.children[i].question
       }
-      const question = await  questionCollection.findOne(queryQuestion);
+      console.log(queryQuestion);
+      const question = await questionInCatalogCollection.findOne(queryQuestion);
       if(question === null) {
-          return -1;
+          continue;
+      }
+      const queryForQuestionData = {
+        _id: question.question
+      }
+      const questionData = await questionCollection.findOne(queryForQuestionData);
+      console.log(questionData);
+      if(questionData === null) {
+          continue;
       }
       const obj = {
-          questionId: value,
-          text: question.questiontext
+          questionId: data.children[i].question,
+          text: questionData.questiontext
       }
-      children[key] = obj;
+      children[data.children[i].needed_score] = obj;
+      console.log("children");
+      console.log(children);
   }
+  console.log(4);
   const originQueryQuestion = {
-      _id: new mongoDB.ObjectId(questionId)
+      _id: data.question
   }
   const originQuestion: Question = await questionCollection.findOne(originQueryQuestion) as any;
   if(originQuestion === null) {
       return -1;
   }
+  console.log(5);
   const res = {
       questionText: originQuestion.questiontext,
       children: children
@@ -462,13 +480,6 @@ export async function addChildrenToQuestion(
   ) {
     return -1;
   }
-  console.log("-----------------------");
-  console.log(tokenData);
-  console.log(catalogId);
-  console.log(questionId);
-  console.log(childrenOfQuestion);
-  console.log("-----------------------");
-
   const filter = {
     question: new mongoDB.ObjectId(questionId),
     catalog: new mongoDB.ObjectId(catalogId),
@@ -478,8 +489,6 @@ export async function addChildrenToQuestion(
       children: childrenOfQuestion,
     },
   };
-  console.log(filter);
-  console.log(replace);
   const database: mongoDB.Db = await connect();
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
@@ -488,3 +497,47 @@ export async function addChildrenToQuestion(
   console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
   return 0;
 }
+
+export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalogId: string, questionId: string ) {
+   if(!authenticateInCatalog(tokenData, CatalogAccess.tutorInCatalog, catalogId)) {
+       return -1;
+   }
+  console.log(catalogId);
+  console.log(questionId);
+  const database: mongoDB.Db = await connect();
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  const questionCollection: mongoDB.Collection = database.collection("question");
+  console.log("SSS");
+  const query = {
+    catalog: new mongoDB.ObjectId(catalogId),
+    children: {
+        $elemMatch: {
+          question: new mongoDB.ObjectId(questionId)
+        }
+    } 
+  };
+  console.log("SSS");
+  console.log(query);
+  const data = await questionInCatalogCollection.findOne(query);
+  console.log(data);
+  if(data === null) {
+      return {questionInCatalogId: null}
+  } 
+  console.log(1);
+  const questionQuery = {
+      _id: data.question
+  };
+  console.log(2);
+  const prevQuestion = await questionCollection.findOne(questionQuery); 
+  if(prevQuestion === null) {
+      return -1;
+  }
+  console.log(3);
+  const dataObject = {
+      questionInCatalogId: data._id,
+      text: prevQuestion.questiontext,
+  }
+  console.log(4);
+  console.log(dataObject);
+  return dataObject;
+} 

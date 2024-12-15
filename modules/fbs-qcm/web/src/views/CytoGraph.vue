@@ -101,6 +101,7 @@ export default defineComponent({
       console.log(data);
       console.log(data.data);
       const keys = Object.keys(data.data.children).filter(key => key !== "PARTIAL").map(Number);
+      console.log(keys);
       let maxKey = "+";
       let minKey = "+";
       let maxId = null;
@@ -123,11 +124,19 @@ export default defineComponent({
       console.log(minKey);
       console.log(minId);
       console.log("A");
+      const prevData = await catalogService.getPreviousQuestion(id.catalog, id.question);
+      let prevText = "No Previous Question"
+      let prevId = null;
+      if(prevData.data.questionInCatalogId !== null) {
+        prevText = prevData.data.text;
+        prevId = prevData.data.questionInCatalogId;
+      }
+      console.log(prevData);
       cy.value = cytoscape({
         container: document.getElementById('cy'),
         elements: [
           { data: { id: 'center', label: data.data.questionText }, position: { x: 400, y: 0 }, grabbable: false},
-          { data: { id: 'left', label: 'Score: 80' }, position: { x: 250, y: 0 }, grabbable: false },
+          { data: { id: 'left', label: prevText, hiddenData: prevId }, position: { x: 250, y: 0 }, grabbable: false },
           { data: { source: 'left', target: 'center', label: 'Previous Question' }},
           { data: { id: 'correct', label: maxKey, hiddenData: maxId }, position: { x: 550, y: -60 }, grabbable: false  },
           { data: { source: 'center', target: 'correct', label: maxKeyNumber }, grabbable: false },

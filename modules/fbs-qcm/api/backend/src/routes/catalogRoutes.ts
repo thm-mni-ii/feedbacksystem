@@ -1,6 +1,7 @@
-import { addChildrenToQuestion, deleteCatalog, editCatalogInformation, getCatalog, getCatalogs, postCatalog, putCatalog } from "../catalog/catalog";
+import { addChildrenToQuestion, deleteCatalog, editCatalogInformation, getCatalog, getCatalogs, getPreviousQuestionInCatalog, postCatalog, putCatalog } from "../catalog/catalog";
 import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
+import { authenticate } from "../authenticate";
  // get all catalogs from a course with the course id as a path parameter
  const router = Router();
  router.get("/api_v1/catalogs/:id", authenticateToken, async (req, res) => {
@@ -148,6 +149,7 @@ import { authenticateToken } from "../authenticateToken";
         if (data == -1) {
           res.sendStatus(403);
         } else {
+
           res.send(data);
         }
       }
@@ -156,4 +158,26 @@ import { authenticateToken } from "../authenticateToken";
       res.sendStatus(500);
     }
   });
+
+  router.get("/api_v1/getPreviousQuestion/:catalog/:question", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      const questionId = req.params.question as string;
+      const catalogId = req.params.catalog as string;
+      if(req.user !== undefined) {
+          const data = await getPreviousQuestionInCatalog(req.user, catalogId, questionId);
+          if( data === -1) {
+            res.send(403);
+          } else { 
+            res.send(data);
+          }
+      }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
+  
   export default router; 
