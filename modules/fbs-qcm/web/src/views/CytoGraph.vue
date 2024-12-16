@@ -13,6 +13,11 @@
           placeholder="Update node data"
         />
         <p>Auf welche Frage soll verwiesen werden</p>
+        <select v-model="selectedQuestion" class="question-select">
+      <option v-for="question in questionOptions" :key="question.id" :value="question.id">
+        {{ question.text }}
+      </option>
+    </select>
         <button @click="updateNode">Update Node</button>
         <button @click="closeModal">Close</button>
       </div>
@@ -83,7 +88,8 @@
 <script lang="ts">
 import { useRoute } from 'vue-router';
 import { defineComponent, ref, onMounted } from 'vue';
-import catalogService from '@/services/catalog.service'
+import catalogService from '@/services/catalog.service';
+import questionService from '@/services/question.service';
 import cytoscape, { Core } from 'cytoscape';
 export default defineComponent({
   name: 'CytoscapeGraph',
@@ -160,8 +166,10 @@ export default defineComponent({
             const clickedNode = event.target; // The clicked node
             if (clickedNode.data('label') === '+') {
               attachButtonToNode(clickedNode.id());
+              const data = questionService.getAllQuestions();
+              console.log(data);
               console.log(showModal);
-              //showModal.value = true;
+              showModal.value = true;
               clickedNode.data('label', 'Question'); // Update the label to "Question"
              }
             if(clickedNode.data('hiddenData') !== null) {

@@ -516,7 +516,7 @@ export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalo
         }
     } 
   };
-  console.log("SSS");
+  console.log("S221SS");
   console.log(query);
   const data = await questionInCatalogCollection.findOne(query);
   console.log(data);
