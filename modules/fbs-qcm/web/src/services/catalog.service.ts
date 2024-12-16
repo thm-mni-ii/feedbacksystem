@@ -14,21 +14,21 @@ class CatalogService {
   deleteQuestionFromCatalog(questionInCollection: string): Promise<AxiosResponse<Catalog>> {
     return axios.delete(`/api_v1/removeQuestionFromCatalog/${questionInCollection}`, {
       headers: {
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
+        Authorization: "Bearer "
       }
     })
   }
   getPreviousQuestion(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/getPreviousQuestion/${catalog}/${id}`, {
       headers: {
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
+        Authorization: "Bearer "
       }
     })
   }
   editCatalog(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/editCatalog/${catalog}/${id}`, {
       headers: {
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
+        Authorization: "Bearer "
       }
     })
   }
