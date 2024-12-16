@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="cy" style="width: 100%; height: 1000px; border: 1px solid black;"></div>
+    <div id="cy" style="width: 100%; height: 1000px;"></div>
     <div v-if="showModal" class="modal-overlay">
       <div class="modal-content">
         <h3>Frage anfügen</h3>
@@ -159,23 +159,24 @@ export default defineComponent({
         cy.value.on('tap', 'node', (event) => {
             const clickedNode = event.target; // The clicked node
             if (clickedNode.data('label') === '+') {
+              attachButtonToNode(clickedNode.id());
               console.log(showModal);
-              showModal.value = true;
+              //showModal.value = true;
               clickedNode.data('label', 'Question'); // Update the label to "Question"
-            }
+             }
             if(clickedNode.data('hiddenData') !== null) {
-            console.log(id.catalog); // Ensure id.catalog is accessible
-            console.log(clickedNode.data);
-            console.log(clickedNode.data('hiddenData')); // Ensure hiddenData is available on clickedNode
-            console.log(`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`);
-
-             //window.location.href = `http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.hiddenData}`
-             window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`;
-             console.log("");
+                console.log(id.catalog); // Ensure id.catalog is accessible
+                console.log(clickedNode.data);
+                console.log(clickedNode.data('hiddenData')); // Ensure hiddenData is available on clickedNode
+                console.log(`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`);
+                window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`;
             }
-            
+        });
+        cy.value.nodes().forEach((node) => {
+            attachButtonToExistingNode(node.id());  // Attach button to each node using its ID
         });
     });
+
     const addNode = () => {
       if (cy.value) {
         const newNodeId = `question${nodeId.value}`;
@@ -186,8 +187,71 @@ export default defineComponent({
         cy.value.add({ group: 'edges', data: { source: 'center', target: newNodeId, label: '50%' }});
       }
     };
+    const attachButtonToNode = (nodeId) => {
+      const node = cy.value.$id(nodeId);
+      const position = node.renderedPosition();
+      const button = document.createElement('button');
+      button.innerText = 'x';
+      button.className = 'remove-button';
+      button.style.position = 'absolute';
+      button.style.width = '70px';   // Set the button width
+  button.style.height = '70px';  // Set the button height
+        button.style.color = 'red';   // Set the text color to white
+      const left = position.x - 300;
+      const top = position.y;
+      button.style.fontSize = '50px';  // Adjust font size to make "x" bigger
+  button.style.fontWeight = 'bold';
+      button.style.left = `${left}px`;
+      button.style.top = `${top}px`;
+      button.onclick = () => {
+             event.stopPropagation();
+            console.log(node.data);
+            console.log(node.data('hiddenData'));
+            catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
+            node.data('label', '+');
+            node.data('hiddenData', null);
+            button.remove(); // Remove the button
+      };
 
-    return { addNode, showModal, id} ;
+      // Append the button to the container
+      document.getElementById('cy').appendChild(button);
+    };
+    const attachButtonToExistingNode = (nodeId) => {
+      const node = cy.value.$id(nodeId);
+      const position = node.renderedPosition();
+      console.log("SSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
+      console.log(node.data('label'));
+      console.log(position.x);
+      console.log("SSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
+      if (node.data('label') !== '+' && position.x === 1655.7443609022555) {
+          const button = document.createElement('button');
+          button.innerText = 'x';
+          button.className = 'remove-button';
+          button.style.position = 'absolute';
+          button.style.width = '70px';   // Set the button width
+          button.style.height = '70px';  // Set the button height
+          button.style.color = 'red';   // Set the text color to white
+          const left = position.x - 300;
+          const top = position.y;
+          button.style.fontSize = '50px';  // Adjust font size to make "x" bigger
+          button.style.fontWeight = 'bold';
+          button.style.left = `${left}px`;
+          button.style.top = `${top}px`;
+          button.onclick = () => {
+              event.stopPropagation();
+              console.log(node.data);
+              console.log(node.data('hiddenData'));
+                catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
+                node.data('label', '+');
+                node.data('hiddenData', null);
+                button.remove(); // Remove the button
+          };
+
+          // Append the button to the container
+          document.getElementById('cy').appendChild(button);
+      }
+    }
+    return { addNode, showModal, id, attachButtonToExistingNode} ;
   },
 });
 </script>

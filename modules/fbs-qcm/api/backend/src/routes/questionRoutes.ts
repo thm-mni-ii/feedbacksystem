@@ -202,8 +202,8 @@ router.get("/api_v1/question/:id", authenticateToken, async (req, res) => {
       res.sendStatus(500);
     }
   });
-  router.put(
-    "/api_v1/removeQuestionFromCatalog",
+  router.delete(
+    "/api_v1/removeQuestionFromCatalog/:questionInCatalog",
     authenticateToken,
     async (req, res) => {
       try {
@@ -211,13 +211,10 @@ router.get("/api_v1/question/:id", authenticateToken, async (req, res) => {
           res.sendStatus(401);
         }
         if (req.user !== undefined) {
-          const requestData = req.body;
-          const questionId: string = requestData.question;
-          const catalog: string = requestData.catalog;
+          const requestData = req.params.questionInCatalog;
           const result = await removeQuestionFromCatalog(
             req.user,
-            questionId,
-            catalog
+            requestData
           );
           if (result == -1) {
             res.send(403);
