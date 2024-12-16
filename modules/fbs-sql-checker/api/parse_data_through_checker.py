@@ -5,7 +5,7 @@ import os
 import sys
 from tqdm import tqdm
 
-from json_creator import parse_single_stat_upload_db
+from query_processor import parse_single_stat_upload_db
 
 # Usage:
 # Execute "parse_data_through_checker.py" with a path to a json file or a directory in the console

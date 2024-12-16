@@ -35,6 +35,11 @@
           <p>{{ "sidebar.label.allCourses" | i18nextEager }}</p>
         </a>
 
+        <a mat-list-item routerLink="/groups" routerLinkActive="selected">
+          <mat-icon>groups</mat-icon>
+          <p>{{ "sidebar.label.myGroups" | i18nextEager }}</p>
+        </a>
+
         <a
           mat-list-item
           *ngIf="isAdmin"
@@ -72,6 +77,16 @@
         <button mat-list-item (click)="moveAndHideSidebar('/modelling')">
           <mat-icon>format_shapes</mat-icon>
           <p>FBS Modelling</p>
+        </button>
+
+        <button mat-list-item (click)="moveAndHideSidebar('/kanban')">
+          <mat-icon>view_kanban</mat-icon>
+          <p>FBS Kanban</p>
+        </button>
+
+        <button mat-list-item (click)="moveAndHideSidebar('/sci-check')">
+          <mat-icon>description</mat-icon>
+          <p>FBS SciCheck</p>
         </button>
       </mat-nav-list>
 

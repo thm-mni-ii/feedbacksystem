@@ -104,6 +104,14 @@ import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
 import { SqlPlaygroundModule } from "./page-components/sql-playground/sql-playground.module";
+import { MyGroupsComponent } from "./page-components/my-groups/my-groups.component";
+import { GroupSelectionComponent } from "./page-components/course-detail/group-selection/group-selection.component";
+import { NewGroupDialogComponent } from "./dialogs/new-group-dialog/new-group-dialog.component";
+import { GroupPreviewComponent } from "./page-components/group-preview/group-preview.component";
+import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
+import { GroupDeregisterDialogComponent } from "./dialogs/group-deregister-dialog/group-deregister-dialog.component";
+import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
+import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -190,6 +198,15 @@ export const httpInterceptorProviders = [
     SharePlaygroundLinkDialogComponent,
     FbsModellingComponent,
     LanguageMenuComponent,
+    MyGroupsComponent,
+    GroupSelectionComponent,
+    NewGroupDialogComponent,
+    GroupPreviewComponent,
+    GroupPreviewComponent,
+    GroupDetailComponent,
+    GroupDeregisterDialogComponent,
+    FbsKanbanComponent,
+    FbsSciCheckComponent,
   ],
   imports: [
     BrowserModule,

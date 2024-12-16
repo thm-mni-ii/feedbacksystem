@@ -1,0 +1,4 @@
+<mat-card class="card" (click)="goToGroup()">
+  <span>{{ data.name }} - {{ courseName }}</span>
+  <mat-icon class="invisible" *ngIf="!data.visible">visibility_off</mat-icon>
+</mat-card>

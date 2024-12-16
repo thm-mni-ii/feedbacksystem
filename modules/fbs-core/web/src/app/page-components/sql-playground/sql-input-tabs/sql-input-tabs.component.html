@@ -89,15 +89,15 @@
           (update)="updateTabContent(activeTabIndex, $event.content)"
         ></app-highlighted-input>
       </div>
-      <p
+      <div
         class="error-message"
         *ngIf="activeTab?.error && activeTab?.isSubmitMode"
       >
         <strong>{{
           "sql-playground.input.label.errorMessage" | i18nextEager
         }}</strong>
-        {{ activeTab?.errorMsg }}
-      </p>
+        <pre>{{ activeTab?.errorMsg }}</pre>
+      </div>
     </mat-tab>
   </ng-container>
 </mat-tab-group>

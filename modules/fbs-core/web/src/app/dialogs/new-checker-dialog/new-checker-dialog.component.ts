@@ -23,6 +23,7 @@ export class NewCheckerDialogComponent implements OnInit {
     showHintsAt: new UntypedFormControl(0),
     showExtendedHints: new UntypedFormControl(false),
     showExtendedHintsAt: new UntypedFormControl(0),
+    disableDistance: new UntypedFormControl(false),
   });
   choosedSQLChecker;
   mainFile: File[] = [];
@@ -38,6 +39,7 @@ export class NewCheckerDialogComponent implements OnInit {
       showExtendedHintsAt: 0,
       showHints: false,
       showHintsAt: 0,
+      disableDistance: false,
     },
     checkerType: "",
     ord: 0,
@@ -45,6 +47,7 @@ export class NewCheckerDialogComponent implements OnInit {
   checkerCount: Observable<CheckerConfig[]> = of();
   showHintsConfig;
   showExtendedHintsConfig;
+  disableDistance;
 
   constructor(
     public dialogRef: MatDialogRef<NewCheckerDialogComponent>,
@@ -76,6 +79,9 @@ export class NewCheckerDialogComponent implements OnInit {
       );
       this.checkerForm.controls["showHintsAt"].setValue(
         this.checker.checkerTypeInformation.showHintsAt
+      );
+      this.checkerForm.controls["disableDistance"].setValue(
+        this.checker.checkerTypeInformation.disableDistance
       );
     }
 
@@ -146,6 +152,7 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checker.checkerType = value.checkerType;
     this.checker.checkerTypeInformation.showHints = value.showHints;
     this.checker.checkerTypeInformation.showHintsAt = value.showHintsAt;
+    this.checker.checkerTypeInformation.disableDistance = value.disableDistance;
     this.checker.checkerTypeInformation.showExtendedHints =
       value.showExtendedHints;
     this.checker.checkerTypeInformation.showExtendedHintsAt =
@@ -211,6 +218,7 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checker.checkerType = value.checkerType;
     this.checker.checkerTypeInformation.showHints = value.showHints;
     this.checker.checkerTypeInformation.showHintsAt = value.showHintsAt;
+    this.checker.checkerTypeInformation.disableDistance = value.disableDistance;
     this.checker.checkerTypeInformation.showExtendedHints =
       value.showExtendedHints;
     this.checker.checkerTypeInformation.showExtendedHintsAt =

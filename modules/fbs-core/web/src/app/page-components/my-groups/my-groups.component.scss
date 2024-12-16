@@ -1,0 +1,18 @@
+@import "src/colors";
+
+.container {
+  display: block;
+  padding: 16px;
+
+  .card {
+    margin: 8px 0;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card:hover {
+    background: #819ca9;
+  }
+}
