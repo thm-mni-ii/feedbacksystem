@@ -4,8 +4,8 @@ import { Store } from "@ngrx/store";
 import { map, withLatestFrom, switchMap } from "rxjs/operators";
 import * as DynamicResultTableActions from "./dynamic-result-table.actions";
 import * as fromDynamicResultTable from "./dynamic-result-table.selectors";
-import { ResultTab } from "../../../../model/ResultTab";
 import { DynamicResultTableState } from "./dynamic-result-table.reducer";
+import { of } from "rxjs";
 
 @Injectable()
 export class DynamicResultTableEffects {
@@ -18,15 +18,17 @@ export class DynamicResultTableEffects {
         this.store.select(fromDynamicResultTable.selectTabCounter),
         this.store.select(fromDynamicResultTable.selectTabs)
       ),
-      map(([_action, tabCounter, _tabs]) => {
+      switchMap(([_action, tabCounter, _tabs]) => {
         const newTab = {
           id: crypto.randomUUID(),
           name: `Ergebnis Nr. ${tabCounter}`,
         };
-        return DynamicResultTableActions.tabAdded({
-          tab: newTab,
-          tabCounter: tabCounter + 1,
-        });
+        return of(
+          DynamicResultTableActions.tabAdded({
+            tab: newTab,
+            tabCounter: tabCounter + 1,
+          })
+        );
       })
     )
   );
@@ -45,10 +47,9 @@ export class DynamicResultTableEffects {
       ofType(DynamicResultTableActions.updateActiveTab),
       withLatestFrom(
         this.store.select(fromDynamicResultTable.selectResultset),
-        this.store.select(fromDynamicResultTable.selectDataSource),
         this.store.select(fromDynamicResultTable.selectDisplayedColumns)
       ),
-      map(([action, resultset, _dataSource, displayedColumns]) => {
+      map(([action, resultset, displayedColumns]) => {
         console.log(resultset);
         const updatedTab = {
           error: resultset.error,
@@ -70,22 +71,23 @@ export class DynamicResultTableEffects {
       ofType(DynamicResultTableActions.handleResultSetChange),
       withLatestFrom(
         this.store.select(fromDynamicResultTable.selectTabs),
-        this.store.select(fromDynamicResultTable.selectActiveResId)
+        this.store.select(fromDynamicResultTable.selectActiveTabIndex)
       ),
-      switchMap(([action, tabs, activeResId]) => {
+      switchMap(([action, tabs, activeTabIndex]) => {
         const { resultset } = action;
 
         const updatedTabs =
           tabs.length === 0
             ? [{ id: crypto.randomUUID(), name: "Result 1" }]
             : tabs;
-        const newActiveResId = tabs.length === 0 ? 0 : activeResId;
+        const newTabIndex = tabs.length === 0 ? 0 : activeTabIndex;
 
         let change = {
           resultset,
           tabs: updatedTabs,
-          activeResId: newActiveResId,
+          activeResId: newTabIndex,
         } as Partial<DynamicResultTableState>;
+        console.log(change);
 
         if (resultset && !resultset.error) {
           let displayedColumns = resultset.result[0].head;
@@ -105,7 +107,7 @@ export class DynamicResultTableEffects {
         return [
           DynamicResultTableActions.handleResultSetChangeSuccess({ change }),
           DynamicResultTableActions.updateActiveTab({
-            index: newActiveResId,
+            index: newTabIndex,
           }),
         ];
       })

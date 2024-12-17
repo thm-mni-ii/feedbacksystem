@@ -1,10 +1,7 @@
 import { createReducer, on } from "@ngrx/store";
 import { SqlTemplates } from "../../../../model/sql_playground/SqlTemplates";
 import { TemplateCategory } from "../../../../model/sql_playground/TemplateCategory";
-import {
-  addCategories,
-  addTemplates,
-} from "./templates.actions";
+import { addCategories, addTemplates } from "./templates.actions";
 
 export interface TemplatesState {
   templates: SqlTemplates[];
@@ -20,6 +17,12 @@ export const initialState: TemplatesState = {
 
 export const templatesReducer = createReducer(
   initialState,
-  on(addTemplates, (state, { templates }) => ({ ...state, templates: [...state.templates, ...templates] })),
-  on(addCategories, (state, { categories }) => ({ ...state, categories: [...state.categories, ...categories] })),
+  on(addTemplates, (state, { templates }) => ({
+    ...state,
+    templates: [...state.templates, ...templates],
+  })),
+  on(addCategories, (state, { categories }) => ({
+    ...state,
+    categories: [...state.categories, ...categories],
+  }))
 );

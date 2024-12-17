@@ -7,12 +7,10 @@ import { selectBackend } from "../state/sql-playground.selectors";
 import { LocalBackend } from "./local.backend";
 import { CollaborativeBackend } from "./collab.backend";
 import * as SqlInputTabsActions from "../sql-input-tabs/state/sql-input-tabs.actions";
-import * as DynamicResultTableActions from "../dynamic-result-table/state/dynamic-result-table.actions";
 import {
   selectActiveTab,
   selectTabs as selectInputTabs,
 } from "../sql-input-tabs/state/sql-input-tabs.selectors";
-import { selectTabs as selectResultTabs } from "../dynamic-result-table/state/dynamic-result-table.selectors";
 
 export interface Identity<I> {
   id: I;
@@ -67,8 +65,8 @@ export class BackendService {
         this.currentBackend = new CollaborativeBackend(backend.id);
       }
 
-      this.store.dispatch(SqlInputTabsActions.closeAllTabs());
-      this.store.dispatch(DynamicResultTableActions.closeTab({ index: -1 })); // Close all tabs
+      /*this.store.dispatch(SqlInputTabsActions.closeAllTabs());
+      this.store.dispatch(DynamicResultTableActions.closeTab({ index: -1 })); // Close all tabs*/
 
       this.currentBackend.streamInputChanges().subscribe((change) => {
         /*if (this.i > 10) {

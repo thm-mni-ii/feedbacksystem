@@ -1,6 +1,8 @@
 <div class="grid">
   <div class="results-grid">
     <app-bordered-container
+      [xScrollable]="true"
+      [yScrollable]="false"
       title="{{ 'sql-playground.results' | i18nextEager }}"
     >
       <app-dynamic-result-table></app-dynamic-result-table>

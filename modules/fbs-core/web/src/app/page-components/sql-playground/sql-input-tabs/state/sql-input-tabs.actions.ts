@@ -1,6 +1,6 @@
 import { createAction, props } from "@ngrx/store";
 import { QueryTab } from "../../../../model/sql_playground/QueryTab";
-import {AwarenessState, BackendUser} from "../../collab/backend.service";
+import { AwarenessState } from "../../collab/backend.service";
 
 export const addTab = createAction(
   "[SQL Input Tabs] Add Tab",

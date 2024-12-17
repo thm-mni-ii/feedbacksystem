@@ -14,19 +14,14 @@ export const selectIsQueryPending = createSelector(
   (state: DynamicResultTableState) => state.isQueryPending
 );
 
-export const selectActiveResId = createSelector(
+export const selectActiveTabIndex = createSelector(
   selectDynamicResultTableState,
-  (state: DynamicResultTableState) => state.activeResId
+  (state: DynamicResultTableState) => state.activeTabIndex
 );
 
 export const selectTabs = createSelector(
   selectDynamicResultTableState,
   (state: DynamicResultTableState) => state.tabs
-);
-
-export const selectDataSource = createSelector(
-  selectDynamicResultTableState,
-  (state: DynamicResultTableState) => state.dataSource
 );
 
 export const selectDisplayedColumns = createSelector(

@@ -7,7 +7,7 @@ import {
   AwarenessState,
   BackendUser,
 } from "./backend.service";
-import { Observable, of } from "rxjs";
+import { Observable } from "rxjs";
 import {
   QueryTab,
   queryTabEquals,

@@ -11,7 +11,7 @@ import { AuthService } from "src/app/service/auth.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import * as SqlPlaygroundActions from "./state/sql-playground.actions";
 import * as fromSqlPlayground from "./state/sql-playground.selectors";
-import {BackendService} from "./collab/backend.service";
+import { BackendService } from "./collab/backend.service";
 
 @Component({
   selector: "app-sql-playground-management",
@@ -33,7 +33,7 @@ export class SqlPlaygroundComponent implements OnInit {
     private authService: AuthService,
     private backendService: BackendService,
     private snackbar: MatSnackBar,
-    private store: Store,
+    private store: Store
   ) {}
 
   ngOnInit() {

@@ -30,12 +30,13 @@ import { DatabasesEffects } from "./db-control-panel/state/databases.effects";
 import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { SqlInputTabsEffects } from "./sql-input-tabs/state/sql-input-tabs.effects";
 import { DynamicResultTableEffects } from "./dynamic-result-table/state/dynamic-result-table.effects";
-import {BackendService} from "./collab/backend.service";
+import { DynamicResultTableTabComponent } from "./dynamic-result-table/tab/dynamic-result-table-tab.component";
 
 @NgModule({
   declarations: [
     SqlPlaygroundComponent,
     DynamicResultTableComponent,
+    DynamicResultTableTabComponent,
     DbControlPanelComponent,
     SqlInputTabsComponent,
     DbSchemeComponent,

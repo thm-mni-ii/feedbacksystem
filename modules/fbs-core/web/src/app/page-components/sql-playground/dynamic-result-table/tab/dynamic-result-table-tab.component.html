@@ -1,0 +1,69 @@
+<div class="inputField">
+  <div class="spinner" *ngIf="$isQueryPending | async">
+    <mat-spinner [diameter]="100"></mat-spinner>&nbsp;
+  </div>
+  <div
+    class="container"
+    *ngIf="tab !== undefined && ($isQueryPending | async) === false"
+  >
+    <div *ngIf="tab.error === true">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="error-icon">close</mat-icon>
+            <span>{{
+              "sql-playground.result-table.sql-error" | i18nextEager
+            }}</span>
+            <mat-icon class="error-icon">close</mat-icon>
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{
+              "sql-playground.result-table.check-input-error" | i18nextEager
+            }}</mat-card-subtitle
+          >
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ tab.errorMsg }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div *ngIf="tab.error === false && ($isQueryPending | async) === false">
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource">
+          <ng-container
+            matColumnDef="{{ col }}"
+            *ngFor="let col of tab.displayedColumns; let index = index"
+          >
+            <th mat-header-cell class="cells" *matHeaderCellDef>
+              {{ col }}
+            </th>
+            <td mat-cell class="cells" *matCellDef="let row; let i = index">
+              {{ row[index] }}
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            class="table-row"
+            *matHeaderRowDef="tab.displayedColumns"
+          ></tr>
+          <tr
+            mat-row
+            class="table-row"
+            *matRowDef="let row; columns: tab.displayedColumns"
+          ></tr>
+        </table>
+      </div>
+      <div class="action-container">
+        <div></div>
+        <mat-paginator
+          class="custom-paginator"
+          hidePageSize="true"
+          pageSize="9"
+          showFirstLastButtons
+        ></mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>

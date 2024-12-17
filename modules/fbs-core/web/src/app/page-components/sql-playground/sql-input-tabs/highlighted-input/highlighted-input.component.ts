@@ -24,7 +24,9 @@ import { QueryTab } from "../../../../model/sql_playground/QueryTab";
   templateUrl: "./highlighted-input.component.html",
   styleUrls: ["./highlighted-input.component.scss"],
 })
-export class HighlightedInputComponent implements OnInit, OnDestroy {
+export class HighlightedInputComponent
+  implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked
+{
   @ViewChild("textArea", { static: true }) textArea!: ElementRef;
   @ViewChild("codeContent", { static: true }) codeContent!: ElementRef;
   @ViewChild("pre", { static: true }) pre!: ElementRef;
@@ -60,7 +62,7 @@ export class HighlightedInputComponent implements OnInit, OnDestroy {
     //this.synchronizeScroll();
   }
 
-  /*ngAfterViewInit() {
+  ngAfterViewInit() {
     this.prismService.highlightAll();
   }
 
@@ -69,7 +71,7 @@ export class HighlightedInputComponent implements OnInit, OnDestroy {
       this.prismService.highlightAll();
       this.highlighted = false;
     }
-  }*/
+  }
 
   ngOnDestroy() {
     console.log("detroy");
@@ -109,8 +111,9 @@ export class HighlightedInputComponent implements OnInit, OnDestroy {
         distinctUntilChanged((a, b) => a === b)
       )
       .subscribe((content: string) => {
-        /*const modifiedContent =
+        const modifiedContent =
           this.prismService.convertHtmlIntoString(content);
+        console.log("mod", modifiedContent);
 
         this.renderer.setProperty(
           this.codeContent.nativeElement,
@@ -118,7 +121,7 @@ export class HighlightedInputComponent implements OnInit, OnDestroy {
           modifiedContent
         );
 
-        this.highlighted = true;*/
+        this.highlighted = true;
 
         if (content !== this.lastUpdated) {
           this.lastUpdated = content;

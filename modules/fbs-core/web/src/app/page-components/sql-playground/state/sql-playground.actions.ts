@@ -4,7 +4,7 @@ import { Trigger } from "src/app/model/sql_playground/Trigger";
 import { View } from "src/app/model/sql_playground/View";
 import { Table } from "src/app/model/sql_playground/Table";
 import { Constraint } from "src/app/model/sql_playground/Constraint";
-import {BackendDefintion} from "../collab/backend.service";
+import { BackendDefintion } from "../collab/backend.service";
 
 export const changeActiveDbId = createAction(
   "[SQL Playground] Change Active DB Id",

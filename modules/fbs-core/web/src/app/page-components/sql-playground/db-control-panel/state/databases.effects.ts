@@ -42,12 +42,18 @@ export class DatabasesEffects {
       ofType(loadDatabases),
       switchMap(() =>
         this.sqlPlaygroundService.getDatabases(this.token.id).pipe(
-          map((databases) => {
+          switchMap((databases) => {
             if (databases.length == 0) {
               // create default database if none exists
-              return createDatabase({ name: "Standard Datenbank" });
+              return of(createDatabase({ name: "Standard Datenbank" }));
             } else {
-              return loadDatabasesSuccess({ databases });
+              const activeId =
+                databases.find(({ active }) => active)?.id ?? databases[0]?.id;
+              return of(
+                loadDatabasesSuccess({ databases }),
+                changeActiveDbId({ dbId: activeId }),
+                updateScheme()
+              );
             }
           }),
           catchError((error) => of(loadDatabasesFailure({ error })))

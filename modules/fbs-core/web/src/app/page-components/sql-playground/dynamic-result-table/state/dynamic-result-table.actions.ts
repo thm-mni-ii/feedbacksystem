@@ -1,6 +1,5 @@
 import { createAction, props } from "@ngrx/store";
 import { ResultTab } from "src/app/model/ResultTab";
-import { MatTableDataSource } from "@angular/material/table";
 import { DynamicResultTableState } from "./dynamic-result-table.reducer";
 
 export const addTab = createAction("[Dynamic Result Table] Add Tab");
@@ -10,6 +9,10 @@ export const closeTab = createAction(
 );
 export const updateActiveTab = createAction(
   "[Dynamic Result Table] Update Active Tab",
+  props<{ index: number }>()
+);
+export const setActiveTabIndex = createAction(
+  "[Dynamic Result Table] Set Active Tab Index",
   props<{ index: number }>()
 );
 export const updateResultset = createAction(
@@ -42,12 +45,4 @@ export const handleResultSetChange = createAction(
 export const handleResultSetChangeSuccess = createAction(
   "[Dynamic Result Table] Handle Result Set Change Success",
   props<{ change: Partial<DynamicResultTableState> }>()
-);
-
-export const updateDataSource = createAction(
-  "[Dynamic Result Table] Update Data Source",
-  props<{
-    dataSource: MatTableDataSource<string[]>;
-    displayedColumns: string[];
-  }>()
 );

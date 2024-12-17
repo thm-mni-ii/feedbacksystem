@@ -10,4 +10,3 @@ export const addCategories = createAction(
   "[Templates] Add Categories",
   props<{ categories: TemplateCategory[] }>()
 );
-

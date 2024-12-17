@@ -1,6 +1,11 @@
 import { from, Observable, of } from "rxjs";
-import { Backend, ChangeEvent, ResultTab, AwarenessState} from "./backend.service";
-import {QueryTab} from "../../../model/sql_playground/QueryTab";
+import {
+  Backend,
+  ChangeEvent,
+  ResultTab,
+  AwarenessState,
+} from "./backend.service";
+import { QueryTab } from "../../../model/sql_playground/QueryTab";
 
 export class LocalBackend implements Backend {
   streamInputChanges(): Observable<ChangeEvent<QueryTab>> {
@@ -39,7 +44,7 @@ export class LocalBackend implements Backend {
   emitResultChange(_event: ChangeEvent<ResultTab>): Observable<void> {
     return of();
   }
-  announceSelectedInput(id: string): Observable<void> {
+  announceSelectedInput(_id: string): Observable<void> {
     return of();
   }
   streamSelectedInputs(): Observable<AwarenessState[]> {

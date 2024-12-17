@@ -257,8 +257,6 @@ export class SqlInputTabsComponent
   }
 
   updateTabName(index: number, name: string) {
-    this.store.dispatch(
-      SqlInputTabsActions.updateTabName({ index, name })
-    )
+    this.store.dispatch(SqlInputTabsActions.updateTabName({ index, name }));
   }
 }

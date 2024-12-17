@@ -14,11 +14,9 @@
   <mat-tab
     label="{{ 'sql-playground.db-control-panel.tab-templates' | i18nextEager }}"
   >
-    <app-db-control-templates></app-db-control-templates>
-    <!--[activeDb]="activeDb"
-      [isAdmin]="isAdmin"
+    <app-db-control-templates
       (submitStatement)="submitStatementToParent($event)"
-    ></app-db-control-templates-->
+    ></app-db-control-templates>
   </mat-tab>
   <mat-tab
     label="{{ 'sql-playground.db-control-panel.tab-coworking' | i18nextEager }}"

@@ -1,6 +1,6 @@
 import { Course } from "../Course";
 import { Task } from "../Task";
-import {BackendUser} from "../../page-components/sql-playground/collab/backend.service";
+import { BackendUser } from "../../page-components/sql-playground/collab/backend.service";
 
 export interface QueryTab {
   id: string;

@@ -1,25 +1,22 @@
 import { createReducer, on } from "@ngrx/store";
-import { MatTableDataSource } from "@angular/material/table";
 import { ResultTab } from "src/app/model/ResultTab";
 import * as DynamicResultTableActions from "./dynamic-result-table.actions";
 
 export interface DynamicResultTableState {
   resultset: any;
   isQueryPending: boolean;
-  activeResId: number;
+  activeTabIndex: number;
   tabCounter: number;
   tabs: ResultTab[];
-  dataSource: MatTableDataSource<string[]>;
   displayedColumns: string[];
 }
 
 const initialState: DynamicResultTableState = {
   resultset: null,
   isQueryPending: false,
-  activeResId: 0,
+  activeTabIndex: 0,
   tabCounter: 0,
   tabs: [],
-  dataSource: new MatTableDataSource<string[]>(),
   displayedColumns: [],
 };
 
@@ -29,7 +26,7 @@ export const dynamicResultTableReducer = createReducer(
     ...state,
     tabs: [...state.tabs, tab],
     tabCounter,
-    activeResId: state.tabs.length,
+    activeTabIndex: state.tabs.length,
   })),
   on(DynamicResultTableActions.tabClosed, (state, { index }) => ({
     ...state,
@@ -44,6 +41,10 @@ export const dynamicResultTableReducer = createReducer(
       ),
     })
   ),
+  on(DynamicResultTableActions.setActiveTabIndex, (state, { index }) => ({
+    ...state,
+    activeTabIndex: index,
+  })),
   on(DynamicResultTableActions.updateResultset, (state, { resultset }) => ({
     ...state,
     resultset,
