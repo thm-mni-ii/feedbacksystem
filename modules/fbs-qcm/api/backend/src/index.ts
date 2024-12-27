@@ -219,11 +219,13 @@ async function createDatabaseAndCollection() {
       children: [
           {
             needed_score: 80,
-            question: new mongoDB.ObjectId("67602da10c3862de8813690f")
+            question: new mongoDB.ObjectId("67602da10c3862de8813690f"),
+            transition: "correct"
           },
           {
             needed_score: 79,
             question: new mongoDB.ObjectId("67602da10c3862de88136910"),
+            transition: "incorrect"
           }
       ]
     });

@@ -114,20 +114,30 @@ export default defineComponent({
       const keys = Object.keys(data.data.children).filter(key => key !== "PARTIAL").map(Number);
       console.log(keys);
       let maxKey = "+";
+      let midKey = "+";
       let minKey = "+";
       let maxId = null;
+      let midId = null;
       let minId = null;
       let maxKeyNumber = "correct";
+      let midKeyNumber = "medium";
       let minKeyNumber = "incorrect";
-      if (keys.length > 0) {        // Find the highest and lowest keys if there are valid keys
-          maxKey = Math.max(...keys);
-          minKey = Math.min(...keys);
-          maxKeyNumber = `${maxKey}%`;
-          minKeyNumber = `${minKey}%`;
-          maxId = data.data.children[maxKey].questionId;
-          maxKey = data.data.children[maxKey].text;
-          minId = data.data.children[minKey].questionId;
-          minKey = data.data.children[minKey].text;
+      for(let i = 0; i < data.data.children.length; i++) {
+        if(data.data.children[i].transition === "correct") {
+            maxKey = data.data.children[i].text;
+            maxId = data.data.children[i].questionId;
+            maxKeyNumber = `${data.data.children[i].score}%`;
+        }
+        if(data.data.children[i].transition === "incorrect") {
+            minKey = data.data.children[i].text;
+            minId = data.data.children[i].questionId;
+            minKeyNumber = `${data.data.children[i].score}%`;
+        }
+        if(data.data.children[i].transition === "partial") {
+            midKey = data.data.children[i].text;
+            midId = data.data.children[i].questionId;
+            midKeyNumber = `${data.data.children[i].score}%`;
+        }
       }
       console.log("A");
       console.log(maxKey);
@@ -168,7 +178,7 @@ export default defineComponent({
         userZoomingEnabled: false,
       });
         cy.value.on('tap', 'node', async (event) => {
-            const clickedNode = event.target; // The clicked node
+            const clickedNode = event.target; 
             if (clickedNode.data('label') === '+') {
               attachButtonToNode(clickedNode.id());
               const data = await questionService.getAllQuestions();
@@ -176,18 +186,18 @@ export default defineComponent({
               console.log(showModal);
               updateQuestionOptions(data.data);
               showModal.value = true;
-              clickedNode.data('label', 'Question'); // Update the label to "Question"
+              clickedNode.data('label', 'Question'); 
              }
             if(clickedNode.data('hiddenData') !== null) {
-                console.log(id.catalog); // Ensure id.catalog is accessible
+                console.log(id.catalog); 
                 console.log(clickedNode.data);
-                console.log(clickedNode.data('hiddenData')); // Ensure hiddenData is available on clickedNode
+                console.log(clickedNode.data('hiddenData')); 
                 console.log(`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`);
                 window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`;
             }
         });
         cy.value.nodes().forEach((node) => {
-            attachButtonToExistingNode(node.id());  // Attach button to each node using its ID
+            attachButtonToExistingNode(node.id());  
         });
     });
 

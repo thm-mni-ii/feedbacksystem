@@ -22,6 +22,8 @@ import { Access, CatalogAccess, CourseAccess } from "../utils/enum";
 interface QuestionData {
   questionId: mongoDB.ObjectId;
   text: string;
+  transition: string;
+  score: number;
 }
 
 interface catalog {
@@ -46,7 +48,8 @@ interface CatalogQuestionData {
   children: [
       {
           needed_score: number,
-          question: mongoDB.ObjectId
+          question: mongoDB.ObjectId,
+          transition: string
       }
   ];
 }
@@ -108,7 +111,7 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
       return -1;
   }
   console.log(2);
-  const children: { [key: number]: QuestionData } = {};
+  const children: QuestionData[] = [];
   console.log(data);
   console.log(data.children.length);
   for (let i = 0; i < data.children.length; i++) {
@@ -130,11 +133,13 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
       if(questionData === null) {
           continue;
       }
-      const obj = {
+      const obj: QuestionData = {
           questionId: data.children[i].question,
-          text: questionData.questiontext
+          text: questionData.questiontext,
+          transition: data.children[i].transition,
+          score: data.children[i].needed_score,
       }
-      children[data.children[i].needed_score] = obj;
+      children.push(obj);
       console.log("children");
       console.log(children);
   }
