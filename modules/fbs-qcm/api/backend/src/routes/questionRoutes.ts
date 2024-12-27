@@ -249,10 +249,8 @@ router.get("/api_v1/question/:id", authenticateToken, async (req, res) => {
           );
           if (result == -1) {
             res.send(403);
-          } else if (result == -2) {
-            res.send(400);
           } else {
-            res.sendStatus(201);
+            res.send(result);
           }
         }
       } catch (error) {
@@ -261,6 +259,5 @@ router.get("/api_v1/question/:id", authenticateToken, async (req, res) => {
       }
     }
   );
-  
 
   export default router; 

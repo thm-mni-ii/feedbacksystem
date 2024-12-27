@@ -95,18 +95,16 @@ import { authenticate } from "../authenticate";
   });
   router.put("/api_v1/addChildrenToQuestion/", authenticateToken, async (req, res) => {
     try {
-      if (req.user == undefined) {
+      if (req.user === undefined) {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
         const requestData = req.body;
-        const catalogId = requestData.catalog;
         const questionId = requestData.question;
-        const children = requestData.children;
-        delete requestData.catalog;
-        delete requestData.question;
-        delete requestData.children;
-        const result = await addChildrenToQuestion(req.user, catalogId, questionId, children)
+        const children = requestData.child;
+        const transition = requestData.transition;
+        const key = requestData.key;
+        const result = await addChildrenToQuestion(req.user, questionId, children, key, transition)
         if(result === -1) {
           res.sendStatus(400);
           return

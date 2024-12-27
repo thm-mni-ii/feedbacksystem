@@ -28,10 +28,14 @@ class QuestionService {
       headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
     })
   }
-
+  addQuestionToCatalog(question: Question, catalog: string ): Promise<AxiosResponse<Question>> {
+    return axios.put('/api_v1/addQuestionToCatalog', { question: question, catalog: catalog, children: []}, {
+      headers: { Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"}
+    })
+  }
   getAllQuestions(): Promise<AxiosResponse<Question[]>> {
     return axios.get('/api_v1/allquestions', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+      headers: { Authorization: ``}
     })
   }
 }

@@ -11,24 +11,31 @@ class CatalogService {
       }
     })
   }
+  addChildrenToQuestion(question: string, child: string, key: number, transition: string): Promise<AxiosResponse<Catalog>> {
+    return axios.put(`/api_v1/addChildrenToQuestion/`, {question, child, key, transition} , {
+      headers: {
+        Authorization: ""
+      }
+    })
+  }
   deleteQuestionFromCatalog(questionInCollection: string): Promise<AxiosResponse<Catalog>> {
     return axios.delete(`/api_v1/removeQuestionFromCatalog/${questionInCollection}`, {
       headers: {
-        Authorization: "Bearer "
+        Authorization: ""
       }
     })
   }
   getPreviousQuestion(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/getPreviousQuestion/${catalog}/${id}`, {
       headers: {
-        Authorization: "Bearer "
+        Authorization: ""
       }
     })
   }
   editCatalog(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/editCatalog/${catalog}/${id}`, {
       headers: {
-        Authorization: "Bearer "
+        Authorization: ""
       }
     })
   }

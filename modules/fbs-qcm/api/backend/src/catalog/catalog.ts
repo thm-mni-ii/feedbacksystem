@@ -465,39 +465,6 @@ function findConnection(question: any, allConnections: any[]) {
   return -1;
 }
 
-export async function addChildrenToQuestion(
-  tokenData: JwtPayload,
-  catalogId: string,
-  questionId: string,
-  childrenOfQuestion: any
-) {
-  if (
-    !(await authenticateInCatalog(
-      tokenData,
-      CourseAccess.docentInCourse,
-      catalogId
-    ))
-  ) {
-    return -1;
-  }
-  const filter = {
-    question: new mongoDB.ObjectId(questionId),
-    catalog: new mongoDB.ObjectId(catalogId),
-  };
-  const replace = {
-    $set: {
-      children: childrenOfQuestion,
-    },
-  };
-  const database: mongoDB.Db = await connect();
-  const questionInCatalogCollection: mongoDB.Collection =
-    database.collection("questionInCatalog");
-  const result = await questionInCatalogCollection.updateOne(filter, replace);
-  console.log(result);
-  console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-  return 0;
-}
-
 export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalogId: string, questionId: string ) {
    if(!authenticateInCatalog(tokenData, CatalogAccess.tutorInCatalog, catalogId)) {
        return -1;
@@ -541,3 +508,33 @@ export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalo
   console.log(dataObject);
   return dataObject;
 } 
+
+export async function addChildrenToQuestion(tokenData: JwtPayload, questionId: string, children: string, key: number, transition: string) {
+    console.log(questionId);
+    console.log(children);
+    console.log(key);
+    const database: mongoDB.Db = await connect();
+    const questionInCatalogCollection: mongoDB.Collection =
+    database.collection("questionInCatalog");
+    const questionIdObject = new mongoDB.ObjectId(questionId);
+    const query = {
+        _id: questionIdObject,
+    };
+    const data = await questionInCatalogCollection.findOne(query);
+    if(data === null) {
+        return -1;
+    }
+    if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, data.catalog)) {
+        return -1;
+    }
+    const update: any = {
+        $push: {
+            children: {
+                needed_score: key,
+                question: new mongoDB.ObjectId(children),
+                transition: transition
+            }
+        }
+    };
+    return await questionInCatalogCollection.updateOne(query, update);
+}

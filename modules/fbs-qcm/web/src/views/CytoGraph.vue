@@ -14,11 +14,11 @@
         />
         <p>Auf welche Frage soll verwiesen werden</p>
         <select v-model="selectedQuestion" class="question-select">
-      <option v-for="question in questionOptions" :key="question.id" :value="question.id">
-        {{ question.text }}
+      <option v-for="question in questionOptions" :key="question._id" :value="question._id">
+        {{ question.questiontext }}
       </option>
     </select>
-        <button @click="updateNode">Update Node</button>
+        <button @click="addQuestion(nodeData, selectedQuestion);">Update Node</button>
         <button @click="closeModal">Close</button>
       </div>
     </div>
@@ -99,11 +99,16 @@ export default defineComponent({
     const showModal = ref(false); 
     const route = useRoute();
     const id = route.params;
+    let currentQuestion = null;
+    let currentCatalog = null;
+    let questionOptions = ref([]);
     onMounted(async () => {
       console.log('ID from query parameter:', id.catalog);
       console.log('ID from query parameter:', id.question);
       console.log(route);
       const data = await catalogService.editCatalog(id.catalog, id.question);
+      currentQuestion = id.question;
+      currentCatalog = id.catalog;
       console.log(data);
       console.log(data.data);
       const keys = Object.keys(data.data.children).filter(key => key !== "PARTIAL").map(Number);
@@ -162,13 +167,14 @@ export default defineComponent({
         userPanningEnabled: false,
         userZoomingEnabled: false,
       });
-        cy.value.on('tap', 'node', (event) => {
+        cy.value.on('tap', 'node', async (event) => {
             const clickedNode = event.target; // The clicked node
             if (clickedNode.data('label') === '+') {
               attachButtonToNode(clickedNode.id());
-              const data = questionService.getAllQuestions();
+              const data = await questionService.getAllQuestions();
               console.log(data);
               console.log(showModal);
+              updateQuestionOptions(data.data);
               showModal.value = true;
               clickedNode.data('label', 'Question'); // Update the label to "Question"
              }
@@ -195,6 +201,24 @@ export default defineComponent({
         cy.value.add({ group: 'edges', data: { source: 'center', target: newNodeId, label: '50%' }});
       }
     };
+    const updateQuestionOptions = (data) => {
+      console.log(data);
+      questionOptions.value = data;
+      console.log(questionOptions);
+    };
+    const closeModal = () => {
+        showModal.value = false;
+        questionOptions.value = [];
+    }
+    const addQuestion = async (score, questionId) => {
+        console.log(score);
+        console.log(questionId);
+        const res = await questionService.addQuestionToCatalog(questionId, currentCatalog);  
+        console.log(res);
+        const question = route.params.question;
+        console.log(question);
+        const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score,"");
+    }
     const attachButtonToNode = (nodeId) => {
       const node = cy.value.$id(nodeId);
       const position = node.renderedPosition();
@@ -259,7 +283,7 @@ export default defineComponent({
           document.getElementById('cy').appendChild(button);
       }
     }
-    return { addNode, showModal, id, attachButtonToExistingNode} ;
+    return { addNode, showModal, id, attachButtonToExistingNode, questionOptions, closeModal, addQuestion} ;
   },
 });
 </script>

@@ -67,14 +67,6 @@ export async function addQuestionToCatalog(
     database.collection("catalogInCourse");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  const checkQuery = {
-    catalog: catalogIdObject,
-    question: questionIdObject,
-  };
-  const entry = await questionInCatalogCollection.findOne(checkQuery);
-  if (entry != null) {
-    return -2;
-  }
   const insert = {
     catalog: catalogIdObject,
     question: questionIdObject,
