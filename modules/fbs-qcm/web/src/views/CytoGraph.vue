@@ -1,3 +1,4 @@
+//fix on refresh, remove option for partial
 <template>
   <div>
     <div id="cy" style="width: 100%; height: 1000px;"></div>
@@ -18,7 +19,7 @@
         {{ question.questiontext }}
       </option>
     </select>
-        <button @click="addQuestion(nodeData, selectedQuestion);">Update Node</button>
+        <button @click="addQuestion(nodeData, selectedQuestion, transition);">Update Node</button>
         <button @click="closeModal">Close</button>
       </div>
     </div>
@@ -102,6 +103,7 @@ export default defineComponent({
     let currentQuestion = null;
     let currentCatalog = null;
     let questionOptions = ref([]);
+    let transition = ref("");
     onMounted(async () => {
       console.log('ID from query parameter:', id.catalog);
       console.log('ID from query parameter:', id.question);
@@ -161,10 +163,11 @@ export default defineComponent({
           { data: { source: 'left', target: 'center', label: 'Previous Question' }},
           { data: { id: 'correct', label: maxKey, hiddenData: maxId }, position: { x: 550, y: -60 }, grabbable: false  },
           { data: { source: 'center', target: 'correct', label: maxKeyNumber }, grabbable: false },
-          { data: { id: 'medium', label: '+' }, position: { x: 550, y: 0 }, grabbable: false  },
-          { data: { source: 'center', target: 'medium', label: 'middle answer' }, grabbable: false },
+          { data: { id: 'partial', label: '+' }, position: { x: 550, y: 0 }, grabbable: false  },
+          { data: { source: 'center', target: 'partial', label: 'middle answer' }, grabbable: false },
           { data: { id: 'incorrect', label: minKey, hiddenData: minId }, position: { x: 550, y: 60 }, grabbable: false  },
           { data: { source: 'center', target: 'incorrect', label: minKeyNumber }, grabbable: false },
+          { data: { id: 'invisible', label: '', hidden: true }, position: { x: 550, y: 30 }, grabbable: false }
         ],
         style: [
           { selector: 'node', style: { 'background-color': '#0074D9', label: 'data(label)', shape: 'rectangle', color: '#ff1f3a', 'text-valign': 'center', 'text-halign': 'center', 'border-width': '2px',
@@ -172,6 +175,7 @@ export default defineComponent({
           { selector: 'edge', style: { 'line-color': 'black', 'target-arrow-color': 'black', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', label: 'data(label)', 'font-size': '6px',
             'width': '1px','text-margin-y': '-10px'} },
           { selector: 'node[label="+"]', style: { 'background-color': '#28a745', label: 'data(label)', 'width': '30px', 'height': '30px', 'shape': 'round-rectangle', color: 'white'} },
+          { selector: 'node[hidden]', style: { 'visibility': 'hidden' } }
         ],
         layout: { name: 'preset' },
         userPanningEnabled: false,
@@ -179,16 +183,19 @@ export default defineComponent({
       });
         cy.value.on('tap', 'node', async (event) => {
             const clickedNode = event.target; 
+            console.log(clickedNode.data('label'));
+            console.log(clickedNode.data('hiddenData'));
+            console.log(clickedNode.id());
             if (clickedNode.data('label') === '+') {
               attachButtonToNode(clickedNode.id());
               const data = await questionService.getAllQuestions();
               console.log(data);
               console.log(showModal);
               updateQuestionOptions(data.data);
+              transition.value = clickedNode.id(); 
               showModal.value = true;
               clickedNode.data('label', 'Question'); 
-             }
-            if(clickedNode.data('hiddenData') !== null) {
+             } else if(clickedNode.data('hiddenData') !== null && clickedNode.data('hiddenData') !== undefined) {
                 console.log(id.catalog); 
                 console.log(clickedNode.data);
                 console.log(clickedNode.data('hiddenData')); 
@@ -220,16 +227,19 @@ export default defineComponent({
         showModal.value = false;
         questionOptions.value = [];
     }
-    const addQuestion = async (score, questionId) => {
+    const addQuestion = async (score, questionId, transition) => {
         console.log(score);
         console.log(questionId);
         const res = await questionService.addQuestionToCatalog(questionId, currentCatalog);  
         console.log(res);
         const question = route.params.question;
         console.log(question);
-        const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score,"");
+        const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score, transition);
     }
     const attachButtonToNode = (nodeId) => {
+      if(nodeId === "invisible") {
+        return;
+      }
       const node = cy.value.$id(nodeId);
       const position = node.renderedPosition();
       const button = document.createElement('button');
@@ -237,16 +247,16 @@ export default defineComponent({
       button.className = 'remove-button';
       button.style.position = 'absolute';
       button.style.width = '70px';   // Set the button width
-  button.style.height = '70px';  // Set the button height
-        button.style.color = 'red';   // Set the text color to white
+      button.style.height = '70px';  // Set the button height
+      button.style.color = 'red';   // Set the text color to white
       const left = position.x - 300;
       const top = position.y;
       button.style.fontSize = '50px';  // Adjust font size to make "x" bigger
-  button.style.fontWeight = 'bold';
+      button.style.fontWeight = 'bold';
       button.style.left = `${left}px`;
       button.style.top = `${top}px`;
       button.onclick = () => {
-             event.stopPropagation();
+            event.stopPropagation();
             console.log(node.data);
             console.log(node.data('hiddenData'));
             catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
@@ -265,7 +275,7 @@ export default defineComponent({
       console.log(node.data('label'));
       console.log(position.x);
       console.log("SSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
-      if (node.data('label') !== '+' && position.x === 1655.7443609022555) {
+      if (node.data('label') !== '+' && position.x === 1655.7443609022555 && node.data('id') !== "invisible") {
           const button = document.createElement('button');
           button.innerText = 'x';
           button.className = 'remove-button';
@@ -293,7 +303,7 @@ export default defineComponent({
           document.getElementById('cy').appendChild(button);
       }
     }
-    return { addNode, showModal, id, attachButtonToExistingNode, questionOptions, closeModal, addQuestion} ;
+    return { addNode, showModal, id, attachButtonToExistingNode, questionOptions, closeModal, addQuestion, transition} ;
   },
 });
 </script>
