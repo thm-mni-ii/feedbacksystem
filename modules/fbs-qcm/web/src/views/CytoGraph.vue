@@ -1,4 +1,4 @@
-//fix on refresh, remove option for partial
+//fix answer showing up before existing, force values before confirmation, validate values
 <template>
   <div>
     <div id="cy" style="width: 100%; height: 1000px;"></div>
@@ -6,13 +6,15 @@
       <div class="modal-content">
         <h3>Frage anfügen</h3>
         <p>Ab wie viel Prozent soll weitergeleitet werden</p>
-        <input
-          type="number"
-          min="0"
-          max="100"
-          v-model="nodeData"
-          placeholder="Update node data"
-        />
+        <div v-if="showInput">
+          <input
+            type="number"
+            min="0"
+            max="100"
+            v-model="nodeData"
+            placeholder="Update node data"
+          />
+        </div>
         <p>Auf welche Frage soll verwiesen werden</p>
         <select v-model="selectedQuestion" class="question-select">
       <option v-for="question in questionOptions" :key="question._id" :value="question._id">
@@ -104,6 +106,7 @@ export default defineComponent({
     let currentCatalog = null;
     let questionOptions = ref([]);
     let transition = ref("");
+    let showInput = ref(false);
     onMounted(async () => {
       console.log('ID from query parameter:', id.catalog);
       console.log('ID from query parameter:', id.question);
@@ -144,6 +147,8 @@ export default defineComponent({
       console.log("A");
       console.log(maxKey);
       console.log(maxId);
+      console.log(midKey);
+      console.log(midId);
       console.log(minKey);
       console.log(minId);
       console.log("A");
@@ -163,7 +168,7 @@ export default defineComponent({
           { data: { source: 'left', target: 'center', label: 'Previous Question' }},
           { data: { id: 'correct', label: maxKey, hiddenData: maxId }, position: { x: 550, y: -60 }, grabbable: false  },
           { data: { source: 'center', target: 'correct', label: maxKeyNumber }, grabbable: false },
-          { data: { id: 'partial', label: '+' }, position: { x: 550, y: 0 }, grabbable: false  },
+          { data: { id: 'partial', label: midKey, hiddenData: midId }, position: { x: 550, y: 0 }, grabbable: false  },
           { data: { source: 'center', target: 'partial', label: 'middle answer' }, grabbable: false },
           { data: { id: 'incorrect', label: minKey, hiddenData: minId }, position: { x: 550, y: 60 }, grabbable: false  },
           { data: { source: 'center', target: 'incorrect', label: minKeyNumber }, grabbable: false },
@@ -193,6 +198,11 @@ export default defineComponent({
               console.log(showModal);
               updateQuestionOptions(data.data);
               transition.value = clickedNode.id(); 
+              if(clickedNode.id() !== "partial") {
+                showInput.value = true;
+              } else {
+                showInput.value = false;
+              }
               showModal.value = true;
               clickedNode.data('label', 'Question'); 
              } else if(clickedNode.data('hiddenData') !== null && clickedNode.data('hiddenData') !== undefined) {
@@ -235,6 +245,8 @@ export default defineComponent({
         const question = route.params.question;
         console.log(question);
         const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score, transition);
+        showModal.value = false;
+        location.reload();
     }
     const attachButtonToNode = (nodeId) => {
       if(nodeId === "invisible") {
@@ -303,7 +315,7 @@ export default defineComponent({
           document.getElementById('cy').appendChild(button);
       }
     }
-    return { addNode, showModal, id, attachButtonToExistingNode, questionOptions, closeModal, addQuestion, transition} ;
+    return { addNode, showModal, id, attachButtonToExistingNode, questionOptions, closeModal, addQuestion, transition, showInput} ;
   },
 });
 </script>

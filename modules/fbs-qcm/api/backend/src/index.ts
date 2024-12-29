@@ -158,7 +158,85 @@ async function createDatabaseAndCollection() {
         ],
       },
     });
+    await questionCollection.insertOne({
+      owner: 1,
+      questiontext: "Kreuze die richtigen Antworten an",
+      questiontype: "Choice",
+      questionconfiguration: {
+        multiplerow: true,
+        multiplecolumn: true,
+        answerColumns: [
+          {
+            id: 0,
+            name: "string",
+          },
+          {
+            id: 1,
+            name: "satring",
+          },
+        ],
+        optionRows: [
+          {
+            id: 0,
+            text: "string",
+            correctAnswers: [1],
+          },
+        ],
+      },
+    });
+    await questionCollection.insertOne({
+      owner: 1,
+      questiontext: "Sind Kartoffel grün",
+      questiontype: "Choice",
+      questionconfiguration: {
+        multiplerow: true,
+        multiplecolumn: true,
+        answerColumns: [
+          {
+            id: 0,
+            name: "string",
+          },
+          {
+            id: 1,
+            name: "satring",
+          },
+        ],
+        optionRows: [
+          {
+            id: 0,
+            text: "string",
+            correctAnswers: [1],
+          },
+        ],
+      },
+    });
 
+    await questionCollection.insertOne({
+      owner: 1,
+      questiontext: "WAS IST wAS",
+      questiontype: "Choice",
+      questionconfiguration: {
+        multiplerow: true,
+        multiplecolumn: true,
+        answerColumns: [
+          {
+            id: 0,
+            name: "string",
+          },
+          {
+            id: 1,
+            name: "satring",
+          },
+        ],
+        optionRows: [
+          {
+            id: 0,
+            text: "string",
+            correctAnswers: [1],
+          },
+        ],
+      },
+    });
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
       owner: 1,
