@@ -21,11 +21,11 @@ class SessionService {
         return res
       })
   }
-  submitAnswer(Answer: Object): Promise<AxiosResponse<any>> {
+  submitAnswer(question: string, answers: any): Promise<AxiosResponse<any>> {
     return axios
       .post(
         '/api_v1/submission',
-        { Answer },
+        { question, answers },
         {
           headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
         }

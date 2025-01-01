@@ -5,8 +5,6 @@ import type Question from '@/model/Question'
 import { useRoute } from 'vue-router'
 import catalogService from '@/services/catalog.service'
 import questionService from '@/services/question.service'
-import draggable from 'vuedraggable'
-import nestedDraggable from 'vuedraggable'
 
 const route = useRoute()
 
@@ -26,7 +24,6 @@ const addQuestionToCatalog = (question: Question) => {
   catalog.value.questions?.push(question)
   catalogService.addQuestionToCatalog({ catalog: catalogId, question: question._id })
 }
-
 onMounted(() => {
   questionService.getAllQuestions().then((res) => {
     allQuestions.value = res.data
@@ -44,9 +41,9 @@ const getCatalog = () => {
 </script>
 
 <template>
-  <div class="d-flex flex-col">
+  <div class="d-flex flex-col justify-space-around">
     <v-sheet class="py-5 w-33">
-      <v-table density="compact" height="100vh" fixed-header>
+      <v-table density="compact" fixed-header>
         <thead>
           <tr>
             <th class="text-left">Question</th>
@@ -58,7 +55,7 @@ const getCatalog = () => {
           <tr v-for="question in allQuestions" :key="question._id">
             <td>{{ question.questiontext }}</td>
             <td>
-              <v-chip size="x-small" v-for="(tag, index) in question.questiontags" :key="index"
+              <v-chip v-for="(tag, index) in question.questiontags" :key="index" size="x-small"
                 >{{ tag }}
               </v-chip>
             </td>
@@ -79,33 +76,18 @@ const getCatalog = () => {
         </tbody>
       </v-table>
     </v-sheet>
-    <v-sheet class="w-75 pt-5 d-flex align-center justify-center">
-      <div v-if="catalog.questions">
+    <v-sheet class="py-5 d-flex justify-center">
+      <div v-if="catalog.questions" class="p-10">
         <h1 class="text-center">{{ catalogId }}</h1>
-        <div class="text-center">
-          <nested-draggable
-            v-model="catalog.questions"
-            :list="catalog.questions"
-            item-key="id"
-            tag="ul"
-          >
-            <template #item="{ element }">
-              <li>
-                {{ element.questiontext }}
-                <nested-draggable
-                  v-if="element.children"
-                  v-model="element.children"
-                  :list="element.children"
-                  item-key="id"
-                  tag="ul"
-                >
-                  <template #item="{ element }">
-                    <li>{{ element.questiontext }}</li>
-                  </template>
-                </nested-draggable>
-              </li>
-            </template>
-          </nested-draggable>
+        <div>
+          <v-list lines="one" density="compact">
+            <v-list-item
+              v-for="n in catalog.questions"
+              :key="n._id"
+              :title="n.questiontext"
+              :subtitle="n._id"
+            ></v-list-item>
+          </v-list>
         </div>
       </div>
     </v-sheet>

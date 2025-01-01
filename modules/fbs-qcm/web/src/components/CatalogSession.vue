@@ -50,9 +50,11 @@ const submitAnswer = () => {
   switch (props.question.questiontype) {
     case 'Choice':
       if (props.question.questionconfiguration.multipleColumn) {
-        emit('submit-answer', choiceAnswers)
+        console.log('QUESTION TYPE: ', props.question.questiontype)
+        console.log('CHOICE ANSWER: ', choiceAnswers.value)
+        emit('submit-answer', choiceAnswers.value)
       } else {
-        emit('submit-answer', selectedAnswers)
+        emit('submit-answer', selectedAnswers.value)
       }
       break
     case 'FillInTheBlanks':
@@ -136,7 +138,6 @@ const submitAnswer = () => {
         </tr>
       </tbody>
     </v-table>
-    <pre>{{ choiceAnswers }}</pre>
   </div>
   <div v-if="question.questiontype == 'FillInTheBlanks'">
     <p>{{ question.questionconfiguration.textParts }}</p>
