@@ -28,10 +28,14 @@ class QuestionService {
       headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
     })
   }
-
+  addQuestionToCatalog(question: Question, catalog: string ): Promise<AxiosResponse<Question>> {
+    return axios.put('/api_v1/addQuestionToCatalog', { question: question, catalog: catalog, children: []}, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}`}
+    })
+  }
   getAllQuestions(): Promise<AxiosResponse<Question[]>> {
     return axios.get('/api_v1/allquestions', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}`}
     })
   }
 }

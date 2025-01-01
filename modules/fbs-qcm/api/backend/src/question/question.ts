@@ -67,14 +67,6 @@ export async function addQuestionToCatalog(
     database.collection("catalogInCourse");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  const checkQuery = {
-    catalog: catalogIdObject,
-    question: questionIdObject,
-  };
-  const entry = await questionInCatalogCollection.findOne(checkQuery);
-  if (entry != null) {
-    return -2;
-  }
   const insert = {
     catalog: catalogIdObject,
     question: questionIdObject,
@@ -87,20 +79,40 @@ export async function addQuestionToCatalog(
 
 export async function removeQuestionFromCatalog(
   tokenData: JwtPayload,
-  questionId: string,
-  catalogId: string
+  questionId: string
 ) {
-  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
-    return -1;
-  }
+    console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
+    console.log(tokenData);
+    console.log(questionId);
+    console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
   const database: mongoDB.Db = await connect();
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
   const questionIdObject = new mongoDB.ObjectId(questionId);
   const query = {
-    question: questionIdObject,
+    _id: questionIdObject,
   };
+  const data = await questionInCatalogCollection.findOne(query);
+  if(data === null) {
+      return -1;
+  }
+  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, data.catalog)) {
+    return -1;
+  }
   const result = await questionInCatalogCollection.deleteOne(query);
+  const filter = {
+      "children.question": questionIdObject
+  }
+  const update: any = {
+    $pull: {
+      "children": {
+        "question": questionIdObject
+      }
+    }
+  }
+  console.log(update);
+  const res2 = await questionInCatalogCollection.updateOne(filter, update);
+  console.log(res2);
   console.log(result);
   return result;
 }

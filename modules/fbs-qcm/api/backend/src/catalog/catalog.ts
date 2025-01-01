@@ -19,6 +19,13 @@ import {
 } from "../authenticate";
 import { Access, CatalogAccess, CourseAccess } from "../utils/enum";
 
+interface QuestionData {
+  questionId: mongoDB.ObjectId;
+  text: string;
+  transition: string;
+  score: number;
+}
+
 interface catalog {
   name: string;
   questions: string[];
@@ -31,6 +38,20 @@ interface QuestionTreeObject {
 interface child {
   requirement: string;
   child: QuestionTreeObject;
+}
+
+interface CatalogQuestionData {
+  _id: mongoDB.ObjectId;
+  catalog: mongoDB.ObjectId;
+  question: mongoDB.ObjectId;
+  weighting: number;
+  children: [
+      {
+          needed_score: number,
+          question: mongoDB.ObjectId,
+          transition: string
+      }
+  ];
 }
 
 export async function postCatalog(
@@ -70,6 +91,73 @@ export async function postCatalog(
   return { catalogId: catalogInsert.insertedId };
 }
 
+export async function editCatalogInformation(tokenData: JwtPayload, catalogId: string, questionId: string) {
+  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+    //need to add verification specifically for questioninCatalogId
+    return -1;
+  } 
+  const database: mongoDB.Db = await connect();
+  if(questionId === "") {
+    return -1;
+  }
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  const questionCollection: mongoDB.Collection = database.collection("question");
+  console.log(1);
+  const query = {
+      _id: new mongoDB.ObjectId(questionId)
+  }
+  const data: CatalogQuestionData = await questionInCatalogCollection.findOne(query) as any;
+  if(data === null) {
+      return -1;
+  }
+  console.log(2);
+  const children: QuestionData[] = [];
+  console.log(data);
+  console.log(data.children.length);
+  for (let i = 0; i < data.children.length; i++) {
+      console.log("DATEN");
+      console.log(data.children[i]);
+      const queryQuestion = {
+          _id: data.children[i].question
+      }
+      console.log(queryQuestion);
+      const question = await questionInCatalogCollection.findOne(queryQuestion);
+      if(question === null) {
+          continue;
+      }
+      const queryForQuestionData = {
+        _id: question.question
+      }
+      const questionData = await questionCollection.findOne(queryForQuestionData);
+      console.log(questionData);
+      if(questionData === null) {
+          continue;
+      }
+      const obj: QuestionData = {
+          questionId: data.children[i].question,
+          text: questionData.questiontext,
+          transition: data.children[i].transition,
+          score: data.children[i].needed_score,
+      }
+      children.push(obj);
+      console.log("children");
+      console.log(children);
+  }
+  console.log(4);
+  const originQueryQuestion = {
+      _id: data.question
+  }
+  const originQuestion: Question = await questionCollection.findOne(originQueryQuestion) as any;
+  if(originQuestion === null) {
+      return -1;
+  }
+  console.log(5);
+  const res = {
+      questionText: originQuestion.questiontext,
+      children: children
+  }
+  return res;
+}
 export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
   if (
     !(await authenticateInCatalog(
@@ -382,44 +470,76 @@ function findConnection(question: any, allConnections: any[]) {
   return -1;
 }
 
-export async function addChildrenToQuestion(
-  tokenData: JwtPayload,
-  catalogId: string,
-  questionId: string,
-  childrenOfQuestion: any
-) {
-  if (
-    !(await authenticateInCatalog(
-      tokenData,
-      CourseAccess.docentInCourse,
-      catalogId
-    ))
-  ) {
-    return -1;
-  }
-  console.log("-----------------------");
-  console.log(tokenData);
+export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalogId: string, questionId: string ) {
+   if(!authenticateInCatalog(tokenData, CatalogAccess.tutorInCatalog, catalogId)) {
+       return -1;
+   }
   console.log(catalogId);
   console.log(questionId);
-  console.log(childrenOfQuestion);
-  console.log("-----------------------");
-
-  const filter = {
-    question: new mongoDB.ObjectId(questionId),
-    catalog: new mongoDB.ObjectId(catalogId),
-  };
-  const replace = {
-    $set: {
-      children: childrenOfQuestion,
-    },
-  };
-  console.log(filter);
-  console.log(replace);
   const database: mongoDB.Db = await connect();
-  const questionInCatalogCollection: mongoDB.Collection =
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  const questionCollection: mongoDB.Collection = database.collection("question");
+  console.log("SSS");
+  const query = {
+    catalog: new mongoDB.ObjectId(catalogId),
+    children: {
+        $elemMatch: {
+          question: new mongoDB.ObjectId(questionId)
+        }
+    } 
+  };
+  console.log("S221SS");
+  console.log(query);
+  const data = await questionInCatalogCollection.findOne(query);
+  console.log(data);
+  if(data === null) {
+      return {questionInCatalogId: null}
+  } 
+  console.log(1);
+  const questionQuery = {
+      _id: data.question
+  };
+  console.log(2);
+  const prevQuestion = await questionCollection.findOne(questionQuery); 
+  if(prevQuestion === null) {
+      return -1;
+  }
+  console.log(3);
+  const dataObject = {
+      questionInCatalogId: data._id,
+      text: prevQuestion.questiontext,
+  }
+  console.log(4);
+  console.log(dataObject);
+  return dataObject;
+} 
+
+export async function addChildrenToQuestion(tokenData: JwtPayload, questionId: string, children: string, key: number, transition: string) {
+    console.log(questionId);
+    console.log(children);
+    console.log(key);
+    const database: mongoDB.Db = await connect();
+    const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  const result = await questionInCatalogCollection.updateOne(filter, replace);
-  console.log(result);
-  console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-  return 0;
+    const questionIdObject = new mongoDB.ObjectId(questionId);
+    const query = {
+        _id: questionIdObject,
+    };
+    const data = await questionInCatalogCollection.findOne(query);
+    if(data === null) {
+        return -1;
+    }
+    if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, data.catalog)) {
+        return -1;
+    }
+    const update: any = {
+        $push: {
+            children: {
+                needed_score: key,
+                question: new mongoDB.ObjectId(children),
+                transition: transition
+            }
+        }
+    };
+    return await questionInCatalogCollection.updateOne(query, update);
 }

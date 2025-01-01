@@ -158,7 +158,85 @@ async function createDatabaseAndCollection() {
         ],
       },
     });
+    await questionCollection.insertOne({
+      owner: 1,
+      questiontext: "Kreuze die richtigen Antworten an",
+      questiontype: "Choice",
+      questionconfiguration: {
+        multiplerow: true,
+        multiplecolumn: true,
+        answerColumns: [
+          {
+            id: 0,
+            name: "string",
+          },
+          {
+            id: 1,
+            name: "satring",
+          },
+        ],
+        optionRows: [
+          {
+            id: 0,
+            text: "string",
+            correctAnswers: [1],
+          },
+        ],
+      },
+    });
+    await questionCollection.insertOne({
+      owner: 1,
+      questiontext: "Sind Kartoffel grün",
+      questiontype: "Choice",
+      questionconfiguration: {
+        multiplerow: true,
+        multiplecolumn: true,
+        answerColumns: [
+          {
+            id: 0,
+            name: "string",
+          },
+          {
+            id: 1,
+            name: "satring",
+          },
+        ],
+        optionRows: [
+          {
+            id: 0,
+            text: "string",
+            correctAnswers: [1],
+          },
+        ],
+      },
+    });
 
+    await questionCollection.insertOne({
+      owner: 1,
+      questiontext: "WAS IST wAS",
+      questiontype: "Choice",
+      questionconfiguration: {
+        multiplerow: true,
+        multiplecolumn: true,
+        answerColumns: [
+          {
+            id: 0,
+            name: "string",
+          },
+          {
+            id: 1,
+            name: "satring",
+          },
+        ],
+        optionRows: [
+          {
+            id: 0,
+            text: "string",
+            correctAnswers: [1],
+          },
+        ],
+      },
+    });
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
       owner: 1,
@@ -216,31 +294,34 @@ async function createDatabaseAndCollection() {
       catalog: new mongoDB.ObjectId("663a51d228d8781d96050905"),
       question: new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
       weighting: 1,
-      children: {
-        TRUE: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
-        FALSE: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
-        PARTIAL: "",
-      },
+      children: [
+          {
+            needed_score: 80,
+            question: new mongoDB.ObjectId("67602da10c3862de8813690f"),
+            transition: "correct"
+          },
+          {
+            needed_score: 79,
+            question: new mongoDB.ObjectId("67602da10c3862de88136910"),
+            transition: "incorrect"
+          }
+      ]
     });
     await questionInCatalogCollection.insertOne({
+      _id: new mongoDB.ObjectId("67602da10c3862de8813690f"),
       catalog: new mongoDB.ObjectId("663a51d228d8781d96050905"),
       question: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
       weighting: 1,
-      children: {
-        TRUE: "",
-        FALSE: "",
-        PARTIAL: "",
-      },
+      children: [
+      ],
     });
     await questionInCatalogCollection.insertOne({
+      _id: new mongoDB.ObjectId("67602da10c3862de88136910"),
       catalog: new mongoDB.ObjectId("663a51d228d8781d96050905"),
       question: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
       weighting: 1,
-      children: {
-        TRUE: "",
-        FALSE: "",
-        PARTIAL: "",
-      },
+      children: [
+      ],
     });
     await tagCollection.insertOne({
       _id: new mongoDB.ObjectId("66e83f0f8b382a419cb023fa"),

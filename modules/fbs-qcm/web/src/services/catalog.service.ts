@@ -11,7 +11,34 @@ class CatalogService {
       }
     })
   }
-  // /api_v1/catalog
+  addChildrenToQuestion(question: string, child: string, key: number, transition: string): Promise<AxiosResponse<Catalog>> {
+    return axios.put(`/api_v1/addChildrenToQuestion/`, {question, child, key, transition} , {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+  deleteQuestionFromCatalog(questionInCollection: string): Promise<AxiosResponse<Catalog>> {
+    return axios.delete(`/api_v1/removeQuestionFromCatalog/${questionInCollection}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+  getPreviousQuestion(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
+    return axios.get(`/api_v1/getPreviousQuestion/${catalog}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+  editCatalog(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
+    return axios.get(`/api_v1/editCatalog/${catalog}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
   getCatalog(id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/catalog/${id}`, {
       headers: {
