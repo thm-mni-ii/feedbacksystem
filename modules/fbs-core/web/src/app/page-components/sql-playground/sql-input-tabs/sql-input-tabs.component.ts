@@ -243,6 +243,7 @@ export class SqlInputTabsComponent
   }
 
   updateTabContent(index: number, content: string) {
+    console.log("utca");
     this.store.dispatch(
       SqlInputTabsActions.updateTabContent({ index, content })
     );

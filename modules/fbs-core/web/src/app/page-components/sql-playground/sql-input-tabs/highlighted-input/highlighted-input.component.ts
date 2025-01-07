@@ -11,8 +11,8 @@ import {
   ViewChild,
 } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
-import { Subscription, fromEvent } from "rxjs";
-import { map, distinctUntilChanged, mergeMap } from "rxjs/operators";
+import { Subscription } from "rxjs";
+import { map, mergeMap } from "rxjs/operators";
 import { PrismService } from "src/app/service/prism.service";
 import { Store } from "@ngrx/store";
 import * as SqlInputTabsActions from "../state/sql-input-tabs.actions";
@@ -27,11 +27,11 @@ import { QueryTab } from "../../../../model/sql_playground/QueryTab";
 export class HighlightedInputComponent
   implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked
 {
-  @ViewChild("textArea", { static: true }) textArea!: ElementRef;
-  @ViewChild("codeContent", { static: true }) codeContent!: ElementRef;
-  @ViewChild("pre", { static: true }) pre!: ElementRef;
+  @ViewChild("textArea") textArea!: ElementRef;
+  @ViewChild("codeContent") codeContent!: ElementRef;
+  @ViewChild("pre") pre!: ElementRef;
 
-  sub!: Subscription;
+  subs: Subscription[] = [];
   highlighted = false;
   codeType = "sql";
 
@@ -57,7 +57,6 @@ export class HighlightedInputComponent
   ) {}
 
   ngOnInit(): void {
-    console.log("init");
     this.listenForm();
     //this.synchronizeScroll();
   }
@@ -73,84 +72,72 @@ export class HighlightedInputComponent
     }
   }
 
+  private unsubscribe() {
+    console.log("unsub", this.subs);
+    this.subs.forEach((sub) => sub.unsubscribe());
+    this.subs = [];
+  }
+
   ngOnDestroy() {
-    console.log("detroy");
-    this.sub?.unsubscribe();
+    this.unsubscribe();
   }
 
   listenForm() {
-    console.log("listen form");
-    this.store
-      .select(fromSqlInputTabs.selectActiveTabIndex)
-      .pipe(
-        mergeMap((activeIndex) => {
-          return this.store
-            .select(fromSqlInputTabs.selectTabs)
-            .pipe(
-              map(
-                (tabs) => [activeIndex, tabs[activeIndex]] as [number, QueryTab]
-              )
-            );
+    console.log("lf");
+    this.unsubscribe();
+    this.subs.push(
+      this.store
+        .select(fromSqlInputTabs.selectActiveTabIndex)
+        .pipe(
+          mergeMap((activeIndex) => {
+            return this.store
+              .select(fromSqlInputTabs.selectTabs)
+              .pipe(
+                map(
+                  (tabs) =>
+                    [activeIndex, tabs[activeIndex]] as [number, QueryTab]
+                )
+              );
+          })
+        )
+        .subscribe(([tabIndex, activeTab]) => {
+          this.selectedIndex = tabIndex;
+          this.groupForm.setValue({
+            content: activeTab?.content ?? "",
+          });
+          this.render(activeTab?.content ?? "");
         })
-      )
-      .subscribe(([tabIndex, activeTab]) => {
-        console.log("tab changed", activeTab);
-        this.selectedIndex = tabIndex;
-        this.groupForm.setValue({
-          content: activeTab?.content ?? "",
-        });
-        console.log("change complete", {
-          value: this.groupForm.value.content,
-          index: this.selectedIndex,
-        });
-      });
-
-    this.sub = this.groupForm.valueChanges
-      .pipe(
-        map((val: any) => val.content),
-        distinctUntilChanged((a, b) => a === b)
-      )
-      .subscribe((content: string) => {
-        const modifiedContent =
-          this.prismService.convertHtmlIntoString(content);
-        console.log("mod", modifiedContent);
-
-        this.renderer.setProperty(
-          this.codeContent.nativeElement,
-          "innerHTML",
-          modifiedContent
-        );
-
-        this.highlighted = true;
-
-        if (content !== this.lastUpdated) {
-          this.lastUpdated = content;
-          this.store.dispatch(
-            SqlInputTabsActions.updateTabContent({
-              index: this.selectedIndex,
-              content: content,
-            })
-          );
-        }
-      });
-  }
-
-  synchronizeScroll() {
-    const localSub = fromEvent(this.textArea.nativeElement, "scroll").subscribe(
-      () => {
-        const toTop = this.textArea.nativeElement.scrollTop;
-        const toLeft = this.textArea.nativeElement.scrollLeft;
-
-        this.renderer.setProperty(this.pre.nativeElement, "scrollTop", toTop);
-        this.renderer.setProperty(
-          this.pre.nativeElement,
-          "scrollLeft",
-          toLeft + 0.2
-        );
-      }
     );
 
-    this.sub.add(localSub);
+    this.subs.push(
+      this.groupForm.valueChanges
+        .pipe(map((val: any) => val.content))
+        .subscribe((content: string) => {
+          this.render(content);
+
+          if (content !== this.lastUpdated) {
+            this.lastUpdated = content;
+            this.store.dispatch(
+              SqlInputTabsActions.updateTabContent({
+                index: this.selectedIndex,
+                content: content,
+              })
+            );
+          }
+        })
+    );
+  }
+
+  private render(content: string) {
+    const modifiedContent = this.prismService.convertHtmlIntoString(content);
+
+    this.renderer.setProperty(
+      this.codeContent.nativeElement,
+      "innerHTML",
+      modifiedContent
+    );
+
+    this.prismService.highlightAll();
   }
 
   onTab(event) {

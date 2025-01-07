@@ -63,8 +63,6 @@ export const sqlInputTabsReducer = createReducer(
       }
     });
 
-    console.log("newTabs", newTabs);
-
     return changed
       ? {
           ...state,
