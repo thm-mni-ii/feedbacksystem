@@ -19,6 +19,7 @@ import {
   selectDatabasesError,
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
 import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
+import { map } from "rxjs/operators";
 
 @Component({
   selector: "app-db-control-db-overview",
@@ -32,7 +33,7 @@ export class DbControlDbOverviewComponent implements OnInit {
   token = this.authService.getToken();
   pending: boolean = false;
 
-  activeDb$: Observable<Database[]>;
+  activeDb$: Observable<Database>;
   collaborativeMode: boolean = false;
 
   constructor(
@@ -47,7 +48,14 @@ export class DbControlDbOverviewComponent implements OnInit {
     this.store.dispatch(loadDatabases());
     this.databases$ = this.store.select(selectAllDatabases);
     this.error$ = this.store.select(selectDatabasesError);
-    this.activeDb$ = this.store.select(selectAllDatabases);
+    this.activeDb$ = this.databases$.pipe(
+      map((databases) => databases.find((database) => database.active))
+    );
+    this.activeDb$.subscribe((activeDb) => {
+      if (activeDb) {
+        this.selectedDb = activeDb.id;
+      }
+    });
   }
 
   createDatabase(name: string) {

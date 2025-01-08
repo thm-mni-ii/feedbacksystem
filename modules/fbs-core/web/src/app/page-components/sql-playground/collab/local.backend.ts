@@ -38,7 +38,7 @@ export class LocalBackend implements Backend {
         i++;
       }
     }
-    localStorage.setItem("tabs", JSON.stringify(currentState));
+    localStorage.setItem("playground.tabs", JSON.stringify(currentState));
     return of();
   }
   emitResultChange(_event: ChangeEvent<ResultTab>): Observable<void> {
@@ -52,7 +52,7 @@ export class LocalBackend implements Backend {
   }
 
   private loadLocalStorage(): QueryTab[] {
-    const loadedData = localStorage.getItem("tabs");
-    return JSON.parse(loadedData)?.tabs ?? [];
+    const loadedData = localStorage.getItem("playground.tabs");
+    return JSON.parse(loadedData) ?? [];
   }
 }

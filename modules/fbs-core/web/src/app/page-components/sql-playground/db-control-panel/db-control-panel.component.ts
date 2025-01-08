@@ -37,6 +37,10 @@ export class DbControlPanelComponent implements OnInit {
 
     this.store.dispatch(loadDatabases());
     this.databases$ = this.store.select(selectAllDatabases);
+
+    this.databases$.subscribe((databases) => {
+      this.activeDb = databases.find((database) => database.active);
+    });
   }
 
   changeDb(db: Database) {

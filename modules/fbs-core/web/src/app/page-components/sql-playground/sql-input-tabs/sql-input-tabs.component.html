@@ -86,6 +86,7 @@
       </p>
       <div class="inputField">
         <app-highlighted-input
+          [index]="index"
           (update)="updateTabContent(activeTabIndex, $event.content)"
         ></app-highlighted-input>
       </div>

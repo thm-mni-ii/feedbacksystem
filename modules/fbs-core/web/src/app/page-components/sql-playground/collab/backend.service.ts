@@ -49,7 +49,7 @@ export interface Backend {
 export class BackendService {
   private i: number = 0;
   private currentBackend: Backend;
-  private knowInputState: QueryTab[];
+  private knowInputState: QueryTab[] = [];
 
   constructor(private store: Store) {}
 
@@ -80,7 +80,6 @@ export class BackendService {
           .subscribe((tabs) => {
             switch (change.event) {
               case "create":
-                // Assuming the last added tab is the one we just created
                 const existingIndex = this.findTabIndex(
                   tabs,
                   change.payload.id
@@ -89,7 +88,7 @@ export class BackendService {
                   this.store.dispatch(
                     SqlInputTabsActions.addTab({ tab: change.payload })
                   );
-                } else {
+                  this.knowInputState.push(change.payload);
                 }
                 break;
               case "update":
@@ -121,6 +120,9 @@ export class BackendService {
                 if (deleteIndex !== -1) {
                   this.store.dispatch(
                     SqlInputTabsActions.closeTab({ index: deleteIndex })
+                  );
+                  this.knowInputState = this.knowInputState.filter(
+                    (tab) => tab.id !== change.id
                   );
                 }
                 break;
@@ -179,6 +181,7 @@ export class BackendService {
             Boolean(
               this.knowInputState.find((knownTab) => knownTab.id === tab.id)
             );
+          debugger;
           this.currentBackend
             .emitInputChange({
               event: known ? "update" : "create",

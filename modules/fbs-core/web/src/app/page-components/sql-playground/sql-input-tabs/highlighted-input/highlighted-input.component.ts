@@ -1,49 +1,44 @@
 import {
-  AfterViewChecked,
   AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
+  Input,
   OnDestroy,
-  OnInit,
   Output,
   Renderer2,
   ViewChild,
 } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { Subscription } from "rxjs";
-import { map, mergeMap } from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { PrismService } from "src/app/service/prism.service";
 import { Store } from "@ngrx/store";
 import * as SqlInputTabsActions from "../state/sql-input-tabs.actions";
 import * as fromSqlInputTabs from "../state/sql-input-tabs.selectors";
-import { QueryTab } from "../../../../model/sql_playground/QueryTab";
 
 @Component({
   selector: "app-highlighted-input",
   templateUrl: "./highlighted-input.component.html",
   styleUrls: ["./highlighted-input.component.scss"],
 })
-export class HighlightedInputComponent
-  implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked
-{
+export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
   @ViewChild("textArea") textArea!: ElementRef;
   @ViewChild("codeContent") codeContent!: ElementRef;
   @ViewChild("pre") pre!: ElementRef;
 
   subs: Subscription[] = [];
-  highlighted = false;
   codeType = "sql";
 
   groupForm = new FormGroup({
     content: new FormControl(""),
   });
-  selectedIndex: number;
 
   titleText: any;
   @Output() update = new EventEmitter<unknown>();
 
   private lastUpdated: string;
+  @Input() index!: number;
 
   get contentControl() {
     return this.groupForm.get("content")?.value;
@@ -56,24 +51,11 @@ export class HighlightedInputComponent
     private store: Store
   ) {}
 
-  ngOnInit(): void {
-    this.listenForm();
-    //this.synchronizeScroll();
-  }
-
   ngAfterViewInit() {
-    this.prismService.highlightAll();
-  }
-
-  ngAfterViewChecked() {
-    if (this.highlighted) {
-      this.prismService.highlightAll();
-      this.highlighted = false;
-    }
+    this.listenForm();
   }
 
   private unsubscribe() {
-    console.log("unsub", this.subs);
     this.subs.forEach((sub) => sub.unsubscribe());
     this.subs = [];
   }
@@ -83,25 +65,12 @@ export class HighlightedInputComponent
   }
 
   listenForm() {
-    console.log("lf");
     this.unsubscribe();
     this.subs.push(
       this.store
-        .select(fromSqlInputTabs.selectActiveTabIndex)
-        .pipe(
-          mergeMap((activeIndex) => {
-            return this.store
-              .select(fromSqlInputTabs.selectTabs)
-              .pipe(
-                map(
-                  (tabs) =>
-                    [activeIndex, tabs[activeIndex]] as [number, QueryTab]
-                )
-              );
-          })
-        )
-        .subscribe(([tabIndex, activeTab]) => {
-          this.selectedIndex = tabIndex;
+        .select(fromSqlInputTabs.selectTabs)
+        .pipe(map((tabs) => tabs[this.index]))
+        .subscribe((activeTab) => {
           this.groupForm.setValue({
             content: activeTab?.content ?? "",
           });
@@ -119,7 +88,7 @@ export class HighlightedInputComponent
             this.lastUpdated = content;
             this.store.dispatch(
               SqlInputTabsActions.updateTabContent({
-                index: this.selectedIndex,
+                index: this.index,
                 content: content,
               })
             );
@@ -137,7 +106,7 @@ export class HighlightedInputComponent
       modifiedContent
     );
 
-    this.prismService.highlightAll();
+    this.prismService.highlight(this.codeContent.nativeElement);
   }
 
   onTab(event) {
@@ -156,8 +125,6 @@ export class HighlightedInputComponent
   }
 
   cleanText(text: string) {
-    console.log(text);
-
     // allow only caracteres for valid sql query
     text = text.replace(
       /[^a-zA-Z0-9üöäÄÖÜß\(\)\[\]\{\}\s\.\,\;\=\+\-\*\/\>\<\!\@\#\$\?\%\^\&\_\~\`´°²³§\:\'\"\|\\]/g,
