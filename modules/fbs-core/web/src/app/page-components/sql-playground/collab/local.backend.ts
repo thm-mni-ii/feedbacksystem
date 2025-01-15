@@ -56,8 +56,9 @@ export class LocalBackend implements Backend {
   }
 
   private loadLocalStorage(): QueryTab[] {
-    const loadedData = localStorage.getItem("tabs");
-    return JSON.parse(loadedData)?.tabs ?? [];
+    return (JSON.parse(localStorage.getItem("tabs"))?.tabs ?? []).map(
+      (tab) => ({ id: crypto.randomUUID(), ...tab })
+    );
   }
 
   streamMetaChanges(): Observable<{ key: string; value: any }> {

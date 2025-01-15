@@ -31,7 +31,7 @@ export class CollaborativeBackend implements Backend {
       url:
         window.location.hostname === "localhost"
           ? "ws://127.0.0.1:1234"
-          : "wss://feedback.mni.thm.de/collab",
+          : "/collab/",
       name: id,
       token,
     });
