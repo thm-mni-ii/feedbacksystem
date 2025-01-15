@@ -63,12 +63,12 @@ services:
     networks:
       classroom:
       fbs:
-    healthcheck:
-      test: curl -k https://localhost:443/actuator/health
-      timeout: 10s
-      interval: 10s
-      start_period: 10s
-      retries: 3
+    #healthcheck:
+    #  test: curl -k https://localhost:443/actuator/health
+    #  timeout: 10s
+    #  interval: 10s
+    #  start_period: 10s
+    #  retries: 3
 
   mysql-checker:
     image: mysql:8.0
@@ -201,7 +201,8 @@ services:
       BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
-      RESULT_SERVER_HOST: core
+      RESULT_SERVER_HOST: 172.17.0.1
+      RESULT_SERVER_PORT: 8443
       MYSQL_SERVER_URL: jdbc:mysql://mysql-checker:3306?allowMultiQueries=true
       MYSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PSQL_SERVER_URL: jdbc:postgresql://psql-checker:5432/?allowMultiQueries=true
@@ -262,6 +263,16 @@ services:
       - URL_BASE_PATH=/eat/
       - FBS_BASE_URL=https://core:443
       - FBS_TLS_NO_VERIFY=true
+
+  collab:
+    build:
+      context: modules/fbs-collab
+    restart: always
+    ports:
+      - 1234:1234
+    environment:
+      - FBS_ROOT_URL=https://core
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
 
 networks:
   classroom:

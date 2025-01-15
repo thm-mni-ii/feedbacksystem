@@ -349,9 +349,9 @@ export const germanTranslation = {
   "sql-playground.db-control-panel.co-working.select-group": "Select Group",
   "sql-playground.db-control-panel.co-working.select-database":
     "Select Database",
-  "sql-playground.db-control-panel.co-working.delete": "Löschen",
-  "sql-playground.db-control-panel.co-working.co": "Co-Working",
-  "sql-playground.db-control-panel.co-working.new": "Neue DB",
+  "sql-playground.db-control-panel.co-working.delete": "Beenden",
+  "sql-playground.db-control-panel.co-working.co": "Beitreten",
+  "sql-playground.db-control-panel.co-working.new": "Teilen",
   "sql-playground.input.highlighted.placeholder":
     "Hier Code einfügen (PostgreSQL)",
   "sql-playground.input.tooltip.closeAllTabs": "Schließe alle Tabs",

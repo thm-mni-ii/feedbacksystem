@@ -1,112 +1,74 @@
-import {
-  Component,
-  ViewChildren,
-  Input,
-  OnChanges,
-  SimpleChanges,
-  QueryList,
-  AfterViewInit,
-} from "@angular/core";
-import { MatPaginator } from "@angular/material/paginator";
-import { MatTableDataSource } from "@angular/material/table";
+import { Component, OnInit, ViewChild } from "@angular/core";
+import { Store } from "@ngrx/store";
+import { Observable } from "rxjs";
 import { ResultTab } from "src/app/model/ResultTab";
+import * as DynamicResultTableActions from "./state/dynamic-result-table.actions";
+import * as fromDynamicResultTable from "./state/dynamic-result-table.selectors";
+import * as fromSqlPlayground from "../state/sql-playground.selectors";
+import { MatTabGroup } from "@angular/material/tabs";
 
 @Component({
   selector: "app-dynamic-result-table",
   templateUrl: "./dynamic-result-table.component.html",
   styleUrls: ["./dynamic-result-table.component.scss"],
-})
-export class DynamicResultTableComponent implements OnChanges, AfterViewInit {
-  @ViewChildren(MatPaginator) paginator = new QueryList<MatPaginator>();
-  @Input() resultset: any;
-  @Input() isQueryPending: boolean = false;
-  /*   dataSource = new MatTableDataSource<any[]>(bigTable.rows);
-  displayedColumns = bigTable.head; */
-  dataSource: MatTableDataSource<string[]>;
-  displayedColumns: string[] = [];
+}) //, AfterViewInit
+export class DynamicResultTableComponent implements OnInit {
+  @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
 
-  activeResId: number = 0;
-  tabCounter: number = 0;
-  tabs: ResultTab[] = [];
+  resultset$: Observable<any>;
+  isQueryPending$: Observable<boolean>;
+  activeTabIndex$: Observable<number>;
+  tabs$: Observable<ResultTab[]>;
+  displayedColumns$: Observable<string[]>;
 
-  ngAfterViewInit() {
-    this.paginator.changes.subscribe(() => {
-      let dataSourceCounter = 0;
-      this.tabs.forEach((tab) => {
-        if (tab.dataSource !== undefined) {
-          tab.dataSource.paginator =
-            this.paginator.toArray()[dataSourceCounter];
-          dataSourceCounter++;
-        }
-      });
-    });
-  }
+  tabs: ResultTab[];
+  activeTabIndex: number;
+  isQueryPending: boolean;
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (
-      changes.isQueryPending &&
-      changes.isQueryPending.firstChange === false
-    ) {
-      // isQueryPending changed
-    }
+  constructor(private store: Store) {}
 
-    if (changes.resultset && changes.resultset.firstChange === false) {
-      // isQueryPending changed
-      if (this.resultset !== undefined && this.resultset.error === false) {
-        this.dataSource = new MatTableDataSource<string[]>(
-          this.resultset.result[0].rows
+  ngOnInit(): void {
+    this.resultset$ = this.store.select(fromSqlPlayground.selectResultset);
+    this.isQueryPending$ = this.store.select(
+      fromSqlPlayground.selectIsQueryPending
+    );
+    this.activeTabIndex$ = this.store.select(
+      fromDynamicResultTable.selectActiveTabIndex
+    );
+    this.tabs$ = this.store.select(fromDynamicResultTable.selectTabs);
+    this.displayedColumns$ = this.store.select(
+      fromDynamicResultTable.selectDisplayedColumns
+    );
+
+    this.resultset$.subscribe((resultset) => {
+      if (resultset) {
+        this.store.dispatch(
+          DynamicResultTableActions.handleResultSetChange({ resultset })
         );
-        this.displayedColumns = this.resultset.result[0].head;
-        // rename duplicate column names
-        let columnNames = this.displayedColumns;
-        let columnNamesCount = {};
-        columnNames.forEach((columnName) => {
-          if (columnNamesCount[columnName] === undefined) {
-            columnNamesCount[columnName] = 1;
-          } else {
-            columnNamesCount[columnName]++;
-          }
-        });
-        columnNames.forEach((columnName, index) => {
-          if (columnNamesCount[columnName] > 1) {
-            this.displayedColumns[index] = columnName + " ".repeat(index);
-          }
-        });
       }
-
-      if (this.tabs.length === 0) {
-        this.addTab();
-      }
-
-      this.updateActiveTab(this.activeResId);
-    }
+    });
+    this.tabs$.subscribe((tabs) => {
+      this.tabs = tabs;
+    });
+    this.activeTabIndex$.subscribe((activeTabIndex) => {
+      setTimeout(() => {
+        this.activeTabIndex = activeTabIndex;
+      }, 100);
+    });
+    this.isQueryPending$.subscribe((isQueryPending) => {
+      this.isQueryPending = isQueryPending;
+    });
   }
 
   closeTab(index: number) {
-    this.tabs.splice(index, 1);
+    this.store.dispatch(DynamicResultTableActions.closeTab({ index }));
   }
 
   updateActiveTab(index: number) {
-    this.tabs[index].error = this.resultset.error;
-    if (this.resultset.error == true) {
-      this.tabs[index].errorMsg = this.resultset.errorMsg;
-    } else if (this.resultset.error == false) {
-      this.tabs[index].dataSource = this.dataSource;
-      this.tabs[index].displayedColumns = this.displayedColumns;
-    } else {
-      throw new Error("Unknown error");
-    }
+    this.store.dispatch(DynamicResultTableActions.setActiveTabIndex({ index }));
   }
 
   addTab() {
-    this.tabs.push({
-      id: this.tabCounter,
-      name: "Ergebnis Nr.",
-    });
-    this.tabCounter++;
-
-    setTimeout(() => {
-      this.activeResId = this.tabs.length - 1;
-    }, 10);
+    this.store.dispatch(DynamicResultTableActions.addTab());
   }
 }

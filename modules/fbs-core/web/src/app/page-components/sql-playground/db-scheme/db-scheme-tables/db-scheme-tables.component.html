@@ -1,6 +1,6 @@
-<div *ngIf="this.tables !== undefined && this.constraints !== undefined">
-  <p class="title">{{ title }}</p>
-  <mat-expansion-panel *ngFor="let table of tables; index as i">
+<div>
+  <p class="title">Tables</p>
+  <mat-expansion-panel *ngFor="let table of updatedTables$ | async; index as i">
     <mat-expansion-panel-header>
       <mat-panel-title>
         {{ table.name }}

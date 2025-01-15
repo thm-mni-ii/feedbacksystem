@@ -3,13 +3,9 @@
     <mat-label>{{
       "sql-playground.db-control-panel.co-working.select-group" | i18nextEager
     }}</mat-label>
-    <mat-select
-      [(value)]="selectedDbGroup"
-      (selectionChange)="activateGroup($event.value)"
-      [disabled]="!collaborativeMode"
-    >
-      <mat-option *ngFor="let group of groups" [value]="group.id">
-        {{ group.name }}
+    <mat-select [(ngModel)]="selectedGroup">
+      <mat-option *ngFor="let db of groups$ | async" [value]="db.id">
+        {{ db.name }}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -18,12 +14,8 @@
       "sql-playground.db-control-panel.co-working.select-database"
         | i18nextEager
     }}</mat-label>
-    <mat-select
-      [(value)]="selectedDb"
-      (selectionChange)="activateDb($event.value)"
-      [disabled]="!collaborativeMode"
-    >
-      <mat-option *ngFor="let db of dbs" [value]="db.id">
+    <mat-select [(ngModel)]="selectedDatabase">
+      <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
         {{ db.name }}
       </mat-option>
     </mat-select>
@@ -31,28 +23,28 @@
   <div class="btn-container">
     <button
       mat-raised-button
-      color="warn"
-      (click)="deleteDatabase()"
-      [disabled]="!collaborativeMode"
-    >
-      {{ "sql-playground.db-control-panel.co-working.delete" | i18nextEager }}
-    </button>
-    <button
-      mat-raised-button
       color="accent"
       class="co-working-btn"
-      [disabled]="collaborativeMode"
-      (click)="changeCollaborativeMode()"
+      [disabled]="(backend$ | async).type === 'collaborative'"
+      (click)="join()"
     >
       {{ "sql-playground.db-control-panel.co-working.co" | i18nextEager }}
     </button>
     <button
       mat-raised-button
       class="new-btn"
-      (click)="addDb()"
-      [disabled]="!collaborativeMode"
+      [disabled]="(backend$ | async).type === 'collaborative'"
+      (click)="create()"
     >
       {{ "sql-playground.db-control-panel.co-working.new" | i18nextEager }}
+    </button>
+    <button
+      mat-raised-button
+      color="warn"
+      [disabled]="(backend$ | async).type !== 'collaborative'"
+      (click)="disconect()"
+    >
+      {{ "sql-playground.db-control-panel.co-working.delete" | i18nextEager }}
     </button>
   </div>
 </div>
