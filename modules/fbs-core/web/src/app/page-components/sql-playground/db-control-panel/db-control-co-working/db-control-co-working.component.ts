@@ -1,13 +1,22 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
+import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Database } from "../../../../model/sql_playground/Database";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
-import { JWTToken } from "src/app/model/JWTToken";
-import { TextConfirmDialogComponent } from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
-import { NewDbDialogComponent } from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
+import { loadDatabases } from "src/app/page-components/sql-playground/db-control-panel/state/databases.actions";
+import {
+  selectAllDatabases,
+  selectDatabasesError,
+} from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
+import { setBackend } from "../../state/sql-playground.actions";
+import { loadGroups } from "../state/groups.actions";
+import { selectAllGroups } from "../state/groups.selector";
+import { Group } from "../../../../model/Group";
+import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
+import { selectBackend } from "../../state/sql-playground.selectors";
+import { BackendDefintion } from "../../collab/backend.service";
 
 @Component({
   selector: "app-db-control-co-working",
@@ -15,200 +24,77 @@ import { MatDialog } from "@angular/material/dialog";
   styleUrls: ["./db-control-co-working.component.scss"],
 })
 export class DbControlCoWorkingComponent implements OnInit {
-  @Input() collaborativeMode: boolean;
-  @Output() collaborativeModeChange = new EventEmitter<boolean>();
-
-  @Output() changeActiveDb = new EventEmitter<Database>();
-
-  constructor(
-    private snackbar: MatSnackBar,
-    private authService: AuthService,
-    private sqlPlaygroundService: SqlPlaygroundService,
-    private dialog: MatDialog
-  ) {}
-
-  dbs: Database[] = [];
-  activeDb: Database;
-  selectedDb: number = 0;
-  token: JWTToken = this.authService.getToken();
+  databases$: Observable<Database[]>;
+  groups$: Observable<Group[]>;
+  error$: Observable<any>;
+  backend$: Observable<BackendDefintion>;
+  selectedDatabase: number = 0;
+  selectedGroup: number = 0;
+  token = this.authService.getToken();
   pending: boolean = false;
 
-  selectedDbGroup: number = 0;
-  groups: any[] = [
-    { id: 0, name: "Gruppe 1" },
-    { id: 1, name: "Gruppe 2" },
-  ];
+  groups: Group[];
+
+  collaborativeMode: boolean = false;
+
+  constructor(
+    private store: Store,
+    private snackbar: MatSnackBar,
+    private authService: AuthService,
+    private dialog: MatDialog,
+    private playgroundService: SqlPlaygroundService
+  ) {}
 
   ngOnInit(): void {
-    this.sqlPlaygroundService.getDatabases(this.token.id).subscribe(
-      (data) => {
-        this.dbs = data;
-
-        if (this.dbs.length == 0) {
-          // create default database if none exists
-          this.createDatabase("Standard Datenbank").subscribe((result) => {
-            if (result != null) {
-              this.activeDb = this.getActiveDb(this.dbs);
-              this.selectedDb = this.activeDb.id;
-            }
-          });
-        } else if (this.getActiveDb(this.dbs) == null) {
-          this.activeDb = this.dbs[0];
-          this.selectedDb = this.activeDb.id;
-          this.activateDb(this.selectedDb);
-        } else {
-          this.activeDb = this.getActiveDb(this.dbs);
-          this.selectedDb = this.activeDb.id;
-        }
-        this.changeActiveDb.emit(this.activeDb);
-      },
-      (error) => {
-        console.log(error);
-        this.snackbar.open("Fehler beim Laden der Datenbanken", "Ok", {
-          duration: 3000,
-        });
-      }
-    );
-  }
-
-  changeCollaborativeMode() {
-    this.collaborativeModeChange.emit(!this.collaborativeMode);
-  }
-
-  getActiveDb(dbs: Database[]): Database {
-    const activeDB = dbs.find((db) => db.active == true);
-    if (activeDB !== undefined) {
-      return activeDB;
-    } else {
-      return null;
-    }
-  }
-
-  isSelectDbActive(): boolean {
-    if (this.activeDb !== undefined) {
-      return this.selectedDb == this.activeDb.id;
-    } else {
-      return false;
-    }
-  }
-
-  createDatabase(name: string): Observable<Database> {
-    this.sqlPlaygroundService.createDatabase(this.token.id, name).subscribe(
-      (data) => {
-        this.snackbar.open("Datenbank erfolgreich erstellt", "Ok", {
-          duration: 3000,
-        });
-        this.ngOnInit();
-        return data;
-      },
-      (error) => {
-        console.log(error);
-        this.snackbar.open("Fehler beim Erstellen der Datenbank", "Ok", {
-          duration: 3000,
-        });
-      }
-    );
-    return null;
-  }
-
-  deleteDatabase() {
-    const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
-
-    this.openTextConfirmDialog(
-      "Datenbank löschen",
-      "Möchten Sie die Datenbank wirklich löschen?",
-      `${selectedDb.name}`
-    ).subscribe((result) => {
-      if (result === true) {
-        this.sqlPlaygroundService
-          .deleteDatabase(this.token.id, selectedDb.id)
-          .subscribe(
-            () => {
-              this.snackbar.open(
-                `Datenbank ${selectedDb.name} erfolgreich gelöscht`,
-                "Ok",
-                {
-                  duration: 3000,
-                }
-              );
-              this.ngOnInit();
-            },
-            (error) => {
-              console.log(error);
-              this.snackbar.open("Fehler beim Löschen der Datenbank", "Ok", {
-                duration: 3000,
-              });
-            }
-          );
-      }
+    this.store.dispatch(loadDatabases());
+    this.store.dispatch(loadGroups());
+    this.databases$ = this.store.select(selectAllDatabases);
+    this.groups$ = this.store.select(selectAllGroups);
+    this.error$ = this.store.select(selectDatabasesError);
+    this.backend$ = this.store.select(selectBackend);
+    this.groups$.subscribe((groups) => {
+      this.groups = groups;
     });
   }
 
-  activateDb(dbId: number) {
-    this.pending = true;
-    const selectedDb = this.dbs.find((db) => db.id == dbId);
+  disconect() {
+    this.store.dispatch(setBackend({ backend: { type: "local" } }));
+  }
 
-    this.sqlPlaygroundService
-      .activateDatabase(this.token.id, selectedDb.id)
-      .subscribe(
-        () => {
-          this.snackbar.open(
-            `Datenbank ${selectedDb.name} erfolgreich aktiviert`,
-            "Ok",
-            {
-              duration: 3000,
-            }
+  create() {
+    this.databases$.subscribe((dbs) => {
+      const database = dbs.find(({ id }) => id === this.selectedDatabase);
+      this.playgroundService
+        .shareWithGroup(
+          this.authService.getToken().id,
+          this.selectedDatabase,
+          this.selectedGroup
+        )
+        .subscribe(() => {
+          this.store.dispatch(
+            setBackend({
+              backend: {
+                type: "collaborative",
+                id: this.selectedGroup.toString(),
+                database: {
+                  id: database.id,
+                  name: database.name,
+                  owner: this.authService.getToken().username,
+                },
+              },
+            })
           );
-          this.ngOnInit();
-          this.pending = false;
-        },
-        (error) => {
-          console.log(error);
-          this.snackbar.open("Fehler beim Aktivieren der Datenbank", "Ok", {
-            duration: 3000,
-          });
-          this.pending = false;
-        }
-      );
-  }
-
-  private openTextConfirmDialog(
-    title: string,
-    message: string,
-    textToRepeat: string
-  ) {
-    const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
-      data: {
-        title: title,
-        message: message,
-        textToRepeat: textToRepeat,
-      },
+          this.collaborativeMode = true;
+        });
     });
-    return dialogRef.afterClosed();
   }
 
-  addDb() {
-    this.dialog
-      .open(NewDbDialogComponent, {
-        height: "auto",
-        width: "50%",
-        data: {
-          token: this.token,
-        },
+  join() {
+    this.store.dispatch(
+      setBackend({
+        backend: { type: "collaborative", id: this.selectedGroup.toString() },
       })
-      .afterClosed()
-      .subscribe((res) => {
-        if (res.success) {
-          this.ngOnInit();
-          this.snackbar.open("Datenbank erfolgreich erstellt", "Ok", {
-            duration: 3000,
-          });
-        } else {
-          this.snackbar.open("Fehler beim Erstellen der Datenbank", "Ok", {
-            duration: 3000,
-          });
-        }
-      });
+    );
   }
 
   activateGroup(groupId: number) {

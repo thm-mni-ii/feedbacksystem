@@ -1,0 +1,23 @@
+{
+  "name": "fbs-colab",
+  "version": "0.1.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon -e ts -x ts-node src/app.ts",
+    "build": "tsc src/app.ts",
+    "start": "node src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@hocuspocus/server": "^2.13.5",
+    "jose": "^5.9.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}

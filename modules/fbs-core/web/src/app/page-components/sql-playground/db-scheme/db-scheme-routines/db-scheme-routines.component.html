@@ -1,7 +1,7 @@
-<p class="title">{{ title }}</p>
+<p class="title">Routines</p>
 <mat-expansion-panel
   class="routine"
-  *ngFor="let routine of routines; index as i"
+  *ngFor="let routine of routines$ | async; index as i"
 >
   <mat-expansion-panel-header>
     <mat-panel-title> {{ routine.name }} </mat-panel-title>
