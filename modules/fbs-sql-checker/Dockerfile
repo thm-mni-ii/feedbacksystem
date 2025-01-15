@@ -9,7 +9,7 @@ RUN pip install poetry && poetry config virtualenvs.in-project true
 WORKDIR "/app"
 COPY . .
 
-RUN poetry install --only main --no-dev
+RUN poetry install --only main
 
 FROM python:3.11
 
