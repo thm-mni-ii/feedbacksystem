@@ -82,10 +82,13 @@ export class SqlPlaygroundEffects {
                 .getResults(token.id, activeDb, result.id)
                 .pipe(
                   retry(),
-                  map((res) =>
-                    SqlPlaygroundActions.submitStatementSuccess({
-                      resultset: res,
-                    })
+                  mergeMap((res) =>
+                    of(
+                      SqlPlaygroundActions.submitStatementSuccess({
+                        resultset: res,
+                      }),
+                      SqlPlaygroundActions.updateScheme()
+                    )
                   ),
                   catchError((error) =>
                     of(SqlPlaygroundActions.submitStatementFailure({ error }))
