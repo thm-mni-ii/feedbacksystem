@@ -3,6 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { SqlPlaygroundService } from "../../service/sql-playground.service";
+import { Store } from "@ngrx/store";
+import { loadDatabases } from "../../page-components/sql-playground/db-control-panel/state/databases.actions";
 
 /**
  * Updates course information in dialog
@@ -21,6 +23,7 @@ export class NewDbDialogComponent {
     private sqlPlaygroundService: SqlPlaygroundService,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<NewDbDialogComponent>,
+    private store: Store,
     private snackbar: MatSnackBar
   ) {}
 
@@ -39,6 +42,7 @@ export class NewDbDialogComponent {
         .createDatabase(this.data.token.id, this.name.value)
         .subscribe(
           () => {
+            this.store.dispatch(loadDatabases());
             this.dialogRef.close({ success: true });
           },
           (error) => {
