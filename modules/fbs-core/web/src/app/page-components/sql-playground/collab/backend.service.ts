@@ -11,6 +11,8 @@ import {
   selectActiveTab,
   selectTabs as selectInputTabs,
 } from "../sql-input-tabs/state/sql-input-tabs.selectors";
+import { AuthService } from "../../../service/auth.service";
+import { setDatabaseInformation } from "../state/sql-playground.actions";
 
 export interface Identity<I> {
   id: I;
@@ -32,11 +34,15 @@ export type BackendUser = { id: string; color: string };
 
 export type AwarenessState = { user: BackendUser; stateId: string };
 
+export type DatabaseInformation = { id: number; name: string; owner: string };
+
 export type BackendDefintion =
   | { type: "local" }
-  | { type: "collaborative"; id: string };
+  | { type: "collaborative"; id: string; database?: DatabaseInformation };
 
 export interface Backend {
+  setMeta(databaseInformation: DatabaseInformation): Observable<void>;
+  streamMetaChanges(): Observable<{ key: string; value: any }>;
   streamInputChanges(): Observable<ChangeEvent<QueryTab>>;
   streamResultChanges(): Observable<ChangeEvent<ResultTab>>;
   emitInputChange(event: ChangeEvent<QueryTab>): Observable<void>;
@@ -50,8 +56,9 @@ export class BackendService {
   private i: number = 0;
   private currentBackend: Backend;
   private knowInputState: QueryTab[] = [];
+  private currentType?: string;
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private authService: AuthService) {}
 
   private findTabIndex(tabs: any[], id: string): number {
     return tabs.findIndex((tab) => tab.id === id);
@@ -59,10 +66,24 @@ export class BackendService {
 
   setupBackendHandler() {
     this.store.select(selectBackend).subscribe((backend) => {
+      if (this.currentType === backend.type) return;
+      this.currentType = backend.type;
       if (backend.type === "local") {
         this.currentBackend = new LocalBackend();
       } else if (backend.type === "collaborative") {
-        this.currentBackend = new CollaborativeBackend(backend.id);
+        this.currentBackend = new CollaborativeBackend(
+          backend.id,
+          this.authService.getToken().username,
+          this.authService.loadToken()
+        );
+        this.currentBackend.streamMetaChanges().subscribe(({ key, value }) => {
+          if (key === "database") {
+            this.store.dispatch(
+              setDatabaseInformation({ databaseInformation: value })
+            );
+          }
+        });
+        if (backend.database) this.currentBackend.setMeta(backend.database);
       }
 
       /*this.store.dispatch(SqlInputTabsActions.closeAllTabs());
@@ -181,7 +202,6 @@ export class BackendService {
             Boolean(
               this.knowInputState.find((knownTab) => knownTab.id === tab.id)
             );
-          debugger;
           this.currentBackend
             .emitInputChange({
               event: known ? "update" : "create",
@@ -206,7 +226,6 @@ export class BackendService {
       });
 
       this.store.select(selectActiveTab).subscribe((activeTab) => {
-        console.log("announce", activeTab?.id);
         if (activeTab)
           this.currentBackend
             .announceSelectedInput(activeTab.id)
@@ -216,7 +235,6 @@ export class BackendService {
       this.currentBackend
         .streamSelectedInputs()
         .subscribe((awarenessStates) => {
-          console.log("as change", awarenessStates);
           this.store.dispatch(
             SqlInputTabsActions.updateActiveTabUsers({ awarenessStates })
           );

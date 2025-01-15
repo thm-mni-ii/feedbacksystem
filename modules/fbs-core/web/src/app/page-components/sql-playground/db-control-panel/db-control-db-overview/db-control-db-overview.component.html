@@ -1,66 +1,79 @@
 <div class="container">
-  <div>
-    <p class="spinner-wrapper" *ngIf="activeDb$ | async as activeDb">
-      {{ "sql-playground.db-control-panel.overview.version" | i18nextEager }}:
-      <span class="highlight">{{ activeDb[0]?.version }}</span>
-      &nbsp;&nbsp;<mat-spinner *ngIf="pending" [diameter]="24"></mat-spinner>
-    </p>
-  </div>
+  <div *ngIf="backend.type === 'local'">
+    <div>
+      <p class="spinner-wrapper" *ngIf="activeDb$ | async as activeDb">
+        {{ "sql-playground.db-control-panel.overview.version" | i18nextEager }}:
+        <span class="highlight">{{ activeDb[0]?.version }}</span>
+        &nbsp;&nbsp;<mat-spinner *ngIf="pending" [diameter]="24"></mat-spinner>
+      </p>
+    </div>
 
-  <mat-form-field appearance="fill">
-    <mat-label>{{
-      "sql-playground.db-control-panel.overview.selectDatabase" | i18nextEager
-    }}</mat-label>
-    <mat-select
-      [(value)]="selectedDb"
-      (selectionChange)="activateDatabase($event.value)"
-      [disabled]="collaborativeMode"
-    >
-      <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
-        {{ db.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <div class="btn-container">
-    <button
-      mat-raised-button
-      color="warn"
-      (click)="deleteDatabase()"
-      [disabled]="collaborativeMode"
-    >
-      {{
-        "sql-playground.db-control-panel.overview.deleteButton" | i18nextEager
-      }}
-    </button>
-    <button
-      mat-raised-button
-      class="new-btn"
-      (click)="addDb()"
-      [disabled]="collaborativeMode"
-    >
-      {{
-        "sql-playground.db-control-panel.overview.newDbButton" | i18nextEager
-      }}
-    </button>
-    <button
-      mat-raised-button
-      color="accent"
-      class="co-working-btn"
-      [disabled]="!collaborativeMode"
-      (click)="changeCollaborativeMode()"
-    >
-      {{
-        "sql-playground.db-control-panel.overview.changeCollaborativeModeButton"
-          | i18nextEager
-      }}
-    </button>
-    <button
-      mat-raised-button
-      class="url-btn"
-      (click)="getTempURI()"
-      [disabled]="collaborativeMode"
-    >
-      Verbindungs-URL anfordern
-    </button>
+    <mat-form-field appearance="fill">
+      <mat-label>{{
+        "sql-playground.db-control-panel.overview.selectDatabase" | i18nextEager
+      }}</mat-label>
+      <mat-select
+        [(value)]="selectedDb"
+        (selectionChange)="activateDatabase($event.value)"
+        [disabled]="collaborativeMode"
+      >
+        <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
+          {{ db.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="btn-container">
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="deleteDatabase()"
+        [disabled]="collaborativeMode"
+      >
+        {{
+          "sql-playground.db-control-panel.overview.deleteButton" | i18nextEager
+        }}
+      </button>
+      <button
+        mat-raised-button
+        class="new-btn"
+        (click)="addDb()"
+        [disabled]="collaborativeMode"
+      >
+        {{
+          "sql-playground.db-control-panel.overview.newDbButton" | i18nextEager
+        }}
+      </button>
+      <button
+        mat-raised-button
+        color="accent"
+        class="co-working-btn"
+        [disabled]="!collaborativeMode"
+        (click)="changeCollaborativeMode()"
+      >
+        {{
+          "sql-playground.db-control-panel.overview.changeCollaborativeModeButton"
+            | i18nextEager
+        }}
+      </button>
+      <button
+        mat-raised-button
+        class="url-btn"
+        (click)="getTempURI()"
+        [disabled]="collaborativeMode"
+      >
+        Verbindungs-URL anfordern
+      </button>
+    </div>
+  </div>
+  <div *ngIf="backend.type === 'collaborative'">
+    <p>Sie sind mit dem Co-Working verbunden.</p>
+    <p>
+      Datenbankname: {{ databaseInformation?.name ?? "-" }}<br />
+      Datenbankursprung: {{ databaseInformation?.owner ?? "-" }}
+    </p>
+    <p>
+      Bitte verwenden Sie das Co-Working-Tab, wenn Sie die Verbindung trennen
+      wollen.
+    </p>
   </div>
 </div>

@@ -31,6 +31,8 @@ import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { SqlInputTabsEffects } from "./sql-input-tabs/state/sql-input-tabs.effects";
 import { DynamicResultTableEffects } from "./dynamic-result-table/state/dynamic-result-table.effects";
 import { DynamicResultTableTabComponent } from "./dynamic-result-table/tab/dynamic-result-table-tab.component";
+import { groupsReducer } from "./db-control-panel/state/groups.reducer";
+import { GroupsEffects } from "./db-control-panel/state/groups.effects";
 
 @NgModule({
   declarations: [
@@ -65,12 +67,14 @@ import { DynamicResultTableTabComponent } from "./dynamic-result-table/tab/dynam
     StoreModule.forFeature("dynamicResultTable", dynamicResultTableReducer),
     StoreModule.forFeature("databases", databasesReducer),
     StoreModule.forFeature("templates", templatesReducer),
+    StoreModule.forFeature("groups", groupsReducer),
     EffectsModule.forRoot(),
     EffectsModule.forFeature([
       SqlPlaygroundEffects,
       SqlInputTabsEffects,
       DynamicResultTableEffects,
       DatabasesEffects,
+      GroupsEffects,
     ]),
     I18NextModule.forRoot(),
     FormsModule,

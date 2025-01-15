@@ -13,6 +13,7 @@ import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { AuthService } from "src/app/service/auth.service";
 import * as SqlPlaygroundActions from "./sql-playground.actions";
 import { selectActiveDb } from "./sql-playground.selectors";
+import { changeActiveDbId, updateScheme } from "./sql-playground.actions";
 
 @Injectable()
 export class SqlPlaygroundEffects {
@@ -95,6 +96,20 @@ export class SqlPlaygroundEffects {
               of(SqlPlaygroundActions.submitStatementFailure({ error }))
             )
           );
+      })
+    )
+  );
+
+  setActive$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(SqlPlaygroundActions.setDatabaseInformation),
+      mergeMap(({ databaseInformation }) => {
+        if (databaseInformation?.id) {
+          return of(
+            changeActiveDbId({ dbId: databaseInformation.id }),
+            updateScheme()
+          );
+        }
       })
     )
   );

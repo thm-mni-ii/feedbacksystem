@@ -6,8 +6,9 @@ import {
   ResultTab,
   AwarenessState,
   BackendUser,
+  DatabaseInformation,
 } from "./backend.service";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
 import {
   QueryTab,
   queryTabEquals,
@@ -16,23 +17,38 @@ import {
 export class CollaborativeBackend implements Backend {
   private provider: HocuspocusProvider;
   private yDoc: Y.Doc;
+  private metaMap: Y.Map<any>;
   private inputMap: Y.Map<QueryTab>;
   private resultMap: Y.Map<ResultTab>;
   private me: BackendUser;
 
-  constructor(readonly id: string) {
+  constructor(
+    readonly id: string,
+    readonly username: string,
+    private readonly token: string
+  ) {
     this.provider = new HocuspocusProvider({
-      url: "ws://127.0.0.1:1234",
-      name: "playground-" + id,
+      url:
+        window.location.hostname === "localhost"
+          ? "ws://127.0.0.1:1234"
+          : "wss://feedback.mni.thm.de/collab",
+      name: id,
+      token,
     });
     this.yDoc = this.provider.document;
+    this.metaMap = this.yDoc.getMap("meta");
     this.inputMap = this.yDoc.getMap("inputs");
     this.resultMap = this.yDoc.getMap("results");
     this.me = {
-      id: crypto.randomUUID(),
+      id: username,
       color: "#" + Math.floor(Math.random() * 16777215).toString(16),
     };
     this.provider.awareness.setLocalStateField("user", this.me);
+  }
+
+  setMeta(databaseInformation: DatabaseInformation): Observable<void> {
+    this.metaMap.set("database", databaseInformation);
+    return of();
   }
 
   streamInputChanges(): Observable<ChangeEvent<QueryTab>> {
@@ -157,6 +173,25 @@ export class CollaborativeBackend implements Backend {
             })
         );
       });
+    });
+  }
+
+  streamMetaChanges(): Observable<any> {
+    return new Observable<{ key: string; value: any }>((observer) => {
+      const handler = (event: Y.YMapEvent<any>) => {
+        event.changes.keys.forEach((change, key) => {
+          observer.next({
+            key,
+            value: this.metaMap.get(key),
+          });
+        });
+      };
+
+      this.metaMap.observe(handler);
+
+      return () => {
+        this.metaMap.unobserve(handler);
+      };
     });
   }
 }

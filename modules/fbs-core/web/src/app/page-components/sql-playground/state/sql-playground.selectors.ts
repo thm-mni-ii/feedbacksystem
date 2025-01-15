@@ -1,5 +1,6 @@
 import { createFeatureSelector, createSelector } from "@ngrx/store";
 import { SqlPlaygroundState } from "./sql-playground.reducer";
+import { BackendDefintion } from "../collab/backend.service";
 
 export const selectSqlPlaygroundState =
   createFeatureSelector<SqlPlaygroundState>("sqlPlayground");
@@ -52,4 +53,10 @@ export const selectError = createSelector(
 export const selectBackend = createSelector(
   selectSqlPlaygroundState,
   (state: SqlPlaygroundState) => state.backend
+);
+
+export const selectBackendDatabaseInformation = createSelector(
+  selectBackend,
+  (state: BackendDefintion) =>
+    state.type === "collaborative" ? state.database : null
 );

@@ -20,11 +20,7 @@
   </mat-tab>
   <mat-tab
     label="{{ 'sql-playground.db-control-panel.tab-coworking' | i18nextEager }}"
-    [disabled]="!isAdmin"
   >
     <app-db-control-co-working></app-db-control-co-working>
-    <!--[(collaborativeMode)]="collaborativeMode"
-      (changeActiveDb)="changeDb($event)"
-    ></app-db-control-co-working-->
   </mat-tab>
 </mat-tab-group>

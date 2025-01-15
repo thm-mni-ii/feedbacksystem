@@ -4,7 +4,10 @@ import { Trigger } from "src/app/model/sql_playground/Trigger";
 import { View } from "src/app/model/sql_playground/View";
 import { Table } from "src/app/model/sql_playground/Table";
 import { Constraint } from "src/app/model/sql_playground/Constraint";
-import { BackendDefintion } from "../collab/backend.service";
+import {
+  BackendDefintion,
+  DatabaseInformation,
+} from "../collab/backend.service";
 
 export const changeActiveDbId = createAction(
   "[SQL Playground] Change Active DB Id",
@@ -39,6 +42,10 @@ export const submitStatementFailure = createAction(
   props<{ error: any }>()
 );
 export const setBackend = createAction(
-  "[SQL Playground] SetBackend",
+  "[SQL Playground] Set Backend",
   props<{ backend: BackendDefintion }>()
+);
+export const setDatabaseInformation = createAction(
+  "[SQL Playground] Set Backend database information",
+  props<{ databaseInformation?: DatabaseInformation }>()
 );

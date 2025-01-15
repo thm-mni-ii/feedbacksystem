@@ -20,6 +20,14 @@ import {
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
 import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
 import { map } from "rxjs/operators";
+import {
+  BackendDefintion,
+  DatabaseInformation,
+} from "../../collab/backend.service";
+import {
+  selectBackend,
+  selectBackendDatabaseInformation,
+} from "../../state/sql-playground.selectors";
 
 @Component({
   selector: "app-db-control-db-overview",
@@ -35,6 +43,10 @@ export class DbControlDbOverviewComponent implements OnInit {
 
   activeDb$: Observable<Database>;
   collaborativeMode: boolean = false;
+  backend$: Observable<BackendDefintion>;
+  backend: BackendDefintion;
+  backendDatabaseInformation$: Observable<DatabaseInformation>;
+  databaseInformation: DatabaseInformation;
 
   constructor(
     private store: Store,
@@ -48,6 +60,18 @@ export class DbControlDbOverviewComponent implements OnInit {
     this.store.dispatch(loadDatabases());
     this.databases$ = this.store.select(selectAllDatabases);
     this.error$ = this.store.select(selectDatabasesError);
+    this.backendDatabaseInformation$ = this.store.select(
+      selectBackendDatabaseInformation
+    );
+    this.backendDatabaseInformation$.subscribe((databaseInformation) => {
+      console.log("dbi", databaseInformation);
+      this.databaseInformation = databaseInformation;
+    });
+    this.backend$ = this.store.select(selectBackend);
+    this.backend$.subscribe((backend) => {
+      console.log("backend", backend);
+      this.backend = backend;
+    });
     this.activeDb$ = this.databases$.pipe(
       map((databases) => databases.find((database) => database.active))
     );

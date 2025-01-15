@@ -77,24 +77,31 @@ export const sqlPlaygroundReducer = createReducer(
   on(SqlPlaygroundActions.setBackend, (state, { backend }) => ({
     ...state,
     backend,
-  }))
-  /*
-  // New Handlers
-  on(SqlPlaygroundActions.saveTabsToLocalStorage, (state) => ({
-    ...state,
-    isQueryPending: true,
-  })),
-  on(SqlPlaygroundActions.saveTabsToLocalStorageSuccess, (state, { tabs }) => ({
-    ...state,
-    tabs,
-    isQueryPending: false,
   })),
   on(
-    SqlPlaygroundActions.saveTabsToLocalStorageFailure,
-    (state, { error }) => ({
+    SqlPlaygroundActions.setDatabaseInformation,
+    (state, { databaseInformation }) => ({
       ...state,
-      error,
-      isQueryPending: false,
+      backend: { ...state.backend, database: databaseInformation },
     })
-  )*/
+  )
+  /*
+// New Handlers
+on(SqlPlaygroundActions.saveTabsToLocalStorage, (state) => ({
+  ...state,
+  isQueryPending: true,
+})),
+on(SqlPlaygroundActions.saveTabsToLocalStorageSuccess, (state, { tabs }) => ({
+  ...state,
+  tabs,
+  isQueryPending: false,
+})),
+on(
+  SqlPlaygroundActions.saveTabsToLocalStorageFailure,
+  (state, { error }) => ({
+    ...state,
+    error,
+    isQueryPending: false,
+  })
+)*/
 );

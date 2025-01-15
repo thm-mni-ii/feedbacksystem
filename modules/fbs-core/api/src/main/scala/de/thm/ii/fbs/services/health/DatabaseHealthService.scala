@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.health
 
-import de.thm.ii.fbs.util.DB
+/*import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.health.{Health, ReactiveHealthIndicator}
 import org.springframework.jdbc.core.JdbcTemplate
@@ -17,3 +17,4 @@ class DatabaseHealthService extends ReactiveHealthIndicator {
     })
   }
 }
+*/

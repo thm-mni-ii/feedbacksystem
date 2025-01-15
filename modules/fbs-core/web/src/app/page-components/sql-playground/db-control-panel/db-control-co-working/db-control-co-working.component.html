@@ -1,15 +1,13 @@
 <div class="container">
-  <mat-form-field class="mat-input-element" appearance="fill">
+  <mat-form-field class="select" appearance="fill">
     <mat-label>{{
       "sql-playground.db-control-panel.co-working.select-group" | i18nextEager
     }}</mat-label>
-    <input
-      type="number"
-      placeholder="Enter Group Code"
-      matInput
-      required
-      [(ngModel)]="groupCode"
-    />
+    <mat-select [(ngModel)]="selectedGroup">
+      <mat-option *ngFor="let db of groups$ | async" [value]="db.id">
+        {{ db.name }}
+      </mat-option>
+    </mat-select>
   </mat-form-field>
   <mat-form-field class="select" appearance="fill">
     <mat-label>{{
@@ -25,28 +23,28 @@
   <div class="btn-container">
     <button
       mat-raised-button
-      color="warn"
-      (click)="deleteDatabase()"
-      [disabled]="!collaborativeMode"
-    >
-      {{ "sql-playground.db-control-panel.co-working.delete" | i18nextEager }}
-    </button>
-    <button
-      mat-raised-button
       color="accent"
       class="co-working-btn"
-      [disabled]="collaborativeMode"
-      (click)="changeCollaborativeMode()"
+      [disabled]="(backend$ | async).type === 'collaborative'"
+      (click)="join()"
     >
       {{ "sql-playground.db-control-panel.co-working.co" | i18nextEager }}
     </button>
     <button
       mat-raised-button
       class="new-btn"
-      (click)="addDb()"
-      [disabled]="!collaborativeMode"
+      [disabled]="(backend$ | async).type === 'collaborative'"
+      (click)="create()"
     >
       {{ "sql-playground.db-control-panel.co-working.new" | i18nextEager }}
+    </button>
+    <button
+      mat-raised-button
+      color="warn"
+      [disabled]="(backend$ | async).type !== 'collaborative'"
+      (click)="disconect()"
+    >
+      {{ "sql-playground.db-control-panel.co-working.delete" | i18nextEager }}
     </button>
   </div>
 </div>

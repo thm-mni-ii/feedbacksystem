@@ -180,4 +180,34 @@ export class SqlPlaygroundService {
       `/api/v2/playground/${uid}/databases/${dbId}/routines`
     );
   }
+
+  /**
+   * shares a database with a group (updates the share if it all ready exists.
+   * @param uid User id
+   * @param dbId Database id
+   * @param groupId Group id
+   * @returns the update database
+   */
+  shareWithGroup(
+    uid: number,
+    dbId: number,
+    groupId: number
+  ): Observable<Database> {
+    return this.http.put<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/share-with-group`,
+      { groupId }
+    );
+  }
+
+  /**
+   * unshares a database with a group
+   * @param uid User id
+   * @param dbId Database id
+   * @returns the update database
+   */
+  unshareWithGroup(uid: number, dbId: number): Observable<Database> {
+    return this.http.delete<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/share-with-group`
+    );
+  }
 }

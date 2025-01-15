@@ -4,10 +4,14 @@ import {
   ChangeEvent,
   ResultTab,
   AwarenessState,
+  DatabaseInformation,
 } from "./backend.service";
 import { QueryTab } from "../../../model/sql_playground/QueryTab";
 
 export class LocalBackend implements Backend {
+  setMeta(_databaseInformation: DatabaseInformation): Observable<void> {
+    return undefined;
+  }
   streamInputChanges(): Observable<ChangeEvent<QueryTab>> {
     return from(
       this.loadLocalStorage().map(
@@ -38,7 +42,7 @@ export class LocalBackend implements Backend {
         i++;
       }
     }
-    localStorage.setItem("playground.tabs", JSON.stringify(currentState));
+    localStorage.setItem("tabs", JSON.stringify({ tabs: currentState }));
     return of();
   }
   emitResultChange(_event: ChangeEvent<ResultTab>): Observable<void> {
@@ -52,7 +56,11 @@ export class LocalBackend implements Backend {
   }
 
   private loadLocalStorage(): QueryTab[] {
-    const loadedData = localStorage.getItem("playground.tabs");
-    return JSON.parse(loadedData) ?? [];
+    const loadedData = localStorage.getItem("tabs");
+    return JSON.parse(loadedData)?.tabs ?? [];
+  }
+
+  streamMetaChanges(): Observable<{ key: string; value: any }> {
+    return of();
   }
 }

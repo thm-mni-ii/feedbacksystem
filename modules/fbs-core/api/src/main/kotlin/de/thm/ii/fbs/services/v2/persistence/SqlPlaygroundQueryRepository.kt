@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface SqlPlaygroundQueryRepository : JpaRepository<SqlPlaygroundQuery, Int> {
     fun findByRunIn_Owner_IdAndRunIn_id(ownerId: Int, databaseId: Int): List<SqlPlaygroundQuery>
     fun findByRunIn_Owner_IdAndRunIn_idAndId(ownerId: Int, databaseId: Int, queryId: Int): SqlPlaygroundQuery?
+    fun findByRunIn_id(databaseId: Int): List<SqlPlaygroundQuery>
+    fun findByRunIn_idAndId(dbId: Int, qId: Int): SqlPlaygroundQuery?
 }

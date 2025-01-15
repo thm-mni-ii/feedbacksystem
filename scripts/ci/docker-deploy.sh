@@ -11,12 +11,14 @@ function dockerPush() {
     docker tag feedbacksystem-runtime-bash thmmniii/fbs-runtime-bash:$tag
     docker tag feedbacksystem_sql-checker thmmniii/fbs-sql-checker:$tag
     docker tag feedbacksystem-dashboard thmmniii/fbs-eat:$tag
+    docker tag feedbacksystem-collab thmmniii/fbs-collab:$tag
     
     docker push thmmniii/fbs-core:$tag
     docker push thmmniii/fbs-runner:$tag
     docker push thmmniii/fbs-runtime-bash:$tag
     docker push thmmniii/fbs-sql-checker:$tag
     docker push thmmniii/fbs-eat:$tag
+    docker push thmmniii/fbs-collab:$tag
 }
 
 function generateDockerTag() {
