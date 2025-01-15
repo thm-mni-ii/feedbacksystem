@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class SqlPlaygroundShareWithGroupRequest(
     @JsonProperty("groupId")
-    var groupId: Int,
+    var groupId: Int
 )

@@ -25,7 +25,7 @@ class PlaygroundController(
     private val entityRepository: SqlPlaygroundEntityRepository,
     private val queryRepository: SqlPlaygroundQueryRepository,
     private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
-    private val groupRepository: GroupRepository,
+    private val groupRepository: GroupRepository
 ) {
     @GetMapping
     @ResponseBody
@@ -164,7 +164,6 @@ class PlaygroundController(
     fun getTriggers(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
         getEntity(currentToken.id, dbId, "triggers")
 
-
     @GetMapping("/shared-with-group/{groupId}")
     @ResponseBody
     fun getByGroupId(@CurrentToken currentToken: LegacyToken, @PathVariable("groupId") groupId: Int): SqlPlaygroundDatabase? {
@@ -180,7 +179,7 @@ class PlaygroundController(
     private fun createAllEntities(database: SqlPlaygroundDatabase) = listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
         entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
     }
-    
+
     private fun getDatabase(userId: Int, databaseId: Int): SqlPlaygroundDatabase {
         val database = databaseRepository.findByIdAndDeleted(databaseId, false) ?: throw NotFoundException()
         if (database.owner.id == userId) return database

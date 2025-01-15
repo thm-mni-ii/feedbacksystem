@@ -1,6 +1,7 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.model.v2.group
 
-import de.thm.ii.fbs.model.v2.security.User
 import javax.persistence.*
 
 @Entity
