@@ -270,8 +270,10 @@ services:
     restart: always
     ports:
       - 1234:1234
+    networks:
+      - fbs
     environment:
-      - FBS_ROOT_URL=https://core
+      - FBS_ROOT_URL=https://core:443
       - NODE_TLS_REJECT_UNAUTHORIZED=0
 
 networks:
