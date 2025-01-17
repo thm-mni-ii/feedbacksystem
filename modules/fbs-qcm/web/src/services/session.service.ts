@@ -3,8 +3,6 @@ import axios, { type AxiosResponse } from 'axios'
 
 class SessionService {
   startSession(courseId: number, catalogId: string): Promise<AxiosResponse<Question>> {
-    console.log(localStorage.getItem('jsessionid'))
-    console.log(localStorage.getItem('token'))
     return axios
       .post(
         '/api_v1/startSession',
