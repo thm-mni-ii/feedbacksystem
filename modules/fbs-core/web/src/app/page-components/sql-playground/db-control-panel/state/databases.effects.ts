@@ -40,8 +40,9 @@ export class DatabasesEffects {
   loadDatabases$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadDatabases),
-      switchMap(() =>
-        this.sqlPlaygroundService.getDatabases(this.token.id).pipe(
+      switchMap(() => {
+        if (!this.token) return;
+        return this.sqlPlaygroundService.getDatabases(this.token.id).pipe(
           switchMap((databases) => {
             if (databases.length == 0) {
               // create default database if none exists
@@ -57,8 +58,8 @@ export class DatabasesEffects {
             }
           }),
           catchError((error) => of(loadDatabasesFailure({ error })))
-        )
-      )
+        );
+      })
     )
   );
 
