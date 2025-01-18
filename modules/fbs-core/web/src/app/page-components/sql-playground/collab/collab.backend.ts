@@ -47,6 +47,7 @@ export class CollaborativeBackend implements Backend {
   }
 
   setMeta(databaseInformation: DatabaseInformation): Observable<void> {
+    //console.log("sm", databaseInformation)
     this.metaMap.set("database", databaseInformation);
     return of();
   }
@@ -54,6 +55,7 @@ export class CollaborativeBackend implements Backend {
   streamInputChanges(): Observable<ChangeEvent<QueryTab>> {
     return new Observable<ChangeEvent<QueryTab>>((observer) => {
       const handler = (event: Y.YMapEvent<QueryTab>) => {
+        //console.log("ic", event);
         event.changes.keys.forEach((change, key) => {
           let changeEvent: ChangeEvent<QueryTab>;
           if (change.action === "add") {
@@ -126,6 +128,7 @@ export class CollaborativeBackend implements Backend {
   emitInputChange(event: ChangeEvent<QueryTab>): Observable<void> {
     return new Observable<void>((observer) => {
       this.yDoc.transact(() => {
+        //console.log("eic", event)
         if (event.event === "create" || event.event === "update") {
           const currentState = this.inputMap.get(event.payload.id);
           if (!queryTabEquals(currentState, event.payload)) {
@@ -179,6 +182,7 @@ export class CollaborativeBackend implements Backend {
   streamMetaChanges(): Observable<any> {
     return new Observable<{ key: string; value: any }>((observer) => {
       const handler = (event: Y.YMapEvent<any>) => {
+        //console.log("mce", event)
         event.changes.keys.forEach((change, key) => {
           observer.next({
             key,
