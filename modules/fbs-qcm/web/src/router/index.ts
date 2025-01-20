@@ -10,6 +10,11 @@ const router = createRouter({
       component: HomeView
     },
     {
+        path: '/EditCatalogInformation/:id',
+        name: '/EditCatalogInformation',
+        component: () => import('../views/EditCatalogView.vue')
+    },
+    {
         path: '/catalogManagement',
         name: '/CatalogManagement',
         component: () => import('../views/CatalogOverview.vue')
