@@ -58,6 +58,8 @@ export async function addQuestionToCatalog(
   catalogId: string,
   children: any
 ) {
+    console.log(questionId);
+    console.log(catalogId);
   if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     return -1;
   }
@@ -74,7 +76,10 @@ export async function addQuestionToCatalog(
   };
   const result = await questionInCatalogCollection.insertOne(insert);
   console.log(result);
-  return result;
+  const res = {
+      id: result.insertedId
+  }
+  return res;
 }
 
 export async function removeQuestionFromCatalog(

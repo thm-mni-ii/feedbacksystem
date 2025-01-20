@@ -10,9 +10,9 @@ const router = createRouter({
       component: HomeView
     },
     {
-        path: '/edi',
-        name: '/CytographTest2',
-        component: () => import('../views/Updated_CytoGraph.vue')
+        path: '/catalogManagement',
+        name: '/CatalogManagement',
+        component: () => import('../views/CatalogOverview.vue')
     },
     {
         path: '/editCatalog/:catalog/:question',

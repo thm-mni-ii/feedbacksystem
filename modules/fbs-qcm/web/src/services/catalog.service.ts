@@ -14,28 +14,35 @@ class CatalogService {
   addChildrenToQuestion(question: string, child: string, key: number, transition: string): Promise<AxiosResponse<Catalog>> {
     return axios.put(`/api_v1/addChildrenToQuestion/`, {question, child, key, transition} , {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
+      }
+    })
+  }
+  getCatalogsFromCourse(course: number): Promise<AxiosResponse<Catalog>> {
+    return axios.get(`/api_v1/catalogs/${course}`, {
+      headers: {
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
       }
     })
   }
   deleteQuestionFromCatalog(questionInCollection: string): Promise<AxiosResponse<Catalog>> {
     return axios.delete(`/api_v1/removeQuestionFromCatalog/${questionInCollection}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
       }
     })
   }
   getPreviousQuestion(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/getPreviousQuestion/${catalog}/${id}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
       }
     })
   }
   editCatalog(catalog: string, id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/editCatalog/${catalog}/${id}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxXCI6XCJET0NFTlRcIn0iLCJpZCI6MTIsImdsb2JhbFJvbGUiOiJBRE1JTiJ9.iln7aK05KPy3D_FUt6OBhSEOuYgOgGHmBYqSd0UPP7E"
       }
     })
   }
@@ -56,7 +63,7 @@ class CatalogService {
   addQuestion(data: any): Promise<AxiosResponse<Catalog>> {
     return axios.put(`/api_v1/addQuestionToCatalog`, data, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiY291cnNlUm9sZXMiOiJ7XCIxODdcIjpcIkRPQ0VOVFwifSIsImlkIjoxMiwiZ2xvYmFsUm9sZSI6IkFETUlOIn0.yKGg_To4obPpgvYwkkd2yATbGUFoqDkxw3zom1cHKz4"
       }
     })
   }

@@ -111,13 +111,6 @@ export default defineComponent({
       console.log('ID from query parameter:', id.catalog);
       console.log('ID from query parameter:', id.question);
       console.log(route);
-      const data = await catalogService.editCatalog(id.catalog, id.question);
-      currentQuestion = id.question;
-      currentCatalog = id.catalog;
-      console.log(data);
-      console.log(data.data);
-      const keys = Object.keys(data.data.children).filter(key => key !== "PARTIAL").map(Number);
-      console.log(keys);
       let maxKey = "+";
       let midKey = "+";
       let minKey = "+";
@@ -127,43 +120,54 @@ export default defineComponent({
       let maxKeyNumber = "correct";
       let midKeyNumber = "medium";
       let minKeyNumber = "incorrect";
-      for(let i = 0; i < data.data.children.length; i++) {
-        if(data.data.children[i].transition === "correct") {
-            maxKey = data.data.children[i].text;
-            maxId = data.data.children[i].questionId;
-            maxKeyNumber = `${data.data.children[i].score}%`;
-        }
-        if(data.data.children[i].transition === "incorrect") {
-            minKey = data.data.children[i].text;
-            minId = data.data.children[i].questionId;
-            minKeyNumber = `${data.data.children[i].score}%`;
-        }
-        if(data.data.children[i].transition === "partial") {
-            midKey = data.data.children[i].text;
-            midId = data.data.children[i].questionId;
-            midKeyNumber = `${data.data.children[i].score}%`;
-        }
-      }
-      console.log("A");
-      console.log(maxKey);
-      console.log(maxId);
-      console.log(midKey);
-      console.log(midId);
-      console.log(minKey);
-      console.log(minId);
-      console.log("A");
-      const prevData = await catalogService.getPreviousQuestion(id.catalog, id.question);
+      let questionText = "+";
       let prevText = "No Previous Question"
       let prevId = null;
-      if(prevData.data.questionInCatalogId !== null) {
-        prevText = prevData.data.text;
-        prevId = prevData.data.questionInCatalogId;
+      currentQuestion = id.question;
+      currentCatalog = id.catalog;
+      if(id.question !== "new") {
+          const data = await catalogService.editCatalog(id.catalog, id.question);
+          console.log(data);
+          console.log(data.data);
+          const keys = Object.keys(data.data.children).filter(key => key !== "PARTIAL").map(Number);
+          console.log(keys);
+          questionText = data.data.questionText;
+          for(let i = 0; i < data.data.children.length; i++) {
+            if(data.data.children[i].transition === "correct") {
+                maxKey = data.data.children[i].text;
+                maxId = data.data.children[i].questionId;
+                maxKeyNumber = `${data.data.children[i].score}%`;
+            }
+            if(data.data.children[i].transition === "incorrect") {
+                minKey = data.data.children[i].text;
+                minId = data.data.children[i].questionId;
+                minKeyNumber = `${data.data.children[i].score}%`;
+            }
+            if(data.data.children[i].transition === "partial") {
+                midKey = data.data.children[i].text;
+                midId = data.data.children[i].questionId;
+                midKeyNumber = `${data.data.children[i].score}%`;
+            }
+          }
+          console.log("A");
+          console.log(maxKey);
+          console.log(maxId);
+          console.log(midKey);
+          console.log(midId);
+          console.log(minKey);
+          console.log(minId);
+          console.log("A");
+          const prevData = await catalogService.getPreviousQuestion(id.catalog, id.question);
+          if(prevData.data.questionInCatalogId !== null) {
+            prevText = prevData.data.text;
+            prevId = prevData.data.questionInCatalogId;
+          }
+          console.log(prevData);
       }
-      console.log(prevData);
       cy.value = cytoscape({
         container: document.getElementById('cy'),
         elements: [
-          { data: { id: 'center', label: data.data.questionText }, position: { x: 400, y: 0 }, grabbable: false},
+          { data: { id: 'center', label: questionText }, position: { x: 400, y: 0 }, grabbable: false},
           { data: { id: 'left', label: prevText, hiddenData: prevId }, position: { x: 250, y: 0 }, grabbable: false },
           { data: { source: 'left', target: 'center', label: 'Previous Question' }},
           { data: { id: 'correct', label: maxKey, hiddenData: maxId }, position: { x: 550, y: -60 }, grabbable: false  },
@@ -204,7 +208,6 @@ export default defineComponent({
                 showInput.value = false;
               }
               showModal.value = true;
-              clickedNode.data('label', 'Question'); 
              } else if(clickedNode.data('hiddenData') !== null && clickedNode.data('hiddenData') !== undefined) {
                 console.log(id.catalog); 
                 console.log(clickedNode.data);
@@ -217,7 +220,6 @@ export default defineComponent({
             attachButtonToExistingNode(node.id());  
         });
     });
-
     const addNode = () => {
       if (cy.value) {
         const newNodeId = `question${nodeId.value}`;
@@ -242,11 +244,16 @@ export default defineComponent({
         console.log(questionId);
         const res = await questionService.addQuestionToCatalog(questionId, currentCatalog);  
         console.log(res);
+        alert(res);
         const question = route.params.question;
         console.log(question);
-        const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score, transition);
-        showModal.value = false;
-        location.reload();
+       /* if(question !== "new") {
+            const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score, transition);
+            showModal.value = false;
+            location.reload();
+        } else {
+            window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${res.id}`; 
+        }*/
     }
     const attachButtonToNode = (nodeId) => {
       if(nodeId === "invisible") {
