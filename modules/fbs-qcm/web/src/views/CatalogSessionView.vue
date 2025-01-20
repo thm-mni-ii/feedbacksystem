@@ -2,18 +2,15 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
-import questionService from '@/services/question.service'
 import sessionService from '@/services/session.service'
 
 import type Catalog from '../model/Catalog'
 import type Question from '@/model/Question'
-import type QuestionType from '@/enums/QuestionType'
-
 const route = useRoute()
 
 const showErrorPage = ref<Boolean>(false)
 
-const questionData = ref<Question | undefined>(undefined)
+const questionData = ref<Question>()
 
 export interface SelectedAnswers {
   rowId: number
@@ -29,12 +26,19 @@ const catalog = ref<Catalog>({
 })
 
 const submitAnswer = (answer: any) => {
-  console.log('Selected Answers:', answer)
-  const submitAnswer = {
-    questionId: questionData.value._id,
-    answers: answer
+  if (!questionData.value || !questionData.value._id) {
+    console.error('Question data or ID is undefined.')
+    return
   }
-  sessionService.submitAnswer(submitAnswer)
+  sessionService
+    .submitAnswer(questionData.value?._id, answer)
+    .then((res) => {
+      console.log(res)
+      questionData.value = res.data
+    })
+    .catch((err) => {
+      console.log('Submit Answer Error: ', err)
+    })
 }
 
 onMounted(() => {
@@ -67,7 +71,7 @@ onMounted(() => {
   <v-card v-if="showErrorPage" class="h-52 mx-auto">
     <h2>Error: Could not find the page you're looking for</h2>
   </v-card>
-  <v-form v-else class="mt-12" @submit.prevent="submitAnswer">
+  <v-form v-else class="mt-12">
     <v-sheet
       class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
       elevation="4"
@@ -94,7 +98,7 @@ onMounted(() => {
         <CatalogSession
           v-if="questionData"
           :question="questionData"
-          @submit-answer="(a) => submitAnswer(a.selectedAnswers)"
+          @submit-answer="submitAnswer"
         />
       </v-responsive>
     </v-sheet>
