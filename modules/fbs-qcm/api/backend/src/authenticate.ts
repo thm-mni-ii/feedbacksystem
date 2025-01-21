@@ -22,6 +22,9 @@ export function authenticateInCourse(tokenData: JwtPayload, level: number, cours
 }
 
 export async function authenticateInCatalog(tokenData: JwtPayload, level: number, catalog: string) {
+    if(tokenData.globalRole === "ADMIN") {
+        return true;
+    }
     const database: mongoDB.Db = await connect();
     const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const query = {

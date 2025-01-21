@@ -163,6 +163,9 @@ export default defineComponent({
             prevId = prevData.data.questionInCatalogId;
           }
           console.log(prevData);
+      } else if (id.question === "new") {
+          const data = await catalogService.editEmptyCatalog(id.catalog);
+          console.log(data);
       }
       cy.value = cytoscape({
         container: document.getElementById('cy'),

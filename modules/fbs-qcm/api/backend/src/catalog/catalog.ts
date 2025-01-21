@@ -543,3 +543,25 @@ export async function addChildrenToQuestion(tokenData: JwtPayload, questionId: s
     };
     return await questionInCatalogCollection.updateOne(query, update);
 }
+
+export async function editEmptyCatalog(tokenData: JwtPayload, catalogId: string) {
+    if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+        return -1;                                               
+    }
+    console.log(catalogId);
+    const query = {
+        catalog: new mongoDB.ObjectId(catalogId)
+    }
+    console.log(query);
+    const database: mongoDB.Db = await connect();
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const data = await questionInCatalogCollection.findOne(query);
+    console.log("question in Catalog");
+    console.log(data);
+    if(data === null) {
+        return 0;
+    }
+    if(data !== null) {
+        return -1;
+    }
+}
