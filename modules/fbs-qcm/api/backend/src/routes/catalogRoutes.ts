@@ -1,4 +1,4 @@
-import { addChildrenToQuestion, deleteCatalog, editCatalogInformation, getCatalog, getCatalogs, getPreviousQuestionInCatalog, postCatalog, putCatalog } from "../catalog/catalog";
+import { addChildrenToQuestion, deleteCatalog, editCatalogInformation, editEmptyCatalog, getCatalog, getCatalogs, getPreviousQuestionInCatalog, postCatalog, putCatalog } from "../catalog/catalog";
 import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
 import { authenticate } from "../authenticate";
@@ -177,5 +177,28 @@ import { authenticate } from "../authenticate";
         res.sendStatus(500);
     }
   });
-  
+  router.get("/api_v1/editEmptyCatalog/:id", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401); 
+      }
+      if (req.user !== undefined) {
+        const catalogId = req.params.id as string;
+        const result = await editEmptyCatalog(req.user, catalogId);
+        console.log(result);
+        if(result === -1) {
+            res.send({isEmpty: false});
+            return;
+        } 
+        if(result === 0) {
+            res.send({isEmpty: true});
+            return;
+        } 
+        res.sendStatus(500);
+      }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+  });
   export default router; 

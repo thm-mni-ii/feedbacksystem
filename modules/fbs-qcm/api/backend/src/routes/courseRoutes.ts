@@ -74,28 +74,4 @@ router.get("/api_v1/teacher_course", authenticateToken, async (req, res) => {
       res.sendStatus(500);
     }
   });
-  router.get("/api_v1/editEmptyCatalog/:id", authenticateToken, async (req, res) => {
-    try {
-      if (req.user == undefined) {
-        res.sendStatus(401); 
-      }
-      if (req.user !== undefined) {
-        const catalogId = req.params.id as string;
-        const result = await editEmptyCatalog(req.user, catalogId);
-        console.log(result);
-        if(result === -1) {
-            res.sendStatus(400);
-            return;
-        } 
-        if(result === 0) {
-            res.sendStatus(200);
-            return;
-        } 
-        res.sendStatus(500);
-      }
-    } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-    }
-  });
   export default router; 

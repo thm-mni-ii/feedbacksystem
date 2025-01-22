@@ -123,9 +123,11 @@ export default defineComponent({
       let questionText = "+";
       let prevText = "No Previous Question"
       let prevId = null;
+      let buttonsHidden = "false";
       currentQuestion = id.question;
       currentCatalog = id.catalog;
       if(id.question !== "new") {
+          buttonsHidden = "false";
           const data = await catalogService.editCatalog(id.catalog, id.question);
           console.log(data);
           console.log(data.data);
@@ -166,20 +168,26 @@ export default defineComponent({
       } else if (id.question === "new") {
           const data = await catalogService.editEmptyCatalog(id.catalog);
           console.log(data);
+          if(data.data.isEmpty) {
+            buttonsHidden = "true";
+          } else {
+            //errorhandling site should not be shown
+            console.log("you shouldn't be here");
+          }
       }
       cy.value = cytoscape({
         container: document.getElementById('cy'),
         elements: [
           { data: { id: 'center', label: questionText }, position: { x: 400, y: 0 }, grabbable: false},
-          { data: { id: 'left', label: prevText, hiddenData: prevId }, position: { x: 250, y: 0 }, grabbable: false },
-          { data: { source: 'left', target: 'center', label: 'Previous Question' }},
-          { data: { id: 'correct', label: maxKey, hiddenData: maxId }, position: { x: 550, y: -60 }, grabbable: false  },
-          { data: { source: 'center', target: 'correct', label: maxKeyNumber }, grabbable: false },
-          { data: { id: 'partial', label: midKey, hiddenData: midId }, position: { x: 550, y: 0 }, grabbable: false  },
-          { data: { source: 'center', target: 'partial', label: 'middle answer' }, grabbable: false },
-          { data: { id: 'incorrect', label: minKey, hiddenData: minId }, position: { x: 550, y: 60 }, grabbable: false  },
-          { data: { source: 'center', target: 'incorrect', label: minKeyNumber }, grabbable: false },
-          { data: { id: 'invisible', label: '', hidden: true }, position: { x: 550, y: 30 }, grabbable: false }
+          { data: { id: 'left', label: prevText, hiddenData: prevId, hidden: buttonsHidden}, position: { x: 250, y: 0 }, grabbable: false },
+          { data: { source: 'left', target: 'center', label: 'Previous Question', hidden: buttonsHidden }},
+          { data: { id: 'correct', label: maxKey, hiddenData: maxId, hidden: buttonsHidden }, position: { x: 550, y: -60 }, grabbable: false  },
+          { data: { source: 'center', target: 'correct', label: maxKeyNumber, hidden: buttonsHidden }, grabbable: false },
+          { data: { id: 'partial', label: midKey, hiddenData: midId, hidden: buttonsHidden }, position: { x: 550, y: 0 }, grabbable: false  },
+          { data: { source: 'center', target: 'partial', label: 'middle answer', hidden: buttonsHidden }, grabbable: false },
+          { data: { id: 'incorrect', label: minKey, hiddenData: minId, hidden: buttonsHidden }, position: { x: 550, y: 60 }, grabbable: false  },
+          { data: { source: 'center', target: 'incorrect', label: minKeyNumber, hidden: buttonsHidden }, grabbable: false },
+          { data: { id: 'invisible', label: '', hidden: "true" }, position: { x: 550, y: 30 }, grabbable: false }
         ],
         style: [
           { selector: 'node', style: { 'background-color': '#0074D9', label: 'data(label)', shape: 'rectangle', color: '#ff1f3a', 'text-valign': 'center', 'text-halign': 'center', 'border-width': '2px',
@@ -187,7 +195,8 @@ export default defineComponent({
           { selector: 'edge', style: { 'line-color': 'black', 'target-arrow-color': 'black', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', label: 'data(label)', 'font-size': '6px',
             'width': '1px','text-margin-y': '-10px'} },
           { selector: 'node[label="+"]', style: { 'background-color': '#28a745', label: 'data(label)', 'width': '30px', 'height': '30px', 'shape': 'round-rectangle', color: 'white'} },
-          { selector: 'node[hidden]', style: { 'visibility': 'hidden' } }
+          { selector: 'node[hidden = "true"]', style: { 'visibility': 'hidden' } },
+          { selector: 'edge[hidden = "true"]', style: { 'visibility': 'hidden' } }
         ],
         layout: { name: 'preset' },
         userPanningEnabled: false,
@@ -247,16 +256,15 @@ export default defineComponent({
         console.log(questionId);
         const res = await questionService.addQuestionToCatalog(questionId, currentCatalog);  
         console.log(res);
-        alert(res);
         const question = route.params.question;
         console.log(question);
-       /* if(question !== "new") {
+        if(question !== "new") {
             const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score, transition);
             showModal.value = false;
             location.reload();
         } else {
-            window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${res.id}`; 
-        }*/
+            window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${res.data.id}`; 
+        }
     }
     const attachButtonToNode = (nodeId) => {
       if(nodeId === "invisible") {
@@ -293,10 +301,6 @@ export default defineComponent({
     const attachButtonToExistingNode = (nodeId) => {
       const node = cy.value.$id(nodeId);
       const position = node.renderedPosition();
-      console.log("SSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
-      console.log(node.data('label'));
-      console.log(position.x);
-      console.log("SSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
       if (node.data('label') !== '+' && position.x === 1655.7443609022555 && node.data('id') !== "invisible") {
           const button = document.createElement('button');
           button.innerText = 'x';
