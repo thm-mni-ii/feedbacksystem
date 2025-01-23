@@ -348,7 +348,7 @@ export async function getAllQuestionsConnectionsFromCatalogs(
   return accesibaleQuestions;
 }
 
-export function createQuestionResponse(newQuestion: any) {
+export function createQuestionResponse(newQuestion: any, newId: string) {
   console.log(newQuestion);
   if (newQuestion.questiontype === QuestionType.Choice) {
     const returnQuestion = newQuestion;
@@ -358,6 +358,7 @@ export function createQuestionResponse(newQuestion: any) {
     for (let i = 0; i < configuration.answerColumns.length; i++) {
       delete configuration.answerColumns[i].correctAnswers;
     }
+    returnQuestion._id = newId;
     return returnQuestion;
   }
   if (newQuestion.questiontype === QuestionType.FillInTheBlanks) {
@@ -370,6 +371,7 @@ export function createQuestionResponse(newQuestion: any) {
         configuration.textParts[i].text = "";
       }
     }
+    returnQuestion._id = newId;
     console.log("returnQuestion");
     console.log(returnQuestion);
     return returnQuestion;

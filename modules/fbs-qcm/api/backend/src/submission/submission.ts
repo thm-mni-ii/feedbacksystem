@@ -66,13 +66,21 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
     const userCourses = getStudentCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
     const timestamp = Date.now();
-    const questionId = new mongoDB.ObjectId(requestData.questionId);
-    const catalog = await checkQuestionAccess(questionId, userCourses, 
-                                              catalogInCourseCollection, catalogCollection);
+    const questionInCatalogId = new mongoDB.ObjectId(requestData.questionId);
+    const actualQuestionIdQuery = {
+        _id: questionInCatalogId
+    }
+    const questionObject = await questionInCatalogCollection.findOne(actualQuestionIdQuery);
+    if( questionObject === null) {
+        return -1;
+    }
+    const questionId = questionObject.question;
+    const catalog = await checkQuestionAccess(questionId, userCourses, catalogInCourseCollection, catalogCollection);
     if(catalog === false) {
         return -1;
     }
@@ -84,7 +92,7 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
     }
     const submission = {
         user: tokenData.id,
-        question: questionId,
+        question: questionInCatalogId,
         answer: requestData.answers,
         evaluation: correct,
         timeStamp: timestamp,
@@ -169,10 +177,6 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
     response.score = score;
     console.log(score);
     return response;
-}
-
-function createResponse() {
-
 }
 
 function getSelectedIds(answer: ChoiceAnswer[]) {

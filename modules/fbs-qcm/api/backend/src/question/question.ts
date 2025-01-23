@@ -20,6 +20,12 @@ import { Question } from "../model/Question";
 import { authenticate, authenticateInCatalog } from "../authenticate";
 type questionInsertionType = Omit<Question, "_id">;
 
+interface Element {
+    needed_score: number,
+    transition: string,
+    question: string
+}
+
 export async function getQuestionById(
   questionId: string,
   tokenData: JwtPayload
@@ -214,10 +220,7 @@ export async function getAllQuestions(tokenData: JwtPayload) {
   
 }
 
-export async function getCurrentQuestion(
-  tokenData: JwtPayload,
-  catalogId: string
-) {
+export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: string) {
   if(!await authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)) {
       return -1;
   }
@@ -228,17 +231,17 @@ export async function getCurrentQuestion(
     database.collection("submission");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  let newQuestionId = await getQuestionId(
+  let newQuestionInCatalogId: any = await getQuestionId(
     tokenData,
     submissionCollection,
     catalogId,
     questionInCatalogCollection
   );
   let newQuestion: any = {};
-  if (newQuestionId == -1) {
+  if (newQuestionInCatalogId === -1) {
     return { catalog: "over" };
   }
-  if (newQuestionId == 0) {
+  if (newQuestionInCatalogId === 0) {
     newQuestion = await getFirstQuestionInCatalog(
       questionCollection,
       questionInCatalogCollection,
@@ -246,23 +249,25 @@ export async function getCurrentQuestion(
     );
   } else {
     const getQuestionQuery = {
-      _id: newQuestionId,
-    };
-    newQuestion = await questionCollection.findOne(getQuestionQuery);
+      _id: newQuestionInCatalogId,
+    }; 
+    const questionId = await questionInCatalogCollection.findOne(getQuestionQuery);
+    if(questionId === null) {
+        return -1;
+    }
+    const questionQuery = {
+        _id: questionId.question
+    }
+    newQuestion = await questionCollection.findOne(questionQuery);
   }
   if (newQuestion == null) {
     return -1;
   }
   newQuestion.questionsLeft = await numberOfQuestionsAhead(catalogId, newQuestion._id.toString());
-  return createQuestionResponse(newQuestion);
+  return createQuestionResponse(newQuestion, newQuestionInCatalogId);
 }
 
-async function getQuestionId(
-  tokenData: JwtPayload,
-  submissionCollection: mongoDB.Collection,
-  catalogId: string,
-  questionInCatalogCollection: mongoDB.Collection
-) {
+async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoDB.Collection, catalogId: string, questionInCatalogCollection: mongoDB.Collection) {
   const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
   const catalogQuery = {
     catalog: catalogIdObject,
@@ -287,7 +292,7 @@ async function getQuestionId(
   }
   const evaluation = lastSubmission[0].evaluation;
   const questionQuery = {
-    question: lastSubmission[0].question,
+    _id: lastSubmission[0].question,
   };
   const priorQuestion = await questionInCatalogCollection.findOne(
     questionQuery
@@ -299,12 +304,23 @@ async function getQuestionId(
   if (forwarding == null || forwarding.length == 0) {
     return -1;
   }
-  if (evaluation == AnswerScore.correct) {
-    return forwarding[AnswerScore.correct];
-  }
-  if (evaluation == AnswerScore.incorrect) {
-    return forwarding[AnswerScore.incorrect];
-  }
+  forwarding.forEach(function(element: Element) {
+    if(element.transition === "correct") {
+        if( evaluation >= element.needed_score ) {
+            return element.question;
+        }
+    }
+    if(element.transition === "incorrect") {
+        if( evaluation <= element.needed_score ) {
+            return element.question;
+        }
+    }
+  });
+  forwarding.forEach(function(element: Element) {
+    if(element.transition === "partial") {
+        return element.question;
+    }
+  });
   return -1;
 }
 

@@ -2,6 +2,7 @@ import { addChildrenToQuestion, deleteCatalog, editCatalogInformation, editEmpty
 import { Router } from 'express';
 import { authenticateToken } from "../authenticateToken";
 import { authenticate } from "../authenticate";
+import { getCurrentQuestion } from "../question/question";
  // get all catalogs from a course with the course id as a path parameter
  const router = Router();
  router.get("/api_v1/catalogs/:id", authenticateToken, async (req, res) => {
@@ -199,6 +200,23 @@ import { authenticate } from "../authenticate";
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
+    }
+  });
+  router.get("/api_v1/current_question", authenticateToken, async (req, res) => {
+    try {
+        res.sendStatus(401);
+      if (req.user == undefined) {
+        res.sendStatus(401); 
+      }
+      if (req.user !== undefined) {
+        const catalogId = req.query.ID as string;
+        const result = await getCurrentQuestion(req.user, catalogId);
+        console.log(result);
+        res.send(result);
+      }
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
     }
   });
   export default router; 
