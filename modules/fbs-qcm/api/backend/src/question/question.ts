@@ -15,15 +15,20 @@ import {
   numberOfQuestionsAhead,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
-import { Access, AnswerScore, CatalogAccess, SessionStatus } from "../utils/enum";
+import {
+  Access,
+  AnswerScore,
+  CatalogAccess,
+  SessionStatus,
+} from "../utils/enum";
 import { Question } from "../model/Question";
 import { authenticate, authenticateInCatalog } from "../authenticate";
 type questionInsertionType = Omit<Question, "_id">;
 
 interface Element {
-    needed_score: number,
-    transition: string,
-    question: string
+  needed_score: number;
+  transition: string;
+  question: string;
 }
 
 export async function getQuestionById(
@@ -39,7 +44,7 @@ export async function getQuestionById(
   const query = {
     _id: new mongoDB.ObjectId(questionId),
   };
-  if(authenticate(tokenData, Access.moderator)) {
+  if (authenticate(tokenData, Access.moderator)) {
     const data = await collection.findOne(query);
     if (data !== null) {
       return data;
@@ -64,15 +69,21 @@ export async function addQuestionToCatalog(
   catalogId: string,
   children: any
 ) {
-    console.log(questionId);
-    console.log(catalogId);
-  if(! await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
+  console.log(questionId);
+  console.log(catalogId);
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.docentInCatalog,
+      catalogId
+    ))
+  ) {
     return -1;
   }
   const questionIdObject = new mongoDB.ObjectId(questionId);
   const catalogIdObject = new mongoDB.ObjectId(catalogId);
   const database: mongoDB.Db = await connect();
-    database.collection("catalogInCourse");
+  database.collection("catalogInCourse");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
   const insert = {
@@ -83,8 +94,8 @@ export async function addQuestionToCatalog(
   const result = await questionInCatalogCollection.insertOne(insert);
   console.log(result);
   const res = {
-      id: result.insertedId
-  }
+    id: result.insertedId,
+  };
   return res;
 }
 
@@ -92,10 +103,10 @@ export async function removeQuestionFromCatalog(
   tokenData: JwtPayload,
   questionId: string
 ) {
-    console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
-    console.log(tokenData);
-    console.log(questionId);
-    console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
+  console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
+  console.log(tokenData);
+  console.log(questionId);
+  console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
   const database: mongoDB.Db = await connect();
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
@@ -104,23 +115,29 @@ export async function removeQuestionFromCatalog(
     _id: questionIdObject,
   };
   const data = await questionInCatalogCollection.findOne(query);
-  if(data === null) {
-      return -1;
+  if (data === null) {
+    return -1;
   }
-  if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, data.catalog)) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.docentInCatalog,
+      data.catalog
+    ))
+  ) {
     return -1;
   }
   const result = await questionInCatalogCollection.deleteOne(query);
   const filter = {
-      "children.question": questionIdObject
-  }
+    "children.question": questionIdObject,
+  };
   const update: any = {
     $pull: {
-      "children": {
-        "question": questionIdObject
-      }
-    }
-  }
+      children: {
+        question: questionIdObject,
+      },
+    },
+  };
   console.log(update);
   const res2 = await questionInCatalogCollection.updateOne(filter, update);
   console.log(res2);
@@ -138,11 +155,12 @@ export async function deleteQuestionById(
   };
   const database: mongoDB.Db = await connect();
   const collection: mongoDB.Collection = database.collection("question");
-    database.collection("catalogInCourse");
-  const questionCollection: mongoDB.Collection = database.collection("question");
+  database.collection("catalogInCourse");
+  const questionCollection: mongoDB.Collection =
+    database.collection("question");
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
-  if(!IsOwner(questionId, tokenData, questionCollection)) {
+  if (!IsOwner(questionId, tokenData, questionCollection)) {
     return -1;
   }
   const questionInCatalogQuery = {
@@ -154,7 +172,7 @@ export async function deleteQuestionById(
 }
 
 export async function postQuestion(question: Question, tokenData: JwtPayload) {
-  if(!authenticate(tokenData, Access.moderator)) {
+  if (!authenticate(tokenData, Access.moderator)) {
     return 1;
   }
   const database: mongoDB.Db = await connect();
@@ -173,10 +191,16 @@ export async function postQuestion(question: Question, tokenData: JwtPayload) {
 export async function putQuestion(question: Question, tokenData: JwtPayload) {
   const database: mongoDB.Db = await connect();
   const questionCollection = database.collection("question");
-  if(!(await IsOwner(question._id as unknown as string, tokenData, questionCollection))) {
-      if(!authenticate(tokenData, Access.admin)) {
-          return -1;
-      }
+  if (
+    !(await IsOwner(
+      question._id as unknown as string,
+      tokenData,
+      questionCollection
+    ))
+  ) {
+    if (!authenticate(tokenData, Access.admin)) {
+      return -1;
+    }
   }
   const filter = {
     _id: new mongoDB.ObjectId(question._id),
@@ -188,7 +212,7 @@ export async function putQuestion(question: Question, tokenData: JwtPayload) {
 }
 
 export async function getAllQuestions(tokenData: JwtPayload) {
-  if(authenticate(tokenData, Access.moderator)) {
+  if (authenticate(tokenData, Access.moderator)) {
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection =
       database.collection("question");
@@ -217,12 +241,20 @@ export async function getAllQuestions(tokenData: JwtPayload) {
     allCatalogs
   );
   return allQuestion;
-  
 }
 
-export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: string) {
-  if(!await authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)) {
-      return -1;
+export async function getCurrentQuestion(
+  tokenData: JwtPayload,
+  catalogId: string
+) {
+  if (
+    !(await authenticateInCatalog(
+      tokenData,
+      CatalogAccess.studentInCatalog,
+      catalogId
+    ))
+  ) {
+    return -1;
   }
   const database: mongoDB.Db = await connect();
   const questionCollection: mongoDB.Collection =
@@ -247,27 +279,38 @@ export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: strin
       questionInCatalogCollection,
       catalogId
     );
+    newQuestionInCatalogId = newQuestion._id;
   } else {
     const getQuestionQuery = {
       _id: newQuestionInCatalogId,
-    }; 
-    const questionId = await questionInCatalogCollection.findOne(getQuestionQuery);
-    if(questionId === null) {
-        return -1;
+    };
+    const questionId = await questionInCatalogCollection.findOne(
+      getQuestionQuery
+    );
+    if (questionId === null) {
+      return -1;
     }
     const questionQuery = {
-        _id: questionId.question
-    }
+      _id: questionId.question,
+    };
     newQuestion = await questionCollection.findOne(questionQuery);
   }
   if (newQuestion == null) {
     return -1;
   }
-  newQuestion.questionsLeft = await numberOfQuestionsAhead(catalogId, newQuestion._id.toString());
+  newQuestion.questionsLeft = await numberOfQuestionsAhead(
+    catalogId,
+    newQuestion._id.toString()
+  );
   return createQuestionResponse(newQuestion, newQuestionInCatalogId);
 }
 
-async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoDB.Collection, catalogId: string, questionInCatalogCollection: mongoDB.Collection) {
+async function getQuestionId(
+  tokenData: JwtPayload,
+  submissionCollection: mongoDB.Collection,
+  catalogId: string,
+  questionInCatalogCollection: mongoDB.Collection
+) {
   const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
   const catalogQuery = {
     catalog: catalogIdObject,
@@ -304,29 +347,29 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   if (forwarding == null || forwarding.length == 0) {
     return -1;
   }
-  forwarding.forEach(function(element: Element) {
-    if(element.transition === "correct") {
-        if( evaluation >= element.needed_score ) {
-            return element.question;
-        }
+  forwarding.forEach(function (element: Element) {
+    if (element.transition === "correct") {
+      if (evaluation >= element.needed_score) {
+        return element.question;
+      }
     }
-    if(element.transition === "incorrect") {
-        if( evaluation <= element.needed_score ) {
-            return element.question;
-        }
+    if (element.transition === "incorrect") {
+      if (evaluation <= element.needed_score) {
+        return element.question;
+      }
     }
   });
-  forwarding.forEach(function(element: Element) {
-    if(element.transition === "partial") {
-        return element.question;
+  forwarding.forEach(function (element: Element) {
+    if (element.transition === "partial") {
+      return element.question;
     }
   });
   return -1;
 }
 
 export async function copyQuestion(tokenData: JwtPayload, questionId: string) {
-  if(!authenticate(tokenData, Access.moderator)) {
-      return -1;
+  if (!authenticate(tokenData, Access.moderator)) {
+    return -1;
   }
   const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);
   const database: mongoDB.Db = await connect();
@@ -354,8 +397,8 @@ export async function copyQuestionToCatalog(
   catalogId: string,
   children: string[]
 ) {
-  if(!authenticate(tokenData, Access.moderator)) {
-      return -1;
+  if (!authenticate(tokenData, Access.moderator)) {
+    return -1;
   }
   const adminCourses = getAdminCourseRoles(tokenData);
   const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);

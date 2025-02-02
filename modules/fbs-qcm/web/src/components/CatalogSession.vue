@@ -153,7 +153,7 @@ const submitAnswer = () => {
   <v-btn
     variant="tonal"
     class="mx-auto my-8"
-    type="submit"
+    type="button"
     append-icon="mdi-arrow-right-bold-outline"
     @click="submitAnswer"
   >

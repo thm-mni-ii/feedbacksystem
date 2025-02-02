@@ -25,45 +25,45 @@ const catalog = ref<Catalog>({
   requirements: null
 })
 
-const submitAnswer = (answer: any) => {
+const submitAnswer = async (answer: any) => {
   if (!questionData.value || !questionData.value._id) {
     console.error('Question data or ID is undefined.')
     return
   }
-  sessionService
-    .submitAnswer(questionData.value?._id, answer)
-    .then((res) => {
-      console.log(res)
-      questionData.value = res.data
-    })
-    .catch((err) => {
-      console.log('Submit Answer Error: ', err)
-    })
+  try {
+    // Submit the answer and get the next question
+    const submitResponse = await sessionService.submitAnswer(questionData.value._id, answer)
+    // Update the question data with the next question from the response
+    console.log(submitResponse)
+    questionData.value = submitResponse.data
+  } catch (error) {
+    console.error('Error submitting answer:', error)
+  }
 }
 
-onMounted(() => {
-  // TODO: Check for ongoing session
-  // TODO: no ongoing session > check parameter
-  sessionService
-    .startSession(187, '663a51d228d8781d96050905')
-    .then((res) => {
-      console.log('START SESSION : ', res)
-      questionData.value = res.data
-    })
-    .catch((error) => {
-      console.error('Fehler beim Abrufen der Frage:', error)
-    })
-
-  console.log(questionData)
-  if (route.params.catalogId && route.params.courseId) {
-    console.log(route.params.catalogId)
-    // Start-session
-  } else {
-    // show keine aktive session - starte session über katalog
-    console.log('error view anzeigen')
+onMounted(async () => {
+  try {
+    const checkSessionResponse = await sessionService.checkSession()
+    if (checkSessionResponse.data.length === 0) {
+      console.log('No active session found. Starting a new session.')
+      const startSessionResponse = await sessionService.startSession(
+        187,
+        '663a51d228d8781d96050905'
+      )
+      questionData.value = startSessionResponse.data
+    } else {
+      console.log('Active session found:', checkSessionResponse.data)
+      const currentQuestionResponse = await sessionService.getCurrentQuestion()
+      questionData.value = currentQuestionResponse.data
+    }
+  } catch (error) {
+    console.error('Error fetching session:', error)
     showErrorPage.value = true
   }
-  console.log(route.params.courseId)
+  if (!route.params.catalogId || !route.params.courseId) {
+    console.log('Error: Missing required parameters.')
+    showErrorPage.value = true
+  }
 })
 </script>
 

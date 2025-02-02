@@ -14,8 +14,6 @@ class SessionService {
         }
       )
       .then((res) => {
-        console.log(res.data)
-        console.log(res)
         return res
       })
   }
@@ -36,6 +34,35 @@ class SessionService {
       .catch((err) => {
         console.log(err)
         throw err
+      })
+  }
+  checkSession(): Promise<AxiosResponse<any>> {
+    return axios
+      .get('/api_v1/getOngoingSessions', {
+        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+      })
+      .then((res) => {
+        console.log(res.data)
+        return res
+      })
+      .catch((err) => {
+        console.log(err)
+        throw err
+      })
+  }
+  getCurrentQuestion(): Promise<AxiosResponse<any>> {
+    return axios
+      .get('/api_v1/currentSessionQuestion', {
+        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+      })
+      .then((res) => {
+        console.log('GET CURRENT QUESTION:')
+        console.log(res.data)
+        return res
+      })
+      .catch((err) => {
+        console.log(err)
+        return err
       })
   }
 }

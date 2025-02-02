@@ -1,12 +1,36 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import axios from 'axios'
-// import VueIntersect from 'vue-intersect'
 import type Question from '../model/Question'
-//import type { Choice } from '../model/questionTypes/Choice'
 import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
 import { onMounted, onBeforeUnmount } from 'vue'
+
+interface ChoiceQuestionConfiguration {
+  multipleRow: boolean
+  multipleColumn: boolean
+  answerColumns: { id: number; name: string }[]
+  optionRows: { id: number; text: string; correctAnswers: number[] }[]
+}
+
+interface FillInTheBlanksQuestionConfiguration {
+  showBlanks: boolean
+  textParts: { order: number; text: string; isBlank: boolean }[]
+}
+
+type QuestionConfiguration = ChoiceQuestionConfiguration | FillInTheBlanksQuestionConfiguration
+
+// Type Guards
+function isChoiceQuestionConfiguration(
+  config: QuestionConfiguration
+): config is ChoiceQuestionConfiguration {
+  return (config as ChoiceQuestionConfiguration).optionRows !== undefined
+}
+
+function isFillInTheBlanksQuestionConfiguration(
+  config: QuestionConfiguration
+): config is FillInTheBlanksQuestionConfiguration {
+  return (config as FillInTheBlanksQuestionConfiguration).textParts !== undefined
+}
 
 const props = defineProps<{
   inputQuestion?: Question
@@ -43,7 +67,7 @@ onMounted(() => {
         multipleColumn: false,
         answerColumns: [{ id: 1, name: '' }],
         optionRows: [{ id: 1, text: '', correctAnswers: [] }]
-      }
+      } as ChoiceQuestionConfiguration
     }
   } else if (props.inputQuestion) {
     question.value = props.inputQuestion
@@ -55,73 +79,87 @@ onBeforeUnmount(() => {
 })
 
 const checkMultipleRows = () => {
-  const optionRows = question.value.questionconfiguration.optionRows
-  const rowsWithAnswers = optionRows.filter((row: any) => row.correctAnswers.length > 0)
-  if (rowsWithAnswers.length > 1) {
-    question.value.questionconfiguration.multipleRow = true
+  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
+    const optionRows = question.value.questionconfiguration.optionRows
+    const rowsWithAnswers = optionRows.filter((row) => row.correctAnswers.length > 0)
+    if (rowsWithAnswers.length > 1) {
+      question.value.questionconfiguration.multipleRow = true
+    }
   }
 }
 
 const addOptionRow = () => {
-  console.log('add option row triggered')
-  if (!question.value.questionconfiguration.optionRows) {
-    question.value.questionconfiguration.optionRows = []
-  }
+  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
+    if (!question.value.questionconfiguration.optionRows) {
+      question.value.questionconfiguration.optionRows = []
+    }
 
-  question.value.questionconfiguration.optionRows.push({
-    id: question.value.questionconfiguration.optionRows.length + 1,
-    text: '',
-    correctAnswers: []
-  })
+    question.value.questionconfiguration.optionRows.push({
+      id: question.value.questionconfiguration.optionRows.length + 1,
+      text: '',
+      correctAnswers: []
+    })
+  }
 }
 
 const addOptionCol = () => {
-  const answerColumns = question.value.questionconfiguration.answerColumns
+  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
+    const answerColumns = question.value.questionconfiguration.answerColumns
 
-  if (!Array.isArray(answerColumns)) {
-    console.error('answerColumns is not initialized or is not an array')
-    return
+    if (!Array.isArray(answerColumns)) {
+      console.error('answerColumns is not initialized or is not an array')
+      return
+    }
+
+    answerColumns.push({
+      id: answerColumns.length + 1,
+      name: ''
+    })
+
+    console.log('Updated answerColumns:', answerColumns)
   }
-
-  answerColumns.push({
-    id: answerColumns.length + 1,
-    name: ''
-  })
-
-  console.log('Updated answerColumns:', answerColumns)
 }
 
 const deleteOption = (index: number) => {
-  question.value.questionconfiguration.optionRows.splice(index, 1)
+  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
+    question.value.questionconfiguration.optionRows.splice(index, 1)
+  }
 }
 
 const deleteAnswerColumn = (index: number) => {
-  if (question.value.questionconfiguration.answerColumns.length > 0) {
-    question.value.questionconfiguration.answerColumns.splice(index, 1)
+  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
+    if (question.value.questionconfiguration.answerColumns.length > 0) {
+      question.value.questionconfiguration.answerColumns.splice(index, 1)
+    }
   }
 }
 
 const toggleCorrectAnswer = (columnIndex: number, optionIndex: number, isSelected: boolean) => {
-  const optionRows = question.value.questionconfiguration.optionRows
-  if (!optionRows || !optionRows[optionIndex]) {
-    return
+  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
+    const optionRows = question.value.questionconfiguration.optionRows
+    if (!optionRows || !optionRows[optionIndex]) {
+      return
+    }
+    const correctAnswers = optionRows[optionIndex].correctAnswers || []
+    const index = correctAnswers.indexOf(columnIndex)
+    if (isSelected && index === -1) {
+      correctAnswers.push(columnIndex)
+    } else if (!isSelected && index !== -1) {
+      correctAnswers.splice(index, 1)
+    }
+    optionRows[optionIndex].correctAnswers = [...correctAnswers]
   }
-  const correctAnswers = optionRows[optionIndex].correctAnswers || []
-  const index = correctAnswers.indexOf(columnIndex)
-  if (isSelected && index === -1) {
-    correctAnswers.push(columnIndex)
-  } else if (!isSelected && index !== -1) {
-    correctAnswers.splice(index, 1)
-  }
-  optionRows[optionIndex].correctAnswers = [...correctAnswers]
 }
 
 const isCorrectAnswer = (columnIndex: number, optionIndex: number) => {
-  const optionRows = question.value.questionconfiguration.optionRows
-  if (!optionRows || !optionRows[optionIndex] || !optionRows[optionIndex].correctAnswers) {
-    return false
+  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
+    const optionRows = question.value.questionconfiguration.optionRows
+    if (!optionRows || !optionRows[optionIndex] || !optionRows[optionIndex].correctAnswers) {
+      return false
+    }
+    return optionRows[optionIndex].correctAnswers.includes(columnIndex)
   }
-  return optionRows[optionIndex].correctAnswers.includes(columnIndex)
+  return false
 }
 
 const removeTag = (item: string) => {
@@ -191,7 +229,12 @@ const handleSubmit = async () => {
           </template>
         </v-combobox>
 
-        <div v-if="question.questiontype === 'Choice'">
+        <div
+          v-if="
+            question.questiontype === 'Choice' &&
+            isChoiceQuestionConfiguration(question.questionconfiguration)
+          "
+        >
           <div class="justify-space-between d-flex flex-row">
             <v-switch
               v-model="question.questionconfiguration.multipleColumn"
@@ -294,7 +337,14 @@ const handleSubmit = async () => {
             </div>
           </div>
         </div>
-        <div v-if="question.questiontype === 'FillInTheBlanks'">HAHOOERR</div>
+        <div
+          v-if="
+            question.questiontype === 'FillInTheBlanks' &&
+            isFillInTheBlanksQuestionConfiguration(question.questionconfiguration)
+          "
+        >
+          HAHOOERR
+        </div>
       </v-form>
     </v-card-text>
 
