@@ -165,7 +165,7 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
         replyRow.id = configuration.optionRows[i].id;
         replyRow.text = configuration.optionRows[i].text;
         replyRow.correct = result.inBothLists;
-        response.row[response.row.length] = replyRow;
+        response.row[i] = replyRow;
         console.log(result);
         correctAnswers += result.inBothLists.length;
         falseAnswers += result.onlyInList1.length + result.onlyInList2.length;
