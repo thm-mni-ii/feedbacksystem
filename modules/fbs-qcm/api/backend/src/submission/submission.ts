@@ -195,6 +195,12 @@ function getSelectedIds(answer: ChoiceAnswer[]) {
 }
 
 function compareNumberLists(list1: number[], list2: number[]) {
+    if(list1 === undefined) {
+        list1 = [];
+    }
+    if(list2 === undefined) {
+        list2 = [];
+    }
     const inBothLists = list1.filter(num => list2.includes(num));
     const onlyInList1 = list1.filter(num => !list2.includes(num));
     const onlyInList2 = list2.filter(num => !list1.includes(num));
