@@ -52,18 +52,18 @@ interface ChoiceReplyRow {
     correct: number[]
 }
 
-export async function submitSessionAnswer(tokenData: JwtPayload, requestData: any) {
+export async function submitSessionAnswer(tokenData: JwtPayload, question: any, answers: any) {
     const session = await getCurrentSession(tokenData.id);
     console.log(session);
     if(session == null || session == undefined) {
         console.log("no Session found");
         return -1;
     }
-    const submitResult = await submit(tokenData, requestData, session);
+    const submitResult = await submit(tokenData, question, answers, session);
     return submitResult;
 }
 
-export async function submit(tokenData: JwtPayload, requestData: any, session: string) {
+export async function submit(tokenData: JwtPayload, question: any, answers: any,  session: string) {
     const userCourses = getStudentCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
@@ -72,7 +72,7 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
     const timestamp = Date.now();
-    const questionInCatalogId = new mongoDB.ObjectId(requestData.questionId);
+    const questionInCatalogId = new mongoDB.ObjectId(question);
     const actualQuestionIdQuery = {
         _id: questionInCatalogId
     }
@@ -87,7 +87,7 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
         console.log("Keinen Zugriff auf Katalog");
         return -1;
     }
-    const correct = await checkAnswer(requestData.answers, questionId, questionCollection);
+    const correct = await checkAnswer(answers, questionId, questionCollection);
     console.log(timestamp);
     let sessionObject: any = "";
     if(session !== "") {
@@ -96,7 +96,7 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
     const submission = {
         user: tokenData.id,
         question: questionInCatalogId,
-        answer: requestData.answers,
+        answer: answers,
         evaluation: correct,
         timeStamp: timestamp,
         session: sessionObject
