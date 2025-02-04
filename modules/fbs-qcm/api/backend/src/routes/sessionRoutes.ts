@@ -123,29 +123,6 @@ router.post("/api_v1/startSession", authenticateToken, async (req, res) => {
       }
     }
   );
-  router.post(
-    "/api_v1/submitSessionAnswer",
-    authenticateToken,
-    async (req, res) => {
-      try {
-        if (req.user === undefined) {
-          res.sendStatus(401);
-          return;
-        }
-        const requestData = req.body;
-        console.log(requestData);
-        const result = await submitSessionAnswer(req.user, requestData);
-        if (result === -1) {
-          res.send(500);
-          return;
-        }
-        res.send(result);
-      } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-      }
-    }
-  );
   router.get("/api_v1/getOngoingSessions", authenticateToken, async (req, res) => {
     try {
       if (req.user === undefined) {
