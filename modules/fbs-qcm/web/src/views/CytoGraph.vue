@@ -135,6 +135,8 @@ export default defineComponent({
           console.log(keys);
           questionText = data.data.questionText;
           for(let i = 0; i < data.data.children.length; i++) {
+            console.log("<transitio");        
+            console.log(data.data.children[i].transition);
             if(data.data.children[i].transition === "correct") {
                 maxKey = data.data.children[i].text;
                 maxId = data.data.children[i].questionId;
@@ -259,7 +261,7 @@ export default defineComponent({
         const question = route.params.question;
         console.log(question);
         if(question !== "new") {
-            const res2 = await catalogService.addChildrenToQuestion(question, res.data.insertedId, score, transition);
+            const res2 = await catalogService.addChildrenToQuestion(question, res.data.id, score, transition);
             showModal.value = false;
             location.reload();
         } else {
