@@ -269,6 +269,7 @@ export async function getCurrentQuestion(
     catalogId,
     questionInCatalogCollection
   );
+  console.log(newQuestionInCatalogId);
   let newQuestion: any = {};
   if (newQuestionInCatalogId === -1) {
     return { catalog: "over" };

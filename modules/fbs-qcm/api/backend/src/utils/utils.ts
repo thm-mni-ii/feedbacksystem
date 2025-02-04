@@ -293,7 +293,12 @@ export async function getFirstQuestionInCatalog(
   const firstQuestionData = await questionCollection.findOne(
     firstQuestionQuery
   );
-  return firstQuestionData;
+  if(firstQuestionData !== null) {
+      firstQuestionData._id = firstQuestion._id;
+      return firstQuestionData;
+  } else {
+      return null;
+  }
 }
 
 function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
@@ -359,6 +364,8 @@ export function createQuestionResponse(newQuestion: any, newId: string) {
       delete configuration.answerColumns[i].correctAnswers;
     }
     returnQuestion._id = newId;
+    console.log("returnQuestion");
+    console.log(returnQuestion);
     return returnQuestion;
   }
   if (newQuestion.questiontype === QuestionType.FillInTheBlanks) {
