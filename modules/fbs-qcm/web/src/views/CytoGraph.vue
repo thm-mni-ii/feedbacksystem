@@ -25,6 +25,22 @@
         <button @click="closeModal">Close</button>
       </div>
     </div>
+     <div v-if="showModalNum" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Weiterleitung ändern</h3>
+        <p>Ab wie viel Prozent soll weitergeleitet werden</p>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            v-model="nodeData"
+            placeholder="change the needed score"
+          />
+        <button @click="changeNeededScore(nodeData, transition);">Update Node</button>
+        <button @click="closeModal">Close</button>
+      </div>
+    </div>
+
   </div>
 </template>
 <style scoped>
@@ -100,6 +116,7 @@ export default defineComponent({
     const cy = ref<Core | null>(null); 
     const nodeId = ref(3); 
     const showModal = ref(false); 
+    const showModalNum = ref(false); 
     const route = useRoute();
     const id = route.params;
     let currentQuestion = null;
@@ -230,27 +247,43 @@ export default defineComponent({
                 window.location.href =`http://localhost:8085/editCatalog/${id.catalog}/${clickedNode.data('hiddenData')}`;
             }
         });
+        cy.value.on('click', 'edge', async (event) => {
+            const edge = event.target;
+            console.log("edge");
+            console.log(edge.data());
+            const data = edge.data();
+            if( data.target === "correct") {
+                console.log("SSS");
+                transition.value = "correct";
+                showModalNum.value = true;
+            }
+            if( data.target === "incorrect") {
+                console.log("SSS");
+                transition.value = "incorrect";
+                showModalNum.value = true;
+            }
+            
+        }); 
         cy.value.nodes().forEach((node) => {
+            console.log("BBBBBBBBBBBBBBBBBBBBBBBTTTTTTTTTTTTTTTTTTTTOOOOOOOOOOOOONNNNNNNNNNNNNNNNN")
             attachButtonToExistingNode(node.id());  
         });
     });
-    const addNode = () => {
-      if (cy.value) {
-        const newNodeId = `question${nodeId.value}`;
-        const newNodeLabel = `Question ${nodeId.value}: What is ${nodeId.value + 1} + ${nodeId.value + 1}?`;
-        nodeId.value++;
-
-        cy.value.add({ group: 'nodes', data: { id: newNodeId, label: newNodeLabel }, position: { x: 550, y: -120 + (nodeId.value *20) }, style: {grabbable: false}});
-        cy.value.add({ group: 'edges', data: { source: 'center', target: newNodeId, label: '50%' }});
-      }
+    const changeNeededScore = async (score, transition) => {
+        const question = id.question;
+        console.log("FRAGEEEEEEEEEEEEEEEEEEEEEEEEE");
+        console.log(question);
+        const result = await catalogService.changeNeededScore(question, score, transition);
+        console.log(result);
+        showModalNum.value = false;
+        location.reload();
     };
     const updateQuestionOptions = (data) => {
-      console.log(data);
       questionOptions.value = data;
-      console.log(questionOptions);
     };
     const closeModal = () => {
         showModal.value = false;
+        showModalNum.value = false;
         questionOptions.value = [];
     }
     const addQuestion = async (score, questionId, transition) => {
@@ -294,26 +327,24 @@ export default defineComponent({
             catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
             node.data('label', '+');
             node.data('hiddenData', null);
-            button.remove(); // Remove the button
+            button.remove(); 
       };
-
-      // Append the button to the container
       document.getElementById('cy').appendChild(button);
     };
     const attachButtonToExistingNode = (nodeId) => {
       const node = cy.value.$id(nodeId);
       const position = node.renderedPosition();
-      if (node.data('label') !== '+' && position.x === 1655.7443609022555 && node.data('id') !== "invisible") {
+      if (node.data('label') !== '+' && position.x === 1180.109022556391 && node.data('id') !== "invisible") {
           const button = document.createElement('button');
           button.innerText = 'x';
           button.className = 'remove-button';
           button.style.position = 'absolute';
-          button.style.width = '70px';   // Set the button width
-          button.style.height = '70px';  // Set the button height
-          button.style.color = 'red';   // Set the text color to white
+          button.style.width = '70px';   
+          button.style.height = '70px'; 
+          button.style.color = 'red';   
           const left = position.x - 300;
           const top = position.y;
-          button.style.fontSize = '50px';  // Adjust font size to make "x" bigger
+          button.style.fontSize = '50px';  
           button.style.fontWeight = 'bold';
           button.style.left = `${left}px`;
           button.style.top = `${top}px`;
@@ -324,14 +355,12 @@ export default defineComponent({
                 catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
                 node.data('label', '+');
                 node.data('hiddenData', null);
-                button.remove(); // Remove the button
+                button.remove(); 
           };
-
-          // Append the button to the container
           document.getElementById('cy').appendChild(button);
       }
     }
-    return { addNode, showModal, id, attachButtonToExistingNode, questionOptions, closeModal, addQuestion, transition, showInput} ;
+    return { showModal, showModalNum, id, attachButtonToExistingNode, questionOptions, closeModal, addQuestion, transition, showInput, changeNeededScore} ;
   },
 });
 </script>

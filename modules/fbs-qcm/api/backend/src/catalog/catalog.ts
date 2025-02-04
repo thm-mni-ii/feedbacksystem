@@ -565,3 +565,31 @@ export async function editEmptyCatalog(tokenData: JwtPayload, catalogId: string)
         return -1;
     }
 }
+
+export async function changeNeededScore(tokenData: JwtPayload, questionId: string, needed_score: number, transition: string) {
+    const database: mongoDB.Db = await connect();
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const query = {
+        _id: new mongoDB.ObjectId(questionId)
+    }
+    const questionObject = await questionInCatalogCollection.findOne(query);
+    if(questionObject === null) {
+        console.log("keine Frage gefunden");
+        return -1;
+    }
+    if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, questionObject.catalog)) {
+        console.log("keine Berechtigungen");
+        return -1;                                               
+    }
+    const filter = {
+        _id: new mongoDB.ObjectId(questionId),
+        "children.transition": transition
+    }
+    const update: any = {
+        $set: {
+            "children.$.needed_score": needed_score
+        }
+    }
+    const response = questionInCatalogCollection.updateOne(filter, update)
+    return response; 
+}

@@ -305,26 +305,12 @@ export async function getCurrentQuestion(
   return createQuestionResponse(newQuestion, newQuestionInCatalogId);
 }
 
-async function getQuestionId(
-  tokenData: JwtPayload,
-  submissionCollection: mongoDB.Collection,
-  catalogId: string,
-  questionInCatalogCollection: mongoDB.Collection
-) {
+async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoDB.Collection, catalogId: string, questionInCatalogCollection: mongoDB.Collection) {
   const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
-  const catalogQuery = {
-    catalog: catalogIdObject,
-  };
-  const catalog: any = await questionInCatalogCollection
-    .find(catalogQuery)
-    .toArray();
-  const questions: mongoDB.ObjectId[] = catalog.map(
-    (entry: any) => entry.question
-  );
-  const query = {
-    user: tokenData.id,
-    question: { $in: questions },
-  };
+  const catalogQuery = { catalog: catalogIdObject };
+  const catalog: any = await questionInCatalogCollection.find(catalogQuery).toArray();
+  const questions: mongoDB.ObjectId[] = catalog.map((entry: any) => entry.question);
+  const query = {user: tokenData.id, question: { $in: questions }};
   const lastSubmission: any = await submissionCollection
     .find(query)
     .sort({ timestamp: -1 })

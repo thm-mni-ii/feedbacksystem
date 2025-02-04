@@ -1,5 +1,5 @@
-import { addChildrenToQuestion, deleteCatalog, editCatalogInformation, editEmptyCatalog, getCatalog, getCatalogs, getPreviousQuestionInCatalog, postCatalog, putCatalog } from "../catalog/catalog";
-import { Router } from 'express';
+import { addChildrenToQuestion, changeNeededScore, deleteCatalog, editCatalogInformation, editEmptyCatalog, getCatalog, getCatalogs, getPreviousQuestionInCatalog, postCatalog, putCatalog } from "../catalog/catalog";
+import { Router, query } from 'express';
 import { authenticateToken } from "../authenticateToken";
 import { authenticate } from "../authenticate";
 import { getCurrentQuestion } from "../question/question";
@@ -204,15 +204,39 @@ import { getCurrentQuestion } from "../question/question";
   });
   router.get("/api_v1/current_question", authenticateToken, async (req, res) => {
     try {
-        res.sendStatus(401);
       if (req.user == undefined) {
         res.sendStatus(401); 
       }
       if (req.user !== undefined) {
-        const catalogId = req.query.ID as string;
+        const catalogId = req.body.ID as string;
         const result = await getCurrentQuestion(req.user, catalogId);
         console.log(result);
         res.send(result);
+      }
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+    }
+  });
+  router.put("/api_v1/change_needed_score", authenticateToken, async (req, res) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401); 
+      }
+      if (req.user !== undefined) {
+        const questionId = req.body.question as string;
+        const score = Number(req.body.score);
+        const transition = req.body.transition as string;
+        console.log(questionId);
+        console.log(score);
+        console.log(transition);
+        console.log(req.query);
+        const result = await changeNeededScore(req.user, questionId, score, transition);
+        if(result === -1) {
+            res.sendStatus(500);
+        } else {
+            res.send(result);
+        }
       }
     } catch (error) {
       console.log(error);

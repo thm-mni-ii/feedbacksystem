@@ -56,6 +56,7 @@ export async function submitSessionAnswer(tokenData: JwtPayload, requestData: an
     const session = await getCurrentSession(tokenData.id);
     console.log(session);
     if(session == null || session == undefined) {
+        console.log("no Session found");
         return -1;
     }
     const submitResult = await submit(tokenData, requestData, session);
@@ -77,11 +78,13 @@ export async function submit(tokenData: JwtPayload, requestData: any, session: s
     }
     const questionObject = await questionInCatalogCollection.findOne(actualQuestionIdQuery);
     if( questionObject === null) {
+        console.log("Frage existiert nicht");
         return -1;
     }
     const questionId = questionObject.question;
     const catalog = await checkQuestionAccess(questionId, userCourses, catalogInCourseCollection, catalogCollection);
     if(catalog === false) {
+        console.log("Keinen Zugriff auf Katalog");
         return -1;
     }
     const correct = await checkAnswer(requestData.answers, questionId, questionCollection);

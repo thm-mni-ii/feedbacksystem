@@ -11,6 +11,16 @@ class CatalogService {
       }
     })
   }
+  changeNeededScore(question: string, score: number, transition: string): Promise<AxiosResponse<Catalog>> {
+      console.log(question);
+      console.log(score);
+      console.log(transition);
+    return axios.put(`/api_v1/change_needed_score/`, {question, score, transition} , {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
   addChildrenToQuestion(question: string, child: string, key: number, transition: string): Promise<AxiosResponse<Catalog>> {
     return axios.put(`/api_v1/addChildrenToQuestion/`, {question, child, key, transition} , {
       headers: {
