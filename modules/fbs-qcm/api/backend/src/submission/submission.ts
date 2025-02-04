@@ -63,7 +63,7 @@ export async function submitSessionAnswer(tokenData: JwtPayload, question: any, 
     return submitResult;
 }
 
-export async function submit(tokenData: JwtPayload, question: any, answers: any,  session: string) {
+export async function submit(tokenData: JwtPayload, question: any, answers: any,  session: any) {
     const userCourses = getStudentCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
@@ -89,17 +89,13 @@ export async function submit(tokenData: JwtPayload, question: any, answers: any,
     }
     const correct = await checkAnswer(answers, questionId, questionCollection);
     console.log(timestamp);
-    let sessionObject: any = "";
-    if(session !== "") {
-        sessionObject = new mongoDB.ObjectId(session);
-    }
     const submission = {
         user: tokenData.id,
         question: questionInCatalogId,
         answer: answers,
         evaluation: correct,
         timeStamp: timestamp,
-        session: sessionObject
+        session: session._id
     }
     await submissionCollection.insertOne(submission);
     return correct;
