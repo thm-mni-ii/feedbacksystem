@@ -157,6 +157,7 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
     const answerRows: number[][] = getSelectedIds(answer);
     let response: ChoiceReply = {} as ChoiceReply;
     console.log(configuration);
+    response.row = [];
     for(let i = 0; i < configuration.optionRows.length; i++) {
         const correctList = configuration.optionRows[i].correctAnswers;
         const answerList = answerRows[i];
