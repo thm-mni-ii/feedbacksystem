@@ -128,7 +128,6 @@ async function createDatabaseAndCollection() {
       },
     });
     await questionCollection.insertOne({
-      _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
       owner: 1,
       questiontext: "string",
       questiontype: "FillInTheBlanks",
@@ -159,6 +158,7 @@ async function createDatabaseAndCollection() {
       },
     });
     await questionCollection.insertOne({
+      _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
       owner: 1,
       questiontext: "Kreuze die richtigen Antworten an",
       questiontype: "Choice",
