@@ -350,6 +350,8 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   console.log("evaluation");
   console.log(evaluation);
   forwarding.forEach(function (element: Element) {
+    console.log("element");
+    console.log(element);
     if (element.transition === "correct") {
       if (evaluation.score * 100 >= element.needed_score) {
         return element.question;
