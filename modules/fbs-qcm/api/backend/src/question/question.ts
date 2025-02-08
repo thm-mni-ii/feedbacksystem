@@ -355,7 +355,7 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
     if (element.transition === "correct") {
       console.log("correct");
       console.log(evaluation.score * 100);
-      console.log(evaluation.needed_score);
+      console.log(element.needed_score);
       if (evaluation.score * 100 >= element.needed_score) {
         return element.question;
       }
@@ -363,7 +363,7 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
     if (element.transition === "incorrect") {
       console.log("incorrect");
       console.log(evaluation.score * 100);
-      console.log(evaluation.needed_score);
+      console.log(element.needed_score);
       if (evaluation.score * 100 <= element.needed_score) {
         return element.question;
       }
