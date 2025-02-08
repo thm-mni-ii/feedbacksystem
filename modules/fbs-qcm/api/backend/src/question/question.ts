@@ -349,6 +349,7 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   console.log(forwarding);
   console.log("evaluation");
   console.log(evaluation);
+  let returnValue: any = -1;
   forwarding.forEach(function (element: Element) {
     console.log("element");
     console.log(element);
@@ -358,7 +359,7 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
       console.log(element.needed_score);
       console.log(evaluation.score * 100 >= element.needed_score)
       if (evaluation.score * 100 >= element.needed_score) {
-        return element.question;
+        returnValue = element.question;
       }
     }
     if (element.transition === "incorrect") {
@@ -367,16 +368,16 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
       console.log(element.needed_score);
       console.log(evaluation.score * 100 <= element.needed_score)
       if (evaluation.score * 100 <= element.needed_score) {
-        return element.question;
+        returnValue = element.question;
       }
     }
   });
   forwarding.forEach(function (element: Element) {
     if (element.transition === "partial") {
-      return element.question;
+      returnValue = element.question;
     }
   });
-  return -1;
+  return returnValue;
 }
 
 export async function copyQuestion(tokenData: JwtPayload, questionId: string) {
