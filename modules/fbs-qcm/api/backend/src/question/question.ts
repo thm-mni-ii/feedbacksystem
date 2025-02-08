@@ -312,6 +312,8 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   const catalog: any = await questionInCatalogCollection.find(catalogQuery).toArray();
   const questions: mongoDB.ObjectId[] = catalog.map((entry: any) => entry.question);
   //needs fix to authenticate with session
+  // all questions in catalog
+  // or through sessionid
   const query = {user: tokenData.id};
   const lastSubmission: any = await submissionCollection
     .find(query)
@@ -343,6 +345,8 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   if (forwarding == null || forwarding.length == 0) {
     return -1;
   }
+  console.log("forwarding");
+  console.log(forwarding);
   forwarding.forEach(function (element: Element) {
     if (element.transition === "correct") {
       if (evaluation >= element.needed_score) {
