@@ -317,7 +317,10 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
     .sort({ timestamp: -1 })
     .limit(1)
     .toArray();
+  console.log("last submission");
+  console.log(lastSubmission);
   if (lastSubmission == null || lastSubmission.length == 0) {
+    print("Keine voherigen Abgaben");
     return 0;
   }
   const evaluation = lastSubmission[0].evaluation;
@@ -327,7 +330,12 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   const priorQuestion = await questionInCatalogCollection.findOne(
     questionQuery
   );
+  console.log("priorQuestionQUERY");
+  console.log(questionQuery);
+  console.log("priorQuestion");
+  console.log(priorQuestion);
   if (priorQuestion == null) {
+    print("Keine Frage im Katalog vorher");
     return 0;
   }
   const forwarding = priorQuestion.children;
