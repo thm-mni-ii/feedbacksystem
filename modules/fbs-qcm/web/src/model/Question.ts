@@ -8,5 +8,5 @@ export default interface Question {
   questiontext?: string
   questiontags: string[]
   questiontype: QuestionType
-  questionconfiguration: Choice | FillInTheBlanks
+  questionconfiguration: any
 }

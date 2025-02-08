@@ -31,11 +31,21 @@ const submitAnswer = async (answer: any) => {
     return
   }
   try {
-    // Submit the answer and get the next question
+    console.log('QUESION DATA SUBMITANSWER:', questionData)
     const submitResponse = await sessionService.submitAnswer(questionData.value._id, answer)
-    // Update the question data with the next question from the response
     console.log(submitResponse)
     questionData.value = submitResponse.data
+    console.log('CATALOG ID: ', route.params.catalogId)
+    sessionService
+      .getCurrentQuestion(route.params.catalogId)
+      .then((res) => console.log('CURRENT QUESTION:', res))
+    sessionService
+      .getCurrentSessionQuestion()
+      .then((res) => {
+        console.log('CURRENT SESSION QUESTION:', res.data)
+        questionData.value = res.data
+      })
+      .catch((error) => console.error('Error fetching question:', error))
   } catch (error) {
     console.error('Error submitting answer:', error)
   }
@@ -53,7 +63,9 @@ onMounted(async () => {
       questionData.value = startSessionResponse.data
     } else {
       console.log('Active session found:', checkSessionResponse.data)
-      const currentQuestionResponse = await sessionService.getCurrentQuestion()
+      const currentQuestionResponse = await sessionService.getCurrentQuestion(
+        route.params.catalogId
+      )
       questionData.value = currentQuestionResponse.data
     }
   } catch (error) {

@@ -73,7 +73,7 @@ const submitAnswer = () => {
     </p>
   </div>
   <div
-    v-if="!question.questionconfiguration.multipleColumn && question.questiontype == 'Choice'"
+    v-if="!question.questionconfiguration?.multipleColumn && question.questiontype == 'Choice'"
     class="d-flex flex-column"
   >
     <div

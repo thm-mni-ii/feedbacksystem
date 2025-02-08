@@ -85,7 +85,7 @@ onMounted(() => {
   <div class="d-flex justify-center">
     <v-btn
       icon="mdi-plus"
-      class="mx-auto row-btn mx-8 mb-8 align-center"
+      class="mx-auto row-btn mx-8 mb-16 align-center"
       variant="tonal"
       color="primary"
       @click="addQuestion()"

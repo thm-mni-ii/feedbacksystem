@@ -18,6 +18,8 @@ class SessionService {
       })
   }
   submitAnswer(question: string, answers: any): Promise<AxiosResponse<any>> {
+    console.log('QUESTION: ', question)
+    console.log('SUBMITTED ANSWERS: ', answers)
     return axios
       .post(
         '/api_v1/submission',
@@ -27,8 +29,7 @@ class SessionService {
         }
       )
       .then((res) => {
-        console.log(res.data)
-        console.log(res)
+        console.log('SUBMIT ANSWER RESPONSE:', res.data)
         return res
       })
       .catch((err) => {
@@ -50,7 +51,21 @@ class SessionService {
         throw err
       })
   }
-  getCurrentQuestion(): Promise<AxiosResponse<any>> {
+  getCurrentQuestion(catalogId: string): Promise<AxiosResponse<any>> {
+    return axios
+      .get('/api_v1/current_question', {
+        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}`, ID: catalogId }
+      })
+      .then((res) => {
+        console.log('GET CURRENT QUESTION: ', res.data)
+        return res
+      })
+      .catch((err) => {
+        console.log(err)
+        return err
+      })
+  }
+  getCurrentSessionQuestion(): Promise<AxiosResponse<any>> {
     return axios
       .get('/api_v1/currentSessionQuestion', {
         headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }

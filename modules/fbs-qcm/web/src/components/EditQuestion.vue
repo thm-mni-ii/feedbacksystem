@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type Question from '../model/Question'
+import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
+import type { Choice } from '@/model/questionTypes/Choice'
 import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
 import { onMounted, onBeforeUnmount } from 'vue'
+import EditFillInTheBlanks from './EditFillInTheBlanks.vue'
 
 interface ChoiceQuestionConfiguration {
   multipleRow: boolean
@@ -12,24 +15,13 @@ interface ChoiceQuestionConfiguration {
   optionRows: { id: number; text: string; correctAnswers: number[] }[]
 }
 
-interface FillInTheBlanksQuestionConfiguration {
-  showBlanks: boolean
-  textParts: { order: number; text: string; isBlank: boolean }[]
-}
-
-type QuestionConfiguration = ChoiceQuestionConfiguration | FillInTheBlanksQuestionConfiguration
+type QuestionConfiguration = ChoiceQuestionConfiguration | FillInTheBlanks
 
 // Type Guards
 function isChoiceQuestionConfiguration(
   config: QuestionConfiguration
 ): config is ChoiceQuestionConfiguration {
   return (config as ChoiceQuestionConfiguration).optionRows !== undefined
-}
-
-function isFillInTheBlanksQuestionConfiguration(
-  config: QuestionConfiguration
-): config is FillInTheBlanksQuestionConfiguration {
-  return (config as FillInTheBlanksQuestionConfiguration).textParts !== undefined
 }
 
 const props = defineProps<{
@@ -196,21 +188,12 @@ const handleSubmit = async () => {
     <v-card-text>
       <v-form>
         <v-select
+          :disabled="!isNew"
           v-model="question.questiontype"
           label="Fragetyp"
           :items="questionTypes"
           variant="solo-filled"
         ></v-select>
-        <v-textarea
-          v-model="question.questiontext"
-          maxlength="130"
-          auto-grow
-          counter
-          rows="3"
-          label="Question"
-          required
-        ></v-textarea>
-
         <v-combobox
           v-model="question.questiontags"
           label="Tags"
@@ -228,13 +211,17 @@ const handleSubmit = async () => {
             </v-chip>
           </template>
         </v-combobox>
+        <v-textarea
+          v-model="question.questiontext"
+          maxlength="130"
+          auto-grow
+          counter
+          rows="3"
+          label="Question"
+          required
+        ></v-textarea>
 
-        <div
-          v-if="
-            question.questiontype === 'Choice' &&
-            isChoiceQuestionConfiguration(question.questionconfiguration)
-          "
-        >
+        <div v-if="question.questiontype === 'Choice'">
           <div class="justify-space-between d-flex flex-row">
             <v-switch
               v-model="question.questionconfiguration.multipleColumn"
@@ -337,13 +324,8 @@ const handleSubmit = async () => {
             </div>
           </div>
         </div>
-        <div
-          v-if="
-            question.questiontype === 'FillInTheBlanks' &&
-            isFillInTheBlanksQuestionConfiguration(question.questionconfiguration)
-          "
-        >
-          HAHOOERR
+        <div v-if="question.questiontype === 'FillInTheBlanks'">
+          <EditFillInTheBlanks :question="question" @update="question" />
         </div>
       </v-form>
     </v-card-text>
