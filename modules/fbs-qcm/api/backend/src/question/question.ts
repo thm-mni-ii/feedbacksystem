@@ -352,23 +352,21 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   forwarding.forEach(function (element: Element) {
     console.log("element");
     console.log(element);
-    console.log(element.transition === "correct");
-    console.log(element.transition === "correct");
     console.log(element.transition == "incorrect");
     console.log(element.transition == "incorrect");
-    if (element.transition === "correct") {
+    if (element.transition == "correct") {
       if (evaluation.score * 100 >= element.needed_score) {
         return element.question;
       }
     }
-    if (element.transition === "incorrect") {
+    if (element.transition == "incorrect") {
       if (evaluation.score * 100 <= element.needed_score) {
         return element.question;
       }
     }
   });
   forwarding.forEach(function (element: Element) {
-    if (element.transition === "partial") {
+    if (element.transition == "partial") {
       return element.question;
     }
   });
