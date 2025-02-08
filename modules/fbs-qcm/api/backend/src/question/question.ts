@@ -314,7 +314,7 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   const query = {user: tokenData.id, question: { $in: questions }};
   const lastSubmission: any = await submissionCollection
     .find(query)
-    .sort({ timestamp: -1 })
+    .sort({ timeStamp: -1 })
     .limit(1)
     .toArray();
   console.log("last submission");
