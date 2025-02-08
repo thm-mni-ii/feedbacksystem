@@ -311,7 +311,8 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   const catalogQuery = { catalog: catalogIdObject };
   const catalog: any = await questionInCatalogCollection.find(catalogQuery).toArray();
   const questions: mongoDB.ObjectId[] = catalog.map((entry: any) => entry.question);
-  const query = {user: tokenData.id, question: { $in: questions }};
+  //needs fix to authenticate with session
+  const query = {user: tokenData.id};
   const lastSubmission: any = await submissionCollection
     .find(query)
     .sort({ timeStamp: -1 })
