@@ -1,21 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
 import sessionService from '@/services/session.service'
 
 import type Catalog from '../model/Catalog'
 import type Question from '@/model/Question'
 const route = useRoute()
+const router = useRouter()
 
 const showErrorPage = ref<Boolean>(false)
-
+const catalogStatus = ref<string | null>(null)
 const questionData = ref<Question>()
-
-export interface SelectedAnswers {
-  rowId: number
-  selectedColumns: number[]
-}
 
 const catalog = ref<Catalog>({
   id: route.params.catalogId,
@@ -33,7 +29,6 @@ const submitAnswer = async (answer: any) => {
   try {
     console.log('QUESION DATA SUBMITANSWER:', questionData)
     const submitResponse = await sessionService.submitAnswer(questionData.value._id, answer)
-    console.log(submitResponse)
     questionData.value = submitResponse.data
     console.log('CATALOG ID: ', route.params.catalogId)
     sessionService
@@ -43,6 +38,12 @@ const submitAnswer = async (answer: any) => {
       .getCurrentSessionQuestion()
       .then((res) => {
         console.log('CURRENT SESSION QUESTION:', res.data)
+        if (res.data.catalog === 'over') {
+          catalogStatus.value = 'over' // Update state when backend responds with 'over'
+        } else {
+          catalogStatus.value = null
+        }
+
         questionData.value = res.data
       })
       .catch((error) => console.error('Error fetching question:', error))
@@ -106,10 +107,23 @@ onMounted(async () => {
             rounded
           ></v-progress-linear>
         </div>
-
+        <div v-if="catalogStatus == 'over'">
+          <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">Finished!🎉</h4>
+          <p class="text-blue-grey-darken-2">evaluation......</p>
+          <v-btn
+            variant="tonal"
+            class="mx-auto my-8"
+            type="button"
+            append-icon="mdi-arrow-right-bold-outline"
+            @click="router.push('/')"
+          >
+            Go back
+          </v-btn>
+        </div>
         <CatalogSession
-          v-if="questionData"
+          v-if="questionData && catalogStatus == null"
           :question="questionData"
+          :catalogStatus="catalogStatus"
           @submit-answer="submitAnswer"
         />
       </v-responsive>

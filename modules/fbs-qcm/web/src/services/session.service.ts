@@ -19,7 +19,7 @@ class SessionService {
   }
   submitAnswer(question: string, answers: any): Promise<AxiosResponse<any>> {
     console.log('QUESTION: ', question)
-    console.log('SUBMITTED ANSWERS: ', answers)
+    console.log('SUBMITTED ANSWERS: ', JSON.parse(JSON.stringify(answers)))
     return axios
       .post(
         '/api_v1/submission',
@@ -71,8 +71,7 @@ class SessionService {
         headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
       })
       .then((res) => {
-        console.log('GET CURRENT QUESTION:')
-        console.log(res.data)
+        console.log('GET CURRENT QUESTION: ', res.data)
         return res
       })
       .catch((err) => {

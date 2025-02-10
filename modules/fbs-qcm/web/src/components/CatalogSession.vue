@@ -53,12 +53,16 @@ const submitAnswer = () => {
         console.log('QUESTION TYPE: ', props.question.questiontype)
         console.log('CHOICE ANSWER: ', choiceAnswers.value)
         emit('submit-answer', choiceAnswers.value)
+        choiceAnswers.value.length = 0
+        selectedMatrixAnswers.value.length = 0
       } else {
         emit('submit-answer', selectedAnswers.value)
+        selectedAnswers.value.length = 0
       }
       break
     case 'FillInTheBlanks':
       emit('submit-answer', fillInTheBlanksAnswer)
+      fillInTheBlanksAnswer.value = null
       break
     default:
       console.warn('Unsupported question type')
@@ -99,7 +103,7 @@ const submitAnswer = () => {
   </div>
 
   <div
-    v-if="question.questionconfiguration.multipleColumn && question.questiontype == 'Choice'"
+    v-if="question.questionconfiguration?.multipleColumn && question.questiontype == 'Choice'"
     class="d-flex flex-column"
   >
     <v-table>
