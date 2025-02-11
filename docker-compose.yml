@@ -35,6 +35,8 @@ services:
     depends_on:
       - mysql1
       - runner
+      - mongodb
+      - minio
     ports:
       - "127.0.0.1:443:443"
       - "127.0.0.1:80:80"
@@ -60,12 +62,12 @@ services:
     networks:
       classroom:
       fbs:
-    healthcheck:
-      test: curl -k https://localhost:443/actuator/health
-      timeout: 10s
-      interval: 10s
-      start_period: 10s
-      retries: 3
+    #healthcheck:
+    #  test: curl -k https://localhost:443/actuator/health
+    #  timeout: 10s
+    #  interval: 10s
+    #  start_period: 10s
+    #  retries: 3
 
   mysql-checker:
     image: mysql:8.0
@@ -90,6 +92,8 @@ services:
     environment:
       POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
     volumes:
       - ./data/postgres2:/var/lib/postgresql/data
     networks:
@@ -200,7 +204,8 @@ services:
       BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
-      RESULT_SERVER_HOST: core
+      RESULT_SERVER_HOST: 172.17.0.1
+      RESULT_SERVER_PORT: 8443
       MYSQL_SERVER_URL: jdbc:mysql://mysql-checker:3306?allowMultiQueries=true
       MYSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PSQL_SERVER_URL: jdbc:postgresql://psql-checker:5432/?allowMultiQueries=true
@@ -214,6 +219,7 @@ services:
       SQL_PLAYGROUND_SHARE_PSQL_SERVER_URL: jdbc:postgresql://psql-sharing:5432/?allowMultiQueries=true
       SQL_PLAYGROUND_SHARE_PSQL_SERVER_PASSWORD: R!7pWqY@K5zE3Xt&g9L1MfD
       SQL_PLAYGROUND_SHARE_PSQL_SERVER_USERNAME: postgres
+      RUNNER_DOCKER_DISABLE_REMOVE: "true"
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock
@@ -249,7 +255,7 @@ services:
       context: modules/fbs-eat/eat
     restart: always
     ports:
-      - 5000:8050
+      - 5001:8050
     networks:
       - fbs
     environment:
@@ -259,6 +265,18 @@ services:
       - URL_BASE_PATH=/eat/
       - FBS_BASE_URL=https://core:443
       - FBS_TLS_NO_VERIFY=true
+
+  collab:
+    build:
+      context: modules/fbs-collab
+    restart: always
+    ports:
+      - 1234:1234
+    networks:
+      - fbs
+    environment:
+      - FBS_ROOT_URL=https://core:443
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
 
   qcm:
     build:

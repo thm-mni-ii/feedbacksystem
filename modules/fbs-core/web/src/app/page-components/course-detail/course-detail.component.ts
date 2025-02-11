@@ -296,7 +296,7 @@ export class CourseDetailComponent implements OnInit {
               /*
               if (element.bonusFormula === undefined) {
                 element.bonusFormula = "0";
-              
+
                 points = +element.bonusFormula;
               }
               else {
@@ -306,7 +306,7 @@ export class CourseDetailComponent implements OnInit {
               points = +element.bonusFormula;
               points += element.points;
               element.bonusFormula = points.toString();
-            
+
               */
             }
           }

@@ -1,7 +1,5 @@
-export interface Trigger {
+export interface Trigger extends TriggerEvent, TriggerAction {
   name: string;
-  event: TriggerEvent;
-  action: TriggerAction;
 }
 
 interface TriggerEvent {

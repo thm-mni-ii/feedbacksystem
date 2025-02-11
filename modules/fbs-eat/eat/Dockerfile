@@ -12,7 +12,7 @@ RUN poetry config virtualenvs.create false
 COPY pyproject.toml .
 
 # Installiere die Dependencies mit Poetry
-RUN poetry install --no-dev --no-root
+RUN poetry install --no-root
 
 COPY . .
 

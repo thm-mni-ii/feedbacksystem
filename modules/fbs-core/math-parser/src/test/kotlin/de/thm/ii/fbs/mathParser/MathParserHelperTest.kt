@@ -466,6 +466,16 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun parseEmptyExp() {
+        assertEquals(
+            Ast(
+                Operation(Operator.ADD, Operation(Operator.EXP, Num(2), Num(1)), Operation(Operator.EXP, Num(2), Num(1)))
+            ),
+            MathParserHelper.parse("2^{}+2^{}")
+        )
+    }
+
+    @Test
     fun parseLatexRad() {
         assertEquals(
             Ast(

@@ -6,6 +6,7 @@ import { ChangePasswordComponent } from "./page-components/change-password/chang
 import { MyCoursesComponent } from "./page-components/my-courses/my-courses.component";
 import { SearchCoursesComponent } from "./page-components/search-courses/search-courses.component";
 import { CourseDetailComponent } from "./page-components/course-detail/course-detail.component";
+import { MyGroupsComponent } from "./page-components/my-groups/my-groups.component";
 import { UserManagementComponent } from "./page-components/user-management/user-management.component";
 import { NotFoundComponent } from "./page-components/not-found/not-found.component";
 import { LoginComponent } from "./page-components/login/login.component";
@@ -20,6 +21,9 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
+import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
+import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
 
 const routes: Routes = [
@@ -75,6 +79,19 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
 
+      //groups
+      {
+        path: "groups",
+        component: MyGroupsComponent,
+        canActivate: [AuthGuard],
+      },
+
+      {
+        path: "groups/:courseId/:id",
+        component: GroupDetailComponent,
+        canActivate: [AuthGuard],
+      },
+
       //sql playground
       {
         path: "sqlplayground",
@@ -94,7 +111,18 @@ const routes: Routes = [
         component: FbsModellingComponent,
         canActivate: [AuthGuard],
       },
-      // Questionary
+      // Kanban
+      {
+        path: "kanban",
+        component: FbsKanbanComponent,
+        canActivate: [AuthGuard],
+      },
+      // Sci-Check
+      {
+        path: "sci-check",
+        component: FbsSciCheckComponent,
+        canActivate: [AuthGuard],
+      },      // Questionary
       {
         path: "questionary",
         component: FbsQuestionaryComponent,

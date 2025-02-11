@@ -6,27 +6,21 @@
   <mat-tab
     label="{{ 'sql-playground.db-control-panel.tab-db' | i18nextEager }}"
   >
-    <app-db-control-db-overview
-      (changeActiveDb)="changeDb($event)"
+    <app-db-control-db-overview></app-db-control-db-overview>
+    <!--(changeActiveDb)="changeDb($event)"
       [(collaborativeMode)]="collaborativeMode"
-    ></app-db-control-db-overview>
+    ></app-db-control-db-overview>-->
   </mat-tab>
   <mat-tab
     label="{{ 'sql-playground.db-control-panel.tab-templates' | i18nextEager }}"
   >
     <app-db-control-templates
-      [activeDb]="activeDb"
-      [isAdmin]="isAdmin"
       (submitStatement)="submitStatementToParent($event)"
     ></app-db-control-templates>
   </mat-tab>
   <mat-tab
     label="{{ 'sql-playground.db-control-panel.tab-coworking' | i18nextEager }}"
-    [disabled]="!isAdmin"
   >
-    <app-db-control-co-working
-      [(collaborativeMode)]="collaborativeMode"
-      (changeActiveDb)="changeDb($event)"
-    ></app-db-control-co-working>
+    <app-db-control-co-working></app-db-control-co-working>
   </mat-tab>
 </mat-tab-group>

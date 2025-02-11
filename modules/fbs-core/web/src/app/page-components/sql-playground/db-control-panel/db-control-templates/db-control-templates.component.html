@@ -1,11 +1,9 @@
 <div class="container">
-  <p class="info-text" *ngIf="this.activeDb !== undefined">
+  <p class="info-text" *ngIf="activeDb$ | async as activeDb">
     {{
       "sql-playground.db-control-panel.templates.selected-db" | i18nextEager
     }}:
-    <span class="highlight">
-      {{ this.activeDb.name }}
-    </span>
+    <span class="highlight">{{ activeDb[0]?.name }}</span>
   </p>
 
   <mat-form-field appearance="fill">
@@ -21,11 +19,11 @@
         --</mat-option
       >
       <mat-optgroup
-        *ngFor="let category of templatesByCategory"
-        [label]="category.category.name"
+        *ngFor="let category of categories$ | async"
+        [label]="category.name"
       >
         <mat-option
-          *ngFor="let template of category.templates"
+          *ngFor="let template of templates$ | async"
           [value]="template.id"
         >
           {{ template.name }}

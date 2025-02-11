@@ -1,4 +1,4 @@
-FROM gradle:jdk18 AS BUILD
+FROM gradle:jdk18 AS build
 
 RUN mkdir /build
 WORKDIR /build
@@ -14,6 +14,7 @@ COPY modules/fbs-runner/checker/*.gradle /build/modules/fbs-runner/checker/
 
 # Build web
 COPY modules/fbs-core/web /build/modules/fbs-core/web/
+RUN apt-get update && apt-get install -y build-essential curl
 RUN gradle fbs-core.web:installDist
 
 # Copy math-parser
@@ -23,9 +24,9 @@ COPY modules/fbs-core/math-parser /build/modules/fbs-core/math-parser/
 COPY modules/fbs-core/api /build/modules/fbs-core/api/
 RUN gradle fbs-core.web:copyWebToWS fbs-core.api:installDist
 
-FROM eclipse-temurin:18.0.2_9-jre-alpine
+FROM eclipse-temurin:18-jre
 
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y curl
 
 COPY --from=build /build/modules/fbs-core/api/build/install/fbs-core.api /usr/local/fbs-core.api
 

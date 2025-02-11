@@ -144,3 +144,16 @@
   // margin-right: 10px;
   // cursor: pointer;
 }
+
+.circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  background-color: white;
+}

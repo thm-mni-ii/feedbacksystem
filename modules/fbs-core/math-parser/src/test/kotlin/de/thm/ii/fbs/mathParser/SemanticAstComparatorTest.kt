@@ -221,4 +221,14 @@ internal class SemanticAstComparatorTest {
             )
         )
     }
+
+    @Test
+    fun emptyExponentTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("a^{}"),
+                MathParserHelper.parse("a")
+            )
+        )
+    }
 }

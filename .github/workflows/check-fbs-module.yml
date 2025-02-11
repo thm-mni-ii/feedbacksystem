@@ -97,17 +97,18 @@ jobs:
         name: Run ${{ inputs.name }} Tests
         with:
           arguments: ${{ inputs.testArguments }}
-      - uses: gradle/gradle-build-action@v2
-        name: Generate ${{ inputs.name }} Coverage
-        if: ${{ inputs.coverageArguments }}
-        with:
-          arguments: ${{ inputs.coverageArguments }}
-      - uses: ./.github/actions/retry-codecov
-        if: ${{ inputs.coverageFilesLocation }}
-        name: Upload Coverage Report
-        with:
-          files: ${{ inputs.coverageFilesLocation }}
-          flags: ${{ inputs.name }}
+# Disabled because of coverals errors
+#      - uses: gradle/gradle-build-action@v2
+#        name: Generate ${{ inputs.name }} Coverage
+#        if: ${{ inputs.coverageArguments }}
+#        with:
+#          arguments: ${{ inputs.coverageArguments }}
+#      - uses: ./.github/actions/retry-codecov
+#        if: ${{ inputs.coverageFilesLocation }}
+#        name: Upload Coverage Report
+#        with:
+#          files: ${{ inputs.coverageFilesLocation }}
+#          flags: ${{ inputs.name }}
       - name: Stop mysql service container
         if: ${{ inputs.startMysqlService }}
         run: docker stop mysql

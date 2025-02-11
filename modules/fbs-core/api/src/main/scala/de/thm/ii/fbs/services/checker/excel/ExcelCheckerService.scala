@@ -170,7 +170,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   }
 
   private def generateCheckResultError(errorMsg: String, args: Any*): CheckResultTask = {
-    CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg.format(args))))
+    CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg.format(args: _*))))
   }
 
   private def storeError(submissionID: Int, cc: CheckrunnerConfiguration, errorMsg: String): Unit = {
@@ -184,10 +184,12 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
       "OK"
     } else {
       val correct = results.count(c => c.success)
-      val hints = results.zip(excelMediaInformation.tasks)
-        .filter(t => !t._1.success)
-        .map(t => buildTaskResultText(t._1, t._2))
-        .mkString("\n")
+      val hints = if (!excelMediaInformation.disableFeedback) {
+        results.zip(excelMediaInformation.tasks)
+          .filter(t => !t._1.success)
+          .map(t => buildTaskResultText(t._1, t._2))
+          .mkString("\n")
+      } else {""}
       val res = f"$correct von ${results.length} Unteraufgaben richtig."
 
       if (hints.nonEmpty) {
