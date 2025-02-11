@@ -14,7 +14,7 @@ interface Session {
     courseId: number,
     duration: number,
 }
-export async function startSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
+export async function postSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
     const userCourses = getUserCourseRoles(tokenData);
     console.log(userCourses);
     if ( userCourses.length == 0) {
@@ -56,7 +56,7 @@ export async function getSessionQuestion(catalogId: string, tokenData: JwtPayloa
     return question;
 }
 
-export async function pauseSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
+export async function pauseSingleSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
     const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;
@@ -100,7 +100,7 @@ async function getLastSession(sessionCollection: mongoDB.Collection, catalogId: 
     return session;
 }
 
-export async function endSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
+export async function endSingleSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
     const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;
@@ -144,7 +144,7 @@ export async function endSession(tokenData: JwtPayload, catalogId: string, cours
     return 1;
 }
 
-export async function unpauseSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
+export async function unpauseSingleSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
     const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;

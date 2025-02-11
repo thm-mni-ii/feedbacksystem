@@ -3,7 +3,7 @@ import { getAdminCourseRoles } from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { connect } from "../mongo/mongo";
 
-export async function createTag(tokenData: JwtPayload, tagName: string) {
+export async function createSingleTag(tokenData: JwtPayload, tagName: string) {
     console.log(tagName);
     const adminCourses = getAdminCourseRoles(tokenData);
     if(adminCourses.length === 0) {
@@ -26,7 +26,7 @@ export async function createTag(tokenData: JwtPayload, tagName: string) {
     return returnValue;
 }
 
-export async function findTag(tokenData: JwtPayload, tagName: string) {
+export async function findMultipleTags(tokenData: JwtPayload, tagName: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
     if(adminCourses.length === 0) {
         return -1;
@@ -40,7 +40,7 @@ export async function findTag(tokenData: JwtPayload, tagName: string) {
     return data; 
 }
 
-export async function searchTag(tokenData: JwtPayload, tagName: string) {
+export async function searchMultipleTags(tokenData: JwtPayload, tagName: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
     if(adminCourses.length === 0) {
         return -1;
@@ -60,7 +60,7 @@ export async function searchTag(tokenData: JwtPayload, tagName: string) {
     return data;
 }
 
-export async function editTag(tokenData: JwtPayload, tagId: string, newtext: string) {
+export async function editSingleTag(tokenData: JwtPayload, tagId: string, newtext: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
     if(adminCourses.length === 0) {
         return -1;
@@ -92,7 +92,7 @@ export async function editTag(tokenData: JwtPayload, tagId: string, newtext: str
     return data;
 }
 
-export async function deleteTag(tokenData: JwtPayload, tagId: string) {
+export async function deleteSingleTag(tokenData: JwtPayload, tagId: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
     if(adminCourses.length === 0) {
         return -1;

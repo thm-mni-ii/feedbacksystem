@@ -1,34 +1,10 @@
 import { Router } from 'express';
-import { authenticateToken } from "../authenticateToken";
-import { submitSessionAnswer } from '../submission/submission';
-const router = Router();
-router.post("/api_v1/submission", authenticateToken, async (req, res) => {
-    try {
-      if (req.user == undefined) {
-        res.sendStatus(401);
-      }
-      if (req.user !== undefined) {
-        const requestData = req.body;
-        console.log(requestData);
-        const question = requestData.question;
-        const answers = requestData.answers;
-        const response = await submitSessionAnswer(req.user, question, answers);
-        console.log(response);
-        if (response == -1) {
-          res.sendStatus(403);
-          return;
-        }
-        const responseJson = {
-          correct: response,
-        };
-        res.send(responseJson);
-      } else {
-        res.sendStatus(403);
-      }
-    } catch (error) {
-      console.log(error);
-      res.sendStatus(500);
-    }
-  });
+import { authenticateToken } from '../authenticateToken';
+import { submission } from '../controller/submission';
 
-  export default router; 
+const router = Router();
+
+router.post("/api_v1/submission", authenticateToken, submission);
+
+export default router;
+

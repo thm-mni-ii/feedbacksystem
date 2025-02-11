@@ -171,7 +171,7 @@ export async function deleteQuestionById(
   return data;
 }
 
-export async function postQuestion(question: Question, tokenData: JwtPayload) {
+export async function postSingleQuestion(question: Question, tokenData: JwtPayload) {
   if (!authenticate(tokenData, Access.moderator)) {
     return 1;
   }
@@ -188,7 +188,7 @@ export async function postQuestion(question: Question, tokenData: JwtPayload) {
   return { id: result.insertedId };
 }
 
-export async function putQuestion(question: Question, tokenData: JwtPayload) {
+export async function editSingleQuestion(question: Question, tokenData: JwtPayload) {
   const database: mongoDB.Db = await connect();
   const questionCollection = database.collection("question");
   if (
@@ -380,7 +380,7 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   return returnValue;
 }
 
-export async function copyQuestion(tokenData: JwtPayload, questionId: string) {
+export async function copyQuestionWithNewOwner(tokenData: JwtPayload, questionId: string) {
   if (!authenticate(tokenData, Access.moderator)) {
     return -1;
   }
@@ -404,7 +404,7 @@ export async function copyQuestion(tokenData: JwtPayload, questionId: string) {
   return data.insertedId;
 }
 
-export async function copyQuestionToCatalog(
+export async function copyQuestionToCatalogWithNewOwner(
   tokenData: JwtPayload,
   questionId: string,
   catalogId: string,

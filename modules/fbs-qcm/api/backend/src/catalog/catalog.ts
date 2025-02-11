@@ -54,7 +54,7 @@ interface CatalogQuestionData {
   ];
 }
 
-export async function postCatalog(
+export async function createSingleCatalog(
   data: catalog,
   token: string,
   tokenData: JwtPayload,
@@ -158,7 +158,7 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   }
   return res;
 }
-export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
+export async function getSingleCatalog(tokenData: JwtPayload, catalogId: string) {
   if (
     !(await authenticateInCatalog(
       tokenData,
@@ -195,7 +195,7 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
   }
 }
 
-export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
+export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
   if (!authenticateInCourse(tokenData, CourseAccess.docentInCourse, courseId)) {
     return -1;
   }
@@ -233,14 +233,8 @@ export async function getCatalogs(tokenData: JwtPayload, courseId: number) {
   return modifiedCatalogs;
 }
 
-export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
-  if (
-    !(await authenticateInCatalog(
-      tokenData,
-      CatalogAccess.docentInCatalog,
-      catalogId
-    ))
-  ) {
+export async function deleteSingleCatalog(tokenData: JwtPayload, catalogId: string) {
+  if (!(await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId))) {
     console.log("No Permissions to Catalog");
     return -1;
   }
@@ -263,7 +257,7 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
   return data;
 }
 
-export async function putCatalog(
+export async function editSingleCatalog(
   catalogId: string,
   token: string,
   data: catalog,
@@ -514,7 +508,7 @@ export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalo
   return dataObject;
 } 
 
-export async function addChildrenToQuestion(tokenData: JwtPayload, questionId: string, children: string, key: number, transition: string) {
+export async function addNewChildrenToQuestion(tokenData: JwtPayload, questionId: string, children: string, key: number, transition: string) {
     console.log(questionId);
     console.log(children);
     console.log(key);
@@ -544,7 +538,7 @@ export async function addChildrenToQuestion(tokenData: JwtPayload, questionId: s
     return await questionInCatalogCollection.updateOne(query, update);
 }
 
-export async function editEmptyCatalog(tokenData: JwtPayload, catalogId: string) {
+export async function emptyCatalogInformation(tokenData: JwtPayload, catalogId: string) {
     if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
         return -1;                                               
     }
@@ -566,7 +560,7 @@ export async function editEmptyCatalog(tokenData: JwtPayload, catalogId: string)
     }
 }
 
-export async function changeNeededScore(tokenData: JwtPayload, questionId: string, needed_score: number, transition: string) {
+export async function changeScoreNeededForQuestion(tokenData: JwtPayload, questionId: string, needed_score: number, transition: string) {
     const database: mongoDB.Db = await connect();
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const query = {

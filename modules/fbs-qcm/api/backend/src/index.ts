@@ -1,52 +1,7 @@
-import express, { NextFunction, Response, Request } from "express";
-import jwt from "jsonwebtoken";
-import axios from "axios";
-import {
-  postCatalog,
-  getCatalog,
-  deleteCatalog,
-  putCatalog,
-  getCatalogScore,
-  getUser,
-  getQuestionTree,
-  allQuestionsInCatalog,
-  getCatalogs,
-} from "./catalog/catalog";
-import {
-  postQuestion,
-  getQuestionById,
-  deleteQuestionById,
-  putQuestion,
-  getAllQuestions,
-  getCurrentQuestion,
-  addQuestionToCatalog,
-  getCurrentSessionQuestion,
-  removeQuestionFromCatalog,
-  copyQuestion,
-  copyQuestionToCatalog,
-} from "./question/question";
-import { submit, submitSessionAnswer } from "./submission/submission";
-import {
-  allQuestionInCourse,
-  getStudentCourses,
-  getTeacherCourses,
-} from "./course/course";
+import express from "express";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "./utils/enum";
-import {
-  endSession,
-  getOngoingSessions,
-  getOpenSessions,
-  getPausedSessions,
-  pauseSession,
-  startSession,
-  unpauseSession,
-} from "./session/session";
-import Choice from "./model/questionTypes/Choice";
-import { Question } from "./model/Question";
-import { getAllQuestionInCatalog, numberOfQuestionsAhead } from "./utils/utils";
-import { createTag, deleteTag, editTag, findTag, searchTag } from "./tag/tag";
 import catalogRoutes from './routes/catalogRoutes';
 import courseRoutes from './routes/courseRoutes';
 import questionRoutes from './routes/questionRoutes';
