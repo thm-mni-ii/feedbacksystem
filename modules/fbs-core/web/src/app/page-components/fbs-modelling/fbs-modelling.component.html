@@ -1,1 +1,5 @@
-<iframe [src]="getURL()" title="FBS-Modellierung" frameBorder="0"></iframe>
+<iframe
+  [src]="safeUrl | async"
+  title="FBS-Modellierung"
+  frameBorder="0"
+></iframe>
