@@ -13,10 +13,10 @@ class IntegrationService(
     private val cleanRegex = Regex("[^A-Za-z ]")
 
     fun getAll(): Map<String, Integration> =
-        (this.env.getProperty("integrations.names", List::class.java) as List<String>).mapNotNull { name -> get(name).let {if (it != null) name to it else null} }.toMap()
+        (this.env.getProperty("integrations.names", List::class.java) as List<String>).mapNotNull { name -> get(name).let { if (it != null) name to it else null } }.toMap()
 
     fun get(integrationName: String): Integration? =
-        this.env.getProperty("integrations." + cleanName(integrationName) + ".url").let {if (it !== null) Integration(it) else null }
+        this.env.getProperty("integrations." + cleanName(integrationName) + ".url").let { if (it !== null) Integration(it) else null }
 
     private fun cleanName(input: String): String = cleanRegex.replace(input, "")
 }

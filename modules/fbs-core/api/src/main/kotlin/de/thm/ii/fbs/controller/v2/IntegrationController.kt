@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.controller.v2
 
 import de.thm.ii.fbs.model.v2.misc.Integration
@@ -8,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(path = ["/api/v2/integrations"])
 class IntegrationController(
-    private val integrationService: IntegrationService,
+    private val integrationService: IntegrationService
 ) {
 
     @GetMapping()
