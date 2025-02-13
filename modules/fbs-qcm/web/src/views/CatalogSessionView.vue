@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
 import sessionService from '@/services/session.service'
@@ -12,6 +12,17 @@ const router = useRouter()
 const showErrorPage = ref<Boolean>(false)
 const catalogStatus = ref<string | null>(null)
 const questionData = ref<Question>()
+const progressBar = ref<number>(1)
+const showFeedback = ref<boolean>(false)
+const currentQuestionScore = ref<number>(0)
+const formattedScore = computed(() => (currentQuestionScore.value * 100).toFixed(2))
+
+const scoreEmoji = computed(() => {
+  if (currentQuestionScore.value < 0.2) return '💀'
+  if (currentQuestionScore.value < 0.4) return '😐'
+  if (currentQuestionScore.value < 0.6) return '🙂'
+  return '😎'
+})
 
 const catalog = ref<Catalog>({
   id: route.params.catalogId,
@@ -29,26 +40,26 @@ const submitAnswer = async (answer: any) => {
   try {
     console.log('QUESION DATA SUBMITANSWER:', questionData)
     const submitResponse = await sessionService.submitAnswer(questionData.value._id, answer)
-    questionData.value = submitResponse.data
+    currentQuestionScore.value = submitResponse.data.correct.score
+    showFeedback.value = true
     console.log('CATALOG ID: ', route.params.catalogId)
+    // erst feedback geben
     sessionService
       .getCurrentQuestion(route.params.catalogId)
-      .then((res) => console.log('CURRENT QUESTION:', res))
-    sessionService
-      .getCurrentSessionQuestion()
       .then((res) => {
-        console.log('CURRENT SESSION QUESTION:', res.data)
+        console.log('CURRENT QUESTION:', res)
         if (res.data.catalog === 'over') {
-          catalogStatus.value = 'over' // Update state when backend responds with 'over'
+          catalogStatus.value = 'over'
         } else {
           catalogStatus.value = null
         }
-
         questionData.value = res.data
       })
       .catch((error) => console.error('Error fetching question:', error))
   } catch (error) {
     console.error('Error submitting answer:', error)
+  } finally {
+    progressBar.value++
   }
 }
 
@@ -102,12 +113,12 @@ onMounted(async () => {
             :max="8"
             color="primary"
             height="8"
-            :model-value="1"
+            :model-value="progressBar"
             stream
             rounded
           ></v-progress-linear>
         </div>
-        <div v-if="catalogStatus == 'over'">
+        <div v-if="catalogStatus == 'over' && !showFeedback">
           <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">Finished!🎉</h4>
           <p class="text-blue-grey-darken-2">evaluation......</p>
           <v-btn
@@ -120,10 +131,22 @@ onMounted(async () => {
             Go back
           </v-btn>
         </div>
+        <div v-if="showFeedback">
+          <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">You scored:</h4>
+          <p class="text-blue-grey-darken-2">{{ formattedScore }} % {{ scoreEmoji }}</p>
+          <v-btn
+            variant="tonal"
+            class="mx-auto my-8"
+            type="button"
+            append-icon="mdi-arrow-right-bold-outline"
+            @click="showFeedback = false"
+          >
+            next
+          </v-btn>
+        </div>
         <CatalogSession
-          v-if="questionData && catalogStatus == null"
+          v-if="questionData && catalogStatus == null && !showFeedback"
           :question="questionData"
-          :catalogStatus="catalogStatus"
           @submit-answer="submitAnswer"
         />
       </v-responsive>

@@ -65,20 +65,6 @@ class SessionService {
         return err
       })
   }
-  getCurrentSessionQuestion(): Promise<AxiosResponse<any>> {
-    return axios
-      .get('/api_v1/currentSessionQuestion', {
-        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-      })
-      .then((res) => {
-        console.log('GET CURRENT QUESTION: ', res.data)
-        return res
-      })
-      .catch((err) => {
-        console.log(err)
-        return err
-      })
-  }
 }
 
 export default new SessionService()
