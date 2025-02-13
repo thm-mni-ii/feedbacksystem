@@ -1,28 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type Question from '../model/Question'
-import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
-import type { Choice } from '@/model/questionTypes/Choice'
+import type ChoiceQuestionConfiguration from '@/model/ChoiceQuestionConfiguration'
 import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
 import { onMounted, onBeforeUnmount } from 'vue'
 import EditFillInTheBlanks from './EditFillInTheBlanks.vue'
-
-interface ChoiceQuestionConfiguration {
-  multipleRow: boolean
-  multipleColumn: boolean
-  answerColumns: { id: number; name: string }[]
-  optionRows: { id: number; text: string; correctAnswers: number[] }[]
-}
-
-type QuestionConfiguration = ChoiceQuestionConfiguration | FillInTheBlanks
-
-// Type Guards
-function isChoiceQuestionConfiguration(
-  config: QuestionConfiguration
-): config is ChoiceQuestionConfiguration {
-  return (config as ChoiceQuestionConfiguration).optionRows !== undefined
-}
+import EditChoiceQuestion from './EditChoiceQuestion.vue'
 
 const props = defineProps<{
   inputQuestion?: Question
@@ -78,80 +62,6 @@ const checkMultipleRows = () => {
       question.value.questionconfiguration.multipleRow = true
     }
   }
-}
-
-const addOptionRow = () => {
-  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
-    if (!question.value.questionconfiguration.optionRows) {
-      question.value.questionconfiguration.optionRows = []
-    }
-
-    question.value.questionconfiguration.optionRows.push({
-      id: question.value.questionconfiguration.optionRows.length + 1,
-      text: '',
-      correctAnswers: []
-    })
-  }
-}
-
-const addOptionCol = () => {
-  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
-    const answerColumns = question.value.questionconfiguration.answerColumns
-
-    if (!Array.isArray(answerColumns)) {
-      console.error('answerColumns is not initialized or is not an array')
-      return
-    }
-
-    answerColumns.push({
-      id: answerColumns.length + 1,
-      name: ''
-    })
-
-    console.log('Updated answerColumns:', answerColumns)
-  }
-}
-
-const deleteOption = (index: number) => {
-  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
-    question.value.questionconfiguration.optionRows.splice(index, 1)
-  }
-}
-
-const deleteAnswerColumn = (index: number) => {
-  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
-    if (question.value.questionconfiguration.answerColumns.length > 0) {
-      question.value.questionconfiguration.answerColumns.splice(index, 1)
-    }
-  }
-}
-
-const toggleCorrectAnswer = (columnIndex: number, optionIndex: number, isSelected: boolean) => {
-  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
-    const optionRows = question.value.questionconfiguration.optionRows
-    if (!optionRows || !optionRows[optionIndex]) {
-      return
-    }
-    const correctAnswers = optionRows[optionIndex].correctAnswers || []
-    const index = correctAnswers.indexOf(columnIndex)
-    if (isSelected && index === -1) {
-      correctAnswers.push(columnIndex)
-    } else if (!isSelected && index !== -1) {
-      correctAnswers.splice(index, 1)
-    }
-    optionRows[optionIndex].correctAnswers = [...correctAnswers]
-  }
-}
-
-const isCorrectAnswer = (columnIndex: number, optionIndex: number) => {
-  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
-    const optionRows = question.value.questionconfiguration.optionRows
-    if (!optionRows || !optionRows[optionIndex] || !optionRows[optionIndex].correctAnswers) {
-      return false
-    }
-    return optionRows[optionIndex].correctAnswers.includes(columnIndex)
-  }
-  return false
 }
 
 const removeTag = (item: string) => {
@@ -220,110 +130,7 @@ const handleSubmit = async () => {
           label="Question"
           required
         ></v-textarea>
-
-        <div v-if="question.questiontype === 'Choice'">
-          <div class="justify-space-between d-flex flex-row">
-            <v-switch
-              v-model="question.questionconfiguration.multipleColumn"
-              class="ml-4"
-              :label="`Multi-Select Matrix`"
-              color="primary"
-              hide-details
-            ></v-switch>
-
-            <div v-if="question.questionconfiguration.multipleColumn === true">
-              <v-btn icon="mdi-plus" class="my-4 mr-2" size="small" @click="addOptionCol"></v-btn>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto">
-            <div
-              v-for="(option, optionIndex) in question.questionconfiguration.optionRows"
-              :key="optionIndex"
-              class="d-flex flex-row flex-nowrap align-center my-4 justify-space-between"
-            >
-              <v-responsive class="ml-2" width="480">
-                <div class="d-flex flex-row">
-                  <div class="d-flex flex-row">
-                    <v-text-field
-                      v-model="option.text"
-                      :label="'Answer ' + (optionIndex + 1)"
-                      hide-details
-                      class="row-text"
-                      required
-                    ></v-text-field>
-                    <v-btn
-                      icon="mdi-delete-outline"
-                      class="ml-4 row-btn"
-                      variant="text"
-                      color="red"
-                      @click="deleteOption(optionIndex)"
-                    >
-                      <v-tooltip activator="parent" location="end">Delete Row</v-tooltip>
-                      <v-icon icon="mdi-delete-outline" size="small"></v-icon>
-                    </v-btn>
-                  </div>
-                </div>
-              </v-responsive>
-              <div class="d-flex flex-row flex-nowrap mx-auto">
-                <v-checkbox
-                  v-for="(column, columnIndex) in question.questionconfiguration.answerColumns"
-                  :key="columnIndex"
-                  :model-value="isCorrectAnswer(columnIndex, optionIndex)"
-                  class="d-flex justify-center column-items mx-auto"
-                  color="green"
-                  width="120"
-                  hide-details
-                  @update:model-value="
-                    (newValue) => toggleCorrectAnswer(columnIndex, optionIndex, newValue)
-                  "
-                >
-                  <v-tooltip activator="parent" location="end">Correct Answer</v-tooltip>
-                </v-checkbox>
-              </div>
-            </div>
-            <div class="d-flex flex-row flex-nowrap justify-space-between align-center my-4">
-              <v-responsive width="480">
-                <v-btn
-                  v-tooltip:end="'Add Answer'"
-                  icon="mdi-plus"
-                  class="ml-2 mb-2"
-                  size="small"
-                  @click="addOptionRow"
-                ></v-btn>
-              </v-responsive>
-
-              <div class="d-flex flex-row flex-nowrap">
-                <div
-                  v-for="(column, columnIndex) in question.questionconfiguration.answerColumns"
-                  :key="columnIndex"
-                  class="d-flex flex-column align-center"
-                >
-                  <v-responsive width="120">
-                    <v-text-field
-                      v-model="column.name"
-                      :label="'Column ' + (columnIndex + 1)"
-                      hide-details
-                      class="mx-2 column-text"
-                      required
-                    ></v-text-field>
-
-                    <v-btn
-                      icon="mdi-delete-outline"
-                      class="ml-9 mr-1 column-btn"
-                      variant="text"
-                      color="red"
-                      @click="deleteAnswerColumn(columnIndex)"
-                    >
-                      <v-tooltip activator="parent" location="end">Delete Column</v-tooltip>
-                      <v-icon icon="mdi-delete-outline" size="small"></v-icon>
-                    </v-btn>
-                  </v-responsive>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <EditChoiceQuestion v-if="question.questiontype === 'Choice'" :question="question" />
         <div v-if="question.questiontype === 'FillInTheBlanks'">
           <EditFillInTheBlanks :question="question" @update="question" />
         </div>

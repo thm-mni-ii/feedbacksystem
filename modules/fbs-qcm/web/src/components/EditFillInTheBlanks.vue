@@ -1,4 +1,3 @@
-<!-- src/components/EditFillInTheBlanks.vue -->
 <script setup lang="ts">
 import { ref, watch, defineProps, defineEmits } from 'vue'
 import type Question from '../model/Question'
