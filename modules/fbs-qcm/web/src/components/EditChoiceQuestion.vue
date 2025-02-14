@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, defineProps, defineEmits } from 'vue'
 import type Question from '@/model/Question'
 import type { Choice } from '@/model/questionTypes/Choice'
 import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
@@ -8,12 +8,27 @@ type QuestionConfiguration = Choice | FillInTheBlanks
 
 const props = defineProps<{ question: Question }>()
 
+const emit = defineEmits<{ (e: 'update', localQuestion: Question): void }>()
+
 const localQuestion = ref<Question>(JSON.parse(JSON.stringify(props.question)))
 
 watch(
   () => props.question,
   (newQuestion) => {
-    localQuestion.value = JSON.parse(JSON.stringify(newQuestion))
+    const newCopy = JSON.parse(JSON.stringify(newQuestion))
+
+    if (JSON.stringify(localQuestion.value) !== JSON.stringify(newCopy)) {
+      localQuestion.value = newCopy
+    }
+  },
+  { deep: true }
+)
+watch(
+  () => localQuestion.value,
+  (updatedQuestion) => {
+    if (JSON.stringify(props.question) !== JSON.stringify(updatedQuestion)) {
+      emit('update', updatedQuestion)
+    }
   },
   { deep: true }
 )

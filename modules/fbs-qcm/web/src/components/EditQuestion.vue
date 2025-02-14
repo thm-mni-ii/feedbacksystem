@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import type Question from '../model/Question'
 import type ChoiceQuestionConfiguration from '@/model/ChoiceQuestionConfiguration'
+import type { Choice } from '@/model/questionTypes/Choice'
+import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
 import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
 import { onMounted, onBeforeUnmount } from 'vue'
@@ -19,6 +21,7 @@ const emit = defineEmits<{
 }>()
 
 const questionTypes = Object.values(QuestionType)
+type QuestionConfiguration = Choice | FillInTheBlanks
 
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
@@ -27,6 +30,10 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 
 const question = ref<Question>({} as Question)
+// Type Guard
+function isChoiceQuestionConfiguration(config: QuestionConfiguration): config is Choice {
+  return (config as Choice).optionRows !== undefined
+}
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
@@ -66,6 +73,10 @@ const checkMultipleRows = () => {
 
 const removeTag = (item: string) => {
   question.value.questiontags.splice(question.value.questiontags.indexOf(item), 1)
+}
+
+const handleUpdate = (updatedQuestion: Question) => {
+  question.value = updatedQuestion
 }
 
 const handleSubmit = async () => {
@@ -130,10 +141,16 @@ const handleSubmit = async () => {
           label="Question"
           required
         ></v-textarea>
-        <EditChoiceQuestion v-if="question.questiontype === 'Choice'" :question="question" />
-        <div v-if="question.questiontype === 'FillInTheBlanks'">
-          <EditFillInTheBlanks :question="question" @update="question" />
-        </div>
+        <EditChoiceQuestion
+          v-if="question.questiontype === 'Choice'"
+          :question="question"
+          @update="handleUpdate"
+        />
+        <EditFillInTheBlanks
+          v-if="question.questiontype === 'FillInTheBlanks'"
+          :question="question"
+          @update="question"
+        />
       </v-form>
     </v-card-text>
 
