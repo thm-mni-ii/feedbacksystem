@@ -9,7 +9,11 @@
     "test": "ng test",
     "clean": "rimraf dist",
     "lint": "ng lint --max-warnings=0",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "docker:start": "docker-compose up -d",
+    "test:setup": "npm install",
+    "app:start": "npm run start",
+    "test:e2e": "npm run docker:start && npm run test:setup && concurrently \"npm run app:start\" \"npx playwright test\""
   },
   "private": true,
   "dependencies": {
@@ -65,6 +69,7 @@
     "@types/node": "^12.11.1",
     "@typescript-eslint/eslint-plugin": "5.29.0",
     "@typescript-eslint/parser": "5.46.1",
+    "concurrently": "^9.0.1",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
