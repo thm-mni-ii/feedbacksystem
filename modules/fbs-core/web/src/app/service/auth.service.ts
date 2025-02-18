@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 import { of, throwError } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
 import { JWTToken } from "../model/JWTToken";
+import { UserService } from "./user.service";
 
 const TOKEN_ID = "token";
 
@@ -15,7 +16,11 @@ const TOKEN_ID = "token";
   providedIn: "root",
 })
 export class AuthService {
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {}
+  constructor(
+    private http: HttpClient,
+    private jwtHelper: JwtHelperService,
+    private UserService: UserService
+  ) {}
 
   /**
    * Logout user by removing its token.
@@ -29,7 +34,7 @@ export class AuthService {
    */
   public isAuthenticated(): boolean {
     const token = this.loadToken();
-    return token && !this.jwtHelper.isTokenExpired(token);
+    return token && !this._isTokenExpired(token);
   }
 
   /**
@@ -40,9 +45,10 @@ export class AuthService {
     const decodedToken = this.decodeToken();
     if (!decodedToken) {
       throw new Error("Decoding the token failed");
-    } else if (this.jwtHelper.isTokenExpired(token)) {
-      throw new Error("Token expired");
     }
+    // } else if (this._isTokenExpired(token)) {
+    //   throw new Error("Token expired");
+    // }
     decodedToken.courseRoles = JSON.parse(<any>decodedToken.courseRoles);
     return decodedToken;
   }
@@ -93,7 +99,7 @@ export class AuthService {
    */
   public renewToken(response: HttpResponse<any>) {
     const token = this.extractTokenFromHeader(response);
-    if (token && !this.jwtHelper.isTokenExpired(token)) {
+    if (token && !this._isTokenExpired(token)) {
       this.storeToken(token);
     }
   }
@@ -119,7 +125,7 @@ export class AuthService {
           const decodedToken = this.decodeToken();
           if (!decodedToken) {
             return throwError("Decoding the token failed");
-          } else if (this.jwtHelper.isTokenExpired(token)) {
+          } else if (this._isTokenExpired(token)) {
             return throwError("Token expired");
           }
           return of(decodedToken);
@@ -160,5 +166,14 @@ export class AuthService {
         }
       }
     }, 60000);
+  }
+
+  private _isTokenExpired(token: string, serverDate: Date): boolean {
+    let tokesExpereation = this.jwtHelper.getTokenExpirationDate(token);
+    if (tokesExpereation) {
+      return tokesExpereation.getTime() < serverDate.getTime();
+    }
+
+    return this.jwtHelper.isTokenExpired(token);
   }
 }
