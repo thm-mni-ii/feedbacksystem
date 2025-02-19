@@ -570,18 +570,27 @@ export async function catalogScore(tokenData: JwtPayload, courseId: number, cata
     const query = {
         session: session._id
     }
-    const submissionCollection = database.collection("submisssion");
-    const submissions = submissionCollection.find(query);
-    if(submissions === null) {
+    console.log(query);
+    const submissionCollection = database.collection("submission");
+    const submissions = await submissionCollection.find(query).toArray();
+    console.log(submissions);
+    if(submissions.length === 0) {
+        console.log("no submissions yet");
         return -1;
     }
     let score = 0.0;
     let count = 0
     submissions.forEach((submission) => {
-       score += submission.evaluation; 
+       score += submission.evaluation.score; 
        count++;
+       console.log(submission);
     });
-    return score/count;
+
+    console.log("score");
+    console.log(score);
+    console.log("count")
+    console.log(count)
+    return {"score": score/count};
 }
 
 export async function changeScoreNeededForQuestion(tokenData: JwtPayload, questionId: string, needed_score: number, transition: string) {

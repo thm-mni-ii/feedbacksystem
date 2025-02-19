@@ -16,6 +16,6 @@ router.get("/api_v1/getPreviousQuestion/:catalog/:question", authenticateToken, 
 router.get("/api_v1/editEmptyCatalog/:id", authenticateToken, editEmptyCatalog);
 router.get("/api_v1/current_question", authenticateToken, currentQuestion);
 router.put("/api_v1/change_needed_score", authenticateToken, changeNeededScore);
-router.get("/api_v1/getCatalogScore", authenticateToken, getCatalogScore);
+router.get("/api_v1/getCatalogScore/:courseId/:catalogId", authenticateToken, getCatalogScore);
 
 export default router;

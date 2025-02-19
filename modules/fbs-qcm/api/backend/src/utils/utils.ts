@@ -314,14 +314,13 @@ export async function getLastSessionForCatalog(db: mongoDB.Db, catalogId: string
     const query = {
         catalogId: new mongoDB.ObjectId(catalogId),
         courseId: courseId,
-        status: SessionStatus.finished,
         user: userId
     }
-    const session = await sessionCollection.find(query)
-    .sort({ starttime: -1 })
-    .limit(1)
-    .toArray();
-    return session;
+    console.log(query);
+    const session = await sessionCollection.find(query).sort({ starttime: -1 }).limit(1).toArray();
+    console.log("session");
+    console.log(session);
+    return session[0];
 }
 
 export async function getAllQuestionsFromCatalogs(

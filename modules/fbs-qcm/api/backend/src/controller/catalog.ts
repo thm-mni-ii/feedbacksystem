@@ -13,11 +13,15 @@ const getCatalogScore = ( async (req: Request, res: Response) => {
       if (req.user !== undefined) {
         const data = await catalogScore(req.user, courseId, catalogId);
         if (data == -1) {
+          console.log("no submissions yet");
           res.sendStatus(403);
+          return;
         } else {
           res.send(data);
+          return;
         }
       }
+        res.sendStatus(500); 
     } catch (error) {
       console.log(error);
       res.sendStatus(500);
