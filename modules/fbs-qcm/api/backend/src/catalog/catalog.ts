@@ -7,6 +7,7 @@ import {
   getFirstQuestionInCatalog,
   getAllQuestionInCatalog,
   getAllQuestionsConnectionsFromCatalogs,
+  getLastSessionForCatalog,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { Question } from "../model/Question";
@@ -558,6 +559,29 @@ export async function emptyCatalogInformation(tokenData: JwtPayload, catalogId: 
     if(data !== null) {
         return -1;
     }
+}
+
+export async function catalogScore(tokenData: JwtPayload, courseId: number, catalogId: string) {
+    const database: mongoDB.Db = await connect();
+    const session: any = await getLastSessionForCatalog(database, catalogId, courseId, tokenData.id); 
+    if(session === null) {
+        return -1;
+    }
+    const query = {
+        session: session._id
+    }
+    const submissionCollection = database.collection("submisssion");
+    const submissions = submissionCollection.find(query);
+    if(submissions === null) {
+        return -1;
+    }
+    let score = 0.0;
+    let count = 0
+    submissions.forEach((submission) => {
+       score += submission.evaluation; 
+       count++;
+    });
+    return score/count;
 }
 
 export async function changeScoreNeededForQuestion(tokenData: JwtPayload, questionId: string, needed_score: number, transition: string) {

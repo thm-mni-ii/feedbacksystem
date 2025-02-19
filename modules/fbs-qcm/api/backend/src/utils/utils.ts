@@ -309,6 +309,21 @@ function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
   return list;
 }
 
+export async function getLastSessionForCatalog(db: mongoDB.Db, catalogId: string, courseId: number, userId: number) {
+    const sessionCollection: mongoDB.Collection = db.collection("sessions");
+    const query = {
+        catalogId: new mongoDB.ObjectId(catalogId),
+        courseId: courseId,
+        status: SessionStatus.finished,
+        user: userId
+    }
+    const session = await sessionCollection.find(query)
+    .sort({ starttime: -1 })
+    .limit(1)
+    .toArray();
+    return session;
+}
+
 export async function getAllQuestionsFromCatalogs(
   questionInCatalogCollection: mongoDB.Collection,
   questionCollection: mongoDB.Collection,

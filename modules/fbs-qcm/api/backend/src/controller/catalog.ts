@@ -1,8 +1,28 @@
-import { addNewChildrenToQuestion, changeScoreNeededForQuestion, createSingleCatalog, deleteSingleCatalog, editCatalogInformation, editSingleCatalog, emptyCatalogInformation, getAllCatalogs, getPreviousQuestionInCatalog, getSingleCatalog } from "../catalog/catalog";
+import { addNewChildrenToQuestion, catalogScore, changeScoreNeededForQuestion, createSingleCatalog, deleteSingleCatalog, editCatalogInformation, editSingleCatalog, emptyCatalogInformation, getAllCatalogs, getPreviousQuestionInCatalog, getSingleCatalog } from "../catalog/catalog";
 import { Request, Response } from "express";
 import { getCurrentQuestion } from "../question/question";
 
 
+const getCatalogScore = ( async (req: Request, res: Response) => {
+    try {
+      if (req.user == undefined) {
+        res.sendStatus(401);
+      }
+      const courseId = Number(req.params.courseId);
+      const catalogId = req.params.catalogId;
+      if (req.user !== undefined) {
+        const data = await catalogScore(req.user, courseId, catalogId);
+        if (data == -1) {
+          res.sendStatus(403);
+        } else {
+          res.send(data);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+    }
+});
 const getCatalogs = ( async (req: Request, res: Response) => {
     try {
       if (req.user == undefined) {
@@ -246,5 +266,6 @@ export {
     getPreviousQuestion,
     editEmptyCatalog,
     currentQuestion,
-    changeNeededScore
+    changeNeededScore,
+    getCatalogScore
 }

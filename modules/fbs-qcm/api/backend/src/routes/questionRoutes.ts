@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../authenticateToken';
-import { copyQuestion, copyQuestionToCatalog, deleteQuestion, deleteQuestionFromCatalog, getAllquestionsInCatalog, getAllquestionsInCourse, getQuestion, postQuestion, postQuestionToCatalog, putQuestion } from '../controller/question';
-import { getAllQuestions } from '../question/question';
+import { allQuestions, copyQuestion, copyQuestionToCatalog, deleteQuestion, deleteQuestionFromCatalog, getAllquestionsInCatalog, getAllquestionsInCourse, getQuestion, postQuestion, postQuestionToCatalog, putQuestion } from '../controller/question';
 
 const router = Router();
 
@@ -13,7 +12,7 @@ router.put("/api_v1/copyQuestionToCatalog", authenticateToken, copyQuestionToCat
 router.put("/api_v1/copyQuestion/:id", authenticateToken, copyQuestion);
 router.get("/api_v1/allquestionsInCatalog/:id", authenticateToken, getAllquestionsInCatalog);
 router.get("/api_v1/allquestionsInCourse/:id", authenticateToken, getAllquestionsInCourse);
-router.get("/api_v1/allquestions", authenticateToken, getAllQuestions);
+router.get("/api_v1/allquestions", authenticateToken, allQuestions);
 router.delete("/api_v1/removeQuestionFromCatalog/:questionInCatalog", authenticateToken, deleteQuestionFromCatalog);
 router.get("/api_v1/addQuestionToCatalog", authenticateToken, postQuestionToCatalog);
 
