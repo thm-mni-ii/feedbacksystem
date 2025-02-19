@@ -583,13 +583,8 @@ export async function catalogScore(tokenData: JwtPayload, courseId: number, cata
     submissions.forEach((submission) => {
        score += submission.evaluation.score; 
        count++;
-       console.log(submission);
     });
 
-    console.log("score");
-    console.log(score);
-    console.log("count")
-    console.log(count)
     return {"score": score/count};
 }
 
