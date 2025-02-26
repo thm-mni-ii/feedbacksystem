@@ -67,6 +67,18 @@ services:
   ids:
     salt: ${ID_SALT:feedbacksystem_id_salt}
     length: ${ID_LENGTH:8}
+integrations:
+  names: [modelling, feedbackApp, eat, kanban, sciCheck]
+  modelling:
+    url: ${MODELLING_URL:https://fbs-modelling.mni.thm.de/}
+  feedbackApp:
+    url: ${FEEDBACK_APP_URL:/feedbackApp/}
+  eat:
+    url: ${EAT_URL:/eat/}
+  kanban:
+    url: ${KANBAN_URL:/kanban/}
+  sciCheck:
+    url: ${SCI_CHECK_URL:/scicheck/}
 spring:
   main:
     allow-bean-definition-overriding: true
