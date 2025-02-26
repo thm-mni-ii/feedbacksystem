@@ -20,7 +20,7 @@ export const sqlInputTabsReducer = createReducer(
     ...state,
     tabs: [
       ...state.tabs,
-      tab ?? {
+      tab ? {...tab, createdAt: tab.createdAt ?? Date.now()} : {
         id: crypto.randomUUID(),
         name: "New Query",
         content: "",
@@ -34,8 +34,9 @@ export const sqlInputTabsReducer = createReducer(
         selectedCourseName: "Course",
         selectedTaskName: "Task",
         active: [],
+        createdAt: Date.now(),
       },
-    ],
+    ].sort((a, b) => a.createdAt - b.createdAt),
     activeTabIndex: state.tabs.length,
   })),
   on(SqlInputTabsActions.closeTab, (state, { index }) => {
