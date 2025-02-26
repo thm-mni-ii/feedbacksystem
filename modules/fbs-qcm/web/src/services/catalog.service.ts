@@ -11,22 +11,39 @@ class CatalogService {
       }
     })
   }
-  changeNeededScore(question: string, score: number, transition: string): Promise<AxiosResponse<Catalog>> {
-      console.log(question);
-      console.log(score);
-      console.log(transition);
-    return axios.put(`/api_v1/change_needed_score/`, {question, score, transition} , {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+  changeNeededScore(
+    question: string,
+    score: number,
+    transition: string
+  ): Promise<AxiosResponse<Catalog>> {
+    console.log(question)
+    console.log(score)
+    console.log(transition)
+    return axios.put(
+      `/api_v1/change_needed_score/`,
+      { question, score, transition },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
       }
-    })
+    )
   }
-  addChildrenToQuestion(question: string, child: string, key: number, transition: string): Promise<AxiosResponse<Catalog>> {
-    return axios.put(`/api_v1/addChildrenToQuestion/`, {question, child, key, transition} , {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+  addChildrenToQuestion(
+    question: string,
+    child: string,
+    key: number,
+    transition: string
+  ): Promise<AxiosResponse<Catalog>> {
+    return axios.put(
+      `/api_v1/addChildrenToQuestion/`,
+      { question, child, key, transition },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
       }
-    })
+    )
   }
   deleteQuestionFromCatalog(questionInCollection: string): Promise<AxiosResponse<Catalog>> {
     return axios.delete(`/api_v1/removeQuestionFromCatalog/${questionInCollection}`, {
@@ -66,6 +83,13 @@ class CatalogService {
   }
   postCatalog(data: Catalog): Promise<AxiosResponse<Catalog>> {
     return axios.post(`/api_v1/catalog/`, data, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+  putCatalog(data: Catalog): Promise<AxiosResponse<Catalog>> {
+    return axios.put(`/api_v1/catalog/${data.id}`, data, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
       }

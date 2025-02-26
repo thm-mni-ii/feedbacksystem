@@ -134,7 +134,7 @@ const loadCatalogsFromCourse = (courseId: number) => {
   const course = myCourses.value.find((course) => course.id === courseId)
   if (course) {
     axios
-      .get(`api_v1/catalogs/187`, {
+      .get(`api_v1/catalogs/${course.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
         }
