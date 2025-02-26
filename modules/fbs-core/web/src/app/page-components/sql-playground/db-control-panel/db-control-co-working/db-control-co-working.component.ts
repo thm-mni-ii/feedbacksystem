@@ -17,7 +17,7 @@ import { Group } from "../../../../model/Group";
 import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
 import { selectBackend } from "../../state/sql-playground.selectors";
 import { BackendDefintion } from "../../collab/backend.service";
-import {closeAllTabs} from "../../sql-input-tabs/state/sql-input-tabs.actions";
+import { closeAllTabs } from "../../sql-input-tabs/state/sql-input-tabs.actions";
 
 @Component({
   selector: "app-db-control-co-working",
