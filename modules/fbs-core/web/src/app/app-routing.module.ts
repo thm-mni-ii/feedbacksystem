@@ -105,24 +105,29 @@ const routes: Routes = [
         component: AnalyticsToolComponent,
         canActivate: [AuthGuard],
       },
+
       // Modelling
       {
         path: "modelling",
         component: FbsModellingComponent,
         canActivate: [AuthGuard],
       },
+
       // Kanban
       {
         path: "kanban",
         component: FbsKanbanComponent,
         canActivate: [AuthGuard],
       },
+
       // Sci-Check
       {
         path: "sci-check",
         component: FbsSciCheckComponent,
         canActivate: [AuthGuard],
-      },      // Questionary
+      },
+
+      // Questionary
       {
         path: "questionary",
         component: FbsQuestionaryComponent,
