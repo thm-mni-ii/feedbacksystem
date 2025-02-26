@@ -64,4 +64,12 @@ export class LocalBackend implements Backend {
   streamMetaChanges(): Observable<{ key: string; value: any }> {
     return of();
   }
+
+  announceSchemaChange(): Observable<void> {
+    return of();
+  }
+
+  streamSchemaChange(): Observable<void> {
+    return of();
+  }
 }
