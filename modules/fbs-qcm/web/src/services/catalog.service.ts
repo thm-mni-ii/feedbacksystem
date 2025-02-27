@@ -81,6 +81,13 @@ class CatalogService {
       }
     })
   }
+  getCatalogs(id: number): Promise<AxiosResponse<Catalog>> {
+    return axios.get(`/api_v1/catalogs/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
   postCatalog(data: Catalog): Promise<AxiosResponse<Catalog>> {
     return axios.post(`/api_v1/catalog/`, data, {
       headers: {

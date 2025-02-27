@@ -14,6 +14,6 @@ router.get("/api_v1/allquestionsInCatalog/:id", authenticateToken, getAllquestio
 router.get("/api_v1/allquestionsInCourse/:id", authenticateToken, getAllquestionsInCourse);
 router.get("/api_v1/allquestions", authenticateToken, allQuestions);
 router.delete("/api_v1/removeQuestionFromCatalog/:questionInCatalog", authenticateToken, deleteQuestionFromCatalog);
-router.get("/api_v1/addQuestionToCatalog", authenticateToken, postQuestionToCatalog);
+router.put("/api_v1/addQuestionToCatalog", authenticateToken, postQuestionToCatalog);
 
 export default router;
