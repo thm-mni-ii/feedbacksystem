@@ -1,8 +1,25 @@
 import { addNewChildrenToQuestion, catalogScore, changeScoreNeededForQuestion, createSingleCatalog, deleteSingleCatalog, editCatalogInformation, editSingleCatalog, emptyCatalogInformation, getAllCatalogs, getPreviousQuestionInCatalog, getSingleCatalog } from "../catalog/catalog";
 import { Request, Response } from "express";
 import { getCurrentQuestion } from "../question/question";
+import { accessibleCourses } from "../course/course";
 
 
+const getAccessibleCourses = ( async (req: Request, res: Response) => {
+  try {
+    if (req.user == undefined) {
+      res.sendStatus(401);
+    }
+    if (req.user !== undefined) {
+      const data = await accessibleCourses(req.user);
+      res.send(data);
+      return;
+    }
+      res.sendStatus(500); 
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
 const getCatalogScore = ( async (req: Request, res: Response) => {
     try {
       if (req.user == undefined) {
@@ -272,5 +289,6 @@ export {
     editEmptyCatalog,
     currentQuestion,
     changeNeededScore,
-    getCatalogScore
+    getCatalogScore,
+    getAccessibleCourses
 }

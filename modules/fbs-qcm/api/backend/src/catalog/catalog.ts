@@ -118,6 +118,10 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
     questionId = question._id;
     console.log(`start question is: ${questionId}`);
   }
+  if(questionId === undefined || questionId === null ||questionId === "") {
+    console.log("so we return here");
+    return {isEmpty: true};
+  }
   console.log(1);
   const query = {
       _id: new mongoDB.ObjectId(questionId)
@@ -171,7 +175,8 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   const res = {
       _id: questionId,
       questionText: originQuestion.questiontext,
-      children: children
+      children: children,
+      isEmpty: false
   }
   return res;
 }

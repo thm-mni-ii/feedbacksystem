@@ -225,6 +225,10 @@ const postQuestionToCatalog = ( async (req: Request, res: Response) => {
           const questionId: string = requestData.question;
           const catalog: string = requestData.catalog;
           const children = requestData.children;
+          console.log("questionId");
+          console.log(questionId);
+          console.log("catalog");
+          console.log(catalog);
           const result = await addQuestionToCatalog(
             req.user,
             questionId,

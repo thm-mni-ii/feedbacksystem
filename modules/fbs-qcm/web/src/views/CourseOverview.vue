@@ -1,12 +1,12 @@
 <template>
-  <div class="catalog-container">
-    <h1 class="text-h4 font-weight-bold text-center mb-4">Katalogübersicht</h1>
+  <div class="course-container">
+    <h1 class="text-h4 font-weight-bold text-center mb-4">Meine Kurse</h1>
     
     <!-- Loading State -->
     <v-card v-if="loading" elevation="2" class="pa-4 mx-auto" max-width="600">
       <div class="d-flex align-center justify-center">
         <v-progress-circular indeterminate color="primary" class="mr-2"></v-progress-circular>
-        <span>Lade Kataloge...</span>
+        <span>Lade Kurse...</span>
       </div>
     </v-card>
     
@@ -15,26 +15,28 @@
       <strong>Fehler beim Laden:</strong> {{ error }}
     </v-alert>
     
-    <!-- Catalog List -->
+    <!-- Course List -->
     <v-card v-else elevation="3" class="mx-auto" max-width="600">
       <v-card-title class="text-subtitle-1 bg-primary text-white">
-        <v-icon left>mdi-book-multiple</v-icon>
-        Verfügbare Kataloge
+        <v-icon left>mdi-school</v-icon>
+        Meine Kurse
       </v-card-title>
       
-      <v-list two-line>
-        <v-list-item v-for="catalog in catalogs" :key="catalog.id" @click="openCatalog(catalog.id)" class="catalog-item">
+      <v-list>
+        <v-list-item 
+          v-for="courseId in courses" 
+          :key="courseId" 
+          :to="`http://localhost:8085/catalogManagement/${courseId}`"
+          class="course-item"
+        >
           <v-list-item-avatar>
             <v-icon color="primary">mdi-book-open-variant</v-icon>
           </v-list-item-avatar>
           
           <v-list-item-content>
             <v-list-item-title class="text-subtitle-1 font-weight-medium">
-              {{ catalog.name }}
+              Kurs {{ courseId }}
             </v-list-item-title>
-            <v-list-item-subtitle v-if="catalog.description">
-              {{ catalog.description }}
-            </v-list-item-subtitle>
           </v-list-item-content>
           
           <v-list-item-action>
@@ -45,10 +47,10 @@
         </v-list-item>
         
         <!-- Empty State -->
-        <v-list-item v-if="catalogs.length === 0">
+        <v-list-item v-if="courses.length === 0">
           <v-list-item-content class="text-center py-4">
-            <v-icon x-large color="grey lighten-1" class="mb-2">mdi-book-off</v-icon>
-            <div class="text-subtitle-1 grey--text">Keine Kataloge gefunden</div>
+            <v-icon x-large color="grey lighten-1" class="mb-2">mdi-school-outline</v-icon>
+            <div class="text-subtitle-1 grey--text">Keine Kurse gefunden</div>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -62,43 +64,48 @@ import catalogService from '@/services/catalog.service';
 
 export default {
   setup() {
-    const catalogs = ref([]);
+    const courses = ref([]);
     const loading = ref(true);
     const error = ref(null);
 
-    const fetchCatalogs = async () => {
+    const fetchCourses = async () => {
       try {
-        const response = await catalogService.getCatalogs(187);
-        catalogs.value = response.data;
+        console.log("HHHHHHHHHHHHHHAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLLLLLOIOOOOOOOOOOOOOOO");
+        const response = await catalogService.getAccessibleCourses();
+        console.log(response);
+        console.log(response);
+        console.log(response);
+        console.log(response);
+        console.log(response);
+        console.log(response);
+        console.log(response);
+        console.log(response);
+
+        courses.value = response.data;
       } catch (err) {
-        error.value = err.message;
+        error.value = err.message || 'Fehler beim Laden der Kurse';
       } finally {
         loading.value = false;
       }
     };
 
-    const openCatalog = (catalogId) => {
-      console.log("Katalog geöffnet: ", catalogId);
-      window.location.href = `http://localhost:8085/editCatalog/${catalogId}/open`;
-    };
+    onMounted(fetchCourses);
 
-    onMounted(fetchCatalogs);
-
-    return { catalogs, loading, error, openCatalog };
+    return { courses, loading, error };
   }
 };
 </script>
 
 <style scoped>
-.catalog-container {
+.course-container {
   padding: 20px;
 }
 
-.catalog-item {
+.course-item {
   transition: background-color 0.2s;
 }
 
-.catalog-item:hover {
+.course-item:hover {
   background-color: rgba(0, 0, 0, 0.05);
   cursor: pointer;
 }

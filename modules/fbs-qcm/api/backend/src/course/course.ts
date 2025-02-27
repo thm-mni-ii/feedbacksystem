@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { checkCourseAccess, getAdminCourseRoles, getAllQuestionsInCourse, getStudentCourseRoles} from "../utils/utils";
+import { checkCourseAccess, getAdminCourseRoles, getAllQuestionsInCourse, getStudentCourseRoles, getUserCourseRoles} from "../utils/utils";
 import * as mongoDB from "mongodb";
 import axios from "axios";
 import https from "https";
@@ -16,7 +16,11 @@ export async function getTeacherCourses(token: string, tokenData: JwtPayload) {
     const courses = findMatchingCourses(adminCourses, allCourses);
     return courses;
 }
-
+export async function accessibleCourses(tokenData: JwtPayload) {
+    const courses = getUserCourseRoles(tokenData);
+    console.log(courses);
+    return courses;
+}
 export async function getCourses(token: string) {
     try {
         const url = process.env.FBS_BASE_URL

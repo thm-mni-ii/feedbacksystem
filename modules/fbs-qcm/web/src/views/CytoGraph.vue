@@ -344,7 +344,7 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      console.log('ID from query parameter:', id.catalog);
+      console.log('ID from query parameter:', id.catalogId);
       console.log('ID from query parameter:', id.question);
       
       let maxKey = "+";
@@ -362,38 +362,44 @@ export default defineComponent({
       let buttonsHidden = "false";
       
       currentQuestion.value = id.question;
-      currentCatalog.value = id.catalog;
+      currentCatalog.value = id.catalogId;
       
       try {
         if(id.question !== "new") {
-            buttonsHidden = "false";
-            const data = await catalogService.editCatalog(id.catalog, id.question);
+            const data = await catalogService.editCatalog(id.catalogId, id.question);
+            console.log(id.catalogId, id.question)
             console.log(data.data);
-            
-            questionText = data.data.questionText;
-            
-            for(let i = 0; i < data.data.children.length; i++) {
-              if(data.data.children[i].transition === "correct") {
-                  maxKey = data.data.children[i].text;
-                  maxId = data.data.children[i].questionId;
-                  maxKeyNumber = `${data.data.children[i].score}%`;
+            if(data.data.isEmpty) {
+              console.log("its true");
+              buttonsHidden = "true"
+            } else {              
+              console.log("its not true");
+              buttonsHidden = "false";
+              questionText = data.data.questionText;
+              
+              for(let i = 0; i < data.data.children.length; i++) {
+                if(data.data.children[i].transition === "correct") {
+                    maxKey = data.data.children[i].text;
+                    maxId = data.data.children[i].questionId;
+                    maxKeyNumber = `${data.data.children[i].score}%`;
+                }
+                if(data.data.children[i].transition === "incorrect") {
+                    minKey = data.data.children[i].text;
+                    minId = data.data.children[i].questionId;
+                    minKeyNumber = `${data.data.children[i].score}%`;
+                }
+                if(data.data.children[i].transition === "partial") {
+                    midKey = data.data.children[i].text;
+                    midId = data.data.children[i].questionId;
+                    midKeyNumber = `${data.data.children[i].score}%`;
+                }
               }
-              if(data.data.children[i].transition === "incorrect") {
-                  minKey = data.data.children[i].text;
-                  minId = data.data.children[i].questionId;
-                  minKeyNumber = `${data.data.children[i].score}%`;
+              console.log(data.data);
+              const prevData = await catalogService.getPreviousQuestion(id.catalog, data.data._id);
+              if(prevData.data.questionInCatalogId !== null) {
+                prevText = prevData.data.text;
+                prevId = prevData.data.questionInCatalogId;
               }
-              if(data.data.children[i].transition === "partial") {
-                  midKey = data.data.children[i].text;
-                  midId = data.data.children[i].questionId;
-                  midKeyNumber = `${data.data.children[i].score}%`;
-              }
-            }
-            console.log(data.data);
-            const prevData = await catalogService.getPreviousQuestion(id.catalog, data.data._id);
-            if(prevData.data.questionInCatalogId !== null) {
-              prevText = prevData.data.text;
-              prevId = prevData.data.questionInCatalogId;
             }
         } else if (id.question === "new") {
             const data = await catalogService.editEmptyCatalog(id.catalog);

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../authenticateToken';
-import { addChildrenToQuestion, changeNeededScore, currentQuestion, deleteCatalog, editCatalog, editEmptyCatalog, getCatalog, getCatalogScore, getCatalogs, getPreviousQuestion, postCatalog, putCatalog } from '../controller/catalog';
+import { addChildrenToQuestion, changeNeededScore, currentQuestion, deleteCatalog, editCatalog, editEmptyCatalog, getAccessibleCourses, getCatalog, getCatalogScore, getCatalogs, getPreviousQuestion, postCatalog, putCatalog } from '../controller/catalog';
 
 const router = Router();
 
@@ -17,5 +17,6 @@ router.get("/api_v1/editEmptyCatalog/:id", authenticateToken, editEmptyCatalog);
 router.get("/api_v1/current_question", authenticateToken, currentQuestion);
 router.put("/api_v1/change_needed_score", authenticateToken, changeNeededScore);
 router.get("/api_v1/getCatalogScore/:courseId/:catalogId", authenticateToken, getCatalogScore);
+router.get("/api_v1/accessibleCourses", authenticateToken, getAccessibleCourses)
 
 export default router;

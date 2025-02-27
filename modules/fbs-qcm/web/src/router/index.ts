@@ -15,6 +15,11 @@ const router = createRouter({
         component: () => import('../views/EditCatalogView.vue')
     },
     {
+      path: '/courseOverview',
+      name: '/courseOverview',
+      component: () => import('../views/CourseOverview.vue')
+  },
+    {
         path: '/catalogManagement',
         name: '/CatalogManagement',
         component: () => import('../views/CatalogOverview.vue')
@@ -30,7 +35,7 @@ const router = createRouter({
         component: () => import('../views/MyTest.vue')
     },
     {
-      path: '/manageCatalog/:catalogId',
+      path: '/manageCatalog/:catalogId/:questionId',
       name: 'manageCatalog',
       component: () => import('../views/ManageCatalogView.vue')
     },

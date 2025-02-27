@@ -73,7 +73,13 @@ class CatalogService {
       }
     })
   }
-
+  getAccessibleCourses(): Promise<AxiosResponse<Catalog>> {
+    return axios.get(`/api_v1/accessibleCourses`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
   getCatalog(id: string): Promise<AxiosResponse<Catalog>> {
     return axios.get(`/api_v1/catalog/${id}`, {
       headers: {

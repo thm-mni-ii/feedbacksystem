@@ -198,7 +198,7 @@ const deleteCatalog = (courseId: number, catalog: Catalog) => {
 const manageQuestions = (catalog: Catalog) => {
   console.log(catalog.id)
   console.log(catalog)
-  router.push(`/manageCatalog/${catalog.id}`)
+  router.push(`/manageCatalog/${catalog.id}/open`)
 }
 
 const startSession = (catalog: Catalog) => {
