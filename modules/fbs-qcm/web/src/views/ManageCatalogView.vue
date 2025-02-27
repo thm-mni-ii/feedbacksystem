@@ -347,8 +347,9 @@ export default defineComponent({
     });
 
     onMounted(async () => {
+      console.log('ID from query parameter:', id.questionId);      
       console.log('ID from query parameter:', id.catalogId);
-      console.log('ID from query parameter:', id.questionId);
+
       
       let maxKey = "+";
       let midKey = "+";
@@ -542,7 +543,9 @@ export default defineComponent({
               selectedQuestion.value = "";
               showModal.value = true;
             } else if(clickedNode.data('hiddenData') !== null && clickedNode.data('hiddenData') !== undefined) {
-                router.push(`/editCatalog/${id.catalogId}/${clickedNode.data('hiddenData')}`);
+                console.log(id.catalogId);
+                console.log("warum passiert hier nichts");
+                window.location.href = `/manageCatalog/${id.catalogId}/${clickedNode.data('hiddenData')}`
             }
         });
         
@@ -607,6 +610,7 @@ export default defineComponent({
         try {
           console.log("Füge Frage hinzu:", score, questionId, transition);
           console.log("IN DEN FOLGENDEN KATALOG:", currentCatalog.value);
+          console.log("IN DEN FOLGENDEN KATALOG:", id.catalogId);
           const res = await questionService.addQuestionToCatalog(questionId, currentCatalog.value);  
           console.log(res);
           
@@ -619,7 +623,7 @@ export default defineComponent({
               showModal.value = false;
               location.reload();
           } else {
-              router.push(`/editCatalog/${id.catalogId}/${res.data.id}`);
+              window.location.href = `/manageCatalog/${id.catalogId}/${res.data.id}`
           }
         } catch (error) {
           console.error("Fehler beim Hinzufügen der Frage:", error);

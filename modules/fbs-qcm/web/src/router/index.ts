@@ -25,11 +25,6 @@ const router = createRouter({
         component: () => import('../views/CatalogOverview.vue')
     },
     {
-        path: '/editCatalog/:catalog/:question',
-        name: '/CytographTest',
-        component: () => import('../views/CytoGraph.vue')
-    },
-    {
         path: '/myTest',
         name: '/myTest',
         component: () => import('../views/MyTest.vue')
