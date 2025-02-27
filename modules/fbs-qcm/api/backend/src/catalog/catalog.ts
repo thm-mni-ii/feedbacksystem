@@ -97,12 +97,27 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
     //need to add verification specifically for questioninCatalogId
     return -1;
   } 
+  console.log(catalogId);
+  console.log(questionId);
   const database: mongoDB.Db = await connect();
   if(questionId === "") {
     return -1;
   }
-  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  console.log(catalogId);
+  console.log(questionId);
   const questionCollection: mongoDB.Collection = database.collection("question");
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  console.log(catalogId);
+  console.log(questionId);
+  if(questionId === "open") {
+    const question = await getFirstQuestionInCatalog(
+      questionCollection,
+      questionInCatalogCollection,
+      catalogId
+    ) as any;
+    questionId = question._id;
+    console.log(`start question is: ${questionId}`);
+  }
   console.log(1);
   const query = {
       _id: new mongoDB.ObjectId(questionId)
@@ -154,6 +169,7 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   }
   console.log(5);
   const res = {
+      _id: questionId,
       questionText: originQuestion.questiontext,
       children: children
   }

@@ -145,6 +145,7 @@ const editCatalog = ( async (req: Request, res: Response) => {
           res.sendStatus(403);
         } else {
           res.send(data);
+          return;
         }
       }
     } catch (error) {

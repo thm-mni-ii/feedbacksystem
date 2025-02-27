@@ -389,8 +389,8 @@ export default defineComponent({
                   midKeyNumber = `${data.data.children[i].score}%`;
               }
             }
-            
-            const prevData = await catalogService.getPreviousQuestion(id.catalog, id.question);
+            console.log(data.data);
+            const prevData = await catalogService.getPreviousQuestion(id.catalog, data.data._id);
             if(prevData.data.questionInCatalogId !== null) {
               prevText = prevData.data.text;
               prevId = prevData.data.questionInCatalogId;
