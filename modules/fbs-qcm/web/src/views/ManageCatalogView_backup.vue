@@ -12,7 +12,6 @@ const catalog = ref<Catalog>({} as Catalog)
 
 const allQuestions = ref<Question[]>([])
 
-// wichtig!
 const catalogId = ref<string>(route.params.catalogId as string)
 
 const addQuestionToCatalog = (question: Question) => {
