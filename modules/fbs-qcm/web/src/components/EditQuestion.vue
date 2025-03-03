@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import type { Ref } from 'vue'
 import type Question from '../model/Question'
 import type ChoiceQuestionConfiguration from '@/model/ChoiceQuestionConfiguration'
 import type { Choice } from '@/model/questionTypes/Choice'
@@ -30,6 +31,21 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 
 const question = ref<Question>({} as Question)
+const resetChoiceQuestion = (q: Ref<Question>) => {
+  q.value = {
+    owner: 1,
+    questiontext: '',
+    questiontags: [],
+    questiontype: QuestionType.Choice,
+    questionconfiguration: {
+      multipleRow: false,
+      multipleColumn: false,
+      answerColumns: [{ id: 1, name: '' }],
+      optionRows: [{ id: 1, text: '', correctAnswers: [] }]
+    } as ChoiceQuestionConfiguration
+  }
+  console.log(q.value)
+}
 // Type Guard
 function isChoiceQuestionConfiguration(config: QuestionConfiguration): config is Choice {
   return (config as Choice).optionRows !== undefined
@@ -37,21 +53,9 @@ function isChoiceQuestionConfiguration(config: QuestionConfiguration): config is
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
-  console.log(props.isNew)
-  console.log(props.inputQuestion)
+
   if (props.isNew) {
-    question.value = {
-      owner: 1,
-      questiontext: '',
-      questiontags: [] as string[],
-      questiontype: QuestionType.Choice,
-      questionconfiguration: {
-        multipleRow: false,
-        multipleColumn: false,
-        answerColumns: [{ id: 1, name: '' }],
-        optionRows: [{ id: 1, text: '', correctAnswers: [] }]
-      } as ChoiceQuestionConfiguration
-    }
+    resetChoiceQuestion(question)
   } else if (props.inputQuestion) {
     question.value = props.inputQuestion
   }
@@ -60,6 +64,15 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
+
+watch(
+  () => question.value.questiontype,
+  (newType) => {
+    if (newType === QuestionType.Choice) {
+      resetChoiceQuestion(question)
+    }
+  }
+)
 
 const checkMultipleRows = () => {
   if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
@@ -76,7 +89,11 @@ const removeTag = (item: string) => {
 }
 
 const handleUpdate = (updatedQuestion: Question) => {
-  question.value = updatedQuestion
+  question.value = {
+    ...question.value,
+    ...updatedQuestion,
+    questionconfiguration: updatedQuestion.questionconfiguration
+  }
 }
 
 const handleSubmit = async () => {
@@ -109,8 +126,8 @@ const handleSubmit = async () => {
     <v-card-text>
       <v-form>
         <v-select
-          :disabled="!isNew"
           v-model="question.questiontype"
+          :disabled="!isNew"
           label="Fragetyp"
           :items="questionTypes"
           variant="solo-filled"
@@ -149,7 +166,7 @@ const handleSubmit = async () => {
         <EditFillInTheBlanks
           v-if="question.questiontype === 'FillInTheBlanks'"
           :question="question"
-          @update="question"
+          @update="handleUpdate"
         />
       </v-form>
     </v-card-text>
