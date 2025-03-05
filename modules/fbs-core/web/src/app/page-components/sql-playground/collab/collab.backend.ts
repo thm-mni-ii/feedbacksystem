@@ -198,4 +198,32 @@ export class CollaborativeBackend implements Backend {
       };
     });
   }
+
+  announceSchemaChange(): Observable<void> {
+    return new Observable<void>((observer) => {
+      const newValue =
+        (this.provider.awareness.getLocalState()["schemaCounter"] ?? 0) + 1;
+      this.provider.awareness.setLocalStateField("schemaCounter", newValue);
+
+      observer.next();
+      observer.complete();
+    });
+  }
+
+  private schamaMap: Map<number, number> = new Map();
+
+  streamSchemaChange(): Observable<void> {
+    return new Observable<void>((observer) => {
+      this.provider.awareness.on("change", () => {
+        for (const [key, value] of this.provider.awareness
+          .getStates()
+          .entries()) {
+          if (this.schamaMap.get(key) !== value.schemaCounter) {
+            observer.next();
+            this.schamaMap.set(key, value.schemaCounter);
+          }
+        }
+      });
+    });
+  }
 }

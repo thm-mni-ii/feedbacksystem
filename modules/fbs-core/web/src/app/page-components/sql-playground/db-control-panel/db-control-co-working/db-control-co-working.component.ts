@@ -17,6 +17,7 @@ import { Group } from "../../../../model/Group";
 import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
 import { selectBackend } from "../../state/sql-playground.selectors";
 import { BackendDefintion } from "../../collab/backend.service";
+import { closeAllTabs } from "../../sql-input-tabs/state/sql-input-tabs.actions";
 
 @Component({
   selector: "app-db-control-co-working",
@@ -84,6 +85,7 @@ export class DbControlCoWorkingComponent implements OnInit {
               },
             })
           );
+          this.store.dispatch(closeAllTabs());
           this.collaborativeMode = true;
         });
     });
@@ -95,6 +97,7 @@ export class DbControlCoWorkingComponent implements OnInit {
         backend: { type: "collaborative", id: this.selectedGroup.toString() },
       })
     );
+    this.store.dispatch(closeAllTabs());
   }
 
   activateGroup(groupId: number) {
