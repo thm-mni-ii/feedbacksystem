@@ -1,14 +1,22 @@
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits } from 'vue'
+import { ref, watch, defineEmits } from 'vue'
 import type Question from '../model/Question'
 import type FillInTheBlanks from '../model/questionTypes/FillInTheBlanks.ts'
 import { onMounted } from 'vue'
 
-const props = defineProps<{ question: Question }>()
+const props = defineProps<{ question: Question; isNew: boolean }>()
 
 const emit = defineEmits<{ (e: 'update', updatedQuestion: FillInTheBlanks): void }>()
 
 const localQuestion = ref<Question>({ ...props.question })
+
+const addTextPart = () => {
+  localQuestion.value.questionconfiguration.textParts.push({
+    order: localQuestion.value.questionconfiguration.textParts.length + 1,
+    text: '',
+    isBlank: false
+  })
+}
 
 const checkLocalQuestion = () => {
   console.log(localQuestion.value)
@@ -22,9 +30,11 @@ watch(
 )
 
 onMounted(() => {
-  localQuestion.value.questionconfiguration = {
-    showBlanks: true,
-    textParts: [{ order: 1, text: '', isBlank: true }]
+  if (props.isNew) {
+    localQuestion.value.questionconfiguration = {
+      showBlanks: true,
+      textParts: [{ order: 1, text: '', isBlank: false }]
+    }
   }
 })
 </script>
@@ -54,9 +64,41 @@ onMounted(() => {
       </span>
     </div>
 
-    <div v-for="(part, index) in localQuestion.questionconfiguration.textParts" :key="index">
-      <v-text-field label="Label" v-model="part.text"></v-text-field>
+    <div
+      v-for="(part, index) in localQuestion.questionconfiguration.textParts"
+      :key="index"
+      class="d-flex"
+    >
+      <v-text-field
+        :label="'Textpart ' + part.order"
+        v-model="part.text"
+        class="pr-10"
+      ></v-text-field>
+      <v-switch
+        v-model="part.isBlank"
+        class="ml-4"
+        :label="`Is Blank`"
+        color="primary"
+        hide-details
+      ></v-switch>
     </div>
   </div>
-  <v-btn @click="checkLocalQuestion">check</v-btn>
+  <v-btn
+    v-tooltip:end="'Add Text Part'"
+    icon="mdi-plus"
+    class="ml-2 mb-2"
+    size="small"
+    @click="addTextPart"
+  ></v-btn>
+
+  <h3 class="text-primary">Preview</h3>
+  <div class="text-body-1 d-flex flex-wrap">
+    <span
+      v-for="(part, index) in localQuestion.questionconfiguration.textParts"
+      :key="index"
+      :class="{ 'bg-yellow-lighten-2 px-1 rounded': part.isBlank }"
+    >
+      {{ part.text }}
+    </span>
+  </div>
 </template>

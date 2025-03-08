@@ -166,6 +166,7 @@ const handleSubmit = async () => {
         <EditFillInTheBlanks
           v-if="question.questiontype === 'FillInTheBlanks'"
           :question="question"
+          :isNew="isNew"
           @update="handleUpdate"
         />
       </v-form>
