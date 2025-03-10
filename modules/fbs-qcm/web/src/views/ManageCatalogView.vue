@@ -525,7 +525,6 @@ export default defineComponent({
             console.log(clickedNode.id());
             
             if (clickedNode.data('label') === '+') {
-              attachButtonToNode(clickedNode.id());
               const data = await questionService.getAllQuestions();
               console.log(data);
               
@@ -629,95 +628,65 @@ export default defineComponent({
           console.error("Fehler beim Hinzufügen der Frage:", error);
         }
     };
-    
-    // Funktion zum Anfügen eines Buttons an einen Knoten
-    const attachButtonToNode = (nodeId) => {
-      if(nodeId === "invisible") {
-        return;
-      }
-      
+    const attachButtonToExistingNode = (nodeId) => {
       const node = cy.value.$id(nodeId);
-      const position = node.renderedPosition();
-      const button = document.createElement('button');
       
-      button.innerText = 'x';
-      button.className = 'remove-button';
-      button.style.position = 'absolute';
-      button.style.width = '30px';
-      button.style.height = '30px';
-      button.style.color = 'white';
-      button.style.backgroundColor = '#e74c3c';
-      button.style.border = 'none';
-      button.style.borderRadius = '50%';
-      button.style.cursor = 'pointer';
-      button.style.fontSize = '16px';
-      button.style.fontWeight = 'bold';
-      button.style.display = 'flex';
-      button.style.alignItems = 'center';
-      button.style.justifyContent = 'center';
-      button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-      
-      const left = position.x - 200;
-      const top = position.y;
-      
-      button.style.left = `${left}px`;
-      button.style.top = `${top}px`;
-      
-      button.onclick = (event) => {
+      // Überprüfen, ob der Knoten einer der drei rechten Knoten ist und sein Label nicht '+' ist
+      if ((nodeId === 'correct' || nodeId === 'partial' || nodeId === 'incorrect') && 
+          node.data('label') !== '+') {
+        const position = node.renderedPosition();
+        const button = document.createElement('button');
+        
+        // Mülleimer-Symbol statt "x" verwenden
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>';
+        button.className = 'remove-button';
+        button.style.position = 'absolute';
+        button.style.width = '30px';
+        button.style.height = '30px';
+        button.style.color = 'white';
+        button.style.backgroundColor = '#e74c3c';
+        button.style.border = 'none';
+        button.style.borderRadius = '50%';
+        button.style.cursor = 'pointer';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+        button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        button.style.transition = 'transform 0.2s, background-color 0.2s';
+        
+        // Hover-Effekt hinzufügen
+        button.onmouseover = () => {
+          button.style.backgroundColor = '#c0392b';
+          button.style.transform = 'scale(1.1)';
+        };
+        
+        button.onmouseout = () => {
+          button.style.backgroundColor = '#e74c3c';
+          button.style.transform = 'scale(1)';
+        };
+        
+        // Position des Buttons verbessern
+        // Position relativ zum Knoten, leicht versetzt nach rechts und oben
+        const left = position.x + 55;
+        const top = position.y - 30;
+        
+        button.style.left = `${left}px`;
+        button.style.top = `${top}px`;
+        button.style.zIndex = '10'; // Sicherstellen, dass der Button immer oben ist
+        
+        button.onclick = (event) => {
             event.stopPropagation();
-            console.log(node.data);
+            console.log(node.data());
             console.log(node.data('hiddenData'));
+            
+            // Verwende die bestehende Löschlogik
             catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
             node.data('label', '+');
             node.data('hiddenData', null);
-            button.remove(); 
-      };
-      
-      document.getElementById('cy').appendChild(button);
-    };
-    
-    // Funktion zum Anfügen eines Buttons an einen vorhandenen Knoten
-    const attachButtonToExistingNode = (nodeId) => {
-      const node = cy.value.$id(nodeId);
-      const position = node.renderedPosition();
-      
-      if (node.data('label') !== '+' && position.x === 1180.109022556391 && node.data('id') !== "invisible") {
-          const button = document.createElement('button');
-          
-          button.innerText = 'x';
-          button.className = 'remove-button';
-          button.style.position = 'absolute';
-          button.style.width = '30px';
-          button.style.height = '30px';
-          button.style.color = 'white';
-          button.style.backgroundColor = '#e74c3c';
-          button.style.border = 'none';
-          button.style.borderRadius = '50%';
-          button.style.cursor = 'pointer';
-          button.style.fontSize = '16px';
-          button.style.fontWeight = 'bold';
-          button.style.display = 'flex';
-          button.style.alignItems = 'center';
-          button.style.justifyContent = 'center';
-          button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-          
-          const left = position.x - 200;
-          const top = position.y;
-          
-          button.style.left = `${left}px`;
-          button.style.top = `${top}px`;
-          
-          button.onclick = (event) => {
-              event.stopPropagation();
-              console.log(node.data);
-              console.log(node.data('hiddenData'));
-              catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
-              node.data('label', '+');
-              node.data('hiddenData', null);
-              button.remove(); 
-          };
-          
-          document.getElementById('cy').appendChild(button);
+            button.remove();
+        };
+        
+        document.getElementById('cy').appendChild(button);
       }
     };
     

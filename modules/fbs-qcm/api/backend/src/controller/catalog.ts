@@ -14,7 +14,8 @@ const getAccessibleCourses = ( async (req: Request, res: Response) => {
       res.send(data);
       return;
     }
-      res.sendStatus(500); 
+    console.log("kein Nutzer gefunden");
+    res.sendStatus(500); 
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
