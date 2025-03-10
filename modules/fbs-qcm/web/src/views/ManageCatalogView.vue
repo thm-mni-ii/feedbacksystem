@@ -376,6 +376,7 @@ export default defineComponent({
               buttonsHidden = "true"
           } else {   
             buttonsHidden = "false";
+            currentQuestion.value = data.data._id
             console.log(data.data);
             
             questionText = data.data.questionText;
@@ -613,11 +614,10 @@ export default defineComponent({
           const res = await questionService.addQuestionToCatalog(questionId, currentCatalog.value);  
           console.log(res);
           
-          const question = route.params.questionId;
-          console.log(question);
+          const question = currentQuestion.value;
           
           if(question !== "new" && question !== "open") {
-              const res2 = await catalogService.addChildrenToQuestion(question, res.data.id, score, transition);
+              await catalogService.addChildrenToQuestion(question, res.data.id, score, transition);
               console.log("PASSIERT DA WAS");
               showModal.value = false;
               location.reload();
