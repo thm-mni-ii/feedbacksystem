@@ -679,11 +679,10 @@ export default defineComponent({
             console.log(node.data());
             console.log(node.data('hiddenData'));
             
-            // Verwende die bestehende Löschlogik
             catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
             node.data('label', '+');
             node.data('hiddenData', null);
-            button.remove();
+            location.reload();
         };
         
         document.getElementById('cy').appendChild(button);

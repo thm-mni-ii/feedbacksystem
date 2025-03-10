@@ -23,6 +23,7 @@ import {
 } from "../utils/enum";
 import { Question } from "../model/Question";
 import { authenticate, authenticateInCatalog } from "../authenticate";
+import { questionInCatalogObject } from "../model/utilInterfaces";
 type questionInsertionType = Omit<Question, "_id">;
 
 interface Element {
@@ -114,10 +115,12 @@ export async function removeQuestionFromCatalog(
   const query = {
     _id: questionIdObject,
   };
-  const data = await questionInCatalogCollection.findOne(query);
+  const data: questionInCatalogObject | null = await questionInCatalogCollection.findOne(query) as unknown as questionInCatalogObject;
   if (data === null) {
     return -1;
   }
+  console.log("data");
+  console.log(data);
   if (
     !(await authenticateInCatalog(
       tokenData,
@@ -127,7 +130,8 @@ export async function removeQuestionFromCatalog(
   ) {
     return -1;
   }
-  const result = await questionInCatalogCollection.deleteOne(query);
+  //const result = await questionInCatalogCollection.deleteOne(query);
+  await deleteQuestionAndChildren(data);
   const filter = {
     "children.question": questionIdObject,
   };
@@ -141,8 +145,32 @@ export async function removeQuestionFromCatalog(
   console.log(update);
   const res2 = await questionInCatalogCollection.updateOne(filter, update);
   console.log(res2);
-  console.log(result);
-  return result;
+  return;
+}
+
+async function deleteQuestionAndChildren(question: questionInCatalogObject) {
+  console.log("childre");
+  console.log(question);
+  const database: mongoDB.Db = await connect();
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+  for(let i = 0; i < question.children.length; i++) {
+    const query = {
+      _id: new mongoDB.ObjectId(question.children[i].question)
+    }
+    console.log("query");
+    console.log(query);
+    const data: questionInCatalogObject = await questionInCatalogCollection.findOne(query) as unknown as questionInCatalogObject;
+    console.log("data2");
+    console.log(data);
+    if (data === undefined) {
+      continue;
+    }
+    await deleteQuestionAndChildren(data);
+  }
+  const deleteQuery = {
+    _id: new mongoDB.ObjectId(question._id)
+  };
+  questionInCatalogCollection.deleteOne(deleteQuery);
 }
 
 export async function deleteQuestionById(
