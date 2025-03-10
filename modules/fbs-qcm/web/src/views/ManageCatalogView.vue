@@ -333,6 +333,7 @@ export default defineComponent({
     const nodeData = ref("");
     const selectedQuestion = ref("");
     const router = useRouter()
+    const firstQuestion = ref(false);
 
 
     // Computed property für die Formularvalidierung
@@ -374,6 +375,7 @@ export default defineComponent({
           if(data.data.isEmpty) {
               console.log("its true");
               buttonsHidden = "true"
+              firstQuestion.value = true;
           } else {   
             buttonsHidden = "false";
             currentQuestion.value = data.data._id
@@ -532,9 +534,15 @@ export default defineComponent({
               updateQuestionOptions(data.data);
               transition.value = clickedNode.id(); 
               
-              if(clickedNode.id() !== "partial") {
-                showInput.value = true;
+              if(clickedNode.id() === "partial" || firstQuestion.value) {
+                showInput.value = false;
               } else {
+                showInput.value = true;
+              }
+              console.log("Was geht ab");
+              console.log(id.question);
+              console.log(currentQuestion.value);
+              if(currentQuestion.value === "new") {
                 showInput.value = false;
               }
               
