@@ -387,10 +387,17 @@ export function createQuestionResponse(newQuestion: any, newId: string) {
     const configuration = newQuestion.questionconfiguration as FillInTheBlanks;
     console.log(configuration);
     delete returnQuestion.owner;
+    let blankStrings: string[] = [];
     for (let i = 0; i < configuration.textParts.length; i++) {
       if (configuration.textParts[i].isBlank) {
+        if(configuration.showBlanks) {
+          blankStrings.push(configuration.textParts[i].text);
+        }
         configuration.textParts[i].text = "";
       }
+    }
+    if(configuration.showBlanks) {
+      returnQuestion.blankStrings = blankStrings;
     }
     returnQuestion._id = newId;
     console.log("returnQuestion");

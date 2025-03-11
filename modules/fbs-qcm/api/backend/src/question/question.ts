@@ -70,8 +70,6 @@ export async function addQuestionToCatalog(
   catalogId: string,
   children: any
 ) {
-  console.log(questionId);
-  console.log(catalogId);
   if (
     !(await authenticateInCatalog(
       tokenData,
@@ -93,7 +91,6 @@ export async function addQuestionToCatalog(
     children: children,
   };
   const result = await questionInCatalogCollection.insertOne(insert);
-  console.log(result);
   const res = {
     id: result.insertedId,
   };
@@ -104,10 +101,6 @@ export async function removeQuestionFromCatalog(
   tokenData: JwtPayload,
   questionId: string
 ) {
-  console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
-  console.log(tokenData);
-  console.log(questionId);
-  console.log("WSSSSSSSSSSSSSSSSSSSSSSS");
   const database: mongoDB.Db = await connect();
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
@@ -119,8 +112,6 @@ export async function removeQuestionFromCatalog(
   if (data === null) {
     return -1;
   }
-  console.log("data");
-  console.log(data);
   if (
     !(await authenticateInCatalog(
       tokenData,
@@ -142,26 +133,18 @@ export async function removeQuestionFromCatalog(
       },
     },
   };
-  console.log(update);
   const res2 = await questionInCatalogCollection.updateOne(filter, update);
-  console.log(res2);
   return;
 }
 
 async function deleteQuestionAndChildren(question: questionInCatalogObject) {
-  console.log("childre");
-  console.log(question);
   const database: mongoDB.Db = await connect();
   const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
   for(let i = 0; i < question.children.length; i++) {
     const query = {
       _id: new mongoDB.ObjectId(question.children[i].question)
     }
-    console.log("query");
-    console.log(query);
     const data: questionInCatalogObject = await questionInCatalogCollection.findOne(query) as unknown as questionInCatalogObject;
-    console.log("data2");
-    console.log(data);
     if (data === undefined) {
       continue;
     }
@@ -206,12 +189,10 @@ export async function postSingleQuestion(question: Question, tokenData: JwtPaylo
   const database: mongoDB.Db = await connect();
   const questionCollection: mongoDB.Collection =
     database.collection("question");
-  console.log(tokenData);
   let questionInsertion: any = question;
   delete questionInsertion.id;
   delete questionInsertion._id;
   questionInsertion.owner = tokenData.id;
-  console.log(questionInsertion);
   const result = await questionCollection.insertOne(questionInsertion);
   return { id: result.insertedId };
 }
@@ -245,7 +226,6 @@ export async function getAllQuestions(tokenData: JwtPayload) {
     const questionCollection: mongoDB.Collection =
       database.collection("question");
     const allQuestion = await questionCollection.find().toArray();
-    console.log(allQuestion);
     return allQuestion;
   }
   const adminCourses = getAdminCourseRoles(tokenData);
@@ -297,7 +277,6 @@ export async function getCurrentQuestion(
     catalogId,
     questionInCatalogCollection
   );
-  console.log(newQuestionInCatalogId);
   let newQuestion: any = {};
   if (newQuestionInCatalogId === -1) {
     return { catalog: "over" };
@@ -348,8 +327,6 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
     .sort({ timeStamp: -1 })
     .limit(1)
     .toArray();
-  console.log("last submission");
-  console.log(lastSubmission);
   if (lastSubmission == null || lastSubmission.length == 0) {
     console.log("Keine voherigen Abgaben");
     return 0;
@@ -361,10 +338,6 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   const priorQuestion = await questionInCatalogCollection.findOne(
     questionQuery
   );
-  console.log("priorQuestionQUERY");
-  console.log(questionQuery);
-  console.log("priorQuestion");
-  console.log(priorQuestion);
   if (priorQuestion == null) {
     console.log("Keine Frage im Katalog vorher");
     return 0;
@@ -373,28 +346,14 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   if (forwarding == null || forwarding.length == 0) {
     return -1;
   }
-  console.log("forwarding");
-  console.log(forwarding);
-  console.log("evaluation");
-  console.log(evaluation);
   let returnValue: any = -1;
   forwarding.forEach(function (element: Element) {
-    console.log("element");
-    console.log(element);
     if (element.transition === "correct") {
-      console.log("correct");
-      console.log(evaluation.score * 100);
-      console.log(element.needed_score);
-      console.log(evaluation.score * 100 >= element.needed_score)
       if (evaluation.score * 100 >= element.needed_score) {
         returnValue = element.question;
       }
     }
     if (element.transition === "incorrect") {
-      console.log("incorrect");
-      console.log(evaluation.score * 100);
-      console.log(element.needed_score);
-      console.log(evaluation.score * 100 <= element.needed_score)
       if (evaluation.score * 100 <= element.needed_score) {
         returnValue = element.question;
       }
@@ -418,17 +377,13 @@ export async function copyQuestionWithNewOwner(tokenData: JwtPayload, questionId
   const questionQuery = {
     _id: questionIdObject,
   };
-  console.log(questionQuery);
   const question: any = await questionCollection.findOne(questionQuery);
   if (question === null) {
     return -2;
   }
-  console.log(question);
   question.owner = tokenData.user;
   delete question._id;
-  console.log(question);
   const data = await questionCollection.insertOne(question);
-  console.log(data);
   return data.insertedId;
 }
 
@@ -457,16 +412,13 @@ export async function copyQuestionToCatalogWithNewOwner(
   const question: any = await questionCollection.findOne(questionQuery);
   question.owner = tokenData.user;
   delete question._id;
-  console.log(question);
   const data = await questionCollection.insertOne(question);
-  console.log(data);
   const entry = {
     catalog: catalogIdObject,
     question: data.insertedId,
     children: children,
   };
   const result = await questionInCatalogCollection.insertOne(entry);
-  console.log(result);
   return data.insertedId;
 }
 
