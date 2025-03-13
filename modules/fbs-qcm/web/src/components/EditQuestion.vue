@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import type { Ref } from 'vue'
 import type Question from '../model/Question'
 import type ChoiceQuestionConfiguration from '@/model/ChoiceQuestionConfiguration'
 import type { Choice } from '@/model/questionTypes/Choice'
-import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
 import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
 import { onMounted, onBeforeUnmount } from 'vue'
@@ -22,7 +21,6 @@ const emit = defineEmits<{
 }>()
 
 const questionTypes = Object.values(QuestionType)
-type QuestionConfiguration = Choice | FillInTheBlanks
 
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
@@ -47,8 +45,13 @@ const resetChoiceQuestion = (q: Ref<Question>) => {
   console.log(q.value)
 }
 // Type Guard
-function isChoiceQuestionConfiguration(config: QuestionConfiguration): config is Choice {
-  return (config as Choice).optionRows !== undefined
+function isChoiceQuestionConfiguration(config: any): config is Choice {
+  return (
+    config &&
+    typeof config === 'object' &&
+    'optionRows' in config &&
+    Array.isArray(config.optionRows)
+  )
 }
 
 onMounted(() => {
@@ -82,7 +85,6 @@ const removeTag = (item: string) => {
 const handleUpdate = (updatedQuestion: Question) => {
   question.value = {
     ...question.value,
-    ...updatedQuestion,
     questionconfiguration: updatedQuestion.questionconfiguration
   }
 }

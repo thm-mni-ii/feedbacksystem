@@ -17,24 +17,45 @@ const addTextPart = () => {
     isBlank: false
   })
 }
-
-const checkLocalQuestion = () => {
-  console.log(localQuestion.value)
+const removeLastTextPart = () => {
+  if (localQuestion.value.questionconfiguration.textParts.length > 0) {
+    localQuestion.value.questionconfiguration.textParts.pop()
+  }
 }
+
 watch(
   localQuestion,
-  (newVal) => {
-    emit('update', newVal)
+  (newVal, oldVal) => {
+    const updatedConfig = newVal as FillInTheBlanks
+    updatedConfig.questionconfiguration.textParts.forEach((part: { text: string }) => {
+      part.text = part.text.trim()
+    })
+    console.log('New Value: ', updatedConfig)
+    console.log('Old Value: ', oldVal)
+    console.log('Local Question: ', localQuestion)
+    emit('update', updatedConfig)
   },
   { deep: true }
 )
 
 onMounted(() => {
   if (props.isNew) {
+    console.log('QUESTION: ', props.question)
     localQuestion.value.questionconfiguration = {
       showBlanks: true,
       textParts: [{ order: 1, text: '', isBlank: false }]
     }
+    console.log('LOCAL QUESTION', localQuestion.value)
+  } else if (
+    props.question.questiontype === 'FillInTheBlanks' &&
+    !localQuestion.value.questionconfiguration
+  ) {
+    localQuestion.value.questionconfiguration = {
+      showBlanks: true,
+      textParts: [{ order: 1, text: '', isBlank: false }]
+    }
+  } else {
+    localQuestion.value = { ...props.question }
   }
 })
 </script>
@@ -70,8 +91,8 @@ onMounted(() => {
       class="d-flex"
     >
       <v-text-field
-        :label="'Textpart ' + part.order"
         v-model="part.text"
+        :label="'Textpart ' + part.order"
         class="pr-10"
       ></v-text-field>
       <v-switch
@@ -90,8 +111,18 @@ onMounted(() => {
     size="small"
     @click="addTextPart"
   ></v-btn>
+  <v-btn
+    icon="mdi-delete-outline"
+    class="ml-9 mr-1 column-btn"
+    variant="text"
+    color="red"
+    @click="removeLastTextPart"
+  >
+    <v-tooltip activator="parent" location="end">Delete last text part</v-tooltip>
+    <v-icon icon="mdi-delete-outline" size="small"></v-icon>
+  </v-btn>
 
-  <h3 class="text-primary">Preview</h3>
+  <h2 class="text-primary text-center">Preview</h2>
   <div class="text-body-1 d-flex flex-wrap">
     <span
       v-for="(part, index) in localQuestion.questionconfiguration.textParts"
@@ -99,7 +130,8 @@ onMounted(() => {
       :class="{ 'bg-yellow-lighten-2 px-1 rounded': part.isBlank }"
       class="inline-block"
     >
-      {{ part.text }} &nbsp;
+      {{ part.text }}
+      <span v-if="!part.isBlank"> &nbsp; </span>
     </span>
   </div>
 </template>

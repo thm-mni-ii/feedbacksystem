@@ -2,11 +2,8 @@
 import { ref, onMounted } from 'vue'
 import type Question from '@/model/Question'
 import questionService from '@/services/question.service'
-import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
 
-const dialogConfirm = ref<typeof DialogConfirmVue>()
-const selectedQuestionId = ref<string | null>(null)
 const dialogEditQuestion = ref<typeof DialogEditQuestion>()
 
 const allQuestions = ref<Question[]>([])
@@ -41,15 +38,6 @@ const addQuestion = () => {
   }
 }
 
-const openDialog = (id: string) => {
-  selectedQuestionId.value = id
-  // dialogEditQuestion.value = true
-}
-
-const closeDialog = () => {
-  // dialogEditQuestion.value = false
-  console.log(dialogEditQuestion.value)
-}
 const snackbar = ref<boolean>(false)
 const snackbarText = ref<string>('')
 const openSnackbar = (text: string) => {
