@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, defineProps } from 'vue'
+import FillInTheBlanksQuestion from './FillInTheBlanksQuestion.vue'
+
 interface ChoiceAnswer {
   id: number
   text: string
@@ -11,7 +13,7 @@ interface Entry {
   text: string
 }
 
-const fillInTheBlanksAnswer = ref<string | null>(null)
+const fillInTheBlanksAnswer = ref<{ [key: number]: string }>({})
 
 const props = defineProps({
   question: { type: Object, required: true },
@@ -50,7 +52,6 @@ const submitAnswer = () => {
   switch (props.question.questiontype) {
     case 'Choice':
       if (props.question.questionconfiguration.multipleColumn) {
-        console.log('QUESTION TYPE: ', props.question.questiontype)
         console.log('CHOICE ANSWER: ', choiceAnswers.value)
         emit('submit-answer', choiceAnswers.value)
         choiceAnswers.value.length = 0
@@ -60,10 +61,18 @@ const submitAnswer = () => {
         selectedAnswers.value.length = 0
       }
       break
-    case 'FillInTheBlanks':
-      emit('submit-answer', fillInTheBlanksAnswer)
-      fillInTheBlanksAnswer.value = null
+    case 'FillInTheBlanks': {
+      const formattedAnswer = {
+        question: props.question._id,
+        answers: Object.entries(fillInTheBlanksAnswer.value).map(([order, text]) => ({
+          order: Number(order),
+          text
+        }))
+      }
+      emit('submit-answer', formattedAnswer)
+      fillInTheBlanksAnswer.value = {}
       break
+    }
     default:
       console.warn('Unsupported question type')
   }
@@ -143,16 +152,11 @@ const submitAnswer = () => {
       </tbody>
     </v-table>
   </div>
-  <div v-if="question.questiontype == 'FillInTheBlanks'">
-    <p>{{ question.questionconfiguration.textParts }}</p>
-    <v-textarea
-      v-model="fillInTheBlanksAnswer"
-      label="Your Answer"
-      rows="3"
-      outlined
-      color="primary"
-    ></v-textarea>
-  </div>
+  <FillInTheBlanksQuestion
+    v-if="question.questiontype == 'FillInTheBlanks'"
+    v-model="fillInTheBlanksAnswer"
+    :questionconfiguration="question.questionconfiguration"
+  />
 
   <v-btn
     variant="tonal"

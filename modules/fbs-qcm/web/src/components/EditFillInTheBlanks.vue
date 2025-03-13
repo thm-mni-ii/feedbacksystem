@@ -97,8 +97,9 @@ onMounted(() => {
       v-for="(part, index) in localQuestion.questionconfiguration.textParts"
       :key="index"
       :class="{ 'bg-yellow-lighten-2 px-1 rounded': part.isBlank }"
+      class="inline-block"
     >
-      {{ part.text }}
+      {{ part.text }} &nbsp;
     </span>
   </div>
 </template>

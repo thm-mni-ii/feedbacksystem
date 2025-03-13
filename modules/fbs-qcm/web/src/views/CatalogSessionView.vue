@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
 import sessionService from '@/services/session.service'
+import catalogService from '@/services/catalog.service'
 
 import type Catalog from '../model/Catalog'
 import type Question from '@/model/Question'
@@ -25,11 +26,9 @@ const scoreEmoji = computed(() => {
 })
 
 const catalog = ref<Catalog>({
-  id: route.params.catalogId,
-  name: 'Datenbanken - SQL',
-  difficulty: 1,
-  passed: false,
-  requirements: null
+  id: route.params.catalogId as string,
+  course: route.params.courseId as string,
+  name: ''
 })
 
 const submitAnswer = async (answer: any) => {
@@ -42,10 +41,10 @@ const submitAnswer = async (answer: any) => {
     const submitResponse = await sessionService.submitAnswer(questionData.value._id, answer)
     currentQuestionScore.value = submitResponse.data.correct.score
     showFeedback.value = true
-    console.log('CATALOG ID: ', route.params.catalogId)
+    console.log('CATALOG ID ROUTE PARAMS: ', route.params.catalogId)
     // erst feedback geben
     sessionService
-      .getCurrentQuestion(route.params.catalogId)
+      .getCurrentQuestion(route.params.catalogId as string)
       .then((res) => {
         console.log('CURRENT QUESTION:', res)
         if (res.data.catalog === 'over') {
@@ -65,25 +64,44 @@ const submitAnswer = async (answer: any) => {
 
 onMounted(async () => {
   try {
+    const catalogResponse = await catalogService.getCatalog(route.params.catalogId as string)
+    catalog.value.name = catalogResponse.data.name
+
     const checkSessionResponse = await sessionService.checkSession()
     if (checkSessionResponse.data.length === 0) {
       console.log('No active session found. Starting a new session.')
+      console.log('Route Course ID: ', route.params.courseId)
+      console.log('Route Catalog ID: ', route.params.catalogId)
       const startSessionResponse = await sessionService.startSession(
-        187,
-        '663a51d228d8781d96050905'
+        Number(route.params.courseId),
+        route.params.catalogId as string
       )
       questionData.value = startSessionResponse.data
+      console.log('QUESTION: ', questionData.value)
+      sessionService
+        .getCurrentQuestion(route.params.catalogId as string)
+        .then((res) => {
+          console.log('CURRENT QUESTION:', res)
+          if (res.data.catalog === 'over') {
+            catalogStatus.value = 'over'
+          } else {
+            catalogStatus.value = null
+          }
+          questionData.value = res.data
+        })
+        .catch((error) => console.error('Error fetching question:', error))
     } else {
       console.log('Active session found:', checkSessionResponse.data)
       const currentQuestionResponse = await sessionService.getCurrentQuestion(
-        route.params.catalogId
+        route.params.catalogId as string
       )
       questionData.value = currentQuestionResponse.data
     }
   } catch (error) {
-    console.error('Error fetching session:', error)
+    console.error('Error fetching data:', error)
     showErrorPage.value = true
   }
+
   if (!route.params.catalogId || !route.params.courseId) {
     console.log('Error: Missing required parameters.')
     showErrorPage.value = true

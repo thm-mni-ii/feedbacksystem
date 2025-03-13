@@ -65,15 +65,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
-watch(
-  () => question.value.questiontype,
-  (newType) => {
-    if (newType === QuestionType.Choice) {
-      resetChoiceQuestion(question)
-    }
-  }
-)
-
 const checkMultipleRows = () => {
   if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
     const optionRows = question.value.questionconfiguration.optionRows
