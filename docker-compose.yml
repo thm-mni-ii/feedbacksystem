@@ -58,6 +58,8 @@ services:
       - MASTER_RUNNER_TLS_INSECURE=true
       - MONGODB_URI=mongodb://mongodb:27017/sql-checker
       - MONGODB_DATABASE=sql-checker
+      - MONGODB_PLAYGROUND_URI=mongodb://mongodb-playground:27018/playground-db
+      - MONGODB_PLAYGROUND_DATABASE=playground-db
       - SELF_URL=https://core
       - MINIO_URL=http://minio
     networks:
@@ -141,10 +143,9 @@ services:
       interval: 10s
       start_period: 10s
       retries: 3
-    
 
   mongodb:
-    image: mongo:5.0.6
+    image: mongo:8.0
     restart: unless-stopped
     volumes:
       - ./data/mongodb:/data/db
@@ -153,11 +154,27 @@ services:
     networks:
       fbs:
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongodb://localhost:27017/ --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://localhost:27017/ --quiet
       timeout: 10s
       interval: 10s
       start_period: 10s
       retries: 3
+
+  mongodb-playground:
+    image: mongo:8.0
+    restart: unless-stopped
+    volumes:
+      - ./data/mongodb-playground:/data/db
+    ports:
+      - "127.0.0.1:27018:27017"
+    networks:
+      fbs:
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet --port 27017
+      timeout: 20s
+      interval: 30s
+      start_period: 30s
+      retries: 5
 
   minio:
     image: minio/minio:RELEASE.2022-10-29T06-21-33Z
@@ -260,6 +277,7 @@ services:
       - JWT_SECRET=8Dsupersecurekeydf0
       - SERVER_SESSION_SECRET=sessiosecret
       - MONGODB_URL=mongodb://mongodb:27017/sql-checker
+      - MONGODB_PLAYGROUND_URL=mongodb://mongodb-playground:27018/playground-db
       - URL_BASE_PATH=/eat/
       - FBS_BASE_URL=https://core:443
       - FBS_TLS_NO_VERIFY=true

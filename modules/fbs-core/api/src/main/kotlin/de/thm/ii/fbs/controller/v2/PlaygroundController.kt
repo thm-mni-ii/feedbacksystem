@@ -21,34 +21,84 @@ import kotlin.jvm.optionals.getOrNull
 @RequestMapping(path = ["/api/v2/playground/{uid}/databases"])
 class PlaygroundController(
     private val userRepository: UserRepository,
+
     private val databaseRepository: SqlPlaygroundDatabaseRepository,
+
+    private val mongoDatabaseRepository: MongoPlaygroundDatabaseRepository,
+
     private val entityRepository: SqlPlaygroundEntityRepository,
+
     private val queryRepository: SqlPlaygroundQueryRepository,
+
     private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
+
     private val groupRepository: GroupRepository
 ) {
     @GetMapping
     @ResponseBody
-    fun index(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> = databaseRepository.findByOwner_IdAndDeleted(currentToken.id, false)
+    fun index(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> =
+        databaseRepository.findByOwner_IdAndDeleted(currentToken.id, false)
 
     @PostMapping
     @ResponseBody
-    fun create(@CurrentToken currentToken: LegacyToken, @RequestBody database: SqlPlaygroundDatabaseCreation): SqlPlaygroundDatabase {
-        val db = SqlPlaygroundDatabase(database.name, "PostgreSQL 14", "PSQL", userRepository.findById(currentToken.id).get(), true)
-        val currentActiveDb = databaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
-        if (currentActiveDb !== null) {
-            currentActiveDb.active = false
-            databaseRepository.save(currentActiveDb)
+    fun create(
+        @CurrentToken currentToken: LegacyToken,
+        @RequestBody database: SqlPlaygroundDatabaseCreation,
+        @RequestParam(required = false, defaultValue = "POSTGRES") dbType: PlaygroundDatabaseType
+    ): Any {
+
+        val user = userRepository.findById(currentToken.id).orElseThrow {
+            NotFoundException()
         }
-        val newDb = databaseRepository.save(db)
-        createAllEntities(newDb)
-        return newDb
+
+        return when (dbType) {
+            PlaygroundDatabaseType.POSTGRES -> {
+                val db = SqlPlaygroundDatabase(
+                    database.name,
+                    "PostgreSQL 14",
+                    "POSTGRES",
+                    user,
+                    true
+                )
+
+                val currentActiveDb =
+                    databaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
+                if (currentActiveDb != null) {
+                    currentActiveDb.active = false
+                    databaseRepository.save(currentActiveDb)
+                }
+
+                val newDb = databaseRepository.save(db)
+                createAllEntities(newDb)
+                newDb
+            }
+
+            PlaygroundDatabaseType.MONGO -> {
+                val db = MongoPlaygroundDatabase(
+                    database.name,
+                    version = "MongoDB 8.0.5",
+                    "MONGO",
+                    user,
+                    true
+                )
+
+                val currentActiveDb =
+                    mongoDatabaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
+                if (currentActiveDb != null) {
+                    currentActiveDb.active = false
+                    mongoDatabaseRepository.save(currentActiveDb)
+                }
+
+                mongoDatabaseRepository.save(db)
+            }
+        }
     }
 
     @DeleteMapping("/{dbId}")
     @ResponseBody
     fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
-        val db = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+        val db =
+            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
         sqlPlaygroundCheckerService.deleteDatabase(db, currentToken.id, currentToken.username)
         db.active = false
         db.deleted = true
@@ -64,7 +114,8 @@ class PlaygroundController(
     @PostMapping("/{dbId}/activate")
     @ResponseBody
     fun activate(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
-        val db = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+        val db =
+            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
         db.active = true
         val currentActiveDb = databaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
         if (currentActiveDb !== null) {
@@ -76,16 +127,25 @@ class PlaygroundController(
 
     @PostMapping("/{dbId}/share")
     @ResponseBody
-    fun createPlaygroundShare(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundShareResponse {
-        val currentActiveDb = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+    fun createPlaygroundShare(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int
+    ): SqlPlaygroundShareResponse {
+        val currentActiveDb =
+            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
         val url = sqlPlaygroundCheckerService.shareDatabase(currentActiveDb)
         return SqlPlaygroundShareResponse(url)
     }
 
     @PutMapping("/{dbId}/share-with-group")
     @ResponseBody
-    fun setPlaygroundShareWithGroup(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @RequestBody shareWithGroup: SqlPlaygroundShareWithGroupRequest): SqlPlaygroundDatabase {
-        val db = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+    fun setPlaygroundShareWithGroup(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int,
+        @RequestBody shareWithGroup: SqlPlaygroundShareWithGroupRequest
+    ): SqlPlaygroundDatabase {
+        val db =
+            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
         val group = getGroup(shareWithGroup.groupId, currentToken.id)
         db.shareWithGroup = group
         return databaseRepository.save(db)
@@ -103,8 +163,12 @@ class PlaygroundController(
 
     @DeleteMapping("/{dbId}/share-with-group")
     @ResponseBody
-    fun unsetPlaygroundShareWithGroup(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
-        val db = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+    fun unsetPlaygroundShareWithGroup(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int
+    ): SqlPlaygroundDatabase {
+        val db =
+            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
         db.shareWithGroup = null
         return databaseRepository.save(db)
     }
@@ -117,7 +181,11 @@ class PlaygroundController(
     @PostMapping("/{dbId}/execute")
     @ResponseBody
     @ResponseStatus(HttpStatus.ACCEPTED)
-    fun execute(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @RequestBody sqlQuery: SqlPlaygroundQueryCreation): SqlPlaygroundQuery {
+    fun execute(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int,
+        @RequestBody sqlQuery: SqlPlaygroundQueryCreation
+    ): SqlPlaygroundQuery {
         val db = getDatabase(currentToken.id, dbId)
         val query = queryRepository.save(SqlPlaygroundQuery(sqlQuery.statement, db))
         sqlPlaygroundCheckerService.submit(query)
@@ -126,14 +194,21 @@ class PlaygroundController(
 
     @GetMapping("/{dbId}/results")
     @ResponseBody
-    fun getResults(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): List<SqlPlaygroundResult> {
+    fun getResults(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int
+    ): List<SqlPlaygroundResult> {
         getDatabase(currentToken.id, dbId)
         return queryRepository.findByRunIn_id(dbId).mapNotNull { it.result }
     }
 
     @GetMapping("/{dbId}/results/{qId}")
     @ResponseBody
-    fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult {
+    fun getResult(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int,
+        @PathVariable("qId") qId: Int
+    ): SqlPlaygroundResult {
         getDatabase(currentToken.id, dbId)
         return queryRepository.findByRunIn_idAndId(dbId, qId)?.result
             ?: throw NotFoundException()
@@ -166,19 +241,24 @@ class PlaygroundController(
 
     @GetMapping("/shared-with-group/{groupId}")
     @ResponseBody
-    fun getByGroupId(@CurrentToken currentToken: LegacyToken, @PathVariable("groupId") groupId: Int): SqlPlaygroundDatabase? {
+    fun getByGroupId(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("groupId") groupId: Int
+    ): SqlPlaygroundDatabase? {
         getGroup(groupId, currentToken.id)
         return databaseRepository.findByShareWithGroup(groupId)
     }
 
     private fun getEntity(userId: Int, databaseId: Int, type: String): ArrayNode {
         getDatabase(userId, databaseId)
-        return entityRepository.findByDatabase_idAndDatabase_DeletedAndType(databaseId, false, type)?.data ?: throw NotFoundException()
+        return entityRepository.findByDatabase_idAndDatabase_DeletedAndType(databaseId, false, type)?.data
+            ?: throw NotFoundException()
     }
 
-    private fun createAllEntities(database: SqlPlaygroundDatabase) = listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
-        entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
-    }
+    private fun createAllEntities(database: SqlPlaygroundDatabase) =
+        listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
+            entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
+        }
 
     private fun getDatabase(userId: Int, databaseId: Int): SqlPlaygroundDatabase {
         val database = databaseRepository.findByIdAndDeleted(databaseId, false) ?: throw NotFoundException()
