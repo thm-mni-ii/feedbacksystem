@@ -11,6 +11,9 @@ const getAccessibleCourses = ( async (req: Request, res: Response) => {
     }
     if (req.user !== undefined) {
       const data = await accessibleCourses(req.user);
+      if(data.length === 0) {
+        res.sendStatus(404);
+      }
       res.send(data);
       return;
     }
@@ -242,8 +245,12 @@ const currentQuestion = (async (req: Request, res: Response) => {
         res.sendStatus(401); 
       }
       if (req.user !== undefined) {
-        const catalogId = req.body.ID as string;
+        const catalogId = req.params.ID as string;
         const result = await getCurrentQuestion(req.user, catalogId);
+        if(result === -1) {
+          res.sendStatus(404);
+          return;
+        }
         console.log(result);
         res.send(result);
       }
