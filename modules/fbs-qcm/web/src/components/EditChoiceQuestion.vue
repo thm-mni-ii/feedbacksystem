@@ -61,12 +61,10 @@ const addOptionCol = () => {
       console.error('answerColumns is not initialized or is not an array')
       return
     }
-
     answerColumns.push({
       id: answerColumns.length + 1,
       name: ''
     })
-
     console.log('Updated answerColumns:', answerColumns)
   }
 }
