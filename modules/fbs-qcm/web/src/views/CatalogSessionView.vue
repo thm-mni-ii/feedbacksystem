@@ -68,6 +68,7 @@ onMounted(async () => {
     catalog.value.name = catalogResponse.data.name
 
     const checkSessionResponse = await sessionService.checkSession()
+    console.log('Check Session Respone: ', checkSessionResponse)
     if (checkSessionResponse.data.length === 0) {
       console.log('No active session found. Starting a new session.')
       console.log('Route Course ID: ', route.params.courseId)

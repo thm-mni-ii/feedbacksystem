@@ -7,6 +7,7 @@ import type { Choice } from '@/model/questionTypes/Choice'
 import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
 import { onMounted, onBeforeUnmount } from 'vue'
+import QuestionTags from './QuestionTags.vue'
 import EditFillInTheBlanks from './EditFillInTheBlanks.vue'
 import EditChoiceQuestion from './EditChoiceQuestion.vue'
 
@@ -78,15 +79,15 @@ const checkMultipleRows = () => {
   }
 }
 
-const removeTag = (item: string) => {
-  question.value.questiontags.splice(question.value.questiontags.indexOf(item), 1)
-}
-
 const handleUpdate = (updatedQuestion: Question) => {
   question.value = {
     ...question.value,
     questionconfiguration: updatedQuestion.questionconfiguration
   }
+}
+
+const updateTags = (newTags: string[]) => {
+  question.value.questiontags = newTags
 }
 
 const handleSubmit = async () => {
@@ -125,23 +126,7 @@ const handleSubmit = async () => {
           :items="questionTypes"
           variant="solo-filled"
         ></v-select>
-        <v-combobox
-          v-model="question.questiontags"
-          label="Tags"
-          prepend-icon="mdi-tag"
-          variant="solo"
-          chips
-          clearable
-          multiple
-        >
-          <template #selection="{ item }">
-            <v-chip v-bind="question.questiontags" closable @click:close="removeTag(item)">
-              <strong>{{ item }}</strong
-              >&nbsp;
-              <span>(interest)</span>
-            </v-chip>
-          </template>
-        </v-combobox>
+        <QuestionTags :questiontags="question.questiontags" @update="updateTags" />
         <div class="d-flex flex-col">
           <v-textarea
             v-model="question.questiontext"
