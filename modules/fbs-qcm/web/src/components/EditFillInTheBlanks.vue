@@ -30,9 +30,6 @@ watch(
     updatedConfig.questionconfiguration.textParts.forEach((part: { text: string }) => {
       part.text = part.text.trim()
     })
-    console.log('New Value: ', updatedConfig)
-    console.log('Old Value: ', oldVal)
-    console.log('Local Question: ', localQuestion)
     emit('update', updatedConfig)
   },
   { deep: true }
@@ -45,7 +42,6 @@ onMounted(() => {
       showBlanks: true,
       textParts: [{ order: 1, text: '', isBlank: false }]
     }
-    console.log('LOCAL QUESTION', localQuestion.value)
   } else if (
     props.question.questiontype === 'FillInTheBlanks' &&
     !localQuestion.value.questionconfiguration

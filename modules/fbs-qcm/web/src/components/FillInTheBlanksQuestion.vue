@@ -14,13 +14,16 @@ interface QuestionConfiguration {
 
 const props = defineProps<{
   questionconfiguration: QuestionConfiguration
+  blankStrings: string[]
 }>()
 
 const fillInTheBlanksAnswer = defineModel<{ [key: number]: string }>({ default: {} })
 
-const possibleAnswers = computed(() =>
-  props.questionconfiguration.textParts.filter((part) => part.isBlank).map((part) => part.text)
-)
+const possibleAnswers = computed(() => {
+  return props.blankStrings.length > 0
+    ? props.blankStrings
+    : props.questionconfiguration.textParts.filter((part) => part.isBlank).map((part) => part.text)
+})
 
 const formattedText = computed(() => {
   return props.questionconfiguration.textParts.map((part) => {
@@ -75,6 +78,7 @@ const formattedText = computed(() => {
   gap: 8px;
 }
 .blank-input {
-  width: 20px;
+  width: 200px;
+  max-width: 300px;
 }
 </style>

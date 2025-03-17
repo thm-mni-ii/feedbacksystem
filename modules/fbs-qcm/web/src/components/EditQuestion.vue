@@ -112,7 +112,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <v-card>
+  <v-card class="w-75 mx-auto">
     <v-card-title class="text-h4 font-weight-bold text-center text-primary">{{
       isNew ? 'Add new Question' : 'Update Question'
     }}</v-card-title>
@@ -142,18 +142,30 @@ const handleSubmit = async () => {
             </v-chip>
           </template>
         </v-combobox>
-        <v-textarea
-          v-model="question.questiontext"
-          maxlength="130"
-          auto-grow
-          counter
-          rows="3"
-          label="Question"
-          required
-        ></v-textarea>
+        <div class="d-flex flex-col">
+          <v-textarea
+            v-model="question.questiontext"
+            maxlength="130"
+            auto-grow
+            counter
+            rows="3"
+            label="Question"
+            required
+          ></v-textarea>
+          <div v-if="question.questiontype === 'FillInTheBlanks'" class="d-flex align-center">
+            <v-icon icon="mdi-information-outline" size="small" class="ml-4 mr-8" color="dark-grey">
+            </v-icon>
+            <v-tooltip activator="parent" location="end"
+              >This text field is optional. If no text is provided, then the default "Fill in the
+              Blanks" will be saved for the Questiontext</v-tooltip
+            >
+          </div>
+        </div>
+
         <EditChoiceQuestion
           v-if="question.questiontype === 'Choice'"
           :question="question"
+          :isNew="isNew"
           @update="handleUpdate"
         />
         <EditFillInTheBlanks

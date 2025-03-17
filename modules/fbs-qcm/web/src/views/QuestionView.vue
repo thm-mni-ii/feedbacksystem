@@ -31,7 +31,7 @@ const getCatalogs = async () => {
 <template>
   <div class="mx-16 mt-16">
     <div class="d-flex my-4 align-center">
-      <v-form @submit.prevent="getQuestion" class="w-50">
+      <v-form class="w-50" @submit.prevent="getQuestion">
         <v-text-field v-model="questionId" label="Question ID"></v-text-field>
         <v-btn type="submit">get question</v-btn>
       </v-form>

@@ -156,6 +156,7 @@ const submitAnswer = () => {
     v-if="question.questiontype == 'FillInTheBlanks'"
     v-model="fillInTheBlanksAnswer"
     :questionconfiguration="question.questionconfiguration"
+    :blankStrings="question.blankStrings ?? []"
   />
 
   <v-btn
