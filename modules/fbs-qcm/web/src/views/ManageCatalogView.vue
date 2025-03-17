@@ -98,6 +98,13 @@
         </div>
       </div>
     </div>
+    <!-- Modal für die Löschbestätigung -->
+    <delete-confirmation-modal
+      :show="showDeleteModal"
+      :question-id="nodeToDelete ? nodeToDelete.id : ''"
+      @cancel="cancelDelete"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
@@ -314,10 +321,13 @@ import { defineComponent, ref, onMounted, computed } from 'vue';
 import catalogService from '@/services/catalog.service';
 import questionService from '@/services/question.service';
 import cytoscape, { Core } from 'cytoscape';
-
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.vue';
 
 export default defineComponent({
   name: 'CytoscapeGraph',
+  components: {
+    DeleteConfirmationModal
+  },
   setup() {
     const cy = ref<Core | null>(null); 
     const nodeId = ref(3); 
@@ -334,6 +344,8 @@ export default defineComponent({
     const selectedQuestion = ref("");
     const router = useRouter()
     const firstQuestion = ref(false);
+    const showDeleteModal = ref(false);
+    const nodeToDelete = ref(null);
 
 
     // Computed property für die Formularvalidierung
@@ -644,8 +656,9 @@ export default defineComponent({
           node.data('label') !== '+') {
         const position = node.renderedPosition();
         const button = document.createElement('button');
+
+        button.setAttribute('type', 'button'); // Prevents unintended form submission
         
-        // Mülleimer-Symbol statt "x" verwenden
         button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>';
         button.className = 'remove-button';
         button.style.position = 'absolute';
@@ -673,27 +686,36 @@ export default defineComponent({
           button.style.transform = 'scale(1)';
         };
         
-        // Position des Buttons verbessern
-        // Position relativ zum Knoten, leicht versetzt nach rechts und oben
-        const left = position.x + 55;
+        const left = position.x + 85;
         const top = position.y - 30;
         
         button.style.left = `${left}px`;
         button.style.top = `${top}px`;
-        button.style.zIndex = '10'; // Sicherstellen, dass der Button immer oben ist
+        button.style.zIndex = '10';
         
         button.onclick = (event) => {
-            event.stopPropagation();
-            console.log(node.data());
-            console.log(node.data('hiddenData'));
-            
-            catalogService.deleteQuestionFromCatalog(node.data('hiddenData'));
-            node.data('label', '+');
-            node.data('hiddenData', null);
-            location.reload();
-        };
-        
+          event.stopPropagation();
+          nodeToDelete.value = {
+            id: node.data('hiddenData'),
+            nodeId: node.id()
+          };
+          showDeleteModal.value = true;
+        }
         document.getElementById('cy').appendChild(button);
+      }
+    };
+    const cancelDelete = () => {
+      showDeleteModal.value = false;
+      nodeToDelete.value = null;
+    };
+
+    const confirmDelete = async (questionId) => {
+      try {
+        await catalogService.deleteQuestionFromCatalog(questionId);
+        showDeleteModal.value = false;
+        location.reload();
+      } catch (error) {
+        console.error("Fehler beim Löschen der Frage:", error);
       }
     };
     
@@ -710,7 +732,11 @@ export default defineComponent({
       changeNeededScore,
       nodeData,
       selectedQuestion,
-      isFormValid
+      isFormValid,
+      showDeleteModal,
+      nodeToDelete,
+      cancelDelete,
+      confirmDelete,
     };
   },
 });
