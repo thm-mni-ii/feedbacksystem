@@ -108,7 +108,10 @@ export async function removeQuestionFromCatalog(
   const query = {
     _id: questionIdObject,
   };
-  const data: questionInCatalogObject | null = await questionInCatalogCollection.findOne(query) as unknown as questionInCatalogObject;
+  const data: questionInCatalogObject | null =
+    (await questionInCatalogCollection.findOne(
+      query
+    )) as unknown as questionInCatalogObject;
   if (data === null) {
     return -1;
   }
@@ -139,19 +142,23 @@ export async function removeQuestionFromCatalog(
 
 async function deleteQuestionAndChildren(question: questionInCatalogObject) {
   const database: mongoDB.Db = await connect();
-  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-  for(let i = 0; i < question.children.length; i++) {
+  const questionInCatalogCollection: mongoDB.Collection =
+    database.collection("questionInCatalog");
+  for (let i = 0; i < question.children.length; i++) {
     const query = {
-      _id: new mongoDB.ObjectId(question.children[i].question)
-    }
-    const data: questionInCatalogObject = await questionInCatalogCollection.findOne(query) as unknown as questionInCatalogObject;
+      _id: new mongoDB.ObjectId(question.children[i].question),
+    };
+    const data: questionInCatalogObject =
+      (await questionInCatalogCollection.findOne(
+        query
+      )) as unknown as questionInCatalogObject;
     if (data === undefined) {
       continue;
     }
     await deleteQuestionAndChildren(data);
   }
   const deleteQuery = {
-    _id: new mongoDB.ObjectId(question._id)
+    _id: new mongoDB.ObjectId(question._id),
   };
   questionInCatalogCollection.deleteOne(deleteQuery);
 }
@@ -182,7 +189,10 @@ export async function deleteQuestionById(
   return data;
 }
 
-export async function postSingleQuestion(question: Question, tokenData: JwtPayload) {
+export async function postSingleQuestion(
+  question: Question,
+  tokenData: JwtPayload
+) {
   if (!authenticate(tokenData, Access.moderator)) {
     return 1;
   }
@@ -197,7 +207,10 @@ export async function postSingleQuestion(question: Question, tokenData: JwtPaylo
   return { id: result.insertedId };
 }
 
-export async function editSingleQuestion(question: Question, tokenData: JwtPayload) {
+export async function editSingleQuestion(
+  question: Question,
+  tokenData: JwtPayload
+) {
   const database: mongoDB.Db = await connect();
   const questionCollection = database.collection("question");
   if (
@@ -306,22 +319,31 @@ export async function getCurrentQuestion(
   if (newQuestion == null) {
     return -1;
   }
-  newQuestion.questionsLeft = await numberOfQuestionsAhead(
-    catalogId,
-    newQuestion._id.toString()
-  );
+  //  newQuestion.questionsLeft = await numberOfQuestionsAhead(
+  //    catalogId,
+  //    newQuestion._id
+  //  );
   return createQuestionResponse(newQuestion, newQuestionInCatalogId);
 }
 
-async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoDB.Collection, catalogId: string, questionInCatalogCollection: mongoDB.Collection) {
+async function getQuestionId(
+  tokenData: JwtPayload,
+  submissionCollection: mongoDB.Collection,
+  catalogId: string,
+  questionInCatalogCollection: mongoDB.Collection
+) {
   const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
   const catalogQuery = { catalog: catalogIdObject };
-  const catalog: any = await questionInCatalogCollection.find(catalogQuery).toArray();
-  const questions: mongoDB.ObjectId[] = catalog.map((entry: any) => entry.question);
+  const catalog: any = await questionInCatalogCollection
+    .find(catalogQuery)
+    .toArray();
+  const questions: mongoDB.ObjectId[] = catalog.map(
+    (entry: any) => entry.question
+  );
   //needs fix to authenticate with session
   // all questions in catalog
   // or through sessionid
-  const query = {user: tokenData.id};
+  const query = { user: tokenData.id };
   const lastSubmission: any = await submissionCollection
     .find(query)
     .sort({ timeStamp: -1 })
@@ -367,7 +389,10 @@ async function getQuestionId(tokenData: JwtPayload, submissionCollection: mongoD
   return returnValue;
 }
 
-export async function copyQuestionWithNewOwner(tokenData: JwtPayload, questionId: string) {
+export async function copyQuestionWithNewOwner(
+  tokenData: JwtPayload,
+  questionId: string
+) {
   if (!authenticate(tokenData, Access.moderator)) {
     return -1;
   }

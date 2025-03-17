@@ -53,8 +53,8 @@ class SessionService {
   }
   getCurrentQuestion(catalogId: string): Promise<AxiosResponse<any>> {
     return axios
-      .get('/api_v1/current_question', {
-        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}`, ID: catalogId }
+      .get(`/api_v1/current_question/${catalogId}`, {
+        headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
       })
       .then((res) => {
         console.log('GET CURRENT QUESTION: ', res.data)

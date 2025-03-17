@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits } from 'vue'
+import { ref, watch, defineProps, defineEmits, onMounted } from 'vue'
 import type Question from '@/model/Question'
 import type { Choice } from '@/model/questionTypes/Choice'
 import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
+import QuestionType from '../enums/QuestionType'
 
 type QuestionConfiguration = Choice | FillInTheBlanks
 
-const props = defineProps<{ question: Question }>()
+const props = defineProps<{ question: Question; isNew: boolean }>()
 
 const emit = defineEmits<{ (e: 'update', localQuestion: Question): void }>()
 
@@ -111,20 +112,61 @@ const isCorrectAnswer = (columnIndex: number, optionIndex: number) => {
   }
   return false
 }
+const resetChoiceQuestion = (q: Ref<Question>) => {
+  q.value = {
+    owner: 1,
+    questiontext: '',
+    questiontags: [],
+    questiontype: QuestionType.Choice,
+    questionconfiguration: {
+      multipleRow: false,
+      multipleColumn: false,
+      answerColumns: [{ id: 1, name: '' }],
+      optionRows: [{ id: 1, text: '', correctAnswers: [] }]
+    } as ChoiceQuestionConfiguration
+  }
+  console.log(q.value)
+}
+
+onMounted(() => {
+  if (props.isNew) {
+    resetChoiceQuestion(localQuestion)
+  }
+})
 </script>
 <template>
   <div>
     <div class="justify-space-between d-flex flex-row">
-      <v-switch
-        v-model="localQuestion.questionconfiguration.multipleColumn"
-        class="ml-4"
-        :label="`Multi-Select Matrix`"
-        color="primary"
-        hide-details
-      ></v-switch>
+      <span class="d-flex flex-col">
+        <v-switch
+          v-model="localQuestion.questionconfiguration.multipleColumn"
+          class="ml-4"
+          :label="`Multi-Select Matrix`"
+          color="primary"
+          hide-details
+        ></v-switch>
+        <span class="d-flex align-self-center pl-2">
+          <v-icon
+            icon="mdi-information-outline"
+            size="small"
+            class="pl-2 pr-4"
+            color="dark-grey"
+          ></v-icon>
+          <v-tooltip activator="parent" location="end"
+            >Choose between a Multiple Choice Question and a Question with a Multi Select
+            Matrix</v-tooltip
+          >
+        </span>
+      </span>
 
       <div v-if="localQuestion.questionconfiguration.multipleColumn === true">
-        <v-btn icon="mdi-plus" class="my-4 mr-2" size="small" @click="addOptionCol"></v-btn>
+        <v-btn
+          icon="mdi-plus"
+          class="my-2 mr-10"
+          size="small"
+          v-tooltip:start="'Add Column'"
+          @click="addOptionCol"
+        ></v-btn>
       </div>
     </div>
 

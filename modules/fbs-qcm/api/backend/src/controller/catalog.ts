@@ -245,7 +245,7 @@ const currentQuestion = (async (req: Request, res: Response) => {
         res.sendStatus(401); 
       }
       if (req.user !== undefined) {
-        const catalogId = req.params.ID as string;
+        const catalogId = req.params.id as string;
         const result = await getCurrentQuestion(req.user, catalogId);
         if(result === -1) {
           res.sendStatus(404);
