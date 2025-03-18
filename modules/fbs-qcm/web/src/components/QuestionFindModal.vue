@@ -8,6 +8,17 @@
       
       <div class="modal-body">
         <div class="form-group">
+          <label for="question-search">Frage suchen</label>
+          <input
+            id="question-search"
+            type="text"
+            v-model="searchQuery"
+            placeholder="Suchbegriff eingeben"
+            class="form-control"
+          />
+        </div>
+        
+        <div class="form-group">
           <label for="question-select">Zu welcher Frage möchten Sie weiterleiten?</label>
           <select 
             id="question-select" 
@@ -15,10 +26,13 @@
             class="form-control question-select"
           >
             <option disabled value="">Bitte wählen Sie eine Frage aus</option>
-            <option v-for="question in questionOptions" :key="question._id" :value="question._id">
+            <option v-for="question in filteredQuestions" :key="question._id" :value="question._id">
               {{ question.questiontext }}
             </option>
           </select>
+          <small v-if="filteredQuestions.length === 0" class="form-text text-muted">
+            Keine Fragen gefunden. Bitte passen Sie Ihre Suche an.
+          </small>
         </div>
         
         <div v-if="showInput" class="form-group">
@@ -50,7 +64,7 @@
 </template>
     
 <script lang="ts">
-  import { defineComponent, ref, watch } from 'vue';
+  import { defineComponent, ref, watch, computed } from 'vue';
 
   interface QuestionOption {
     _id: string;
@@ -88,6 +102,19 @@
       const selectedQuestion = ref('');
       const nodeData = ref(props.initialNodeData);
       const transitionValue = ref(props.transition);
+      const searchQuery = ref('');
+
+      // Filter questions based on search query
+      const filteredQuestions = computed(() => {
+        if (!searchQuery.value) {
+          return props.questionOptions;
+        }
+        
+        const query = searchQuery.value.toLowerCase();
+        return props.questionOptions.filter(question => 
+          question.questiontext.toLowerCase().includes(query)
+        );
+      });
 
       const cancel = () => {
         emit('cancel');
@@ -103,6 +130,7 @@
           selectedQuestion.value = '';
           nodeData.value = props.initialNodeData;
           transitionValue.value = props.transition;
+          searchQuery.value = '';
         }
       });
 
@@ -110,6 +138,8 @@
         selectedQuestion,
         nodeData,
         transitionValue,
+        searchQuery,
+        filteredQuestions,
         cancel,
         confirm
       };
