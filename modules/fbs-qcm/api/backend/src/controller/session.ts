@@ -16,8 +16,6 @@ const startSession = (async (req: Request, res: Response) => {
           res.sendStatus(403);
           return;
         }
-        console.log("result");
-        console.log(result);
         res.send(result);
         return;
       }

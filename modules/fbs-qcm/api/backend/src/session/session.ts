@@ -21,7 +21,8 @@ export async function postSession(tokenData: JwtPayload, catalogId: string, cour
         return -1;
     }
     const catalogObjectId = new mongoDB.ObjectId(catalogId)
-    if( await checkifSessionIsNotFinished(tokenData.id, catalogObjectId, courseId)) {
+    if( await checkifSessionIsNotFinished(tokenData.id, catalogObjectId)) {
+        console.log("Session for that catalog already in progress");
         return -1;
     }
     const database: mongoDB.Db = await connect();
@@ -37,7 +38,6 @@ export async function postSession(tokenData: JwtPayload, catalogId: string, cour
     }
     await sessionCollection.insertOne(sessionEntry);
     const question =  await getCurrentQuestion(tokenData, catalogId);
-    console.log(question);
     return question;
 }
 
@@ -216,17 +216,14 @@ async function checkifSessionIsNotPaused(user: number, catalogObjectId: mongoDB.
     }
     return false;
 }
-async function checkifSessionIsNotFinished(user: number, catalogObjectId: mongoDB.ObjectId, courseId: number) {
+async function checkifSessionIsNotFinished(user: number, catalogObjectId: mongoDB.ObjectId) {
     const query = {
         user: user,
         catalogId: catalogObjectId,
-        courseId: courseId
     }
-    console.log(query);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
     const result = await sessionCollection.find(query).sort({ time: -1 }).limit(1).toArray();
-    console.log(result);
     if(result.length === 0) {
         return false;
     }

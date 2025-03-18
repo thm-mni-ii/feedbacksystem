@@ -372,20 +372,16 @@ export function createQuestionResponse(newQuestion: any, newId: string) {
   if (newQuestion.questiontype === QuestionType.Choice) {
     const returnQuestion = newQuestion;
     const configuration = newQuestion.questionconfiguration as any;
-    console.log(configuration);
     delete returnQuestion.owner;
     for (let i = 0; i < configuration.answerColumns.length; i++) {
       delete configuration.answerColumns[i].correctAnswers;
     }
     returnQuestion._id = newId;
-    console.log("returnQuestion");
-    console.log(returnQuestion);
     return returnQuestion;
   }
   if (newQuestion.questiontype === QuestionType.FillInTheBlanks) {
     const returnQuestion = newQuestion;
     const configuration = newQuestion.questionconfiguration as FillInTheBlanks;
-    console.log(configuration);
     delete returnQuestion.owner;
     let blankStrings: string[] = [];
     for (let i = 0; i < configuration.textParts.length; i++) {
@@ -400,8 +396,6 @@ export function createQuestionResponse(newQuestion: any, newId: string) {
       returnQuestion.blankStrings = blankStrings;
     }
     returnQuestion._id = newId;
-    console.log("returnQuestion");
-    console.log(returnQuestion);
     return returnQuestion;
   }
 
