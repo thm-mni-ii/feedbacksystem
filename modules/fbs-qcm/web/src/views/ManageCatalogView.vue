@@ -8,58 +8,15 @@
     <div id="cy" class="cyto-graph"></div>
     
     <!-- Modal für das Hinzufügen einer neuen Frage -->
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Frage anfügen</h3>
-          <button class="close-button" @click="closeModal">&times;</button>
-        </div>
-        
-        <div class="modal-body">
-          <div v-if="showInput" class="form-group">
-            <label for="score-input">Ab wie viel Prozent soll weitergeleitet werden?</label>
-            <div class="input-with-helper">
-              <input
-                id="score-input"
-                type="number"
-                min="0"
-                max="100"
-                v-model="nodeData"
-                placeholder="Prozentwert eingeben"
-                class="form-control"
-              />
-              <span class="input-suffix">%</span>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="question-select">Auf welche Frage soll verwiesen werden?</label>
-            <select 
-              id="question-select" 
-              v-model="selectedQuestion" 
-              class="form-control question-select"
-            >
-              <option disabled value="">Bitte wählen Sie eine Frage aus</option>
-              <option v-for="question in questionOptions" :key="question._id" :value="question._id">
-                {{ question.questiontext }}
-              </option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeModal">Abbrechen</button>
-          <button 
-            class="btn btn-primary" 
-            @click="addQuestion(nodeData, selectedQuestion, transition);"
-            :disabled="!isFormValid"
-          >
-            Frage hinzufügen
-          </button>
-        </div>
-      </div>
-    </div>
-    
+    <question-find-modal
+      :show="showModal"
+      :question-options="questionOptions"
+      :show-input="showInput"
+      :transition="transition"
+      @cancel="cancelAdd"
+      @confirm="confirmAdd"
+    />
+
     <!-- Modal für das Ändern des Schwellenwerts -->
     <div v-if="showModalNum" class="modal-overlay">
       <div class="modal-content">
@@ -322,15 +279,16 @@ import catalogService from '@/services/catalog.service';
 import questionService from '@/services/question.service';
 import cytoscape, { Core } from 'cytoscape';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.vue';
+import QuestionFindModal from '@/components/QuestionFindModal.vue';
 
 export default defineComponent({
   name: 'CytoscapeGraph',
   components: {
-    DeleteConfirmationModal
+    DeleteConfirmationModal,
+    QuestionFindModal
   },
   setup() {
     const cy = ref<Core | null>(null); 
-    const nodeId = ref(3); 
     const showModal = ref(false); 
     const showModalNum = ref(false); 
     const route = useRoute();
@@ -342,7 +300,6 @@ export default defineComponent({
     const showInput = ref(false);
     const nodeData = ref("");
     const selectedQuestion = ref("");
-    const router = useRouter()
     const firstQuestion = ref(false);
     const showDeleteModal = ref(false);
     const nodeToDelete = ref(null);
@@ -551,7 +508,6 @@ export default defineComponent({
               } else {
                 showInput.value = true;
               }
-              console.log("Was geht ab");
               console.log(id.question);
               console.log(currentQuestion.value);
               if(currentQuestion.value === "new") {
@@ -564,7 +520,6 @@ export default defineComponent({
               showModal.value = true;
             } else if(clickedNode.data('hiddenData') !== null && clickedNode.data('hiddenData') !== undefined) {
                 console.log(id.catalogId);
-                console.log("warum passiert hier nichts");
                 window.location.href = `/manageCatalog/${id.catalogId}/${clickedNode.data('hiddenData')}`
             }
         });
@@ -612,7 +567,6 @@ export default defineComponent({
         }
     };
     
-    // Funktion zum Aktualisieren der Fragenoptionen
     const updateQuestionOptions = (data) => {
       questionOptions.value = data;
     };
@@ -718,6 +672,14 @@ export default defineComponent({
         console.error("Fehler beim Löschen der Frage:", error);
       }
     };
+
+    const cancelAdd = () => {
+      showModal.value = false;
+    }
+    const confirmAdd = (nodeData: number, selectedQuestion: string, transition: string) => {
+      addQuestion(nodeData, selectedQuestion, transition);
+      showModal.value = false;
+    }
     
     return { 
       showModal, 
@@ -737,6 +699,8 @@ export default defineComponent({
       nodeToDelete,
       cancelDelete,
       confirmDelete,
+      cancelAdd,
+      confirmAdd,
     };
   },
 });
