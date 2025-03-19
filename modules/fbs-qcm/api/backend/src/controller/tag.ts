@@ -1,6 +1,19 @@
 import { Request, Response } from "express";
-import { createSingleTag, deleteSingleTag, editSingleTag, findMultipleTags, searchMultipleTags } from "../tag/tag";
-import { editSingleQuestion } from "../question/question";
+import { createSingleTag, deleteSingleTag, editSingleTag, findMultipleTags, getAllTags, searchMultipleTags } from "../tag/tag";
+
+const allTags = ( async (req: Request, res: Response) => {
+    try {
+      if (req.user === undefined) {
+        res.sendStatus(401);
+        return;
+      }
+      const result = await getAllTags(req.user);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+    }
+});
 
 const createTag = ( async (req: Request, res: Response) => {
     try {
@@ -22,7 +35,7 @@ const createTag = ( async (req: Request, res: Response) => {
       console.log(error);
       res.sendStatus(500);
     }
-  });
+});
 
   const editTag = ( async (req: Request, res: Response) => {
     try {
@@ -113,5 +126,6 @@ export {
     editTag,
     deleteTag,
     findTag,
-    searchTag
+    searchTag,
+    allTags
 }
