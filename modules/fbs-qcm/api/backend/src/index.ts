@@ -9,6 +9,7 @@ import sessionRoutes from './routes/sessionRoutes';
 import submissionRoutes from './routes/submissionRoutes';
 import tagRoutes from './routes/tagRoutes';
 import userRoutes from './routes/userRoutes';
+import cors from "cors";
 
 interface User {
   username: string;
@@ -291,6 +292,8 @@ async function startServer() {
   await createDatabaseAndCollection();
 
   const app = express();
+
+  app.use(cors());
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

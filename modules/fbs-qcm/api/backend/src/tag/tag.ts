@@ -10,10 +10,8 @@ export async function getAllTags(tokenData: JwtPayload) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const tagCollection: mongoDB.Collection = database.collection("tag");
-    const allTags = tagCollection.find().toArray();
     const questionCollection: mongoDB.Collection = database.collection("question");
-    const result = questionCollection.aggregate([
+    const data = await questionCollection.aggregate([
         // Zerlege das Array questionTags in einzelne Dokumente
         { $unwind: "$questionTags" },
         
@@ -27,8 +25,19 @@ export async function getAllTags(tokenData: JwtPayload) {
         // Optional: Sortiere nach Häufigkeit absteigend
         { $sort: { count: -1 } }
       ])
-    console.log(result);
-    return result;
+      let result: any[] = [];
+      await data.forEach((tag: any) => {
+        console.log(`${tag._id}: ${tag.count}`);
+        const tagObject = {
+            tag: tag._id,
+            count: tag.count
+        }
+        console.log(tagObject);
+        result.push(tagObject);
+      });
+      console.log("END RESULT");
+      console.log(result);
+      return result;
 }
 
 export async function createSingleTag(tokenData: JwtPayload, tagName: string) {
