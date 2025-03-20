@@ -4,15 +4,20 @@ package de.thm.ii.fbs.controller.v2
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.mongodb.client.MongoClients
 import de.thm.ii.fbs.model.v2.group.Group
 import de.thm.ii.fbs.model.v2.playground.*
 import de.thm.ii.fbs.model.v2.playground.api.*
 import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
+import de.thm.ii.fbs.services.v2.mongo.MongoPlaygroundService
 import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import kotlin.jvm.optionals.getOrNull
@@ -24,15 +29,15 @@ class PlaygroundController(
 
     private val databaseRepository: SqlPlaygroundDatabaseRepository,
 
-    private val mongoDatabaseRepository: MongoPlaygroundDatabaseRepository,
-
     private val entityRepository: SqlPlaygroundEntityRepository,
 
     private val queryRepository: SqlPlaygroundQueryRepository,
 
     private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
 
-    private val groupRepository: GroupRepository
+    private val groupRepository: GroupRepository,
+
+    private val mongoPlaygroundService: MongoPlaygroundService
 ) {
     @GetMapping
     @ResponseBody
@@ -74,23 +79,81 @@ class PlaygroundController(
             }
 
             PlaygroundDatabaseType.MONGO -> {
+                val prefixedDbName = "mongo_playground_student_${currentToken.id}_${database.name.replace(" ", "_")}"
+
                 val db = MongoPlaygroundDatabase(
-                    database.name,
-                    version = "MongoDB 8.0.5",
+                    prefixedDbName,
+                    version = "MongoDB 8.0",
                     "MONGO",
                     user,
                     true
                 )
 
-                val currentActiveDb =
-                    mongoDatabaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
-                if (currentActiveDb != null) {
-                    currentActiveDb.active = false
-                    mongoDatabaseRepository.save(currentActiveDb)
-                }
-
-                mongoDatabaseRepository.save(db)
+                val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, prefixedDbName)
+                mongoTemplate.save(db)
+                db
             }
+        }
+    }
+
+    @PostMapping("/mongo/{dbId}/execute")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    fun executeMongoQuery(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @RequestBody mongoQuery: MongoPlaygroundQueryDTO
+    ): Any? {
+        val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, dbId)
+
+        val criteria = mongoQuery.criteria?.entries
+            ?.fold(Criteria()) { crit, (key, value) -> crit.and(key).`is`(value) }
+            ?: Criteria()
+
+        val update = mongoQuery.update?.entries
+            ?.fold(Update()) { update, (key, value) -> update.set(key, value) }
+            ?: Update()
+
+        val query = Query(criteria)
+
+
+        return when (mongoQuery.operation) {
+            "insert" -> mongoTemplate.insert(mongoQuery.document, mongoQuery.collection)
+
+            "update" -> mongoTemplate.updateFirst(query, update, mongoQuery.collection)
+
+            "find" -> mongoTemplate.find(query, Map::class.java, mongoQuery.collection)
+
+            "delete" -> mongoTemplate.remove(query, mongoQuery.collection)
+
+            else -> throw UnsupportedOperationException("Operation ${mongoQuery.operation} is not supported")
+        }
+    }
+
+    @GetMapping("/mongo/list")
+    @ResponseBody
+    fun getMongoDatabase(@CurrentToken currentToken: LegacyToken): List<String> {
+        return MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            mongoClient.listDatabaseNames().filter {
+                it.startsWith("mongo_playground_student_${currentToken.id}_")
+            }
+        }
+    }
+
+    @DeleteMapping("/mongo/{dbId}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteMongoDatabase(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String
+    ) {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            mongoClient.getDatabase(databaseName).drop()
         }
     }
 
