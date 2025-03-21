@@ -203,6 +203,8 @@ export async function postSingleQuestion(
   delete questionInsertion.id;
   delete questionInsertion._id;
   questionInsertion.owner = tokenData.id;
+  questionInsertion.createdAt = new Date; 
+  questionInsertion.lastEdited = new Date; 
   const result = await questionCollection.insertOne(questionInsertion);
   return { id: result.insertedId };
 }
@@ -229,6 +231,7 @@ export async function editSingleQuestion(
   };
   const questionWithoutId: any = question;
   delete questionWithoutId._id;
+  questionWithoutId.lastEdited = new Date;
   const res = await questionCollection.replaceOne(filter, questionWithoutId);
   return res;
 }

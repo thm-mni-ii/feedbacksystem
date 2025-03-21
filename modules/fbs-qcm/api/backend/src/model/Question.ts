@@ -10,4 +10,6 @@ export interface Question {
   questiontags: string[];
   questiontype: QuestionType;
   questionconfiguration: Choice | FillInTheBlanks | QuestionType.SQL;
+  createdAt: Date,
+  lastEdited: Date
 }
