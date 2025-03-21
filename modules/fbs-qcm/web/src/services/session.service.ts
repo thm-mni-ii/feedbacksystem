@@ -45,13 +45,13 @@ class SessionService {
         throw err
       })
   }
-  checkSession(): Promise<AxiosResponse<IcheckSession[]>> {
+  checkOngoingSessions(): Promise<AxiosResponse<IcheckSession[]>> {
     return axios
       .get('/api_v1/getOngoingSessions', {
         headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
       })
       .then((res) => {
-        console.log(res.data)
+        console.log('getOngoingSessions: ', res.data)
         return res
       })
       .catch((err) => {

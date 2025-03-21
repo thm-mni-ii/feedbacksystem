@@ -21,13 +21,25 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit-answer'])
-const selectedAnswers = ref([])
+const selectedAnswers = ref<ChoiceAnswer[]>([])
 const selectedMatrixAnswers = ref<
   Array<{ rowId: number; rowText: string; colId: number; colText: string }>
 >([])
 
 const choiceAnswers = ref<ChoiceAnswer[]>([])
 
+const updateSelectedAnswers = (option: { id: number; text: string }) => {
+  const existingAnswer = selectedAnswers.value.find((a) => a.id === option.id)
+  if (existingAnswer) {
+    selectedAnswers.value = selectedAnswers.value.filter((a) => a.id !== option.id)
+  } else {
+    selectedAnswers.value.push({
+      id: option.id,
+      text: option.text,
+      entries: []
+    })
+  }
+}
 const updateChoiceAnswers = () => {
   choiceAnswers.value = []
   selectedMatrixAnswers.value.forEach((answer) => {
@@ -96,12 +108,12 @@ const submitAnswer = () => {
     >
       <div class="w-50 mt-4 justify-start rounded-lg d-flex border-md border-primary">
         <v-checkbox
-          v-model="selectedAnswers"
+          :model-value="selectedAnswers.some((a) => a.id === option.id)"
           :label="`${option.text}`"
-          :value="option.id"
           color="primary"
           class="mx-auto py-auto"
           hide-details
+          @change="updateSelectedAnswers(option)"
         >
           <template #label>
             <div>{{ option.text }}</div>

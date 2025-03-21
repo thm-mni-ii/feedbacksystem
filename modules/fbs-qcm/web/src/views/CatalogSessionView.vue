@@ -17,9 +17,10 @@ const progressBar = ref<number>(1)
 const showFeedback = ref<boolean>(false)
 const currentQuestionScore = ref<number>(0)
 const formattedScore = computed(() => (currentQuestionScore.value * 100).toFixed(2))
+const catalogScore = ref<Number>()
 
 const scoreEmoji = computed(() => {
-  if (currentQuestionScore.value < 0.2) return '💀'
+  if (currentQuestionScore.value < 0.1) return '💀'
   if (currentQuestionScore.value < 0.4) return '😐'
   if (currentQuestionScore.value < 0.6) return '🙂'
   return '😎'
@@ -32,79 +33,81 @@ const catalog = ref<Catalog>({
 })
 
 const submitAnswer = async (answer: any) => {
-  if (!questionData.value || !questionData.value._id) {
-    console.error('Question data or ID is undefined.')
+  if (!questionData.value?._id) {
+    console.error('[submitAnswer]: questionData or ID is undefined.')
     return
   }
   try {
-    console.log('QUESION DATA SUBMITANSWER:', questionData)
     const submitResponse = await sessionService.submitAnswer(questionData.value._id, answer)
     currentQuestionScore.value = submitResponse.data.correct.score
     showFeedback.value = true
-    console.log('CATALOG ID ROUTE PARAMS: ', route.params.catalogId)
-    // erst feedback geben
-    sessionService
-      .getCurrentQuestion(route.params.catalogId as string)
-      .then((res) => {
-        console.log('CURRENT QUESTION:', res)
-        if (res.data.catalog === 'over') {
-          sessionService.endSession(route.params.catalogId as string, Number(route.params.courseId))
-          catalogStatus.value = 'over'
-          const catalogScore = catalogService.getCatalogScore(route.params.catalogId as string)
-          console.log('SCORE: ', catalogScore)
-        } else {
-          catalogStatus.value = null
-        }
-        questionData.value = res.data
-      })
-      .catch((error) => console.error('Error fetching question:', error))
-  } catch (error) {
-    console.error('Error submitting answer:', error)
-  } finally {
+
+    const catalogId = route.params.catalogId as string
+    const courseId = Number(route.params.courseId)
+
+    const res = await sessionService.getCurrentQuestion(catalogId)
+    if (res.data.catalog === 'over') {
+      console.log('Catalog finished. Ending Session.')
+      await sessionService.endSession(catalogId, courseId)
+      catalogStatus.value = 'over'
+
+      const catalogScoreRes = await catalogService.getCatalogScore(courseId, catalogId)
+      catalogScore.value = catalogScoreRes.data.score
+      console.log('Catalog Score:', catalogScoreRes.data)
+    } else {
+      catalogStatus.value = null
+      questionData.value = res.data
+    }
     progressBar.value++
+  } catch (error) {
+    console.error('Error submitting Answer: ', error)
   }
 }
 
 onMounted(async () => {
   try {
-    const catalogResponse = await catalogService.getCatalog(route.params.catalogId as string)
+    const catalogId = route.params.catalogId as string
+    const courseId = Number(route.params.courseId)
+
+    const catalogResponse = await catalogService.getCatalog(catalogId)
     catalog.value.name = catalogResponse.data.name
 
-    const checkSessionResponse = await sessionService.checkSession()
-    console.log('get ongoing sessions response: ', checkSessionResponse)
-    console.log('Route Course ID: ', route.params.courseId)
-    console.log('Route Catalog ID: ', route.params.catalogId)
-    const startSessionResponse = await sessionService.startSession(
-      Number(route.params.courseId),
-      route.params.catalogId as string
-    )
-    questionData.value = startSessionResponse.data
-    console.log('START SESSION QUESTION: ', questionData.value)
-    sessionService
-      .getCurrentQuestion(route.params.catalogId as string)
-      .then((res) => {
-        console.log('CURRENT QUESTION:', res)
-        if (res.data.catalog === 'over') {
-          catalogStatus.value = 'over'
-        } else {
-          catalogStatus.value = null
-        }
-        questionData.value = res.data
-      })
-      .catch((error) => console.error('Error fetching question:', error))
+    const ongoingSessions = await sessionService.checkOngoingSessions()
+    const currentQuestion = await sessionService.getCurrentQuestion(catalogId)
+
+    if (ongoingSessions.data.length === 0 && currentQuestion.data.catalog !== 'over') {
+      console.log('[onMounted] No active session found. Starting a new session.')
+
+      const startSessionResponse = await sessionService.startSession(courseId, catalogId)
+      questionData.value = startSessionResponse.data
+      console.log('[onMounted] First Question:', questionData.value)
+    } else {
+      questionData.value = currentQuestion.data
+    }
+
+    if (currentQuestion.data.catalog === 'over') {
+      catalogStatus.value = 'over'
+
+      const catalogScoreRes = await catalogService.getCatalogScore(courseId, catalogId)
+      catalogScore.value = catalogScoreRes.data.score
+      console.log(catalogScoreRes)
+      console.log('[onMounted] Catalog Score:', catalogScore.value)
+    } else {
+      catalogStatus.value = null
+      questionData.value = currentQuestion.data
+    }
   } catch (error) {
-    const currentQuestionResponse = await sessionService.getCurrentQuestion(
-      route.params.catalogId as string
-    )
-    questionData.value = currentQuestionResponse.data
+    console.error('[onMounted] Error fetching question:', error)
 
-    console.error('Error fetching data:', error)
-    showErrorPage.value = true
-  }
-
-  if (!route.params.catalogId || !route.params.courseId) {
-    console.log('Error: Missing required parameters.')
-    showErrorPage.value = true
+    try {
+      const currentQuestionResponse = await sessionService.getCurrentQuestion(
+        route.params.catalogId as string
+      )
+      questionData.value = currentQuestionResponse.data
+    } catch (fetchError) {
+      console.error('[onMounted] FetchError:', fetchError)
+      showErrorPage.value = true
+    }
   }
 })
 </script>
@@ -138,7 +141,7 @@ onMounted(async () => {
         </div>
         <div v-if="catalogStatus == 'over' && !showFeedback">
           <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">Finished!🎉</h4>
-          <p class="text-blue-grey-darken-2">evaluation......</p>
+          <h3 class="text-blue-grey-darken-2">Total Score: {{ catalogScore }} %</h3>
           <v-btn
             variant="tonal"
             class="mx-auto my-8"

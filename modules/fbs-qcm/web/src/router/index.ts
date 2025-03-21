@@ -77,12 +77,12 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // console.log('beforeEach', to, from)
+  console.log('beforeEach', to, from)
 
-  // Check if ongoing session
+  // //Check if ongoing session
   // if (to.name === 'home') {
   //   sessionService
-  //     .checkSession()
+  //     .checkOngoingSessions()
   //     .then((session) => {
   //       console.log('router check session -->', session.data)
   //       if (session.data.length > 0) {

@@ -129,12 +129,17 @@ class CatalogService {
       }
     })
   }
-  getCatalogScore(ID: string): Promise<AxiosResponse<any>> {
-    return axios.get(`/api_v1/catalog_score/?ID=${ID}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-      }
-    })
+  getCatalogScore(courseId: number, catalogId: string): Promise<AxiosResponse<any>> {
+    return axios
+      .get(`/api_v1/getCatalogScore/${courseId}/${catalogId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
+      })
+      .then((res) => {
+        console.log('getCatalogScore: ', res)
+        return res
+      })
   }
 }
 
