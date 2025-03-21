@@ -19,20 +19,36 @@
         </div>
         
         <div class="form-group">
-          <label for="question-select">Zu welcher Frage möchten Sie weiterleiten?</label>
-          <select 
-            id="question-select" 
-            v-model="selectedQuestion" 
-            class="form-control question-select"
-          >
-            <option disabled value="">Bitte wählen Sie eine Frage aus</option>
-            <option v-for="question in filteredQuestions" :key="question._id" :value="question._id">
-              {{ question.questiontext }}
-            </option>
-          </select>
-          <small v-if="filteredQuestions.length === 0" class="form-text text-muted">
-            Keine Fragen gefunden. Bitte passen Sie Ihre Suche an.
-          </small>
+          <label>Zu welcher Frage möchten Sie weiterleiten?</label>
+          <div class="datatable-container">
+            <table class="datatable">
+              <thead>
+                <tr>
+                  <th>Frage</th>
+                  <th class="action-column">Auswahl</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="question in filteredQuestions" :key="question._id" 
+                    :class="{ 'selected-row': selectedQuestion === question._id }">
+                  <td>{{ question.questiontext }}</td>
+                  <td class="action-column">
+                    <button 
+                      class="select-button" 
+                      @click="selectQuestion(question._id)"
+                      :class="{ 'selected': selectedQuestion === question._id }">
+                      {{ selectedQuestion === question._id ? '✓' : 'Wählen' }}
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="filteredQuestions.length === 0">
+                  <td colspan="2" class="no-data">
+                    Keine Fragen gefunden. Bitte passen Sie Ihre Suche an.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         
         <div v-if="showInput" class="form-group">
@@ -57,7 +73,12 @@
       
       <div class="modal-footer">
         <button class="btn btn-secondary" @click="cancel">Abbrechen</button>
-        <button class="btn btn-primary" @click="confirm">Auswählen</button>
+        <button 
+          class="btn btn-primary" 
+          @click="confirm" 
+          :disabled="!selectedQuestion">
+          Auswählen
+        </button>
       </div>
     </div>
   </div>
@@ -116,12 +137,18 @@
         );
       });
 
+      const selectQuestion = (id: string) => {
+        selectedQuestion.value = id;
+      };
+
       const cancel = () => {
         emit('cancel');
       };
 
       const confirm = () => {
-        emit('confirm', nodeData.value, selectedQuestion.value, transitionValue.value);
+        if (selectedQuestion.value) {
+          emit('confirm', nodeData.value, selectedQuestion.value, transitionValue.value);
+        }
       };
 
       // Reset form when modal is shown
@@ -140,6 +167,7 @@
         transitionValue,
         searchQuery,
         filteredQuestions,
+        selectQuestion,
         cancel,
         confirm
       };
@@ -165,7 +193,7 @@
     background-color: white;
     border-radius: 8px;
     width: 95%;
-    max-width: 500px;
+    max-width: 600px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
 
@@ -215,8 +243,64 @@
     font-size: 14px;
   }
 
-  .question-select {
+  .datatable-container {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+  }
+
+  .datatable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .datatable th, .datatable td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eaeaea;
+  }
+
+  .datatable th {
     background-color: #f9f9f9;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .datatable tr:hover {
+    background-color: #f5f5f5;
+  }
+
+  .datatable .action-column {
+    width: 80px;
+    text-align: center;
+  }
+
+  .select-button {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .select-button.selected {
+    background-color: #3498db;
+    color: white;
+    border-color: #2980b9;
+  }
+
+  .selected-row {
+    background-color: #ebf5fb;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 20px;
+    color: #666;
   }
 
   .input-with-helper {
@@ -259,6 +343,11 @@
   .btn-primary {
     background-color: #3498db;
     color: white;
+  }
+
+  .btn-primary:disabled {
+    background-color: #a0cfee;
+    cursor: not-allowed;
   }
 
   .btn-secondary {

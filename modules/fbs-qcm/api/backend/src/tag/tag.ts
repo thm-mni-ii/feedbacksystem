@@ -2,6 +2,43 @@ import { JwtPayload } from "jsonwebtoken";
 import { getAdminCourseRoles } from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { connect } from "../mongo/mongo";
+import { authenticate } from "../authenticate";
+import { Access } from "../utils/enum";
+
+export async function getAllTags(tokenData: JwtPayload) {
+    if(!authenticate(tokenData, Access.tutor)) {
+        return -1;
+    }
+    const database: mongoDB.Db = await connect();
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    const data = await questionCollection.aggregate([
+        // Zerlege das Array questionTags in einzelne Dokumente
+        { $unwind: "$questionTags" },
+        
+        // Gruppiere nach den Tags und zähle sie
+        { $group: { 
+            _id: "$questionTags", 
+            count: { $sum: 1 } 
+          } 
+        },
+        
+        // Optional: Sortiere nach Häufigkeit absteigend
+        { $sort: { count: -1 } }
+      ])
+      let result: any[] = [];
+      await data.forEach((tag: any) => {
+        console.log(`${tag._id}: ${tag.count}`);
+        const tagObject = {
+            tag: tag._id,
+            count: tag.count
+        }
+        console.log(tagObject);
+        result.push(tagObject);
+      });
+      console.log("END RESULT");
+      console.log(result);
+      return result;
+}
 
 export async function createSingleTag(tokenData: JwtPayload, tagName: string) {
     console.log(tagName);
