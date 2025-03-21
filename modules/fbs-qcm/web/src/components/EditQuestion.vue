@@ -29,22 +29,19 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-const question = ref<Question>({} as Question)
-const resetChoiceQuestion = (q: Ref<Question>) => {
-  q.value = {
-    owner: 1,
-    questiontext: '',
-    questiontags: [],
-    questiontype: QuestionType.Choice,
-    questionconfiguration: {
-      multipleRow: false,
-      multipleColumn: false,
-      answerColumns: [{ id: 1, name: '' }],
-      optionRows: [{ id: 1, text: '', correctAnswers: [] }]
-    } as ChoiceQuestionConfiguration
-  }
-  console.log(q.value)
-}
+const question = ref<Question>({
+  owner: 1,
+  questiontext: '',
+  questiontags: [] as string[],
+  questiontype: QuestionType.Choice,
+  questionconfiguration: {
+    multipleRow: false,
+    multipleColumn: false,
+    answerColumns: [{ id: 1, name: '' }],
+    optionRows: [{ id: 1, text: '', correctAnswers: [] }]
+  } as ChoiceQuestionConfiguration
+} as Question)
+
 // Type Guard
 function isChoiceQuestionConfiguration(config: any): config is Choice {
   return (
@@ -58,9 +55,7 @@ function isChoiceQuestionConfiguration(config: any): config is Choice {
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
 
-  if (props.isNew) {
-    resetChoiceQuestion(question)
-  } else if (props.inputQuestion) {
+  if (!props.isNew && props.inputQuestion) {
     question.value = props.inputQuestion
   }
 })
@@ -126,7 +121,6 @@ const handleSubmit = async () => {
           :items="questionTypes"
           variant="solo-filled"
         ></v-select>
-        <QuestionTags :questiontags="question.questiontags" @update="updateTags" />
         <div class="d-flex flex-col">
           <v-textarea
             v-model="question.questiontext"
@@ -146,6 +140,7 @@ const handleSubmit = async () => {
             >
           </div>
         </div>
+        <QuestionTags :questiontags="question.questiontags" @update-tags="updateTags" />
 
         <EditChoiceQuestion
           v-if="question.questiontype === 'Choice'"

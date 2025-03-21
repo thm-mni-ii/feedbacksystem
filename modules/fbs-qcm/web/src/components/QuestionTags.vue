@@ -2,15 +2,19 @@
 import { ref, onMounted, defineProps, defineEmits } from 'vue'
 import questionService from '../services/question.service.ts'
 
-const props = defineProps<{ questiontags: Array }>()
+const props = defineProps<{
+  questiontags: string[]
+}>()
 
-const emit = defineEmits<{ (e: 'update', localTags: Array): void }>()
+const emit = defineEmits<{
+  (e: 'updateTag', localTags: string[]): void
+}>()
 
 const items = ref(['SQL', 'Datenbanken'])
-const localTags = ref([...props.questiontags])
+const localTags = ref<any>(props.questiontags.values)
 
 const updateTags = (newValue: string[]) => {
-  emit('update', newValue)
+  emit('updateTag', newValue)
 }
 
 const getTags = async () => {
@@ -30,7 +34,6 @@ onMounted(() => {
 
 <template>
   <v-combobox
-    v-model="localTags"
     :items="items"
     label="Add Tags to your Question"
     prepend-icon="mdi-tag"
@@ -39,7 +42,7 @@ onMounted(() => {
     clearable
     closable-chips
     multiple
-    @update:model-value="updateTags"
+    @update="updateTags"
   >
     <template #chip="{ chipProps, item }">
       <v-chip v-bind="chipProps">

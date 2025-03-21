@@ -1,6 +1,14 @@
 import type Question from '@/model/Question'
 import axios, { type AxiosResponse } from 'axios'
 
+interface IcheckSession {
+  catalogId: string
+  courseId: number
+  status: string
+  time: string
+  user: string
+}
+
 class SessionService {
   startSession(courseId: number, catalogId: string): Promise<AxiosResponse<Question>> {
     return axios
@@ -37,11 +45,29 @@ class SessionService {
         throw err
       })
   }
-  checkSession(): Promise<AxiosResponse<any>> {
+  checkSession(): Promise<AxiosResponse<IcheckSession[]>> {
     return axios
       .get('/api_v1/getOngoingSessions', {
         headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
       })
+      .then((res) => {
+        console.log(res.data)
+        return res
+      })
+      .catch((err) => {
+        console.log(err)
+        throw err
+      })
+  }
+  endSession(catalog: string, course: number): Promise<AxiosResponse<any>> {
+    return axios
+      .put(
+        '/api_v1/endSession',
+        { catalog, course },
+        {
+          headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+        }
+      )
       .then((res) => {
         console.log(res.data)
         return res

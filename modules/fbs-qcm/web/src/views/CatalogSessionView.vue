@@ -48,7 +48,10 @@ const submitAnswer = async (answer: any) => {
       .then((res) => {
         console.log('CURRENT QUESTION:', res)
         if (res.data.catalog === 'over') {
+          sessionService.endSession(route.params.catalogId as string, Number(route.params.courseId))
           catalogStatus.value = 'over'
+          const catalogScore = catalogService.getCatalogScore(route.params.catalogId as string)
+          console.log('SCORE: ', catalogScore)
         } else {
           catalogStatus.value = null
         }
@@ -68,37 +71,33 @@ onMounted(async () => {
     catalog.value.name = catalogResponse.data.name
 
     const checkSessionResponse = await sessionService.checkSession()
-    console.log('Check Session Respone: ', checkSessionResponse)
-    if (checkSessionResponse.data.length === 0) {
-      console.log('No active session found. Starting a new session.')
-      console.log('Route Course ID: ', route.params.courseId)
-      console.log('Route Catalog ID: ', route.params.catalogId)
-      const startSessionResponse = await sessionService.startSession(
-        Number(route.params.courseId),
-        route.params.catalogId as string
-      )
-      questionData.value = startSessionResponse.data
-      console.log('QUESTION: ', questionData.value)
-      sessionService
-        .getCurrentQuestion(route.params.catalogId as string)
-        .then((res) => {
-          console.log('CURRENT QUESTION:', res)
-          if (res.data.catalog === 'over') {
-            catalogStatus.value = 'over'
-          } else {
-            catalogStatus.value = null
-          }
-          questionData.value = res.data
-        })
-        .catch((error) => console.error('Error fetching question:', error))
-    } else {
-      console.log('Active session found:', checkSessionResponse.data)
-      const currentQuestionResponse = await sessionService.getCurrentQuestion(
-        route.params.catalogId as string
-      )
-      questionData.value = currentQuestionResponse.data
-    }
+    console.log('get ongoing sessions response: ', checkSessionResponse)
+    console.log('Route Course ID: ', route.params.courseId)
+    console.log('Route Catalog ID: ', route.params.catalogId)
+    const startSessionResponse = await sessionService.startSession(
+      Number(route.params.courseId),
+      route.params.catalogId as string
+    )
+    questionData.value = startSessionResponse.data
+    console.log('START SESSION QUESTION: ', questionData.value)
+    sessionService
+      .getCurrentQuestion(route.params.catalogId as string)
+      .then((res) => {
+        console.log('CURRENT QUESTION:', res)
+        if (res.data.catalog === 'over') {
+          catalogStatus.value = 'over'
+        } else {
+          catalogStatus.value = null
+        }
+        questionData.value = res.data
+      })
+      .catch((error) => console.error('Error fetching question:', error))
   } catch (error) {
+    const currentQuestionResponse = await sessionService.getCurrentQuestion(
+      route.params.catalogId as string
+    )
+    questionData.value = currentQuestionResponse.data
+
     console.error('Error fetching data:', error)
     showErrorPage.value = true
   }

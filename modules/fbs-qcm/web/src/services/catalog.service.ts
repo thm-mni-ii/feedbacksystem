@@ -129,6 +129,13 @@ class CatalogService {
       }
     })
   }
+  getCatalogScore(ID: string): Promise<AxiosResponse<any>> {
+    return axios.get(`/api_v1/catalog_score/?ID=${ID}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
 }
 
 export default new CatalogService()

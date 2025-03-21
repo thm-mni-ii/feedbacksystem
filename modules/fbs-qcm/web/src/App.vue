@@ -3,8 +3,6 @@
     <v-app-bar app color="primary">
       <v-tabs class="d-flex justify-between">
         <v-tab @click="router.push('/')">Home</v-tab>
-        <v-tab @click="router.push('/Question')">Get Question</v-tab>
-        <v-tab @click="router.push('/deleteQuestion')">Delete Question</v-tab>
         <v-tab @click="router.push('/allQuestions')">All Questions</v-tab>
         <v-tab @click="router.push('/CourseOverview')">Edit Catalog</v-tab>
       </v-tabs>
