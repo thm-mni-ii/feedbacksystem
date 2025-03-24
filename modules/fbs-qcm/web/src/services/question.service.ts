@@ -43,9 +43,17 @@ class QuestionService {
     })
   }
   getAllTags(): Promise<AxiosResponse<String[]>> {
-    return axios.get('/api_v1/allTags', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-    })
+    return axios
+      .get('/api_v1/getAllTags', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+      })
+      .then((res) => {
+        console.log('all tags: ', res.data)
+        return res
+      })
+      .catch((err) => {
+        return err
+      })
   }
 }
 

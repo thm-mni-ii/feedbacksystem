@@ -45,13 +45,13 @@ class SessionService {
         throw err
       })
   }
-  checkOngoingSessions(): Promise<AxiosResponse<IcheckSession[]>> {
+  checkOngoingSession(): Promise<AxiosResponse<IcheckSession[]>> {
     return axios
-      .get('/api_v1/getOngoingSessions', {
+      .get('/api_v1/getOngoingSession', {
         headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
       })
       .then((res) => {
-        console.log('getOngoingSessions: ', res.data)
+        console.log('getOngoingSession: ', res.data)
         return res
       })
       .catch((err) => {
@@ -77,9 +77,9 @@ class SessionService {
         throw err
       })
   }
-  getCurrentQuestion(catalogId: string): Promise<AxiosResponse<any>> {
+  getCurrentQuestion(id: string): Promise<AxiosResponse<any>> {
     return axios
-      .get(`/api_v1/current_question/${catalogId}`, {
+      .get(`/api_v1/current_question/${id}`, {
         headers: { authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
       })
       .then((res) => {

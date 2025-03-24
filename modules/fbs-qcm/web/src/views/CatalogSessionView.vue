@@ -25,7 +25,7 @@ const scoreEmoji = computed(() => {
   if (currentQuestionScore.value < 0.6) return '🙂'
   return '😎'
 })
-
+const sessionId = ref<string>('')
 const catalog = ref<Catalog>({
   id: route.params.catalogId as string,
   course: route.params.courseId as string,
@@ -71,21 +71,19 @@ onMounted(async () => {
 
     const catalogResponse = await catalogService.getCatalog(catalogId)
     catalog.value.name = catalogResponse.data.name
+    const ongoingSession = await sessionService.checkOngoingSession()
 
-    const ongoingSessions = await sessionService.checkOngoingSessions()
-    const currentQuestion = await sessionService.getCurrentQuestion(catalogId)
-
-    if (ongoingSessions.data.length === 0 && currentQuestion.data.catalog !== 'over') {
+    if (ongoingSession.data.length === 0) {
       console.log('[onMounted] No active session found. Starting a new session.')
 
       const startSessionResponse = await sessionService.startSession(courseId, catalogId)
-      questionData.value = startSessionResponse.data
-      console.log('[onMounted] First Question:', questionData.value)
-    } else {
+      sessionId.value = startSessionResponse.data.sessionId
+      const currentQuestion = await sessionService.getCurrentQuestion(sessionId.value)
+      console.log('ongoingSession -->', ongoingSession)
+      console.log('currentQuestion -->', currentQuestion)
+      console.log('sessionID -->', sessionId.value)
       questionData.value = currentQuestion.data
-    }
-
-    if (currentQuestion.data.catalog === 'over') {
+    } else if (currentQuestion.data.catalog === 'over') {
       catalogStatus.value = 'over'
 
       const catalogScoreRes = await catalogService.getCatalogScore(courseId, catalogId)
@@ -103,6 +101,7 @@ onMounted(async () => {
       const currentQuestionResponse = await sessionService.getCurrentQuestion(
         route.params.catalogId as string
       )
+      console.log('current Question on mounted --> ', currentQuestionResponse.data)
       questionData.value = currentQuestionResponse.data
     } catch (fetchError) {
       console.error('[onMounted] FetchError:', fetchError)
@@ -141,7 +140,7 @@ onMounted(async () => {
         </div>
         <div v-if="catalogStatus == 'over' && !showFeedback">
           <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">Finished!🎉</h4>
-          <h3 class="text-blue-grey-darken-2">Total Score: {{ catalogScore }} %</h3>
+          <h3 class="text-blue-grey-darken-2">Total Score: {{ catalogScore * 100 }} %</h3>
           <v-btn
             variant="tonal"
             class="mx-auto my-8"

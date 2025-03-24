@@ -129,9 +129,9 @@ class CatalogService {
       }
     })
   }
-  getCatalogScore(courseId: number, catalogId: string): Promise<AxiosResponse<any>> {
+  getCatalogScore(sessionId: string): Promise<AxiosResponse<any>> {
     return axios
-      .get(`/api_v1/getCatalogScore/${courseId}/${catalogId}`, {
+      .get(`/api_v1/getCatalogScore/${sessionId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
         }

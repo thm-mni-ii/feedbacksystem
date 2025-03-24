@@ -1,39 +1,52 @@
 <script setup lang="ts">
-import { ref, onMounted, defineProps, defineEmits } from 'vue'
-import questionService from '../services/question.service.ts'
+import { ref, watch, defineProps, defineEmits, onMounted } from 'vue'
+import questionService from '@/services/question.service'
 
 const props = defineProps<{
   questiontags: string[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'updateTag', localTags: string[]): void
+  (e: 'update-tags', newTags: string[]): void
 }>()
 
-const items = ref(['SQL', 'Datenbanken'])
-const localTags = ref<any>(props.questiontags.values)
+const localTags = ref<string[]>([...props.questiontags])
+const items = ref<string[]>([])
 
-const updateTags = (newValue: string[]) => {
-  emit('updateTag', newValue)
-}
+watch(
+  () => props.questiontags,
+  (newTags) => {
+    if (JSON.stringify(localTags.value) !== JSON.stringify(newTags)) {
+      console.log('Props geändert:', newTags)
+      localTags.value = [...newTags]
+    }
+  },
+  { immediate: true }
+)
 
-const getTags = async () => {
-  try {
-    const res = await questionService.getAllTags()
-    items.value = res.data
-  } catch (err) {
-    console.log(err)
-  }
-}
+watch(
+  localTags,
+  (newTags) => {
+    if (JSON.stringify(props.questiontags) !== JSON.stringify(newTags)) {
+      console.log('Neue Tags werden emittiert:', newTags)
+      emit('update-tags', [...newTags])
+    }
+  },
+  { deep: true }
+)
 
-onMounted(() => {
-  console.log(props.questiontags)
-  getTags()
+onMounted(async () => {
+  questionService.getAllTags().then((res) => {
+    res.data.map((tag) => {
+      items.value.push(tag.tag)
+    })
+  })
 })
 </script>
 
 <template>
   <v-combobox
+    v-model="localTags"
     :items="items"
     label="Add Tags to your Question"
     prepend-icon="mdi-tag"
@@ -42,7 +55,6 @@ onMounted(() => {
     clearable
     closable-chips
     multiple
-    @update="updateTags"
   >
     <template #chip="{ chipProps, item }">
       <v-chip v-bind="chipProps">
