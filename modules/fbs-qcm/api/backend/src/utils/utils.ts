@@ -262,8 +262,6 @@ export async function getFirstQuestionInCatalog(
   const allQuestionsInCatalog = await questionInCatalogCollection
     .find(allQuestionsInCatalogQuery)
     .toArray();
-  console.log("All Question In Cataolg");
-  console.log(allQuestionsInCatalog);
   let usedQuestion: mongoDB.ObjectId[] = [];
   for (let i = 0; i < allQuestionsInCatalog.length; i++) {
     for (const key in allQuestionsInCatalog[i].children) {
@@ -273,8 +271,6 @@ export async function getFirstQuestionInCatalog(
       );
     }
   }
-  console.log("usedQuestion");
-  console.log(usedQuestion);
   const findFirstQuestion = {
     question: { $nin: usedQuestion },
     catalog: catalogIdObject,
@@ -282,8 +278,6 @@ export async function getFirstQuestionInCatalog(
   const firstQuestion = await questionInCatalogCollection.findOne(
     findFirstQuestion
   );
-  console.log("firstQuestion");
-  console.log(firstQuestion);
   if (firstQuestion == null || firstQuestion == undefined) {
     return -1;
   }
@@ -503,4 +497,14 @@ export async function numberOfQuestionsAhead(catalogId: string, questionId: stri
        counter++;
        currentId = question.children.TRUE;
     }
+}
+
+export async function getSessionInformation(sessionId: string) {
+  const database: mongoDB.Db = await connect();
+  const sessionCollection = database.collection("sessions");
+  const query = {
+    _id: new mongoDB.ObjectId(sessionId)
+  }
+  const session = sessionCollection.findOne(query);
+  return session;
 }

@@ -58,12 +58,12 @@ interface ChoiceReplyRow {
 export async function submitSessionAnswer(
   tokenData: JwtPayload,
   question: any,
-  answers: any
+  answers: any,
+  sessionId: any
 ) {
   const session = await getCurrentSession(tokenData.id);
-  console.log(session);
-  if (session == null || session == undefined) {
-    console.log("no Session found");
+  if(session._id !== sessionId) {
+    console.log("submission for differen Session");
     return -1;
   }
   const submitResult = await submit(tokenData, question, answers, session);
@@ -111,7 +111,6 @@ export async function submit(
     return -1;
   }
   const correct = await checkAnswer(answers, questionId, questionCollection);
-  console.log(timestamp);
   const submission = {
     user: tokenData.id,
     question: questionInCatalogId,
@@ -129,15 +128,11 @@ async function checkAnswer(
   questionId: mongoDB.ObjectId,
   questionCollection: mongoDB.Collection
 ) {
-  console.log(answer);
   const questionQuery = {
     _id: questionId,
   };
-  console.log("questionQuery");
-  console.log(questionQuery);
 
   const result: any = await questionCollection.findOne(questionQuery);
-  console.log(result);
   if (result === null) {
     return -1;
   }
@@ -150,11 +145,6 @@ async function checkAnswer(
 
 function checkSubmission(answer: any, question: Question) {
   const questionType = question.questiontype;
-  console.log("VIBE-CHECK");
-  console.log(answer);
-  console.log(questionType);
-  console.log(QuestionType.FillInTheBlanks);
-  console.log(QuestionType.Choice);
   if (questionType == QuestionType.Choice) {
     return checkChoice(answer, question);
   } else if (questionType == QuestionType.FillInTheBlanks) {
@@ -178,7 +168,6 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
   const configuration = question.questionconfiguration as Choice;
   const answerRows: number[][] = getSelectedIds(answer);
   let response: ChoiceReply = {} as ChoiceReply;
-  console.log(configuration);
   response.row = [];
   for (let i = 0; i < configuration.optionRows.length; i++) {
     const correctList = configuration.optionRows[i].correctAnswers;
@@ -189,7 +178,6 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
     replyRow.text = configuration.optionRows[i].text;
     replyRow.correct = result.inBothLists;
     response.row[i] = replyRow;
-    console.log(result);
     correctAnswers += result.inBothLists.length;
     falseAnswers += result.onlyInList1.length + result.onlyInList2.length;
     falsePositives += result.onlyInList2.length;
@@ -213,7 +201,6 @@ function getSelectedIds(answer: ChoiceAnswer[]) {
       result[answer[i].id][j] = answer[i].entries[j].id;
     }
   }
-  console.log(result);
   return result;
 }
 
@@ -262,7 +249,6 @@ function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
 function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
   let evaluation: FillInTheBlanksIndividual = {} as FillInTheBlanksIndividual;
   for (let k = 0; k < answer.length; k++) {
-    console.log(answer[k]);
     if (
       answer[k].text === blankFields.text &&
       answer[k].order === blankFields.order
@@ -304,7 +290,6 @@ async function findFirstFalseAnswerInSession(
     status: SessionStatus.ongoing,
   };
   const session = await sessionCollection.findOne(request);
-  console.log(session);
   if (session === null) {
     return -1;
   }
@@ -315,5 +300,4 @@ async function findFirstFalseAnswerInSession(
   const falseAnswers: any[] = await submissionCollection
     .find(falseSubmissionRequest)
     .toArray();
-  console.log(falseAnswers);
 }

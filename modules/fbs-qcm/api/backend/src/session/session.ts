@@ -3,7 +3,9 @@ import { getCurrentSession, getFirstQuestionInCatalog, getSessionStatusAsText, g
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
-import { SessionStatus } from "../utils/enum";
+import { CatalogAccess, SessionStatus } from "../utils/enum";
+import { authenticateInCatalog } from "../authenticate";
+import { checkIfOngoingSessionExist, getOngoingSession } from "./sessionUtils";
 
 interface Session {
     user: string,
@@ -15,18 +17,16 @@ interface Session {
     duration: number,
 }
 export async function postSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
-    const userCourses = getUserCourseRoles(tokenData);
-    console.log(userCourses);
-    if ( userCourses.length == 0) {
-        return -1;
-    }
-    const catalogObjectId = new mongoDB.ObjectId(catalogId)
-    if( await checkifSessionIsNotFinished(tokenData.id, catalogObjectId)) {
-        console.log("Session for that catalog already in progress");
+    if(!authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    const catalogObjectId = new mongoDB.ObjectId(catalogId)
+    if( await checkIfOngoingSessionExist(tokenData.id, sessionCollection)) {
+        console.log("Session is already ongoing");
+        return -2;
+    }
     const sessionEntry = {
         user: tokenData.id,
         time: new Date,
@@ -36,24 +36,11 @@ export async function postSession(tokenData: JwtPayload, catalogId: string, cour
         courseId: courseId,
         duration: 0
     }
-    await sessionCollection.insertOne(sessionEntry);
-    const question =  await getCurrentQuestion(tokenData, catalogId);
-    return question;
-}
-
-
-export async function getSessionQuestion(catalogId: string, tokenData: JwtPayload) {
-    const userCourses = getUserCourseRoles(tokenData);
-    if(userCourses.length === 0) {
-        return -1;
-    }
-    const database: mongoDB.Db = await connect();
-    const questionCollection: mongoDB.Collection = database.collection("question");
-    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-    const question = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
-    console.log(question);
-    console.log("HALLLLOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-    return question;
+    const result = await sessionCollection.insertOne(sessionEntry);
+    console.log(result)
+    return { 
+        sessionId: result.insertedId 
+    };
 }
 
 export async function pauseSingleSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
@@ -96,27 +83,30 @@ async function getLastSession(sessionCollection: mongoDB.Collection, catalogId: 
     }
     const sessionList = await sessionCollection.find(sessionQuery).sort({ time: -1 }).limit(1).toArray();
     const session = sessionList[0];
-    console.log(session);
     return session;
 }
 
-export async function endSingleSession(tokenData: JwtPayload, catalogId: string, courseId: number) {
+export async function endSingleSession(tokenData: JwtPayload, sessionId: string) {
     const userCourses = getStudentCourseRoles(tokenData);
     if(userCourses.length == 0) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
-    const session = await getLastSession(sessionCollection, catalogId, courseId, tokenData.id);
+    const session = await getOngoingSession(tokenData.id, sessionCollection)
+    if(session === null) {
+        return -1;
+    }
     if(session.status === SessionStatus.finished) {
+        return -1;
+    }
+    if(session.id !== sessionId) {
         return -1;
     }
     const finder = {
         _id: session._id
     };
     let duration = session.duration;
-    console.log("session.status");
-    console.log(session.status);
     if(session.status === SessionStatus.ongoing) {
         const currentTime = new Date;
         duration = currentTime.getTime() - session.time.getTime() + duration;    
@@ -128,7 +118,6 @@ export async function endSingleSession(tokenData: JwtPayload, catalogId: string,
             }
         }
         const result = await sessionCollection.updateOne(finder, update);
-        console.log(result);
     } else {
         const currentTime = new Date;
         const update = {
@@ -137,9 +126,7 @@ export async function endSingleSession(tokenData: JwtPayload, catalogId: string,
                 status: SessionStatus.finished
             }
         }
-        console.log(update);
         const result = await sessionCollection.updateOne(finder, update);
-        console.log(result);
     }
     return 1;
 }
@@ -155,20 +142,16 @@ export async function unpauseSingleSession(tokenData: JwtPayload, catalogId: str
     if(session.status !== SessionStatus.paused) {
         return -1;
     }
-    console.log(session);
     const filter = {
         _id: session._id
     };
-    console.log(filter);
     const update = {
         $set: {
             time: new Date,
             status: SessionStatus.ongoing
         }
     }
-    console.log(update)
     const result = await sessionCollection.updateOne(filter, update);
-    console.log(result);
     return result;
 }
 
@@ -178,12 +161,9 @@ async function checkIfSessionIsOngoing(user: number, catalogObjectId: mongoDB.Ob
         catalogId: catalogObjectId,
         courseId: courseObjectId
     }
-    console.log("query");
-    console.log(query);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
     const result = await sessionCollection.find(query).sort({ time: -1 }).limit(1).toArray();
-    console.log(result);
     if(result === null) {
         return false;
     }
@@ -199,12 +179,9 @@ async function checkifSessionIsNotPaused(user: number, catalogObjectId: mongoDB.
         catalogId: catalogObjectId,
         courseId: courseObjectId
     }
-    console.log("query");
-    console.log(query);
     const database: mongoDB.Db = await connect();
     const sessionCollection: mongoDB.Collection = database.collection("sessions");
     const result = await sessionCollection.find(query).sort({ time: -1 }).limit(1).toArray();
-    console.log(result);
     if(result === null) {
         return true;
     }
@@ -262,41 +239,12 @@ export async function getOpenSessions(user: number) {
     }
     return unfinishedSessions;
 }
-export async function getOngoingSessions(user: number) {
-    const query = {
-        user: user,
-    }
-    console.log(query);
-    const result = await getSessionData(query);
-    console.log(result);
-    let pausedOrFinishedSessions: any[] = [];
-    let ongoingSessions: any[] = [];
-    if(result === null) {
-        return 0;
-    }
-    for(let i = 0; i < result.length; i++) {
-       if(ongoingSessions.find(obj => obj.catalogId === result[i].catalogId && obj.courseId === result[i].courseId)) {
-           continue;
-       }
-       if(pausedOrFinishedSessions.find(obj => obj.catalogId === result[i].catalogId && obj.courseId === result[i].courseId)) {
-           continue;
-       }
-       const entry = await createSessionReturn(result[i]);
-       if(result[i].status === SessionStatus.finished  || result[i].status === SessionStatus.paused) {
-            pausedOrFinishedSessions.push(entry)
-       } else {
-            ongoingSessions.push(entry);
-       }
-    }
-    for(let j = 0; j < pausedOrFinishedSessions.length; j++) {
 
-    }
-    // nach Pause oder finish letztes Ongoing suchen und beenden
-    ongoingSessions = removeMatchingObjects(ongoingSessions, pausedOrFinishedSessions)
-    console.log("ongoingSessions");
-    console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHSSSSSSSSSSSSSSSSSSSS");
-    console.log(ongoingSessions);
-    return ongoingSessions;
+export async function getOnlyOngoingSession(user: number) {
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection = database.collection("sessions");
+    const ongoingSession = await getOngoingSession(user, sessionCollection);
+    return ongoingSession;
 }
 
 function removeMatchingObjects(arr1: any[], arr2: any[]) { 
@@ -338,8 +286,6 @@ async function getSessionData(query: any) {
 }
 
 async function createSessionReturn(session: any) {
-    console.log(session);
-    console.log(getSessionStatusAsText(session.status));
     const sessionReturn = {
         user: session.user,
         catalogId: session.catalogId,
@@ -348,7 +294,6 @@ async function createSessionReturn(session: any) {
         score: session.score,
         time: session.duration
     }
-    console.log(sessionReturn);
     return sessionReturn;
 }
 

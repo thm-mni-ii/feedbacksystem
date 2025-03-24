@@ -8,9 +8,10 @@ const submission = ( async (req: Request, res: Response) => {
       if (req.user !== undefined) {
         const requestData = req.body;
         console.log(requestData);
-        const question = requestData.question;
+        const questionId = requestData.questionId;
         const answers = requestData.answers;
-        const response = await submitSessionAnswer(req.user, question, answers);
+        const sessionId = requestData.sessionId;
+        const response = await submitSessionAnswer(req.user, questionId, answers, sessionId);
         console.log(response);
         if (response == -1) {
           res.sendStatus(403);

@@ -13,6 +13,7 @@ import {
   IsOwner,
   getStudentCourseRoles,
   numberOfQuestionsAhead,
+  getSessionInformation,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
 import {
@@ -269,8 +270,24 @@ export async function getAllQuestions(tokenData: JwtPayload) {
 
 export async function getCurrentQuestion(
   tokenData: JwtPayload,
-  catalogId: string
+  sessionId: string
 ) {
+  const database: mongoDB.Db = await connect();
+  const questionCollection: mongoDB.Collection =
+    database.collection("question");
+  const submissionCollection: mongoDB.Collection =
+    database.collection("submission");
+  const questionInCatalogCollection: mongoDB.Collection =
+    database.collection("questionInCatalog");
+  const session = await getSessionInformation(sessionId);
+  console.log(session);
+  if(session === null) {
+    return -1;
+  }
+  if(session.status !== SessionStatus.ongoing) {
+    return -2;
+  }
+  const catalogId = session.catalogId;
   if (
     !(await authenticateInCatalog(
       tokenData,
@@ -280,18 +297,11 @@ export async function getCurrentQuestion(
   ) {
     return -1;
   }
-  const database: mongoDB.Db = await connect();
-  const questionCollection: mongoDB.Collection =
-    database.collection("question");
-  const submissionCollection: mongoDB.Collection =
-    database.collection("submission");
-  const questionInCatalogCollection: mongoDB.Collection =
-    database.collection("questionInCatalog");
   let newQuestionInCatalogId: any = await getQuestionId(
     tokenData,
     submissionCollection,
-    catalogId,
-    questionInCatalogCollection
+    questionInCatalogCollection,
+    sessionId
   );
   let newQuestion: any = {};
   if (newQuestionInCatalogId === -1) {
@@ -332,21 +342,13 @@ export async function getCurrentQuestion(
 async function getQuestionId(
   tokenData: JwtPayload,
   submissionCollection: mongoDB.Collection,
-  catalogId: string,
-  questionInCatalogCollection: mongoDB.Collection
+  questionInCatalogCollection: mongoDB.Collection,
+  session: any // Session objekt erstellen
 ) {
-  const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
-  const catalogQuery = { catalog: catalogIdObject };
-  const catalog: any = await questionInCatalogCollection
-    .find(catalogQuery)
-    .toArray();
-  const questions: mongoDB.ObjectId[] = catalog.map(
-    (entry: any) => entry.question
-  );
-  //needs fix to authenticate with session
-  // all questions in catalog
-  // or through sessionid
-  const query = { user: tokenData.id };
+  const query = { 
+    user: tokenData.id,
+    session: session._id
+  };
   const lastSubmission: any = await submissionCollection
     .find(query)
     .sort({ timeStamp: -1 })

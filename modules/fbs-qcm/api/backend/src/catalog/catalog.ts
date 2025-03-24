@@ -18,7 +18,7 @@ import {
   authenticateInCatalog,
   authenticateInCourse,
 } from "../authenticate";
-import { Access, CatalogAccess, CourseAccess } from "../utils/enum";
+import { Access, CatalogAccess, CourseAccess, SessionStatus } from "../utils/enum";
 
 interface QuestionData {
   questionId: mongoDB.ObjectId;
@@ -73,7 +73,6 @@ export async function createSingleCatalog(
     return -1;
   }
   const couresExist = courses.some((obj: any) => obj.id === course);
-  console.log(couresExist);
   if (!couresExist) {
     return -1;
   }
@@ -86,7 +85,6 @@ export async function createSingleCatalog(
     catalog: catalogInsert.insertedId,
     requirements: data.requirements,
   };
-  console.log(catalogInCourse);
   const catalogInCourseInsert =
     catalogInCourseCollection.insertOne(catalogInCourse);
   return { catalogId: catalogInsert.insertedId };
@@ -97,18 +95,12 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
     //need to add verification specifically for questioninCatalogId
     return -1;
   } 
-  console.log(catalogId);
-  console.log(questionId);
   const database: mongoDB.Db = await connect();
   if(questionId === "") {
     return -1;
   }
-  console.log(catalogId);
-  console.log(questionId);
   const questionCollection: mongoDB.Collection = database.collection("question");
   const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
-  console.log(catalogId);
-  console.log(questionId);
   if(questionId === "open") {
     const question = await getFirstQuestionInCatalog(
       questionCollection,
@@ -119,10 +111,9 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
     console.log(`start question is: ${questionId}`);
   }
   if(questionId === undefined || questionId === null ||questionId === "") {
-    console.log("so we return here");
+    console.log("no Question in Catalog");
     return {isEmpty: true};
   }
-  console.log(1);
   const query = {
       _id: new mongoDB.ObjectId(questionId)
   }
@@ -130,17 +121,11 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   if(data === null) {
       return -1;
   }
-  console.log(2);
   const children: QuestionData[] = [];
-  console.log(data);
-  console.log(data.children.length);
   for (let i = 0; i < data.children.length; i++) {
-      console.log("DATEN");
-      console.log(data.children[i]);
       const queryQuestion = {
           _id: data.children[i].question
       }
-      console.log(queryQuestion);
       const question = await questionInCatalogCollection.findOne(queryQuestion);
       if(question === null) {
           continue;
@@ -149,7 +134,6 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
         _id: question.question
       }
       const questionData = await questionCollection.findOne(queryForQuestionData);
-      console.log(questionData);
       if(questionData === null) {
           continue;
       }
@@ -160,10 +144,7 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
           score: data.children[i].needed_score,
       }
       children.push(obj);
-      console.log("children");
-      console.log(children);
   }
-  console.log(4);
   const originQueryQuestion = {
       _id: data.question
   }
@@ -171,7 +152,6 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   if(originQuestion === null) {
       return -1;
   }
-  console.log(5);
   const res = {
       _id: questionId,
       questionText: originQuestion.questiontext,
@@ -228,9 +208,7 @@ export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
   const request = {
     course: Number(courseId),
   };
-  console.log(request);
   const courseResult = await catalogInCourseCollection.find(request).toArray();
-  console.log(courseResult);
   if (courseResult.length === 0) {
     console.log("no catalogs found");
     return -1;
@@ -346,19 +324,27 @@ export async function getUser(tokenData: JwtPayload) {
 
 export async function getCatalogScore(
   tokenData: JwtPayload,
-  catalogId: string
+  sessionId: string
 ) {
   const database: mongoDB.Db = await connect();
-  const userCollection: mongoDB.Collection = database.collection("user");
+  const sessionCollection: mongoDB.Collection = database.collection("session");
   const query = {
-    id: tokenData.id,
-    [`catalogscores.${catalogId}`]: { $exists: true },
-  };
-  const res: any = await userCollection.findOne(query);
-  const score = {
-    score: res.catalogscores[catalogId],
-  };
-  return score;
+    _id: new mongoDB.ObjectId(sessionId)
+  }
+  const session = await sessionCollection.findOne(query);
+  if(session === null) {
+    console.log("Session does not exist");
+    return -3;
+  }
+  if(session.user !== tokenData.id) {
+    console.log("Not the user the session belongs to");
+    return -2;
+  }
+  if(session.status !== SessionStatus.finished) {
+    console.log("Session is not finished");
+    return -1;
+  }
+  return session.score;
 }
 
 export async function getQuestionTree(
@@ -490,12 +476,9 @@ export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalo
    if(!authenticateInCatalog(tokenData, CatalogAccess.tutorInCatalog, catalogId)) {
        return -1;
    }
-  console.log(catalogId);
-  console.log(questionId);
   const database: mongoDB.Db = await connect();
   const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
   const questionCollection: mongoDB.Collection = database.collection("question");
-  console.log("SSS");
   const query = {
     catalog: new mongoDB.ObjectId(catalogId),
     children: {
@@ -504,36 +487,25 @@ export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalo
         }
     } 
   };
-  console.log("S221SS");
-  console.log(query);
   const data = await questionInCatalogCollection.findOne(query);
-  console.log(data);
   if(data === null) {
       return {questionInCatalogId: null}
   } 
-  console.log(1);
   const questionQuery = {
       _id: data.question
   };
-  console.log(2);
   const prevQuestion = await questionCollection.findOne(questionQuery); 
   if(prevQuestion === null) {
       return -1;
   }
-  console.log(3);
   const dataObject = {
       questionInCatalogId: data._id,
       text: prevQuestion.questiontext,
   }
-  console.log(4);
-  console.log(dataObject);
   return dataObject;
 } 
 
 export async function addNewChildrenToQuestion(tokenData: JwtPayload, questionId: string, children: string, key: number, transition: string) {
-    console.log(questionId);
-    console.log(children);
-    console.log(key);
     const database: mongoDB.Db = await connect();
     const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
@@ -564,16 +536,12 @@ export async function emptyCatalogInformation(tokenData: JwtPayload, catalogId: 
     if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
         return -1;                                               
     }
-    console.log(catalogId);
     const query = {
         catalog: new mongoDB.ObjectId(catalogId)
     }
-    console.log(query);
     const database: mongoDB.Db = await connect();
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const data = await questionInCatalogCollection.findOne(query);
-    console.log("question in Catalog");
-    console.log(data);
     if(data === null) {
         return 0;
     }
@@ -591,10 +559,8 @@ export async function catalogScore(tokenData: JwtPayload, courseId: number, cata
     const query = {
         session: session._id
     }
-    console.log(query);
     const submissionCollection = database.collection("submission");
     const submissions = await submissionCollection.find(query).toArray();
-    console.log(submissions);
     if(submissions.length === 0) {
         console.log("no submissions yet");
         return -1;
