@@ -13,11 +13,11 @@ export async function getAllTags(tokenData: JwtPayload) {
     const questionCollection: mongoDB.Collection = database.collection("question");
     const data = await questionCollection.aggregate([
         // Zerlege das Array questionTags in einzelne Dokumente
-        { $unwind: "$questionTags" },
+        { $unwind: "$questiontags" },
         
         // Gruppiere nach den Tags und zähle sie
         { $group: { 
-            _id: "$questionTags", 
+            _id: "$questiontags", 
             count: { $sum: 1 } 
           } 
         },
