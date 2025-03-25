@@ -40,7 +40,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.highlightCode(); /
+    this.highlightCode();
   }
 
   // Umschalten des Editors (Text-Editor vs. Code-Editor)
