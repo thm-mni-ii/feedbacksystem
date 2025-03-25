@@ -343,7 +343,7 @@ async function getQuestionId(
   tokenData: JwtPayload,
   submissionCollection: mongoDB.Collection,
   questionInCatalogCollection: mongoDB.Collection,
-  session: any // Session objekt erstellen
+  session: any 
 ) {
   const query = { 
     user: tokenData.id,
