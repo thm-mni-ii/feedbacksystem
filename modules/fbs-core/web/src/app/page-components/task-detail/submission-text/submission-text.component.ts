@@ -29,8 +29,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   };
 
   constructor() {
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/pdfjs/pdf.worker.min.js';
   }
 
   ngOnInit() {
