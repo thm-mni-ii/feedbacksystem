@@ -62,7 +62,9 @@ export async function submitSessionAnswer(
   sessionId: any
 ) {
   const session = await getCurrentSession(tokenData.id);
-  if(session._id !== sessionId) {
+  if (session._id.toString() !== sessionId) {
+    console.log(session._id);
+    console.log(sessionId);
     console.log("submission for differen Session");
     return -1;
   }

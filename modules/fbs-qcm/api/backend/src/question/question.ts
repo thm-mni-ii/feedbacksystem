@@ -204,8 +204,8 @@ export async function postSingleQuestion(
   delete questionInsertion.id;
   delete questionInsertion._id;
   questionInsertion.owner = tokenData.id;
-  questionInsertion.createdAt = new Date; 
-  questionInsertion.lastEdited = new Date; 
+  questionInsertion.createdAt = new Date();
+  questionInsertion.lastEdited = new Date();
   const result = await questionCollection.insertOne(questionInsertion);
   return { id: result.insertedId };
 }
@@ -232,7 +232,7 @@ export async function editSingleQuestion(
   };
   const questionWithoutId: any = question;
   delete questionWithoutId._id;
-  questionWithoutId.lastEdited = new Date;
+  questionWithoutId.lastEdited = new Date();
   const res = await questionCollection.replaceOne(filter, questionWithoutId);
   return res;
 }
@@ -281,10 +281,10 @@ export async function getCurrentQuestion(
     database.collection("questionInCatalog");
   const session = await getSessionInformation(sessionId);
   console.log(session);
-  if(session === null) {
+  if (session === null) {
     return -1;
   }
-  if(session.status !== SessionStatus.ongoing) {
+  if (session.status !== SessionStatus.ongoing) {
     return -2;
   }
   const catalogId = session.catalogId;
@@ -301,7 +301,7 @@ export async function getCurrentQuestion(
     tokenData,
     submissionCollection,
     questionInCatalogCollection,
-    sessionId
+    session
   );
   let newQuestion: any = {};
   if (newQuestionInCatalogId === -1) {
@@ -345,10 +345,11 @@ async function getQuestionId(
   questionInCatalogCollection: mongoDB.Collection,
   session: any // Session objekt erstellen
 ) {
-  const query = { 
+  const query = {
     user: tokenData.id,
-    session: session._id
+    session: session._id,
   };
+  console.log(query);
   const lastSubmission: any = await submissionCollection
     .find(query)
     .sort({ timeStamp: -1 })
