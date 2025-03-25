@@ -1,6 +1,27 @@
-.resetExternalInfo {
-  display: block;
-  color: gray;
-  font-style: italic;
-  cursor: pointer;
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-popup {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.angular-editor-toolbar button i {
+  color: black !important;  // Ändere die Farbe der Symbole auf schwarz
 }
