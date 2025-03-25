@@ -19,6 +19,41 @@
         </div>
         
         <div class="form-group">
+          <label>Nach Tags filtern</label>
+          <div class="tags-container">
+            <div v-if="isLoadingTags" class="loading-tags">Tags werden geladen...</div>
+            <div v-else-if="tags.length === 0" class="no-tags">Keine Tags verfügbar</div>
+            <div v-else class="tag-list">
+              <button
+                v-for="tag in tags"
+                :key="tag.tag"
+                class="tag-button"
+                :class="{ 'tag-selected': selectedTags.includes(tag.tag) }"
+                @click="toggleTag(tag.tag)"
+              >
+                {{ tag.tag }} ({{ tag.count }})
+              </button>
+            </div>
+          </div>
+          <div v-if="selectedTags.length > 0" class="selected-tags-info">
+            <div class="selected-tags-label">Ausgewählte Tags:</div>
+            <div class="selected-tags-list">
+              <span 
+                v-for="tag in selectedTags" 
+                :key="tag" 
+                class="selected-tag"
+              >
+                {{ tag }}
+                <button class="remove-tag-button" @click="removeTag(tag)">×</button>
+              </span>
+            </div>
+            <button v-if="selectedTags.length > 0" class="clear-tags-button" @click="clearTags">
+              Alle Tags zurücksetzen
+            </button>
+          </div>
+        </div>
+        
+        <div class="form-group">
           <label>Zu welcher Frage möchten Sie weiterleiten?</label>
           <div class="datatable-container">
             <table class="datatable">
@@ -85,12 +120,19 @@
 </template>
     
 <script lang="ts">
-  import { defineComponent, ref, watch, computed } from 'vue';
+  import { defineComponent, ref, watch, computed, onMounted } from 'vue';
+  import questionService from '@/services/question.service'; // Stelle sicher, dass dieser Import korrekt ist
 
   interface QuestionOption {
     _id: string;
     questiontext: string;
+    tags?: string[];
     [key: string]: any;
+  }
+
+  interface TagItem {
+    tag: string;
+    count: number;
   }
 
   export default defineComponent({
@@ -124,18 +166,71 @@
       const nodeData = ref(props.initialNodeData);
       const transitionValue = ref(props.transition);
       const searchQuery = ref('');
+      const tags = ref<TagItem[]>([]);
+      const selectedTags = ref<string[]>([]);
+      const isLoadingTags = ref(true);
 
-      // Filter questions based on search query
+      // Hole Tags beim Laden der Komponente
+      const fetchTags = async () => {
+        try {
+          isLoadingTags.value = true;
+          const tagData = await questionService.getAllTags();
+          tags.value = tagData.data;
+        } catch (error) {
+          console.error('Fehler beim Laden der Tags:', error);
+        } finally {
+          isLoadingTags.value = false;
+        }
+      };
+
+      onMounted(() => {
+        fetchTags();
+      });
+
+      watch(() => props.show, (newValue) => {
+        if (newValue) {
+          fetchTags();
+        }
+      });
+
       const filteredQuestions = computed(() => {
-        if (!searchQuery.value) {
-          return props.questionOptions;
+        let filtered = props.questionOptions;
+        
+        if (searchQuery.value) {
+          const query = searchQuery.value.toLowerCase();
+          filtered = filtered.filter(question => 
+            question.questiontext.toLowerCase().includes(query)
+          );
         }
         
-        const query = searchQuery.value.toLowerCase();
-        return props.questionOptions.filter(question => 
-          question.questiontext.toLowerCase().includes(query)
-        );
+        if (selectedTags.value.length > 0) {
+          filtered = filtered.filter(question => {
+            if (!question.questiontags || !Array.isArray(question.questiontags)) {
+              return false;
+            }
+            
+            return selectedTags.value.some(tag => question.questiontags!.includes(tag));
+          });
+        }
+        
+        return filtered;
       });
+
+      const toggleTag = (tag: string) => {
+        if (selectedTags.value.includes(tag)) {
+          removeTag(tag);
+        } else {
+          selectedTags.value.push(tag);
+        }
+      };
+
+      const removeTag = (tag: string) => {
+        selectedTags.value = selectedTags.value.filter(t => t !== tag);
+      };
+
+      const clearTags = () => {
+        selectedTags.value = [];
+      };
 
       const selectQuestion = (id: string) => {
         selectedQuestion.value = id;
@@ -158,6 +253,7 @@
           nodeData.value = props.initialNodeData;
           transitionValue.value = props.transition;
           searchQuery.value = '';
+          selectedTags.value = [];
         }
       });
 
@@ -166,7 +262,13 @@
         nodeData,
         transitionValue,
         searchQuery,
+        tags,
+        selectedTags,
+        isLoadingTags,
         filteredQuestions,
+        toggleTag,
+        removeTag,
+        clearTags,
         selectQuestion,
         cancel,
         confirm
@@ -241,6 +343,101 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+  }
+
+  /* Tag Styling */
+  .tags-container {
+    margin-top: 8px;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  .loading-tags, .no-tags {
+    padding: 10px;
+    color: #666;
+    text-align: center;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag-button {
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tag-button:hover {
+    background-color: #e6e6e6;
+  }
+
+  .tag-selected {
+    background-color: #3498db;
+    color: white;
+    border-color: #2980b9;
+  }
+
+  .selected-tags-info {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #ebf5fb;
+    border-radius: 4px;
+  }
+
+  .selected-tags-label {
+    font-weight: 500;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+
+  .selected-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .selected-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #3498db;
+    color: white;
+    border-radius: 16px;
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+
+  .remove-tag-button {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .clear-tags-button {
+    background: none;
+    border: none;
+    color: #2980b9;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: underline;
+    padding: 0;
   }
 
   .datatable-container {
