@@ -57,7 +57,7 @@ interface ChoiceReplyRow {
 
 export async function submitSessionAnswer(
   tokenData: JwtPayload,
-  question: any,
+  question: string,
   answers: any,
   sessionId: any
 ) {
@@ -74,7 +74,7 @@ export async function submitSessionAnswer(
 
 export async function submit(
   tokenData: JwtPayload,
-  question: any,
+  question: string,
   answers: any,
   session: any
 ) {

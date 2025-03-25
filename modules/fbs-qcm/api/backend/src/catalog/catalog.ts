@@ -19,6 +19,7 @@ import {
   authenticateInCourse,
 } from "../authenticate";
 import { Access, CatalogAccess, CourseAccess, SessionStatus } from "../utils/enum";
+import { timeStamp } from "console";
 
 interface QuestionData {
   questionId: mongoDB.ObjectId;
@@ -345,6 +346,25 @@ export async function getCatalogScore(
     return -1;
   }
   return session.score;
+}
+
+async function getQuestionReport(sessionId: string, submissionCollection: mongoDB.Collection) {
+  const query = {
+    session: new mongoDB.ObjectId(sessionId)
+  };
+  const sort = {
+    timeStamp: 1
+  };
+  const questionReport = [];
+  const submissions = submissionCollection.find(query).sort(sort).toArray();
+  for(let submission in submissions) {
+    const questionObject = {
+    }
+  }
+}
+
+async function getDetailedSingleQuestionReport() {
+
 }
 
 export async function getQuestionTree(

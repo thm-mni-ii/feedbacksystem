@@ -242,7 +242,7 @@ export async function getAllQuestions(tokenData: JwtPayload) {
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection =
       database.collection("question");
-    const allQuestion = await questionCollection.find().toArray();
+    const allQuestion = await questionCollection.find().sort({ lastEdited: -1 }).toArray();
     return allQuestion;
   }
   const adminCourses = getAdminCourseRoles(tokenData);
@@ -343,7 +343,7 @@ async function getQuestionId(
   tokenData: JwtPayload,
   submissionCollection: mongoDB.Collection,
   questionInCatalogCollection: mongoDB.Collection,
-  session: any // Session objekt erstellen
+  session: any 
 ) {
   const query = {
     user: tokenData.id,

@@ -82,6 +82,8 @@ async function createDatabaseAndCollection() {
           },
         ],
       },
+      lastEdited: new Date,
+      createdAt: new Date,
     });
     await questionCollection.insertOne({
       owner: 1,
@@ -112,6 +114,8 @@ async function createDatabaseAndCollection() {
           },
         ],
       },
+      lastEdited: new Date,
+      createdAt: new Date,
     });
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
@@ -139,6 +143,8 @@ async function createDatabaseAndCollection() {
           },
         ],
       },
+      lastEdited: new Date,
+      createdAt: new Date,
     });
     await questionCollection.insertOne({
       owner: 1,
@@ -165,6 +171,8 @@ async function createDatabaseAndCollection() {
           },
         ],
       },
+      lastEdited: new Date,
+      createdAt: new Date,
     });
 
     await questionCollection.insertOne({
@@ -192,6 +200,8 @@ async function createDatabaseAndCollection() {
           },
         ],
       },
+      lastEdited: new Date,
+      createdAt: new Date,
     });
     await questionCollection.insertOne({
       _id: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
@@ -219,6 +229,8 @@ async function createDatabaseAndCollection() {
           },
         ],
       },
+      lastEdited: new Date,
+      createdAt: new Date,
     });
     await catalogCollection.insertOne({
       _id: new mongoDB.ObjectId("663a51d228d8781d96050905"),
