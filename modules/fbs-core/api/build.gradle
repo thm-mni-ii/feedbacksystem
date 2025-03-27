@@ -80,6 +80,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.23.0'
     implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.2'
     implementation group: 'org.hashids', name: 'hashids', version: '1.0.3'
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
 }
 
 jacoco {

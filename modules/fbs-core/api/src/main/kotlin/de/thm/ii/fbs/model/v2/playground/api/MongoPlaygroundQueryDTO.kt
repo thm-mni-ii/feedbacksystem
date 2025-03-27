@@ -1,10 +1,13 @@
 package de.thm.ii.fbs.model.v2.playground.api
 
+import org.bson.Document
+
 data class MongoPlaygroundQueryDTO(
     val operation: String,
     val collection: String,
-    val document: Map<String, Any>? = null,
-    val criteria: Map<String, Any>? = null,
-    val update: Map<String, Any>? = null,
-    val pipeline: List<Map<String, Any>>? = null
+    val document: Document? = null,
+    val criteria: Document? = null,
+    val update: Document? = null,
+    val projection: Document? = null,
+    val pipeline: List<Document>? = null
 )

@@ -15,6 +15,7 @@ import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
+import org.bson.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
@@ -26,17 +27,11 @@ import kotlin.jvm.optionals.getOrNull
 @RequestMapping(path = ["/api/v2/playground/{uid}/databases"])
 class PlaygroundController(
     private val userRepository: UserRepository,
-
     private val databaseRepository: SqlPlaygroundDatabaseRepository,
-
     private val entityRepository: SqlPlaygroundEntityRepository,
-
     private val queryRepository: SqlPlaygroundQueryRepository,
-
     private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
-
     private val groupRepository: GroupRepository,
-
     private val mongoPlaygroundService: MongoPlaygroundService
 ) {
     @GetMapping
@@ -105,25 +100,50 @@ class PlaygroundController(
         @RequestBody mongoQuery: MongoPlaygroundQueryDTO
     ): Any? {
         val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, dbId)
+        val criteria = mongoQuery.criteria ?: Document()
 
-        val criteria = mongoQuery.criteria?.entries
-            ?.fold(Criteria()) { crit, (key, value) -> crit.and(key).`is`(value) }
-            ?: Criteria()
+        val up = Update().apply {
+            mongoQuery.update?.forEach { (key, value) ->
+                set(key, value)
+            }
+        }
 
-        val update = mongoQuery.update?.entries
-            ?.fold(Update()) { update, (key, value) -> update.set(key, value) }
-            ?: Update()
-
-        val query = Query(criteria)
-
+        val query = Query(Criteria().apply {
+            criteria.forEach { (key, value) -> this.and(key).`is`(value) }
+        })
 
         return when (mongoQuery.operation) {
-            "insert" -> mongoTemplate.insert(mongoQuery.document, mongoQuery.collection)
+            "insert" -> {
+                mongoQuery.document ?: throw IllegalArgumentException("Document cannot be null for insert operation")
+                mongoTemplate.insert(mongoQuery.document, mongoQuery.collection)
+            }
 
-            "update" -> mongoTemplate.updateFirst(query, update, mongoQuery.collection)
+            "find" -> {
+                if (mongoQuery.projection != null) {
+                    val queryWithProjection = Query(Criteria().apply {
+                        criteria.forEach { (key, value) -> this.and(key).`is`(value) }
+                    })
 
-            "find" -> mongoTemplate.find(query, Map::class.java, mongoQuery.collection)
+                    queryWithProjection.fields().apply {
+                        mongoQuery.projection.forEach { (key, value) ->
+                            if (value == 1 || value == true) include(key)
+                            if (value == 0 || value == false) exclude(key)
+                        }
+                    }
+                    mongoTemplate.find(queryWithProjection, Document::class.java, mongoQuery.collection)
+                } else mongoTemplate.find(query, Document::class.java, mongoQuery.collection)
+            }
 
+            "aggregate" -> {
+                val pipe = mongoQuery.pipeline
+                    ?: throw UnsupportedOperationException("Pipeline is required for aggregate operation")
+
+                mongoTemplate.db.getCollection(mongoQuery.collection)
+                    .aggregate(pipe)
+                    .toList()
+            }
+
+            "update" -> mongoTemplate.updateFirst(query, up, mongoQuery.collection)
             "delete" -> mongoTemplate.remove(query, mongoQuery.collection)
 
             else -> throw UnsupportedOperationException("Operation ${mongoQuery.operation} is not supported")
