@@ -119,162 +119,150 @@
   </div>
 </template>
     
-<script lang="ts">
-  import { defineComponent, ref, watch, computed, onMounted } from 'vue';
-  import questionService from '@/services/question.service'; // Stelle sicher, dass dieser Import korrekt ist
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue';
+import questionService from '@/services/question.service';
 
-  interface QuestionOption {
-    _id: string;
-    questiontext: string;
-    tags?: string[];
-    [key: string]: any;
+interface QuestionOption {
+  _id: string;
+  questiontext: string;
+  questiontags?: string[];
+  [key: string]: any;
+}
+
+interface TagItem {
+  tag: string;
+  count: number;
+}
+
+// Props definition
+const props = defineProps({
+  show: {
+    type: Boolean,
+    default: false
+  },
+  showInput: {
+    type: Boolean,
+    default: true
+  },
+  questionOptions: {
+    type: Array as () => QuestionOption[],
+    required: true,
+    default: () => []
+  },
+  initialNodeData: {
+    type: [String, Number],
+    default: 0
+  },
+  transition: {
+    type: String,
+    default: "correct"
   }
+});
 
-  interface TagItem {
-    tag: string;
-    count: number;
+// Emits definition
+const emit = defineEmits(['cancel', 'confirm']);
+
+// Reactive state
+const selectedQuestion = ref('');
+const nodeData = ref(props.initialNodeData);
+const transitionValue = ref(props.transition);
+const searchQuery = ref('');
+const tags = ref<TagItem[]>([]);
+const selectedTags = ref<string[]>([]);
+const isLoadingTags = ref(true);
+
+// Fetch tags method
+const fetchTags = async () => {
+  try {
+    isLoadingTags.value = true;
+    const tagData = await questionService.getAllTags();
+    tags.value = tagData.data;
+  } catch (error) {
+    console.error('Fehler beim Laden der Tags:', error);
+  } finally {
+    isLoadingTags.value = false;
   }
+};
 
-  export default defineComponent({
-    name: 'QuestionFindModal',
-    props: {
-      show: {
-        type: Boolean,
-        default: false
-      },
-      showInput: {
-        type: Boolean,
-        default: true
-      },
-      questionOptions: {
-        type: Array as () => QuestionOption[],
-        required: true,
-        default: () => []
-      },
-      initialNodeData: {
-        type: [String, Number],
-        default: 0
-      },
-      transition: {
-        type: String,
-        default: "correct"
+// Fetch tags on mount
+onMounted(() => {
+  fetchTags();
+});
+
+// Watch for show prop changes to fetch tags
+watch(() => props.show, (newValue) => {
+  if (newValue) {
+    fetchTags();
+  }
+});
+
+// Computed filtered questions
+const filteredQuestions = computed(() => {
+  let filtered = props.questionOptions;
+  
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(question => 
+      question.questiontext.toLowerCase().includes(query)
+    );
+  }
+  
+  if (selectedTags.value.length > 0) {
+    filtered = filtered.filter(question => {
+      if (!question.questiontags || !Array.isArray(question.questiontags)) {
+        return false;
       }
-    },
-    emits: ['cancel', 'confirm'],
-    setup(props, { emit }) {
-      const selectedQuestion = ref('');
-      const nodeData = ref(props.initialNodeData);
-      const transitionValue = ref(props.transition);
-      const searchQuery = ref('');
-      const tags = ref<TagItem[]>([]);
-      const selectedTags = ref<string[]>([]);
-      const isLoadingTags = ref(true);
+      
+      return selectedTags.value.some(tag => question.questiontags!.includes(tag));
+    });
+  }
+  
+  return filtered;
+});
 
-      // Hole Tags beim Laden der Komponente
-      const fetchTags = async () => {
-        try {
-          isLoadingTags.value = true;
-          const tagData = await questionService.getAllTags();
-          tags.value = tagData.data;
-        } catch (error) {
-          console.error('Fehler beim Laden der Tags:', error);
-        } finally {
-          isLoadingTags.value = false;
-        }
-      };
+// Tag management methods
+const toggleTag = (tag: string) => {
+  if (selectedTags.value.includes(tag)) {
+    removeTag(tag);
+  } else {
+    selectedTags.value.push(tag);
+  }
+};
 
-      onMounted(() => {
-        fetchTags();
-      });
+const removeTag = (tag: string) => {
+  selectedTags.value = selectedTags.value.filter(t => t !== tag);
+};
 
-      watch(() => props.show, (newValue) => {
-        if (newValue) {
-          fetchTags();
-        }
-      });
+const clearTags = () => {
+  selectedTags.value = [];
+};
 
-      const filteredQuestions = computed(() => {
-        let filtered = props.questionOptions;
-        
-        if (searchQuery.value) {
-          const query = searchQuery.value.toLowerCase();
-          filtered = filtered.filter(question => 
-            question.questiontext.toLowerCase().includes(query)
-          );
-        }
-        
-        if (selectedTags.value.length > 0) {
-          filtered = filtered.filter(question => {
-            if (!question.questiontags || !Array.isArray(question.questiontags)) {
-              return false;
-            }
-            
-            return selectedTags.value.some(tag => question.questiontags!.includes(tag));
-          });
-        }
-        
-        return filtered;
-      });
+const selectQuestion = (id: string) => {
+  selectedQuestion.value = id;
+};
 
-      const toggleTag = (tag: string) => {
-        if (selectedTags.value.includes(tag)) {
-          removeTag(tag);
-        } else {
-          selectedTags.value.push(tag);
-        }
-      };
+// Modal actions
+const cancel = () => {
+  emit('cancel');
+};
 
-      const removeTag = (tag: string) => {
-        selectedTags.value = selectedTags.value.filter(t => t !== tag);
-      };
+const confirm = () => {
+  if (selectedQuestion.value) {
+    emit('confirm', nodeData.value, selectedQuestion.value, transitionValue.value);
+  }
+};
 
-      const clearTags = () => {
-        selectedTags.value = [];
-      };
-
-      const selectQuestion = (id: string) => {
-        selectedQuestion.value = id;
-      };
-
-      const cancel = () => {
-        emit('cancel');
-      };
-
-      const confirm = () => {
-        if (selectedQuestion.value) {
-          emit('confirm', nodeData.value, selectedQuestion.value, transitionValue.value);
-        }
-      };
-
-      // Reset form when modal is shown
-      watch(() => props.show, (newValue) => {
-        if (newValue) {
-          selectedQuestion.value = '';
-          nodeData.value = props.initialNodeData;
-          transitionValue.value = props.transition;
-          searchQuery.value = '';
-          selectedTags.value = [];
-        }
-      });
-
-      return {
-        selectedQuestion,
-        nodeData,
-        transitionValue,
-        searchQuery,
-        tags,
-        selectedTags,
-        isLoadingTags,
-        filteredQuestions,
-        toggleTag,
-        removeTag,
-        clearTags,
-        selectQuestion,
-        cancel,
-        confirm
-      };
-    }
-  });
+// Reset form when modal is shown
+watch(() => props.show, (newValue) => {
+  if (newValue) {
+    selectedQuestion.value = '';
+    nodeData.value = props.initialNodeData;
+    transitionValue.value = props.transition;
+    searchQuery.value = '';
+    selectedTags.value = [];
+  }
+});
 </script>
     
 <style scoped>

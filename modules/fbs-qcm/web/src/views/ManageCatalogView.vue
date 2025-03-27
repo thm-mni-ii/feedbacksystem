@@ -1,5 +1,6 @@
 <template>
   <div class="cyto-container">
+    <DialogEditQuestion ref="dialogEditQuestion" />
     <div class="graph-header">
       <h1>Fragefluss-Editor</h1>
       <p class="instructions">Klicken Sie auf die Knoten oder Verbindungen, um Änderungen vorzunehmen</p>
@@ -7,15 +8,7 @@
     
     <div id="cy" class="cyto-graph"></div>
     
-    <!-- Modal für das Hinzufügen einer neuen Frage -->
-    <question-find-modal
-      :show="showModal"
-      :question-options="questionOptions"
-      :show-input="showInput"
-      :transition="transition"
-      @cancel="cancelAdd"
-      @confirm="confirmAdd"
-    />
+    <DialogAddQuestion ref="dialogAddQuestion" />
 
     <!-- Modal für das Ändern des Schwellenwerts -->
     <div v-if="showModalNum" class="modal-overlay">
@@ -272,436 +265,408 @@ node {
 }
 </style>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import catalogService from '@/services/catalog.service';
 import questionService from '@/services/question.service';
-import cytoscape, { Core } from 'cytoscape';
+import cytoscape from 'cytoscape'; 
+import type { Core } from 'cytoscape';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.vue';
 import QuestionFindModal from '@/components/QuestionFindModal.vue';
-
-export default defineComponent({
-  name: 'CytoscapeGraph',
-  components: {
-    DeleteConfirmationModal,
-    QuestionFindModal
-  },
-  setup() {
-    const cy = ref<Core | null>(null); 
-    const showModal = ref(false); 
-    const showModalNum = ref(false); 
-    const route = useRoute();
-    const id = route.params;
-    const currentQuestion = ref(null);
-    const currentCatalog = ref(null);
-    const questionOptions = ref([]);
-    const transition = ref("");
-    const showInput = ref(false);
-    const nodeData = ref("");
-    const selectedQuestion = ref("");
-    const firstQuestion = ref(false);
-    const showDeleteModal = ref(false);
-    const nodeToDelete = ref(null);
+import DialogAddQuestion from '@/dialog/DialogAddQuestion.vue';
 
 
-    // Computed property für die Formularvalidierung
-    const isFormValid = computed(() => {
-      if (showInput.value) {
-        // Wenn Zahleneingabe sichtbar ist, müssen beide Felder gefüllt sein
-        return nodeData.value && selectedQuestion.value;
+const dialogAddQuestion = ref<InstanceType<typeof DialogAddQuestion> | null>(null);
+const route = useRoute();
+const id = route.params;
+
+const cy = ref<Core | null>(null);
+const showModal = ref(false);
+const showModalNum = ref(false);
+const currentQuestion = ref<string | null>(null);
+const currentCatalog = ref<string | null>(null);
+const questionOptions = ref([]);
+const transition = ref("");
+const showInput = ref(false);
+const nodeData = ref("");
+const selectedQuestion = ref("");
+const firstQuestion = ref(false);
+const showDeleteModal = ref(false);
+const nodeToDelete = ref<{id: string; nodeId: string} | null>(null);
+
+const isFormValid = computed(() => {
+  if (showInput.value) {
+    return nodeData.value && selectedQuestion.value;
+  } else {
+    return selectedQuestion.value;
+  }
+});
+
+onMounted(async () => {
+  console.log('ID from query parameter:', id.questionId);      
+  console.log('ID from query parameter:', id.catalogId);
+
+  let maxKey = "+";
+  let midKey = "+";
+  let minKey = "+";
+  let maxId = null;
+  let midId = null;
+  let minId = null;
+  let maxKeyNumber = "correct";
+  let midKeyNumber = "medium";
+  let minKeyNumber = "incorrect";
+  let questionText = "+";
+  let prevText = "No Previous Question"
+  let prevId = null;
+  let buttonsHidden = "false";
+  
+  currentQuestion.value = id.questionId as string;
+  currentCatalog.value = id.catalogId as string;
+  
+  try {
+    if(id.questionId !== "new") {
+      const data = await catalogService.editCatalog(id.catalogId as string, id.questionId as string);
+      if(data.data.isEmpty) {
+        console.log("its true");
+        buttonsHidden = "true"
+        firstQuestion.value = true;
+      } else {   
+        buttonsHidden = "false";
+        currentQuestion.value = data.data._id
+        console.log(data.data);
+        
+        questionText = data.data.questionText;
+        
+        for(let i = 0; i < data.data.children.length; i++) {
+          if(data.data.children[i].transition === "correct") {
+            maxKey = data.data.children[i].text;
+            maxId = data.data.children[i].questionId;
+            maxKeyNumber = `${data.data.children[i].score}%`;
+          }
+          if(data.data.children[i].transition === "incorrect") {
+            minKey = data.data.children[i].text;
+            minId = data.data.children[i].questionId;
+            minKeyNumber = `${data.data.children[i].score}%`;
+          }
+          if(data.data.children[i].transition === "partial") {
+            midKey = data.data.children[i].text;
+            midId = data.data.children[i].questionId;
+            midKeyNumber = `${data.data.children[i].score}%`;
+          }
+        }
+        console.log(data.data);
+        const prevData = await catalogService.getPreviousQuestion(id.catalogId as string, data.data._id);
+        if(prevData.data.questionInCatalogId !== null) {
+          prevText = prevData.data.text;
+          prevId = prevData.data.questionInCatalogId;
+        }
+      }
+    } else if (id.questionId === "new") {
+      const data = await catalogService.editEmptyCatalog(id.catalogId as string);
+      if(data.data.isEmpty) {
+        buttonsHidden = "true";
       } else {
-        // Sonst nur die Fragenauswahl
-        return selectedQuestion.value;
+        console.log("you shouldn't be here");
       }
+    }
+    cy.value = cytoscape({
+      container: document.getElementById('cy'),
+      elements: [
+        { data: { id: 'center', label: questionText }, position: { x: 400, y: 0 }, grabbable: false},
+        { data: { id: 'left', label: prevText, hiddenData: prevId, hidden: buttonsHidden}, position: { x: 200, y: 0 }, grabbable: false },
+        { data: { source: 'left', target: 'center', hidden: buttonsHidden }},
+        { data: { id: 'correct', label: maxKey, hiddenData: maxId, hidden: buttonsHidden }, position: { x: 650, y: -120 }, grabbable: false },
+        { data: { source: 'center', target: 'correct', label: maxKeyNumber, hidden: buttonsHidden }, grabbable: false },
+        { data: { id: 'partial', label: midKey, hiddenData: midId, hidden: buttonsHidden }, position: { x: 650, y: 0 }, grabbable: false },
+        { data: { source: 'center', target: 'partial', label: 'middle answer', hidden: buttonsHidden }, grabbable: false },
+        { data: { id: 'incorrect', label: minKey, hiddenData: minId, hidden: buttonsHidden }, position: { x: 650, y: 120 }, grabbable: false },
+        { data: { source: 'center', target: 'incorrect', label: minKeyNumber, hidden: buttonsHidden }, grabbable: false },
+        { data: { id: 'invisible', label: '', hidden: "true" }, position: { x: 650, y: 60 }, grabbable: false }
+      ],
+      style: [
+        { 
+          selector: 'node', 
+          style: { 
+            'background-color': '#3498db', 
+            'label': 'data(label)', 
+            'shape': 'rectangle', 
+            'color': '#ffffff', 
+            'text-valign': 'center', 
+            'text-halign': 'center', 
+            'border-width': '2px',
+            'border-color': '#2980b9', 
+            'width': '120px', 
+            'height': '40px', 
+            'font-size': '12px',
+            'text-outline-width': '1px',
+            'text-outline-color': '#2980b9',
+            'text-wrap': 'wrap',
+            'text-max-width': '110px'
+          } 
+        },
+        { 
+          selector: 'edge', 
+          style: { 
+            'line-color': '#2c3e50',           
+            'target-arrow-color': '#2c3e50',   
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'label': 'data(label)',
+            'font-size': '12px',               
+            'font-weight': 'bold',             
+            'color': '#2c3e50',
+            'text-background-opacity': 1,
+            'text-background-color': '#ffffff',
+            'text-background-padding': '4px',   
+            'text-background-shape': 'roundrectangle', 
+            'width': '3px',                     
+            'text-margin-y': '-10px',
+            'arrow-scale': 1.5,                 
+            'text-outline-width': 0,            
+            'text-border-width': 1,             
+            'text-border-color': '#95a5a6',     
+            'text-border-opacity': 1,
+            'line-style': 'solid'               
+          } 
+        },
+        { 
+          selector: 'node[label="+"]', 
+          style: { 
+            'background-color': '#27ae60', 
+            'label': '+', 
+            'width': '40px', 
+            'height': '40px', 
+            'shape': 'round-rectangle', 
+            'color': 'white',
+            'font-size': '24px',
+            'border-color': '#219653',
+            'text-valign': 'center',
+            'text-halign': 'center'
+          } 
+        },
+        { 
+          selector: 'node#center', 
+          style: { 
+            'background-color': '#e74c3c', 
+            'border-color': '#c0392b',
+            'width': '150px', 
+            'height': '50px',
+            'font-weight': 'bold',
+            'font-size': '14px'
+          } 
+        },
+        { selector: 'node[hidden = "true"]', style: { 'visibility': 'hidden' } },
+        { selector: 'edge[hidden = "true"]', style: { 'visibility': 'hidden' } }
+      ],
+      layout: { name: 'preset' },
+      userPanningEnabled: false,
+      userZoomingEnabled: false,
+      zoom: 1.4,
+      minZoom: 1.4,
+      maxZoom: 1.4,
+      fit: true,
+      padding: 50,
+      boxSelectionEnabled: false,
+      autoungrabify: true,
+      autounselectify: true
     });
 
-    onMounted(async () => {
-      console.log('ID from query parameter:', id.questionId);      
-      console.log('ID from query parameter:', id.catalogId);
-
+    cy.value.on('tap', 'node', async (event) => {
+      const clickedNode = event.target; 
       
-      let maxKey = "+";
-      let midKey = "+";
-      let minKey = "+";
-      let maxId = null;
-      let midId = null;
-      let minId = null;
-      let maxKeyNumber = "correct";
-      let midKeyNumber = "medium";
-      let minKeyNumber = "incorrect";
-      let questionText = "+";
-      let prevText = "No Previous Question"
-      let prevId = null;
-      let buttonsHidden = "false";
-      
-      currentQuestion.value = id.questionId;
-      currentCatalog.value = id.catalogId;
-      
-      try {
-        if(id.questionId !== "new") {
-          const data = await catalogService.editCatalog(id.catalogId, id.questionId);
-          if(data.data.isEmpty) {
-              console.log("its true");
-              buttonsHidden = "true"
-              firstQuestion.value = true;
-          } else {   
-            buttonsHidden = "false";
-            currentQuestion.value = data.data._id
-            console.log(data.data);
-            
-            questionText = data.data.questionText;
-            
-            for(let i = 0; i < data.data.children.length; i++) {
-              if(data.data.children[i].transition === "correct") {
-                  maxKey = data.data.children[i].text;
-                  maxId = data.data.children[i].questionId;
-                  maxKeyNumber = `${data.data.children[i].score}%`;
-              }
-              if(data.data.children[i].transition === "incorrect") {
-                  minKey = data.data.children[i].text;
-                  minId = data.data.children[i].questionId;
-                  minKeyNumber = `${data.data.children[i].score}%`;
-              }
-              if(data.data.children[i].transition === "partial") {
-                  midKey = data.data.children[i].text;
-                  midId = data.data.children[i].questionId;
-                  midKeyNumber = `${data.data.children[i].score}%`;
-              }
-            }
-            console.log(data.data);
-            const prevData = await catalogService.getPreviousQuestion(id.catalogId, data.data._id);
-            if(prevData.data.questionInCatalogId !== null) {
-              prevText = prevData.data.text;
-              prevId = prevData.data.questionInCatalogId;
-            }
-          }
-        } else if (id.questionId === "new") {
-            const data = await catalogService.editEmptyCatalog(id.catalogId);
-            if(data.data.isEmpty) {
-              buttonsHidden = "true";
-            } else {
-              console.log("you shouldn't be here");
-            }
+      if (clickedNode.data('label') === '+') {
+        const data = await questionService.getAllQuestions();
+        const questionOptions = data.data;
+        
+        transition.value = clickedNode.id(); 
+        
+        const showInput = !(clickedNode.id() === "partial" || firstQuestion.value || currentQuestion.value === "new");
+        
+        const result = await dialogAddQuestion.value?.openDialog(questionOptions, showInput, transition.value);
+        
+        if (result) {
+          await addQuestion(result.nodeData, result.selectedQuestion, result.transition);
         }
-        cy.value = cytoscape({
-          container: document.getElementById('cy'),
-          elements: [
-            { data: { id: 'center', label: questionText }, position: { x: 400, y: 0 }, grabbable: false},
-            { data: { id: 'left', label: prevText, hiddenData: prevId, hidden: buttonsHidden}, position: { x: 200, y: 0 }, grabbable: false }, // Weiter nach links
-            { data: { source: 'left', target: 'center', hidden: buttonsHidden }},
-            { data: { id: 'correct', label: maxKey, hiddenData: maxId, hidden: buttonsHidden }, position: { x: 650, y: -120 }, grabbable: false }, // Weiter rechts und oben
-            { data: { source: 'center', target: 'correct', label: maxKeyNumber, hidden: buttonsHidden }, grabbable: false },
-            { data: { id: 'partial', label: midKey, hiddenData: midId, hidden: buttonsHidden }, position: { x: 650, y: 0 }, grabbable: false }, // Weiter rechts
-            { data: { source: 'center', target: 'partial', label: 'middle answer', hidden: buttonsHidden }, grabbable: false },
-            { data: { id: 'incorrect', label: minKey, hiddenData: minId, hidden: buttonsHidden }, position: { x: 650, y: 120 }, grabbable: false }, // Weiter rechts und unten
-            { data: { source: 'center', target: 'incorrect', label: minKeyNumber, hidden: buttonsHidden }, grabbable: false },
-            { data: { id: 'invisible', label: '', hidden: "true" }, position: { x: 650, y: 60 }, grabbable: false } // Angepasst an neue Positionen
-          ],
-          style: [
-            { 
-              selector: 'node', 
-              style: { 
-                'background-color': '#3498db', 
-                'label': 'data(label)', 
-                'shape': 'rectangle', 
-                'color': '#ffffff', 
-                'text-valign': 'center', 
-                'text-halign': 'center', 
-                'border-width': '2px',
-                'border-color': '#2980b9', 
-                'width': '120px', 
-                'height': '40px', 
-                'font-size': '12px',
-                'text-outline-width': '1px',
-                'text-outline-color': '#2980b9',
-                'text-wrap': 'wrap',
-                'text-max-width': '110px'
-              } 
-            },
-            { 
-              selector: 'edge', 
-              style: { 
-                'line-color': '#2c3e50',           // Dunklere Farbe für besseren Kontrast
-                'target-arrow-color': '#2c3e50',   // Pfeilfarbe angepasst
-                'target-arrow-shape': 'triangle',
-                'curve-style': 'bezier',
-                'label': 'data(label)',
-                'font-size': '12px',               // Größere Schrift
-                'font-weight': 'bold',             // Fettere Schrift
-                'color': '#2c3e50',
-                'text-background-opacity': 1,
-                'text-background-color': '#ffffff',
-                'text-background-padding': '4px',   // Mehr Padding um Text
-                'text-background-shape': 'roundrectangle', // Abgerundete Ecken für Text-Hintergrund
-                'width': '3px',                     // Dickere Linien
-                'text-margin-y': '-10px',
-                'arrow-scale': 1.5,                 // Größere Pfeile
-                'text-outline-width': 0,            // Kein Text-Outline
-                'text-border-width': 1,             // Text-Border für bessere Lesbarkeit
-                'text-border-color': '#95a5a6',     // Farbe des Text-Borders
-                'text-border-opacity': 1,
-                'line-style': 'solid'               // Durchgezogene Linie (Alternativ: 'dashed')
-              } 
-            },
-            { 
-              selector: 'node[label="+"]', 
-              style: { 
-                'background-color': '#27ae60', 
-                'label': '+', 
-                'width': '40px', 
-                'height': '40px', 
-                'shape': 'round-rectangle', 
-                'color': 'white',
-                'font-size': '24px',
-                'border-color': '#219653',
-                'text-valign': 'center',
-                'text-halign': 'center'
-              } 
-            },
-            { 
-              selector: 'node#center', 
-              style: { 
-                'background-color': '#e74c3c', 
-                'border-color': '#c0392b',
-                'width': '150px', 
-                'height': '50px',
-                'font-weight': 'bold',
-                'font-size': '14px'
-              } 
-            },
-            { selector: 'node[hidden = "true"]', style: { 'visibility': 'hidden' } },
-            { selector: 'edge[hidden = "true"]', style: { 'visibility': 'hidden' } }
-          ],
-          layout: { name: 'preset' },
-          userPanningEnabled: false,
-          userZoomingEnabled: false,
-          zoom: 1.4,
-          minZoom: 1.4,
-          maxZoom: 1.4,
-          fit: true,
-          padding: 50,
-          boxSelectionEnabled: false,
-          autoungrabify: true,
-          autounselectify: true
-        });
-        cy.value.on('layoutready', function() {
-          cy.value.fit();
-          cy.value.center();
-        });
-        // Event-Handler für Knotenklicks
-        cy.value.on('tap', 'node', async (event) => {
-            const clickedNode = event.target; 
-            console.log(clickedNode.data('label'));
-            console.log(clickedNode.data('hiddenData'));
-            console.log(clickedNode.id());
-            
-            if (clickedNode.data('label') === '+') {
-              const data = await questionService.getAllQuestions();
-              console.log(data);
-              
-              updateQuestionOptions(data.data);
-              transition.value = clickedNode.id(); 
-              
-              if(clickedNode.id() === "partial" || firstQuestion.value) {
-                showInput.value = false;
-              } else {
-                showInput.value = true;
-              }
-              console.log(id.question);
-              console.log(currentQuestion.value);
-              if(currentQuestion.value === "new") {
-                showInput.value = false;
-              }
-              
-              // Reset Form
-              nodeData.value = "";
-              selectedQuestion.value = "";
-              showModal.value = true;
-            } else if(clickedNode.data('hiddenData') !== null && clickedNode.data('hiddenData') !== undefined) {
-                console.log(id.catalogId);
-                window.location.href = `/manageCatalog/${id.catalogId}/${clickedNode.data('hiddenData')}`
-            }
-        });
-        
-        // Event-Handler für Kantenklicks
-        cy.value.on('click', 'edge', async (event) => {
-            const edge = event.target;
-            console.log("edge");
-            console.log(edge.data());
-            const data = edge.data();
-            
-            if(data.target === "correct") {
-                transition.value = "correct";
-                nodeData.value = data.label ? data.label.replace('%', '') : "";
-                showModalNum.value = true;
-            }
-            
-            if(data.target === "incorrect") {
-                transition.value = "incorrect";
-                nodeData.value = data.label ? data.label.replace('%', '') : "";
-                showModalNum.value = true;
-            }
-        }); 
-        // Buttons an vorhandene Knoten anfügen
-        cy.value.nodes().forEach((node) => {
-            attachButtonToExistingNode(node.id());  
-        });
-        
-      } catch (error) {
-        console.error("Fehler beim Initialisieren des Graphen:", error);
+      } else if(clickedNode.data('hiddenData') !== null && clickedNode.data('hiddenData') !== undefined) {
+        window.location.href = `/manageCatalog/${id.catalogId}/${clickedNode.data('hiddenData')}`
       }
+});
+    
+    cy.value.on('click', 'edge', async (event) => {
+      const edge = event.target;
+      console.log("edge");
+      console.log(edge.data());
+      const data = edge.data();
+      
+      if(data.target === "correct") {
+        transition.value = "correct";
+        nodeData.value = data.label ? data.label.replace('%', '') : "";
+        showModalNum.value = true;
+      }
+      
+      if(data.target === "incorrect") {
+        transition.value = "incorrect";
+        nodeData.value = data.label ? data.label.replace('%', '') : "";
+        showModalNum.value = true;
+      }
+    }); 
+
+    cy.value.nodes().forEach((node) => {
+      attachButtonToExistingNode(node.id());  
     });
     
-    // Funktion zum Ändern des benötigten Scores
-    const changeNeededScore = async (score, transition) => {
-        try {
-          const question = id.questionId;
-          console.log("Ändere Score für Frage:", question);
-          const result = await catalogService.changeNeededScore(question, score, transition);
-          console.log(result);
-          showModalNum.value = false;
-          location.reload();
-        } catch (error) {
-          console.error("Fehler beim Ändern des Scores:", error);
-        }
-    };
-    
-    const updateQuestionOptions = (data) => {
-      questionOptions.value = data;
-    };
-    
-    // Funktion zum Schließen des Modals
-    const closeModal = () => {
-        showModal.value = false;
-        showModalNum.value = false;
-        nodeData.value = "";
-        selectedQuestion.value = "";
-    };
-    
-    // Funktion zum Hinzufügen einer Frage
-    const addQuestion = async (score, questionId, transition) => {
-        try {
-          console.log("Füge Frage hinzu:", score, questionId, transition);
-          console.log("IN DEN FOLGENDEN KATALOG:", currentCatalog.value);
-          console.log("IN DEN FOLGENDEN KATALOG:", id.catalogId);
-          const res = await questionService.addQuestionToCatalog(questionId, currentCatalog.value);  
-          console.log(res);
-          
-          const question = currentQuestion.value;
-          
-          if(question !== "new" && question !== "open") {
-              await catalogService.addChildrenToQuestion(question, res.data.id, score, transition);
-              console.log("PASSIERT DA WAS");
-              showModal.value = false;
-              location.reload();
-          } else {
-              window.location.href = `/manageCatalog/${id.catalogId}/${res.data.id}`
-          }
-        } catch (error) {
-          console.error("Fehler beim Hinzufügen der Frage:", error);
-        }
-    };
-    const attachButtonToExistingNode = (nodeId) => {
-      const node = cy.value.$id(nodeId);
-      
-      // Überprüfen, ob der Knoten einer der drei rechten Knoten ist und sein Label nicht '+' ist
-      if ((nodeId === 'correct' || nodeId === 'partial' || nodeId === 'incorrect') && 
-          node.data('label') !== '+') {
-        const position = node.renderedPosition();
-        const button = document.createElement('button');
+  } catch (error) {
+    console.error("Fehler beim Initialisieren des Graphen:", error);
+  }
+});
 
-        button.setAttribute('type', 'button'); // Prevents unintended form submission
-        
-        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>';
-        button.className = 'remove-button';
-        button.style.position = 'absolute';
-        button.style.width = '30px';
-        button.style.height = '30px';
-        button.style.color = 'white';
-        button.style.backgroundColor = '#e74c3c';
-        button.style.border = 'none';
-        button.style.borderRadius = '50%';
-        button.style.cursor = 'pointer';
-        button.style.display = 'flex';
-        button.style.alignItems = 'center';
-        button.style.justifyContent = 'center';
-        button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-        button.style.transition = 'transform 0.2s, background-color 0.2s';
-        
-        // Hover-Effekt hinzufügen
-        button.onmouseover = () => {
-          button.style.backgroundColor = '#c0392b';
-          button.style.transform = 'scale(1.1)';
-        };
-        
-        button.onmouseout = () => {
-          button.style.backgroundColor = '#e74c3c';
-          button.style.transform = 'scale(1)';
-        };
-        
-        const left = position.x + 85;
-        const top = position.y - 30;
-        
-        button.style.left = `${left}px`;
-        button.style.top = `${top}px`;
-        button.style.zIndex = '10';
-        
-        button.onclick = (event) => {
-          event.stopPropagation();
-          nodeToDelete.value = {
-            id: node.data('hiddenData'),
-            nodeId: node.id()
-          };
-          showDeleteModal.value = true;
-        }
-        document.getElementById('cy').appendChild(button);
-      }
-    };
-    const cancelDelete = () => {
-      showDeleteModal.value = false;
-      nodeToDelete.value = null;
-    };
+const changeNeededScore = async (score: number, transition: string) => {
+  try {
+    const question = id.questionId;
+    console.log("Ändere Score für Frage:", question);
+    const result = await catalogService.changeNeededScore(question, score, transition);
+    console.log(result);
+    showModalNum.value = false;
+    location.reload();
+  } catch (error) {
+    console.error("Fehler beim Ändern des Scores:", error);
+  }
+};
 
-    const confirmDelete = async (questionId) => {
-      try {
-        await catalogService.deleteQuestionFromCatalog(questionId);
-        showDeleteModal.value = false;
-        location.reload();
-      } catch (error) {
-        console.error("Fehler beim Löschen der Frage:", error);
-      }
-    };
+const updateQuestionOptions = (data: any[]) => {
+  questionOptions.value = data;
+};
 
-    const cancelAdd = () => {
+const closeModal = () => {
+  showModal.value = false;
+  showModalNum.value = false;
+  nodeData.value = "";
+  selectedQuestion.value = "";
+};
+
+const addQuestion = async (score: number, questionId: string, transition: string) => {
+  try {
+    console.log("Füge Frage hinzu:", score, questionId, transition);
+    console.log("IN DEN FOLGENDEN KATALOG:", currentCatalog.value);
+    console.log("IN DEN FOLGENDEN KATALOG:", id.catalogId);
+    const res = await questionService.addQuestionToCatalog(questionId, currentCatalog.value);  
+    console.log(res);
+    
+    const question = currentQuestion.value;
+    
+    if(question !== "new" && question !== "open") {
+      await catalogService.addChildrenToQuestion(question, res.data.id, score, transition);
       showModal.value = false;
+      location.reload();
+    } else {
+      window.location.href = `/manageCatalog/${id.catalogId}/${res.data.id}`
     }
-    const confirmAdd = (nodeData: number, selectedQuestion: string, transition: string) => {
-      addQuestion(nodeData, selectedQuestion, transition);
-      showModal.value = false;
-    }
+  } catch (error) {
+    console.error("Fehler beim Hinzufügen der Frage:", error);
+  }
+};
+
+const attachButtonToExistingNode = (nodeId: string) => {
+  if (!cy.value) return;
+  
+  const node = cy.value.$id(nodeId);
+  
+  if ((nodeId === 'correct' || nodeId === 'partial' || nodeId === 'incorrect') && 
+      node.data('label') !== '+') {
+    const position = node.renderedPosition();
+    const button = document.createElement('button');
+
+    button.setAttribute('type', 'button');
     
-    return { 
-      showModal, 
-      showModalNum, 
-      id, 
-      attachButtonToExistingNode, 
-      questionOptions, 
-      closeModal, 
-      addQuestion, 
-      transition, 
-      showInput, 
-      changeNeededScore,
-      nodeData,
-      selectedQuestion,
-      isFormValid,
-      showDeleteModal,
-      nodeToDelete,
-      cancelDelete,
-      confirmDelete,
-      cancelAdd,
-      confirmAdd,
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>';
+    button.className = 'remove-button';
+    button.style.position = 'absolute';
+    button.style.width = '30px';
+    button.style.height = '30px';
+    button.style.color = 'white';
+    button.style.backgroundColor = '#e74c3c';
+    button.style.border = 'none';
+    button.style.borderRadius = '50%';
+    button.style.cursor = 'pointer';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    button.style.transition = 'transform 0.2s, background-color 0.2s';
+    
+    button.onmouseover = () => {
+      button.style.backgroundColor = '#c0392b';
+      button.style.transform = 'scale(1.1)';
     };
-  },
+    
+    button.onmouseout = () => {
+      button.style.backgroundColor = '#e74c3c';
+      button.style.transform = 'scale(1)';
+    };
+    
+    const left = position.x + 85;
+    const top = position.y - 30;
+    
+    button.style.left = `${left}px`;
+    button.style.top = `${top}px`;
+    button.style.zIndex = '10';
+    
+    button.onclick = (event) => {
+      event.stopPropagation();
+      nodeToDelete.value = {
+        id: node.data('hiddenData'),
+        nodeId: node.id()
+      };
+      showDeleteModal.value = true;
+    }
+    document.getElementById('cy')?.appendChild(button);
+  }
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  nodeToDelete.value = null;
+};
+
+const confirmDelete = async (questionId: string) => {
+  try {
+    await catalogService.deleteQuestionFromCatalog(questionId);
+    showDeleteModal.value = false;
+    location.reload();
+  } catch (error) {
+    console.error("Fehler beim Löschen der Frage:", error);
+  }
+};
+
+const cancelAdd = () => {
+  showModal.value = false;
+}
+
+const confirmAdd = (nodeData: number, selectedQuestion: string, transition: string) => {
+  addQuestion(nodeData, selectedQuestion, transition);
+  showModal.value = false;
+}
+
+defineExpose({
+  showModal, 
+  showModalNum, 
+  id, 
+  attachButtonToExistingNode, 
+  questionOptions, 
+  closeModal, 
+  addQuestion, 
+  transition, 
+  showInput, 
+  changeNeededScore,
+  nodeData,
+  selectedQuestion,
+  isFormValid,
+  showDeleteModal,
+  nodeToDelete,
+  cancelDelete,
+  confirmDelete,
+  cancelAdd,
+  confirmAdd,
 });
 </script>
