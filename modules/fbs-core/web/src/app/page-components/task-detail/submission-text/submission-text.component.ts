@@ -61,17 +61,25 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return languages[fileType] || 'javascript'; // Default-Sprache
   }
 
-
   onTextChange(content: string) {
     this.toSubmit = content;
+    console.log("Aktueller Editor-Inhalt (Text):", this.toSubmit);
     this.update.emit({ content: this.toSubmit });
-    this.highlightCode(); 
+    this.highlightCode();
+  }
+  
+  onCodeChange(content: string) {
+    this.toSubmit = content;
+    console.log("Aktueller Editor-Inhalt (Code):", this.toSubmit);
+    this.update.emit({ content: this.toSubmit });
+    this.highlightCode();
   }
 
   highlightCode() {
     if (this.toSubmit && this.isCodeFile) {
-      const language = this.getLanguageByFileType('fileType');
+      const language = this.getLanguageByFileType('js'); // Setzt hier den richtigen Dateityp
       this.highlightedText = prism.highlight(this.toSubmit, prism.languages[language], language);
+      console.log("Highlight Text:", this.highlightedText);
     }
   }
 
@@ -153,7 +161,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
                     }
                     return item.str + ' ';
                   })
-                  .join('');
+                  .join(' ');
 
                 text += pageText;
               };
