@@ -54,16 +54,14 @@ const formattedText = computed(() => {
           v-model="fillInTheBlanksAnswer[part.order]"
           :items="possibleAnswers"
           density="compact"
-          variant="outlined"
           class="blank-input"
         />
         <v-text-field
           v-else-if="part.component === 'input'"
           v-model="fillInTheBlanksAnswer[part.order]"
           density="compact"
-          variant="underlined"
           class="blank-input"
-          max-width="100"
+          style="width: fit-content"
         />
       </template>
     </div>
@@ -78,7 +76,8 @@ const formattedText = computed(() => {
   gap: 8px;
 }
 .blank-input {
-  width: 200px;
-  max-width: 300px;
+  text-align: center;
+  min-width: 100px;
+  max-width: fit-content;
 }
 </style>

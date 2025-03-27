@@ -33,34 +33,40 @@ const catalog = ref<Catalog>({
 })
 
 const submitAnswer = async (answer: any) => {
-  if (!questionData.value?._id) {
-    console.error('[submitAnswer]: questionData or ID is undefined.')
+  if (!questionData.value?._id || !sessionId.value) {
+    console.error('[submitAnswer]: questionData or sessionId is undefined.')
     return
   }
+
   try {
-    const submitResponse = await sessionService.submitAnswer(questionData.value._id, answer)
+    const submitResponse = await sessionService.submitAnswer(
+      questionData.value._id,
+      answer,
+      sessionId.value
+    )
     currentQuestionScore.value = submitResponse.data.correct.score
     showFeedback.value = true
 
-    const catalogId = route.params.catalogId as string
-    const courseId = Number(route.params.courseId)
+    const res = await sessionService.getCurrentQuestion(sessionId.value)
+    console.log(res.data)
 
-    const res = await sessionService.getCurrentQuestion(catalogId)
     if (res.data.catalog === 'over') {
       console.log('Catalog finished. Ending Session.')
-      await sessionService.endSession(catalogId, courseId)
+
+      await sessionService.endSession(sessionId.value)
       catalogStatus.value = 'over'
 
-      const catalogScoreRes = await catalogService.getCatalogScore(courseId, catalogId)
+      const catalogScoreRes = await catalogService.getCatalogScore(sessionId)
       catalogScore.value = catalogScoreRes.data.score
       console.log('Catalog Score:', catalogScoreRes.data)
     } else {
       catalogStatus.value = null
       questionData.value = res.data
     }
+
     progressBar.value++
   } catch (error) {
-    console.error('Error submitting Answer: ', error)
+    console.error('Error submitting Answer:', error)
   }
 }
 
@@ -71,42 +77,32 @@ onMounted(async () => {
 
     const catalogResponse = await catalogService.getCatalog(catalogId)
     catalog.value.name = catalogResponse.data.name
-    const ongoingSession = await sessionService.checkOngoingSession()
 
-    if (ongoingSession.data.length === 0) {
-      console.log('[onMounted] No active session found. Starting a new session.')
+    let sessionResponse = await sessionService.checkOngoingSession()
 
+    if (!sessionResponse.data) {
       const startSessionResponse = await sessionService.startSession(courseId, catalogId)
       sessionId.value = startSessionResponse.data.sessionId
-      const currentQuestion = await sessionService.getCurrentQuestion(sessionId.value)
-      console.log('ongoingSession -->', ongoingSession)
-      console.log('currentQuestion -->', currentQuestion)
-      console.log('sessionID -->', sessionId.value)
-      questionData.value = currentQuestion.data
-    } else if (currentQuestion.data.catalog === 'over') {
-      catalogStatus.value = 'over'
 
+      sessionResponse = await sessionService.getCurrentQuestion(sessionId.value)
+    } else {
+      sessionId.value = sessionResponse.data._id
+      sessionResponse = await sessionService.getCurrentQuestion(sessionId.value)
+    }
+
+    questionData.value = sessionResponse.data
+
+    if (questionData.value.catalog === 'over') {
+      catalogStatus.value = 'over'
       const catalogScoreRes = await catalogService.getCatalogScore(courseId, catalogId)
       catalogScore.value = catalogScoreRes.data.score
-      console.log(catalogScoreRes)
       console.log('[onMounted] Catalog Score:', catalogScore.value)
     } else {
       catalogStatus.value = null
-      questionData.value = currentQuestion.data
     }
   } catch (error) {
     console.error('[onMounted] Error fetching question:', error)
-
-    try {
-      const currentQuestionResponse = await sessionService.getCurrentQuestion(
-        route.params.catalogId as string
-      )
-      console.log('current Question on mounted --> ', currentQuestionResponse.data)
-      questionData.value = currentQuestionResponse.data
-    } catch (fetchError) {
-      console.error('[onMounted] FetchError:', fetchError)
-      showErrorPage.value = true
-    }
+    showErrorPage.value = true
   }
 })
 </script>
