@@ -1,20 +1,22 @@
-<div style="display: flex; justify-content: space-between; align-items: center;">
+<div style="display: flex; justify-content: space-between; align-items: center">
   <h3>{{ titleText }}</h3>
-  <button mat-button color="primary" (click)="uploadFile()">Text aus Datei lesen</button>
+  <button mat-button color="primary" (click)="uploadFile()">
+    Text aus Datei lesen
+  </button>
   <button mat-button color="accent" (click)="toggleEditor()">
-    {{ isCodeFile ? 'Wechsel zu Text-Editor' : 'Wechsel zu Code-Editor' }}
+    {{ isCodeFile ? "Wechsel zu Text-Editor" : "Wechsel zu Code-Editor" }}
   </button>
 </div>
 
-<input 
-  type="file" 
-  #fileInput 
-  style="display: none" 
-  (change)="handleFileInput($event)" 
+<input
+  type="file"
+  #fileInput
+  style="display: none"
+  (change)="handleFileInput($event)"
   accept=".pdf,.docx,.txt,.java,.ts,.js,.py"
 />
 
-<!-- Ladeanzeige (Popup) -->
+<!-- Ladeanzeige -->
 <div *ngIf="processing" class="loading-overlay">
   <div class="loading-popup">
     <mat-spinner></mat-spinner>
@@ -22,29 +24,19 @@
   </div>
 </div>
 
-<!-- Texteditor für normale Texte -->
+<!-- Normaler Texteditor -->
 <div *ngIf="!isCodeFile" class="editor-container">
-  <angular-editor 
-    [config]="editorConfig" 
+  <angular-editor
+    [config]="editorConfig"
     [(ngModel)]="toSubmit"
-    (ngModelChange)="stripHtml($event)">
-  </angular-editor>
+    (ngModelChange)="onTextChange($event)"
+  ></angular-editor>
 </div>
 
-<!-- Flexbox-Ansicht mit bearbeitbarem Code links und Highlighting rechts -->
-<div *ngIf="isCodeFile" style="display: flex; justify-content: space-between; width: 100%;">
-  <!-- Links: Textarea für Code -->
-  <div style="width: 48%;">
-    <textarea 
-      [(ngModel)]="toSubmit" 
-      (ngModelChange)="stripHtml($event)" 
-      rows="10" 
-      style="width: 100%; font-family: monospace; white-space: pre-wrap;">
-    </textarea>
-  </div>
-
-  <!-- Rechts: Code mit Highlighting -->
-  <div style="width: 48%; background: #f5f5f5; padding: 10px;">
-    <pre [innerHTML]="highlightedText"></pre>
-  </div>
-</div>
+<!-- Code-Editor mit Highlighting -->
+<app-code-editor
+  *ngIf="isCodeFile"
+  [codeType]="getLanguageByFileType(fileType)"
+  [(content)]="toSubmit"
+  (ngModelChange)="onTextChange($event)"
+></app-code-editor>

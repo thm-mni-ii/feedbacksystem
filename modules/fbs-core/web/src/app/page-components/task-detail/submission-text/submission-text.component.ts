@@ -9,14 +9,14 @@ import * as prism from 'prismjs';
   styleUrls: ['./submission-text.component.scss'],
 })
 export class SubmissionTextComponent implements OnInit, AfterViewInit {
-  toSubmit = ''; 
-  highlightedText = ''; 
+  toSubmit = '';
+  highlightedText = '';
   @Input() title?: string;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
   processing: boolean = false;
   titleText: string = 'Abgabe Text:';
-  isCodeFile: boolean = false; 
+  isCodeFile: boolean = false;
 
   editorConfig = {
     editable: true,
@@ -42,18 +42,9 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     this.highlightCode();
   }
 
-  // Umschalten des Editors (Text-Editor vs. Code-Editor)
   toggleEditor() {
-    this.isCodeFile = !this.isCodeFile; 
+    this.isCodeFile = !this.isCodeFile;
   }
-
-  // Funktion zum Syntax-Highlighting von Code
-  highlightCode() {
-    if (this.toSubmit && this.isCodeFile) {
-      const language = this.getLanguageByFileType('js');
-      this.highlightedText = prism.highlight(this.toSubmit, prism.languages[language], language); 
-    }
-  } 
 
   getLanguageByFileType(fileType: string): string {
     const languages: { [key: string]: string } = {
@@ -70,10 +61,24 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return languages[fileType] || 'javascript'; // Default-Sprache
   }
 
-  stripHtml(content: string) {
+
+  onTextChange(content: string) {
     this.toSubmit = content;
     this.update.emit({ content: this.toSubmit });
     this.highlightCode(); 
+  }
+
+  highlightCode() {
+    if (this.toSubmit && this.isCodeFile) {
+      const language = this.getLanguageByFileType('fileType');
+      this.highlightedText = prism.highlight(this.toSubmit, prism.languages[language], language);
+    }
+  }
+
+  stripHtml(content: string) {
+    this.toSubmit = content;
+    this.update.emit({ content: this.toSubmit });
+    this.highlightCode();
   }
 
   uploadFile() {
@@ -94,13 +99,13 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     try {
       if (fileType === 'pdf') {
         this.toSubmit = await this.extractPdfText(file);
-        this.isCodeFile = false; 
+        this.isCodeFile = false;
       } else if (fileType === 'docx') {
         this.toSubmit = await this.extractWordText(file);
-        this.isCodeFile = false; 
+        this.isCodeFile = false;
       } else if (fileType === 'txt' || this.checkIfCodeFile(fileType)) {
         this.toSubmit = await this.extractPlainText(file);
-        this.isCodeFile = this.checkIfCodeFile(fileType); 
+        this.isCodeFile = this.checkIfCodeFile(fileType);
       } else {
         throw new Error('Dateityp nicht unterstützt.');
       }
@@ -110,6 +115,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     } finally {
       this.processing = false;
       this.highlightCode(); 
+      this.update.emit({ content: this.toSubmit });
     }
   }
 
