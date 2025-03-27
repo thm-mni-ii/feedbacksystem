@@ -38,5 +38,5 @@
   *ngIf="isCodeFile"
   [codeType]="getLanguageByFileType(fileType)"
   [(content)]="toSubmit"
-  (ngModelChange)="onCodeChange($event)"
+  (update)="onCodeChange($event)"
 ></app-code-editor>
