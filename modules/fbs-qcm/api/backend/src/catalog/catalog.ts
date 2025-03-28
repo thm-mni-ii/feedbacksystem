@@ -352,11 +352,8 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
   const query = {
     session: new mongoDB.ObjectId(sessionId)
   };
-  const sort = {
-    timeStamp: 1
-  };
   const questionReport = [];
-  const submissions = submissionCollection.find(query).sort(sort).toArray();
+  const submissions = submissionCollection.find(query).sort({ timeStamp: 1}).toArray();
   for(let submission in submissions) {
     const questionObject = {
     }
