@@ -15,6 +15,7 @@ import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
+import de.thm.ii.fbs.utils.v2.mongo.MongoSecurityValidator
 import org.bson.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -111,6 +112,8 @@ class PlaygroundController(
         val query = Query(Criteria().apply {
             criteria.forEach { (key, value) -> this.and(key).`is`(value) }
         })
+
+        MongoSecurityValidator.validate(mongoQuery.operation, mongoQuery)
 
         return when (mongoQuery.operation) {
             "insert" -> {
@@ -240,7 +243,7 @@ class PlaygroundController(
         userId: Int
     ): Group {
         val group = groupRepository.findById(groupId).getOrNull() ?: throw NotFoundException()
-        if (group.users.find { it.userId == userId } == null) throw ForbiddenException()
+        if (group.users.find { it.userId == userId } == null) throw ForbiddenException("You are not allowed to access this group.")
         return group
     }
 
