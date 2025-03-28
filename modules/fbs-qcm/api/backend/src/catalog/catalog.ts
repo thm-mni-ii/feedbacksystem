@@ -328,7 +328,8 @@ export async function getCatalogScore(
   sessionId: string
 ) {
   const database: mongoDB.Db = await connect();
-  const sessionCollection: mongoDB.Collection = database.collection("session");
+  const sessionCollection: mongoDB.Collection = database.collection("sessions");
+  const submissionCollection: mongoDB.Collection = database.collection("submission");
   const query = {
     _id: new mongoDB.ObjectId(sessionId)
   }
@@ -345,7 +346,9 @@ export async function getCatalogScore(
     console.log("Session is not finished");
     return -1;
   }
-  return session.score;
+  const report = getQuestionReport(sessionId, submissionCollection);
+  console.log(report);
+  return report;
 }
 
 async function getQuestionReport(sessionId: string, submissionCollection: mongoDB.Collection) {
@@ -353,11 +356,22 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
     session: new mongoDB.ObjectId(sessionId)
   };
   const questionReport = [];
-  const submissions = submissionCollection.find(query).sort({ timeStamp: 1}).toArray();
-  for(let submission in submissions) {
+  const submissions: Submission[] = await submissionCollection.find(query).sort({ timeStamp: 1}).toArray() as unknown as Submission[];
+  let totalScore = 0;
+  for(let submission of submissions) {
     const questionObject = {
+      answer: submission.answer,
+      correctAnswer: "a",// find correct answer of question
+      score: submission.evaluation.score
     }
+    totalScore += submission.evaluation.score;
+    questionReport.push(questionObject);
   }
+  const finalObject = {
+    questionReport: questionReport,
+    score: totalScore
+  } 
+  return finalObject;
 }
 
 async function getDetailedSingleQuestionReport() {
