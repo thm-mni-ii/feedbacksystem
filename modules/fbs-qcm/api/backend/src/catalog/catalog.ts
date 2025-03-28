@@ -330,6 +330,8 @@ export async function getCatalogScore(
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
   const submissionCollection: mongoDB.Collection = database.collection("submission");
+  const questionCollection: mongoDB.Collection = database.collection("question");
+  const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
   const query = {
     _id: new mongoDB.ObjectId(sessionId)
   }
@@ -346,12 +348,13 @@ export async function getCatalogScore(
     console.log("Session is not finished");
     return -1;
   }
-  const report = getQuestionReport(sessionId, submissionCollection);
+  const report = getQuestionReport(sessionId, submissionCollection, questionCollection, questionInCatalogCollection);
   console.log(report);
   return report;
 }
 
-async function getQuestionReport(sessionId: string, submissionCollection: mongoDB.Collection) {
+async function getQuestionReport(sessionId: string, submissionCollection: mongoDB.Collection,
+   questionCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection) {
   const query = {
     session: new mongoDB.ObjectId(sessionId)
   };
@@ -359,13 +362,24 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
   const submissions: Submission[] = await submissionCollection.find(query).sort({ timeStamp: 1}).toArray() as unknown as Submission[];
   let totalScore = 0;
   for(let submission of submissions) {
-    const questionObject = {
-      answer: submission.answer,
-      correctAnswer: "a",// find correct answer of question
-      score: submission.evaluation.score
+    if(submission !== null) {
+    const questionInCatalogObject = await questionInCatalogCollection.findOne({_id: new mongoDB.ObjectId(submission.question)});
+      if(questionInCatalogObject !== null) {
+        const question = await questionCollection.findOne({_id: new mongoDB.ObjectId(questionInCatalogObject.question)});
+        if(question === null) {
+          continue;
+        }
+        console.log("question");
+        console.log(question);
+        const questionObject = {
+          answer: submission.answer,
+          correctAnswer: question.questionconfiguration,
+          score: submission.evaluation.score
+        }
+        totalScore += submission.evaluation.score;
+        questionReport.push(questionObject);
+      }
     }
-    totalScore += submission.evaluation.score;
-    questionReport.push(questionObject);
   }
   const finalObject = {
     questionReport: questionReport,

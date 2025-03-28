@@ -164,6 +164,10 @@ export async function endSingleSession(
   return 1;
 }
 
+async function setAllRemainingQuestionsFalse(sessionId: string, userId: number) {
+  
+}
+
 export async function unpauseSingleSession(
   tokenData: JwtPayload,
   catalogId: string,
