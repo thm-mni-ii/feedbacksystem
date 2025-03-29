@@ -286,7 +286,7 @@ export async function getOpenSessions(user: number) {
   const query = {
     user: user,
   };
-  const result = await getSessionData(query);
+  const result: Session[] = await getSessionData(query);
   let finishedSessions: any[] = [];
   let unfinishedSessions: any[] = [];
   if (result === null) {
@@ -343,7 +343,7 @@ export async function getPausedSessions(user: number) {
   const query = {
     user: user,
   };
-  const result = await getSessionData(query);
+  const result: Session[] = await getSessionData(query);
   let finishedOrOngoingSessions: any[] = [];
   let pausedSessions: any[] = [];
   if (result === null) {
@@ -383,20 +383,19 @@ export async function getPausedSessions(user: number) {
 async function getSessionData(query: any) {
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
-  const result = await sessionCollection
+  const result: Session[] = await sessionCollection
     .find(query)
     .sort({ time: -1 })
-    .toArray();
+    .toArray() as unknown as Session[];
   return result;
 }
 
-async function createSessionReturn(session: any) {
+async function createSessionReturn(session: Session) {
   const sessionReturn = {
     user: session.user,
     catalogId: session.catalogId,
     courseId: session.courseId,
     status: getSessionStatusAsText(session.status),
-    score: session.score,
     time: session.duration,
   };
   return sessionReturn;
