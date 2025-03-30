@@ -47,7 +47,6 @@ class PlaygroundController(
         @RequestBody database: SqlPlaygroundDatabaseCreation,
         @RequestParam(required = false, defaultValue = "POSTGRES") dbType: PlaygroundDatabaseType
     ): Any {
-
         val user = userRepository.findById(currentToken.id).orElseThrow {
             NotFoundException()
         }
@@ -62,8 +61,7 @@ class PlaygroundController(
                     true
                 )
 
-                val currentActiveDb =
-                    databaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
+                val currentActiveDb = databaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
                 if (currentActiveDb != null) {
                     currentActiveDb.active = false
                     databaseRepository.save(currentActiveDb)
@@ -76,7 +74,6 @@ class PlaygroundController(
 
             PlaygroundDatabaseType.MONGO -> {
                 val prefixedDbName = "mongo_playground_student_${currentToken.id}_${database.name.replace(" ", "_")}"
-
                 val db = MongoPlaygroundDatabase(
                     prefixedDbName,
                     version = "MongoDB 8.0",
@@ -102,19 +99,16 @@ class PlaygroundController(
     ): Any? {
         val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, dbId)
         val criteria = mongoQuery.criteria ?: Document()
-
         val up = Update().apply {
             mongoQuery.update?.forEach { (key, value) ->
                 set(key, value)
             }
         }
-
         val query = Query(Criteria().apply {
             criteria.forEach { (key, value) -> this.and(key).`is`(value) }
         })
 
         MongoSecurityValidator.validate(mongoQuery.operation, mongoQuery)
-
         return when (mongoQuery.operation) {
             "insert" -> {
                 mongoQuery.document ?: throw IllegalArgumentException("Document cannot be null for insert operation")
@@ -166,10 +160,7 @@ class PlaygroundController(
     @DeleteMapping("/mongo/{dbId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteMongoDatabase(
-        @CurrentToken currentToken: LegacyToken,
-        @PathVariable("dbId") dbId: String
-    ) {
+    fun deleteMongoDatabase(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: String) {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
         MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
@@ -177,6 +168,29 @@ class PlaygroundController(
                 throw NotFoundException()
 
             mongoClient.getDatabase(databaseName).drop()
+        }
+    }
+
+    @PostMapping("/mongo/{dbId}/reset")
+    @ResponseBody
+    fun resetMongoDatabase(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String
+    ): Map<String, List<String>> {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            val collections = db.listCollectionNames()
+                .filter { it != "mongo_playground_database" }
+                .onEach { db.getCollection(it).drop() }
+                .toList()
+
+            return mapOf("collections" to collections)
         }
     }
 
