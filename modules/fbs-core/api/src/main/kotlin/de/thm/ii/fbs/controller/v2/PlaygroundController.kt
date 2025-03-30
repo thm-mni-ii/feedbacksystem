@@ -194,6 +194,71 @@ class PlaygroundController(
         }
     }
 
+    @PostMapping("/mongo/{dbId}/create-view")
+    @ResponseBody
+    fun createMongoView(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @RequestBody request: MongoViewDTO
+    ) {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            db.createView(request.viewName, request.collectionSource, request.pipeline)
+        }
+    }
+
+    @GetMapping("/mongo/{dbId}/views")
+    @ResponseBody
+    fun getMongoView(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String
+    ): List<String> {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            return db.listCollections()
+                .filter { it.getString("type") == "view" }
+                .map { it.getString("name") }
+                .toList()
+        }
+    }
+
+    @DeleteMapping("/mongo/{dbId}/views/{viewName}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteMongoView(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @PathVariable("viewName") viewName: String
+    ) {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            val collectionsNames = db.listCollectionNames().toList()
+
+            if (!collectionsNames.contains(viewName))
+                throw NotFoundException()
+
+            db.getCollection(viewName).drop()
+        }
+    }
+
     @DeleteMapping("/{dbId}")
     @ResponseBody
     fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
