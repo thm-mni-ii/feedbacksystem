@@ -4,6 +4,7 @@ package de.thm.ii.fbs.controller.v2
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.mongodb.MongoCommandException
 import com.mongodb.client.MongoClients
 import de.thm.ii.fbs.model.v2.group.Group
 import de.thm.ii.fbs.model.v2.playground.*
@@ -17,6 +18,7 @@ import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import de.thm.ii.fbs.utils.v2.mongo.MongoSecurityValidator
 import org.bson.Document
+import org.bson.conversions.Bson
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
@@ -256,6 +258,91 @@ class PlaygroundController(
                 throw NotFoundException()
 
             db.getCollection(viewName).drop()
+        }
+    }
+
+    @PostMapping("/mongo/{dbId}/create-index")
+    @ResponseBody
+    fun createMongoIndex(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @RequestBody request: MongoIndexDTO
+    ): Map<String, Any> {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            val index = Document(request.index)
+            val indexName = db.getCollection(request.collection).createIndex(index)
+
+            return mapOf("createdIndex" to indexName)
+        }
+    }
+
+    @GetMapping("/mongo/{dbId}/indexes")
+    @ResponseBody
+    fun getMongoIndexes(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+    ): List<Map<String, Any>> {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            return db.listCollectionNames()
+                .filter { it !in listOf("system.views", "mongo_playground_database") }
+                .map { collectionName ->
+                    val indexes = db.getCollection(collectionName).listIndexes()
+                        .map { index ->
+                            mapOf(
+                                "name" to index.getString("name"),
+                                "key" to index.get("key", Document::class.java)
+                            )
+                        }.toList()
+                    mapOf(
+                        "collection" to collectionName,
+                        "indexes" to indexes
+                    )
+                }.toList()
+        }
+    }
+
+    @DeleteMapping("/mongo/{dbId}/indexes/{collection}/{indexName}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteIndex(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @PathVariable("collection") collection: String,
+        @PathVariable("indexName") indexName: String
+    ) {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            if (!db.listCollectionNames().contains(collection))
+                throw NotFoundException()
+
+            try {
+                db.getCollection(collection).dropIndex(indexName)
+            } catch (ex: MongoCommandException) {
+                if (ex.errorCode == 27)
+                    throw NotFoundException()
+                else
+                    throw ex
+            }
         }
     }
 
