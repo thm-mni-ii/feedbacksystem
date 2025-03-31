@@ -9,5 +9,6 @@ data class MongoPlaygroundQueryDTO(
     val criteria: Document? = null,
     val update: Document? = null,
     val projection: Document? = null,
-    val pipeline: List<Document>? = null
+    val pipeline: List<Document>? = null,
+    val upsert: Boolean = false
 )

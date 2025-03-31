@@ -99,13 +99,20 @@ class PlaygroundController(
         @PathVariable("dbId") dbId: String,
         @RequestBody mongoQuery: MongoPlaygroundQueryDTO
     ): Any? {
-        val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, dbId)
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+        }
+
+        val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, databaseName)
         val criteria = mongoQuery.criteria ?: Document()
         val up = Update().apply {
             mongoQuery.update?.forEach { (key, value) ->
                 set(key, value)
             }
         }
+
         val query = Query(Criteria().apply {
             criteria.forEach { (key, value) -> this.and(key).`is`(value) }
         })
@@ -142,7 +149,13 @@ class PlaygroundController(
                     .toList()
             }
 
-            "update" -> mongoTemplate.updateFirst(query, up, mongoQuery.collection)
+            "update" -> {
+                if (mongoQuery.upsert)
+                    mongoTemplate.upsert(query, up, mongoQuery.collection)
+                else
+                    mongoTemplate.updateFirst(query, up, mongoQuery.collection)
+            }
+
             "delete" -> mongoTemplate.remove(query, mongoQuery.collection)
 
             else -> throw UnsupportedOperationException("Operation ${mongoQuery.operation} is not supported")
