@@ -327,6 +327,8 @@ export async function getCatalogScore(
   tokenData: JwtPayload,
   sessionId: string
 ) {
+  console.log("sessionId");
+  console.log(sessionId);
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
   const submissionCollection: mongoDB.Collection = database.collection("submission");
@@ -348,7 +350,7 @@ export async function getCatalogScore(
     console.log("Session is not finished");
     return -1;
   }
-  const report = getQuestionReport(sessionId, submissionCollection, questionCollection, questionInCatalogCollection);
+  const report = await getQuestionReport(sessionId, submissionCollection, questionCollection, questionInCatalogCollection);
   console.log(report);
   return report;
 }
@@ -369,10 +371,8 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
         if(question === null) {
           continue;
         }
-        console.log("question");
-        console.log(question);
         const questionObject = {
-          answer: submission.answer,
+          givenAnswer: submission.answer,
           correctAnswer: question.questionconfiguration,
           score: submission.evaluation.score
         }
@@ -385,6 +385,7 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
     questionReport: questionReport,
     score: totalScore
   } 
+  console.log(finalObject);
   return finalObject;
 }
 
