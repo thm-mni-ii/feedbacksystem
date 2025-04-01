@@ -75,12 +75,32 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     this.highlightCode();
   }
 
-  highlightCode() {
+  highlightCode(fileType?: string) {
     if (this.toSubmit && this.isCodeFile) {
-      const language = this.getLanguageByFileType('js'); // Setzt hier den richtigen Dateityp
-      this.highlightedText = prism.highlight(this.toSubmit, prism.languages[language], language);
-      console.log("Highlight Text:", this.highlightedText);
+      const detectedFileType = fileType || this.detectFileType(); 
+      const language = this.getLanguageByFileType(detectedFileType);
+      
+      if (prism.languages[language]) {
+        this.highlightedText = prism.highlight(this.toSubmit, prism.languages[language], language);
+        console.log("Highlight Text:", this.highlightedText);
+      } else {
+        console.warn("Keine passende Sprache für Prism gefunden:", detectedFileType);
+      }
     }
+  }
+
+  // Methode, um den Dateityp anhand des Inhalts zu erkennen
+  detectFileType(): string {
+    if (this.toSubmit.startsWith("<!DOCTYPE html") || this.toSubmit.includes("<html>")) {
+      return "html";
+    }
+    if (this.toSubmit.includes("import") || this.toSubmit.includes("export")) {
+      return "js"; 
+    }
+    if (this.toSubmit.includes("class") && this.toSubmit.includes("public static void main")) {
+      return "java";
+    }
+    return "txt"; // Fallback
   }
 
   stripHtml(content: string) {
@@ -195,11 +215,15 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       reader.readAsArrayBuffer(file);
       reader.onload = async () => {
         const arrayBuffer = reader.result as ArrayBuffer;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        resolve(result.value);
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+  
+        // Bilder entfernen 
+        const cleanedHtml = result.value.replace(/<img[^>]*>/g, "");
+  
+        resolve(cleanedHtml);
       };
     });
-  }
+  } 
 
   async extractPlainText(file: File): Promise<string> {
     return new Promise((resolve) => {
