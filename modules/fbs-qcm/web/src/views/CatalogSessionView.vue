@@ -56,7 +56,7 @@ const submitAnswer = async (answer: any) => {
       await sessionService.endSession(sessionId.value)
       catalogStatus.value = 'over'
 
-      const catalogScoreRes = await catalogService.getCatalogScore(sessionId)
+      const catalogScoreRes = await catalogService.getCatalogScore(sessionId.value);
       catalogScore.value = catalogScoreRes.data.score
       console.log('Catalog Score:', catalogScoreRes.data)
     } else {

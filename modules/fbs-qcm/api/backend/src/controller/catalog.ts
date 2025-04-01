@@ -268,10 +268,6 @@ const changeNeededScore = ( async (req: Request, res: Response) => {
         const questionId = req.body.question as string;
         const score = Number(req.body.score);
         const transition = req.body.transition as string;
-        console.log(questionId);
-        console.log(score);
-        console.log(transition);
-        console.log(req.query);
         const result = await changeScoreNeededForQuestion(req.user, questionId, score, transition);
         if(result === -1) {
             res.sendStatus(500);

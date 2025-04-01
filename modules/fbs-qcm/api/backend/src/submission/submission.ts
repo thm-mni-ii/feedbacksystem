@@ -63,8 +63,6 @@ export async function submitSessionAnswer(
 ) {
   const session = await getCurrentSession(tokenData.id);
   if (session._id.toString() !== sessionId) {
-    console.log(session._id);
-    console.log(sessionId);
     console.log("submission for differen Session");
     return -1;
   }
@@ -185,13 +183,8 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
     falsePositives += result.onlyInList2.length;
     falseNegatives += result.onlyInList1.length;
   }
-  console.log(`falseAnswers: ${falseAnswers}`);
-  console.log(`correctAnswers: ${correctAnswers}`);
-  console.log(`falsePositives: ${falsePositives}`);
-  console.log(`falseNegatives: ${falseNegatives}`);
   const score = correctAnswers / (correctAnswers + falseAnswers);
   response.score = score;
-  console.log(score);
   return response;
 }
 
@@ -225,22 +218,16 @@ function compareNumberLists(list1: number[], list2: number[]) {
 
 function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
   let blankFields = [];
-  console.log("ALLE ANTWORTEN");
-  console.log(answer);
   let numberOfCorrectAnswers = 0;
   let FillInTheBlanksResponse: FillInTheBlanksResponse =
     {} as FillInTheBlanksResponse;
   const configuration = question.questionconfiguration as FillInTheBlanks;
-  console.log(configuration)
   for (let i = 0; i < configuration.textParts.length; i++) {
     if (configuration.textParts[i].isBlank === true) {
-      console.log(configuration.textParts[i])
       blankFields.push(configuration.textParts[i]);
     }
   }
-  console.log(blankFields);
   for (let j = 0; j < blankFields.length; j++) {
-    console.log(blankFields[j]);
     const res = checkSingleWord(answer, blankFields[j]);
     if (res.correct) {
       numberOfCorrectAnswers++;
@@ -254,15 +241,7 @@ function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
 
 function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
   let evaluation: FillInTheBlanksIndividual = {} as FillInTheBlanksIndividual;
-  console.log("ALLE ANTWORTEN");
-  console.log(answer);
   for (let k = 0; k < answer.length; k++) {
-    console.log("LÖSUNG");
-    console.log(blankFields.text);
-    console.log(blankFields.order);
-    console.log("AbGABE");
-    console.log(answer[k].text);
-    console.log(answer[k].order);
     if (
       answer[k].text === blankFields.text &&
       answer[k].order === blankFields.order
