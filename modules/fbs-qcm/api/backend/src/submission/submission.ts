@@ -150,7 +150,7 @@ function checkSubmission(answer: any, question: Question) {
   if (questionType == QuestionType.Choice) {
     return checkChoice(answer, question);
   } else if (questionType == QuestionType.FillInTheBlanks) {
-    return checkClozeText(answer as FillInTheBlanksAnswer[], question);
+    return checkClozeText(answer.answers as FillInTheBlanksAnswer[], question);
   } else if (questionType == QuestionType.SQL) {
     return checkSQL(answer, question);
   } else {
@@ -225,19 +225,23 @@ function compareNumberLists(list1: number[], list2: number[]) {
 
 function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
   let blankFields = [];
+  console.log("ALLE ANTWORTEN");
+  console.log(answer);
   let numberOfCorrectAnswers = 0;
   let FillInTheBlanksResponse: FillInTheBlanksResponse =
     {} as FillInTheBlanksResponse;
   const configuration = question.questionconfiguration as FillInTheBlanks;
+  console.log(configuration)
   for (let i = 0; i < configuration.textParts.length; i++) {
     if (configuration.textParts[i].isBlank === true) {
+      console.log(configuration.textParts[i])
       blankFields.push(configuration.textParts[i]);
     }
   }
-
+  console.log(blankFields);
   for (let j = 0; j < blankFields.length; j++) {
+    console.log(blankFields[j]);
     const res = checkSingleWord(answer, blankFields[j]);
-    //        FillInTheBlanksResponse.texts.push(res);
     if (res.correct) {
       numberOfCorrectAnswers++;
     }
@@ -250,7 +254,15 @@ function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
 
 function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
   let evaluation: FillInTheBlanksIndividual = {} as FillInTheBlanksIndividual;
+  console.log("ALLE ANTWORTEN");
+  console.log(answer);
   for (let k = 0; k < answer.length; k++) {
+    console.log("LÖSUNG");
+    console.log(blankFields.text);
+    console.log(blankFields.order);
+    console.log("AbGABE");
+    console.log(answer[k].text);
+    console.log(answer[k].order);
     if (
       answer[k].text === blankFields.text &&
       answer[k].order === blankFields.order
