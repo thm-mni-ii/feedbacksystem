@@ -42,6 +42,11 @@ class QuestionService {
       headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
     })
   }
+  getAllCatalogQuestions(catalogId: string): Promise<AxiosResponse<Question[]>> {
+    return axios.get(`/api_v1/allquestionsInCatalog/${catalogId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
+    })
+  }
   getAllTags(): Promise<AxiosResponse<String[]>> {
     return axios
       .get('/api_v1/getAllTags', {
