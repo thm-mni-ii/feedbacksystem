@@ -22,7 +22,7 @@ import {
   CatalogAccess,
   SessionStatus,
 } from "../utils/enum";
-import { Question } from "../model/Question";
+import { EditQuestionType, Question, QuestionWithoutId } from "../model/Question";
 import { authenticate, authenticateInCatalog } from "../authenticate";
 import { questionInCatalogObject } from "../model/utilInterfaces";
 type questionInsertionType = Omit<Question, "_id">;
@@ -211,7 +211,7 @@ export async function postSingleQuestion(
 }
 
 export async function editSingleQuestion(
-  question: Question,
+  question: EditQuestionType,
   tokenData: JwtPayload
 ) {
   const database: mongoDB.Db = await connect();
@@ -230,9 +230,16 @@ export async function editSingleQuestion(
   const filter = {
     _id: new mongoDB.ObjectId(question._id),
   };
-  const questionWithoutId: any = question;
-  delete questionWithoutId._id;
-  questionWithoutId.lastEdited = new Date();
+  const questionOriginalData: Question = await questionCollection.findOne(filter) as unknown as Question;
+  const questionWithoutId: QuestionWithoutId = {
+      owner: question.owner ?? questionOriginalData.owner, 
+      questiontext: question.questiontext ?? questionOriginalData.questiontext,
+      questiontags: question.questiontags ?? questionOriginalData.questiontags,
+      questiontype: question.questiontype ?? questionOriginalData.questiontype,
+      questionconfiguration: question.questionconfiguration ?? questionOriginalData.questionconfiguration,
+      createdAt: questionOriginalData.createdAt,
+      lastEdited: new Date()
+  };
   const res = await questionCollection.replaceOne(filter, questionWithoutId);
   return res;
 }

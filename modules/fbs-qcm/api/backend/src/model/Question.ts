@@ -13,3 +13,22 @@ export interface Question {
   createdAt: Date,
   lastEdited: Date
 }
+
+export interface EditQuestionType {
+  _id: ObjectId;
+  owner?: number;
+  questiontext?: string;
+  questiontags?: string[];
+  questiontype?: QuestionType;
+  questionconfiguration?: Choice | FillInTheBlanks | QuestionType.SQL;
+}
+
+export interface QuestionWithoutId { 
+  owner: number;
+  questiontext?: string;
+  questiontags: string[];
+  questiontype: QuestionType;
+  questionconfiguration: Choice | FillInTheBlanks | QuestionType.SQL;
+  createdAt: Date,
+  lastEdited: Date
+}
