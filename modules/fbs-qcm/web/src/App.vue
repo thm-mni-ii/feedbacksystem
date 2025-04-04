@@ -5,6 +5,7 @@
         <v-tab @click="router.push('/')">Home</v-tab>
         <v-tab @click="router.push('/allQuestions')">All Questions</v-tab>
         <v-tab @click="router.push('/CourseOverview')">Edit Catalog</v-tab>
+        <v-tab @click="router.push('/Study')">Study</v-tab>
       </v-tabs>
     </v-app-bar>
     <v-main>

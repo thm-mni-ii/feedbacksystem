@@ -3,20 +3,20 @@ import { ref, watch, defineProps, defineEmits, onMounted } from 'vue'
 import questionService from '@/services/question.service'
 
 const props = defineProps<{
-  questiontags: string[]
+  questiontags?: string[]
 }>()
 
 const emit = defineEmits<{
   (e: 'update-tags', newTags: string[]): void
 }>()
 
-const localTags = ref<string[]>([...props.questiontags])
+const localTags = ref<string[]>([...(props.questiontags ?? [])])
 const items = ref<string[]>([])
 
 watch(
   () => props.questiontags,
   (newTags) => {
-    if (JSON.stringify(localTags.value) !== JSON.stringify(newTags)) {
+    if (Array.isArray(newTags) && JSON.stringify(localTags.value) !== JSON.stringify(newTags)) {
       console.log('Props geändert:', newTags)
       localTags.value = [...newTags]
     }
