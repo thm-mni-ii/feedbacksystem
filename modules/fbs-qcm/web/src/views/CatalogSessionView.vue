@@ -18,6 +18,7 @@ const showFeedback = ref<boolean>(false)
 const currentQuestionScore = ref<number>(0)
 const formattedScore = computed(() => (currentQuestionScore.value * 100).toFixed(2))
 const catalogScore = ref<Number>()
+const catalogEvaluation = ref<{}>({})
 
 const scoreEmoji = computed(() => {
   if (currentQuestionScore.value < 0.1) return '💀'
@@ -58,6 +59,8 @@ const submitAnswer = async (answer: any) => {
 
       const catalogScoreRes = await catalogService.getCatalogScore(sessionId.value)
       catalogScore.value = catalogScoreRes.data.score
+      catalogEvaluation.value = catalogScoreRes.data
+
       console.log('Catalog Score:', catalogScoreRes.data)
     } else {
       catalogStatus.value = null
@@ -95,7 +98,8 @@ onMounted(async () => {
     if (questionData.value.catalog === 'over') {
       catalogStatus.value = 'over'
       const catalogScoreRes = await catalogService.getCatalogScore(sessionId.value)
-      catalogScore.value = catalogScoreRes.data.score
+      catalogScore.value = Number(catalogScoreRes.data.score)
+      catalogEvaluation.value = catalogScoreRes.data
       console.log('[onMounted] Catalog Score:', catalogScore.value)
     } else {
       catalogStatus.value = null
