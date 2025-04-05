@@ -13,3 +13,7 @@ interface questionInCatalogObjectChild {
     question: string,
     transition: string
 }
+
+export interface Course {
+    id: number
+}

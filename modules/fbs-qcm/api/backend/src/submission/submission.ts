@@ -11,62 +11,20 @@ import { Question } from "../model/Question";
 import QuestionType from "../enums/QuestionType";
 import FillInTheBlanks from "../model/questionTypes/FillInTheBlanks";
 import Choice from "../model/questionTypes/Choice";
-
-interface FillInTheBlanksAnswer {
-  text: string;
-  order: number;
-}
-interface FillInTheBlanksResponse {
-  score: number;
-  texts: FillInTheBlanksIndividual[];
-}
-
-interface FillInTheBlanksIndividual {
-  text: string;
-  order: number;
-  correct: boolean;
-}
-
-interface entry {
-  text: string;
-  id: number;
-}
-
-interface ChoiceAnswer {
-  id: number;
-  text: string;
-  entries: entry[];
-}
-
-interface entry {
-  id: number;
-  text: string;
-}
-
-interface ChoiceReply {
-  score: number;
-  row: ChoiceReplyRow[];
-}
-
-interface ChoiceReplyRow {
-  id: number;
-  text: string;
-  entries: entry[];
-  correct: number[];
-}
+import { ChoiceAnswer, ChoiceReply, ChoiceReplyRow, FillInTheBlanksAnswer, FillInTheBlanksIndividual, FillInTheBlanksResponse } from "./utils";
 
 export async function submitSessionAnswer(
   tokenData: JwtPayload,
   question: string,
   answers: any,
-  sessionId: any
+  sessionId: string
 ) {
   const session = await getCurrentSession(tokenData.id);
   if (session._id.toString() !== sessionId) {
     console.log("submission for differen Session");
     return -1;
   }
-  const submitResult = await submit(tokenData, question, answers, session);
+  const submitResult = await submit(tokenData, question, answers, sessionId);
   return submitResult;
 }
 
@@ -74,7 +32,7 @@ export async function submit(
   tokenData: JwtPayload,
   question: string,
   answers: any,
-  session: any
+  sessionId: string
 ) {
   const userCourses = getStudentCourseRoles(tokenData);
   const database: mongoDB.Db = await connect();
@@ -117,7 +75,7 @@ export async function submit(
     answer: answers,
     evaluation: correct,
     timeStamp: timestamp,
-    session: session._id,
+    session: sessionId,
   };
   await submissionCollection.insertOne(submission);
   return correct;
@@ -132,7 +90,7 @@ async function checkAnswer(
     _id: questionId,
   };
 
-  const result: any = await questionCollection.findOne(questionQuery);
+  const result: Question = await questionCollection.findOne(questionQuery) as unknown as Question;
   if (result === null) {
     return -1;
   }
@@ -239,7 +197,7 @@ function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
   return FillInTheBlanksResponse;
 }
 
-function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
+function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: FillInTheBlanksAnswer) {
   let evaluation: FillInTheBlanksIndividual = {} as FillInTheBlanksIndividual;
   for (let k = 0; k < answer.length; k++) {
     if (
@@ -259,38 +217,4 @@ function checkSingleWord(answer: FillInTheBlanksAnswer[], blankFields: any) {
     }
   }
   return evaluation;
-}
-
-async function findFirstFalseAnswerInSession(
-  tokenData: JwtPayload,
-  catalog: string,
-  course: string
-) {
-  const id = tokenData.id;
-  const catalogIdOject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
-  const courseIdOject: mongoDB.ObjectId = new mongoDB.ObjectId(course);
-  const database: mongoDB.Db = await connect();
-  const sessionCollection: mongoDB.Collection = await database.collection(
-    "session"
-  );
-  const submissionCollection: mongoDB.Collection = await database.collection(
-    "submission"
-  );
-  const request = {
-    course: courseIdOject,
-    catalog: catalogIdOject,
-    user: id,
-    status: SessionStatus.ongoing,
-  };
-  const session = await sessionCollection.findOne(request);
-  if (session === null) {
-    return -1;
-  }
-  const falseSubmissionRequest = {
-    session: session._id,
-    evaluation: false,
-  };
-  const falseAnswers: any[] = await submissionCollection
-    .find(falseSubmissionRequest)
-    .toArray();
 }

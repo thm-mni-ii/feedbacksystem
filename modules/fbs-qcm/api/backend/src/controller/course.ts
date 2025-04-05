@@ -1,45 +1,7 @@
 import { Request, Response } from "express";
-import { getStudentCourses, getTeacherCourses } from "../course/course";
 import { getCatalogScore } from "../catalog/catalog";
 import { getCurrentQuestion } from "../question/question";
 
-const teacherCourse = ( async (req: Request, res: Response) => {
-    try {
-      if (req.user == undefined) {
-        res.sendStatus(401);
-        return;
-      }
-      if (req.user !== undefined) {
-        const authHeader = req.headers["authorization"];
-        const token: any = authHeader && authHeader.split(" ")[1];
-        const result = await getTeacherCourses(token, req.user);
-        console.log("HI");
-        console.log(result);
-        res.send(result);
-        return;
-      }
-    } catch (error) {
-      res.sendStatus(500);
-    }
-});
-const studentCourse = ( async (req: Request, res: Response) => {
-    try {
-      if (req.user == undefined) {
-        res.sendStatus(401);
-        return;
-      }
-      if (req.user !== undefined) {
-        const authHeader = req.headers["authorization"];
-        const token: any = authHeader && authHeader.split(" ")[1];
-        const result = await getStudentCourses(token, req.user);
-        console.log(result);
-        res.send(result);
-        return;
-      }
-    } catch (error) {
-      res.sendStatus(500);
-    }
-});
 const getSingleCatalogScore = (async (req:Request, res: Response) => {
     try {
       if (req.user == undefined) {
@@ -66,7 +28,5 @@ const getSingleCatalogScore = (async (req:Request, res: Response) => {
     }
 });
 export {
-    teacherCourse,
-    studentCourse,
     getSingleCatalogScore,
 }
