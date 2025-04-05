@@ -11,17 +11,8 @@ import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
 import { CatalogAccess, SessionStatus } from "../utils/enum";
 import { authenticateInCatalog } from "../authenticate";
-import { checkIfOngoingSessionExist, getOngoingSession } from "./sessionUtils";
+import { checkIfOngoingSessionExist, getOngoingSession, SessionReturn, Session } from "./sessionUtils";
 
-interface Session {
-  user: string;
-  time: Date;
-  starttime: Date;
-  status: number;
-  catalogId: string;
-  courseId: number;
-  duration: number;
-}
 export async function postSession(
   tokenData: JwtPayload,
   catalogId: string,
@@ -287,8 +278,8 @@ export async function getOpenSessions(user: number) {
     user: user,
   };
   const result: Session[] = await getSessionData(query);
-  let finishedSessions: any[] = [];
-  let unfinishedSessions: any[] = [];
+  let finishedSessions: SessionReturn[] = [];
+  let unfinishedSessions: SessionReturn[] = [];
   if (result === null) {
     return 0;
   }
@@ -311,7 +302,7 @@ export async function getOpenSessions(user: number) {
     ) {
       continue;
     }
-    const entry = createSessionReturn(result[i]);
+    const entry: SessionReturn = await createSessionReturn(result[i]);
     if (result[i].status === SessionStatus.finished) {
       finishedSessions.push(entry);
     } else {
@@ -328,24 +319,13 @@ export async function getOnlyOngoingSession(user: number) {
   return ongoingSession;
 }
 
-function removeMatchingObjects(arr1: any[], arr2: any[]) {
-  return arr1.filter(
-    (item1) =>
-      !arr2.some(
-        (item2) =>
-          item1.catalogId === item2.catalogId &&
-          item1.courseId === item2.courseId
-      )
-  );
-}
-
 export async function getPausedSessions(user: number) {
   const query = {
     user: user,
   };
   const result: Session[] = await getSessionData(query);
-  let finishedOrOngoingSessions: any[] = [];
-  let pausedSessions: any[] = [];
+  let finishedOrOngoingSessions: SessionReturn[] = [];
+  let pausedSessions: SessionReturn[] = [];
   if (result === null) {
     return 0;
   }
@@ -368,7 +348,7 @@ export async function getPausedSessions(user: number) {
     ) {
       continue;
     }
-    const entry = createSessionReturn(result[i]);
+    const entry = await createSessionReturn(result[i]);
     if (
       result[i].status === SessionStatus.finished ||
       result[i].status === SessionStatus.ongoing
@@ -380,7 +360,7 @@ export async function getPausedSessions(user: number) {
   }
   return pausedSessions;
 }
-async function getSessionData(query: any) {
+async function getSessionData(query: object) {
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
   const result: Session[] = await sessionCollection
@@ -391,7 +371,7 @@ async function getSessionData(query: any) {
 }
 
 async function createSessionReturn(session: Session) {
-  const sessionReturn = {
+  const sessionReturn: SessionReturn = {
     user: session.user,
     catalogId: session.catalogId,
     courseId: session.courseId,

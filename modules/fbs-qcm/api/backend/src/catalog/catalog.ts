@@ -20,6 +20,8 @@ import {
 } from "../authenticate";
 import { Access, CatalogAccess, CourseAccess, SessionStatus } from "../utils/enum";
 import { timeStamp } from "console";
+import { Submission } from "../submission/utils";
+import { Course } from "../model/utilInterfaces";
 
 interface QuestionData {
   questionId: mongoDB.ObjectId;
@@ -69,13 +71,16 @@ export async function createSingleCatalog(
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
-  const courses = await getCourses(token);
-  if (courses === -1) {
+  const result: Course[] | number = await getCourses(token);
+  if (result === -1) {
     return -1;
   }
-  const couresExist = courses.some((obj: any) => obj.id === course);
-  if (!couresExist) {
-    return -1;
+  if (Array.isArray(result)) {
+    const courses: Course[] = result;
+    const couresExist = courses.some((obj: Course) => obj.id === course);
+    if (!couresExist) {
+      return -1;
+    }
   }
   const catalog = {
     name: data.name,
@@ -103,12 +108,12 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   const questionCollection: mongoDB.Collection = database.collection("question");
   const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
   if(questionId === "open") {
-    const question = await getFirstQuestionInCatalog(
+    const question: Question = await getFirstQuestionInCatalog(
       questionCollection,
       questionInCatalogCollection,
       catalogId
-    ) as any;
-    questionId = question._id;
+    ) as Question;
+    questionId = question._id as unknown as string;
     console.log(`start question is: ${questionId}`);
   }
   if(questionId === undefined || questionId === null ||questionId === "") {
@@ -118,7 +123,7 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   const query = {
       _id: new mongoDB.ObjectId(questionId)
   }
-  const data: CatalogQuestionData = await questionInCatalogCollection.findOne(query) as any;
+  const data: CatalogQuestionData = await questionInCatalogCollection.findOne(query) as CatalogQuestionData;
   if(data === null) {
       return -1;
   }
@@ -149,7 +154,7 @@ export async function editCatalogInformation(tokenData: JwtPayload, catalogId: s
   const originQueryQuestion = {
       _id: data.question
   }
-  const originQuestion: Question = await questionCollection.findOne(originQueryQuestion) as any;
+  const originQuestion: Question = await questionCollection.findOne(originQueryQuestion) as Question;
   if(originQuestion === null) {
       return -1;
   }
@@ -286,10 +291,16 @@ export async function editSingleCatalog(
     catalogs: catalogIdObject,
   };
   await catalogCollection.find(catalogQuery).toArray();
-  const courses = await getCourses(token);
-  const couresExist = courses.some((obj: any) => obj.id === course);
-  if (!couresExist) {
+  const result: Course[] | number = await getCourses(token);
+  if (result === -1) {
     return -1;
+  }
+  if (Array.isArray(result)) {
+    const courses: Course[] = result;
+    const couresExist = courses.some((obj: Course) => obj.id === course);
+    if (!couresExist) {
+      return -1;
+    }
   }
   const filter = {
     _id: catalogIdObject,
@@ -309,18 +320,6 @@ export async function editSingleCatalog(
   };
   await catalogInCourseCollection.updateOne(filter2, update2);
   return 0;
-}
-
-export async function getUser(tokenData: JwtPayload) {
-  const database: mongoDB.Db = await connect();
-  const userCollection: mongoDB.Collection = database.collection("user");
-  const query = {
-    id: tokenData.id,
-  };
-  const res: any = await userCollection.findOne(query);
-  delete res._id;
-  delete res.id;
-  return res;
 }
 
 export async function getCatalogScore(
@@ -410,12 +409,12 @@ export async function getQuestionTree(
   const database: mongoDB.Db = await connect();
   const questionCollection = database.collection("question");
   const questionInCatalogCollection = database.collection("questionInCatalog");
-  const firstQuestion: any = await getFirstQuestionInCatalog(
+  const firstQuestion: Question | number = await getFirstQuestionInCatalog(
     questionCollection,
     questionInCatalogCollection,
     catalogId
   );
-  if (firstQuestion == null || firstQuestion == -1) {
+  if (firstQuestion == null || typeof firstQuestion === 'number') {
     return -1;
   }
   const catalogArray: string[] = [catalogId];
@@ -427,7 +426,7 @@ export async function getQuestionTree(
     return -1;
   }
   let tree: QuestionTreeObject = {
-    question: firstQuestion,
+    question: firstQuestion, // Now we know this is a Question object
     children: await createChildrenObjects(firstQuestion, allConnections),
   };
   const allQuestions = await getAllQuestionInCatalog(

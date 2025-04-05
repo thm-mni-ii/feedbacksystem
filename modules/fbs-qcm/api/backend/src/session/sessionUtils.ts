@@ -2,7 +2,7 @@ import * as mongoDB from "mongodb";
 import { JwtPayload } from "jsonwebtoken";
 import { SessionStatus } from "../utils/enum";
 
-interface Session {
+export interface Session {
     _id: string,
     user: number,
     time: Date,
@@ -12,6 +12,14 @@ interface Session {
     courseId: number,
     duration: number
 };
+
+export interface SessionReturn {
+    user: number,
+    catalogId: string,
+    courseId: number,
+    status: string,
+    time: number
+}
 
 export async function getOngoingSession(userId: number, sessionCollection: mongoDB.Collection) {
     const query = {

@@ -284,14 +284,14 @@ export async function getFirstQuestionInCatalog(
   const firstQuestionQuery = {
     _id: firstQuestion.question,
   };
-  const firstQuestionData = await questionCollection.findOne(
+  const firstQuestionData: Question = await questionCollection.findOne(
     firstQuestionQuery
-  );
+  ) as unknown as Question;
   if(firstQuestionData !== null) {
       firstQuestionData._id = firstQuestion._id;
       return firstQuestionData;
   } else {
-      return null;
+      return -1;
   }
 }
 
