@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineProps, defineModel } from 'vue'
+import { computed, defineProps, defineModel, watch } from 'vue'
 
 interface TextPart {
   order: number
@@ -42,6 +42,19 @@ const formattedText = computed(() => {
     }
   })
 })
+
+watch(
+  fillInTheBlanksAnswer,
+  (newVal) => {
+    for (const key in newVal) {
+      const trimmed = newVal[key]?.trim?.()
+      if (trimmed !== newVal[key]) {
+        fillInTheBlanksAnswer.value[key] = trimmed
+      }
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <template>
