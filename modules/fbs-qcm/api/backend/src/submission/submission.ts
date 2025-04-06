@@ -75,7 +75,7 @@ export async function submit(
     answer: answers,
     evaluation: correct,
     timeStamp: timestamp,
-    session: sessionId,
+    session: new mongoDB.ObjectId(sessionId),
   };
   await submissionCollection.insertOne(submission);
   return correct;

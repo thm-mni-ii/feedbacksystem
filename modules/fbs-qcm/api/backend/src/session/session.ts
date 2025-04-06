@@ -18,6 +18,9 @@ export async function postSession(
   catalogId: string,
   courseId: number
 ) {
+  console.log(tokenData);
+  console.log(catalogId);
+  console.log(courseId);
   if (
     !authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)
   ) {

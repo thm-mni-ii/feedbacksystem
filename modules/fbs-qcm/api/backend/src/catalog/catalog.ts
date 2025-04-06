@@ -91,6 +91,9 @@ export async function createSingleCatalog(
 }
 
 export async function editCatalogInformation(tokenData: JwtPayload, catalogId: string, questionId: string) {
+  console.log(tokenData)
+  console.log(catalogId)
+  console.log(questionId)
   if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     //need to add verification specifically for questioninCatalogId
     return -1;
@@ -201,59 +204,35 @@ export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
   }
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
-  const catalogInCourseCollection: mongoDB.Collection =
-    database.collection("catalogInCourse");
-  
-  // Query for catalogs in course
+  const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
   const request = {
     course: Number(courseId),
   };
-  
-  // Get all catalog references for this course
-  const courseResult = await catalogInCourseCollection
-    .find(request)
-    .toArray() as unknown as CatalogInCourseObject[];
-  
+ 
+
+  const courseResult = await catalogInCourseCollection.find(request).toArray();
   if (courseResult.length === 0) {
     console.log("no catalogs found");
     return -1;
   }
-  
-  // Convert string IDs to ObjectIds
-  const catalogIds = courseResult.map((x: CatalogInCourseObject) => 
-    new mongoDB.ObjectId(x.catalog)
-  );
-
-  // Get catalog details
-  const catalogsFromDB = await catalogCollection
-    .find({ _id: { $in: catalogIds } })
+  const catalogs = await catalogCollection
+    .find({ _id: { $in: courseResult.map((x) => x.catalog) } })
     .toArray();
-  
-  // Convert to Catalog type
-  const catalogs = catalogsFromDB as unknown as Catalog[];
-  
-  // Map back to CatalogInCourseObject
-  const modifiedCatalogs = catalogs.map((catalog: Catalog) => {
-    // Find matching course entry
-    const catalogInCourse = courseResult.find((x: CatalogInCourseObject) => 
-      x.catalog === catalog._id.toString()
-    );
-    
-    if (!catalogInCourse) {
-      // Fallback if no matching entry found
-      return {
-        _id: "", // You may want to generate an ID here
-        course: courseId, 
-        catalog: catalog._id.toString(),
-        requirements: []
-      } as CatalogInCourseObject;
-    }
-    
-    return catalogInCourse;
-  });
-  
+     // Modify the response to replace _id with id and include courseId
+  const modifiedCatalogs: any[] = catalogs.map((catalog) => {
+    const catalogInCourse = courseResult.find((x) =>
+      x.catalog.equals(catalog._id)    );
+       return {
+        id: catalog._id as unknown as string,
+        name: catalog.name,
+        requirements: catalogInCourse ? catalogInCourse.requirements : [],
+        course: catalogInCourse ? catalogInCourse.course : -1,
+        };
+      });
   return modifiedCatalogs;
 }
+ 
+
 
 export async function deleteSingleCatalog(tokenData: JwtPayload, catalogId: string) {
   if (!(await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId))) {
