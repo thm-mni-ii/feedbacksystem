@@ -58,18 +58,18 @@ class FsStorageService {
   /**
     * Get the path to the main file of a task
     *
-    * @param tid Task id
+    * @param ccid Checker Configuration id
     * @return The path to the file
     */
-  def pathToMainFile(tid: Int): Option[Path] = Option(tasksDir(tid).resolve(storageFileName.MAIN_FILE)).filter(Files.exists(_))
+  def pathToMainFile(ccid: Int): Option[Path] = Option(tasksDir(ccid).resolve(storageFileName.MAIN_FILE)).filter(Files.exists(_))
 
   /**
     * Get the path to the secondary file of a task
     *
-    * @param tid Task id
+    * @param ccid Checker Configuration id
     * @return The path to the file
     */
-  def pathToSecondaryFile(tid: Int): Option[Path] = Option(tasksDir(tid).resolve(storageFileName.SECONDARY_FILE)).filter(Files.exists(_))
+  def pathToSecondaryFile(ccid: Int): Option[Path] = Option(tasksDir(ccid).resolve(storageFileName.SECONDARY_FILE)).filter(Files.exists(_))
 
   /**
     * Get the path to the solution file of a submission
