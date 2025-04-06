@@ -368,6 +368,8 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
         const questionObject = {
           givenAnswer: submission.answer,
           correctAnswer: question.questionconfiguration,
+          questionId: questionInCatalogObject.question,
+          questionInCatalogId: questionInCatalogObject._id,
           score: submission.evaluation.score
         }
         totalScore += submission.evaluation.score;
