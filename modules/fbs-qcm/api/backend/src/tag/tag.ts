@@ -13,22 +13,23 @@ export async function getAllTags(tokenData: JwtPayload) {
     const database: mongoDB.Db = await connect();
     const questionCollection: mongoDB.Collection = database.collection("question");
     const data = await questionCollection.aggregate([
-        // Zerlege das Array questionTags in einzelne Dokumente
         { $unwind: "$questiontags" },
-        
-        // Gruppiere nach den Tags und zähle sie
         { $group: { 
-            tag: "$questiontags", 
+            _id: "$questiontags", 
             count: { $sum: 1 } 
           } 
         },
-        
-        // Optional: Sortiere nach Häufigkeit absteigend
         { $sort: { count: -1 } }
-      ]) as unknown as TagObject[];
-      let result: TagObject[] = [];
-      await data.forEach((tag: TagObject) => {
-        result.push(tag);
+        ])
+      let result: any[] = [];
+      await data.forEach((tag: any) => {
+        console.log(`${tag._id}: ${tag.count}`);
+        const tagObject = {
+            tag: tag._id,
+            count: tag.count
+        }
+        console.log(tagObject);
+        result.push(tagObject);
       });
       return result;
 }
