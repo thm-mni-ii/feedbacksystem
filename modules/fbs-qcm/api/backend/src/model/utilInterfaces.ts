@@ -17,3 +17,10 @@ interface questionInCatalogObjectChild {
 export interface Course {
     id: number
 }
+
+export interface CatalogInCourseObject {
+    _id: string,
+    course: number,
+    catalog: string,
+    requirements: CatalogInCourseObject[]
+}

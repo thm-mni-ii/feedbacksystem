@@ -6,6 +6,8 @@ import { Question } from "../model/Question";
 import QuestionType from "../enums/QuestionType";
 import Choice from "../model/questionTypes/Choice";
 import FillInTheBlanks from "../model/questionTypes/FillInTheBlanks";
+import { questionInCatalogObject } from "../model/utilInterfaces";
+import { Session } from "../session/sessionUtils";
 
 interface ReturnChoiceQuestion {
   id: mongoDB.ObjectId;
@@ -311,7 +313,7 @@ export async function getLastSessionForCatalog(db: mongoDB.Db, catalogId: string
         user: userId
     }
     console.log(query);
-    const session = await sessionCollection.find(query).sort({ starttime: -1 }).limit(1).toArray();
+    const session: Session[] = await sessionCollection.find(query).sort({ starttime: -1 }).limit(1).toArray() as unknown as Session[];
     console.log("session");
     console.log(session);
     return session[0];
@@ -355,10 +357,10 @@ export async function getAllQuestionsConnectionsFromCatalogs(
   const findQuestions = {
     catalog: { $in: catalogIds },
   };
-  const accesibaleQuestions = await questionInCatalogCollection
+  const accesibleQuestions: questionInCatalogObject[] = await questionInCatalogCollection
     .find(findQuestions)
-    .toArray();
-  return accesibaleQuestions;
+    .toArray()as unknown as questionInCatalogObject[];
+  return accesibleQuestions;
 }
 
 export function createQuestionResponse(newQuestion: any, newId: string) {

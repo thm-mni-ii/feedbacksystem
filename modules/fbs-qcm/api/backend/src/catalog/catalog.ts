@@ -10,7 +10,7 @@ import {
   getLastSessionForCatalog,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
-import { Question } from "../model/Question";
+import { UpdateFilter } from 'mongodb';
 import { getCourses } from "../course/course";
 import { Catalog } from "../model/Catalog";
 import {
@@ -21,7 +21,9 @@ import {
 import { Access, CatalogAccess, CourseAccess, SessionStatus } from "../utils/enum";
 import { timeStamp } from "console";
 import { Submission } from "../submission/utils";
-import { Course } from "../model/utilInterfaces";
+import { CatalogInCourseObject, Course, questionInCatalogObject } from "../model/utilInterfaces";
+import { Session } from "../session/sessionUtils";
+import { Question } from "../model/Question";
 
 interface QuestionData {
   questionId: mongoDB.ObjectId;
@@ -34,14 +36,6 @@ interface catalog {
   name: string;
   questions: string[];
   requirements: string[];
-}
-interface QuestionTreeObject {
-  question: Question;
-  children: child[];
-}
-interface child {
-  requirement: string;
-  child: QuestionTreeObject;
 }
 
 interface CatalogQuestionData {
@@ -185,15 +179,13 @@ export async function getSingleCatalog(tokenData: JwtPayload, catalogId: string)
     _id: new mongoDB.ObjectId(catalogId),
   };
   let data = await catalogCollection.findOne(query);
-  const tree = await getQuestionTree(tokenData, catalogId);
   const catalogInCourse = await catalogInCourseCollection.findOne({
     catalog: new mongoDB.ObjectId(catalogId),
   });
   if (data != null) {
-    const res: Catalog = {
-      id: data._id as unknown as string,
+    const res: any = {
+      _id: data._id as unknown as string,
       name: data.name as string,
-      questions: tree ? [tree] : [],
       requirements: catalogInCourse ? catalogInCourse.requirements : [],
       course: catalogInCourse ? catalogInCourse.course : -1,
     };
@@ -211,31 +203,55 @@ export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection =
     database.collection("catalogInCourse");
+  
+  // Query for catalogs in course
   const request = {
     course: Number(courseId),
   };
-  const courseResult = await catalogInCourseCollection.find(request).toArray();
+  
+  // Get all catalog references for this course
+  const courseResult = await catalogInCourseCollection
+    .find(request)
+    .toArray() as unknown as CatalogInCourseObject[];
+  
   if (courseResult.length === 0) {
     console.log("no catalogs found");
     return -1;
   }
-  const catalogs = await catalogCollection
-    .find({ _id: { $in: courseResult.map((x) => x.catalog) } })
+  
+  // Convert string IDs to ObjectIds
+  const catalogIds = courseResult.map((x: CatalogInCourseObject) => 
+    new mongoDB.ObjectId(x.catalog)
+  );
+
+  // Get catalog details
+  const catalogsFromDB = await catalogCollection
+    .find({ _id: { $in: catalogIds } })
     .toArray();
-
-  // Modify the response to replace _id with id and include courseId
-  const modifiedCatalogs: Catalog[] = catalogs.map((catalog) => {
-    const catalogInCourse = courseResult.find((x) =>
-      x.catalog.equals(catalog._id)
+  
+  // Convert to Catalog type
+  const catalogs = catalogsFromDB as unknown as Catalog[];
+  
+  // Map back to CatalogInCourseObject
+  const modifiedCatalogs = catalogs.map((catalog: Catalog) => {
+    // Find matching course entry
+    const catalogInCourse = courseResult.find((x: CatalogInCourseObject) => 
+      x.catalog === catalog._id.toString()
     );
-    return {
-      id: catalog._id as unknown as string,
-      name: catalog.name,
-      requirements: catalogInCourse ? catalogInCourse.requirements : [],
-      course: catalogInCourse ? catalogInCourse.course : -1,
-    };
+    
+    if (!catalogInCourse) {
+      // Fallback if no matching entry found
+      return {
+        _id: "", // You may want to generate an ID here
+        course: courseId, 
+        catalog: catalog._id.toString(),
+        requirements: []
+      } as CatalogInCourseObject;
+    }
+    
+    return catalogInCourse;
   });
-
+  
   return modifiedCatalogs;
 }
 
@@ -388,90 +404,6 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
   return finalObject;
 }
 
-async function getDetailedSingleQuestionReport() {
-
-}
-
-export async function getQuestionTree(
-  tokenData: JwtPayload,
-  catalogId: string
-) {
-  if (
-    !(await authenticateInCatalog(
-      tokenData,
-      CatalogAccess.docentInCatalog,
-      catalogId
-    ))
-  ) {
-    console.log("No Permissions to Catalog");
-    return -1;
-  }
-  const database: mongoDB.Db = await connect();
-  const questionCollection = database.collection("question");
-  const questionInCatalogCollection = database.collection("questionInCatalog");
-  const firstQuestion: Question | number = await getFirstQuestionInCatalog(
-    questionCollection,
-    questionInCatalogCollection,
-    catalogId
-  );
-  if (firstQuestion == null || typeof firstQuestion === 'number') {
-    return -1;
-  }
-  const catalogArray: string[] = [catalogId];
-  const allConnections = await getAllQuestionsConnectionsFromCatalogs(
-    questionInCatalogCollection,
-    catalogArray
-  );
-  if (allConnections == null || allConnections.length == 0) {
-    return -1;
-  }
-  let tree: QuestionTreeObject = {
-    question: firstQuestion, // Now we know this is a Question object
-    children: await createChildrenObjects(firstQuestion, allConnections),
-  };
-  const allQuestions = await getAllQuestionInCatalog(
-    questionInCatalogCollection,
-    questionCollection,
-    catalogId
-  );
-  if (allQuestions == null || allQuestions == -1) {
-    return -1;
-  }
-  return tree;
-}
-
-async function createChildrenObjects(question: any, allConnections: any[]) {
-  const connections = findConnection(question, allConnections);
-  let children: child[] = [];
-  const database: mongoDB.Db = await connect();
-  const questionCollection: mongoDB.Collection =
-    database.collection("question");
-  for (const key in connections) {
-    if (connections[key] === "") {
-      continue;
-    }
-    const questionFind = {
-      _id: connections[key],
-    };
-    const data: Question = (await questionCollection.findOne(
-      questionFind
-    )) as unknown as Question;
-    if (data === null) {
-      continue;
-    }
-    const newQuestion: QuestionTreeObject = {
-      question: data,
-      children: await createChildrenObjects(data, allConnections),
-    };
-    let child: child = {
-      requirement: key,
-      child: newQuestion,
-    };
-    children.push(child);
-  }
-  return children;
-}
-
 export async function allQuestionsInCatalog(
   tokenData: JwtPayload,
   catalogId: string
@@ -500,21 +432,6 @@ export async function allQuestionsInCatalog(
     return -1;
   }
   return data;
-}
-
-function findConnection(question: any, allConnections: any[]) {
-  if (question == "empty") {
-    return -2;
-  }
-  if (question == "") {
-    return -1;
-  }
-  for (let i = 0; i < allConnections.length; i++) {
-    if (allConnections[i].question.equals(question._id)) {
-      return allConnections[i].children;
-    }
-  }
-  return -1;
 }
 
 export async function getPreviousQuestionInCatalog(tokenData: JwtPayload, catalogId: string, questionId: string ) {
@@ -597,7 +514,7 @@ export async function emptyCatalogInformation(tokenData: JwtPayload, catalogId: 
 
 export async function catalogScore(tokenData: JwtPayload, courseId: number, catalogId: string) {
     const database: mongoDB.Db = await connect();
-    const session: any = await getLastSessionForCatalog(database, catalogId, courseId, tokenData.id); 
+    const session: Session = await getLastSessionForCatalog(database, catalogId, courseId, tokenData.id); 
     if(session === null) {
         return -1;
     }
@@ -605,7 +522,7 @@ export async function catalogScore(tokenData: JwtPayload, courseId: number, cata
         session: session._id
     }
     const submissionCollection = database.collection("submission");
-    const submissions = await submissionCollection.find(query).toArray();
+    const submissions: Submission[] = await submissionCollection.find(query).toArray() as unknown as Submission[];
     if(submissions.length === 0) {
         console.log("no submissions yet");
         return -1;
@@ -639,7 +556,7 @@ export async function changeScoreNeededForQuestion(tokenData: JwtPayload, questi
         _id: new mongoDB.ObjectId(questionId),
         "children.transition": transition
     }
-    const update: any = {
+    const update = {
         $set: {
             "children.$.needed_score": needed_score
         }
