@@ -91,9 +91,6 @@ export async function createSingleCatalog(
 }
 
 export async function editCatalogInformation(tokenData: JwtPayload, catalogId: string, questionId: string) {
-  console.log(tokenData)
-  console.log(catalogId)
-  console.log(questionId)
   if(!await authenticateInCatalog(tokenData, CatalogAccess.docentInCatalog, catalogId)) {
     //need to add verification specifically for questioninCatalogId
     return -1;
@@ -321,8 +318,6 @@ export async function getCatalogScore(
   tokenData: JwtPayload,
   sessionId: string
 ) {
-  console.log("sessionId");
-  console.log(sessionId);
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
   const submissionCollection: mongoDB.Collection = database.collection("submission");
@@ -345,7 +340,6 @@ export async function getCatalogScore(
     return -1;
   }
   const report = await getQuestionReport(sessionId, submissionCollection, questionCollection, questionInCatalogCollection);
-  console.log(report);
   return report;
 }
 
@@ -381,7 +375,6 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
     questionReport: questionReport,
     score: totalScore
   } 
-  console.log(finalObject);
   return finalObject;
 }
 
@@ -519,10 +512,6 @@ export async function catalogScore(tokenData: JwtPayload, courseId: number, cata
 }
 
 export async function changeScoreNeededForQuestion(tokenData: JwtPayload, questionId: string, needed_score: number, transition: string) {
-    console.log(questionId);
-    console.log(needed_score);
-    console.log(tokenData);
-    console.log(transition);
     const database: mongoDB.Db = await connect();
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const query = {
