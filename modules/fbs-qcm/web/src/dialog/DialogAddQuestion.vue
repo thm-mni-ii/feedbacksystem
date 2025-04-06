@@ -8,13 +8,15 @@ const AddQuestionDialog = ref(false)
 const questionOptionsVar = ref<Question[]>([]); 
 const showInputVar = ref(false);
 const transitionVar = ref("");
-const resolvePromise = ref<Function | undefined>(undefined)
+const resolvePromise = ref<Function | undefined>(undefined);
+const currentQuestionVar = ref("");
 
-const openDialog = (questionOptions: Question[], showInput: boolean, transition: string) => {
+const openDialog = (questionOptions: Question[], showInput: boolean, transition: string, currentQuestion: string) => {
   AddQuestionDialog.value = true
   questionOptionsVar.value = questionOptions;
   showInputVar.value = showInput;
   transitionVar.value = transition;
+  currentQuestionVar.value = currentQuestion;
   return new Promise((resolve) => {
     resolvePromise.value = resolve
   })
@@ -47,6 +49,7 @@ defineExpose({
       :question-options="questionOptionsVar"
       :show-input="showInputVar"
       :transition="transitionVar"
+      :current-question="currentQuestionVar"
       @cancel="_cancel"
       @confirm="_confirm"
     ></QuestionFindModal>

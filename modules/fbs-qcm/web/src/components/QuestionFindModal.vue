@@ -97,12 +97,16 @@
               v-model="nodeData"
               placeholder="Prozentwert eingeben"
               class="form-control"
+              :class="{ 'input-error': scoreValidationError }"
             />
             <span class="input-suffix">%</span>
           </div>
           <small class="form-text text-muted">
             Ab diesem Prozentwert wird zur ausgewählten Frage weitergeleitet.
           </small>
+          <div v-if="scoreValidationError" class="error-message">
+            {{ scoreValidationError }}
+          </div>
         </div>
       </div>
       
@@ -110,7 +114,7 @@
         <button class="btn btn-secondary" @click="cancel">Abbrechen</button>
         <button 
           class="btn btn-primary" 
-          @click="confirm" 
+          @click="validateAndConfirm" 
           :disabled="!selectedQuestion">
           Auswählen
         </button>
@@ -122,6 +126,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import questionService from '@/services/question.service';
+import catalogService from '@/services/catalog.service';
 
 interface QuestionOption {
   _id: string;
@@ -157,6 +162,10 @@ const props = defineProps({
   transition: {
     type: String,
     default: "correct"
+  },
+  currentQuestion: {
+    type: String,
+    default: ""
   }
 });
 
@@ -171,6 +180,10 @@ const searchQuery = ref('');
 const tags = ref<TagItem[]>([]);
 const selectedTags = ref<string[]>([]);
 const isLoadingTags = ref(true);
+const scoreValidationError = ref('');
+const correctScore = ref<number | null>(null);
+const incorrectScore = ref<number | null>(null);
+const currentQuestionVar = ref(props.currentQuestion);
 
 // Fetch tags method
 const fetchTags = async () => {
@@ -185,19 +198,40 @@ const fetchTags = async () => {
   }
 };
 
-// Fetch tags on mount
+const fetchCurrentScores = async () => {
+  try {
+    const path = window.location.pathname;
+    const pathParts = path.split('/');
+    const catalogId = pathParts[2];
+    const response = await catalogService.editCatalog(catalogId, currentQuestionVar.value);) 
+    correctScore.value = null;
+    incorrectScore.value = null;
+    
+    for (const child of response.data.children) {
+      if (child.transition === 'correct') {
+        correctScore.value = child.score;
+      } else if (child.transition === 'incorrect') {
+        incorrectScore.value = child.score;
+      }
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden der aktuellen Schwellenwerte:', error);
+  }
+};
+
 onMounted(() => {
   fetchTags();
+  fetchCurrentScores();
 });
 
-// Watch for show prop changes to fetch tags
 watch(() => props.show, (newValue) => {
   if (newValue) {
     fetchTags();
+    fetchCurrentScores();
+    scoreValidationError.value = '';
   }
 });
 
-// Computed filtered questions
 const filteredQuestions = computed(() => {
   let filtered = props.questionOptions;
   
@@ -242,18 +276,46 @@ const selectQuestion = (id: string) => {
   selectedQuestion.value = id;
 };
 
-// Modal actions
+const validateScore = () => {
+  scoreValidationError.value = '';
+  
+  const score = Number(nodeData.value);
+  
+  if (isNaN(score) || score < 0 || score > 100) {
+    scoreValidationError.value = 'Bitte geben Sie einen gültigen Prozentwert zwischen 0 und 100 ein.';
+    return false;
+  }
+  if (transitionValue.value === 'correct') {
+    if (incorrectScore.value !== null && score <= incorrectScore.value) {
+      scoreValidationError.value = `Der Schwellenwert für "Richtig" (${score}%) muss höher sein als für "Falsch" (${incorrectScore.value}%).`;
+      return false;
+    }
+  } else if (transitionValue.value === 'incorrect') {
+    if (correctScore.value !== null && score >= correctScore.value) {
+      scoreValidationError.value = `Der Schwellenwert für "Falsch" (${score}%) muss niedriger sein als für "Richtig" (${correctScore.value}%).`;
+      return false;
+    }
+  }
+  
+  return true;
+};
+
 const cancel = () => {
   emit('cancel');
 };
 
-const confirm = () => {
-  if (selectedQuestion.value) {
-    emit('confirm', nodeData.value, selectedQuestion.value, transitionValue.value);
+const validateAndConfirm = () => {
+  if (!selectedQuestion.value) {
+    return;
   }
+  
+  if (props.showInput && !validateScore()) {
+    return;
+  }
+  
+  emit('confirm', nodeData.value, selectedQuestion.value, transitionValue.value);
 };
 
-// Reset form when modal is shown
 watch(() => props.show, (newValue) => {
   if (newValue) {
     selectedQuestion.value = '';
@@ -261,7 +323,13 @@ watch(() => props.show, (newValue) => {
     transitionValue.value = props.transition;
     searchQuery.value = '';
     selectedTags.value = [];
+    scoreValidationError.value = '';
   }
+});
+
+watch(() => props.transition, (newValue) => {
+  transitionValue.value = newValue;
+  scoreValidationError.value = '';
 });
 </script>
     
@@ -331,6 +399,17 @@ watch(() => props.show, (newValue) => {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+  }
+
+  .input-error {
+    border-color: #e74c3c;
+    background-color: #ffeaea;
+  }
+
+  .error-message {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 6px;
   }
 
   /* Tag Styling */

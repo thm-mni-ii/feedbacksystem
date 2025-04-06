@@ -33,6 +33,9 @@
               />
               <span class="input-suffix">%</span>
             </div>
+            <div v-if="showValidationError" class="validation-error">
+              Der Schwellenwert für "Correct" muss höher sein als für "Incorrect".
+            </div>
           </div>
         </div>
         
@@ -40,7 +43,7 @@
           <button class="btn btn-secondary" @click="closeModal">Abbrechen</button>
           <button 
             class="btn btn-primary" 
-            @click="changeNeededScore(nodeData, transition);"
+            @click="validateAndChangeScore"
             :disabled="!nodeData"
           >
             Schwellenwert aktualisieren
@@ -186,6 +189,12 @@ node {
   color: #2c3e50;
 }
 
+.validation-error {
+  color: #e74c3c;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
 .form-control {
   width: 100%;
   padding: 12px;
@@ -294,6 +303,11 @@ const selectedQuestion = ref("");
 const firstQuestion = ref(false);
 const showDeleteModal = ref(false);
 const nodeToDelete = ref<{id: string; nodeId: string} | null>(null);
+const showValidationError = ref(false);
+
+// Neue Zustandsvariablen hinzufügen, um die aktuellen Scores zu speichern
+const correctScore = ref<number | null>(null);
+const incorrectScore = ref<number | null>(null);
 
 const isFormValid = computed(() => {
   if (showInput.value) {
@@ -304,8 +318,6 @@ const isFormValid = computed(() => {
 });
 
 onMounted(async () => {
-  console.log('ID from query parameter:', id.questionId);      
-  console.log('ID from query parameter:', id.catalogId);
 
   let maxKey = "+";
   let midKey = "+";
@@ -328,13 +340,11 @@ onMounted(async () => {
     if(id.questionId !== "new") {
       const data = await catalogService.editCatalog(id.catalogId as string, id.questionId as string);
       if(data.data.isEmpty) {
-        console.log("its true");
         buttonsHidden = "true"
         firstQuestion.value = true;
       } else {   
         buttonsHidden = "false";
         currentQuestion.value = data.data._id
-        console.log(data.data);
         
         questionText = data.data.questionText;
         
@@ -343,11 +353,13 @@ onMounted(async () => {
             maxKey = data.data.children[i].text;
             maxId = data.data.children[i].questionId;
             maxKeyNumber = `${data.data.children[i].score}%`;
+            correctScore.value = data.data.children[i].score; // Speichere den 'correct' Score
           }
           if(data.data.children[i].transition === "incorrect") {
             minKey = data.data.children[i].text;
             minId = data.data.children[i].questionId;
             minKeyNumber = `${data.data.children[i].score}%`;
+            incorrectScore.value = data.data.children[i].score; // Speichere den 'incorrect' Score
           }
           if(data.data.children[i].transition === "partial") {
             midKey = data.data.children[i].text;
@@ -355,7 +367,6 @@ onMounted(async () => {
             midKeyNumber = `${data.data.children[i].score}%`;
           }
         }
-        console.log(data.data);
         const prevData = await catalogService.getPreviousQuestion(id.catalogId as string, data.data._id);
         if(prevData.data.questionInCatalogId !== null) {
           prevText = prevData.data.text;
@@ -483,7 +494,7 @@ onMounted(async () => {
         
         const showInput = !(clickedNode.id() === "partial" || firstQuestion.value || currentQuestion.value === "new");
         
-        const result = await dialogAddQuestion.value?.openDialog(questionOptions, showInput, transition.value);
+        const result = await dialogAddQuestion.value?.openDialog(questionOptions, showInput, transition.value, currentQuestion.value);
         
         if (result) {
           await addQuestion(result.nodeData, result.selectedQuestion, result.transition);
@@ -495,20 +506,20 @@ onMounted(async () => {
     
     cy.value.on('click', 'edge', async (event) => {
       const edge = event.target;
-      console.log("edge");
-      console.log(edge.data());
       const data = edge.data();
       
       if(data.target === "correct") {
         transition.value = "correct";
         nodeData.value = data.label ? data.label.replace('%', '') : "";
         showModalNum.value = true;
+        showValidationError.value = false;
       }
       
       if(data.target === "incorrect") {
         transition.value = "incorrect";
         nodeData.value = data.label ? data.label.replace('%', '') : "";
         showModalNum.value = true;
+        showValidationError.value = false;
       }
     }); 
 
@@ -521,12 +532,28 @@ onMounted(async () => {
   }
 });
 
+const validateAndChangeScore = async () => {
+  const score = Number(nodeData.value);
+  
+  if (transition.value === "correct") {
+    if (incorrectScore.value !== null && score <= incorrectScore.value) {
+      showValidationError.value = true;
+      return;
+    }
+  }
+    if (transition.value === "incorrect") {
+    if (correctScore.value !== null && score >= correctScore.value) {
+      showValidationError.value = true;
+      return;
+    }
+  }
+  await changeNeededScore(score, transition.value);
+};
+
 const changeNeededScore = async (score: number, transition: string) => {
   try {
-    const question = id.questionId;
-    console.log("Ändere Score für Frage:", question);
+    const question = currentQuestion.value as string;
     const result = await catalogService.changeNeededScore(question, score, transition);
-    console.log(result);
     showModalNum.value = false;
     location.reload();
   } catch (error) {
@@ -543,15 +570,12 @@ const closeModal = () => {
   showModalNum.value = false;
   nodeData.value = "";
   selectedQuestion.value = "";
+  showValidationError.value = false;
 };
 
 const addQuestion = async (score: number, questionId: string, transition: string) => {
   try {
-    console.log("Füge Frage hinzu:", score, questionId, transition);
-    console.log("IN DEN FOLGENDEN KATALOG:", currentCatalog.value);
-    console.log("IN DEN FOLGENDEN KATALOG:", id.catalogId);
     const res = await questionService.addQuestionToCatalog(questionId, currentCatalog.value);  
-    console.log(res);
     
     const question = currentQuestion.value;
     
@@ -668,5 +692,6 @@ defineExpose({
   confirmDelete,
   cancelAdd,
   confirmAdd,
+  validateAndChangeScore,
 });
 </script>

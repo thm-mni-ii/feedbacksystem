@@ -519,6 +519,10 @@ export async function catalogScore(tokenData: JwtPayload, courseId: number, cata
 }
 
 export async function changeScoreNeededForQuestion(tokenData: JwtPayload, questionId: string, needed_score: number, transition: string) {
+    console.log(questionId);
+    console.log(needed_score);
+    console.log(tokenData);
+    console.log(transition);
     const database: mongoDB.Db = await connect();
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const query = {
