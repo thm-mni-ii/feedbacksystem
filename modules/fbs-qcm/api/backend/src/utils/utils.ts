@@ -364,7 +364,6 @@ export async function getAllQuestionsConnectionsFromCatalogs(
 }
 
 export function createQuestionResponse(newQuestion: any, newId: string) {
-  console.log(newQuestion);
   if (newQuestion.questiontype === QuestionType.Choice) {
     const returnQuestion = newQuestion;
     const configuration = newQuestion.questionconfiguration as any;

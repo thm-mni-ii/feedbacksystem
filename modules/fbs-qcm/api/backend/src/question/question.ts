@@ -287,11 +287,11 @@ export async function getCurrentQuestion(
   const questionInCatalogCollection: mongoDB.Collection =
     database.collection("questionInCatalog");
   const session = await getSessionInformation(sessionId);
-  console.log(session);
   if (session === null) {
     return -1;
   }
   if (session.status !== SessionStatus.ongoing) {
+    console.log("Session is not ongoing")
     return -2;
   }
   const catalogId = session.catalogId;
@@ -356,7 +356,6 @@ async function getQuestionId(
     user: tokenData.id,
     session: session._id,
   };
-  console.log(query);
   const lastSubmission: any = await submissionCollection
     .find(query)
     .sort({ timeStamp: -1 })

@@ -12,15 +12,13 @@ import { getCurrentQuestion } from "../question/question";
 import { CatalogAccess, SessionStatus } from "../utils/enum";
 import { authenticateInCatalog } from "../authenticate";
 import { checkIfOngoingSessionExist, getOngoingSession, SessionReturn, Session } from "./sessionUtils";
+import { currentQuestion } from "../controller/catalog";
 
 export async function postSession(
   tokenData: JwtPayload,
   catalogId: string,
   courseId: number
 ) {
-  console.log(tokenData);
-  console.log(catalogId);
-  console.log(courseId);
   if (
     !authenticateInCatalog(tokenData, CatalogAccess.studentInCatalog, catalogId)
   ) {
@@ -120,6 +118,7 @@ export async function endSingleSession(
   }
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
+  const submissionCollection: mongoDB.Collection = database.collection("submission");
   const session = await getOngoingSession(tokenData.id, sessionCollection);
   if (session === null) {
     return -1;
@@ -133,6 +132,7 @@ export async function endSingleSession(
   const finder = {
     _id: session._id,
   };
+  await setAllRemainingQuestionsFalse(tokenData, sessionId, submissionCollection);
   let duration = session.duration;
   if (session.status === SessionStatus.ongoing) {
     const currentTime = new Date();
@@ -158,8 +158,22 @@ export async function endSingleSession(
   return 1;
 }
 
-async function setAllRemainingQuestionsFalse(sessionId: string, userId: number) {
-  
+async function setAllRemainingQuestionsFalse(tokenData: JwtPayload, sessionId: string, submissionCollection: mongoDB.Collection) {
+  const currentQuestion = await getCurrentQuestion(tokenData, sessionId)
+  if(currentQuestion === -2 || currentQuestion === -1 || currentQuestion.catalog === "over") {
+    return;
+  } else {
+    const submission = {
+      user: tokenData.id,
+      question: currentQuestion._id,
+      answer: null,
+      evaluation: 0,
+      timeStamp: new Date,
+      session: new mongoDB.ObjectId(sessionId),
+    };
+    await submissionCollection.insertOne(submission);
+    await setAllRemainingQuestionsFalse(tokenData, sessionId, submissionCollection);
+  }
 }
 
 export async function unpauseSingleSession(
