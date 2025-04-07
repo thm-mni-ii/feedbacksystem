@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CatalogSession from '../components/CatalogSession.vue'
+import SessionFeedback from '../components/SessionFeedback.vue'
 import sessionService from '@/services/session.service'
 import catalogService from '@/services/catalog.service'
 
@@ -140,6 +141,10 @@ onMounted(async () => {
         </div>
         <div v-if="catalogStatus == 'over' && !showFeedback">
           <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">Finished!🎉</h4>
+          <SessionFeedback
+            :questionReport="catalogEvaluation.questionReport"
+            :score="catalogScore"
+          />
           <h3 class="text-blue-grey-darken-2">Total Score: {{ catalogScore * 100 }} %</h3>
           <v-btn
             variant="tonal"

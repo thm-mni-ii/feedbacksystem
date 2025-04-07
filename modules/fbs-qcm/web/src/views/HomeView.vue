@@ -11,6 +11,11 @@
         <v-expansion-panel-title> {{ course.name }} </v-expansion-panel-title>
         <v-expansion-panel-text>
           <v-list>
+            <v-list-item>
+              <v-btn color="primary-light" class="mx-auto mb-2" @click="startStudy(course.id)">
+                Study for {{ course.name }}
+              </v-btn>
+            </v-list-item>
             <v-list-subheader>Catalogs</v-list-subheader>
             <v-list-item v-for="catalog in course.catalogs" :key="catalog.id">
               <v-list-item-title class="d-flex align-center justify-space-between">
@@ -217,6 +222,9 @@ const startSession = (catalog: Catalog) => {
         }
       })
   }
+}
+const startStudy = (courseId: number) => {
+  router.push(`/study/${courseId}`)
 }
 </script>
 

@@ -5,8 +5,7 @@ class QuestionService {
   getQuestion(questionId: string): Promise<AxiosResponse<Question>> {
     return axios
       .get(`/api_v1/question/${questionId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` },
-        params: { ID: questionId }
+        headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
       })
       .then((response) => {
         console.log('Response status:', response.status)
