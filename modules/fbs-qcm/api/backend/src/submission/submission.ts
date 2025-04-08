@@ -119,6 +119,8 @@ function checkSQL(answer: any, question: Question) {
 }
 
 function checkChoice(answer: ChoiceAnswer[], question: Question) {
+  console.log("answer");
+  console.log(answer);
   let correctAnswers = 0;
   let falseAnswers = 0;
   let falsePositives = 0;
@@ -128,20 +130,50 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
   let response: ChoiceReply = {} as ChoiceReply;
   response.row = [];
   for (let i = 0; i < configuration.optionRows.length; i++) {
-    const correctList = configuration.optionRows[i].correctAnswers;
-    const answerList = answerRows[i];
-    const result = compareNumberLists(correctList, answerList);
+    const correctList: number[] = configuration.optionRows[i].correctAnswers;
+    correctList.forEach((value, index) => {
+      correctList[index] = value + 1;
+    });
+    let answerList: number[] = answerRows[i];
+    if(answerList === undefined) {
+      answerList = [];
+    }
+    correctList.forEach((item) => {
+      if (answerList.includes(item)) {
+        console.log(item);
+        console.log(answerList);
+        correctAnswers++;
+      } else {
+        falseNegatives++;
+      }
+    });
+    answerList.forEach((item) => {
+      if (!correctList.includes(item)) {
+        falsePositives++;
+      }
+    });
+      console.log("correctAnswers");
+      console.log(correctAnswers);
+      console.log("falseNegatives");
+      console.log(falseNegatives);
+      console.log("falsePositives");
+      console.log(falsePositives);
     let replyRow: ChoiceReplyRow = {} as ChoiceReplyRow;
     replyRow.id = configuration.optionRows[i].id;
     replyRow.text = configuration.optionRows[i].text;
-    replyRow.correct = result.inBothLists;
     response.row[i] = replyRow;
-    correctAnswers += result.inBothLists.length;
-    falseAnswers += result.onlyInList1.length + result.onlyInList2.length;
-    falsePositives += result.onlyInList2.length;
-    falseNegatives += result.onlyInList1.length;
+    falseAnswers += falseNegatives + falsePositives;
   }
-  const score = correctAnswers / (correctAnswers + falseAnswers);
+      console.log("correctAnswers");
+      console.log(correctAnswers);
+      console.log("falseNegatives");
+      console.log(falseNegatives);
+      console.log("falsePositives");
+      console.log(falsePositives);
+  let score = (correctAnswers - falsePositives) / (correctAnswers + falseNegatives);
+  if(score < 0 ) {
+    score = 0;
+  }
   response.score = score;
   return response;
 }
@@ -149,29 +181,17 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
 function getSelectedIds(answer: ChoiceAnswer[]) {
   let result: number[][] = [];
   for (let i = 0; i < answer.length; i++) {
-    result[answer[i].id] = [];
+    result[answer[i].id-1] = [];
+    console.log("answer[i].entries");
+    console.log(answer[i].entries);
     for (let j = 0; j < answer[i].entries.length; j++) {
-      result[answer[i].id][j] = answer[i].entries[j].id;
+      result[answer[i].id-1][j] = answer[i].entries[j].id;
+      console.log(result);
     }
   }
+  console.log("result");
+  console.log(result);
   return result;
-}
-
-function compareNumberLists(list1: number[], list2: number[]) {
-  if (list1 === undefined) {
-    list1 = [];
-  }
-  if (list2 === undefined) {
-    list2 = [];
-  }
-  const inBothLists = list1.filter((num) => list2.includes(num));
-  const onlyInList1 = list1.filter((num) => !list2.includes(num));
-  const onlyInList2 = list2.filter((num) => !list1.includes(num));
-  return {
-    inBothLists,
-    onlyInList1,
-    onlyInList2,
-  };
 }
 
 function checkClozeText(answer: FillInTheBlanksAnswer[], question: Question) {
