@@ -203,7 +203,7 @@ const fetchCurrentScores = async () => {
     const path = window.location.pathname;
     const pathParts = path.split('/');
     const catalogId = pathParts[2];
-    const response = await catalogService.editCatalog(catalogId, currentQuestionVar.value);) 
+    const response = await catalogService.editCatalog(catalogId, currentQuestionVar.value); 
     correctScore.value = null;
     incorrectScore.value = null;
     
