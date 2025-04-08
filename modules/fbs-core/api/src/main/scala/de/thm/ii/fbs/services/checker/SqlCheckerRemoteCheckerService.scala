@@ -15,7 +15,6 @@ object SqlCheckerRemoteCheckerService {
   private val extInfo = new ConcurrentHashMap[Int, String]()
 }
 
-@Service
 abstract class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends RemoteCheckerService(insecure) {
   @Autowired
   private val userService: UserService = null

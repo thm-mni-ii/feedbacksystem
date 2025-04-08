@@ -11,11 +11,13 @@ import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, SQLC
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.stereotype.Service
 
 import java.util.{Optional, UUID}
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 
+@Service
 class LegacySqlCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends SqlCheckerRemoteCheckerService(insecure)
   with CheckerServiceFormatSubmission with CheckerServiceFormatConfiguration with CheckerServiceOnChange with CheckerServiceOnDelete
   with CheckerServiceOnMainFileUpload {
