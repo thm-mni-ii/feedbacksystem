@@ -371,6 +371,7 @@ async function getQuestionReport(sessionId: string, submissionCollection: mongoD
       }
     }
   }
+  totalScore = totalScore / submissions.length;
   const finalObject = {
     questionReport: questionReport,
     score: totalScore
