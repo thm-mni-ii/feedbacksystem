@@ -39,7 +39,18 @@ watch(activeCatalog, async () => {
 </script>
 
 <template>
-  <div class="d-flex flex-col align-start justify-space-around">
+  <div class="d-flex flex-col align-start justify-space-around mt-4">
+    <div class="mx-4 w-25">
+      <p class="text-h5 text-center mt-4">Kompetenzen / Kataloge</p>
+      <StudyCatalogProgress
+        v-for="cat in catalogs"
+        :key="cat.id"
+        :name="cat.name"
+        :progress="progress"
+        :is-active="cat.id === activeCatalog"
+        @click="activeCatalog = cat.id"
+      />
+    </div>
     <div class="w-66">
       <p class="text-h5 text-center mt-4">Questions</p>
       <v-card class="mx-auto mt-4">
@@ -54,18 +65,6 @@ watch(activeCatalog, async () => {
           </v-list-item>
         </v-list>
       </v-card>
-    </div>
-
-    <div class="mx-4 w-25">
-      <p class="text-h5 text-center mt-4">Kompetenzen</p>
-      <StudyCatalogProgress
-        v-for="cat in catalogs"
-        :key="cat.id"
-        :name="cat.name"
-        :progress="progress"
-        :is-active="cat.id === activeCatalog"
-        @click="activeCatalog = cat.id"
-      />
     </div>
   </div>
 </template>

@@ -125,9 +125,9 @@ onMounted(async () => {
       rounded
     >
       <v-responsive class="mx-auto" width="85%">
-        <h2 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">
+        <h3 class="text-h3 my-8 font-weight-black text-blue-grey-darken-2">
           {{ catalog.name }}
-        </h2>
+        </h3>
         <div class="d-flex flex-row mb-8">
           <v-progress-linear
             min="0"
@@ -140,11 +140,10 @@ onMounted(async () => {
           ></v-progress-linear>
         </div>
         <div v-if="catalogStatus == 'over' && !showFeedback">
-          <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">Finished!🎉</h4>
-          <SessionFeedback
-            :questionReport="catalogEvaluation.questionReport"
-            :score="catalogScore"
-          />
+          <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">
+            Finished!🎉 Here's your Summary:
+          </h4>
+          <SessionFeedback :questionReport="catalogEvaluation.questionReport" />
           <h3 class="text-blue-grey-darken-2">Total Score: {{ catalogScore * 100 }} %</h3>
           <v-btn
             variant="tonal"
