@@ -29,6 +29,8 @@ export class DbControlPanelComponent implements OnInit {
 
   databases$: Observable<Database[]>;
 
+  @Output() dbChanged = new EventEmitter<'postgres' | 'mongo'>();
+
   constructor(private auth: AuthService, private store: Store) {}
 
   ngOnInit(): void {
@@ -63,5 +65,9 @@ export class DbControlPanelComponent implements OnInit {
 
   onActivateDatabase(id: number) {
     this.store.dispatch(activateDatabase({ id }));
+  }
+
+  dbChangedToParent(db: 'postgres' | 'mongo') {
+    this.dbChanged.emit(db);
   }
 }

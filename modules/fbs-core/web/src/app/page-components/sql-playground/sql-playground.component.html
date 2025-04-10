@@ -8,13 +8,16 @@
       <app-dynamic-result-table></app-dynamic-result-table>
     </app-bordered-container>
   </div>
+
   <div class="input-grid">
     <app-bordered-container [input]="true">
       <app-sql-input-tabs
+        [dbType]="selectedDbType"
         (submitStatement)="submitStatement($event)"
       ></app-sql-input-tabs>
     </app-bordered-container>
   </div>
+
   <div class="db-grid">
     <app-bordered-container
       title="{{ 'sql-playground.control' | i18nextEager }}"
@@ -22,6 +25,7 @@
       <app-db-control-panel
         (changeActiveDbId)="changeActiveDbId($event)"
         (submitStatement)="submitStatement($event)"
+        (dbChanged)="onDbChanged($event)"
       ></app-db-control-panel>
     </app-bordered-container>
   </div>

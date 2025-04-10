@@ -26,6 +26,7 @@ import * as SqlInputTabsActions from "./state/sql-input-tabs.actions";
 import * as fromSqlInputTabs from "./state/sql-input-tabs.selectors";
 import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { FormControl, FormGroup } from "@angular/forms";
+import { Input } from "@angular/core";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -35,6 +36,10 @@ import { FormControl, FormGroup } from "@angular/forms";
 export class SqlInputTabsComponent
   implements OnInit, AfterViewChecked, AfterViewInit
 {
+  @Input() dbType: 'postgres' | 'mongo' = 'postgres';
+
+  //codeType = this.dbType === 'postgres' ? 'sql' : 'json';
+
   @Output() submitStatement = new EventEmitter<string>();
   isPending: boolean;
   activeTabIndex: number;
@@ -52,7 +57,7 @@ export class SqlInputTabsComponent
   @ViewChild("pre", { static: true }) pre!: ElementRef;
 
   highlighted = false;
-  codeType = "sql";
+  codeType: 'sql' | 'json' = 'sql';
 
   groupForm = new FormGroup({
     content: new FormControl(""),
@@ -94,6 +99,7 @@ export class SqlInputTabsComponent
   }
 
   ngOnInit(): void {
+    this.codeType = this.dbType === 'mongo' ? 'json' : 'sql';
     const userID = this.authService.getToken().id;
     this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
 
@@ -190,8 +196,19 @@ export class SqlInputTabsComponent
         if (isEmpty) {
           this.snackbar.open("Sie haben keine Lösung abgegeben", "Ups!");
         } else {
-          this.activeTabIndex$.pipe(take(1)).subscribe((index) => {
-            this.store.dispatch(SqlInputTabsActions.submission({ index }));
+          this.activeTabIndex$.pipe(take(1)).subscribe(index => {
+            const query = this.tabs[index].content;
+
+            if (this.dbType === 'mongo') {
+              try {
+                JSON.parse(query);
+                this.submitStatement.emit(query);
+              } catch {
+                this.snackbar.open('Ungültiges JSON!', 'MongoDB Fehler', { duration: 3000 });
+              }
+            } else {
+              this.submitStatement.emit(query);
+            }
           });
         }
       });

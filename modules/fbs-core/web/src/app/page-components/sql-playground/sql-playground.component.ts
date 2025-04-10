@@ -12,6 +12,8 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import * as SqlPlaygroundActions from "./state/sql-playground.actions";
 import * as fromSqlPlayground from "./state/sql-playground.selectors";
 import { BackendService } from "./collab/backend.service";
+import { HttpClient } from "@angular/common/http";
+import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
 
 @Component({
   selector: "app-sql-playground-management",
@@ -28,15 +30,22 @@ export class SqlPlaygroundComponent implements OnInit {
   constraints$: Observable<Constraint[]>;
   isQueryPending$: Observable<boolean>;
 
+  selectedDbType: 'postgres' | 'mongo' = 'postgres';
+  mongoDbId: string | null = null;
+
   constructor(
     private titlebar: TitlebarService,
     private authService: AuthService,
     private backendService: BackendService,
     private snackbar: MatSnackBar,
-    private store: Store
+    private store: Store,
+    private http: HttpClient,
+    private mongoPlaygroundService: MongoPlaygroundService
   ) {}
 
   ngOnInit() {
+    const savedDbType = localStorage.getItem('playground-db-type') as 'postgres' | 'mongo';
+    this.selectedDbType = savedDbType ?? 'postgres';
     this.titlebar.emitTitle("SQL Playground");
     this.activeDb$ = this.store.select(fromSqlPlayground.selectActiveDb);
     this.resultset$ = this.store.select(fromSqlPlayground.selectResultset);
@@ -49,6 +58,14 @@ export class SqlPlaygroundComponent implements OnInit {
       fromSqlPlayground.selectIsQueryPending
     );
     this.backendService.setupBackendHandler();
+
+    if (this.selectedDbType === 'mongo') {
+      const userId = this.authService.getToken().id;
+      this.http.get<string[]>(`/api/v2/playground/${userId}/databases/mongo/list`)
+        .subscribe((dbs) => {
+          this.mongoDbId = dbs[0] ?? null;
+        });
+    }
   }
 
   changeActiveDbId(dbId: number) {
@@ -65,6 +82,42 @@ export class SqlPlaygroundComponent implements OnInit {
   }
 
   submitStatement(statement: string) {
-    this.store.dispatch(SqlPlaygroundActions.submitStatement({ statement }));
+    if(this.selectedDbType === 'postgres') {
+      this.store.dispatch(SqlPlaygroundActions.submitStatement({ statement }));
+    } else {
+      let parsedQuery;
+      try {
+        parsedQuery = JSON.parse(statement);
+      } catch {
+        this.snackbar.open("Invalid JSON", "Error", { duration: 3000 });
+        return;
+      }
+
+      const userId = this.authService.getToken().id;
+      const dbId = this.mongoDbId;
+
+      if(!dbId) {
+        this.snackbar.open("No MongoDB Database found", "Error", { duration: 3000 });
+        return;
+      }
+
+      this.mongoPlaygroundService.executeMongoQuery(userId, dbId, parsedQuery).subscribe({
+        next: (res) => console.log("MongoDB Result:", res),
+        error: (err) => this.snackbar.open("MongoDB Fehler: " + (err.error?.message ?? "Unbekannt"), "Fehler", { duration: 3000 })
+      });
+    }
+  }
+
+  onDbChanged(db: 'postgres' | 'mongo') {
+    this.selectedDbType = db;
+    localStorage.setItem('playground-db-type', db);
+
+    if (db === 'mongo') {
+      const userId = this.authService.getToken().id;
+      this.http.get<string[]>(`/api/v2/playground/${userId}/databases/mongo/list`)
+        .subscribe((dbs) => {
+          this.mongoDbId = dbs[0] ?? null;
+        });
+    }
   }
 }

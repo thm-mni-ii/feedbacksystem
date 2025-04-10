@@ -36,6 +36,9 @@ export class DbControlTemplatesComponent implements OnInit {
   token: JWTToken = this.authService.getToken();
   isAdmin: boolean = false;
 
+  @Output() dbChanged = new EventEmitter<'postgres' | 'mongo'>();
+  selectedDb: 'postgres' | 'mongo' = 'postgres';
+
   constructor(
     private store: Store,
     private dialog: MatDialog,
@@ -174,5 +177,10 @@ export class DbControlTemplatesComponent implements OnInit {
         this.submitStatement.emit(template.templateQuery);
       }
     });
+  }
+
+  onDbChange(db: 'postgres' | 'mongo') {
+    this.selectedDb = db;
+    this.dbChanged.emit(db);
   }
 }

@@ -18,7 +18,6 @@ import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import de.thm.ii.fbs.utils.v2.mongo.MongoSecurityValidator
 import org.bson.Document
-import org.bson.conversions.Bson
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
@@ -42,6 +41,7 @@ class PlaygroundController(
     fun index(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> =
         databaseRepository.findByOwner_IdAndDeleted(currentToken.id, false)
 
+    /*----------------------------------------------------------------------------------------------------------------*/
     @PostMapping
     @ResponseBody
     fun create(
@@ -331,7 +331,7 @@ class PlaygroundController(
     @DeleteMapping("/mongo/{dbId}/indexes/{collection}/{indexName}")
     @ResponseBody
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteIndex(
+    fun deleteMongoIndex(
         @CurrentToken currentToken: LegacyToken,
         @PathVariable("dbId") dbId: String,
         @PathVariable("collection") collection: String,
@@ -358,6 +358,8 @@ class PlaygroundController(
             }
         }
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     @DeleteMapping("/{dbId}")
     @ResponseBody
