@@ -118,6 +118,29 @@ function checkSQL(answer: any, question: Question) {
   return 0;
 }
 
+function checkSingleColumnChoiceQuestion(configuration: any, answerRows: number[]) {
+  let correctRows: number[] = [];
+  console.log("answerRows");
+  console.log(answerRows);
+  for (let i = 0; i < configuration.optionRows.length; i++) {
+    if(configuration.optionRows[i].correctAnswers.length === 1) {
+      correctRows.push(i+1);
+    }
+  }
+  console.log("Actual correct");
+  console.log(correctRows);
+  return 0;
+}
+
+function getSingleAnswerRow(answer: ChoiceAnswer[]) {
+  let answers: number[] = []
+  for (let i = 0; i < answer.length; i++) {
+    answers.push(answer[i].id);
+  }
+  return answers;
+}
+
+
 function checkChoice(answer: ChoiceAnswer[], question: Question) {
   console.log("answer");
   console.log(answer);
@@ -126,50 +149,43 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
   let falsePositives = 0;
   let falseNegatives = 0;
   const configuration = question.questionconfiguration as Choice;
-  const answerRows: number[][] = getSelectedIds(answer);
   let response: ChoiceReply = {} as ChoiceReply;
   response.row = [];
-  for (let i = 0; i < configuration.optionRows.length; i++) {
-    const correctList: number[] = configuration.optionRows[i].correctAnswers;
-    correctList.forEach((value, index) => {
-      correctList[index] = value + 1;
-    });
-    let answerList: number[] = answerRows[i];
-    if(answerList === undefined) {
-      answerList = [];
+  if(configuration.multipleColumn === false) {
+    const answerRow: number[] = getSingleAnswerRow(answer);
+    checkSingleColumnChoiceQuestion(configuration, answerRow)
+  } else {
+    const answerRows: number[][] = getSelectedIds(answer);
+    for (let i = 0; i < configuration.optionRows.length; i++) {
+      const correctList: number[] = configuration.optionRows[i].correctAnswers;
+      correctList.forEach((value, index) => {
+        correctList[index] = value + 1;
+      });
+      let answerList: number[] = answerRows[i];
+      if(answerList === undefined) {
+        answerList = [];
+      }
+      correctList.forEach((item) => {
+        if (answerList.includes(item)) {
+          console.log(item);
+          console.log(answerList);
+          correctAnswers++;
+        } else {
+          falseNegatives++;
+        }
+      });
+      answerList.forEach((item) => {
+        if (!correctList.includes(item)) {
+          falsePositives++;
+        }
+      });
+      let replyRow: ChoiceReplyRow = {} as ChoiceReplyRow;
+      replyRow.id = configuration.optionRows[i].id;
+      replyRow.text = configuration.optionRows[i].text;
+      response.row[i] = replyRow;
+      falseAnswers += falseNegatives + falsePositives;
     }
-    correctList.forEach((item) => {
-      if (answerList.includes(item)) {
-        console.log(item);
-        console.log(answerList);
-        correctAnswers++;
-      } else {
-        falseNegatives++;
-      }
-    });
-    answerList.forEach((item) => {
-      if (!correctList.includes(item)) {
-        falsePositives++;
-      }
-    });
-      console.log("correctAnswers");
-      console.log(correctAnswers);
-      console.log("falseNegatives");
-      console.log(falseNegatives);
-      console.log("falsePositives");
-      console.log(falsePositives);
-    let replyRow: ChoiceReplyRow = {} as ChoiceReplyRow;
-    replyRow.id = configuration.optionRows[i].id;
-    replyRow.text = configuration.optionRows[i].text;
-    response.row[i] = replyRow;
-    falseAnswers += falseNegatives + falsePositives;
   }
-      console.log("correctAnswers");
-      console.log(correctAnswers);
-      console.log("falseNegatives");
-      console.log(falseNegatives);
-      console.log("falsePositives");
-      console.log(falsePositives);
   let score = (correctAnswers - falsePositives) / (correctAnswers + falseNegatives);
   if(score < 0 ) {
     score = 0;
