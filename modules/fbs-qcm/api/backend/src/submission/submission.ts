@@ -118,18 +118,45 @@ function checkSQL(answer: any, question: Question) {
   return 0;
 }
 
-function checkSingleColumnChoiceQuestion(configuration: any, answerRows: number[]) {
+function checkSingleColumnChoiceQuestion(configuration: any, answerRows: number[], response: any) {
   let correctRows: number[] = [];
-  console.log("answerRows");
-  console.log(answerRows);
+  let correctAnswers = 0;
+  let falseAnswers = 0;
+  let falsePositives = 0;
+  let falseNegatives = 0;
   for (let i = 0; i < configuration.optionRows.length; i++) {
     if(configuration.optionRows[i].correctAnswers.length === 1) {
       correctRows.push(i+1);
     }
   }
-  console.log("Actual correct");
+  console.log("correctRows");
   console.log(correctRows);
-  return 0;
+  console.log("answerRows");
+  console.log(answerRows);
+  for(let j = 0; j < correctRows.length; j++) {
+    if(answerRows.includes(correctRows[j])) {
+      correctAnswers++;
+    } else {
+      falseNegatives++;
+    }
+  }
+  for(let k = 0; k < answerRows.length; k++) {
+    if(!correctRows.includes(answerRows[k])) {
+      falsePositives++;
+    }
+  } 
+  console.log("correctAnswers");
+  console.log(correctAnswers);
+  console.log("falsePositives");
+  console.log(falsePositives);
+  console.log("falseNegatives");
+  console.log(falseNegatives);
+  let score = (correctAnswers - falsePositives) / (correctAnswers + falseNegatives);
+  if(score < 0 ) {
+    score = 0;
+  }
+  response.score = score;
+  return response;
 }
 
 function getSingleAnswerRow(answer: ChoiceAnswer[]) {
@@ -144,47 +171,52 @@ function getSingleAnswerRow(answer: ChoiceAnswer[]) {
 function checkChoice(answer: ChoiceAnswer[], question: Question) {
   console.log("answer");
   console.log(answer);
-  let correctAnswers = 0;
-  let falseAnswers = 0;
-  let falsePositives = 0;
-  let falseNegatives = 0;
   const configuration = question.questionconfiguration as Choice;
   let response: ChoiceReply = {} as ChoiceReply;
   response.row = [];
   if(configuration.multipleColumn === false) {
     const answerRow: number[] = getSingleAnswerRow(answer);
-    checkSingleColumnChoiceQuestion(configuration, answerRow)
+    response = checkSingleColumnChoiceQuestion(configuration, answerRow, response)
   } else {
     const answerRows: number[][] = getSelectedIds(answer);
-    for (let i = 0; i < configuration.optionRows.length; i++) {
-      const correctList: number[] = configuration.optionRows[i].correctAnswers;
-      correctList.forEach((value, index) => {
-        correctList[index] = value + 1;
-      });
-      let answerList: number[] = answerRows[i];
-      if(answerList === undefined) {
-        answerList = [];
-      }
-      correctList.forEach((item) => {
-        if (answerList.includes(item)) {
-          console.log(item);
-          console.log(answerList);
-          correctAnswers++;
-        } else {
-          falseNegatives++;
-        }
-      });
-      answerList.forEach((item) => {
-        if (!correctList.includes(item)) {
-          falsePositives++;
-        }
-      });
-      let replyRow: ChoiceReplyRow = {} as ChoiceReplyRow;
-      replyRow.id = configuration.optionRows[i].id;
-      replyRow.text = configuration.optionRows[i].text;
-      response.row[i] = replyRow;
-      falseAnswers += falseNegatives + falsePositives;
+    response = checkMultipleRowsChoiceQuestion(configuration, answerRows, response);
+  }
+  return response;
+}
+
+function checkMultipleRowsChoiceQuestion(configuration: any, answerRows: number[][], response: any) {
+  let correctAnswers = 0;
+  let falseAnswers = 0;
+  let falsePositives = 0;
+  let falseNegatives = 0;
+  for (let i = 0; i < configuration.optionRows.length; i++) {
+    const correctList: number[] = configuration.optionRows[i].correctAnswers;
+    correctList.forEach((value, index) => {
+      correctList[index] = value + 1;
+    });
+    let answerList: number[] = answerRows[i];
+    if (answerList === undefined) {
+      answerList = [];
     }
+    correctList.forEach((item) => {
+      if (answerList.includes(item)) {
+        console.log(item);
+        console.log(answerList);
+        correctAnswers++;
+      } else {
+        falseNegatives++;
+      }
+    });
+    answerList.forEach((item) => {
+      if (!correctList.includes(item)) {
+        falsePositives++;
+      }
+    });
+    let replyRow: ChoiceReplyRow = {} as ChoiceReplyRow;
+    replyRow.id = configuration.optionRows[i].id;
+    replyRow.text = configuration.optionRows[i].text;
+    response.row[i] = replyRow;
+    falseAnswers += falseNegatives + falsePositives;
   }
   let score = (correctAnswers - falsePositives) / (correctAnswers + falseNegatives);
   if(score < 0 ) {
@@ -193,7 +225,6 @@ function checkChoice(answer: ChoiceAnswer[], question: Question) {
   response.score = score;
   return response;
 }
-
 function getSelectedIds(answer: ChoiceAnswer[]) {
   let result: number[][] = [];
   for (let i = 0; i < answer.length; i++) {

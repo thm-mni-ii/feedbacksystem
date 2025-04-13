@@ -304,6 +304,10 @@ export async function getCurrentQuestion(
   ) {
     return -1;
   }
+  console.log("tokenData");
+  console.log(tokenData);
+  console.log("session");
+  console.log(session);
   let newQuestionInCatalogId: any = await getQuestionId(
     tokenData,
     submissionCollection,
@@ -365,6 +369,8 @@ async function getQuestionId(
     console.log("Keine voherigen Abgaben");
     return 0;
   }
+  console.log("lastSubmission");
+  console.log(lastSubmission);
   const evaluation = lastSubmission[0].evaluation;
   const questionQuery = {
     _id: lastSubmission[0].question,
