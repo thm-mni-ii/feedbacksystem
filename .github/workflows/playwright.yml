@@ -1,0 +1,47 @@
+name: Playwright Tests with Allure Reports
+on:
+  push:
+    branches: [ dev]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: npm ci
+    - name: Start Application
+      working-directory:  ./modules/fbs-core/web
+      run: npm run start &
+    - name: Wait for services to be ready
+      run: sleep 30
+    - name: Clean previous Allure results
+      working-directory: ./modules/fbs-core/web
+      run: |
+        rm -rf allure-results
+        rm -rf allure-report
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Install Allure dependencies
+      run: npm i -D allure-playwright
+    - name: Run Playwright tests with Allure
+      working-directory: ./modules/fbs-core/web
+      run: npm run test:e2e
+    - name: Generate Allure Report
+      run: |
+        npx allure generate allure-results --clean -o allure-report
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 30
