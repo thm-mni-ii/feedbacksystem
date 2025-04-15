@@ -41,7 +41,6 @@ export async function postSession(
     duration: 0,
   };
   const result = await sessionCollection.insertOne(sessionEntry);
-  console.log(result);
   return {
     sessionId: result.insertedId,
   };

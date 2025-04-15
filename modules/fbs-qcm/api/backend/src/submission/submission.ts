@@ -129,10 +129,6 @@ function checkSingleColumnChoiceQuestion(configuration: any, answerRows: number[
       correctRows.push(i+1);
     }
   }
-  console.log("correctRows");
-  console.log(correctRows);
-  console.log("answerRows");
-  console.log(answerRows);
   for(let j = 0; j < correctRows.length; j++) {
     if(answerRows.includes(correctRows[j])) {
       correctAnswers++;
@@ -145,12 +141,6 @@ function checkSingleColumnChoiceQuestion(configuration: any, answerRows: number[
       falsePositives++;
     }
   } 
-  console.log("correctAnswers");
-  console.log(correctAnswers);
-  console.log("falsePositives");
-  console.log(falsePositives);
-  console.log("falseNegatives");
-  console.log(falseNegatives);
   let score = (correctAnswers - falsePositives) / (correctAnswers + falseNegatives);
   if(score < 0 ) {
     score = 0;
@@ -169,8 +159,6 @@ function getSingleAnswerRow(answer: ChoiceAnswer[]) {
 
 
 function checkChoice(answer: ChoiceAnswer[], question: Question) {
-  console.log("answer");
-  console.log(answer);
   const configuration = question.questionconfiguration as Choice;
   let response: ChoiceReply = {} as ChoiceReply;
   response.row = [];
@@ -200,8 +188,6 @@ function checkMultipleRowsChoiceQuestion(configuration: any, answerRows: number[
     }
     correctList.forEach((item) => {
       if (answerList.includes(item)) {
-        console.log(item);
-        console.log(answerList);
         correctAnswers++;
       } else {
         falseNegatives++;
@@ -229,15 +215,10 @@ function getSelectedIds(answer: ChoiceAnswer[]) {
   let result: number[][] = [];
   for (let i = 0; i < answer.length; i++) {
     result[answer[i].id-1] = [];
-    console.log("answer[i].entries");
-    console.log(answer[i].entries);
     for (let j = 0; j < answer[i].entries.length; j++) {
       result[answer[i].id-1][j] = answer[i].entries[j].id;
-      console.log(result);
     }
   }
-  console.log("result");
-  console.log(result);
   return result;
 }
 
