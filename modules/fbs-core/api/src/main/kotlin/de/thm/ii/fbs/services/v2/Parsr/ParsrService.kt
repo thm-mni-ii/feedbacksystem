@@ -30,13 +30,12 @@ class ParsrService {
             .bodyToMono<String>()
             .block(Duration.ofSeconds(30)) ?: throw RuntimeException("Empty response from Parsr")
 
-        // Direkte Verwendung der Antwort als Job-ID (kein JSON-Parsing nötig)
         val jobId = response.trim()
 
         // Asynchrones Polling starten
         coroutineScope.launch {
             try {
-                val markdown = pollParsrResultWithRetry(jobId)
+                val markdown = pollParsrResult(jobId)
                 documentCache[jobId] = markdown
                 println("Successfully cached markdown for job: $jobId")
             } catch (e: Exception) {
@@ -52,21 +51,26 @@ class ParsrService {
         return documentCache[jobId] ?: throw RuntimeException("Document not found")
     }
 
-    private suspend fun pollParsrResultWithRetry(jobId: String, maxRetries: Int = 5): String {
-        var retryCount = 0
-        while (retryCount < maxRetries) {
-            try {
-                return parsrClient.get()
-                    .uri("/api/v1/markdown/$jobId")
-                    .retrieve()
-                    .bodyToMono<String>()
-                    .block(Duration.ofSeconds(10)) ?: ""
-            } catch (e: Exception) {
-                retryCount++
-                if (retryCount >= maxRetries) throw e
-                delay(2000L * retryCount)
+    private suspend fun pollParsrResult(jobId: String): String {
+    var retries = 0
+    while (retries < 5) {
+        try {
+            val result = parsrClient.get()
+                .uri("/api/v1/markdown/$jobId")
+                .retrieve()
+                .bodyToMono<String>()
+                .block(Duration.ofSeconds(10))
+            
+            if (!result.isNullOrEmpty()) {
+                documentCache[jobId] = result
+                return result
             }
+        } catch (e: Exception) {
+            delay(2000L * (retries + 1))
         }
-        throw RuntimeException("Max retries ($maxRetries) reached for job $jobId")
+        retries++
     }
+    throw RuntimeException("Maximale Versuche erreicht")
+}
+
 }

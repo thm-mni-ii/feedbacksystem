@@ -30,7 +30,10 @@
     [config]="editorConfig"
     [(ngModel)]="toSubmit"
     (ngModelChange)="onTextChange($event)"
-  ></angular-editor>
+    [placeholder]="'Schreibe hier deine Lösung...'"
+    [sanitize]="false"
+  >
+  </angular-editor>
 </div>
 
 <!-- Code-Editor mit Highlighting -->

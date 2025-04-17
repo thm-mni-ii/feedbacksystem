@@ -181,22 +181,14 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return codeExtensions.includes(fileType || "");
   }
 
-  // In submission-text.component.ts
   async extractPdfText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       this.parsrService.uploadFile(file).subscribe({
         next: (jobId) => {
-          const polling = setInterval(() => {
-            this.parsrService.getMarkdown(jobId).subscribe({
-              next: (markdown) => {
-                clearInterval(polling);
-                resolve(markdown);
-              },
-              error: (err) => {
-                if (err.status !== 404) reject(err);
-              },
-            });
-          }, 2000);
+          this.parsrService.getMarkdown(jobId).subscribe({
+            next: (markdown) => resolve(markdown),
+            error: (err) => reject(err),
+          });
         },
         error: (err) => reject(err),
       });
