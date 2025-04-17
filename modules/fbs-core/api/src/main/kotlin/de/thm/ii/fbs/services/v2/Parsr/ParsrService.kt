@@ -53,24 +53,26 @@ class ParsrService {
 
     private suspend fun pollParsrResult(jobId: String): String {
     var retries = 0
-    while (retries < 5) {
+    val maxRetries = 30 // 40 Sekunden bei 2s-Intervallen
+    while (retries < maxRetries) {
         try {
             val result = parsrClient.get()
                 .uri("/api/v1/markdown/$jobId")
                 .retrieve()
                 .bodyToMono<String>()
-                .block(Duration.ofSeconds(10))
+                .block(Duration.ofSeconds(20)) ?: ""
             
-            if (!result.isNullOrEmpty()) {
-                documentCache[jobId] = result
-                return result
-            }
+            if (result.isNotBlank()) return result
         } catch (e: Exception) {
-            delay(2000L * (retries + 1))
+            delay(3000L)
         }
         retries++
     }
-    throw RuntimeException("Maximale Versuche erreicht")
-}
+    throw RuntimeException("Verarbeitungszeitüberschreitung (${maxRetries*2}s)")
+    }
+
+    fun documentExists(jobId: String): Boolean {
+        return documentCache.containsKey(jobId)
+    }
 
 }
