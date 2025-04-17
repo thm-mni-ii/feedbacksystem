@@ -112,8 +112,8 @@ import { GroupDetailComponent } from "./page-components/group-detail/group-detai
 import { GroupDeregisterDialogComponent } from "./dialogs/group-deregister-dialog/group-deregister-dialog.component";
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
-import { AngularEditorModule } from '@kolkov/angular-editor';
-import { CodeEditorComponent } from './page-components/task-detail/submission-text/code-editor/code-editor.component';
+import { AngularEditorModule } from "@kolkov/angular-editor";
+import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {

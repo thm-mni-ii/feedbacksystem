@@ -23,3 +23,5 @@ data/
 master-runner/upload-dir/*
 
 docker-config
+
+data_kaputt

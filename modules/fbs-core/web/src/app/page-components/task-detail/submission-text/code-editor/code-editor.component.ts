@@ -21,19 +21,21 @@ import { PrismService } from "src/app/service/prism.service";
   templateUrl: "./code-editor.component.html",
   styleUrls: ["./code-editor.component.scss"],
 })
-export class CodeEditorComponent implements OnDestroy, AfterViewInit, OnChanges {
+export class CodeEditorComponent
+  implements OnDestroy, AfterViewInit, OnChanges
+{
   @ViewChild("textArea") textArea!: ElementRef;
   @ViewChild("codeContent") codeContent!: ElementRef;
 
-  @Input() content: string = ''; 
+  @Input() content: string = "";
   @Input() index!: number;
-  @Input() codeType: string = "javascript"; 
+  @Input() codeType: string = "javascript";
 
   @Output() contentChange = new EventEmitter<string>();
   @Output() update = new EventEmitter<string>();
 
   subs: Subscription[] = [];
-  viewInitialized = false; 
+  viewInitialized = false;
 
   groupForm = new FormGroup({
     content: new FormControl(""),
@@ -48,17 +50,24 @@ export class CodeEditorComponent implements OnDestroy, AfterViewInit, OnChanges 
   constructor(
     private prismService: PrismService,
     private renderer: Renderer2
-  ) { }
+  ) {}
 
   ngAfterViewInit() {
-    this.viewInitialized = true; 
+    this.viewInitialized = true;
     this.listenForm();
     this.safeRender(this.content);
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.content && this.viewInitialized && changes.content.previousValue !== changes.content.currentValue) {
-      this.groupForm.patchValue({ content: this.content }, { emitEvent: false });
+    if (
+      changes.content &&
+      this.viewInitialized &&
+      changes.content.previousValue !== changes.content.currentValue
+    ) {
+      this.groupForm.patchValue(
+        { content: this.content },
+        { emitEvent: false }
+      );
       this.safeRender(this.content);
     }
   }
@@ -99,13 +108,17 @@ export class CodeEditorComponent implements OnDestroy, AfterViewInit, OnChanges 
     }
 
     const modifiedContent = this.prismService.convertHtmlIntoString(content);
-    this.renderer.setProperty(this.codeContent.nativeElement, "innerHTML", modifiedContent);
+    this.renderer.setProperty(
+      this.codeContent.nativeElement,
+      "innerHTML",
+      modifiedContent
+    );
 
-    if (content !== this.groupForm.get('content')?.value) {
+    if (content !== this.groupForm.get("content")?.value) {
       this.groupForm.setValue({ content });
     }
 
-    this.update.emit(content); 
+    this.update.emit(content);
 
     this.prismService.highlight(this.codeContent.nativeElement);
   }
@@ -122,7 +135,9 @@ export class CodeEditorComponent implements OnDestroy, AfterViewInit, OnChanges 
     const end = textarea.selectionEnd!;
 
     const updatedContent =
-      this.groupForm.get("content")?.value.substring(0, start) + "\t" + this.groupForm.get("content")?.value.substring(end);
+      this.groupForm.get("content")?.value.substring(0, start) +
+      "\t" +
+      this.groupForm.get("content")?.value.substring(end);
 
     this.groupForm.patchValue({
       content: updatedContent,
@@ -133,6 +148,6 @@ export class CodeEditorComponent implements OnDestroy, AfterViewInit, OnChanges 
 
   onContentChange(updatedContent: string) {
     this.content = updatedContent;
-    this.contentChange.emit(this.content); 
+    this.contentChange.emit(this.content);
   }
 }

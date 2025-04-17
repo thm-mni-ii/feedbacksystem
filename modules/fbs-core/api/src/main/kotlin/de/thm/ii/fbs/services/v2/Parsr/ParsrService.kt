@@ -1,0 +1,72 @@
+package de.thm.ii.fbs.services.v2.Parsr
+
+import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
+import org.springframework.http.MediaType
+import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
+
+@Service
+class ParsrService {
+    private val parsrClient: WebClient = WebClient.builder()
+        .baseUrl("http://parsr:3001")
+        .build()
+
+    // Thread-sicherer Cache mit ConcurrentHashMap
+    private val documentCache = ConcurrentHashMap<String, String>()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    fun sendPdfToParsr(file: MultipartFile): String {
+        val response = parsrClient.post()
+            .uri("/api/v1/document")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData("file", file.resource))
+            .retrieve()
+            .bodyToMono<String>()
+            .block(Duration.ofSeconds(30)) ?: throw RuntimeException("Empty response from Parsr")
+
+        // Direkte Verwendung der Antwort als Job-ID (kein JSON-Parsing nötig)
+        val jobId = response.trim()
+
+        // Asynchrones Polling starten
+        coroutineScope.launch {
+            try {
+                val markdown = pollParsrResultWithRetry(jobId)
+                documentCache[jobId] = markdown
+                println("Successfully cached markdown for job: $jobId")
+            } catch (e: Exception) {
+                println("Failed to cache markdown for job $jobId: ${e.message}")
+                documentCache.remove(jobId)
+            }
+        }
+
+        return jobId
+    }
+
+    fun getParsedDocument(jobId: String): String {
+        return documentCache[jobId] ?: throw RuntimeException("Document not found")
+    }
+
+    private suspend fun pollParsrResultWithRetry(jobId: String, maxRetries: Int = 5): String {
+        var retryCount = 0
+        while (retryCount < maxRetries) {
+            try {
+                return parsrClient.get()
+                    .uri("/api/v1/markdown/$jobId")
+                    .retrieve()
+                    .bodyToMono<String>()
+                    .block(Duration.ofSeconds(10)) ?: ""
+            } catch (e: Exception) {
+                retryCount++
+                if (retryCount >= maxRetries) throw e
+                delay(2000L * retryCount)
+            }
+        }
+        throw RuntimeException("Max retries ($maxRetries) reached for job $jobId")
+    }
+}
