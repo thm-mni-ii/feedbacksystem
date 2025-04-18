@@ -198,16 +198,22 @@ export async function getSingleCatalog(tokenData: JwtPayload, catalogId: string)
 }
 
 export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
+  let request = {}
   if (!authenticateInCourse(tokenData, CourseAccess.docentInCourse, courseId)) {
+    request = {
+      course: Number(courseId),
+    };
+  } else if(!authenticateInCourse(tokenData, CatalogAccess.studentInCatalog, courseId)) {
+    request = {
+      course: Number(courseId),
+      isPublic: true
+    };
+  } else {
     return -1;
   }
   const database: mongoDB.Db = await connect();
   const catalogCollection: mongoDB.Collection = database.collection("catalog");
   const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
-  const request = {
-    course: Number(courseId),
-    isPublic: true
-  };
   const courseResult = await catalogInCourseCollection.find(request).toArray();
   if (courseResult.length === 0) {
     console.log("no catalogs found");
