@@ -57,7 +57,7 @@ const getCatalogs = ( async (req: Request, res: Response) => {
       if (req.user !== undefined) {
         const data = await getAllCatalogs(req.user, courseId);
         if (data == -1) {
-          res.sendStatus(403);
+          res.sendStatus(404);
         } else {
           res.send(data);
         }
