@@ -199,11 +199,11 @@ export async function getSingleCatalog(tokenData: JwtPayload, catalogId: string)
 
 export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
   let request = {}
-  if (!authenticateInCourse(tokenData, CourseAccess.docentInCourse, courseId)) {
+  if (authenticateInCourse(tokenData, CourseAccess.docentInCourse, courseId)) {
     request = {
       course: Number(courseId),
     };
-  } else if(!authenticateInCourse(tokenData, CatalogAccess.studentInCatalog, courseId)) {
+  } else if(authenticateInCourse(tokenData, CatalogAccess.studentInCatalog, courseId)) {
     request = {
       course: Number(courseId),
       isPublic: true
