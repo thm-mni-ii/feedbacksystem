@@ -62,14 +62,25 @@ onMounted(() => {
   </v-snackbar>
 
   <DialogEditQuestion ref="dialogEditQuestion" />
-  <h2 class="mx-auto mt-8 text-primary text-center">All Questions</h2>
-  <v-list class="mx-auto" max-width="400">
-    <v-list-item v-for="question in allQuestions" :key="question._id" :v-bind="question">
-      <v-card class="mx-auto text-center px-8 py-4" @click="editQuestion(question)">
-        {{ question._id }}
-      </v-card>
-    </v-list-item>
-  </v-list>
+  <v-card class="mx-auto my-8" max-width="800">
+    <v-card-title class="text-primary"> All Questions </v-card-title>
+
+    <v-divider></v-divider>
+
+    <v-virtual-scroll :items="allQuestions" height="700" item-height="48">
+      <template #default="{ item }">
+        <v-list-item
+          :title="`${item.questiontype} Question`"
+          :subtitle="`${item.questiontext}`"
+          @click="editQuestion(item)"
+        >
+          <template v-slot:append>
+            <v-btn icon="mdi-pencil" size="x-small" variant="tonal"></v-btn>
+          </template>
+        </v-list-item>
+      </template>
+    </v-virtual-scroll>
+  </v-card>
   <div class="d-flex justify-center">
     <v-btn
       icon="mdi-plus"

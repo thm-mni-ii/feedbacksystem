@@ -27,38 +27,40 @@
                   Start Session
                 </v-btn>
                 <!-- manage questions with icon -->
-                <v-btn
-                  prepend-icon="mdi-cog"
-                  color="dark-grey"
-                  variant="outlined"
-                  class="mr-2"
-                  @click="manageQuestions(catalog)"
-                >
-                  Manage
-                </v-btn>
-                <v-btn
-                  icon="mdi-pencil"
-                  color="dark-grey"
-                  variant="outlined"
-                  size="x-small"
-                  class="mr-2"
-                  @click="editCatalog(course.id, catalog)"
-                >
-                </v-btn>
-                <v-btn
-                  icon="mdi-delete"
-                  color="error"
-                  variant="outlined"
-                  size="x-small"
-                  class="mr-2"
-                  @click="deleteCatalog(course.id, catalog)"
-                >
-                </v-btn>
+                <span v-if="decodedToken.globalRole != 'USER'">
+                  <v-btn
+                    prepend-icon="mdi-cog"
+                    color="dark-grey"
+                    variant="outlined"
+                    class="mr-2"
+                    @click="manageQuestions(catalog)"
+                  >
+                    Manage Questions
+                  </v-btn>
+                  <v-btn
+                    icon="mdi-pencil"
+                    color="dark-grey"
+                    variant="outlined"
+                    size="x-small"
+                    class="mr-2"
+                    @click="editCatalog(course.id, catalog)"
+                  >
+                  </v-btn>
+                  <v-btn
+                    icon="mdi-delete"
+                    color="error"
+                    variant="outlined"
+                    size="x-small"
+                    class="mr-2"
+                    @click="deleteCatalog(course.id, catalog)"
+                  >
+                  </v-btn>
+                </span>
               </v-list-item-title>
 
               <v-list-item-action> </v-list-item-action>
             </v-list-item>
-            <v-list-item>
+            <v-list-item v-if="decodedToken.globalRole != 'USER'">
               <v-list-item-title class="d-flex align-center justify-space-between">
                 <v-btn color="primary" variant="outlined" @click="createNewCatalog(course.id)"
                   >Add new Catalog</v-btn
@@ -77,6 +79,7 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import courseService from '@/services/course.service'
+import { jwtDecode } from 'jwt-decode'
 
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogEditCatalog from '@/dialog/DialogEditCatalog.vue'
@@ -88,6 +91,7 @@ import catalogService from '@/services/catalog.service'
 const dialogConfirm = ref<typeof DialogConfirmVue>()
 const dialogEditCatalog = ref<typeof DialogEditCatalog>()
 const router = useRouter()
+const decodedToken = ref<{}>()
 
 const myCourses = ref<Course[]>([])
 
@@ -102,6 +106,7 @@ onMounted(async () => {
     .catch((error) => {
       console.log(error)
     })
+  decodedToken.value = decodeJwtToken()
 })
 
 // async func to write jsessionid to local storage
@@ -225,6 +230,14 @@ const startSession = (catalog: Catalog) => {
 }
 const startStudy = (courseId: number) => {
   router.push(`/study/${courseId}`)
+}
+
+const decodeJwtToken = () => {
+  const token = localStorage.getItem('jsessionid')
+  console.log(token)
+  const decoded = jwtDecode<JwtPayload>(token)
+  console.log('TOKEN INHALT:', decoded)
+  return decoded
 }
 </script>
 

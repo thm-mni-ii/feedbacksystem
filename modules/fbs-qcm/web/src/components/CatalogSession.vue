@@ -106,12 +106,12 @@ const submitAnswer = () => {
       :key="option.id"
       class="d-flex justify-end"
     >
-      <div class="w-50 mt-4 justify-start rounded-lg d-flex border-md border-primary">
+      <div class="mt-4 w-50 rounded-lg border-md border-primary">
         <v-checkbox
           :model-value="selectedAnswers.some((a) => a.id === option.id)"
           :label="`${option.text}`"
           color="primary"
-          class="mx-auto py-auto"
+          class="mx-4 py-auto d-flex justify-start"
           hide-details
           @change="updateSelectedAnswers(option)"
         >
@@ -125,12 +125,12 @@ const submitAnswer = () => {
 
   <div
     v-if="question.questionconfiguration?.multipleColumn && question.questiontype == 'Choice'"
-    class="d-flex flex-column"
+    class="d-flex flex-column mt-4"
   >
     <v-table>
       <thead>
         <tr>
-          <th>Options</th>
+          <th></th>
           <th
             v-for="column in question.questionconfiguration.answerColumns"
             :key="column.id"
