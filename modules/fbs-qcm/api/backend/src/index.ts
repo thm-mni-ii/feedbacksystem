@@ -47,6 +47,7 @@ async function createDatabaseAndCollection() {
       course: 1,
       catalog: new mongoDB.ObjectId("67f7f3b7d93fb13cd308e807"),
       requirements: [],
+      isPublic: true
     });
     submissionCollection.insertOne({
       _id: new mongoDB.ObjectId("664b63aefa0e9768d9ffd02a"),

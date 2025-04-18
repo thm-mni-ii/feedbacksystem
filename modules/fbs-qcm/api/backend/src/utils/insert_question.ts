@@ -152,7 +152,7 @@ export async function insertQuestions() {
             {
                 order: "null",
                 text: "Syntax",
-                isBlakn: "false"
+                isBlank: "false"
             }
         ]
     },

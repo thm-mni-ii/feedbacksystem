@@ -204,6 +204,7 @@ export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
   const catalogInCourseCollection: mongoDB.Collection = database.collection("catalogInCourse");
   const request = {
     course: Number(courseId),
+    isPublic: true
   };
  
 
