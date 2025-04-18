@@ -88,7 +88,7 @@ defineExpose({
                 <td>{{ row.text }}</td>
                 <td v-for="col in report.correctAnswer.answerColumns" :key="col.id">
                   <div class="d-flex align-center">
-                    <v-icon v-if="row.correctAnswers.includes(col.id)" color="primary">
+                    <v-icon v-if="row.correctAnswers.includes(col.id - 1)" color="primary">
                       mdi-check-circle-outline
                     </v-icon>
                     <v-icon v-else color="orange"> mdi-close-circle-outline </v-icon>

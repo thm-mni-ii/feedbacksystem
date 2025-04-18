@@ -103,7 +103,7 @@ onMounted(() => {
   <v-btn
     v-tooltip:end="'Add Text Part'"
     icon="mdi-plus"
-    class="ml-2 mb-2"
+    class="ml-2"
     size="small"
     @click="addTextPart"
   ></v-btn>
@@ -127,7 +127,7 @@ onMounted(() => {
       class="inline-block"
     >
       {{ part.text }}
-      <span v-if="!part.isBlank"> &nbsp; </span>
+      <span v-if="!part.isBlank">&nbsp;</span>
     </span>
   </div>
 </template>

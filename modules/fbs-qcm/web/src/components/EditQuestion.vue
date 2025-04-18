@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Ref } from 'vue'
 import type Question from '../model/Question'
 import type ChoiceQuestionConfiguration from '@/model/ChoiceQuestionConfiguration'
 import type { Choice } from '@/model/questionTypes/Choice'
@@ -121,25 +120,15 @@ const handleSubmit = async () => {
           :items="questionTypes"
           variant="solo-filled"
         ></v-select>
-        <div class="d-flex flex-col">
-          <v-textarea
-            v-model="question.questiontext"
-            maxlength="130"
-            auto-grow
-            counter
-            rows="3"
-            label="Question"
-            required
-          ></v-textarea>
-          <div v-if="question.questiontype === 'FillInTheBlanks'" class="d-flex align-center">
-            <v-icon icon="mdi-information-outline" size="small" class="ml-4 mr-8" color="dark-grey">
-            </v-icon>
-            <v-tooltip activator="parent" location="end"
-              >This text field is optional. If no text is provided, then the default "Fill in the
-              Blanks" will be saved for the Questiontext</v-tooltip
-            >
-          </div>
-        </div>
+        <v-textarea
+          v-model="question.questiontext"
+          maxlength="130"
+          auto-grow
+          counter
+          rows="3"
+          label="Question"
+          required
+        ></v-textarea>
         <QuestionTags :questiontags="question.questiontags" @update-tags="updateTags" />
 
         <EditChoiceQuestion
