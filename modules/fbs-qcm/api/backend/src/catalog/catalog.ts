@@ -35,6 +35,7 @@ interface QuestionData {
 interface catalog {
   name: string;
   questions: string[];
+  isPublic: boolean;
   requirements: string[];
 }
 
@@ -84,6 +85,7 @@ export async function createSingleCatalog(
     course: course,
     catalog: catalogInsert.insertedId,
     requirements: data.requirements,
+    isPublic: data.isPublic
   };
   const catalogInCourseInsert =
     catalogInCourseCollection.insertOne(catalogInCourse);
@@ -206,8 +208,6 @@ export async function getAllCatalogs(tokenData: JwtPayload, courseId: number) {
     course: Number(courseId),
     isPublic: true
   };
- 
-
   const courseResult = await catalogInCourseCollection.find(request).toArray();
   if (courseResult.length === 0) {
     console.log("no catalogs found");
@@ -309,6 +309,7 @@ export async function editSingleCatalog(
   const update2 = {
     $set: {
       requirements: data.requirements,
+      isPublic: data.isPublic
     },
   };
   await catalogInCourseCollection.updateOne(filter2, update2);
