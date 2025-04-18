@@ -166,7 +166,7 @@ export async function getSingleCatalog(tokenData: JwtPayload, catalogId: string)
   if (
     !(await authenticateInCatalog(
       tokenData,
-      CatalogAccess.docentInCatalog,
+      CatalogAccess.studentInCatalog,
       catalogId
     ))
   ) {
