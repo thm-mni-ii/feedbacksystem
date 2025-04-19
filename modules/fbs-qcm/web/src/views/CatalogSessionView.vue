@@ -144,7 +144,9 @@ onMounted(async () => {
             Finished!🎉 Here's your Summary:
           </h4>
           <SessionFeedback :questionReport="catalogEvaluation.questionReport" />
-          <h3 class="text-blue-grey-darken-2">Total Score: {{ catalogScore * 100 }} %</h3>
+          <h3 class="text-blue-grey-darken-2">
+            Total Score: {{ (catalogScore * 100).toFixed(2) }} %
+          </h3>
           <v-btn
             variant="tonal"
             class="mx-auto my-8"

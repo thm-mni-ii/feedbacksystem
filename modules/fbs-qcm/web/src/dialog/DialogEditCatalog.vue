@@ -40,6 +40,7 @@
                 item-value="id"
                 label="Requirements"
               ></v-select>
+              <v-switch v-model="catalog.isPublic" label="is Public" color="primary"></v-switch>
             </v-col>
           </v-row>
         </v-container>
