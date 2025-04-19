@@ -24,3 +24,16 @@ export interface CatalogInCourseObject {
     catalog: string,
     requirements: CatalogInCourseObject[]
 }
+
+export interface Skill {
+    _id: string
+    course: number,
+    name: string,
+    requirements: Skill[]
+}
+
+export interface QuestionInSkill {
+    _id: string,
+    skillId: string,
+    questionId: string
+}

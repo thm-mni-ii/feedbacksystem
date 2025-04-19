@@ -11,7 +11,8 @@ export interface Question {
   questiontype: QuestionType;
   questionconfiguration: Choice | FillInTheBlanks | QuestionType.SQL;
   createdAt: Date,
-  lastEdited: Date
+  lastEdited: Date,
+  difficulty: number
 }
 
 export interface EditQuestionType {
