@@ -7,7 +7,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="d-flex justify-center mt-4 mr-4">
+  <div class="d-flex justify-center mt-4">
     <v-sheet
       border
       rounded

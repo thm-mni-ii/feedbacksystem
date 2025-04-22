@@ -27,7 +27,7 @@
                   Start Session
                 </v-btn>
                 <!-- manage questions with icon -->
-                <span v-if="decodedToken.globalRole != 'USER'">
+                <span v-if="decodedToken.globalRole == 'ADMIN'">
                   <v-btn
                     prepend-icon="mdi-cog"
                     color="dark-grey"
@@ -234,9 +234,7 @@ const startStudy = (courseId: number) => {
 
 const decodeJwtToken = () => {
   const token = localStorage.getItem('jsessionid')
-  console.log(token)
   const decoded = jwtDecode<JwtPayload>(token)
-  console.log('TOKEN INHALT:', decoded)
   return decoded
 }
 </script>
