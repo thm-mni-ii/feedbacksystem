@@ -6,6 +6,9 @@
   <button mat-button color="accent" (click)="toggleEditor()">
     {{ isCodeFile ? "Wechsel zu Text-Editor" : "Wechsel zu Code-Editor" }}
   </button>
+  <button mat-button color="warn" (click)="downloadSubmission()">
+    Abgabe herunterladen
+  </button>
 </div>
 
 <input
@@ -31,8 +34,7 @@
     [(ngModel)]="toSubmit"
     (ngModelChange)="onTextChange($event)"
     [placeholder]="'Schreibe hier deine Lösung...'"
-    [sanitize]="false"
-  >
+    [sanitize]="false">
   </angular-editor>
 </div>
 
