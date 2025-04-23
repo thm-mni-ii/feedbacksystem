@@ -22,15 +22,14 @@ export class DbControlPanelComponent implements OnInit {
   @Output() changeActiveDbId = new EventEmitter<number>();
   @Output() submitStatement = new EventEmitter<string>();
   @Output() mongoDbSelected = new EventEmitter<string>();
+  @Output() schemaReload = new EventEmitter<void>();
+  @Output() dbChanged = new EventEmitter<'postgres' | 'mongo'>();
 
   isAdmin: boolean;
   selectedTab: number = 0;
   activeDb: Database;
   collaborativeMode: boolean = false;
-
   databases$: Observable<Database[]>;
-
-  @Output() dbChanged = new EventEmitter<'postgres' | 'mongo'>();
 
   constructor(private auth: AuthService, private store: Store) {}
 

@@ -1,4 +1,4 @@
-import {Component, OnInit} from "@angular/core";
+import {AfterViewChecked, Component, OnInit} from "@angular/core";
 import {Store} from "@ngrx/store";
 import {Observable, of} from "rxjs";
 import {Routine} from "src/app/model/sql_playground/Routine";
@@ -15,6 +15,9 @@ import {BackendService} from "./collab/backend.service";
 import {HttpClient} from "@angular/common/http";
 import {MongoPlaygroundService} from "src/app/service/mongo-playground.service";
 import {Subject} from "rxjs";
+
+import Prism from 'prismjs';
+import 'prismjs/components/prism-json';
 
 @Component({
   selector: "app-sql-playground-management",
@@ -155,5 +158,11 @@ export class SqlPlaygroundComponent implements OnInit {
     this.mongoDbId = dbSuffix;
     localStorage.setItem('playground-mongo-db', dbSuffix);
     this.schemaReload$.next();
+  }
+
+  ngAfterViewChecked() {
+    if (this.selectedDbType === 'mongo') {
+      Prism.highlightAll();
+    }
   }
 }

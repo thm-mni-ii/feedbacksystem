@@ -38,19 +38,19 @@ import {MongoPlaygroundService} from "../../../../service/mongo-playground.servi
   styleUrls: ["./db-control-db-overview.component.scss"],
 })
 export class DbControlDbOverviewComponent implements OnInit {
+  @Output() mongoDbSelected = new EventEmitter<string>();
+  @Output() schemaReload = new EventEmitter<void>();
+
   databases$: Observable<Database[]>;
   error$: Observable<any>;
   token = this.authService.getToken();
   pending: boolean = false;
-
   activeDb$: Observable<Database>;
   collaborativeMode: boolean = false;
   backend$: Observable<BackendDefintion>;
   backend: BackendDefintion;
   backendDatabaseInformation$: Observable<DatabaseInformation>;
   databaseInformation: DatabaseInformation;
-
-  @Output() mongoDbSelected = new EventEmitter<string>();
   selectedDbType: 'postgres' | 'mongo' | null = null;
   selectedDb: number | string = '';
 
@@ -211,6 +211,38 @@ export class DbControlDbOverviewComponent implements OnInit {
       });
   }
 
+  resetMongoDatabase() {
+    const userId = this.authService.getToken().id;
+    const shortId = typeof this.selectedDb === 'string'
+      ? this.selectedDb.split("_").slice(-1)[0]
+      : this.selectedDb.toString();
+
+    const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
+      data: {
+        title: "Datenbank resetten",
+        message: "Möchten Sie wirklich alle Inhalte dieser MongoDB löschen?",
+        textToRepeat: `${shortId}`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+
+      this.mongodbService.resetMongoDatabase(userId, shortId).subscribe({
+        next: (response) => {
+          this.snackbar.open(
+            `Die MongoDB wurde resettet.`,
+            "Ok",
+            { duration: 3000 }
+          );
+          this.schemaReload.emit();
+        },
+        error: () => {
+          this.snackbar.open("Fehler beim Reset der MongoDB", "Ok", { duration: 3000 });
+        }
+      });
+    });
+  }
 
   getTempURI() {
     this.databases$.subscribe((databases) => {

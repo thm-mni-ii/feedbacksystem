@@ -7,7 +7,8 @@
     label="{{ 'sql-playground.db-control-panel.tab-db' | i18nextEager }}"
   >
     <app-db-control-db-overview
-      (mongoDbSelected)="mongoDbSelectedToParent($event)">
+      (mongoDbSelected)="mongoDbSelectedToParent($event)"
+      (schemaReload)="schemaReload.emit()">
     </app-db-control-db-overview>
   </mat-tab>
   <mat-tab

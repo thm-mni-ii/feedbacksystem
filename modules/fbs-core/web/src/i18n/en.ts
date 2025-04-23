@@ -338,6 +338,7 @@ export const englishTranslation = {
   "sql-playground.db-control-panel.overview.selectDatabase": "Select Database",
   "sql-playground.db-control-panel.overview.deleteButton": "Delete",
   "sql-playground.db-control-panel.overview.newDbButton": "New DB",
+  "sql-playground.db-control-panel.overview.resetDbButton": "Reset DB",
   "sql-playground.db-control-panel.overview.changeCollaborativeModeButton":
     "Switch to Private Mode",
   "sql-playground.db-control-panel.co-working.select-group": "Select Group",

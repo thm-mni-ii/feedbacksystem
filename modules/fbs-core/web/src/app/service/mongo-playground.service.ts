@@ -20,19 +20,26 @@ export class MongoPlaygroundService {
     );
   }
 
-  deleteMongoDatabase(uid: number, dbId: string): Observable<void> {
-    return this.http.delete<void>(`/api/v2/playground/${uid}/databases/mongo/${dbId}`);
+  deleteMongoDatabase(userId: number, dbId: string): Observable<void> {
+    return this.http.delete<void>(`/api/v2/playground/${userId}/databases/mongo/${dbId}`);
   }
 
-  executeMongoQuery(uid: number, dbId: string, query: any): Observable<any> {
+  executeMongoQuery(userId: number, dbId: string, query: any): Observable<any> {
     return this.http.post<any>(
-      `/api/v2/playground/${uid}/databases/mongo/${dbId}/execute`,
+      `/api/v2/playground/${userId}/databases/mongo/${dbId}/execute`,
       query
     );
   }
 
-  getMongoDatabases(uid: number): Observable<any> {
-    return this.http.get<any>(`/api/v2/playground/${uid}/databases/mongo/list`);
+  resetMongoDatabase(userId: number, dbId: string) {
+    return this.http.post<{ collections: string[] }>(
+      `/api/v2/playground/${userId}/databases/mongo/${dbId}/reset`,
+      {}
+    );
+  }
+
+  getMongoDatabases(userId: number): Observable<any> {
+    return this.http.get<any>(`/api/v2/playground/${userId}/databases/mongo/list`);
   }
 
   getMongoCollections(userId: number, dbSuffix: string) {

@@ -11,7 +11,7 @@
 
       <ng-template #mongoOutput>
         <div class="mongo-output" *ngIf="mongoRawResult$ | async as result">
-          <pre>{{ result | json }}</pre>
+          <pre><code class="language-json">{{ result | json }}</code></pre>
         </div>
       </ng-template>
     </app-bordered-container>
@@ -35,6 +35,7 @@
         (submitStatement)="submitStatement($event)"
         (dbChanged)="onDbChanged($event)"
         (mongoDbSelected)="onMongoDbSelected($event)"
+        (schemaReload)="schemaReload$.next()"
       ></app-db-control-panel>
     </app-bordered-container>
   </div>

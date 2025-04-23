@@ -37,9 +37,4 @@ export class DbSchemeCollectionsComponent implements OnInit {
       this.collections = cols;
     });
   }
-
-  showCollectionData(event: any, collectionName: string): void {
-    event.stopPropagation();
-    this.submitStatement.emit(`db.${collectionName}.find({})`);
-  }
 }

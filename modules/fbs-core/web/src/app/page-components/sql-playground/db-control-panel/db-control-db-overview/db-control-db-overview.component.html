@@ -15,17 +15,20 @@
 
     <mat-form-field appearance="fill">
       <mat-label>{{
-        "sql-playground.db-control-panel.overview.selectDatabase" | i18nextEager
-      }}</mat-label>
+          "sql-playground.db-control-panel.overview.selectDatabase" | i18nextEager
+        }}
+      </mat-label>
       <mat-select
         [(value)]="selectedDb"
         (selectionChange)="activateDatabase($event.value)"
         [disabled]="collaborativeMode || !selectedDbType"
       >
         <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
-          {{ selectedDbType === 'mongo'
-          ? db.name.replace('mongo_playground_student_' + token.id + '_', '')
-          : db.name }}
+          {{
+            selectedDbType === 'mongo'
+              ? db.name.replace('mongo_playground_student_' + token.id + '_', '')
+              : db.name
+          }}
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -51,6 +54,18 @@
           "sql-playground.db-control-panel.overview.newDbButton" | i18nextEager
         }}
       </button>
+
+      <button
+        mat-raised-button
+        class="orange-btn"
+        *ngIf="selectedDbType === 'mongo' && selectedDb"
+        (click)="resetMongoDatabase()"
+      >
+        {{
+          "sql-playground.db-control-panel.overview.resetDbButton" | i18nextEager
+        }}
+      </button>
+
       <button
         mat-raised-button
         color="accent"
@@ -76,7 +91,7 @@
   <div *ngIf="backend.type === 'collaborative'">
     <p>Sie sind mit dem Co-Working verbunden.</p>
     <p>
-      Datenbankname: {{ databaseInformation?.name ?? "-" }}<br />
+      Datenbankname: {{ databaseInformation?.name ?? "-" }}<br/>
       Datenbankursprung: {{ databaseInformation?.owner ?? "-" }}
     </p>
     <p>
