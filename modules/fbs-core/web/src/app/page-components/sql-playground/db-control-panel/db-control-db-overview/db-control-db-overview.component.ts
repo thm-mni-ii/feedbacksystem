@@ -1,13 +1,15 @@
-import { Component, OnInit } from "@angular/core";
-import { Store } from "@ngrx/store";
-import { Observable } from "rxjs";
-import { Database } from "../../../../model/sql_playground/Database";
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { AuthService } from "src/app/service/auth.service";
-import { MatDialog } from "@angular/material/dialog";
-import { TextConfirmDialogComponent } from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
-import { NewDbDialogComponent } from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
-import { SharePlaygroundLinkDialogComponent } from "src/app/dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
+import {Component, EventEmitter, OnInit, Output} from "@angular/core";
+import {Store} from "@ngrx/store";
+import {Observable, of} from "rxjs";
+import {Database} from "../../../../model/sql_playground/Database";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {AuthService} from "src/app/service/auth.service";
+import {MatDialog} from "@angular/material/dialog";
+import {TextConfirmDialogComponent} from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
+import {NewDbDialogComponent} from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
+import {
+  SharePlaygroundLinkDialogComponent
+} from "src/app/dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 import {
   loadDatabases,
   createDatabase,
@@ -18,8 +20,8 @@ import {
   selectAllDatabases,
   selectDatabasesError,
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
-import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
-import { map } from "rxjs/operators";
+import {SqlPlaygroundService} from "../../../../service/sql-playground.service";
+import {map} from "rxjs/operators";
 import {
   BackendDefintion,
   DatabaseInformation,
@@ -28,6 +30,7 @@ import {
   selectBackend,
   selectBackendDatabaseInformation,
 } from "../../state/sql-playground.selectors";
+import {MongoPlaygroundService} from "../../../../service/mongo-playground.service";
 
 @Component({
   selector: "app-db-control-db-overview",
@@ -37,7 +40,6 @@ import {
 export class DbControlDbOverviewComponent implements OnInit {
   databases$: Observable<Database[]>;
   error$: Observable<any>;
-  selectedDb: number = 0;
   token = this.authService.getToken();
   pending: boolean = false;
 
@@ -48,30 +50,63 @@ export class DbControlDbOverviewComponent implements OnInit {
   backendDatabaseInformation$: Observable<DatabaseInformation>;
   databaseInformation: DatabaseInformation;
 
+  @Output() mongoDbSelected = new EventEmitter<string>();
+  selectedDbType: 'postgres' | 'mongo' | null = null;
+  selectedDb: number | string = '';
+
   constructor(
     private store: Store,
     private snackbar: MatSnackBar,
     private authService: AuthService,
     private dialog: MatDialog,
-    private playgroundService: SqlPlaygroundService
-  ) {}
+    private playgroundService: SqlPlaygroundService,
+    private mongodbService: MongoPlaygroundService
+  ) {
+  }
+
+  onDbTypeChange(type: 'postgres' | 'mongo') {
+    this.selectedDbType = type;
+    localStorage.setItem('playground-db-type', type);
+    location.reload();
+  }
 
   ngOnInit(): void {
-    this.store.dispatch(loadDatabases());
-    this.databases$ = this.store.select(selectAllDatabases);
+    const dbType = localStorage.getItem('playground-db-type') as 'postgres' | 'mongo' | null;
+    this.selectedDbType = dbType;
+
+    if (dbType === 'postgres') {
+      this.store.dispatch(loadDatabases());
+      this.databases$ = this.store.select(selectAllDatabases);
+    } else if (dbType === 'mongo') {
+      const userId = this.authService.getToken().id;
+      const lastSelectedDb = localStorage.getItem('playground-mongo-db');
+
+      this.databases$ = this.mongodbService.getMongoDatabases(userId).pipe(
+        map(mongoDatabases => {
+          const mapped = mongoDatabases.map(name => ({id: name, name}));
+
+          if (lastSelectedDb && mapped.some(db => db.id === lastSelectedDb)) {
+            this.selectedDb = lastSelectedDb;
+          }
+
+          return mapped;
+        })
+      );
+    } else {
+      this.databases$ = of([]);
+    }
+
     this.error$ = this.store.select(selectDatabasesError);
-    this.backendDatabaseInformation$ = this.store.select(
-      selectBackendDatabaseInformation
-    );
+    this.backendDatabaseInformation$ = this.store.select(selectBackendDatabaseInformation);
     this.backendDatabaseInformation$.subscribe((databaseInformation) => {
-      console.log("dbi", databaseInformation);
       this.databaseInformation = databaseInformation;
     });
+
     this.backend$ = this.store.select(selectBackend);
     this.backend$.subscribe((backend) => {
-      console.log("backend", backend);
       this.backend = backend;
     });
+
     this.activeDb$ = this.databases$.pipe(
       map((databases) => databases.find((database) => database.active))
     );
@@ -83,28 +118,56 @@ export class DbControlDbOverviewComponent implements OnInit {
   }
 
   createDatabase(name: string) {
-    this.store.dispatch(createDatabase({ name }));
+    this.store.dispatch(createDatabase({name}));
   }
 
   deleteDatabase() {
     const selectedDb = this.selectedDb;
+
+    const shortId =
+      typeof selectedDb === 'string' && selectedDb.includes('_')
+        ? selectedDb.split("_")[selectedDb.split("_").length - 1]
+        : selectedDb.toString();
+
     const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
       data: {
         title: "Datenbank löschen",
         message: "Möchten Sie die Datenbank wirklich löschen?",
-        textToRepeat: `${selectedDb}`,
+        textToRepeat: `${shortId}`,
       },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.store.dispatch(deleteDatabase({ id: selectedDb }));
+      if (!result) return;
+
+      if (this.selectedDbType === 'postgres') {
+        this.store.dispatch(deleteDatabase({id: +selectedDb}));
+      } else if (this.selectedDbType === 'mongo') {
+        const userId = this.authService.getToken().id;
+        this.mongodbService.deleteMongoDatabase(userId, shortId).subscribe({
+          next: () => {
+            this.snackbar.open("MongoDB erfolgreich gelöscht", "Ok", {duration: 3000});
+            localStorage.removeItem('playground-mongo-db');
+            location.reload(); // oder loadDatabases()
+          },
+          error: () => {
+            this.snackbar.open("Fehler beim Löschen der MongoDB", "Ok", {duration: 3000});
+          }
+        });
       }
     });
   }
 
-  activateDatabase(id: number) {
-    this.store.dispatch(activateDatabase({ id }));
+  activateDatabase(id: number | string) {
+    this.selectedDb = id;
+    const dbType = this.selectedDbType;
+
+    if (dbType === 'mongo') {
+      localStorage.setItem('playground-mongo-db', id.toString());
+      this.mongoDbSelected.emit(id.toString());
+    } else if (dbType === 'postgres')
+      this.store.dispatch(activateDatabase({id: +id}));
+
   }
 
   changeCollaborativeMode() {
@@ -120,17 +183,34 @@ export class DbControlDbOverviewComponent implements OnInit {
       })
       .afterClosed()
       .subscribe((res) => {
-        if (res.success) {
-          this.snackbar.open("Datenbank erfolgreich erstellt", "Ok", {
-            duration: 3000,
-          });
-        } else {
+        if (!res || !res.success || !res.name) {
           this.snackbar.open("Fehler beim Erstellen der Datenbank", "Ok", {
             duration: 3000,
+          });
+          console.warn('Dialog-Response ungültig:', res);
+          return;
+        }
+
+        const dbType = this.selectedDbType;
+
+        if (dbType === 'postgres') {
+          this.store.dispatch(createDatabase({ name: res.name }));
+        } else if (dbType === 'mongo') {
+          const userId = this.authService.getToken().id;
+          this.mongodbService.createMongoDatabase(userId, res.name).subscribe({
+            next: () => {
+              this.snackbar.open("MongoDB erfolgreich erstellt", "Ok", { duration: 3000 });
+              localStorage.setItem('playground-mongo-db', res.name);
+              location.reload();
+            },
+            error: () => {
+              this.snackbar.open("Fehler beim Erstellen der MongoDB", "Ok", { duration: 3000 });
+            }
           });
         }
       });
   }
+
 
   getTempURI() {
     this.databases$.subscribe((databases) => {

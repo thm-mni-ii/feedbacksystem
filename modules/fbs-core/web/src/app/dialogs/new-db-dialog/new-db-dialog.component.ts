@@ -29,28 +29,13 @@ export class NewDbDialogComponent {
 
   createDb() {
     if (!this.isInputValid()) {
-      this.pending = false;
       return;
     }
 
-    this.pending = true;
-
-    if (this.isUpdateDialog) {
-      // update DB
-    } else {
-      this.sqlPlaygroundService
-        .createDatabase(this.data.token.id, this.name.value)
-        .subscribe(
-          () => {
-            this.store.dispatch(loadDatabases());
-            this.dialogRef.close({ success: true });
-          },
-          (error) => {
-            console.log(error);
-            this.dialogRef.close({ success: false });
-          }
-        );
-    }
+    this.dialogRef.close({
+      success: true,
+      name: this.name.value
+    });
   }
 
   isInputValid(): boolean {

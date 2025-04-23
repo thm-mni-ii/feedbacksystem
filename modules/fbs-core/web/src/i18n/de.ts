@@ -341,7 +341,7 @@ export const germanTranslation = {
   "sql-playground.db-control-panel.templates.insert-button": "Einfügen",
   "sql-playground.db-control-panel.templates.edit-button": "Bearbeiten",
   "sql-playground.db-control-panel.overview.version": "Version",
-  "sql-playground.db-control-panel.overview.selectDatabase": "Select Database",
+  "sql-playground.db-control-panel.overview.selectDatabase": "Datenbankauswahl",
   "sql-playground.db-control-panel.overview.deleteButton": "Löschen",
   "sql-playground.db-control-panel.overview.newDbButton": "Neue DB",
   "sql-playground.db-control-panel.overview.changeCollaborativeModeButton":

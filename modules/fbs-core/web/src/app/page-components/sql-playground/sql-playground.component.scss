@@ -45,3 +45,17 @@
   grid-column-start: 8;
   grid-column-end: 11;
 }
+
+.mongo-output {
+  background: white;
+  color: #333;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  overflow: auto;
+  max-height: 400px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

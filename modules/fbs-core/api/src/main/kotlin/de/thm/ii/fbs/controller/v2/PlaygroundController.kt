@@ -162,6 +162,25 @@ class PlaygroundController(
         }
     }
 
+    @GetMapping("/mongo/{dbId}/collections")
+    @ResponseBody
+    fun getMongoCollections(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String
+    ): List<String> {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if(!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            return db.listCollectionNames().toList()
+                .filter { it != "mongo_playground_database" && it != "system.views" }
+        }
+    }
+
     @GetMapping("/mongo/list")
     @ResponseBody
     fun getMongoDatabase(@CurrentToken currentToken: LegacyToken): List<String> {

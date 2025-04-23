@@ -178,9 +178,4 @@ export class DbControlTemplatesComponent implements OnInit {
       }
     });
   }
-
-  onDbChange(db: 'postgres' | 'mongo') {
-    this.selectedDb = db;
-    this.dbChanged.emit(db);
-  }
 }

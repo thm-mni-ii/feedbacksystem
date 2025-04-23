@@ -1,0 +1,27 @@
+<div>
+  <p class="title">Collections</p>
+  <mat-expansion-panel *ngFor="let col of collections; index as i">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{ col }}
+      </mat-panel-title>
+      <mat-panel-description>
+        <button
+          mat-icon-button
+          color="grey-light"
+          matTooltip="Alle Dokumente anzeigen"
+          (click)="showCollectionData($event, col)"
+        >
+          <mat-icon>table_chart</mat-icon>
+        </button>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <ul class="attribute-list">
+      <li>
+        <span class="attribute">
+          MongoDB-Collection: <strong>{{ col }}</strong>
+        </span>
+      </li>
+    </ul>
+  </mat-expansion-panel>
+</div>

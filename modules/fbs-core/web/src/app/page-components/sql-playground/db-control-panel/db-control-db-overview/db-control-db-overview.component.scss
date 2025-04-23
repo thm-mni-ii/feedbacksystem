@@ -5,6 +5,10 @@
   flex-direction: column;
 }
 
+.form-field-spacing {
+  margin-bottom: 5px;
+}
+
 .highlight {
   font-style: italic;
   color: $cPrimary;
@@ -19,7 +23,7 @@ mat-form-field {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 15px;
-  margin: 15px 0;
+  margin: 10px 0;
 }
 
 .new-btn {

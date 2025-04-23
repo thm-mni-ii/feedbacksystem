@@ -1,7 +1,22 @@
-<div class="scheme-container">
+<div class="scheme-container" *ngIf="selectedDbType">
   <h2>{{ title }}</h2>
-  <app-db-scheme-tables></app-db-scheme-tables>
-  <app-db-scheme-views></app-db-scheme-views>
-  <app-db-scheme-triggers></app-db-scheme-triggers>
-  <app-db-scheme-routines></app-db-scheme-routines>
+  <ng-container *ngIf="selectedDbType === 'postgres'">
+    <app-db-scheme-tables></app-db-scheme-tables>
+    <app-db-scheme-views></app-db-scheme-views>
+    <app-db-scheme-triggers></app-db-scheme-triggers>
+    <app-db-scheme-routines></app-db-scheme-routines>
+  </ng-container>
+
+  <ng-container *ngIf="selectedDbType === 'mongo'">
+    <app-db-scheme-collections
+      [reloadTrigger]="reloadTrigger"
+      (submitStatement)="submitStatement.emit($event)"
+    ></app-db-scheme-collections>
+    <app-db-scheme-mongo-views
+      [reloadTrigger]="reloadTrigger"
+    ></app-db-scheme-mongo-views>
+    <app-db-scheme-mongo-indexes
+      [reloadTrigger]="reloadTrigger"
+    ></app-db-scheme-mongo-indexes>
+  </ng-container>
 </div>

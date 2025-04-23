@@ -13,6 +13,9 @@ import { DbSchemeViewsComponent } from "./db-scheme/db-scheme-views/db-scheme-vi
 import { DbSchemeTriggersComponent } from "./db-scheme/db-scheme-triggers/db-scheme-triggers.component";
 import { DbSchemeRoutinesComponent } from "./db-scheme/db-scheme-routines/db-scheme-routines.component";
 import { DbSchemeTablesComponent } from "./db-scheme/db-scheme-tables/db-scheme-tables.component";
+import { DbSchemeCollectionsComponent } from "./db-scheme/db-scheme-mongo/db-scheme-collections/db-scheme-collections.component"
+import { DbSchemeMongoViewsComponent } from "./db-scheme/db-scheme-mongo/db-scheme-views/db-scheme-mongo-views.component";
+import { DbSchemeMongoIndexesComponent } from "./db-scheme/db-scheme-mongo/db-scheme-indexes/db-scheme-indexes.component";
 import { DbControlTemplatesComponent } from "./db-control-panel/db-control-templates/db-control-templates.component";
 import { DbControlCoWorkingComponent } from "./db-control-panel/db-control-co-working/db-control-co-working.component";
 import { DbControlDbOverviewComponent } from "./db-control-panel/db-control-db-overview/db-control-db-overview.component";
@@ -46,6 +49,9 @@ import { GroupsEffects } from "./db-control-panel/state/groups.effects";
     DbSchemeTriggersComponent,
     DbSchemeRoutinesComponent,
     DbSchemeTablesComponent,
+    DbSchemeCollectionsComponent,
+    DbSchemeMongoViewsComponent,
+    DbSchemeMongoIndexesComponent,
     DbControlTemplatesComponent,
     DbControlCoWorkingComponent,
     DbControlDbOverviewComponent,

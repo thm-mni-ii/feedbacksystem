@@ -1,17 +1,5 @@
 <div class="container">
   <mat-form-field appearance="fill">
-    <mat-label>
-      {{
-        "sql-playground.db-control-panel.templates.selected-db-type" | i18nextEager
-      }}
-    </mat-label>
-    <mat-select [(value)]="selectedDb" (selectionChange)="onDbChange($event.value)">
-      <mat-option value="postgres">PostgreSQL</mat-option>
-      <mat-option value="mongo">MongoDB</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field appearance="fill">
     <mat-label>{{
         "sql-playground.db-control-panel.templates.templates" | i18nextEager
       }}
