@@ -29,11 +29,22 @@ export interface Skill {
     _id: string
     course: number,
     name: string,
-    requirements: Skill[]
+    requirements: string[]
+}
+
+export interface SkillInsertion {
+    course: number,
+    name: ObjectId,
+    requirements: ObjectId[]
 }
 
 export interface QuestionInSkill {
     _id: string,
     skillId: string,
     questionId: string
+}
+
+export interface QuestionInSkillInsertion {
+    skillId: ObjectId,
+    questionId: ObjectId
 }

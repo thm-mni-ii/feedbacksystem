@@ -12,8 +12,6 @@ const getQuestion = ( async (req: Request, res: Response) => {
       }
       if (req.user !== undefined) {
         const data = await getQuestionById(questionId, req.user);
-        console.log("data");
-        console.log(data);
         if (data !== null) {
           res.send(data);
         } else {
@@ -50,7 +48,6 @@ const putQuestion = ( async (req: Request, res: Response) => {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        console.log(req.body);
         const requestData = req.body;
         delete requestData.children;
         delete requestData.catalog;
@@ -74,10 +71,8 @@ const postQuestion = ( async (req: Request, res: Response) => {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        console.log(req.body);
         const requestData = req.body;
         const question: Question = requestData;
-        console.log(question);
         const data = await postSingleQuestion(question, req.user);
         if (data === 1) {
           res.sendStatus(403);
@@ -96,7 +91,6 @@ const copyQuestionToCatalog = ( async (req: Request, res: Response) => {
           res.sendStatus(401);
         }
         if (req.user !== undefined) {
-          console.log(req.body);
           const requestData = req.body;
           const questionId: string = requestData.question;
           const catalogId: string = requestData.catalog;
@@ -126,7 +120,6 @@ const copyQuestion = ( async (req: Request, res: Response) => {
         res.sendStatus(401);
       }
       if (req.user !== undefined) {
-        console.log(req.body);
         const questionId = req.params.id as string;
         const data = await copyQuestionWithNewOwner(req.user, questionId);
         if (data === -2) {
@@ -225,10 +218,6 @@ const postQuestionToCatalog = ( async (req: Request, res: Response) => {
           const questionId: string = requestData.question;
           const catalog: string = requestData.catalog;
           const children = requestData.children;
-          console.log("questionId");
-          console.log(questionId);
-          console.log("catalog");
-          console.log(catalog);
           const result = await addQuestionToCatalog(
             req.user,
             questionId,

@@ -23,12 +23,10 @@ export async function getAllTags(tokenData: JwtPayload) {
         ])
       let result: any[] = [];
       await data.forEach((tag: any) => {
-        console.log(`${tag._id}: ${tag.count}`);
         const tagObject = {
             tag: tag._id,
             count: tag.count
         }
-        console.log(tagObject);
         result.push(tagObject);
       });
       return result;

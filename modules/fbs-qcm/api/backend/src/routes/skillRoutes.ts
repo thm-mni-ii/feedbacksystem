@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { authenticateToken } from "../authenticateToken";
-import { deleteQuestionFromSkill, deleteSkill, editSkill, getLearnSessionQuestion, getSkill, postSkill, putLearnSessionSettings, putQuestionToSkill } from "../controller/skill";
-import { editCatalog } from "../controller/catalog";
+import { deleteQuestionFromSkill, deleteSkill, editSkill, endLearnSession, getLearnSessionQuestion, getSkill, postLearnSession, postSkill, putLearnSessionSettings, putQuestionToSkill } from "../controller/skill";
 
 const router = Router();
 
@@ -13,5 +12,7 @@ router.delete("/api_v1/deleteSkill/:skillId", authenticateToken, deleteSkill);
 router.get("/api_v1/getLearnSessionQuestion/:learnSessionId", authenticateToken, getLearnSessionQuestion);
 router.get("/api_v1/getSkill/:skillId", authenticateToken, getSkill);
 router.put("/api_v1/editLearnSessionSettings/:learnSessionId", authenticateToken, putLearnSessionSettings);
+router.post("/api_v1/startLearnSession", authenticateToken, postLearnSession);
+router.put("/api_v1/stopLearnSession/:learnSessionId", authenticateToken, endLearnSession);
 
 export default router;

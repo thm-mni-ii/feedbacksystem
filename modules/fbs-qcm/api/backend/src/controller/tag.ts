@@ -55,7 +55,6 @@ const createTag = ( async (req: Request, res: Response) => {
         res.send(200);
         return;
       }
-      console.log(result);
       res.send(400);
     } catch (error) {
       console.log(error);
@@ -69,8 +68,6 @@ const createTag = ( async (req: Request, res: Response) => {
         return;
       }
       const tagId = req.query.tagId as string;
-      console.log(req.body);
-      console.log(tagId);
       const result = await deleteSingleTag(req.user, tagId);
       if (result === -1) {
         res.send(403);

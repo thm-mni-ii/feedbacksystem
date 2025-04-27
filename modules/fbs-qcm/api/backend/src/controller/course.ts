@@ -9,7 +9,6 @@ const getSingleCatalogScore = (async (req:Request, res: Response) => {
       }
       if (req.user !== undefined) {
         const sessionId = req.params.sessionId as string;
-        console.log(sessionId);
         const result = await getCatalogScore(req.user, sessionId);
         if(result === -1) {
           res.sendStatus(400);

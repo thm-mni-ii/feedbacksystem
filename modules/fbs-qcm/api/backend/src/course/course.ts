@@ -11,7 +11,6 @@ import { Course } from "../model/utilInterfaces";
 
 export async function accessibleCourses(tokenData: JwtPayload) {
     const courses = getUserCourseRoles(tokenData);
-    console.log(courses);
     return courses;
 }
 export async function getCourses(token: string) {
