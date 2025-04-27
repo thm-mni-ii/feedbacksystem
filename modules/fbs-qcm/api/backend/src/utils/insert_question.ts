@@ -143,16 +143,6 @@ export async function insertQuestions() {
                 order: 4,
                 text: "Wissen",
                 isBlank: true
-            },
-            {
-                order: "null",
-                text: "Daten",
-                isBlank: "false"
-            },
-            {
-                order: "null",
-                text: "Syntax",
-                isBlank: "false"
             }
         ]
     },
