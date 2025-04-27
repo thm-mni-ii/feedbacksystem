@@ -9,4 +9,5 @@ export default interface Question {
   questiontags: string[]
   questiontype: QuestionType
   questionconfiguration: any
+  difficulty: number
 }
