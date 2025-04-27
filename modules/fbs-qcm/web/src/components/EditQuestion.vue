@@ -33,6 +33,7 @@ const question = ref<Question>({
   questiontext: '',
   questiontags: [] as string[],
   questiontype: QuestionType.Choice,
+  difficulty: 1,
   questionconfiguration: {
     multipleRow: false,
     multipleColumn: false,
@@ -40,6 +41,8 @@ const question = ref<Question>({
     optionRows: [{ id: 1, text: '', correctAnswers: [] }]
   } as ChoiceQuestionConfiguration
 } as Question)
+
+const tickLabels = { 1: 'Basic', 2: 'Moderate', 3: 'Challenging', 4: 'Complex' }
 
 // Type Guard
 function isChoiceQuestionConfiguration(config: any): config is Choice {
@@ -131,6 +134,19 @@ const handleSubmit = async () => {
         ></v-textarea>
         <QuestionTags :questiontags="question.questiontags" @update-tags="updateTags" />
 
+        <v-slider
+          v-model="question.difficulty"
+          class="custom-slider"
+          label="Difficulty"
+          :ticks="tickLabels"
+          show-ticks="always"
+          tick-size="4"
+          color="primary"
+          min="1"
+          max="4"
+          step="1"
+        ></v-slider>
+
         <EditChoiceQuestion
           v-if="question.questiontype === 'Choice'"
           :question="question"
@@ -158,5 +174,9 @@ const handleSubmit = async () => {
 <style scoped>
 .row-text {
   width: 350px;
+}
+.custom-slider .v-slider-tick-label {
+  color: #36c78e; /* Hier deine Wunschfarbe */
+  font-weight: bold; /* Optional: Schrift dicker machen */
 }
 </style>
