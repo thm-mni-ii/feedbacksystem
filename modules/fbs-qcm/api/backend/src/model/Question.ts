@@ -12,7 +12,7 @@ export interface Question {
   questionconfiguration: Choice | FillInTheBlanks | QuestionType.SQL;
   createdAt: Date,
   lastEdited: Date,
-  difficulty: number
+  difficulty?: number
 }
 
 export interface EditQuestionType {
@@ -22,6 +22,7 @@ export interface EditQuestionType {
   questiontags?: string[];
   questiontype?: QuestionType;
   questionconfiguration?: Choice | FillInTheBlanks | QuestionType.SQL;
+  difficulty?: number
 }
 
 export interface QuestionWithoutId { 
@@ -32,4 +33,5 @@ export interface QuestionWithoutId {
   questionconfiguration: Choice | FillInTheBlanks | QuestionType.SQL;
   createdAt: Date,
   lastEdited: Date
+  difficulty?: number
 }

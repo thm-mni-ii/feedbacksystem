@@ -1,27 +1,20 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import {
-  getAllQuestionsFromCatalogs,
-  getAdminCourseRoles,
-  getCatalogPermission,
   getFirstQuestionInCatalog,
   getAllQuestionInCatalog,
-  getAllQuestionsConnectionsFromCatalogs,
   getLastSessionForCatalog,
 } from "../utils/utils";
 import * as mongoDB from "mongodb";
-import { UpdateFilter } from 'mongodb';
 import { getCourses } from "../course/course";
-import { Catalog } from "../model/Catalog";
 import {
   authenticate,
   authenticateInCatalog,
   authenticateInCourse,
 } from "../authenticate";
 import { Access, CatalogAccess, CourseAccess, SessionStatus } from "../utils/enum";
-import { timeStamp } from "console";
 import { Submission } from "../submission/utils";
-import { CatalogInCourseObject, Course, questionInCatalogObject } from "../model/utilInterfaces";
+import { Course } from "../model/utilInterfaces";
 import { Session } from "../session/sessionUtils";
 import { Question } from "../model/Question";
 
