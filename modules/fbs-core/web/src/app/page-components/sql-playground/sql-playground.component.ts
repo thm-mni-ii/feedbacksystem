@@ -1,6 +1,6 @@
 import {AfterViewChecked, Component, OnInit} from "@angular/core";
 import {Store} from "@ngrx/store";
-import {Observable, of} from "rxjs";
+import {Subject, BehaviorSubject, Observable, of} from "rxjs";
 import {Routine} from "src/app/model/sql_playground/Routine";
 import {Trigger} from "src/app/model/sql_playground/Trigger";
 import {View} from "src/app/model/sql_playground/View";
@@ -14,7 +14,6 @@ import * as fromSqlPlayground from "./state/sql-playground.selectors";
 import {BackendService} from "./collab/backend.service";
 import {HttpClient} from "@angular/common/http";
 import {MongoPlaygroundService} from "src/app/service/mongo-playground.service";
-import {Subject} from "rxjs";
 
 import Prism from 'prismjs';
 import 'prismjs/components/prism-json';
@@ -36,7 +35,7 @@ export class SqlPlaygroundComponent implements OnInit {
   selectedDbType: 'postgres' | 'mongo' = 'postgres';
   mongoDbId: string | null = null;
   schemaReload$ = new Subject<void>();
-  mongoRawResult$: Observable<any> = of(null);
+  mongoRawResult$ = new BehaviorSubject<any>(null);
 
   constructor(
     private titlebar: TitlebarService,
@@ -103,7 +102,7 @@ export class SqlPlaygroundComponent implements OnInit {
     try {
       parsedQuery = JSON.parse(statement);
     } catch {
-      this.snackbar.open("Invalid JSON", "Error", {duration: 3000});
+      this.snackbar.open("Ungültiger JSON-Code!", "Fehler", {duration: 3000});
       return;
     }
 
@@ -115,33 +114,61 @@ export class SqlPlaygroundComponent implements OnInit {
       return;
     }
 
+    const operation = parsedQuery.operation;
     const prefix = `mongo_playground_student_${userId}_`;
     const fullDb = dbSuffixOrFull.startsWith(prefix) ? dbSuffixOrFull : prefix + dbSuffixOrFull;
-    console.log('fullDb:', fullDb);
-
     const dbId = fullDb.split(prefix)[1];
-    console.log('dbId:', dbId);
 
     if (!dbId) {
       this.snackbar.open("Ungültige Mongo-Datenbank", "Fehler", {duration: 3000});
       return;
     }
 
+    this.mongoRawResult$.next(null);
+
     this.mongoPlaygroundService.executeMongoQuery(userId, dbId, parsedQuery).subscribe({
       next: (res) => {
-        if (parsedQuery.operation === 'find' || parsedQuery.operation === 'aggregate')
-          this.mongoRawResult$ = of(res);
-        else {
-          this.snackbar.open("MongoDB Operation erfolgreich", "Ok", { duration: 3000 });  // SnackBar für Insert etc.
-          this.mongoRawResult$ = of(null);
+        this.mongoRawResult$.next(res);
+        if (parsedQuery.operation !== 'find' && parsedQuery.operation !== 'aggregate') {
+          this.snackbar.open("MongoDB-Operation erfolgreich", "Ok", {duration: 3000});
         }
         this.schemaReload$.next();
       },
-      error: (err) =>
-        this.snackbar.open("MongoDB Fehler: " + (err.error?.message ?? "Unbekannt"), "Fehler", {
-          duration: 3000,
-        }),
+      error: (err) => {
+        this.snackbar.open("MongoDB-Fehler: " + (err.error?.message ?? "Unbekannt"), "Fehler", {duration: 3000});
+      },
     });
+
+    /*
+  if (operation === 'createIndex') {
+    this.mongoPlaygroundService.createMongoIndex(userId, dbId, parsedQuery).subscribe({
+      next: () => {
+        this.snackbar.open("MongoDB Index erfolgreich erstellt", "Ok", { duration: 3000 });
+        this.schemaReload$.next();
+      },
+      error: (err) =>
+        this.snackbar.open("MongoDB Fehler: " + (err.error?.message ?? "Unbekannt"), "Fehler", { duration: 3000 }),
+    });
+  } else if (operation === 'createView') {
+    this.mongoPlaygroundService.createMongoView(userId, dbId, parsedQuery).subscribe({
+      next: () => {
+        this.snackbar.open("MongoDB View erfolgreich erstellt", "Ok", { duration: 3000 });
+        this.schemaReload$.next();
+      },
+      error: (err) =>
+        this.snackbar.open("MongoDB Fehler: " + (err.error?.message ?? "Unbekannt"), "Fehler", { duration: 3000 }),
+    });
+  } else {
+    this.mongoPlaygroundService.executeMongoQuery(userId, dbId, parsedQuery).subscribe({
+      next: (res) => {
+        this.mongoRawResult$.next(res);
+        this.schemaReload$.next();
+      },
+      error: (err) =>
+        this.snackbar.open("MongoDB Fehler: " + (err.error?.message ?? "Unbekannt"), "Fehler", { duration: 3000 }),
+    });
+  }
+     */
   }
 
   onDbChanged(dbType: 'postgres' | 'mongo') {

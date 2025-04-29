@@ -173,11 +173,32 @@ class PlaygroundController(
         MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if(!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
                 throw NotFoundException()
 
             return db.listCollectionNames().toList()
                 .filter { it != "mongo_playground_database" && it != "system.views" }
+        }
+    }
+
+    @GetMapping("/mongo/{dbId}/collections/{collectionName}/count")
+    @ResponseBody
+    fun getCollectionCount(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @PathVariable("collectionName") collectionName: String
+    ): Long {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            val count = db.getCollection(collectionName).countDocuments()
+
+            return count
         }
     }
 
@@ -252,7 +273,7 @@ class PlaygroundController(
     fun getMongoView(
         @CurrentToken currentToken: LegacyToken,
         @PathVariable("dbId") dbId: String
-    ): List<String> {
+    ): List<Map<String, String>> {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
         MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
@@ -262,9 +283,20 @@ class PlaygroundController(
                 throw NotFoundException()
 
             return db.listCollections()
-                .filter { it.getString("type") == "view" }
-                .map { it.getString("name") }
-                .toList()
+                .mapNotNull { collection ->
+                    try {
+                        val type = collection.getString("type") ?: ""
+                        val name = collection.getString("name") ?: ""
+
+                        if (type == "view") {
+                            val source = collection.getString("viewOn") ?: ""
+                            mapOf("name" to name, "source" to source)
+                        } else null
+                    } catch (e: Exception) {
+                        println("Fehler beim Verarbeiten einer Collection: ${e.message}")
+                        null
+                    }
+                }.toList()
         }
     }
 
@@ -331,18 +363,28 @@ class PlaygroundController(
 
             return db.listCollectionNames()
                 .filter { it !in listOf("system.views", "mongo_playground_database") }
-                .map { collectionName ->
-                    val indexes = db.getCollection(collectionName).listIndexes()
-                        .map { index ->
-                            mapOf(
-                                "name" to index.getString("name"),
-                                "key" to index.get("key", Document::class.java)
-                            )
-                        }.toList()
-                    mapOf(
-                        "collection" to collectionName,
-                        "indexes" to indexes
-                    )
+                .mapNotNull { collectionName ->
+                    try {
+                        val indexes = db.getCollection(collectionName).listIndexes()
+                            .mapNotNull { index ->
+                                try {
+                                    mapOf(
+                                        "name" to index.getString("name"),
+                                        "key" to index.get("key", Document::class.java)
+                                    )
+                                } catch (e: Exception) {
+                                    println("Fehler bei Index in Collection $collectionName: ${e.message}")
+                                    null
+                                }
+                            }
+                        mapOf(
+                            "collection" to collectionName,
+                            "indexes" to indexes
+                        )
+                    } catch (e: Exception) {
+                        println("Fehler beim Abrufen der Collection $collectionName: ${e.message}")
+                        null
+                    }
                 }.toList()
         }
     }

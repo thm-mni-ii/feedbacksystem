@@ -11,7 +11,8 @@ import { AuthService } from 'src/app/service/auth.service';
 export class DbSchemeMongoViewsComponent implements OnInit {
   @Input() reloadTrigger: Subject<void>;
 
-  views: string[] = [];
+  //views: string[] = [];
+  views: { name: string, source: string }[] = [];
   dbId: string;
   userId: number;
 
@@ -33,7 +34,11 @@ export class DbSchemeMongoViewsComponent implements OnInit {
     const dbSuffix = this.dbId.startsWith(prefix) ? this.dbId.split(prefix)[1] : this.dbId;
 
     this.mongoService.getMongoViews(this.userId, dbSuffix).subscribe((res) => {
-      this.views = res;
+      this.views = res.map((entry: any) =>
+        typeof entry === 'string'
+          ? { name: entry, source: '' }
+          : { name: entry.name, source: entry.source }
+      );
     });
   }
 }

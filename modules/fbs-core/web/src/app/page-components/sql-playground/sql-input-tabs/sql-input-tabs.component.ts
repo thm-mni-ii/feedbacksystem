@@ -37,10 +37,8 @@ export class SqlInputTabsComponent
   implements OnInit, AfterViewChecked, AfterViewInit
 {
   @Input() dbType: 'postgres' | 'mongo' = 'postgres';
-
-  //codeType = this.dbType === 'postgres' ? 'sql' : 'json';
-
   @Output() submitStatement = new EventEmitter<string>();
+
   isPending: boolean;
   activeTabIndex: number;
   tabs: QueryTab[];
@@ -194,7 +192,7 @@ export class SqlInputTabsComponent
       .pipe(take(1))
       .subscribe((isEmpty) => {
         if (isEmpty) {
-          this.snackbar.open("Sie haben keine Lösung abgegeben", "Ups!");
+          this.snackbar.open("Sie haben keine Lösung abgegeben", "Fehler");
         } else {
           this.activeTabIndex$.pipe(take(1)).subscribe(index => {
             const query = this.tabs[index].content;
@@ -204,7 +202,7 @@ export class SqlInputTabsComponent
                 JSON.parse(query);
                 this.submitStatement.emit(query);
               } catch {
-                this.snackbar.open('Ungültiges JSON!', 'MongoDB Fehler', { duration: 3000 });
+                this.snackbar.open('Ungültiger JSON-Code!', 'Fehler', { duration: 3000 });
               }
             } else {
               this.submitStatement.emit(query);

@@ -135,7 +135,7 @@ export class SqlInputTabsEffects {
         const a = document.createElement("a"),
           url = URL.createObjectURL(file);
         a.href = url;
-        a.download = activeTab.name + ".sql";
+        a.download = activeTab.name + ".txt";
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
@@ -157,7 +157,7 @@ export class SqlInputTabsEffects {
           const a = document.createElement("a"),
             url = URL.createObjectURL(file);
           a.href = url;
-          a.download = tabs[i].name + ".sql";
+          a.download = tabs[i].name + ".txt";
           document.body.appendChild(a);
           a.click();
           setTimeout(() => {

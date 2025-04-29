@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Subject } from 'rxjs';
-import { MongoPlaygroundService } from 'src/app/service/mongo-playground.service';
-import { AuthService } from 'src/app/service/auth.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Subject} from 'rxjs';
+import {MongoPlaygroundService} from 'src/app/service/mongo-playground.service';
+import {AuthService} from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-db-scheme-collections',
@@ -12,11 +12,12 @@ export class DbSchemeCollectionsComponent implements OnInit {
   @Input() reloadTrigger: Subject<void>;
   @Output() submitStatement = new EventEmitter<string>();
 
-  collections: string[] = [];
+  collections: { name: string, count: number }[] = [];
   dbId: string;
   userId: number;
 
-  constructor(private mongoService: MongoPlaygroundService, private auth: AuthService) {}
+  constructor(private mongoService: MongoPlaygroundService, private auth: AuthService) {
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -34,7 +35,13 @@ export class DbSchemeCollectionsComponent implements OnInit {
     const dbSuffix = this.dbId.startsWith(prefix) ? this.dbId.split(prefix)[1] : this.dbId;
 
     this.mongoService.getMongoCollections(this.userId, dbSuffix).subscribe((cols) => {
-      this.collections = cols;
+      this.collections = cols.map(col => ({ name: col, count: 0 }));
+
+      cols.forEach((col, idx) => {
+        this.mongoService.getCollectionCount(this.userId, dbSuffix, col).subscribe(count => {
+          this.collections[idx].count = count;
+        });
+      });
     });
   }
 }
