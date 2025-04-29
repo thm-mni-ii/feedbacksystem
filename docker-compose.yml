@@ -278,9 +278,9 @@ services:
       - FBS_ROOT_URL=https://core:443
       - NODE_TLS_REJECT_UNAUTHORIZED=0
 
-  qcm:
+  qcm-backend:
     build:
-      context: modules/fbs-qcm/
+      context: modules/fbs-qcm/api/backend
       target: production
     ports:
       - 3000:3000
@@ -292,6 +292,16 @@ services:
       - FBS_BASE_URL=https://core:443
     depends_on:
       - mongodb_qcm
+
+  qcm-frontend:
+    build:
+      context: modules/fbs-qcm/web
+    ports:
+      - 8086:8085
+    networks:
+      - fbs
+    depends_on:
+      - qcm-backend
 
 networks:
   classroom:

@@ -47,12 +47,12 @@ export default defineConfig({
     port: 8085,
     proxy: {
       '/api_v1': {
-        target: 'http://localhost:3000/',
+        target: 'http://qcm-backend:3000/',
         changeOrigin: true,
         secure: false
       },
       '/core': {
-        target: 'https://localhost/',
+        target: 'https://core/',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/core/, '/api/v1')
