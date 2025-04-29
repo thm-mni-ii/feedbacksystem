@@ -296,6 +296,8 @@ services:
   qcm-frontend:
     build:
       context: modules/fbs-qcm/web
+    environment:
+      - NODE_ENV=production
     ports:
       - 8086:8086
     networks:
