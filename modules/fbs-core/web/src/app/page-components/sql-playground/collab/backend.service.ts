@@ -12,7 +12,11 @@ import {
   selectTabs as selectInputTabs,
 } from "../sql-input-tabs/state/sql-input-tabs.selectors";
 import { AuthService } from "../../../service/auth.service";
-import { setDatabaseInformation } from "../state/sql-playground.actions";
+import {
+  setDatabaseInformation,
+  updateScheme,
+} from "../state/sql-playground.actions";
+import { selectResultset } from "../dynamic-result-table/state/dynamic-result-table.selectors";
 
 export interface Identity<I> {
   id: I;
@@ -49,6 +53,8 @@ export interface Backend {
   emitResultChange(event: ChangeEvent<ResultTab>): Observable<void>;
   announceSelectedInput(id: string): Observable<void>;
   streamSelectedInputs(): Observable<AwarenessState[]>;
+  announceSchemaChange(): Observable<void>;
+  streamSchemaChange(): Observable<void>;
 }
 
 @Injectable({ providedIn: "root" })
@@ -239,6 +245,14 @@ export class BackendService {
             SqlInputTabsActions.updateActiveTabUsers({ awarenessStates })
           );
         });
+
+      this.store.select(selectResultset).subscribe(() => {
+        this.currentBackend.announceSchemaChange().subscribe(() => {});
+      });
+
+      this.currentBackend.streamSchemaChange().subscribe(() => {
+        this.store.dispatch(updateScheme());
+      });
 
       setTimeout(() => {
         this.store
