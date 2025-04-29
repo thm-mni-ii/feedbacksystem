@@ -27,7 +27,7 @@
                   Start Session
                 </v-btn>
                 <!-- manage questions with icon -->
-                <span v-if="decodedToken.globalRole == 'ADMIN'">
+                <span v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
                   <v-btn
                     prepend-icon="mdi-cog"
                     color="dark-grey"
@@ -60,7 +60,7 @@
 
               <v-list-item-action> </v-list-item-action>
             </v-list-item>
-            <v-list-item v-if="decodedToken.globalRole != 'USER'">
+            <v-list-item v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
               <v-list-item-title class="d-flex align-center justify-space-between">
                 <v-btn color="primary" variant="outlined" @click="createNewCatalog(course.id)"
                   >Add new Catalog</v-btn
@@ -79,7 +79,6 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import courseService from '@/services/course.service'
-import { jwtDecode } from 'jwt-decode'
 
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogEditCatalog from '@/dialog/DialogEditCatalog.vue'
@@ -87,17 +86,24 @@ import DialogEditCatalog from '@/dialog/DialogEditCatalog.vue'
 import type Course from '../model/Course'
 import type Catalog from '../model/Catalog'
 import catalogService from '@/services/catalog.service'
+import { useAuthStore } from '@/stores/authStore'
 
 const dialogConfirm = ref<typeof DialogConfirmVue>()
 const dialogEditCatalog = ref<typeof DialogEditCatalog>()
 const router = useRouter()
-const decodedToken = ref<{}>()
+const authStore = useAuthStore()
+
+// Setze den jsessionid-Token direkt nach der Initialisierung
+const jsessionid = router.currentRoute.value.query.jsessionid?.toString()
+if (jsessionid) {
+  authStore.setToken(jsessionid)
+} else {
+  console.warn('No jsessionid found in query parameters')
+}
 
 const myCourses = ref<Course[]>([])
 
 onMounted(async () => {
-  await writeJsessionidToLocalStorage()
-
   courseService
     .getMyCourses()
     .then((response) => {
@@ -106,39 +112,7 @@ onMounted(async () => {
     .catch((error) => {
       console.log(error)
     })
-  decodedToken.value = decodeJwtToken()
 })
-
-// async func to write jsessionid to local storage
-const writeJsessionidToLocalStorage = async () => {
-  //get jsessionid from params
-  const jsessionid = router.currentRoute.value.query.jsessionid?.toString()
-  if (jsessionid) {
-    // write jsessionid to local storage
-    localStorage.setItem('jsessionid', jsessionid)
-    // write userId to local storage from jwt token
-
-    localStorage.setItem('userId', parseJwt(jsessionid).id)
-  } else {
-    console.log('No jsessionid found in params')
-  }
-}
-
-const parseJwt = (token: string) => {
-  var base64Url = token.split('.')[1]
-  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-  var jsonPayload = decodeURIComponent(
-    window
-      .atob(base64)
-      .split('')
-      .map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      })
-      .join('')
-  )
-
-  return JSON.parse(jsonPayload)
-}
 
 const loadCatalogsFromCourse = (courseId: number) => {
   const course = myCourses.value.find((course) => course.id === courseId)
@@ -230,12 +204,6 @@ const startSession = (catalog: Catalog) => {
 }
 const startStudy = (courseId: number) => {
   router.push(`/study/${courseId}`)
-}
-
-const decodeJwtToken = () => {
-  const token = localStorage.getItem('jsessionid')
-  const decoded = jwtDecode<JwtPayload>(token)
-  return decoded
 }
 </script>
 

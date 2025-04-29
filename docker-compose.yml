@@ -297,7 +297,7 @@ services:
     build:
       context: modules/fbs-qcm/web
     ports:
-      - 8086:8085
+      - 8086:8086
     networks:
       - fbs
     depends_on:

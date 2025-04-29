@@ -6,6 +6,8 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import eslintPlugin from 'vite-plugin-eslint'
 import vuetify from 'vite-plugin-vuetify'
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   css: {
@@ -44,15 +46,15 @@ export default defineConfig({
   },
   server: {
     host: true,
-    port: 8085,
+    port: 8086,
     proxy: {
       '/api_v1': {
-        target: 'http://qcm-backend:3000/',
+        target: isProduction ? 'http://qcm-backend:3000/' : 'http://localhost:3000/',
         changeOrigin: true,
         secure: false
       },
       '/core': {
-        target: 'https://core/',
+        target: isProduction ? 'https://core/' : 'https://localhost/',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/core/, '/api/v1')

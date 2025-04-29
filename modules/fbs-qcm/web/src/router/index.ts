@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import sessionService from '@/services/session.service'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -82,7 +81,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  console.log('beforeEach', to, from)
+  // console.log('beforeEach', to, from)
 
   // //Check if ongoing session
   // if (to.name === 'home') {
