@@ -298,6 +298,8 @@ services:
       context: modules/fbs-qcm/web
     environment:
       - NODE_ENV=production
+      - BACKEND_URL=http://qcm-backend:3000/
+      - CORE_URL=https://core/
     ports:
       - 8086:8086
     networks:
