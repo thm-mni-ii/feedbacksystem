@@ -11,7 +11,7 @@ import {
 import * as mammoth from "mammoth";
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
-import { MarkdownService } from '../../../service/markdown.service';
+import { MarkdownService } from "../../../service/markdown.service";
 
 @Component({
   selector: "app-submission-text",
@@ -38,9 +38,10 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     toolbarHiddenButtons: [[], []],
   };
 
-  constructor(private parsrService: ParsrService,
+  constructor(
+    private parsrService: ParsrService,
     private markdownService: MarkdownService
-  ) { }
+  ) {}
 
   ngOnInit() {
     if (this.title != null) {
@@ -189,15 +190,16 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       this.parsrService.uploadFile(file).subscribe({
         next: async (jobId) => {
           try {
-            const markdown = await this.parsrService.getMarkdown(jobId).toPromise();
-            let html = this.markdownService.parseToString(markdown); // Direkt String
-            html = this.replaceImagesWithFilename(html); // <-- Hier werden Bilder ersetzt
+            const markdown = await this.parsrService
+              .getMarkdown(jobId)
+              .toPromise();
+            const html = this.markdownService.parseToString(markdown);
             resolve(html);
           } catch (err) {
             reject(err);
           }
         },
-        error: (err) => reject(err)
+        error: (err) => reject(err),
       });
     });
   }
@@ -206,10 +208,9 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   private replaceImagesWithFilename(html: string): string {
     return html.replace(
       /<img[^>]+src=["']([^"']+)["'][^>]*>/g,
-      (match, src) => src.split('/').pop() || ''
+      (match, src) => src.split("/").pop() || ""
     );
   }
-
 
   async extractWordText(file: File): Promise<string> {
     return new Promise((resolve) => {
@@ -237,38 +238,38 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   }
 
   downloadSubmission() {
-    let filename = 'abgabe';
-    let mimeType = 'text/plain;charset=utf-8';
+    let filename = "abgabe";
+    let mimeType = "text/plain;charset=utf-8";
 
     const looksLikeHtml = /<[a-z][\s\S]*>/i.test(this.toSubmit);
 
     if (looksLikeHtml && !this.isCodeFile) {
-      filename += '.html';
-      mimeType = 'text/html;charset=utf-8';
-      
-      if (!this.toSubmit.trim().startsWith('<!DOCTYPE')) {
+      filename += ".html";
+      mimeType = "text/html;charset=utf-8";
+
+      if (!this.toSubmit.trim().startsWith("<!DOCTYPE")) {
         this.toSubmit = `<!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Abgabe</title>
-  </head>
-  <body>
-  ${this.toSubmit}
-  </body>
-  </html>`;
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Abgabe</title>
+    </head>
+    <body>
+    ${this.toSubmit}
+    </body>
+    </html>`;
       }
     } else if (this.isCodeFile) {
       const detectedType = this.detectFileType();
-      filename += '.' + detectedType;
+      filename += "." + detectedType;
     } else {
-      filename += '.txt';
+      filename += ".txt";
     }
 
     const blob = new Blob([this.toSubmit], { type: mimeType });
     const url = window.URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -277,6 +278,4 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   }
-
-
 }

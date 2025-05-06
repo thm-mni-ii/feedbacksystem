@@ -45,6 +45,19 @@ class ParsrController(
         }
     }
 
+    @GetMapping("/document/{jobId}/markdownWithImages")
+    fun getMarkdownWithImages(@PathVariable jobId: String): ResponseEntity<String> {
+    return try {
+        val markdown = parsrService.getParsedDocument(jobId)
+        ResponseEntity.ok(markdown)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Fehler beim Verarbeiten: ${e.message}")
+    }
+}
+
+
     @GetMapping("/test")
     @ResponseBody
     fun test(): String = "Hello World"

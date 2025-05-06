@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import * as marked from 'marked';
-import DOMPurify from 'dompurify';
+import { Injectable } from "@angular/core";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
+import * as marked from "marked";
+import DOMPurify from "dompurify";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class MarkdownService {
   constructor(private sanitizer: DomSanitizer) {
     marked.setOptions({
       breaks: true,
-      gfm: true
+      gfm: true,
     });
   }
 
@@ -22,9 +22,9 @@ export class MarkdownService {
     const unsafeHtml = marked.parse(markdown) as string;
     return DOMPurify.sanitize(unsafeHtml);
   }
-  
+
   safeHtmlToString(safeHtml: SafeHtml): string {
     // @ts-ignore – Zugriff auf den internen Wert
-    return safeHtml.changingThisBreaksApplicationSecurity || '';
+    return safeHtml.changingThisBreaksApplicationSecurity || "";
   }
 }
