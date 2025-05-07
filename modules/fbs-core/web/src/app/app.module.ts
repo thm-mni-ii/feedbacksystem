@@ -96,6 +96,7 @@ import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
 import { SharePlaygroundLinkDialogComponent } from "./dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
 import { I18NextModule } from "angular-i18next";
 import { I18N_PROVIDERS } from "./util/i18n";
 import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
@@ -197,6 +198,7 @@ export const httpInterceptorProviders = [
     MathInputComponent,
     SharePlaygroundLinkDialogComponent,
     FbsModellingComponent,
+    FbsQuestionaryComponent,
     LanguageMenuComponent,
     MyGroupsComponent,
     GroupSelectionComponent,

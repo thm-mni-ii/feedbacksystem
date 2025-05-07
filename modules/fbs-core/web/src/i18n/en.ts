@@ -125,6 +125,7 @@ export const englishTranslation = {
   "sidebar.label.feedbackApp": "Feedback App",
   "sidebar.label.sqlPlayground": "SQL Playground",
   "sidebar.label.analyticsPlatform": "Analytics Platform",
+  "sidebar.label.questionary": "Questionary",
   "sidebar.label.imprint": "Imprint",
   "sidebar.label.dataProtection": "Privacy Policy",
   "sidebar.label.changePassword": "Change Password",
