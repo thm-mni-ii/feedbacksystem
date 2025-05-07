@@ -88,6 +88,11 @@
           <mat-icon>description</mat-icon>
           <p>FBS SciCheck</p>
         </button>
+
+        <button mat-list-item (click)="moveAndHideSidebar('/questionary')">
+          <mat-icon>assignment</mat-icon>
+          <p>{{ "sidebar.label.questionary" | i18nextEager }}</p>
+        </button>
       </mat-nav-list>
 
       <span class="filler"></span>
