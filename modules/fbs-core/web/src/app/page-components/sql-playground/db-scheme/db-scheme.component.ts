@@ -18,6 +18,8 @@ import { EventEmitter, Output } from "@angular/core";
 })
 export class DbSchemeComponent implements OnInit {
   @Input() title: string;
+  @Input() dbName: string;
+  @Input() reloadTrigger: Subject<void>
   @Output() submitStatement = new EventEmitter<string>();
 
   tables$: Observable<Table[]>;
@@ -27,7 +29,6 @@ export class DbSchemeComponent implements OnInit {
   constraints$: Observable<Constraint[]>;
   selectedDbType: 'postgres' | 'mongo' | null = null;
   collections$: Observable<string[]>;
-  @Input() reloadTrigger: Subject<void>
 
   constructor(
     private store: Store,
@@ -50,18 +51,4 @@ export class DbSchemeComponent implements OnInit {
       });
     }
   }
-
-
-/*
-    else if (this.selectedDbType === 'mongo') {
-      const dbId = localStorage.getItem('playground-mongo-db');
-      const userId = this.auth.getToken().id;
-
-      if (dbId && userId) {
-        this.collections$ = this.mongoService.getMongoCollections(userId, dbId);
-      }
-    }
-
- */
-
 }

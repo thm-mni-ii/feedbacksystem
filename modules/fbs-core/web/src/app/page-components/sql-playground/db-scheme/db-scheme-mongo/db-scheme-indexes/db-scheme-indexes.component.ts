@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
 import { Subject } from 'rxjs';
 import { MongoPlaygroundService } from 'src/app/service/mongo-playground.service';
 import { AuthService } from 'src/app/service/auth.service';
@@ -10,9 +10,9 @@ import { AuthService } from 'src/app/service/auth.service';
 })
 export class DbSchemeMongoIndexesComponent implements OnInit {
   @Input() reloadTrigger: Subject<void>;
+  @Input() dbName: string;
 
   indexes: any[] = [];
-  dbId: string;
   userId: number;
 
   constructor(private mongoService: MongoPlaygroundService, private auth: AuthService) {}
@@ -25,12 +25,16 @@ export class DbSchemeMongoIndexesComponent implements OnInit {
     });
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['dbName'] && changes['dbName'].currentValue)
+      this.loadData();
+  }
+
   loadData(): void {
-    this.dbId = localStorage.getItem('playground-mongo-db')!;
     this.userId = this.auth.getToken().id;
 
     const prefix = `mongo_playground_student_${this.userId}_`;
-    const dbSuffix = this.dbId.startsWith(prefix) ? this.dbId.split(prefix)[1] : this.dbId;
+    const dbSuffix = this.dbName.startsWith(prefix) ? this.dbName.split(prefix)[1] : this.dbName;
 
     this.mongoService.getMongoIndexes(this.userId, dbSuffix).subscribe((res) => {
       this.indexes = res;

@@ -12,7 +12,7 @@ import {
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Store } from "@ngrx/store";
-import { Observable, of } from "rxjs";
+import {Observable, of, Subject} from "rxjs";
 import { map, take } from "rxjs/operators";
 import { AuthService } from "src/app/service/auth.service";
 import { CourseRegistrationService } from "src/app/service/course-registration.service";
@@ -27,6 +27,7 @@ import * as fromSqlInputTabs from "./state/sql-input-tabs.selectors";
 import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { FormControl, FormGroup } from "@angular/forms";
 import { Input } from "@angular/core";
+import {MongoPlaygroundService} from "../../../service/mongo-playground.service";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -37,6 +38,8 @@ export class SqlInputTabsComponent
   implements OnInit, AfterViewChecked, AfterViewInit
 {
   @Input() dbType: 'postgres' | 'mongo' = 'postgres';
+  @Input() dbName!: string;
+  @Input() schemaReload!: Subject<void>;
   @Output() submitStatement = new EventEmitter<string>();
 
   isPending: boolean;
@@ -82,8 +85,10 @@ export class SqlInputTabsComponent
     private courseRegistrationService: CourseRegistrationService,
     private taskService: TaskService,
     private prismService: PrismService,
-    private store: Store
-  ) {}
+    private store: Store,
+    private mongoService: MongoPlaygroundService
+  ) {
+  }
 
   ngAfterViewChecked() {
     if (this.highlighted) {
@@ -124,7 +129,7 @@ export class SqlInputTabsComponent
       "Achtung der Inhalt wird nicht gespeichert!"
     ).subscribe((result) => {
       if (result) {
-        this.store.dispatch(SqlInputTabsActions.closeTab({ index }));
+        this.store.dispatch(SqlInputTabsActions.closeTab({index}));
       }
     });
   }
@@ -165,7 +170,7 @@ export class SqlInputTabsComponent
   }
 
   downloadFile(index: number) {
-    this.store.dispatch(SqlInputTabsActions.downloadFile({ index }));
+    this.store.dispatch(SqlInputTabsActions.downloadFile({index}));
   }
 
   downloadAllFiles() {
@@ -197,23 +202,14 @@ export class SqlInputTabsComponent
           this.activeTabIndex$.pipe(take(1)).subscribe(index => {
             const query = this.tabs[index].content;
 
-            if (this.dbType === 'mongo') {
-              try {
-                JSON.parse(query);
-                this.submitStatement.emit(query);
-              } catch {
-                this.snackbar.open('Ungültiger JSON-Code!', 'Fehler', { duration: 3000 });
-              }
-            } else {
-              this.submitStatement.emit(query);
-            }
+            this.submitStatement.emit(query);
           });
         }
       });
   }
 
   updateMode(index: number, value: boolean) {
-    this.store.dispatch(SqlInputTabsActions.updateMode({ index, value }));
+    this.store.dispatch(SqlInputTabsActions.updateMode({index, value}));
   }
 
   hasDeadlinePassed(task: Task): boolean {
@@ -254,13 +250,13 @@ export class SqlInputTabsComponent
   }
 
   setActiveTab(index: number) {
-    this.store.dispatch(SqlInputTabsActions.setActiveTab({ index }));
+    this.store.dispatch(SqlInputTabsActions.setActiveTab({index}));
   }
 
   updateTabContent(index: number, content: string) {
     console.log("utca");
     this.store.dispatch(
-      SqlInputTabsActions.updateTabContent({ index, content })
+      SqlInputTabsActions.updateTabContent({index, content})
     );
   }
 
@@ -273,6 +269,6 @@ export class SqlInputTabsComponent
   }
 
   updateTabName(index: number, name: string) {
-    this.store.dispatch(SqlInputTabsActions.updateTabName({ index, name }));
+    this.store.dispatch(SqlInputTabsActions.updateTabName({index, name}));
   }
 }

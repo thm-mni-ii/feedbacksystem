@@ -19,6 +19,7 @@ import { selectAllDatabases } from "src/app/page-components/sql-playground/db-co
 })
 export class DbControlPanelComponent implements OnInit {
   @Input() activeDbId: number;
+  @Input() selectedMongoDbId: string | null = null;
   @Output() changeActiveDbId = new EventEmitter<number>();
   @Output() submitStatement = new EventEmitter<string>();
   @Output() mongoDbSelected = new EventEmitter<string>();

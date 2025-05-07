@@ -31,6 +31,13 @@ export class MongoPlaygroundService {
     );
   }
 
+  executeMongoShellCommand(userId: number, dbId: string, command: string): Observable<any> {
+    return this.http.post<any>(
+      `/api/v2/playground/${userId}/databases/mongo/${dbId}/shell-execute`,
+      { command }
+    );
+  }
+
   createMongoIndex(userId: number, dbId: string, body: { collection: string, index: any }) {
     return this.http.post<{ createdIndex: string }>(
       `/api/v2/playground/${userId}/databases/mongo/${dbId}/create-index`,

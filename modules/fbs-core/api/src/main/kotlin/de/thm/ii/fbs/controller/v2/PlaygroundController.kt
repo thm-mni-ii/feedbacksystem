@@ -17,6 +17,7 @@ import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import de.thm.ii.fbs.utils.v2.mongo.MongoSecurityValidator
+import de.thm.ii.fbs.utils.v2.mongo.MongoShellParser
 import org.bson.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -91,6 +92,106 @@ class PlaygroundController(
         }
     }
 
+    @PostMapping("/mongo/{dbId}/shell-execute")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    fun executeMongoShellCommand(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @RequestBody commandDTO: MongoShellCommandDTO
+    ): Any {
+
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            val db = mongoClient.getDatabase(databaseName)
+
+            val parsed = MongoShellParser.parse(commandDTO.command)
+            MongoSecurityValidator.validateShellCommand(commandDTO.command)
+
+            val collectionName = parsed.collection
+            val collection = collectionName?.let { db.getCollection(it) }
+
+            println("parsed = $parsed")
+            println("document = ${parsed.document}")
+            println("database: $databaseName")
+
+            return when (parsed.operation) {
+                "find" -> collection!!.find(parsed.filter ?: Document()).toList()
+
+                "insert" -> {
+                    if (parsed.document == null || parsed.collection == null)
+                        throw IllegalArgumentException("Insert requires document and collection")
+
+                    db.getCollection(parsed.collection).insertOne(parsed.document)
+                    mapOf("status" to "success")
+                }
+
+                "insertMany" -> {
+                    if (parsed.pipeline == null || parsed.collection == null)
+                        throw IllegalArgumentException("insertMany requires array of documents and collection")
+
+                    db.getCollection(parsed.collection).insertMany(parsed.pipeline)
+                    mapOf("status" to "success")
+                }
+
+                "update" -> {
+                    val result = collection!!.updateOne(parsed.filter!!, parsed.update!!)
+                    mapOf("matched" to result.matchedCount, "modified" to result.modifiedCount)
+                }
+
+                "deleteMany" -> {
+                    val result = collection!!.deleteMany(parsed.filter!!)
+                    mapOf("deletedCount" to result.deletedCount)
+                }
+
+                "delete" -> {
+                    val result = collection!!.deleteMany(parsed.filter!!)
+                    mapOf("deletedCount" to result.deletedCount)
+                }
+
+                "deleteOne" ->  {
+                    val result = collection!!.deleteOne(parsed.filter!!)
+                    mapOf("deletedCount" to result.deletedCount)
+                }
+
+                "aggregate" -> collection!!.aggregate(parsed.pipeline!!).toList()
+
+                "getIndexes" -> collection!!.listIndexes().map { it }.toList()
+
+                "createIndex" -> {
+                    val name = collection!!.createIndex(parsed.document!!)
+                    mapOf("createdIndex" to name)
+                }
+
+                "dropIndex" -> {
+                    collection!!.dropIndex(parsed.document!!["indexName"].toString())
+                    mapOf("status" to "success")
+                }
+
+                "countDocuments" -> collection!!.countDocuments(parsed.filter ?: Document())
+
+                "dropCollection" -> {
+                    collection!!.drop()
+                    mapOf("status" to "collection dropped")
+                }
+
+                "createView" -> {
+                    val source = parsed.document!!["source"] as String
+                    db.createView(parsed.collection!!, source, parsed.pipeline!!)
+                    mapOf("status" to "view created")
+                }
+
+                "showCollections" -> db.listCollectionNames().toList()
+
+                else -> throw UnsupportedOperationException("Unsupported operation: ${parsed.operation}")
+            }
+        }
+    }
+
     @PostMapping("/mongo/{dbId}/execute")
     @ResponseBody
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -122,6 +223,16 @@ class PlaygroundController(
             "insert" -> {
                 mongoQuery.document ?: throw IllegalArgumentException("Document cannot be null for insert operation")
                 mongoTemplate.insert(mongoQuery.document, mongoQuery.collection)
+            }
+
+            "drop" -> {
+                mongoTemplate.db.getCollection(mongoQuery.collection).drop()
+                mapOf("status" to "collection/view dropped")
+            }
+
+            "dropCollection" -> {
+                mongoTemplate.db.getCollection(mongoQuery.collection).drop()
+                mapOf("status" to "collection/view dropped")
             }
 
             "find" -> {
@@ -157,6 +268,32 @@ class PlaygroundController(
             }
 
             "delete" -> mongoTemplate.remove(query, mongoQuery.collection)
+
+            "deleteMany" -> mongoTemplate.remove(query, mongoQuery.collection)
+
+            "deleteOne" -> mongoTemplate.remove(query.limit(1), mongoQuery.collection)
+
+            "createIndex" -> {
+                val index = Document(mongoQuery.document ?: throw IllegalArgumentException("Document required"))
+                val indexName = mongoTemplate.db.getCollection(mongoQuery.collection)
+                    .createIndex(index)
+                mapOf("createdIndex" to indexName)
+            }
+
+            "dropIndex" -> {
+                val indexName = mongoQuery.document?.getString("indexName")
+                    ?: throw IllegalArgumentException("indexName must be provided in document")
+
+                mongoTemplate.db.getCollection(mongoQuery.collection).dropIndex(indexName)
+                mapOf("status" to "index dropped")
+            }
+
+            "createView" -> {
+                val source = mongoQuery.document?.getString("source") ?: throw IllegalArgumentException("Source required")
+                val pipeline = mongoQuery.pipeline ?: throw IllegalArgumentException("Pipeline required")
+                mongoTemplate.db.createView(mongoQuery.collection, source, pipeline)
+                mapOf("status" to "view created")
+            }
 
             else -> throw UnsupportedOperationException("Operation ${mongoQuery.operation} is not supported")
         }
@@ -199,6 +336,29 @@ class PlaygroundController(
             val count = db.getCollection(collectionName).countDocuments()
 
             return count
+        }
+    }
+
+    @DeleteMapping("/mongo/{dbId}/collections/{collection}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteMongoCollection(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: String,
+        @PathVariable("collection") collection: String
+    ) {
+        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+
+        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+            val db = mongoClient.getDatabase(databaseName)
+
+            if (!mongoClient.listDatabaseNames().contains(databaseName))
+                throw NotFoundException()
+
+            if (!db.listCollectionNames().contains(collection))
+                throw NotFoundException()
+
+            db.getCollection(collection).drop()
         }
     }
 

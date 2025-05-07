@@ -9,13 +9,16 @@
 
   <ng-container *ngIf="selectedDbType === 'mongo'">
     <app-db-scheme-collections
+      [dbName]="dbName"
       [reloadTrigger]="reloadTrigger"
       (submitStatement)="submitStatement.emit($event)"
     ></app-db-scheme-collections>
     <app-db-scheme-mongo-views
+      [dbName]="dbName"
       [reloadTrigger]="reloadTrigger"
     ></app-db-scheme-mongo-views>
     <app-db-scheme-mongo-indexes
+      [dbName]="dbName"
       [reloadTrigger]="reloadTrigger"
     ></app-db-scheme-mongo-indexes>
   </ng-container>

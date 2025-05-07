@@ -21,6 +21,8 @@
     <app-bordered-container [input]="true">
       <app-sql-input-tabs
         [dbType]="selectedDbType"
+        [dbName]="mongoDbId"
+        [schemaReload]="schemaReload$"
         (submitStatement)="submitStatement($event)"
       ></app-sql-input-tabs>
     </app-bordered-container>
@@ -31,6 +33,7 @@
       title="{{ 'sql-playground.control' | i18nextEager }}"
     >
       <app-db-control-panel
+        [selectedMongoDbId]="mongoDbId"
         (changeActiveDbId)="changeActiveDbId($event)"
         (submitStatement)="submitStatement($event)"
         (dbChanged)="onDbChanged($event)"
@@ -46,6 +49,7 @@
     >
       <app-db-scheme
         [reloadTrigger]="schemaReload$"
+        [dbName]="mongoDbId"
         (submitStatement)="submitStatement($event)"
       ></app-db-scheme>
     </app-bordered-container>

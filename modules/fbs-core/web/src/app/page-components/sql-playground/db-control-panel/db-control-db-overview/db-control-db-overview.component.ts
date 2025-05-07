@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {Store} from "@ngrx/store";
 import {Observable, of} from "rxjs";
 import {Database} from "../../../../model/sql_playground/Database";
@@ -38,6 +38,7 @@ import {MongoPlaygroundService} from "../../../../service/mongo-playground.servi
   styleUrls: ["./db-control-db-overview.component.scss"],
 })
 export class DbControlDbOverviewComponent implements OnInit {
+  @Input() selectedMongoDbId: string | null = null;
   @Output() mongoDbSelected = new EventEmitter<string>();
   @Output() schemaReload = new EventEmitter<void>();
 
@@ -79,19 +80,24 @@ export class DbControlDbOverviewComponent implements OnInit {
       this.databases$ = this.store.select(selectAllDatabases);
     } else if (dbType === 'mongo') {
       const userId = this.authService.getToken().id;
-      const lastSelectedDb = localStorage.getItem('playground-mongo-db');
+      const toSelect = this.selectedMongoDbId ?? localStorage.getItem('playground-mongo-db');
 
       this.databases$ = this.mongodbService.getMongoDatabases(userId).pipe(
-        map(mongoDatabases => {
-          const mapped = mongoDatabases.map(name => ({id: name, name}));
-
-          if (lastSelectedDb && mapped.some(db => db.id === lastSelectedDb)) {
-            this.selectedDb = lastSelectedDb;
-          }
-
-          return mapped;
-        })
+        map(mongoDatabases => mongoDatabases.map(name => ({id: name, name})))
       );
+
+      this.databases$.subscribe(dbs => {
+        if (toSelect) {
+          const userId = this.authService.getToken().id;
+          const expectedFullName = `mongo_playground_student_${userId}_${toSelect}`;
+
+          // @ts-ignore
+          const match = dbs.find(db => db.id === expectedFullName);
+          if (match) {
+            this.selectedDb = match.id;
+          }
+        }
+      });
     } else {
       this.databases$ = of([]);
     }
@@ -165,9 +171,9 @@ export class DbControlDbOverviewComponent implements OnInit {
     if (dbType === 'mongo') {
       localStorage.setItem('playground-mongo-db', id.toString());
       this.mongoDbSelected.emit(id.toString());
+      this.schemaReload.emit();
     } else if (dbType === 'postgres')
       this.store.dispatch(activateDatabase({id: +id}));
-
   }
 
   changeCollaborativeMode() {
@@ -200,6 +206,8 @@ export class DbControlDbOverviewComponent implements OnInit {
           this.mongodbService.createMongoDatabase(userId, res.name).subscribe({
             next: () => {
               this.snackbar.open("MongoDB erfolgreich erstellt", "Ok", { duration: 3000 });
+
+              localStorage.setItem('playground-mongo-db-full', `mongo_playground_student_${userId}_${res.name}`);
               localStorage.setItem('playground-mongo-db', res.name);
               location.reload();
             },
