@@ -10,6 +10,7 @@ RUN npm install
 
 COPY . .
 
+ENV VITE_BASE_URL=/questionary/
 RUN npm run build-only
 
-CMD ["npm", "run", "serve"]
+CMD ["npm", "run", "preview"]

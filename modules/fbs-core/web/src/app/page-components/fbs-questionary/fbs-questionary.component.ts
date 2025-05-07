@@ -25,7 +25,7 @@ export class FbsQuestionaryComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const url = `https://feedback.mni.thm.de/questionary?jsessionid=${this.token}`;
+    const url = `/questionary/?jsessionid=${this.token}`;
     this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.cdr.detach(); // stops iframe from reloading
     return this.safeUrl;

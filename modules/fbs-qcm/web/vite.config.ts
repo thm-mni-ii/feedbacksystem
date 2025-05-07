@@ -11,6 +11,7 @@ const coreUrl = process.env.CORE_URL ?? 'https://localhost/';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: process.env.VITE_BASE_URL ?? '/',
   css: {
     postcss: {
       plugins: [
