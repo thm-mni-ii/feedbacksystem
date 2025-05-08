@@ -69,6 +69,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'org.springframework.data:spring-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     //implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.projectreactor:reactor-core:3.5.6'
@@ -79,6 +80,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.23.0'
     implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.2'
     implementation group: 'org.hashids', name: 'hashids', version: '1.0.3'
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
 }
 
 jacoco {

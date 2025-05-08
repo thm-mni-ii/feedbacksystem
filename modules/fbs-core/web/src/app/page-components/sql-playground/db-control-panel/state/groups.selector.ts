@@ -5,7 +5,7 @@ export const selectGroupsState = createFeatureSelector<GroupsState>("groups");
 
 export const selectAllGroups = createSelector(
   selectGroupsState,
-  (state: GroupsState) => state.groups
+  state => Object.values(state.groups)
 );
 export const selectGroupsError = createSelector(
   selectGroupsState,

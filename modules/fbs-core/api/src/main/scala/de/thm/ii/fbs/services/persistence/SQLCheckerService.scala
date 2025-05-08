@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.persistence
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.model.{SQLCheckerQuery, SQLCheckerSolution}
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Qualifier}
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
@@ -20,6 +20,7 @@ class SQLCheckerService {
   val TablesCollectionName = "Tables"
 
   @Autowired
+  @Qualifier("mongodbTemplate")
   private val mongodbTemplate: MongoTemplate = null
   @Autowired
   private val mapper: ObjectMapper = null

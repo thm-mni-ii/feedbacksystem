@@ -17,6 +17,7 @@ export interface QueryTab {
   selectedTaskName: string;
   active: BackendUser[];
   createdAt: number;
+  result?: any;
 }
 
 export function queryTabEquals(

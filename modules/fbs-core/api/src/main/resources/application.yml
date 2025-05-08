@@ -45,7 +45,7 @@ security:
     allowList: ${BRUTEFORCE_ALLOW_LIST:""}
 server:
   host: ${SERVER_HOST:https://localhost}
-  port: ${SERVER_PORT:443}
+  port: ${SERVER_PORT:443} #443 oder 8443
   ssl:
     enabled: true
     key-store: ${KEYSTORE_PATH:classpath:keystore.p12}
@@ -98,10 +98,12 @@ spring:
   #      ddl-auto: create-drop
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/}
-      database: ${MONGODB_DATABASE:sql-checker}
-      repositories:
-        type: none
+      sqlchecker:
+        uri: ${MONGODB_URI:mongodb://localhost:27017/}
+        database: ${MONGODB_DATABASE:sql-checker}
+      playground:
+        uri: mongodb://localhost:27018
+        database: playground-db
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

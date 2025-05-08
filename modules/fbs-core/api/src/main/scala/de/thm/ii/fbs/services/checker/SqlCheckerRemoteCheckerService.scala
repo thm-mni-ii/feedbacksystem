@@ -44,7 +44,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   private val storageService: StorageService = null
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
-  @Value("${spring.data.mongodb.uri}")
+  @Value("${spring.data.mongodb.sqlchecker.uri}")
   private val mongodbUrl: String = null
 
   /**
