@@ -23,7 +23,8 @@ class CheckerServiceFactoryService {
   def apply(service: String): CheckerService = service match {
     case "spreadsheet" => applicationContext.getBean(classOf[SpreadsheetCheckerService])
     case "excel" => applicationContext.getBean(classOf[ExcelCheckerService])
-    case "sql-checker" => applicationContext.getBean(classOf[SqlCheckerRemoteCheckerService])
+    case "sql-checker" => applicationContext.getBean(classOf[LegacySqlCheckerService])
+    case "ai-supported-sql-analyser" => applicationContext.getBean(classOf[AiSupportedSqlAnalysisService])
     case _: String => applicationContext.getBean(classOf[RemoteCheckerService])
   }
 }
