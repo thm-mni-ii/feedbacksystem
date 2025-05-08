@@ -14,6 +14,6 @@ class MongoPlaygroundService {
         val mongoDatabaseFactory: MongoDatabaseFactory =
             SimpleMongoClientDatabaseFactory(ConnectionString("mongodb://localhost:27018/$dbId"))
 
-        return MongoTemplate(mongoDatabaseFactory);
+        return MongoTemplate(mongoDatabaseFactory)
     }
 }

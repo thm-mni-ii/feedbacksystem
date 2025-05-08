@@ -28,13 +28,15 @@ object MongoSecurityValidator {
     )
 
     fun validate(operation: String, query: MongoPlaygroundQueryDTO) {
-        if (!allowedOperations.contains(operation))
+        if (!allowedOperations.contains(operation)) {
             throw ForbiddenException("Operation '$operation' is not allowed")
+        }
 
         query.pipeline?.forEach { stage ->
             val invalid = stage.keys.intersect(forbiddenOperations)
-            if (invalid.isNotEmpty())
+            if (invalid.isNotEmpty()) {
                 throw ForbiddenException("Forbidden operators in pipeline: ${invalid.joinToString()}")
+            }
         }
 
         query.filter?.let {
@@ -46,8 +48,9 @@ object MongoSecurityValidator {
         }
 
         query.document?.let {
-            if (operation !in setOf("createIndex", "createView"))
+            if (operation !in setOf("createIndex", "createView")) {
                 checkForbiddenKeys(it, "document")
+            }
         }
 
         query.documents?.forEach {
@@ -62,20 +65,23 @@ object MongoSecurityValidator {
         val lower = command.lowercase()
 
         for (keyword in dangerousKeywords) {
-            if (lower.contains(keyword.lowercase()))
+            if (lower.contains(keyword.lowercase())) {
                 throw ForbiddenException("Forbidden keyword used: '$keyword'")
+            }
         }
 
         for (op in dangerousOperators) {
-            if (Regex("""\b$op\b""").containsMatchIn(command))
+            if (Regex("""\b$op\b""").containsMatchIn(command)) {
                 throw ForbiddenException("Forbidden MongoDB operator used: '$op'")
+            }
         }
     }
 
     private fun checkForbiddenKeys(doc: org.bson.Document, name: String) {
         val invalid = doc.keys.filter { it in forbiddenOperations }
 
-        if (invalid.isNotEmpty())
+        if (invalid.isNotEmpty()) {
             throw ForbiddenException("Forbidden operators in $name: ${invalid.joinToString()}")
+        }
     }
 }

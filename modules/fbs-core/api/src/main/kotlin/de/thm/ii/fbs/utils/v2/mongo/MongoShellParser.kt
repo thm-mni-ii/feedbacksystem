@@ -18,8 +18,9 @@ object MongoShellParser {
     fun parse(command: String): ParsedMongoShellCommand {
         val trimmed = command.trim()
 
-        if (trimmed.lowercase() == "show collections")
+        if (trimmed.lowercase() == "show collections") {
             return ParsedMongoShellCommand("showCollections")
+        }
 
         val createViewMatch = createViewRegex.find(trimmed)
         if (createViewMatch != null) {
@@ -32,10 +33,10 @@ object MongoShellParser {
             val rawPipeline = doc["pipeline"] as? List<*>
                 ?: throw IllegalArgumentException("Pipeline must be a list.")
 
-
             val pipeline = rawPipeline.map {
-                if (it !is Document)
+                if (it !is Document) {
                     throw IllegalArgumentException("Pipeline stage is not a Document.")
+                }
                 it
             }
 
@@ -57,10 +58,11 @@ object MongoShellParser {
                 operation = "find",
                 collection = collection,
                 filter =
-                    if (args.isBlank())
-                        Document()
-                    else
-                        Document.parse(args)
+                if (args.isBlank()) {
+                    Document()
+                } else {
+                    Document.parse(args)
+                }
             )
 
             "insert" -> {
@@ -103,7 +105,7 @@ object MongoShellParser {
             )
 
             "aggregate" -> {
-                val full = "{pipeline: ${args}}"
+                val full = "{pipeline: $args}"
                 val doc = Document.parse(full)
 
                 @Suppress("UNCHECKED_CAST")
@@ -136,10 +138,11 @@ object MongoShellParser {
                 operation = "countDocuments",
                 collection = collection,
                 filter =
-                    if (args.isBlank())
-                        Document()
-                    else
-                        Document.parse(args)
+                if (args.isBlank()) {
+                    Document()
+                } else {
+                    Document.parse(args)
+                }
             )
 
             "drop" -> ParsedMongoShellCommand(
@@ -190,11 +193,13 @@ object MongoShellParser {
             }
         }
 
-        if (current.isNotEmpty())
+        if (current.isNotEmpty()) {
             parts.add(current.toString().trim())
+        }
 
-        if (parts.size != expected)
+        if (parts.size != expected) {
             throw IllegalArgumentException("Invalid mongo shell command (expected $expected parts): $input")
+        }
 
         return parts
     }
