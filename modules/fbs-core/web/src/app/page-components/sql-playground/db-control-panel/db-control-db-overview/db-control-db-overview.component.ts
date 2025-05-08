@@ -127,19 +127,17 @@ export class DbControlDbOverviewComponent implements OnInit {
     this.store.dispatch(createDatabase({name}));
   }
 
+  getShortName(fullName: string): string {
+    return fullName.replace(/^mongo_playground_student_\d+_/, '');
+  }
+
   deleteDatabase() {
     const selectedDb = this.selectedDb;
-
-    const shortId =
-      typeof selectedDb === 'string' && selectedDb.includes('_')
-        ? selectedDb.split("_")[selectedDb.split("_").length - 1]
-        : selectedDb.toString();
-
     const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
       data: {
         title: "Datenbank löschen",
         message: "Möchten Sie die Datenbank wirklich löschen?",
-        textToRepeat: `${shortId}`,
+        textToRepeat: this.getShortName(this.selectedDb.toString()),
       },
     });
 
@@ -150,7 +148,7 @@ export class DbControlDbOverviewComponent implements OnInit {
         this.store.dispatch(deleteDatabase({id: +selectedDb}));
       } else if (this.selectedDbType === 'mongo') {
         const userId = this.authService.getToken().id;
-        this.mongodbService.deleteMongoDatabase(userId, shortId).subscribe({
+        this.mongodbService.deleteMongoDatabase(userId, this.getShortName(this.selectedDb.toString())).subscribe({
           next: () => {
             this.snackbar.open("MongoDB erfolgreich gelöscht", "Ok", {duration: 3000});
             localStorage.removeItem('playground-mongo-db');
@@ -221,22 +219,18 @@ export class DbControlDbOverviewComponent implements OnInit {
 
   resetMongoDatabase() {
     const userId = this.authService.getToken().id;
-    const shortId = typeof this.selectedDb === 'string'
-      ? this.selectedDb.split("_").slice(-1)[0]
-      : this.selectedDb.toString();
-
     const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
       data: {
         title: "Datenbank resetten",
         message: "Möchten Sie wirklich alle Inhalte dieser MongoDB löschen?",
-        textToRepeat: `${shortId}`,
+        textToRepeat: this.getShortName(this.selectedDb.toString()),
       },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
 
-      this.mongodbService.resetMongoDatabase(userId, shortId).subscribe({
+      this.mongodbService.resetMongoDatabase(userId, this.getShortName(this.selectedDb.toString())).subscribe({
         next: (response) => {
           this.snackbar.open(
             `Die MongoDB wurde resettet.`,

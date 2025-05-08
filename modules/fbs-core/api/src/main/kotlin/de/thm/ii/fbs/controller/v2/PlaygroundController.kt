@@ -103,7 +103,7 @@ class PlaygroundController(
 
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             if (!mongoClient.listDatabaseNames().contains(databaseName))
                 throw NotFoundException()
 
@@ -201,7 +201,7 @@ class PlaygroundController(
         @RequestBody mongoQuery: MongoPlaygroundQueryDTO
     ): Any? {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             if (!mongoClient.listDatabaseNames().contains(databaseName))
                 throw NotFoundException()
         }
@@ -319,7 +319,7 @@ class PlaygroundController(
     ): List<String> {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -339,7 +339,7 @@ class PlaygroundController(
     ): Long {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -361,7 +361,7 @@ class PlaygroundController(
     ) {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -377,7 +377,7 @@ class PlaygroundController(
     @GetMapping("/mongo/list")
     @ResponseBody
     fun getMongoDatabase(@CurrentToken currentToken: LegacyToken): List<String> {
-        return MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        return mongoPlaygroundService.getMongoClient().use { mongoClient ->
             mongoClient.listDatabaseNames().filter {
                 it.startsWith("mongo_playground_student_${currentToken.id}_")
             }
@@ -390,7 +390,7 @@ class PlaygroundController(
     fun deleteMongoDatabase(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: String) {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             if (!mongoClient.listDatabaseNames().contains(databaseName))
                 throw NotFoundException()
 
@@ -406,7 +406,7 @@ class PlaygroundController(
     ): Map<String, List<String>> {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -430,7 +430,7 @@ class PlaygroundController(
     ) {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -448,7 +448,7 @@ class PlaygroundController(
     ): List<Map<String, String>> {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -482,7 +482,7 @@ class PlaygroundController(
     ) {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -506,7 +506,7 @@ class PlaygroundController(
     ): Map<String, Any> {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -527,7 +527,7 @@ class PlaygroundController(
     ): List<Map<String, Any>> {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
@@ -572,7 +572,7 @@ class PlaygroundController(
     ) {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
-        MongoClients.create("mongodb://localhost:27018").use { mongoClient ->
+        mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
             if (!mongoClient.listDatabaseNames().contains(databaseName))
