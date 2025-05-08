@@ -61,7 +61,7 @@ services:
       - SELF_URL=https://core
       - MINIO_URL=http://minio
       - ASSA_URL=https://feedback.mni.thm.de/ai_feedback/api/v1/analyse
-      - ASSA_TOKEN=1b89436002d89634a81aaf84a33aec45520f494dd98493f5b95b727f7fb3c6e3
+      - ASSA_TOKEN=MY_ASSA_TOKEN
     networks:
       classroom:
       fbs:
