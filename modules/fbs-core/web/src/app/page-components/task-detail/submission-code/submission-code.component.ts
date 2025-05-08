@@ -1,13 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-  ViewChild,
-  ElementRef,
-  AfterViewInit,
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
 
@@ -24,24 +15,6 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
   processing: boolean = false;
   titleText: string = "Abgabe Code:";
   fileType: string = "txt";
-
-  // Sprachen für Dropdown
-  supportedLanguages = [
-    { value: "javascript", viewValue: "JavaScript" },
-    { value: "typescript", viewValue: "TypeScript" },
-    { value: "markup", viewValue: "HTML" },
-    { value: "css", viewValue: "CSS" },
-    { value: "python", viewValue: "Python" },
-    { value: "java", viewValue: "Java" },
-    { value: "cpp", viewValue: "C++" },
-    { value: "c", viewValue: "C" },
-    { value: "go", viewValue: "Go" },
-    { value: "ruby", viewValue: "Ruby" },
-    { value: "php", viewValue: "PHP" },
-    { value: "txt", viewValue: "Text" },
-  ];
-
-  selectedLanguage: string = "txt"; // Standardwert
 
   constructor(
     private parsrService: ParsrService,
@@ -73,9 +46,8 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
       php: "php",
       c: "c",
       go: "go",
-      txt: "txt",
     };
-    return languages[fileType] || "txt";
+    return languages[fileType] || "javascript";
   }
 
   onCodeChange(content: string) {
@@ -97,9 +69,6 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
   async processFile(file: File) {
     this.processing = true;
     this.fileType = file.name.split(".").pop()?.toLowerCase() || "txt";
-    // Automatisch Sprache setzen, aber überschreibbar durch Dropdown
-    this.selectedLanguage = this.getLanguageByFileType(this.fileType);
-
     try {
       if (this.fileType === "pdf") {
         this.toSubmit = await this.extractPdfText(file);
@@ -121,17 +90,7 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
 
   checkIfCodeFile(fileType: string | undefined): boolean {
     const codeExtensions = [
-      "js",
-      "ts",
-      "html",
-      "css",
-      "py",
-      "java",
-      "cpp",
-      "c",
-      "go",
-      "rb",
-      "php",
+      "js", "ts", "html", "css", "py", "java", "cpp", "c", "go", "rb", "php"
     ];
     return codeExtensions.includes(fileType || "");
   }
@@ -191,9 +150,5 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
 
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-  }
-
-  onLanguageChange(lang: string) {
-    this.selectedLanguage = lang;
   }
 }
