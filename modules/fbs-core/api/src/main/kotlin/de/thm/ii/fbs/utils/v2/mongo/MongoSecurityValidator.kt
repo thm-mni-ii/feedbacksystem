@@ -11,6 +11,7 @@ object MongoSecurityValidator {
         "\$accumulator",
         "\$where"
     )
+
     private val allowedOperations = setOf(
         "insert",
         "find",
@@ -36,15 +37,21 @@ object MongoSecurityValidator {
                 throw ForbiddenException("Forbidden operators in pipeline: ${invalid.joinToString()}")
         }
 
-        query.criteria?.let {
-            checkForbiddenKeys(it, "criteria")
+        query.filter?.let {
+            checkForbiddenKeys(it, "filter")
         }
+
         query.update?.let {
             checkForbiddenKeys(it, "update")
         }
+
         query.document?.let {
             if (operation !in setOf("createIndex", "createView"))
                 checkForbiddenKeys(it, "document")
+        }
+
+        query.documents?.forEach {
+            checkForbiddenKeys(it, "documents")
         }
     }
 

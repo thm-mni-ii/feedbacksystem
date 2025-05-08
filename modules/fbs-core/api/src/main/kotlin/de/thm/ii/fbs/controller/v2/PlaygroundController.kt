@@ -207,7 +207,7 @@ class PlaygroundController(
         }
 
         val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, databaseName)
-        val criteria = mongoQuery.criteria ?: Document()
+        val filter = mongoQuery.filter ?: Document()
         val up = Update().apply {
             mongoQuery.update?.forEach { (key, value) ->
                 set(key, value)
@@ -215,14 +215,23 @@ class PlaygroundController(
         }
 
         val query = Query(Criteria().apply {
-            criteria.forEach { (key, value) -> this.and(key).`is`(value) }
+            filter.forEach { (key, value) -> this.and(key).`is`(value) }
         })
 
         MongoSecurityValidator.validate(mongoQuery.operation, mongoQuery)
         return when (mongoQuery.operation) {
             "insert" -> {
-                mongoQuery.document ?: throw IllegalArgumentException("Document cannot be null for insert operation")
-                mongoTemplate.insert(mongoQuery.document, mongoQuery.collection)
+                when {
+                    mongoQuery.documents != null ->
+                        mongoTemplate.insert(mongoQuery.documents, mongoQuery.collection)
+
+                    mongoQuery.document != null ->
+                        mongoTemplate.insert(mongoQuery.document, mongoQuery.collection)
+
+                    else ->
+                        throw
+                        IllegalArgumentException("Either 'document' or 'documents' must be provided for insert operation")
+                }
             }
 
             "drop" -> {
@@ -238,7 +247,7 @@ class PlaygroundController(
             "find" -> {
                 if (mongoQuery.projection != null) {
                     val queryWithProjection = Query(Criteria().apply {
-                        criteria.forEach { (key, value) -> this.and(key).`is`(value) }
+                        filter.forEach { (key, value) -> this.and(key).`is`(value) }
                     })
 
                     queryWithProjection.fields().apply {
@@ -277,6 +286,7 @@ class PlaygroundController(
                 val index = Document(mongoQuery.document ?: throw IllegalArgumentException("Document required"))
                 val indexName = mongoTemplate.db.getCollection(mongoQuery.collection)
                     .createIndex(index)
+
                 mapOf("createdIndex" to indexName)
             }
 
@@ -285,12 +295,14 @@ class PlaygroundController(
                     ?: throw IllegalArgumentException("indexName must be provided in document")
 
                 mongoTemplate.db.getCollection(mongoQuery.collection).dropIndex(indexName)
+
                 mapOf("status" to "index dropped")
             }
 
             "createView" -> {
                 val source = mongoQuery.document?.getString("source") ?: throw IllegalArgumentException("Source required")
                 val pipeline = mongoQuery.pipeline ?: throw IllegalArgumentException("Pipeline required")
+
                 mongoTemplate.db.createView(mongoQuery.collection, source, pipeline)
                 mapOf("status" to "view created")
             }
