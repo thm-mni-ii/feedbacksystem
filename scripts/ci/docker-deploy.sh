@@ -12,6 +12,8 @@ function dockerPush() {
     docker tag feedbacksystem_sql-checker thmmniii/fbs-sql-checker:$tag
     docker tag feedbacksystem-dashboard thmmniii/fbs-eat:$tag
     docker tag feedbacksystem-collab thmmniii/fbs-collab:$tag
+    docker tag feedbacksystem-qcm-backend thmmniii/fbs-qcm-backend:$tag
+    docker tag feedbacksystem-qcm-frontend thmmniii/fbs-qcm-frontend:$tag
     
     docker push thmmniii/fbs-core:$tag
     docker push thmmniii/fbs-runner:$tag
@@ -19,6 +21,8 @@ function dockerPush() {
     docker push thmmniii/fbs-sql-checker:$tag
     docker push thmmniii/fbs-eat:$tag
     docker push thmmniii/fbs-collab:$tag
+    docker push thmmniii/fbs-qcm-backend:$tag
+    docker push thmmniii/fbs-qcm-frontend:$tag
 }
 
 function generateDockerTag() {
