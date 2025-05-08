@@ -47,6 +47,7 @@ import { CourseResultsComponent } from "./page-components/course-detail/course-r
 import { TaskPreviewComponent } from "./page-components/course-detail/task-preview/task-preview.component";
 import { SubmissionFileComponent } from "./page-components/task-detail/submission-file/submission-file.component";
 import { SubmissionTextComponent } from "./page-components/task-detail/submission-text/submission-text.component";
+import { SubmissionCodeComponent } from "./page-components/task-detail/submission-code/submission-code.component";
 import { ResultsComponent } from "./page-components/results/results.component";
 import { DropzoneComponent } from "./tool-components/dropzone/dropzone.component";
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
@@ -210,6 +211,7 @@ export const httpInterceptorProviders = [
     FbsKanbanComponent,
     FbsSciCheckComponent,
     CodeEditorComponent,
+    SubmissionCodeComponent,
   ],
   imports: [
     BrowserModule,
