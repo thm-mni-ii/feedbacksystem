@@ -395,4 +395,6 @@ export const germanTranslation = {
   "group.add.member": "Mitglied hinzufügen",
   "group.delete": "Gruppe löschen",
   "group.delete.message": " wirklich löschen?",
+  "accessibility.page.skip": "Seiten Navigation überspringen",
+  "accessibility.sidebar.skip": "System Navigation überspringen",
 };

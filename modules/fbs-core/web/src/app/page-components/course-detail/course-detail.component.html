@@ -1,4 +1,7 @@
 <div class="container">
+  <app-skip-link anchor="page-content">{{
+    "accessibility.page.skip" | i18nextEager
+  }}</app-skip-link>
   <app-menu-bar *ngIf="role || isAuthorized()">
     <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
     <span>
@@ -123,6 +126,8 @@
       </button>
     </mat-menu>
   </app-menu-bar>
+
+  <a id="page-content"></a>
 
   <app-info class="info" *ngIf="!role">
     <p class="mat-body">

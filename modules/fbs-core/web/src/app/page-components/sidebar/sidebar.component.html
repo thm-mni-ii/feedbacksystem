@@ -1,3 +1,6 @@
+<app-skip-link anchor="main-content">{{
+  "accessibility.sidebar.skip" | i18nextEager
+}}</app-skip-link>
 <mat-sidenav-container class="container">
   <mat-sidenav
     class="sidenav"
@@ -143,8 +146,8 @@
       </mat-menu>
       <app-language-menu #language="languageMenu"></app-language-menu>
     </mat-toolbar>
-    <div class="content-container">
+    <main class="content-container" id="main-content">
       <router-outlet></router-outlet>
-    </div>
+    </main>
   </mat-sidenav-content>
 </mat-sidenav-container>
