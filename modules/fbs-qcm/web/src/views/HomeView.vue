@@ -1,77 +1,37 @@
 <template>
   <DialogEditCatalog ref="dialogEditCatalog" />
   <DialogConfirmVue ref="dialogConfirm" />
-  <v-sheet class="pa-10">
-    <v-expansion-panels>
-      <v-expansion-panel
-        v-for="course in myCourses"
-        :key="course.id"
-        @group:selected="loadCatalogsFromCourse(course.id)"
-      >
-        <v-expansion-panel-title> {{ course.name }} </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <v-list>
-            <v-list-item>
-              <v-btn color="primary-light" class="mx-auto mb-2" @click="startStudy(course.id)">
-                Study for {{ course.name }}
-              </v-btn>
-            </v-list-item>
-            <v-list-subheader>Catalogs</v-list-subheader>
-            <v-list-item v-for="catalog in course.catalogs" :key="catalog.id">
-              <v-list-item-title class="d-flex align-center justify-space-between">
-                <span>{{ catalog.name }}</span>
 
-                <v-spacer></v-spacer>
+  <section style="background: linear-gradient(135deg, #81ba24, #36c78e); color: white" class="mb-4">
+    <v-container class="text-center py-16">
+      <v-avatar size="64" class="mb-4" style="background-color: rgba(255, 255, 255, 0.2)">
+        <v-icon size="36">mdi-brain</v-icon>
+      </v-avatar>
+      <h1 class="text-h3 font-weight-bold mb-2">Questionary</h1>
+      <h2 class="text-subtitle-1 mb-4">Scientific Learning Made Simple</h2>
+      <p class="text-body-1 mx-auto" style="max-width: 720px">
+        Our question-based system helps you to gain knowledge through spaced repetition, reflection,
+        and relationships between ideas.
+      </p>
+    </v-container>
+  </section>
 
-                <v-btn color="primary" variant="tonal" class="mr-2" @click="startSession(catalog)">
-                  Start Session
-                </v-btn>
-                <!-- manage questions with icon -->
-                <span v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
-                  <v-btn
-                    prepend-icon="mdi-cog"
-                    color="dark-grey"
-                    variant="outlined"
-                    class="mr-2"
-                    @click="manageQuestions(catalog)"
-                  >
-                    Manage Questions
-                  </v-btn>
-                  <v-btn
-                    icon="mdi-pencil"
-                    color="dark-grey"
-                    variant="outlined"
-                    size="x-small"
-                    class="mr-2"
-                    @click="editCatalog(course.id, catalog)"
-                  >
-                  </v-btn>
-                  <v-btn
-                    icon="mdi-delete"
-                    color="error"
-                    variant="outlined"
-                    size="x-small"
-                    class="mr-2"
-                    @click="deleteCatalog(course.id, catalog)"
-                  >
-                  </v-btn>
-                </span>
-              </v-list-item-title>
-
-              <v-list-item-action> </v-list-item-action>
-            </v-list-item>
-            <v-list-item v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
-              <v-list-item-title class="d-flex align-center justify-space-between">
-                <v-btn color="primary" variant="outlined" @click="createNewCatalog(course.id)"
-                  >Add new Catalog</v-btn
-                >
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
-  </v-sheet>
+  <v-row justify="center">
+    <v-col v-for="course in courses" :key="course.id" cols="8" md="4" class="ma-2">
+      <v-card :title="course.title" class="mx-auto" :subtitle="course.description">
+        <v-card-actions>
+          <v-btn class="bg-primary-light" @click="startStudy(course.id)">Study for course</v-btn>
+          <v-btn
+            v-if="authStore.decodedToken?.globalRole == 'ADMIN'"
+            prepend-icon="mdi-cog"
+            color="dark-grey"
+            variant="tonal"
+            >Edit course</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">
@@ -92,6 +52,14 @@ const dialogConfirm = ref<typeof DialogConfirmVue>()
 const dialogEditCatalog = ref<typeof DialogEditCatalog>()
 const router = useRouter()
 const authStore = useAuthStore()
+const courses = [
+  { id: 1, title: 'Datenbanken', description: 'Learn about relational databases' },
+  { id: 2, title: 'Algorithmen', description: 'Understand algorithmic problem-solving' },
+  { id: 1, title: 'Datenbanken', description: 'Learn about relational databases' },
+  { id: 3, title: 'Betriebssysteme', description: 'Explore how operating systems work' },
+  { id: 3, title: 'Betriebssysteme', description: 'Explore how operating systems work' },
+  { id: 2, title: 'Algorithmen', description: 'Understand algorithmic problem-solving' }
+]
 
 // Setze den jsessionid-Token direkt nach der Initialisierung
 const jsessionid = router.currentRoute.value.query.jsessionid?.toString()
@@ -133,75 +101,6 @@ const loadCatalogsFromCourse = (courseId: number) => {
   }
 }
 
-const createNewCatalog = (courseId: number) => {
-  if (dialogEditCatalog.value) {
-    dialogEditCatalog.value.openDialog(courseId).then((result: boolean) => {
-      if (result) {
-        console.log('Create new catalog')
-        loadCatalogsFromCourse(courseId)
-      } else {
-        console.log('Cancel')
-      }
-    })
-  }
-}
-const editCatalog = (courseId: number, catalog: Catalog) => {
-  if (dialogEditCatalog.value) {
-    dialogEditCatalog.value.openDialog(courseId, catalog).then((result: boolean) => {
-      if (result) {
-        console.log('Edit catalog')
-        loadCatalogsFromCourse(courseId)
-      } else {
-        console.log('Cancel')
-      }
-    })
-  }
-}
-
-const deleteCatalog = (courseId: number, catalog: Catalog) => {
-  if (dialogConfirm.value) {
-    dialogConfirm.value
-      .openDialog(
-        `Do you want to delete catalog ${catalog.name}?`,
-        'With the confirmation you will delete the catalog.',
-        'Confirm'
-      )
-      .then((result: boolean) => {
-        if (result) {
-          console.log('Delete catalog')
-          catalogService.deleteCatalog(catalog.id).then(() => {
-            loadCatalogsFromCourse(courseId)
-          })
-        } else {
-          console.log('Cancel')
-        }
-      })
-  }
-}
-
-const manageQuestions = (catalog: Catalog) => {
-  console.log(catalog.id)
-  console.log(catalog)
-  router.push(`/manageCatalog/${catalog.id}/open`)
-}
-
-const startSession = (catalog: Catalog) => {
-  if (dialogConfirm.value) {
-    dialogConfirm.value
-      .openDialog(
-        `Do you want to start catalog ${catalog.name}?`,
-        'With the confirmation you will start a new session.',
-        'Confirm'
-      )
-      .then((result: boolean) => {
-        if (result) {
-          router.push(`/catalogSession/${catalog.course}/${catalog.id}`)
-        } else {
-          console.log('Cancel')
-        }
-      })
-  }
-}
 const startStudy = (courseId: number) => {
   router.push(`/study/${courseId}`)
 }
