@@ -9,6 +9,7 @@
       formControlName="content"
       spellcheck="false"
       (keydown.tab)="onTab($event)"
+      (keydown.shift.enter)="onEnter($event)"
       wrap="hard"
     ></textarea>
     <pre

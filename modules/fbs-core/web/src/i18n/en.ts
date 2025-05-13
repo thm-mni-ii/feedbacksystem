@@ -389,4 +389,6 @@ export const englishTranslation = {
   "group.delete": "Delete Group",
   "group.delete.message": ", really delete this group?",
   "group.edit": "Edit Group",
+  "accessibility.page.skip": "Skip page navigation",
+  "accessibility.sidebar.skip": "Skip system navigation",
 };
