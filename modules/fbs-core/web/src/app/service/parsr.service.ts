@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, of, throwError, timer } from "rxjs";
-import { catchError, filter, map, switchMap, take } from "rxjs/operators";
+import { catchError, map, switchMap, take } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -31,30 +31,30 @@ export class ParsrService {
       );
   }
 
-  getText(documentId: string): Observable<any> {
-    return this.http.get(`${this.backendUrl}/document/${documentId}/json`).pipe(
-      catchError((error) => {
-        console.error("Fehler beim Abrufen des Textes:", error);
-        return throwError(() => new Error("Fehler beim Abrufen des Textes."));
-      })
-    );
-  }
-
-  getMarkdown(documentId: string): Observable<string> {
+  getMarkdown(
+    documentId: string,
+    withImages = false
+  ): Observable<string | object> {
+    const resource = withImages ? "markdownWithImages" : "markdown";
     return timer(0, 2000).pipe(
       switchMap(() =>
         this.http
-          .get<string>(`${this.backendUrl}/document/${documentId}/markdown`, {
-            responseType: "text" as "json",
-          })
+          .get<string>(
+            `${this.backendUrl}/document/${documentId}/${resource}`,
+            {
+              responseType: "text" as "json",
+            }
+          )
           .pipe(
             catchError((_error) => {
               // Kein Fehler werfen, sondern als leeres Ergebnis behandeln
-              return of(null);
+              if (_error?.status === 403) {
+                return of({ status: "failed" });
+              }
+              return of();
             })
           )
       ),
-      filter((response) => !!response), // Filtere leere Antworten
       take(1), // Stoppe nach erstem erfolgreichen Ergebnis
       map((response) => response as string)
     );

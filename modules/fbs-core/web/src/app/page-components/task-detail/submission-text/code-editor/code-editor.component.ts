@@ -41,12 +41,6 @@ export class CodeEditorComponent
     content: new FormControl(""),
   });
 
-  private lastUpdated: string = "";
-
-  get contentControl() {
-    return this.groupForm.get("content")?.value;
-  }
-
   constructor(
     private prismService: PrismService,
     private renderer: Renderer2
@@ -121,11 +115,6 @@ export class CodeEditorComponent
     this.update.emit(content);
 
     this.prismService.highlight(this.codeContent.nativeElement);
-  }
-
-  onCodeEditorInput(event: Event) {
-    const content = (event.target as HTMLTextAreaElement).value;
-    this.groupForm.patchValue({ content }, { emitEvent: true });
   }
 
   onTab(event: KeyboardEvent) {

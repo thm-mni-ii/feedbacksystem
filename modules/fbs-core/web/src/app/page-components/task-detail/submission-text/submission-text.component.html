@@ -1,8 +1,19 @@
 <div style="display: flex; justify-content: space-between; align-items: center">
   <h3>{{ titleText }}</h3>
-  <button mat-button color="primary" (click)="uploadFile()">
+
+  <mat-menu #extractionMenu="matMenu">
+    <button mat-menu-item (click)="onExtractOptionSelected('text')">
+      Nur Text
+    </button>
+    <button mat-menu-item (click)="onExtractOptionSelected('all')">
+      Alles (Text + Bilder)
+    </button>
+  </mat-menu>
+
+  <button mat-button color="primary" [matMenuTriggerFor]="extractionMenu">
     Text aus Datei lesen
   </button>
+
   <button mat-button color="accent" (click)="toggleEditor()">
     {{ isCodeFile ? "Wechsel zu Text-Editor" : "Wechsel zu Code-Editor" }}
   </button>

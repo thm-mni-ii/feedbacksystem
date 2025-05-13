@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
 
@@ -7,7 +15,7 @@ import { MarkdownService } from "../../../service/markdown.service";
   templateUrl: "./submission-code.component.html",
   styleUrls: ["./submission-code.component.scss"],
 })
-export class SubmissionCodeComponent implements OnInit, AfterViewInit {
+export class SubmissionCodeComponent implements OnInit {
   toSubmit = "";
   @Input() title?: string;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
@@ -27,12 +35,10 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
     }
     this.parsrService.testConnection().subscribe({
       next: (res) => console.log("✅ Backend antwortet:", res),
-      error: (err) => console.error("❌ Backend nicht erreichbar:", err.message),
+      error: (err) =>
+        console.error("❌ Backend nicht erreichbar:", err.message),
     });
   }
-
-  ngAfterViewInit() {}
-
   getLanguageByFileType(fileType: string): string {
     const languages: { [key: string]: string } = {
       js: "javascript",
@@ -74,7 +80,10 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
         this.toSubmit = await this.extractPdfText(file);
       } else if (this.fileType === "docx") {
         this.toSubmit = await this.extractWordText(file);
-      } else if (this.fileType === "txt" || this.checkIfCodeFile(this.fileType)) {
+      } else if (
+        this.fileType === "txt" ||
+        this.checkIfCodeFile(this.fileType)
+      ) {
         this.toSubmit = await this.extractPlainText(file);
       } else {
         throw new Error("Dateityp nicht unterstützt.");
@@ -90,7 +99,17 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
 
   checkIfCodeFile(fileType: string | undefined): boolean {
     const codeExtensions = [
-      "js", "ts", "html", "css", "py", "java", "cpp", "c", "go", "rb", "php"
+      "js",
+      "ts",
+      "html",
+      "css",
+      "py",
+      "java",
+      "cpp",
+      "c",
+      "go",
+      "rb",
+      "php",
     ];
     return codeExtensions.includes(fileType || "");
   }
@@ -100,7 +119,12 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
       this.parsrService.uploadFile(file).subscribe({
         next: async (jobId) => {
           try {
-            const markdown = await this.parsrService.getMarkdown(jobId).toPromise();
+            const markdown = await this.parsrService
+              .getMarkdown(jobId)
+              .toPromise();
+            if (typeof markdown === "object") {
+              throw markdown;
+            }
             const html = this.markdownService.parseToString(markdown);
             resolve(html);
           } catch (err) {
@@ -118,7 +142,9 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
       reader.readAsArrayBuffer(file);
       reader.onload = async () => {
         const arrayBuffer = reader.result as ArrayBuffer;
-        const result = await (window as any).mammoth.convertToHtml({ arrayBuffer });
+        const result = await (window as any).mammoth.convertToHtml({
+          arrayBuffer,
+        });
         resolve(result.value);
       };
     });

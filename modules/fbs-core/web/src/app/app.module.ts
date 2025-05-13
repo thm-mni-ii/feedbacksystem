@@ -101,7 +101,7 @@ import { I18NextModule } from "angular-i18next";
 import { I18N_PROVIDERS } from "./util/i18n";
 import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
 
-import { registerLocaleData } from "@angular/common";
+import { CommonModule, registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
 import { SqlPlaygroundModule } from "./page-components/sql-playground/sql-playground.module";
@@ -247,6 +247,8 @@ export const httpInterceptorProviders = [
     I18NextModule.forRoot(),
     SqlPlaygroundModule,
     AngularEditorModule,
+    CommonModule,
+    ReactiveFormsModule,
   ],
   entryComponents: [
     DataprivacyDialogComponent,

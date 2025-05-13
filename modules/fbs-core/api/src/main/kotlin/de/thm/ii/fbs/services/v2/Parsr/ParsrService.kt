@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.services.v2.Parsr
 
+import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
+import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import java.io.ByteArrayOutputStream
 import java.time.Duration
 import java.util.Base64
@@ -10,23 +12,75 @@ import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.MediaType
+import org.springframework.security.core.parameters.P
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.net.URLDecoder
+import java.net.URLEncoder
 import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.outputStream
 
 @Service
 class ParsrService {
+
+    enum class ParsrStatus {
+        ONGOING,
+        FINISHED
+    }
+    class ParsrStatusEntry(var status: ParsrStatus = ParsrStatus.ONGOING, var markdown: String = "", var rawMarkdown: String = "") {
+        fun finish(rawMarkdown: String, markdown: String) {
+            this.status = ParsrStatus.FINISHED
+            // update rawMarkdown
+            val regex = Regex("!\\[([^]]*)]\\((\\S*)\\)")
+            var match = regex.find(rawMarkdown)
+            var lastIndex = 0
+            var result = ""
+            while (match != null) {
+                if (match.groups[1]!!.value.isNotBlank()) {
+                    match = match.next()
+                    continue
+                }
+                if (match.range.first > lastIndex) {
+                    result += rawMarkdown.substring(lastIndex, match.range.first)
+                }
+                val key = match.groups[2]!!.value
+                val name = URLDecoder.decode(key, "utf-8")
+                result += "![$name]($key)"
+                lastIndex = match.range.last + 1
+                match = match.next()
+            }
+            if (lastIndex < rawMarkdown.length) {
+                result += rawMarkdown.substring(lastIndex)
+            }
+            this.rawMarkdown = result
+            this.markdown = markdown
+        }
+
+        fun verifyRawMarkdown(): String {
+            if (this.status != ParsrStatus.FINISHED) {
+                throw NotFoundException()
+            }
+            return this.rawMarkdown
+        }
+
+        fun verifyMarkdown(): String {
+            if (this.status != ParsrStatus.FINISHED) {
+                throw NotFoundException()
+            }
+            return this.markdown
+        }
+    }
+
     private val parsrClient: WebClient = WebClient.builder()
             .baseUrl("http://parsr:3001")
             .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) } // 10 MB
             .build()
-    private val documentCache = ConcurrentHashMap<String, String>()
+    private val documentCache = ConcurrentHashMap<String, ParsrStatusEntry>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     fun sendPdfToParsr(file: MultipartFile): String {
@@ -50,7 +104,7 @@ class ParsrService {
                 "joinHyphenatedWords": true
             },
             "output": { "format": "markdown" },
-            "pdf": { "pages": "all" }
+            "pdf": { "pages": "1" }
         }
     """.trimIndent()
 
@@ -72,6 +126,7 @@ class ParsrService {
 
         val jobId = response.trim()
         println("📤 Upload & Jobstart fertig in ${System.currentTimeMillis() - startTime} ms (Job-ID: $jobId)")
+        documentCache[jobId] = ParsrStatusEntry()
 
         coroutineScope.launch {
             val pollStart = System.currentTimeMillis()
@@ -87,20 +142,18 @@ class ParsrService {
                     println("📥 Download ZIP fertig in ${System.currentTimeMillis() - pollStart} ms")
                     try {
                         val unzipStart = System.currentTimeMillis()
-                        val withImages = unzipZip(zipResult)
+                        val (rawMarkdown, withImages) = unzipZip(zipResult)
                         println("🖼️ Entpacken & Ersetzen der Bilder dauerte ${System.currentTimeMillis() - unzipStart} ms")
-                        documentCache[jobId] = withImages
+                        documentCache[jobId]?.finish(rawMarkdown, withImages)
                         println("✅ Markdown mit Bildern gecacht für Job: $jobId")
                     } catch (e: Exception) {
                         println("⚠️ Fehler beim Entpacken, versuche Nur-Markdown: ${e.message}")
-                        Paths.get("/upload-dir", "temp.zip").outputStream().write(zipResult)
-                        println(Paths.get("/upload-dir", "temp.zip").absolutePathString())
                         val fallback = fetchMarkdownWithoutZip(jobId)
-                        documentCache[jobId] = fallback
+                        documentCache[jobId]?.finish(fallback, fallback)
                     }
                 } else {
                     val fallback = fetchMarkdownWithoutZip(jobId)
-                    documentCache[jobId] = fallback
+                    documentCache[jobId]?.finish(fallback, fallback)
                     println("✅ Nur-Markdown gecacht für Job: $jobId (ZIP-Download übersprungen)")
                 }
             } catch (e: Exception) {
@@ -112,14 +165,21 @@ class ParsrService {
         return jobId
     }
 
+
     fun getParsedDocument(jobId: String): String {
-        return documentCache[jobId] ?: throw RuntimeException("Document not found")
+        val markdown = documentCache[jobId] ?: throw ForbiddenException()
+        return markdown.verifyMarkdown()
+    }
+
+    fun getRawDocument(jobId: String): String {
+        val markdown = documentCache[jobId] ?: throw ForbiddenException()
+        return markdown.verifyRawMarkdown()
     }
 
     private suspend fun pollParsrResult(jobId: String): ByteArray? {
         var retries = 0
-        val maxRetries = 30
-        val waittime = 5000L
+        val maxRetries = 150
+        val waittime = 1000L
 
         while (retries < maxRetries) {
             try {
@@ -165,7 +225,7 @@ class ParsrService {
         }
     }
 
-    fun unzipZip(zipData: ByteArray): String {
+    fun unzipZip(zipData: ByteArray): Pair<String, String> {
         val channel = SeekableInMemoryByteChannel(zipData)
         var markdown: String? = null
         val images = mutableMapOf<String, String>()
@@ -173,8 +233,8 @@ class ParsrService {
         ZipFile(channel).use { zipFile ->
             zipFile.entries.asSequence().forEach { entry ->
                 if (entry.isDirectory) return@forEach
-                val name = entry.name.lowercase()
-                val extension = name.substringAfterLast('.', "")
+                val name = entry.name
+                val extension = name.lowercase().substringAfterLast('.', "")
                 zipFile.getInputStream(entry).use { input ->
                     val bytes = input.readBytes()
                     if (extension == "md") {
@@ -192,11 +252,35 @@ class ParsrService {
             }
         }
 
-        images.forEach { (key, value) ->
-            markdown = markdown?.replace("![]($key)", "![]($value)")
+        val rawMarkdown = markdown ?: throw RuntimeException("No markdown file found in zip")
+
+        val regex = Regex("!\\[([^]]*)]\\((\\S*)\\)")
+        var match = regex.find(rawMarkdown)
+        var lastIndex = 0
+        var result = ""
+        while (match != null) {
+            if (match.groups[1]!!.value.isNotBlank()) {
+                match = match.next()
+                continue
+            }
+            val name = URLDecoder.decode(match.groups[2]!!.value, "utf-8")
+            val value = images[name]
+            if (value == null) {
+                match = match.next()
+                continue
+            }
+            if (match.range.first > lastIndex) {
+                result += rawMarkdown.substring(lastIndex, match.range.first)
+            }
+            result += "![$name]($value)"
+            lastIndex = match.range.last + 1
+            match = match.next()
+        }
+        if (lastIndex < rawMarkdown.length) {
+            result += rawMarkdown.substring(lastIndex)
         }
 
-        return markdown ?: throw RuntimeException("No markdown file found in zip")
+        return Pair(rawMarkdown, result)
     }
 
     fun convertPdfToVersion(file: MultipartFile, targetVersion: Float): ByteArray {

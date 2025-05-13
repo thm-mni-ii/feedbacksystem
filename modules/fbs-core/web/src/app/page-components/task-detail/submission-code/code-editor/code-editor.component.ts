@@ -11,15 +11,18 @@ import {
   ViewChild,
   SimpleChanges,
 } from "@angular/core";
-import { FormControl, FormGroup } from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { Subscription } from "rxjs";
 import { map } from "rxjs/operators";
 import { PrismService } from "src/app/service/prism.service";
+import { NgClass } from "@angular/common";
 
 @Component({
   selector: "app-code-editor",
   templateUrl: "./code-editor.component.html",
   styleUrls: ["./code-editor.component.scss"],
+  imports: [ReactiveFormsModule, NgClass],
+  standalone: true,
 })
 export class CodeEditorComponent
   implements OnDestroy, AfterViewInit, OnChanges
@@ -40,12 +43,6 @@ export class CodeEditorComponent
   groupForm = new FormGroup({
     content: new FormControl(""),
   });
-
-  private lastUpdated: string = "";
-
-  get contentControl() {
-    return this.groupForm.get("content")?.value;
-  }
 
   constructor(
     private prismService: PrismService,
@@ -123,11 +120,6 @@ export class CodeEditorComponent
     this.prismService.highlight(this.codeContent.nativeElement);
   }
 
-  onCodeEditorInput(event: Event) {
-    const content = (event.target as HTMLTextAreaElement).value;
-    this.groupForm.patchValue({ content }, { emitEvent: true });
-  }
-
   onTab(event: KeyboardEvent) {
     event.preventDefault();
     const textarea = event.target as HTMLTextAreaElement;
@@ -144,10 +136,5 @@ export class CodeEditorComponent
     });
 
     textarea.selectionStart = textarea.selectionEnd = start + 1;
-  }
-
-  onContentChange(updatedContent: string) {
-    this.content = updatedContent;
-    this.contentChange.emit(this.content);
   }
 }

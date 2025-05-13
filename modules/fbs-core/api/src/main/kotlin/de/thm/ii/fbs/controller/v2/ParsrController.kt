@@ -36,26 +36,15 @@ class ParsrController(
 
     @GetMapping("/document/{jobId}/markdown")
     fun getMarkdownDocument(@PathVariable jobId: String): ResponseEntity<String> {
-        return try {
-            val document = parsrService.getParsedDocument(jobId)
-            ResponseEntity.ok(document)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Dokument nicht gefunden: ${e.message}")
-        }
+        val document = parsrService.getRawDocument(jobId)
+        return ResponseEntity.ok(document)
     }
 
     @GetMapping("/document/{jobId}/markdownWithImages")
     fun getMarkdownWithImages(@PathVariable jobId: String): ResponseEntity<String> {
-    return try {
-        val markdown = parsrService.getParsedDocument(jobId)
-        ResponseEntity.ok(markdown)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Fehler beim Verarbeiten: ${e.message}")
+        val document = parsrService.getParsedDocument(jobId)
+        return ResponseEntity.ok(document)
     }
-}
 
 
     @GetMapping("/test")

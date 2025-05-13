@@ -28,6 +28,14 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   titleText: string = "Abgabe Text:";
   isCodeFile: boolean = false;
 
+  extractionMode: "text" | "all" = "text";
+
+  onExtractOptionSelected(mode: "text" | "all") {
+    this.extractionMode = mode;
+    this.fileInput.nativeElement.value = null;
+    this.fileInput.nativeElement.click();
+  }
+
   editorConfig = {
     editable: true,
     spellcheck: true,
@@ -137,17 +145,18 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   handleFileInput(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.processFile(file);
+      const includeImages = this.extractionMode === "all";
+      this.processFile(file, includeImages); // <-- OK
     }
   }
 
-  async processFile(file: File) {
+  async processFile(file: File, includeImages = false) {
     this.processing = true;
     const fileType = file.name.split(".").pop()?.toLowerCase();
 
     try {
       if (fileType === "pdf") {
-        this.toSubmit = await this.extractPdfText(file);
+        this.toSubmit = await this.extractPdfText(file, includeImages);
         this.isCodeFile = false;
       } else if (fileType === "docx") {
         this.toSubmit = await this.extractWordText(file);
@@ -185,14 +194,17 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return codeExtensions.includes(fileType || "");
   }
 
-  async extractPdfText(file: File): Promise<string> {
+  async extractPdfText(file: File, includeImages = false): Promise<string> {
     return new Promise((resolve, reject) => {
       this.parsrService.uploadFile(file).subscribe({
         next: async (jobId) => {
           try {
             const markdown = await this.parsrService
-              .getMarkdown(jobId)
+              .getMarkdown(jobId, includeImages)
               .toPromise();
+            if (typeof markdown === "object") {
+              throw markdown;
+            }
             const html = this.markdownService.parseToString(markdown);
             resolve(html);
           } catch (err) {
@@ -202,14 +214,6 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
         error: (err) => reject(err),
       });
     });
-  }
-
-  // Neue Methode im Component
-  private replaceImagesWithFilename(html: string): string {
-    return html.replace(
-      /<img[^>]+src=["']([^"']+)["'][^>]*>/g,
-      (match, src) => src.split("/").pop() || ""
-    );
   }
 
   async extractWordText(file: File): Promise<string> {
