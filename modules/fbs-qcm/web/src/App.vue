@@ -9,7 +9,6 @@
           >All Questions</v-tab
         >
         <v-tab
-          v-if="authStore.decodedToken?.globalRole == 'ADMIN'"
           @click="router.push('/questionCatalogs')"
           >Question Catalogs</v-tab
         >
