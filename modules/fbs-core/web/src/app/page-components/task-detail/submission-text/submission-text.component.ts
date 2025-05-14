@@ -12,6 +12,9 @@ import * as mammoth from "mammoth";
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
+import { MatDialog } from "@angular/material/dialog";
+import { TemplateRef } from "@angular/core";
+
 
 @Component({
   selector: "app-submission-text",
@@ -24,6 +27,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   @Input() title?: string;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
+  @ViewChild("errorDialog") errorDialogTemplate!: TemplateRef<any>;
   processing: boolean = false;
   titleText: string = "Abgabe Text:";
   isCodeFile: boolean = false;
@@ -48,7 +52,8 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
 
   constructor(
     private parsrService: ParsrService,
-    private markdownService: MarkdownService
+    private markdownService: MarkdownService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -169,7 +174,9 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       }
     } catch (error: any) {
       console.error("Fehler bei der Datei-Extraktion:", error);
-      alert("Fehler beim Verarbeiten der Datei: " + error.message);
+      this.dialog.open(this.errorDialogTemplate, {
+        data: { message: "Fehler beim Verarbeiten der Datei: " + error.message },
+      });
     } finally {
       this.processing = false;
       this.highlightCode();

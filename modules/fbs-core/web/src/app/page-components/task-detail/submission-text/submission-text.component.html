@@ -3,7 +3,7 @@
 
   <mat-menu #extractionMenu="matMenu">
     <button mat-menu-item (click)="onExtractOptionSelected('text')">
-      Nur Text
+      Nur Text (pdf)
     </button>
     <button mat-menu-item (click)="onExtractOptionSelected('all')">
       Alles (Text + Bilder)
@@ -57,3 +57,13 @@
   [(content)]="toSubmit"
   (update)="onCodeChange($event)"
 ></app-code-editor>
+
+<ng-template #errorDialog let-data>
+  <h2 mat-dialog-title>Fehler</h2>
+  <mat-dialog-content>
+    <p>{{ data.message }}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close color="primary">OK</button>
+  </mat-dialog-actions>
+</ng-template>
