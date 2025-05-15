@@ -43,11 +43,10 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
       this.titleText = this.title;
     }
 
-    // Backend-Test beim Laden
     this.parsrService.testConnection().subscribe({
-      next: (res) => console.log("✅ Backend antwortet:", res),
-      error: (err) =>
-        console.error("❌ Backend nicht erreichbar:", err.message),
+      error: (err) => {
+        console.error("Backend nicht erreichbar:", err.message);
+      },
     });
   }
 
@@ -66,6 +65,7 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
       cpp: "cpp",
       ruby: "ruby",
       php: "php",
+      json: "json",
     };
     return languages[fileType] || "javascript";
   }
@@ -147,10 +147,13 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
         throw new Error("Dateityp nicht unterstützt.");
       }
     } catch (error: any) {
-      console.error("Fehler bei der Datei-Extraktion:", error);
+      const errorMsg =
+        error?.message && typeof error.message === "string"
+          ? error.message
+          : "Die Datei hat zu viele Seiten oder ist zu groß.";
       this.dialog.open(this.errorDialogTemplate, {
         data: {
-          message: "Fehler beim Verarbeiten der Datei: " + error.message,
+          message: "Fehler beim Verarbeiten der Datei: " + errorMsg,
         },
       });
     } finally {
@@ -173,6 +176,7 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
       "go",
       "rb",
       "php",
+      "json",
     ];
     return codeExtensions.includes(fileType || "");
   }
@@ -186,7 +190,8 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
               .getMarkdown(jobId, includeImages)
               .toPromise();
             if (typeof markdown === "object") {
-              throw markdown;
+              reject(markdown);
+              return;
             }
             const html = this.markdownService.parseToString(markdown);
             resolve(html);
@@ -206,10 +211,7 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
       reader.onload = async () => {
         const arrayBuffer = reader.result as ArrayBuffer;
         const result = await mammoth.convertToHtml({ arrayBuffer });
-
-        const htmlWithImages = result.value;
-
-        resolve(htmlWithImages);
+        resolve(result.value);
       };
     });
   }

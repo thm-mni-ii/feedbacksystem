@@ -3,6 +3,7 @@ package de.thm.ii.fbs.services.v2.Parsr
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import java.io.ByteArrayOutputStream
+import java.net.URLDecoder
 import java.time.Duration
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
@@ -20,19 +21,21 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.net.URLDecoder
 
 @Service
 class ParsrService {
 
     enum class ParsrStatus {
-        ONGOING,
-        FINISHED
+        ONGOING, FINISHED
     }
-    class ParsrStatusEntry(var status: ParsrStatus = ParsrStatus.ONGOING, var markdown: String = "", var rawMarkdown: String = "") {
+
+    class ParsrStatusEntry(
+            var status: ParsrStatus = ParsrStatus.ONGOING,
+            var markdown: String = "",
+            var rawMarkdown: String = ""
+    ) {
         fun finish(rawMarkdown: String, markdown: String) {
             this.status = ParsrStatus.FINISHED
-            // update rawMarkdown
             val regex = Regex("!\\[([^]]*)]\\((\\S*)\\)")
             var match = regex.find(rawMarkdown)
             var lastIndex = 0
@@ -58,25 +61,22 @@ class ParsrService {
             this.markdown = markdown
         }
 
-        fun verifyRawMarkdown(): String {
-            if (this.status != ParsrStatus.FINISHED) {
-                throw NotFoundException()
-            }
-            return this.rawMarkdown
+        fun verifyMarkdown(): String {
+            if (this.status != ParsrStatus.FINISHED) throw NotFoundException()
+            return this.markdown
         }
 
-        fun verifyMarkdown(): String {
-            if (this.status != ParsrStatus.FINISHED) {
-                throw NotFoundException()
-            }
-            return this.markdown
+        fun verifyRawMarkdown(): String {
+            if (this.status != ParsrStatus.FINISHED) throw NotFoundException()
+            return this.rawMarkdown
         }
     }
 
     private val parsrClient: WebClient = WebClient.builder()
             .baseUrl("http://parsr:3001")
-            .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) } // 10 MB
+            .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
             .build()
+
     private val documentCache = ConcurrentHashMap<String, ParsrStatusEntry>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -118,7 +118,6 @@ class ParsrService {
                                         Pair(fallback, fallback)
                                     }
                                 } catch (e: Exception) {
-                                    println("❌ Fehler bei Chunk [$startPage]: ${e.message}")
                                     throw RuntimeException("Chunk [$startPage] konnte nicht verarbeitet werden", e)
                                 }
                             }
@@ -131,15 +130,13 @@ class ParsrService {
                 val rawResults = resultsWithRaw.map { it.first }.filter { it.isNotBlank() }
                 val results = resultsWithRaw.map { it.second }.filter { it.isNotBlank() }
 
-                if (results.isEmpty()) {
-                    throw RuntimeException("Kein Chunk konnte erfolgreich verarbeitet werden.")
-                }
+                if (results.isEmpty()) throw RuntimeException("Kein Chunk konnte erfolgreich verarbeitet werden.")
 
                 val combinedRaw = rawResults.joinToString("\n\n")
                 val combinedMarkdown = results.joinToString("\n\n")
                 documentCache[jobId]?.finish(combinedRaw, combinedMarkdown)
             } catch (e: Exception) {
-                println("❌ Gesamter Fehler bei PDF-Verarbeitung: ${e.message}")
+                println("Fehler bei der PDF-Verarbeitung für Job $jobId: ${e.message}")
                 document.close()
                 documentCache.remove(jobId)
             }
@@ -148,26 +145,34 @@ class ParsrService {
         return jobId
     }
 
+    fun getParsedDocument(jobId: String): String {
+        val markdown = documentCache[jobId] ?: throw ForbiddenException()
+        return markdown.verifyMarkdown()
+    }
 
+    fun getRawDocument(jobId: String): String {
+        val markdown = documentCache[jobId] ?: throw ForbiddenException()
+        return markdown.verifyRawMarkdown()
+    }
 
     private fun uploadChunkToParsr(pdfChunk: ByteArray): String {
         val configJson = """
-        {
-            "version": "3.0.0",
-            "languages": ["de"],
-            "ocr": { "enabled": false },
-            "cleaning": {
-                "removeHeaders": true,
-                "removeFooters": true,
-                "removePageNumbers": true
-            },
-            "content": {
-                "splitParagraphs": true,
-                "joinHyphenatedWords": true
-            },
-            "output": { "format": "markdown" }
-        }
-    """.trimIndent()
+            {
+                "version": "3.0.0",
+                "languages": ["de"],
+                "ocr": { "enabled": false },
+                "cleaning": {
+                    "removeHeaders": true,
+                    "removeFooters": true,
+                    "removePageNumbers": true
+                },
+                "content": {
+                    "splitParagraphs": true,
+                    "joinHyphenatedWords": true
+                },
+                "output": { "format": "markdown" }
+            }
+        """.trimIndent()
 
         val resource = object : ByteArrayResource(pdfChunk) {
             override fun getFilename(): String = "chunk.pdf"
@@ -190,26 +195,6 @@ class ParsrService {
                 ?: throw RuntimeException("Leere Antwort beim Chunk-Upload erhalten")
     }
 
-    fun isZip(data: ByteArray): Boolean {
-        return data.size > 4 &&
-                data[0] == 0x50.toByte() &&
-                data[1] == 0x4B.toByte() &&
-                data[2] == 0x03.toByte() &&
-                data[3] == 0x04.toByte()
-    }
-
-
-
-    fun getParsedDocument(jobId: String): String {
-        val markdown = documentCache[jobId] ?: throw ForbiddenException()
-        return markdown.verifyMarkdown()
-    }
-
-    fun getRawDocument(jobId: String): String {
-        val markdown = documentCache[jobId] ?: throw ForbiddenException()
-        return markdown.verifyRawMarkdown()
-    }
-
     private suspend fun pollParsrResult(jobId: String, numpages: Int): ByteArray? {
         var retries = 0
         val maxRetries = 10 * numpages
@@ -217,48 +202,34 @@ class ParsrService {
 
         while (retries < maxRetries) {
             try {
-                println("🔄 Polling-Versuch ${retries + 1}/$maxRetries")
                 return parsrClient
                         .get()
                         .uri("/api/v1/markdown/$jobId?download=1")
                         .retrieve()
                         .bodyToMono<ByteArray>()
-                        .block() // Timeout auf 100 Sekunden ändern
+                        .block()
             } catch (e: Exception) {
-                // Fehler beim Polling, erhöhe die Retry-Zahl
-                println("❌ Fehler beim Polling-Versuch ${retries + 1}/$maxRetries: ${e.message}")
                 retries++
                 delay(waittime)
             }
         }
 
-        // Wenn alle Versuche fehlgeschlagen sind, hole das Markdown ohne ZIP
-        println("⏳ Polling für Job $jobId überschreitet maximale Versuche, versuche Fallback ohne ZIP.")
         return try {
             fetchMarkdownWithoutZip(jobId).toByteArray()
         } catch (e: Exception) {
-            println("❌ Fehler beim Abrufen des Markdowns ohne ZIP: ${e.message}")
             throw RuntimeException("Verarbeitungszeitüberschreitung und kein Fallback möglich: ${e.message}")
         }
     }
 
-
-
     private fun fetchMarkdownWithoutZip(jobId: String): String {
-        return try {
-            parsrClient
-                    .get()
-                    .uri("/api/v1/markdown/$jobId")
-                    .retrieve()
-                    .bodyToMono<String>()
-                    .block(Duration.ofSeconds(30))
-                    ?: throw RuntimeException("Leere Markdown-Antwort erhalten")
-        } catch (e: Exception) {
-            println("❌ Fallback ebenfalls fehlgeschlagen: ${e.message}")
-            throw e
-        }
+        return parsrClient
+                .get()
+                .uri("/api/v1/markdown/$jobId")
+                .retrieve()
+                .bodyToMono<String>()
+                .block(Duration.ofSeconds(30))
+                ?: throw RuntimeException("Leere Markdown-Antwort erhalten")
     }
-
     fun unzipZip(zipData: ByteArray): Pair<String, String> {
         val channel = SeekableInMemoryByteChannel(zipData)
         var markdown: String? = null
@@ -315,6 +286,14 @@ class ParsrService {
         }
 
         return Pair(rawMarkdown, result)
+    }
+
+    fun isZip(data: ByteArray): Boolean {
+        return data.size > 4 &&
+                data[0] == 0x50.toByte() &&
+                data[1] == 0x4B.toByte() &&
+                data[2] == 0x03.toByte() &&
+                data[3] == 0x04.toByte()
     }
 
 }

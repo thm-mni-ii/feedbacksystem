@@ -7,13 +7,13 @@ import {
   ViewChild,
   ElementRef,
   AfterViewInit,
+  TemplateRef,
 } from "@angular/core";
 import * as mammoth from "mammoth";
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
 import { MatDialog } from "@angular/material/dialog";
-import { TemplateRef } from "@angular/core";
 
 @Component({
   selector: "app-submission-text",
@@ -30,6 +30,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   processing: boolean = false;
   titleText: string = "Abgabe Text:";
   isCodeFile: boolean = false;
+  fileType: string = "txt";
 
   extractionMode: "text" | "all" = "text";
 
@@ -60,11 +61,10 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       this.titleText = this.title;
     }
 
-    // Backend-Test beim Laden
     this.parsrService.testConnection().subscribe({
-      next: (res) => console.log("✅ Backend antwortet:", res),
-      error: (err) =>
-        console.error("❌ Backend nicht erreichbar:", err.message),
+      error: (err) => {
+        console.error("Backend nicht erreichbar:", err.message);
+      },
     });
   }
 
@@ -87,6 +87,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       cpp: "cpp",
       ruby: "ruby",
       php: "php",
+      json: "json",
     };
     return languages[fileType] || "javascript";
   }
@@ -114,11 +115,6 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
           prism.languages[language],
           language
         );
-      } else {
-        console.warn(
-          "Keine passende Sprache für Prism gefunden:",
-          detectedFileType
-        );
       }
     }
   }
@@ -142,40 +138,42 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return "txt";
   }
 
-  uploadFile() {
-    this.fileInput.nativeElement.click();
-  }
-
   handleFileInput(event: any) {
     const file = event.target.files[0];
     if (file) {
       const includeImages = this.extractionMode === "all";
-      this.processFile(file, includeImages); // <-- OK
+      this.processFile(file, includeImages);
     }
   }
 
   async processFile(file: File, includeImages = false) {
     this.processing = true;
-    const fileType = file.name.split(".").pop()?.toLowerCase();
+    this.fileType = file.name.split(".").pop()?.toLowerCase() || "txt";
 
     try {
-      if (fileType === "pdf") {
+      if (this.fileType === "pdf") {
         this.toSubmit = await this.extractPdfText(file, includeImages);
         this.isCodeFile = false;
-      } else if (fileType === "docx") {
+      } else if (this.fileType === "docx") {
         this.toSubmit = await this.extractWordText(file);
         this.isCodeFile = false;
-      } else if (fileType === "txt" || this.checkIfCodeFile(fileType)) {
+      } else if (
+        this.fileType === "txt" ||
+        this.checkIfCodeFile(this.fileType)
+      ) {
         this.toSubmit = await this.extractPlainText(file);
-        this.isCodeFile = this.checkIfCodeFile(fileType);
+        this.isCodeFile = this.checkIfCodeFile(this.fileType);
       } else {
         throw new Error("Dateityp nicht unterstützt.");
       }
     } catch (error: any) {
-      console.error("Fehler bei der Datei-Extraktion:", error);
+      const errorMsg =
+        error?.message && typeof error.message === "string"
+          ? error.message
+          : "Die Datei hat zu viele Seiten oder ist zu groß.";
       this.dialog.open(this.errorDialogTemplate, {
         data: {
-          message: "Fehler beim Verarbeiten der Datei: " + error.message,
+          message: "Fehler beim Verarbeiten der Datei: " + errorMsg,
         },
       });
     } finally {
@@ -198,6 +196,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       "go",
       "rb",
       "php",
+      "json",
     ];
     return codeExtensions.includes(fileType || "");
   }
@@ -211,7 +210,8 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
               .getMarkdown(jobId, includeImages)
               .toPromise();
             if (typeof markdown === "object") {
-              throw markdown;
+              reject(markdown);
+              return;
             }
             const html = this.markdownService.parseToString(markdown);
             resolve(html);
@@ -231,10 +231,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       reader.onload = async () => {
         const arrayBuffer = reader.result as ArrayBuffer;
         const result = await mammoth.convertToHtml({ arrayBuffer });
-
-        const htmlWithImages = result.value;
-
-        resolve(htmlWithImages);
+        resolve(result.value);
       };
     });
   }
