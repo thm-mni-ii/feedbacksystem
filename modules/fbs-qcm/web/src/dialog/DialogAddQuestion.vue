@@ -5,18 +5,23 @@ import QuestionFindModal from '@/components/QuestionFindModal.vue'
 
 const AddQuestionDialog = ref(false)
 
-const questionOptionsVar = ref<Question[]>([]); 
-const showInputVar = ref(false);
-const transitionVar = ref("");
-const resolvePromise = ref<Function | undefined>(undefined);
-const currentQuestionVar = ref("");
+const questionOptionsVar = ref<Question[]>([])
+const showInputVar = ref(false)
+const transitionVar = ref('')
+const resolvePromise = ref<Function | undefined>(undefined)
+const currentQuestionVar = ref('')
 
-const openDialog = (questionOptions: Question[], showInput: boolean, transition: string, currentQuestion: string) => {
+const openDialog = (
+  questionOptions: Question[],
+  showInput: boolean,
+  transition: string,
+  currentQuestion: string
+) => {
   AddQuestionDialog.value = true
-  questionOptionsVar.value = questionOptions;
-  showInputVar.value = showInput;
-  transitionVar.value = transition;
-  currentQuestionVar.value = currentQuestion;
+  questionOptionsVar.value = questionOptions
+  showInputVar.value = showInput
+  transitionVar.value = transition
+  currentQuestionVar.value = currentQuestion
   return new Promise((resolve) => {
     resolvePromise.value = resolve
   })
@@ -24,11 +29,12 @@ const openDialog = (questionOptions: Question[], showInput: boolean, transition:
 
 const _confirm = (nodeData: number, selectedQuestion: string, transition: string) => {
   AddQuestionDialog.value = false
-  resolvePromise.value && resolvePromise.value({ 
-    nodeData, 
-    selectedQuestion, 
-    transition 
-  })
+  resolvePromise.value &&
+    resolvePromise.value({
+      nodeData,
+      selectedQuestion,
+      transition
+    })
 }
 
 const _cancel = () => {
@@ -45,7 +51,6 @@ defineExpose({
 <template>
   <v-dialog v-model="AddQuestionDialog">
     <QuestionFindModal
-      :show="AddQuestionDialog"
       :question-options="questionOptionsVar"
       :show-input="showInputVar"
       :transition="transitionVar"
