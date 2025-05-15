@@ -15,7 +15,6 @@ import { MarkdownService } from "../../../service/markdown.service";
 import { MatDialog } from "@angular/material/dialog";
 import { TemplateRef } from "@angular/core";
 
-
 @Component({
   selector: "app-submission-text",
   templateUrl: "./submission-text.component.html",
@@ -175,7 +174,9 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     } catch (error: any) {
       console.error("Fehler bei der Datei-Extraktion:", error);
       this.dialog.open(this.errorDialogTemplate, {
-        data: { message: "Fehler beim Verarbeiten der Datei: " + error.message },
+        data: {
+          message: "Fehler beim Verarbeiten der Datei: " + error.message,
+        },
       });
     } finally {
       this.processing = false;

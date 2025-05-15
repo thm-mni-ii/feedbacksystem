@@ -7,12 +7,13 @@ import java.time.Duration
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.apache.commons.compress.archivers.zip.ZipFile
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.MediaType
-import org.springframework.security.core.parameters.P
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.multipart.MultipartFile
@@ -20,10 +21,6 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.net.URLDecoder
-import java.net.URLEncoder
-import java.nio.file.Paths
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.outputStream
 
 @Service
 class ParsrService {
@@ -84,11 +81,76 @@ class ParsrService {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     fun sendPdfToParsr(file: MultipartFile): String {
-        val convertedPdf = convertPdfToVersion(file, 1.4f)
-        val convertedResource = object : ByteArrayResource(convertedPdf) {
-            override fun getFilename(): String = file.originalFilename ?: "converted.pdf"
+        val pagesPerChunk = 5
+        val document = PDDocument.load(file.inputStream)
+        val totalPages = document.numberOfPages
+        val jobId = System.currentTimeMillis().toString()
+        documentCache[jobId] = ParsrStatusEntry()
+
+        coroutineScope.launch {
+            val semaphore = Semaphore(5)
+
+            try {
+                val resultsWithRaw = supervisorScope {
+                    (0 until totalPages step pagesPerChunk).map { startPage ->
+                        async {
+                            semaphore.withPermit {
+                                try {
+                                    val endPage = minOf(startPage + pagesPerChunk, totalPages)
+                                    val chunk = PDDocument()
+                                    for (i in startPage until endPage) {
+                                        chunk.addPage(document.getPage(i))
+                                    }
+
+                                    val chunkBytes = ByteArrayOutputStream().also { chunk.save(it) }.toByteArray()
+                                    chunk.close()
+
+                                    val chunkJobId = uploadChunkToParsr(chunkBytes)
+                                    val resultBytes = pollParsrResult(chunkJobId, pagesPerChunk)
+
+                                    if (resultBytes != null && isZip(resultBytes)) {
+                                        unzipZip(resultBytes)
+                                    } else if (resultBytes != null) {
+                                        val fallback = resultBytes.decodeToString()
+                                        Pair(fallback, fallback)
+                                    } else {
+                                        val fallback = fetchMarkdownWithoutZip(chunkJobId)
+                                        Pair(fallback, fallback)
+                                    }
+                                } catch (e: Exception) {
+                                    println("❌ Fehler bei Chunk [$startPage]: ${e.message}")
+                                    throw RuntimeException("Chunk [$startPage] konnte nicht verarbeitet werden", e)
+                                }
+                            }
+                        }
+                    }.awaitAll()
+                }
+
+                document.close()
+
+                val rawResults = resultsWithRaw.map { it.first }.filter { it.isNotBlank() }
+                val results = resultsWithRaw.map { it.second }.filter { it.isNotBlank() }
+
+                if (results.isEmpty()) {
+                    throw RuntimeException("Kein Chunk konnte erfolgreich verarbeitet werden.")
+                }
+
+                val combinedRaw = rawResults.joinToString("\n\n")
+                val combinedMarkdown = results.joinToString("\n\n")
+                documentCache[jobId]?.finish(combinedRaw, combinedMarkdown)
+            } catch (e: Exception) {
+                println("❌ Gesamter Fehler bei PDF-Verarbeitung: ${e.message}")
+                document.close()
+                documentCache.remove(jobId)
+            }
         }
 
+        return jobId
+    }
+
+
+
+    private fun uploadChunkToParsr(pdfChunk: ByteArray): String {
         val configJson = """
         {
             "version": "3.0.0",
@@ -103,18 +165,20 @@ class ParsrService {
                 "splitParagraphs": true,
                 "joinHyphenatedWords": true
             },
-            "output": { "format": "markdown" },
-            "pdf": { "pages": "1" }
+            "output": { "format": "markdown" }
         }
     """.trimIndent()
 
+        val resource = object : ByteArrayResource(pdfChunk) {
+            override fun getFilename(): String = "chunk.pdf"
+        }
+
         val multipartData = LinkedMultiValueMap<String, Any>().apply {
-            add("file", convertedResource)
+            add("file", resource)
             add("config", configJson)
         }
 
-        val startTime = System.currentTimeMillis()
-        val response = parsrClient
+        return parsrClient
                 .post()
                 .uri("/api/v1/document")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -122,48 +186,18 @@ class ParsrService {
                 .retrieve()
                 .bodyToMono<String>()
                 .block(Duration.ofSeconds(120))
-                ?: throw RuntimeException("Empty response from Parsr")
-
-        val jobId = response.trim()
-        println("📤 Upload & Jobstart fertig in ${System.currentTimeMillis() - startTime} ms (Job-ID: $jobId)")
-        documentCache[jobId] = ParsrStatusEntry()
-
-        coroutineScope.launch {
-            val pollStart = System.currentTimeMillis()
-            try {
-                val zipResult = try {
-                    pollParsrResult(jobId)
-                } catch (e: Exception) {
-                    println("⚠️ ZIP-Polling fehlgeschlagen (${e.message}), versuche Nur-Markdown...")
-                    null
-                }
-
-                if (zipResult != null) {
-                    println("📥 Download ZIP fertig in ${System.currentTimeMillis() - pollStart} ms")
-                    try {
-                        val unzipStart = System.currentTimeMillis()
-                        val (rawMarkdown, withImages) = unzipZip(zipResult)
-                        println("🖼️ Entpacken & Ersetzen der Bilder dauerte ${System.currentTimeMillis() - unzipStart} ms")
-                        documentCache[jobId]?.finish(rawMarkdown, withImages)
-                        println("✅ Markdown mit Bildern gecacht für Job: $jobId")
-                    } catch (e: Exception) {
-                        println("⚠️ Fehler beim Entpacken, versuche Nur-Markdown: ${e.message}")
-                        val fallback = fetchMarkdownWithoutZip(jobId)
-                        documentCache[jobId]?.finish(fallback, fallback)
-                    }
-                } else {
-                    val fallback = fetchMarkdownWithoutZip(jobId)
-                    documentCache[jobId]?.finish(fallback, fallback)
-                    println("✅ Nur-Markdown gecacht für Job: $jobId (ZIP-Download übersprungen)")
-                }
-            } catch (e: Exception) {
-                println("❌ Fehler bei Parsr-Verarbeitung für Job $jobId: ${e.message}")
-                documentCache.remove(jobId)
-            }
-        }
-
-        return jobId
+                ?.trim()
+                ?: throw RuntimeException("Leere Antwort beim Chunk-Upload erhalten")
     }
+
+    fun isZip(data: ByteArray): Boolean {
+        return data.size > 4 &&
+                data[0] == 0x50.toByte() &&
+                data[1] == 0x4B.toByte() &&
+                data[2] == 0x03.toByte() &&
+                data[3] == 0x04.toByte()
+    }
+
 
 
     fun getParsedDocument(jobId: String): String {
@@ -176,9 +210,9 @@ class ParsrService {
         return markdown.verifyRawMarkdown()
     }
 
-    private suspend fun pollParsrResult(jobId: String): ByteArray? {
+    private suspend fun pollParsrResult(jobId: String, numpages: Int): ByteArray? {
         var retries = 0
-        val maxRetries = 150
+        val maxRetries = 10 * numpages
         val waittime = 1000L
 
         while (retries < maxRetries) {
@@ -283,16 +317,4 @@ class ParsrService {
         return Pair(rawMarkdown, result)
     }
 
-    fun convertPdfToVersion(file: MultipartFile, targetVersion: Float): ByteArray {
-        PDDocument.load(file.inputStream).use { document ->
-            document.document.version = targetVersion
-            val outputStream = ByteArrayOutputStream()
-            document.save(outputStream)
-            return outputStream.toByteArray()
-        }
-    }
-
-    fun documentExists(jobId: String): Boolean {
-        return documentCache.containsKey(jobId)
-    }
 }

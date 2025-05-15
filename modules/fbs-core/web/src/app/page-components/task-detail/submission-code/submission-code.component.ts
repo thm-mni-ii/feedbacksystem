@@ -6,12 +6,13 @@ import {
   Output,
   ViewChild,
   ElementRef,
-  AfterViewInit, TemplateRef,
+  AfterViewInit,
+  TemplateRef,
 } from "@angular/core";
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
-import {MatDialog} from "@angular/material/dialog";
+import { MatDialog } from "@angular/material/dialog";
 import * as mammoth from "mammoth";
 
 @Component({
@@ -29,18 +30,7 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
   processing: boolean = false;
   titleText: string = "Abgabe Text:";
   isCodeFile: boolean = false;
-
-
-
-  editorConfig = {
-    editable: true,
-    spellcheck: true,
-    height: "200px",
-    minHeight: "150px",
-    placeholder: "Schreibe hier deine Lösung...",
-    translate: "no",
-    toolbarHiddenButtons: [[], []],
-  };
+  fileType: string = "txt";
 
   constructor(
     private parsrService: ParsrService,
@@ -138,25 +128,30 @@ export class SubmissionCodeComponent implements OnInit, AfterViewInit {
 
   async processFile(file: File, includeImages = false) {
     this.processing = true;
-    const fileType = file.name.split(".").pop()?.toLowerCase();
+    this.fileType = file.name.split(".").pop()?.toLowerCase() || "txt";
 
     try {
-      if (fileType === "pdf") {
+      if (this.fileType === "pdf") {
         this.toSubmit = await this.extractPdfText(file, includeImages);
         this.isCodeFile = false;
-      } else if (fileType === "docx") {
+      } else if (this.fileType === "docx") {
         this.toSubmit = await this.extractWordText(file);
         this.isCodeFile = false;
-      } else if (fileType === "txt" || this.checkIfCodeFile(fileType)) {
+      } else if (
+        this.fileType === "txt" ||
+        this.checkIfCodeFile(this.fileType)
+      ) {
         this.toSubmit = await this.extractPlainText(file);
-        this.isCodeFile = this.checkIfCodeFile(fileType);
+        this.isCodeFile = this.checkIfCodeFile(this.fileType);
       } else {
         throw new Error("Dateityp nicht unterstützt.");
       }
     } catch (error: any) {
       console.error("Fehler bei der Datei-Extraktion:", error);
       this.dialog.open(this.errorDialogTemplate, {
-        data: { message: "Fehler beim Verarbeiten der Datei: " + error.message },
+        data: {
+          message: "Fehler beim Verarbeiten der Datei: " + error.message,
+        },
       });
     } finally {
       this.processing = false;
