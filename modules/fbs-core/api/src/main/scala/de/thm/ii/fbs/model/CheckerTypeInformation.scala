@@ -12,7 +12,7 @@ object CheckerTypeInformation {
     val obj = new JSONObject(json)
     obj.getString("type") match {
       case "sqlCheckerInformation" => SqlCheckerInformation (obj.getString ("solution"), obj.getBoolean ("showHints"),
-        obj.getInt ("showHintsAt"), obj.getBoolean ("showExtendedHints"), obj.getInt ("showExtendedHintsAt"), obj.getBoolean("disableDistance") )
+        obj.getInt ("showHintsAt"), obj.getBoolean ("showExtendedHints"), obj.getInt ("showExtendedHintsAt"), obj.optBoolean("disableDistance", true) )
       case _ => throw new IllegalArgumentException()
     }
   }

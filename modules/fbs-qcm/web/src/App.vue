@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app color="primary">
+    <v-app-bar app color="grey-darken-4">
       <v-tabs class="d-flex justify-between">
         <v-tab @click="router.push('/')">Home</v-tab>
         <v-tab
@@ -9,9 +9,8 @@
           >All Questions</v-tab
         >
         <v-tab
-          v-if="authStore.decodedToken?.globalRole == 'ADMIN'"
-          @click="router.push('/CourseOverview')"
-          >Edit Catalog</v-tab
+          @click="router.push('/questionCatalogs')"
+          >Question Catalogs</v-tab
         >
       </v-tabs>
     </v-app-bar>
