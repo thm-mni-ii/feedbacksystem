@@ -1,4 +1,6 @@
 import express from "express";
+import cors from "cors";
+import storeRoutes from './routes/storeRoutes';
 
 declare global {
   namespace Express {
@@ -11,11 +13,12 @@ declare global {
 const app = express();
 const port = 3333;
 
-app.get('/', (_req, res) => {
-  res.send('Hello from Express + TypeScript!');
-});
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+async function startServer() {
+    const app = express();
+    app.use(cors());
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
 
+    app.use('/store/', storeRoutes);
+}
