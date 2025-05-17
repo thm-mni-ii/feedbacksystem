@@ -1,9 +1,12 @@
 <div>
-  <p class="title">Tables</p>
-  <mat-expansion-panel *ngFor="let table of updatedTables$ | async; index as i">
+  <p class="title" role="heading" aria-level="4" tabindex="0">Tables</p>
+  <mat-expansion-panel
+    *ngFor="let table of updatedTables$ | async; index as i"
+    aria-label="Tabelle {{ table.name }}"
+  >
     <mat-expansion-panel-header>
       <mat-panel-title>
-        {{ table.name }}
+        <span tabindex="0">{{ table.name }}</span>
       </mat-panel-title>
       <mat-panel-description>
         <button
@@ -13,29 +16,44 @@
             'sql-playground.db-schema.tables.tooltip.button' | i18nextEager
           }}"
           (click)="showTableData($event, table.name)"
+          aria-label="Tabellendaten von {{ table.name }} anzeigen"
         >
-          <mat-icon>table_chart</mat-icon>
+          <mat-icon aria-hidden="true">table_chart</mat-icon>
         </button>
       </mat-panel-description>
     </mat-expansion-panel-header>
-    <ul class="attribute-list">
+    <ul
+      class="attribute-list"
+      aria-label="Tabellenspalten von {{ table.name }}"
+    >
       <li *ngFor="let column of table.columns; index as j">
         <span class="attribute">
-          <span [ngClass]="{ 'primary-key': column.isPrimaryKey }">
+          <span
+            [ngClass]="{ 'primary-key': column.isPrimaryKey }"
+            aria-label="Spaltenname: {{ column.name }}{{
+              column.isPrimaryKey ? ', Primärschlüssel' : ''
+            }}"
+          >
             {{ column.name }}
           </span>
           <span>
-            <i>{{ column.udtName }}</i>
+            <i aria-label="Datentyp: {{ column.udtName }}">{{
+              column.udtName
+            }}</i>
           </span>
         </span>
-        <span class="attribute info" *ngIf="column.isNullable === false">
+        <span
+          class="attribute info"
+          *ngIf="column.isNullable === false"
+          aria-label="Nicht null"
+        >
           {{ "sql-playground.db-schema.tables.label.not-null" | i18nextEager }}
         </span>
       </li>
 
       <li *ngIf="table.constraints !== undefined">
         <span class="constraints"
-          ><b>{{
+          ><b aria-label="Constraints">{{
             "sql-playground.db-schema.tables.label.constraints" | i18nextEager
           }}</b></span
         >
@@ -43,6 +61,13 @@
       <div *ngIf="table.constraints !== undefined">
         <li
           *ngFor="let constraint of table.constraints.constraints; index as k"
+          aria-label="Constraint: {{ constraint.name }}, Typ: {{
+            constraint.type
+          }}, Spalte: {{ constraint.columnName }}{{
+            constraint.checkClause
+              ? ', Bedingung: ' + constraint.checkClause
+              : ''
+          }}"
         >
           <span class="constraints">
             <span>
