@@ -25,6 +25,7 @@ import { GroupDetailComponent } from "./page-components/group-detail/group-detai
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
+import { FbsGdkiCheckerComponent } from "./page-components/fbs-gdki-checker/fbs-gdki-checker.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -131,6 +132,13 @@ const routes: Routes = [
       {
         path: "questionary",
         component: FbsQuestionaryComponent,
+        canActivate: [AuthGuard],
+      },
+
+      // Gdki Chechker
+      {
+        path: "gdki-checker",
+        component: FbsGdkiCheckerComponent,
         canActivate: [AuthGuard],
       },
 
