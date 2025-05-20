@@ -3,6 +3,7 @@ version: "3"
 services:
   mysql1:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
     restart: unless-stopped
     ports:
       - "127.0.0.1:3306:3306"
@@ -59,15 +60,17 @@ services:
       - MONGODB_DATABASE=sql-checker
       - SELF_URL=https://core
       - MINIO_URL=http://minio
+      - ASSA_URL=https://feedback.mni.thm.de/ai_feedback/api/v1/analyse
+      - ASSA_TOKEN=MY_ASSA_TOKEN
     networks:
       classroom:
       fbs:
-    #healthcheck:
-    #  test: curl -k https://localhost:443/actuator/health
-    #  timeout: 10s
-    #  interval: 10s
-    #  start_period: 10s
-    #  retries: 3
+    healthcheck:
+      test: curl -k https://localhost:443/actuator/health
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
 
   mysql-checker:
     image: mysql:8.0
@@ -204,8 +207,8 @@ services:
       BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
-      RESULT_SERVER_HOST: 172.17.0.1
-      RESULT_SERVER_PORT: 8443
+      RESULT_SERVER_HOST: core
+      RESULT_SERVER_PORT: 443
       MYSQL_SERVER_URL: jdbc:mysql://mysql-checker:3306?allowMultiQueries=true
       MYSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PSQL_SERVER_URL: jdbc:postgresql://psql-checker:5432/?allowMultiQueries=true
