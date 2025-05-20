@@ -23,6 +23,7 @@ import { EditorView } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { basicSetup } from 'codemirror'
 import { python } from '@codemirror/lang-python'
+import storeService from './services/storeService'
 
 const editorContainer = ref(null)
 const outputContainer = ref(null)
@@ -35,24 +36,8 @@ onMounted(async () => {
   // Initialize editor
   const state = EditorState.create({
     doc: `# Python-Beispielcode
-def greet(name):
-    """Eine einfache Begrüßungsfunktion"""
-    return f"Hallo, {name}!"
-
-# Funktionsaufruf
-print(greet("Welt"))
-
-# Try more complex code
-import math
-print(f"Pi is approximately {math.pi}")
-
-# You can even use matplotlib (if loaded)
-# import matplotlib.pyplot as plt
-# import numpy as np
-# x = np.linspace(0, 10, 100)
-# y = np.sin(x)
-# plt.plot(x, y)
-# plt.show()`,
+x = 3
+print(f"{x} ist gleich 3")`,
     extensions: [
       basicSetup,
       python(),
@@ -106,7 +91,7 @@ print(f"Pi is approximately {math.pi}")
 })
 
 const saveCode = async () => {
-
+  storeService.sendText(1, editorView.state.doc.toString())
 }
 const runCode = async () => {
   if (!pyodide || isRunning.value) return

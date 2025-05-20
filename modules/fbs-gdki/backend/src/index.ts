@@ -18,7 +18,7 @@ async function startServer() {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    app.use('/store/', storeRoutes);
+    app.use('/store', storeRoutes);
     app.listen(3000, () => console.log("LISTENING on port 3000"));
 }
 startServer().catch(console.error);

@@ -307,24 +307,16 @@ services:
     depends_on:
       - qcm-backend
 
-  mysql_gdki:
-    image: mysql:8.0
+  mongodb_gdki:
+    image: mongo:5.0.6
+    container_name: mongodb_gdki
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:3334:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: pw
-      MYSQL_DATABASE: gdki
     volumes:
-      - ./data/mysql1:/var/lib/mysql
+      - ./data/mongodb_qcm/:/data/gdki_db
+    ports:
+      - "127.0.0.1:27019:27017"
     networks:
       fbs:
-    healthcheck:
-      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
-      timeout: 10s
-      interval: 10s
-      start_period: 10s
-      retries: 3
 
   gdki-backend:
     build:
@@ -339,7 +331,7 @@ services:
       - MYSQL_URI=jdbc:mysql://mysql1:3334
       - FBS_BASE_URL=https://core:443
     depends_on:
-      - mysql_gdki
+      - mongodb_gdki
 
   gdki-frontend:
     build:
