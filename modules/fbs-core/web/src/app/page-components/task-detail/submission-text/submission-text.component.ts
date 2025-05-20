@@ -155,7 +155,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
         this.toSubmit = await this.extractPdfText(file, includeImages);
         this.isCodeFile = false;
       } else if (this.fileType === "docx") {
-        this.toSubmit = await this.extractWordText(file);
+        this.toSubmit = await this.extractWordText(file, includeImages);
         this.isCodeFile = false;
       } else if (
         this.fileType === "txt" ||
@@ -224,14 +224,26 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     });
   }
 
-  async extractWordText(file: File): Promise<string> {
+  async extractWordText(file: File, includeImages: boolean): Promise<string> {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsArrayBuffer(file);
       reader.onload = async () => {
         const arrayBuffer = reader.result as ArrayBuffer;
         const result = await mammoth.convertToHtml({ arrayBuffer });
-        resolve(result.value);
+
+        let html = result.value;
+        if (!includeImages) {
+          // Nur die Bildinformationen beibehalten (alt/src), aber nicht das volle <img>-Tag
+          html = html.replace(
+            /<img[^>]*src="([^"]+)"[^>]*>/g,
+            (_match, src) => {
+              const fileName = src.split("/").pop(); // extrahiert nur den Dateinamen
+              return `<p>[Bild: ${fileName}]</p>`;
+            }
+          );
+        }
+        resolve(html);
       };
     });
   }
