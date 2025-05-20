@@ -128,6 +128,7 @@ export const germanTranslation = {
   "sidebar.label.analyticsPlatform": "Analyseplattform",
   "sidebar.label.questionary": "Fragekatalog",
   "sidebar.label.imprint": "Impressum",
+  "sidebar.label.gdki-checker": "Gdki-Checker",
   "sidebar.label.dataProtection": "Datenschutzerklärung",
   "sidebar.label.changePassword": "Passwort ändern",
   "sidebar.label.changeLanguage": "Sprache ändern",

@@ -25,7 +25,7 @@ export class FbsGdkiCheckerComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const url = `/gdki-checker/?jsessionid=${this.token}`;
+    const url = `http://localhost:1337/`;
     this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.cdr.detach(); // stops iframe from reloading
     return this.safeUrl;

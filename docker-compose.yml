@@ -341,6 +341,20 @@ services:
     depends_on:
       - mysql_gdki
 
+  gdki-frontend:
+    build:
+      context: modules/fbs-gdki/frontend/gdki-checker
+    environment:
+      - NODE_ENV=production
+      - BACKEND_URL=http://gdki-backend:3000/
+      - CORE_URL=https://core/
+    ports:
+      - 3335:8086
+    networks:
+      - fbs
+    depends_on:
+      - gdki-backend
+
 networks:
   classroom:
   fbs:

@@ -4,9 +4,9 @@
       <button @click="runCode" class="run-button" :disabled="isRunning">
         {{ isRunning ? 'Running...' : 'Run Code' }}
       </button>
-      <div class="status-indicator" :class="{ 'running': isRunning }">
-        {{ isRunning ? 'Executing...' : 'Ready' }}
-      </div>
+      <button @click="saveCode" class="save-button" :disabled="isRunning">
+        {{ 'Save' }}
+      </button>
     </div>
     <div class="editor-layout">
       <div ref="editorContainer" class="editor-container"></div>
@@ -105,6 +105,9 @@ print(f"Pi is approximately {math.pi}")
   }
 })
 
+const saveCode = async () => {
+
+}
 const runCode = async () => {
   if (!pyodide || isRunning.value) return
   
@@ -176,6 +179,17 @@ html, body {
   border-bottom: 1px solid #ddd;
   display: flex;
   align-items: center;
+}
+
+.save-button {
+  background-color: royalblue;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 8px;
 }
 
 .run-button {

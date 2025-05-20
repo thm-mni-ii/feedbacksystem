@@ -126,6 +126,7 @@ export const englishTranslation = {
   "sidebar.label.sqlPlayground": "SQL Playground",
   "sidebar.label.analyticsPlatform": "Analytics Platform",
   "sidebar.label.questionary": "Questionary",
+  "sidebar.label.gdki-checker": "Gdki-Checker",
   "sidebar.label.imprint": "Imprint",
   "sidebar.label.dataProtection": "Privacy Policy",
   "sidebar.label.changePassword": "Change Password",
