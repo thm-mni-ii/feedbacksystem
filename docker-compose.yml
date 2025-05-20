@@ -307,6 +307,40 @@ services:
     depends_on:
       - qcm-backend
 
+  mysql_gdki:
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3334:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: pw
+      MYSQL_DATABASE: gdki
+    volumes:
+      - ./data/mysql1:/var/lib/mysql
+    networks:
+      fbs:
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
+
+  gdki-backend:
+    build:
+      context: modules/fbs-gdki/backend
+      target: production
+    ports:
+      - 3333:3000
+    networks:
+      - fbs
+    environment:
+      - JWT_SECRET=8Dsupersecurekeydf0
+      - MYSQL_URI=jdbc:mysql://mysql1:3334
+      - FBS_BASE_URL=https://core:443
+    depends_on:
+      - mongodb_qcm
+
 networks:
   classroom:
   fbs:
