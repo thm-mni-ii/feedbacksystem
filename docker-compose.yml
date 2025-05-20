@@ -339,7 +339,7 @@ services:
       - MYSQL_URI=jdbc:mysql://mysql1:3334
       - FBS_BASE_URL=https://core:443
     depends_on:
-      - mongodb_qcm
+      - mysql_gdki
 
 networks:
   classroom:
