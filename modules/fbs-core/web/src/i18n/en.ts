@@ -125,6 +125,7 @@ export const englishTranslation = {
   "sidebar.label.feedbackApp": "Feedback App",
   "sidebar.label.sqlPlayground": "SQL Playground",
   "sidebar.label.analyticsPlatform": "Analytics Platform",
+  "sidebar.label.questionary": "Questionary",
   "sidebar.label.imprint": "Imprint",
   "sidebar.label.dataProtection": "Privacy Policy",
   "sidebar.label.changePassword": "Change Password",
@@ -388,4 +389,6 @@ export const englishTranslation = {
   "group.delete": "Delete Group",
   "group.delete.message": ", really delete this group?",
   "group.edit": "Edit Group",
+  "accessibility.page.skip": "Skip page navigation",
+  "accessibility.sidebar.skip": "Skip system navigation",
 };

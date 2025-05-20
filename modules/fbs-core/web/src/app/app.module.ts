@@ -96,6 +96,7 @@ import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
 import { SharePlaygroundLinkDialogComponent } from "./dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
 import { I18NextModule } from "angular-i18next";
 import { I18N_PROVIDERS } from "./util/i18n";
 import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
@@ -112,6 +113,8 @@ import { GroupDetailComponent } from "./page-components/group-detail/group-detai
 import { GroupDeregisterDialogComponent } from "./dialogs/group-deregister-dialog/group-deregister-dialog.component";
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
+import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component";
+import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -197,6 +200,7 @@ export const httpInterceptorProviders = [
     MathInputComponent,
     SharePlaygroundLinkDialogComponent,
     FbsModellingComponent,
+    FbsQuestionaryComponent,
     LanguageMenuComponent,
     MyGroupsComponent,
     GroupSelectionComponent,
@@ -207,6 +211,8 @@ export const httpInterceptorProviders = [
     GroupDeregisterDialogComponent,
     FbsKanbanComponent,
     FbsSciCheckComponent,
+    SkipLinkComponent,
+    UnstyledLinkComponent,
   ],
   imports: [
     BrowserModule,
