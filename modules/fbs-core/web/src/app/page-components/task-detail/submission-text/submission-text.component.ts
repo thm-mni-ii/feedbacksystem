@@ -33,6 +33,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   fileType: string = "txt";
 
   extractionMode: "text" | "all" = "text";
+  detectedFileType = "markup";
 
   onExtractOptionSelected(mode: "text" | "all") {
     this.extractionMode = mode;
@@ -73,8 +74,20 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   }
 
   toggleEditor() {
+    if (!this.isCodeFile) {
+      // Wenn wir vom Texteditor zum Codeeditor wechseln: HTML neu formatieren
+      const beautified = this.beautifyHtml(this.toSubmit);
+      this.toSubmit = this.decodeHtmlEntities(beautified);  // Hier Entities decodieren
+    }
     this.isCodeFile = !this.isCodeFile;
   }
+
+  decodeHtmlEntities(html: string): string {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = html;
+    return textarea.value;
+  }
+
 
   getLanguageByFileType(fileType: string): string {
     const languages: { [key: string]: string } = {
@@ -94,36 +107,60 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
 
   onTextChange(content: string) {
     this.toSubmit = content;
+    this.detectedFileType = this.detectFileType(); // <--- NEU
     this.update.emit({ content: this.toSubmit });
     this.highlightCode();
   }
 
   onCodeChange(content: string) {
     this.toSubmit = content;
+    this.detectedFileType = this.detectFileType();
+    console.log("Highlighting triggered", this.detectedFileType);
+    this.highlightCode(this.detectedFileType);
     this.update.emit({ content: this.toSubmit });
-    this.highlightCode();
   }
 
+  @ViewChild('codeBlock', { static: false }) codeBlock!: ElementRef;
+
   highlightCode(fileType?: string) {
-    if (this.toSubmit && this.isCodeFile) {
+    if (this.toSubmit && this.isCodeFile && this.codeBlock) {
       const detectedFileType = fileType || this.detectFileType();
+      this.detectedFileType = detectedFileType;
       const language = this.getLanguageByFileType(detectedFileType);
 
+      let content = this.toSubmit;
+      if (language === "markup") {
+        content = this.formatHtml(content);
+      }
+
       if (prism.languages[language]) {
-        this.highlightedText = prism.highlight(
-          this.toSubmit,
-          prism.languages[language],
-          language
-        );
+        const highlighted = prism.highlight(content, prism.languages[language], language);
+        this.codeBlock.nativeElement.innerHTML = highlighted;
       }
     }
   }
 
+
+  beautifyHtml(html: string): string {
+    return html
+      // Nur Zeilenumbruch vor bestimmten Blockelementen wie <p>, <h1>–<h3>, <li>
+      .replace(/<(\/?(p|h[1-3]|li))[^>]*>/g, "\n<$1>")
+      // Mehrfache Leerzeilen auf maximal zwei reduzieren
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  formatHtml(html: string): string {
+    const parser = new DOMParser();
+    const document = parser.parseFromString(html, "text/html");
+    return document.body.innerHTML;
+  }
+
   detectFileType(): string {
-    if (
-      this.toSubmit.startsWith("<!DOCTYPE html") ||
-      this.toSubmit.includes("<html>")
-    ) {
+    const htmlIndicators = ["<html", "<head", "<body", "<div", "<p", "<h1", "<table", "<!DOCTYPE"];
+    const lowerContent = this.toSubmit.toLowerCase();
+
+    if (htmlIndicators.some(tag => lowerContent.includes(tag))) {
       return "html";
     }
     if (this.toSubmit.includes("import") || this.toSubmit.includes("export")) {
@@ -156,6 +193,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
         this.isCodeFile = false;
       } else if (this.fileType === "docx") {
         this.toSubmit = await this.extractWordText(file, includeImages);
+        this.beautifyHtml(this.toSubmit);
         this.isCodeFile = false;
       } else if (
         this.fileType === "txt" ||
@@ -235,13 +273,10 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
         let html = result.value;
         if (!includeImages) {
           // Nur die Bildinformationen beibehalten (alt/src), aber nicht das volle <img>-Tag
-          html = html.replace(
-            /<img[^>]*src="([^"]+)"[^>]*>/g,
-            (_match, src) => {
-              const fileName = src.split("/").pop(); // extrahiert nur den Dateinamen
-              return `<p>[Bild: ${fileName}]</p>`;
-            }
-          );
+          html = html.replace(/<img[^>]*src="([^"]+)"[^>]*>/g, (_match, src) => {
+            const fileName = src.split("/").pop(); // extrahiert nur den Dateinamen
+            return `<p>[Bild: ${fileName}]</p>`;
+          });
         }
         resolve(html);
       };
