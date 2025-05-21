@@ -72,3 +72,10 @@ code {
   ul, ol { padding-left: 2rem; }
   hr { border-top: 1px solid #ccc; margin: 1rem 0; }
 }
+
+:host ::ng-deep img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+}
