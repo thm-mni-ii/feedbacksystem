@@ -14,7 +14,7 @@ export async function connect() {
   client = new mongoDB.MongoClient(uri);
   try {
     await client.connect();
-    database = client.db("QCM");
+    database = client.db("GDKI");
     console.log("connected to MongoDB");
     return database;
   } catch (error) {

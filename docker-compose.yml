@@ -328,7 +328,7 @@ services:
       - fbs
     environment:
       - JWT_SECRET=8Dsupersecurekeydf0
-      - MYSQL_URI=jdbc:mysql://mysql1:3334
+      - MONGODB_URL=mongodb://mongodb_gdki:27017/
       - FBS_BASE_URL=https://core:443
     depends_on:
       - mongodb_gdki

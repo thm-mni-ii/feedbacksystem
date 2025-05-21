@@ -16,10 +16,3 @@ export const storeCode = async (req: Request, res: Response, ) => {
     res.sendStatus(500);
   }
 };
-export const storeCode2 = async (req: Request, res: Response, ) => {
-  try {
-    res.sendStatus(200);
-  } catch (error) {
-    res.sendStatus(500);
-  }
-};

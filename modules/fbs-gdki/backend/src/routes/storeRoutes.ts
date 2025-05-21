@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../authenticateToken';
-import { storeCode, storeCode2 } from '../controller/store';
+import { storeCode } from '../controller/store';
 
 const router = Router();
 
