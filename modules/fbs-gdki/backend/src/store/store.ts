@@ -3,7 +3,7 @@ import * as mongoDB from "mongodb";
 import { connect } from "../db/mongo";
 import { editCodeStorageFinder } from "../model/model";
 
-export async function storeCodeForTask(userData: JwtPayload, task: number, code: string) {
+export async function storeCodeForTask(userData: JwtPayload, task: number, code: string): Promise<any> {
     //authenticate mabye??
     const database: mongoDB.Db = await connect();
     const storeCollection = database.collection("store");
@@ -13,11 +13,11 @@ export async function storeCodeForTask(userData: JwtPayload, task: number, code:
     };
     const updateQuery = {
         $set: { text: code }
-    }
+    };
     const result = await storeCollection.updateOne(
         findQuery,
         updateQuery,
         {upsert: true}
-    )
-    return result
+    );
+    return result;
 }

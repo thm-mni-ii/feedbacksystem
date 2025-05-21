@@ -10,7 +10,8 @@ export const authenticateToken = (
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) {
     console.log("no token");
-    return res.sendStatus(401);
+    res.sendStatus(401);
+    return;
   }
   jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
     if (err) {
