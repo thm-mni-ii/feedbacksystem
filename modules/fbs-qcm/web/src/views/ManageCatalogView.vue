@@ -17,7 +17,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h3>Weiterleitung ändern</h3>
-          <button class="close-button" @click="closeModal">&times;</button>
+          <button class="primary" @click="closeModal">&times;</button>
         </div>
 
         <div class="modal-body">
@@ -67,7 +67,7 @@ import questionService from '@/services/question.service'
 import cytoscape from 'cytoscape'
 import type { Core } from 'cytoscape'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.vue'
-import QuestionFindModal from '@/components/QuestionFindModal.vue'
+import SelectQuestion from '@/components/SelectQuestion.vue'
 import DialogAddQuestion from '@/dialog/DialogAddQuestion.vue'
 
 const dialogAddQuestion = ref<InstanceType<typeof DialogAddQuestion> | null>(null)

@@ -1,125 +1,89 @@
 <template>
-  <v-card>
-    <v-card-title class="d-flex justify-space-between align-center">
-      <span class="text-h6">Frage auswählen</span>
-      <v-btn icon @click="cancel" variant="text">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-card-title>
+  <v-card-text>
+    <v-text-field
+      v-model="searchQuery"
+      label="Frage suchen"
+      prepend-inner-icon="mdi-magnify"
+      density="compact"
+      variant="outlined"
+    />
 
-    <v-card-text>
-      <!-- Search Input -->
-      <v-text-field
-        v-model="searchQuery"
-        label="Frage suchen"
-        prepend-inner-icon="mdi-magnify"
-        density="compact"
-        variant="outlined"
-      />
-
-      <!-- Tags Filter -->
-      <div class="mt-4">
-        <label class="text-subtitle-2">Nach Tags filtern</label>
-        <div v-if="isLoadingTags" class="text-grey text-caption mt-2">Tags werden geladen...</div>
-        <div v-else-if="tags.length === 0" class="text-grey text-caption mt-2">
-          Keine Tags verfügbar
-        </div>
-        <div v-else class="d-flex flex-wrap gap-2 mt-2">
-          <v-chip
-            v-for="tag in tags"
-            :key="tag.tag"
-            :color="selectedTags.includes(tag.tag) ? 'primary' : 'grey lighten-2'"
-            label
-            @click="toggleTag(tag.tag)"
-            class="cursor-pointer"
-          >
-            {{ tag.tag }} ({{ tag.count }})
-          </v-chip>
-        </div>
-      </div>
-
-      <!-- Selected Tags -->
-      <div v-if="selectedTags.length > 0" class="mt-3">
-        <div class="text-subtitle-2 mb-1">Ausgewählte Tags:</div>
-        <div class="d-flex flex-wrap gap-2">
-          <v-chip
-            v-for="tag in selectedTags"
-            :key="tag"
-            closable
-            color="primary"
-            @click:close="removeTag(tag)"
-          >
-            {{ tag }}
-          </v-chip>
-        </div>
-        <v-btn variant="text" size="small" class="mt-2" @click="clearTags"
-          >Alle Tags zurücksetzen</v-btn
+    <div class="mt-4">
+      <div class="text-h6 border-b-md border-primary">Nach Tags filtern</div>
+      <div v-if="isLoadingTags" class="text-grey text-caption mt-2">Tags werden geladen...</div>
+      <div v-else-if="tags.length === 0" class="text-caption mt-2">Keine Tags verfügbar</div>
+      <div v-else class="d-flex flex-wrap gap-2 mt-2">
+        <v-chip
+          v-for="tag in tags"
+          :key="tag.tag"
+          :color="selectedTags.includes(tag.tag) ? 'primary' : 'grey-darken-1'"
+          label
+          @click="toggleTag(tag.tag)"
+          class="cursor-pointer ma-1"
         >
+          {{ tag.tag }} ({{ tag.count }})
+        </v-chip>
+      </div>
+    </div>
+
+    <div v-if="selectedTags.length > 0" class="mt-3">
+      <div class="text-subtitle-2 mb-1">Ausgewählte Tags:</div>
+      <div class="d-flex flex-wrap gap-2">
+        <v-chip
+          v-for="tag in selectedTags"
+          :key="tag"
+          closable
+          color="primary"
+          @click:close="removeTag(tag)"
+          class="ma-1"
+        >
+          {{ tag }}
+        </v-chip>
+      </div>
+      <v-btn variant="text" size="small" class="mt-2 text-red" @click="clearTags"
+        >Alle Tags zurücksetzen</v-btn
+      >
+    </div>
+
+    <div class="mt-6">
+      <div class="text-h6 border-b-md border-primary">
+        Zu welcher Frage möchten Sie weiterleiten?
       </div>
 
-      <!-- Questions Table -->
-      <div class="mt-6">
-        <label class="text-subtitle-2">Zu welcher Frage möchten Sie weiterleiten?</label>
-        <v-table dense class="mt-2">
-          <thead>
-            <tr>
-              <th>Frage</th>
-              <th class="text-end">Auswahl</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="question in filteredQuestions"
-              :key="question._id"
-              :class="{ 'bg-grey-lighten-4': selectedQuestion === question._id }"
-            >
-              <td>{{ question.questiontext }}</td>
-              <td class="text-end">
-                <v-btn
-                  size="small"
-                  :variant="selectedQuestion === question._id ? 'tonal' : 'outlined'"
-                  color="primary"
-                  @click="selectQuestion(question._id)"
-                >
-                  {{ selectedQuestion === question._id ? '✓ Ausgewählt' : 'Wählen' }}
-                </v-btn>
-              </td>
-            </tr>
-            <tr v-if="filteredQuestions.length === 0">
-              <td colspan="2" class="text-center text-grey text-caption">
-                Keine Fragen gefunden. Bitte passen Sie Ihre Suche an.
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-      </div>
-
-      <!-- Score Input -->
-      <div v-if="showInput" class="mt-6">
-        <v-text-field
-          v-model="nodeData"
-          label="Schwellenwert für Weiterleitung"
-          type="number"
-          min="0"
-          max="100"
-          append-inner-icon="mdi-percent"
-          density="compact"
-          variant="outlined"
-          :error-messages="scoreValidationError ? [scoreValidationError] : []"
-        />
-        <small class="text-grey text-caption">
-          Ab diesem Prozentwert wird zur ausgewählten Frage weitergeleitet.
-        </small>
-      </div>
-    </v-card-text>
-
-    <v-card-actions class="justify-end">
-      <v-btn @click="cancel" variant="text">Abbrechen</v-btn>
-      <v-btn @click="validateAndConfirm" color="primary" :disabled="!selectedQuestion">
-        Auswählen
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+      <v-table dense class="mt-2">
+        <thead>
+          <tr>
+            <th>Frage</th>
+            <th class="text-end">Auswahl</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="question in filteredQuestions"
+            :key="question._id"
+            :class="{ 'bg-grey-lighten-4': selectedQuestion === question._id }"
+          >
+            <td>{{ question.questiontext }}</td>
+            <td class="text-end">
+              <v-btn
+                size="small"
+                :variant="selectedQuestion === question._id ? 'tonal' : 'outlined'"
+                color="primary"
+                @click="selectQuestion(question._id)"
+              >
+                {{ selectedQuestion === question._id ? '✓ Ausgewählt' : 'Wählen' }}
+              </v-btn>
+            </td>
+          </tr>
+          <tr v-if="filteredQuestions.length === 0">
+            <td colspan="2" class="text-center text-grey text-caption">
+              Keine Fragen gefunden. Bitte passen Sie Ihre Suche an.
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
+    </div>
+  </v-card-text>
 </template>
 
 <script setup lang="ts">
@@ -154,10 +118,6 @@ const props = defineProps({
     required: true,
     default: () => []
   },
-  initialNodeData: {
-    type: [String, Number],
-    default: 0
-  },
   transition: {
     type: String,
     default: 'correct'
@@ -168,12 +128,9 @@ const props = defineProps({
   }
 })
 
-// Emits definition
-const emit = defineEmits(['cancel', 'confirm'])
+const emit = defineEmits(['questionChanged'])
 
-// Reactive state
 const selectedQuestion = ref('')
-const nodeData = ref(props.initialNodeData)
 const transitionValue = ref(props.transition)
 const searchQuery = ref('')
 const tags = ref<TagItem[]>([])
@@ -184,7 +141,6 @@ const correctScore = ref<number | null>(null)
 const incorrectScore = ref<number | null>(null)
 const currentQuestionVar = ref(props.currentQuestion)
 
-// Fetch tags method
 const fetchTags = async () => {
   try {
     isLoadingTags.value = true
@@ -255,7 +211,6 @@ const filteredQuestions = computed(() => {
   return filtered
 })
 
-// Tag management methods
 const toggleTag = (tag: string) => {
   if (selectedTags.value.includes(tag)) {
     removeTag(tag)
@@ -274,12 +229,11 @@ const clearTags = () => {
 
 const selectQuestion = (id: string) => {
   selectedQuestion.value = id
+  emit('questionChanged', selectedQuestion)
 }
 
 const validateScore = () => {
   scoreValidationError.value = ''
-
-  const score = Number(nodeData.value)
 
   if (isNaN(score) || score < 0 || score > 100) {
     scoreValidationError.value =
@@ -301,10 +255,6 @@ const validateScore = () => {
   return true
 }
 
-const cancel = () => {
-  emit('cancel')
-}
-
 const validateAndConfirm = () => {
   if (!selectedQuestion.value) {
     return
@@ -314,7 +264,7 @@ const validateAndConfirm = () => {
     return
   }
 
-  emit('confirm', nodeData.value, selectedQuestion.value, transitionValue.value)
+  emit('questionChanged', selectedQuestion.value, transitionValue.value)
 }
 
 watch(
@@ -322,7 +272,6 @@ watch(
   (newValue) => {
     if (newValue) {
       selectedQuestion.value = ''
-      nodeData.value = props.initialNodeData
       transitionValue.value = props.transition
       searchQuery.value = ''
       selectedTags.value = []
