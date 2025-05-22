@@ -126,6 +126,7 @@ export const germanTranslation = {
   "sidebar.label.feedbackApp": "Feedback App",
   "sidebar.label.sqlPlayground": "SQL Playground",
   "sidebar.label.analyticsPlatform": "Analyseplattform",
+  "sidebar.label.questionary": "Fragekatalog",
   "sidebar.label.imprint": "Impressum",
   "sidebar.label.dataProtection": "Datenschutzerklärung",
   "sidebar.label.changePassword": "Passwort ändern",
@@ -394,4 +395,6 @@ export const germanTranslation = {
   "group.add.member": "Mitglied hinzufügen",
   "group.delete": "Gruppe löschen",
   "group.delete.message": " wirklich löschen?",
+  "accessibility.page.skip": "Seiten Navigation überspringen",
+  "accessibility.sidebar.skip": "System Navigation überspringen",
 };

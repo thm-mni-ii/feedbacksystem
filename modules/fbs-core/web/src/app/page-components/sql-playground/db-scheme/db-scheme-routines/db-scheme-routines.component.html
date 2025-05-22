@@ -1,10 +1,13 @@
-<p class="title">Routines</p>
+<p class="title" role="heading" aria-level="4" tabindex="0">Routines</p>
 <mat-expansion-panel
   class="routine"
   *ngFor="let routine of routines$ | async; index as i"
+  aria-label="Routine {{ routine.name }}"
 >
   <mat-expansion-panel-header>
-    <mat-panel-title> {{ routine.name }} </mat-panel-title>
+    <mat-panel-title>
+      <span tabindex="0">{{ routine.name }}</span>
+    </mat-panel-title>
   </mat-expansion-panel-header>
   <p class="header">
     <b>Type: </b>
@@ -24,6 +27,7 @@
     <span
       class="routine-definition"
       *ngFor="let param of routine.parameters.split(',')"
+      aria-label="Parameter: {{ param }}"
     >
       {{ param }} <br />
     </span>
@@ -31,5 +35,7 @@
   </div>
 
   <p class="header"><b>Definition:</b></p>
-  <pre class="routine-definition overflow">{{ routine.definition }}</pre>
+  <pre class="routine-definition overflow" aria-label="Routinedefinition">{{
+    routine.definition
+  }}</pre>
 </mat-expansion-panel>

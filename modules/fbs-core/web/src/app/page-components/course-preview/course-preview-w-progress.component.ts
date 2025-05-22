@@ -71,10 +71,18 @@ export class CoursePreviewWProgressComponent implements OnInit {
     );
   }
 
+  private getCourseLinkComponents() {
+    return ["courses", this.data.id];
+  }
+
+  getCourseLink(): string {
+    return "/" + this.getCourseLinkComponents().join("/");
+  }
+
   /**
    * Show course in detail
    */
   goToCourse() {
-    this.router.navigate(["courses", this.data.id]); // TODO: Should be ID
+    this.router.navigate(this.getCourseLinkComponents()); // TODO: Should be ID
   }
 }
