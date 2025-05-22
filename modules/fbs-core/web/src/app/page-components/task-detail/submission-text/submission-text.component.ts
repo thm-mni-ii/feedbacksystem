@@ -22,7 +22,6 @@ import { MatDialog } from "@angular/material/dialog";
 })
 export class SubmissionTextComponent implements OnInit, AfterViewInit {
   toSubmit = "";
-  highlightedText = "";
   @Input() title?: string;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
@@ -143,10 +142,13 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
 
   beautifyHtml(html: string): string {
     return html
-      // Nur Zeilenumbruch vor bestimmten Blockelementen wie <p>, <h1>–<h3>, <li>
-      .replace(/<(\/?(p|h[1-3]|li))[^>]*>/g, "\n<$1>")
-      // Mehrfache Leerzeilen auf maximal zwei reduzieren
-      .replace(/\n{3,}/g, "\n\n")
+      // Neue Zeile vor bestimmten HTML-Tags
+      .replace(/<(\/?(p|h[1-6]|li|div|table|tr|td|section|article|header|footer|ul|ol))\b/g, "\n<$1")
+      // Zeilenumbruch vor Attributen wie class, src, alt, style
+      .replace(/(<[^>]+?)\s+(class|src|alt|style|href|id|name|data-[^=]+)=/g, "\n  $1\n  $2=")
+      // Mehrfache Zeilenumbrüche auf nur einen reduzieren
+      .replace(/\n{2,}/g, "\n")
+      // Überflüssige Leerzeichen entfernen
       .trim();
   }
 
@@ -191,10 +193,12 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       if (this.fileType === "pdf") {
         this.toSubmit = await this.extractPdfText(file, includeImages);
         this.isCodeFile = false;
+        this.fileType = "html";
       } else if (this.fileType === "docx") {
         this.toSubmit = await this.extractWordText(file, includeImages);
-        this.beautifyHtml(this.toSubmit);
+        this.toSubmit = this.beautifyHtml(this.toSubmit);
         this.isCodeFile = false;
+        this.fileType = "html";
       } else if (
         this.fileType === "txt" ||
         this.checkIfCodeFile(this.fileType)
