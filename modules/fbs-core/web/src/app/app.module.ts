@@ -139,8 +139,8 @@ export const httpInterceptorProviders = [
   { provide: HTTP_INTERCEPTORS, useClass: ApiURIHttpInterceptor, multi: true },
 ];
 /**
-* Root module to manage angular app
-*/
+ * Root module to manage angular app
+ */
 @NgModule({
   declarations: [
     AppComponent,
