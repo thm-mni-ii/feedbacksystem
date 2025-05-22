@@ -1,12 +1,13 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.controller.v2
 
 import de.thm.ii.fbs.services.v2.Parsr.ParsrService
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.http.MediaType
-import org.springframework.http.HttpStatus
-
 
 @RestController
 @RequestMapping(path = ["/api/v2/parsr"])
@@ -45,7 +46,6 @@ class ParsrController(
         val document = parsrService.getParsedDocument(jobId)
         return ResponseEntity.ok(document)
     }
-
 
     @GetMapping("/test")
     @ResponseBody

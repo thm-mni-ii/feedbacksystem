@@ -1,12 +1,9 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.services.v2.Parsr
 
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
-import java.io.ByteArrayOutputStream
-import java.net.URLDecoder
-import java.time.Duration
-import java.util.Base64
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -21,6 +18,11 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.io.ByteArrayOutputStream
+import java.net.URLDecoder
+import java.time.Duration
+import java.util.Base64
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class ParsrService {
@@ -30,9 +32,9 @@ class ParsrService {
     }
 
     class ParsrStatusEntry(
-            var status: ParsrStatus = ParsrStatus.ONGOING,
-            var markdown: String = "",
-            var rawMarkdown: String = ""
+        var status: ParsrStatus = ParsrStatus.ONGOING,
+        var markdown: String = "",
+        var rawMarkdown: String = ""
     ) {
         fun finish(rawMarkdown: String, markdown: String) {
             this.status = ParsrStatus.FINISHED
@@ -73,9 +75,9 @@ class ParsrService {
     }
 
     private val parsrClient: WebClient = WebClient.builder()
-            .baseUrl("http://parsr:3001")
-            .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
-            .build()
+        .baseUrl("http://parsr:3001")
+        .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
+        .build()
 
     private val documentCache = ConcurrentHashMap<String, ParsrStatusEntry>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -184,15 +186,15 @@ class ParsrService {
         }
 
         return parsrClient
-                .post()
-                .uri("/api/v1/document")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(multipartData))
-                .retrieve()
-                .bodyToMono<String>()
-                .block(Duration.ofSeconds(120))
-                ?.trim()
-                ?: throw RuntimeException("Leere Antwort beim Chunk-Upload erhalten")
+            .post()
+            .uri("/api/v1/document")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(multipartData))
+            .retrieve()
+            .bodyToMono<String>()
+            .block(Duration.ofSeconds(120))
+            ?.trim()
+            ?: throw RuntimeException("Leere Antwort beim Chunk-Upload erhalten")
     }
 
     private suspend fun pollParsrResult(jobId: String, numpages: Int): ByteArray? {
@@ -203,11 +205,11 @@ class ParsrService {
         while (retries < maxRetries) {
             try {
                 return parsrClient
-                        .get()
-                        .uri("/api/v1/markdown/$jobId?download=1")
-                        .retrieve()
-                        .bodyToMono<ByteArray>()
-                        .block()
+                    .get()
+                    .uri("/api/v1/markdown/$jobId?download=1")
+                    .retrieve()
+                    .bodyToMono<ByteArray>()
+                    .block()
             } catch (e: Exception) {
                 retries++
                 delay(waittime)
@@ -223,12 +225,12 @@ class ParsrService {
 
     private fun fetchMarkdownWithoutZip(jobId: String): String {
         return parsrClient
-                .get()
-                .uri("/api/v1/markdown/$jobId")
-                .retrieve()
-                .bodyToMono<String>()
-                .block(Duration.ofSeconds(30))
-                ?: throw RuntimeException("Leere Markdown-Antwort erhalten")
+            .get()
+            .uri("/api/v1/markdown/$jobId")
+            .retrieve()
+            .bodyToMono<String>()
+            .block(Duration.ofSeconds(30))
+            ?: throw RuntimeException("Leere Markdown-Antwort erhalten")
     }
     fun unzipZip(zipData: ByteArray): Pair<String, String> {
         val channel = SeekableInMemoryByteChannel(zipData)
@@ -290,10 +292,9 @@ class ParsrService {
 
     fun isZip(data: ByteArray): Boolean {
         return data.size > 4 &&
-                data[0] == 0x50.toByte() &&
-                data[1] == 0x4B.toByte() &&
-                data[2] == 0x03.toByte() &&
-                data[3] == 0x04.toByte()
+            data[0] == 0x50.toByte() &&
+            data[1] == 0x4B.toByte() &&
+            data[2] == 0x03.toByte() &&
+            data[3] == 0x04.toByte()
     }
-
 }
