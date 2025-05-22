@@ -76,7 +76,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     if (!this.isCodeFile) {
       // Wenn wir vom Texteditor zum Codeeditor wechseln: HTML neu formatieren
       const beautified = this.beautifyHtml(this.toSubmit);
-      this.toSubmit = this.decodeHtmlEntities(beautified);  // Hier Entities decodieren
+      this.toSubmit = this.decodeHtmlEntities(beautified); // Hier Entities decodieren
     }
     this.isCodeFile = !this.isCodeFile;
   }
@@ -86,7 +86,6 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     textarea.innerHTML = html;
     return textarea.value;
   }
-
 
   getLanguageByFileType(fileType: string): string {
     const languages: { [key: string]: string } = {
@@ -119,7 +118,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     this.update.emit({ content: this.toSubmit });
   }
 
-  @ViewChild('codeBlock', { static: false }) codeBlock!: ElementRef;
+  @ViewChild("codeBlock", { static: false }) codeBlock!: ElementRef;
 
   highlightCode(fileType?: string) {
     if (this.toSubmit && this.isCodeFile && this.codeBlock) {
@@ -133,23 +132,34 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       }
 
       if (prism.languages[language]) {
-        const highlighted = prism.highlight(content, prism.languages[language], language);
+        const highlighted = prism.highlight(
+          content,
+          prism.languages[language],
+          language
+        );
         this.codeBlock.nativeElement.innerHTML = highlighted;
       }
     }
   }
 
-
   beautifyHtml(html: string): string {
-    return html
-      // Neue Zeile vor bestimmten HTML-Tags
-      .replace(/<(\/?(p|h[1-6]|li|div|table|tr|td|section|article|header|footer|ul|ol))\b/g, "\n<$1")
-      // Zeilenumbruch vor Attributen wie class, src, alt, style
-      .replace(/(<[^>]+?)\s+(class|src|alt|style|href|id|name|data-[^=]+)=/g, "\n  $1\n  $2=")
-      // Mehrfache Zeilenumbrüche auf nur einen reduzieren
-      .replace(/\n{2,}/g, "\n")
-      // Überflüssige Leerzeichen entfernen
-      .trim();
+    return (
+      html
+        // Neue Zeile vor bestimmten HTML-Tags
+        .replace(
+          /<(\/?(p|h[1-6]|li|div|table|tr|td|section|article|header|footer|ul|ol))\b/g,
+          "\n<$1"
+        )
+        // Zeilenumbruch vor Attributen wie class, src, alt, style
+        .replace(
+          /(<[^>]+?)\s+(class|src|alt|style|href|id|name|data-[^=]+)=/g,
+          "\n  $1\n  $2="
+        )
+        // Mehrfache Zeilenumbrüche auf nur einen reduzieren
+        .replace(/\n{2,}/g, "\n")
+        // Überflüssige Leerzeichen entfernen
+        .trim()
+    );
   }
 
   formatHtml(html: string): string {
@@ -159,10 +169,19 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   }
 
   detectFileType(): string {
-    const htmlIndicators = ["<html", "<head", "<body", "<div", "<p", "<h1", "<table", "<!DOCTYPE"];
+    const htmlIndicators = [
+      "<html",
+      "<head",
+      "<body",
+      "<div",
+      "<p",
+      "<h1",
+      "<table",
+      "<!DOCTYPE",
+    ];
     const lowerContent = this.toSubmit.toLowerCase();
 
-    if (htmlIndicators.some(tag => lowerContent.includes(tag))) {
+    if (htmlIndicators.some((tag) => lowerContent.includes(tag))) {
       return "html";
     }
     if (this.toSubmit.includes("import") || this.toSubmit.includes("export")) {
@@ -277,10 +296,13 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
         let html = result.value;
         if (!includeImages) {
           // Nur die Bildinformationen beibehalten (alt/src), aber nicht das volle <img>-Tag
-          html = html.replace(/<img[^>]*src="([^"]+)"[^>]*>/g, (_match, src) => {
-            const fileName = src.split("/").pop(); // extrahiert nur den Dateinamen
-            return `<p>[Bild: ${fileName}]</p>`;
-          });
+          html = html.replace(
+            /<img[^>]*src="([^"]+)"[^>]*>/g,
+            (_match, src) => {
+              const fileName = src.split("/").pop(); // extrahiert nur den Dateinamen
+              return `<p>[Bild: ${fileName}]</p>`;
+            }
+          );
         }
         resolve(html);
       };
