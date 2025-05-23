@@ -98,13 +98,6 @@ jacoco {
     toolVersion = "0.8.8"
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += ["-Xss=4m"] // Stack-Größe auf 4MB erhöhen
-    }
-}
-
 
 tasks.register('jacocoReport', JacocoReport) {
     dependsOn = ['test']
