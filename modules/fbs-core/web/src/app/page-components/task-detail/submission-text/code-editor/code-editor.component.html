@@ -1,0 +1,19 @@
+<form [formGroup]="groupForm">
+  <div class="code-container line-numbers">
+    <textarea
+      #textArea
+      placeholder="{{ 'Code hier einfügen' }}"
+      class="text-area-code-editor"
+      formControlName="content"
+      spellcheck="false"
+      (keydown.tab)="onTab($event)"
+      wrap="hard"
+    ></textarea>
+    <pre
+      aria-hidden="true"
+      class="pre line-numbers"
+      #pre
+    ><code [ngClass]="['code', 'language-' + codeType]" #codeContent></code>
+      </pre>
+  </div>
+</form>

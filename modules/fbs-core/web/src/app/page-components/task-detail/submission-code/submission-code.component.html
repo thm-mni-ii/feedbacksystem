@@ -1,21 +1,7 @@
 <div style="display: flex; justify-content: space-between; align-items: center">
   <h3>{{ titleText }}</h3>
-
-  <mat-menu #extractionMenu="matMenu">
-    <button mat-menu-item (click)="onExtractOptionSelected('text')">
-      Nur Text (PDF/Word)
-    </button>
-    <button mat-menu-item (click)="onExtractOptionSelected('all')">
-      Alles (Text + Bilder)
-    </button>
-  </mat-menu>
-
-  <button mat-button color="primary" [matMenuTriggerFor]="extractionMenu">
-    Text aus Datei lesen
-  </button>
-
-  <button mat-button color="accent" (click)="toggleEditor()">
-    {{ isCodeFile ? "Wechsel zu Text-Editor" : "Wechsel zu Code-Editor" }}
+  <button mat-button color="primary" (click)="uploadFile()">
+    Code aus Datei lesen
   </button>
   <button mat-button color="warn" (click)="downloadSubmission()">
     Abgabe herunterladen
@@ -27,7 +13,7 @@
   #fileInput
   style="display: none"
   (change)="handleFileInput($event)"
-  accept=".pdf,.docx,.txt,.java,.ts,.js,.py"
+  accept=".pdf,.docx,.txt,.java,.ts,.js,.py,.cpp,.c,.go,.rb,.php,.html,.css"
 />
 
 <!-- Ladeanzeige -->
@@ -38,20 +24,8 @@
   </div>
 </div>
 
-<!-- Normaler Texteditor -->
-<div *ngIf="!isCodeFile" class="editor-container">
-  <angular-editor
-    [config]="editorConfig"
-    [(ngModel)]="toSubmit"
-    (ngModelChange)="onTextChange($event)"
-    [placeholder]="'Schreibe hier deine Lösung...'"
-  >
-  </angular-editor>
-</div>
-
-<!-- Code-Editor mit Highlighting -->
+<!-- Code-Editor mit Syntax-Highlighting -->
 <app-code-editor
-  *ngIf="isCodeFile"
   [codeType]="getLanguageByFileType(fileType)"
   [(content)]="toSubmit"
   (update)="onCodeChange($event)"

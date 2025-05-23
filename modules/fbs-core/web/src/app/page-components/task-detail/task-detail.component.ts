@@ -263,6 +263,8 @@ export class TaskDetailComponent implements OnInit {
       return "text";
     } else if (mediaType?.toLowerCase().includes("spreadsheet")) {
       return "spreadsheet";
+    } else if (mediaType?.toLowerCase().includes("code")) {
+      return "code";
     } else {
       return "file";
     }
