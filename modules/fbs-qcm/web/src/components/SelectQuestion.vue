@@ -9,9 +9,9 @@
     />
 
     <div class="mt-4">
-      <div class="text-h6 border-b-md border-primary">Nach Tags filtern</div>
-      <div v-if="isLoadingTags" class="text-grey text-caption mt-2">Tags werden geladen...</div>
-      <div v-else-if="tags.length === 0" class="text-caption mt-2">Keine Tags verfügbar</div>
+      <div class="text-h6 border-b-md border-primary">Filter for Tags</div>
+      <div v-if="isLoadingTags" class="text-grey text-caption mt-2">Tags loading...</div>
+      <div v-else-if="tags.length === 0" class="text-caption mt-2">No Tags available</div>
       <div v-else class="d-flex flex-wrap gap-2 mt-2">
         <v-chip
           v-for="tag in tags"
@@ -27,7 +27,7 @@
     </div>
 
     <div v-if="selectedTags.length > 0" class="mt-3">
-      <div class="text-subtitle-2 mb-1">Ausgewählte Tags:</div>
+      <div class="text-subtitle-2 mb-1">Active Tags:</div>
       <div class="d-flex flex-wrap gap-2">
         <v-chip
           v-for="tag in selectedTags"
@@ -41,47 +41,44 @@
         </v-chip>
       </div>
       <v-btn variant="text" size="small" class="mt-2 text-red" @click="clearTags"
-        >Alle Tags zurücksetzen</v-btn
+        >Reset all Tags</v-btn
       >
     </div>
 
     <div class="mt-6">
-      <div class="text-h6 border-b-md border-primary">
-        Zu welcher Frage möchten Sie weiterleiten?
-      </div>
+      <div class="mt-6">
+        <div class="text-h6 border-b-md border-primary">
+          Which question would you like to forward to?
+        </div>
 
-      <v-table dense class="mt-2">
-        <thead>
-          <tr>
-            <th>Frage</th>
-            <th class="text-end">Auswahl</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="question in filteredQuestions"
-            :key="question._id"
-            :class="{ 'bg-grey-lighten-4': selectedQuestion === question._id }"
-          >
-            <td>{{ question.questiontext }}</td>
-            <td class="text-end">
-              <v-btn
-                size="small"
-                :variant="selectedQuestion === question._id ? 'tonal' : 'outlined'"
-                color="primary"
-                @click="selectQuestion(question._id)"
+        <div class="mt-2" style="max-height: 300px; overflow-y: auto">
+          <v-virtual-scroll :items="filteredQuestions" height="300" item-height="56">
+            <template #default="{ item: question }">
+              <div
+                class="d-flex justify-space-between align-center px-4 py-2"
+                :class="{ 'bg-grey-lighten-4': selectedQuestion === question._id }"
               >
-                {{ selectedQuestion === question._id ? '✓ Ausgewählt' : 'Wählen' }}
-              </v-btn>
-            </td>
-          </tr>
-          <tr v-if="filteredQuestions.length === 0">
-            <td colspan="2" class="text-center text-grey text-caption">
-              Keine Fragen gefunden. Bitte passen Sie Ihre Suche an.
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
+                <div class="text-truncate me-4">{{ question.questiontext }}</div>
+                <v-btn
+                  size="small"
+                  :variant="selectedQuestion === question._id ? 'tonal' : 'outlined'"
+                  color="primary"
+                  @click="selectQuestion(question._id)"
+                >
+                  {{ selectedQuestion === question._id ? '✔ Selected' : 'Select' }}
+                </v-btn>
+              </div>
+            </template>
+          </v-virtual-scroll>
+
+          <div
+            v-if="filteredQuestions.length === 0"
+            class="text-center text-grey text-caption mt-2"
+          >
+            No Questions found.
+          </div>
+        </div>
+      </div>
     </div>
   </v-card-text>
 </template>

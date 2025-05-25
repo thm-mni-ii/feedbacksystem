@@ -62,10 +62,10 @@ defineExpose({
 </script>
 
 <template>
-  <v-dialog v-model="AddQuestionDialog">
+  <v-dialog v-model="AddQuestionDialog" class="w-100 w-md-75">
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="text-h4 ma-2 border-b-md border-primary">Frage auswählen</span>
+        <span class="text-h4 ma-2 border-b-md border-primary">Choose a Question</span>
         <v-btn icon variant="text" @click="_cancel">
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -81,9 +81,9 @@ defineExpose({
       <v-divider></v-divider>
       <v-card-text v-if="showInput" class="mt-6">
         <div class="border-b-md border-primary mb-1 pb-1">
-          <div class="text-h6">Schwellenwert für Weiterleitung</div>
+          <div class="text-h6">Forwarding Threshold</div>
           <small class="text-caption">
-            Ab diesem Prozentwert wird zur ausgewählten Frage weitergeleitet.
+            This percentage is used to redirect to the selected question.
           </small>
         </div>
 
@@ -106,8 +106,8 @@ defineExpose({
         </v-slider>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn variant="text" @click="_cancel">Abbrechen</v-btn>
-        <v-btn color="primary" :disabled="!selectedQuestion" @click="_confirm"> Auswählen </v-btn>
+        <v-btn variant="text" @click="_cancel">Cancel</v-btn>
+        <v-btn color="primary" :disabled="!selectedQuestion" @click="_confirm"> Confirm </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
