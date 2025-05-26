@@ -76,9 +76,11 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     * @param extInfo              Extended runner information
     */
   def handle(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
-             resultText: String, extInfo: String): Unit = {
-    submissionService.storeResult(submission.id, checkerConfiguration.id, exitCode, resultText, extInfo)
-  }
+             resultText: String, extInfo: String): Unit = storeResult(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+
+  protected def storeResult(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
+    resultText: String, extInfo: String): Unit =
+      submissionService.storeResult(submission.id, checkerConfiguration.id, exitCode, resultText, extInfo)
 
   protected def generateRunnerConfiguration(cc: CheckrunnerConfiguration): RunnerConfiguration = {
     val files =

@@ -255,7 +255,7 @@ export class SqlInputTabsComponent
 
   submissionToTask() {
     this.store.dispatch(
-      SqlInputTabsActions.submission({ index: this.activeTabIndex })
+      SqlInputTabsActions.submissionToTask({ index: this.activeTabIndex })
     );
   }
 

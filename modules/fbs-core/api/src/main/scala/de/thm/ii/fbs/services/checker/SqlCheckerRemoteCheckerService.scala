@@ -52,30 +52,24 @@ abstract class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.in
     SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, SqlCheckerState.Runner) match {
       case SqlCheckerState.Runner =>
         SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Checker)
-        this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
-        if (exitCode == 2 && hintsEnabled(checkerConfiguration)) {
+        if (exitCode == 2) {
           if (extInfo != null) {
             SqlCheckerRemoteCheckerService.extInfo.put(submission.id, extInfo)
           }
+          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
         } else {
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
-          super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+          storeResult(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
         }
       case SqlCheckerState.Checker =>
         SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
         val extInfo = SqlCheckerRemoteCheckerService.extInfo.remove(submission.id)
-        this.handleChecker(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+        this.handleChecker(submission, checkerConfiguration, task, 2, resultText, extInfo)
       case SqlCheckerState.Ignore =>
         SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
     }
   }
 
   protected def handleChecker(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
-                              resultText: String, extInfo: String): Unit
-
-  private def hintsEnabled(checkerConfiguration: CheckrunnerConfiguration): Boolean =
-    checkerConfiguration.checkerTypeInformation match {
-      case Some(sci: SqlCheckerInformation) => sci.showHints
-      case _ => false
-    }
+                              resultText: String, extInfo: String): Unit = storeResult(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
 }
