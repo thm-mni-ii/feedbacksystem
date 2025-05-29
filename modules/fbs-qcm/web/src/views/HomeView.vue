@@ -17,8 +17,8 @@
   </section>
 
   <v-row justify="center">
-    <v-col v-for="course in courses" :key="course.id" cols="8" md="4" class="ma-2">
-      <v-card :title="course.title" class="mx-auto" :subtitle="course.description">
+    <v-col v-for="course in myCourses" :key="course.id" cols="8" md="4" class="ma-2">
+      <v-card :title="course.name" class="mx-auto" :subtitle="course.description">
         <v-card-actions>
           <v-btn class="bg-primary-light" @click="startStudy(course.id)">Study for course</v-btn>
           <v-btn
@@ -52,16 +52,9 @@ const dialogConfirm = ref<typeof DialogConfirmVue>()
 const dialogEditCatalog = ref<typeof DialogEditCatalog>()
 const router = useRouter()
 const authStore = useAuthStore()
-const courses = [
-  { id: 1, title: 'Datenbanken', description: 'Learn about relational databases' },
-  { id: 2, title: 'Algorithmen', description: 'Understand algorithmic problem-solving' },
-  { id: 1, title: 'Datenbanken', description: 'Learn about relational databases' },
-  { id: 3, title: 'Betriebssysteme', description: 'Explore how operating systems work' },
-  { id: 3, title: 'Betriebssysteme', description: 'Explore how operating systems work' },
-  { id: 2, title: 'Algorithmen', description: 'Understand algorithmic problem-solving' }
-]
 
-// Setze den jsessionid-Token direkt nach der Initialisierung
+const myCourses = ref<Course[]>([])
+
 const jsessionid = router.currentRoute.value.query.jsessionid?.toString()
 if (jsessionid) {
   authStore.setToken(jsessionid)
@@ -69,13 +62,12 @@ if (jsessionid) {
   console.warn('No jsessionid found in query parameters')
 }
 
-const myCourses = ref<Course[]>([])
-
 onMounted(async () => {
   courseService
     .getMyCourses()
     .then((response) => {
       myCourses.value = response.data as Course[]
+      console.log(myCourses.value)
     })
     .catch((error) => {
       console.log(error)
