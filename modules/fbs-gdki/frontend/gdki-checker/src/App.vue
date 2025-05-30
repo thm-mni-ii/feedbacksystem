@@ -35,9 +35,7 @@ let pyodide = null
 onMounted(async () => {
   // Initialize editor
   const state = EditorState.create({
-    doc: `# Python-Beispielcode
-x = 3
-print(f"{x} ist gleich 3")`,
+    doc: await getCode(),
     extensions: [
       basicSetup,
       python(),
@@ -91,8 +89,31 @@ print(f"{x} ist gleich 3")`,
 })
 
 const saveCode = async () => {
-  storeService.sendText(1, editorView.state.doc.toString())
+  storeService.SaveCodeInTask(1, editorView.state.doc.toString())
 }
+const getCode = async () => {
+  const response = await storeService.getCodeFromTask(1)
+  const code = response.data.text
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  console.log(code)
+  if(code === "" || code === undefined) {
+    console.log("HEUL DOCH");
+    return `# Python-Beispielcode
+      x = 3
+      print(f"{x} ist gleich 3")`
+  }
+  return code;
+}
+
 const runCode = async () => {
   if (!pyodide || isRunning.value) return
   

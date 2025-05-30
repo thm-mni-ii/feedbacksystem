@@ -1,11 +1,8 @@
 import axios, { type AxiosResponse } from 'axios'
 
 class StoreService {
-    async sendText(task, code) {
+    async SaveCodeInTask(task, code) {
         try {
-            console.log(task);
-            console.log(code);
-            console.log(`Bearer ${localStorage.getItem('jsessionid')}`);
             const response = await axios.put(`http://localhost:3333/store/api/v1/storeCode/${task}`, {
                 code 
             }, 
@@ -18,6 +15,21 @@ class StoreService {
             
         );
             console.log('Response:', response);
+        } catch (error) {
+            console.error('Error sending request:', error);
+        }
+      }
+      async getCodeFromTask(task, code) {
+        try {
+            const response = await axios.get(`http://localhost:3333/store/api/v1/getCode/${task}`, {
+                headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jsessionid')}`
+                }
+            } 
+        );
+            console.log('Response:', response);
+            return response;
         } catch (error) {
             console.error('Error sending request:', error);
         }
