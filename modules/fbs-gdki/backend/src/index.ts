@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import storeRoutes from './routes/storeRoutes';
+import taskRoutes from './routes/taskRoutes';
 
 declare global {
   namespace Express {
@@ -19,6 +20,7 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true }));
 
     app.use('/store', storeRoutes);
+    app.use('/tasks', taskRoutes)
     app.listen(3000, () => console.log("LISTENING on port 3000"));
 }
 startServer().catch(console.error);
