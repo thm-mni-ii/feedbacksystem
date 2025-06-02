@@ -69,7 +69,7 @@ class LegacySqlCheckerService(@Value("${services.masterRunner.insecure}") insecu
         }
       case _ => (2, "Ungültige Checker-Typ-Informationen")
     }
-    super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+    storeResult(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
   }
 
   def formatSubmission(submission: FBSSubmission, checker: CheckrunnerConfiguration, solution: String): Any = {
