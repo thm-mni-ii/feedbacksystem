@@ -3,4 +3,5 @@ export default interface Skill {
   name: string
   description: string
   difficulty: number
+  isPublic: boolean
 }

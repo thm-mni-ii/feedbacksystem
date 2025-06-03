@@ -1,14 +1,13 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import StudyCatalogProgress from '@/components/StudyCatalogProgress.vue'
-import questionService from '@/services/question.service'
 import courseService from '@/services/course.service'
-import type Question from '@/model/Question'
 import type Catalog from '@/model/Catalog'
 import type Skill from '@model/Skill'
 import catalogService from '@/services/catalog.service'
 import skillService from '@/services/skill.service'
 import SkillCard from '@/components/SkillCard.vue'
+import StudyHeader from '@/components/StudyHeader.vue'
 import { useRoute } from 'vue-router'
 import { watch, computed } from 'vue'
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
@@ -17,7 +16,7 @@ import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
 const dialogAddSkill = ref<typeof DialogAddSkill>()
 
 const catalogs = ref<Catalog[]>([])
-const studyProgress = ref<number[]>([])
+const studyProgress = ref<{ skillId: number; progress: number }[]>([])
 const route = useRoute()
 const courseId = route.params.courseId
 const courseInformation = ref<{}>({})
@@ -27,7 +26,7 @@ const createNewSkill = (courseId: number) => {
   if (dialogAddSkill.value) {
     dialogAddSkill.value.openDialog(courseId).then((result: boolean) => {
       if (result) {
-        console.log('Create new catalog')
+        console.log('Create new skill')
         loadCatalogsFromCourse(courseId)
       } else {
         console.log('Cancel')
@@ -41,41 +40,55 @@ const averageProgress = computed(() => {
   return Math.round(sum / studyProgress.value.length)
 })
 
+const getSkillProgress = (skillId: number): number => {
+  const progressItem = studyProgress.value.find((x) => x.skillId === skillId)
+  return progressItem?.progress ?? 0
+}
+
+async function loadSkills() {
+  const { data } = await skillService.getSkills()
+  skills.value = data
+}
+
+async function loadStudyProgress() {
+  const { data } = await skillService.getAllStudyProgress()
+  studyProgress.value = data
+}
+
+async function loadCatalogsFromCourse(courseId: number) {
+  const { data } = await catalogService.getCatalogs(courseId)
+  catalogs.value = data
+}
+
+async function loadCourseInformation(courseId: number) {
+  const { data } = await courseService.getCoreCourse(courseId)
+  courseInformation.value = data
+}
+
 onMounted(async () => {
-  const getSkillsResponse = await skillService.getSkills()
-  skills.value = getSkillsResponse.data
-
-  const getStudyProgress = await skillService.getStudyProgress()
-  studyProgress.value = getStudyProgress.data
-  const allCatalogsResponse = await catalogService.getCatalogs(Number(courseId))
-  catalogs.value = allCatalogsResponse.data
-
-  const courseResponse = await courseService.getCourse(2)
-  console.log('COURSE RESPONSE', courseResponse)
-
-  const coreResponse = await courseService.getCoreCourse(courseId)
-  courseInformation.value = coreResponse.data
-  console.log(courseInformation.value)
+  await loadSkills()
+  await loadStudyProgress()
+  await loadCatalogsFromCourse(Number(courseId))
+  await loadCourseInformation(Number(courseId))
 })
 </script>
 
 <template>
   <DialogAddSkill ref="dialogAddSkill" />
   <DialogConfirmVue ref="dialogConfirm" />
-  <v-card class="pa-6 mb-6 text-center" style="background-color: #f8f8f8">
-    <h2 class="text-h6 font-weight-bold mb-1">{{ courseInformation.name }}</h2>
-    <p class="text-body-2 mb-4">{{ courseInformation.description }}</p>
-    <v-progress-circular :model-value="averageProgress" size="72" width="6" color="#36c78e">
-      <span class="text-caption font-weight-medium">{{ averageProgress }}%</span>
-    </v-progress-circular>
-  </v-card>
+  <StudyHeader
+    :name="courseInformation.name ?? ''"
+    :description="courseInformation.description ?? ''"
+    :progress="averageProgress ?? 0"
+    :totalSkills="skills.length ?? 0"
+  />
   <v-row justify="center" class="mt-4">
     <v-col v-for="(skill, index) in skills" :key="index" cols="8" md="4" class="ma-2">
       <SkillCard
-        :name="skill.name"
-        :description="skill.description"
-        :difficulty="skill.difficulty"
-        :progress="studyProgress[index]"
+        :name="skill.name ?? ''"
+        :description="skill.description ?? ''"
+        :difficulty="skill.difficulty ?? 0"
+        :progress="getSkillProgress(skill.id) ?? 0"
       />
     </v-col>
   </v-row>

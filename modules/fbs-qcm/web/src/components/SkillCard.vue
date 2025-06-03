@@ -10,7 +10,7 @@ const props = defineProps<{
 
 const difficultyColor = computed(() => {
   return {
-    1: '#b8f25b', // green
+    1: 'beginner', // green
     2: '#ffd625', // amber
     3: '#f9a825', // orange
     4: '#d84315' // red
@@ -47,7 +47,7 @@ const difficultyLabel = computed(() => {
     </v-progress-linear>
 
     <v-card-actions>
-      <v-btn class="bg-primary-light mt-2">Start</v-btn>
+      <v-btn class="bg-primary-light mt-2">Learn for Skill</v-btn>
     </v-card-actions>
   </v-card>
 </template>

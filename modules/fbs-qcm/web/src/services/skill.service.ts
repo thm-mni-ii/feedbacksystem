@@ -31,7 +31,12 @@ const skillData = [
   }
 ]
 
-const studyProgress = [23, 65, 32, 54]
+const studyProgress = [
+  { skillId: 1, progress: 23 },
+  { skillId: 2, progress: 65 },
+  { skillId: 3, progress: 47 },
+  { skillId: 4, progress: 82 }
+]
 
 class SkillService {
   getSkills(courseId: number): Promise<AxiosResponse<Skill[]>> {
@@ -39,7 +44,7 @@ class SkillService {
       data: skillData as AxiosResponse<Skill[]>
     })
     // return axios.get(
-    //   `api_v1/courseSkills/${courseId}`,
+    //   `/api_v1/courseSkills/${courseId}`,
     //   {
     //     headers: {
     //       authorization: `Bearer ${localStorage.getItem('jsessionid')}`
@@ -47,7 +52,7 @@ class SkillService {
     //   }
     // )
   }
-  getStudyProgress(courseId: number, skillId: number) {
+  getAllStudyProgress(courseId: number) {
     return Promise.resolve({
       data: studyProgress as AxiosResponse<[]>
     })
@@ -60,6 +65,20 @@ class SkillService {
     //     }
     //   }
     // )
+  }
+  createNewSkill(courseId: number, skill: Skill) {
+    return axios.post(`/api_v1/skill/`, skill, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+  editSkill(skill: Skill) {
+    return axios.put(`/api_v1/skill/`, skill, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
   }
 }
 
