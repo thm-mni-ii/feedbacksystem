@@ -59,6 +59,7 @@ class JupyterKernelClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Host': 'localhost:8888'
       },
       body: JSON.stringify({
         name: kernelName,

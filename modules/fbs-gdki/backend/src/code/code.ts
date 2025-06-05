@@ -7,7 +7,7 @@ export async function executePythonCode(userData: JwtPayload, taskId: string, co
     console.log("WIr fangen an");
     const jup = new JupyterKernelClient();
     console.log("Wir starten den Bumms");
-    const res = await jup.startKernel(generateRandomString(10));
+    const res = await jup.startKernel();
     console.log("Der Bumms ist gestartet");
     console.log(res);
     const response = await jup.executeCode(code);

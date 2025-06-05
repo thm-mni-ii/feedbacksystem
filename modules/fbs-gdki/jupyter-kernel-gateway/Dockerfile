@@ -1,16 +1,16 @@
-# start from the jupyter image with R, Python, and Scala (Apache Toree) kernels pre-installed
 FROM jupyter/all-spark-notebook
 
-# install the kernel gateway
+RUN pip install jupyter_kernel_gateway
 
-RUN pip install jupyter_kernel_gateway==2.0
-# run kernel gateway on container start, not notebook server
+ENV KG_ALLOW_ORIGIN=*
+ENV KG_ALLOW_HEADERS=*
+ENV KG_ALLOW_METHODS=*
+ENV KG_TOKEN=
+ENV KG_LIST_KERNELS=true
+ENV KG_ALLOW_REMOTE_ACCESS=true
+
 EXPOSE 8888
 CMD ["jupyter", "kernelgateway", \
      "--KernelGatewayApp.ip=0.0.0.0", \
-     "--KernelGatewayApp.port=8888", \
-     "--KernelGatewayApp.allow_origin='*'", \
-     "--KernelGatewayApp.allow_headers='*'", \
-     "--KernelGatewayApp.allow_methods='*'", \
-     "--KernelGatewayApp.auth_token=''", \
-     "--JupyterWebsocketPersonality.list_kernels=true"]
+     "--KernelGatewayApp.port=8888" \
+]

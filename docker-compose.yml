@@ -352,7 +352,7 @@ services:
     ports:
       - "8889:8888"
     volumes:
-      - ./data:/home/jovyan/work  # Optional: mount local notebooks
+      - ./data:/home/jovyan/work
     environment:
       - JUPYTER_ENABLE_LAB=yes
     networks:
