@@ -1,6 +1,7 @@
 import { token } from "../model/model";
+import { JwtPayload } from "jsonwebtoken";
 
-export async function authenticate(userData: token) {
+export async function authenticate(userData: JwtPayload) {
     if(userData.globalRole === "Admin") {
         return true;
     }
@@ -11,7 +12,7 @@ export async function authenticate(userData: token) {
     return false;
 }
 
-export function getDocentCourseRoles(tokenData: token) {
+export function getDocentCourseRoles(tokenData: JwtPayload) {
   let coursesAdmin: number[] = [];
   const courseRolesObject = JSON.parse(tokenData.courseRoles);
   for (const courseId in courseRolesObject) {
@@ -25,7 +26,7 @@ export function getDocentCourseRoles(tokenData: token) {
   return coursesAdmin;
 }
 
-export function getAdminCourseRoles(tokenData: token) {
+export function getAdminCourseRoles(tokenData: JwtPayload) {
   let coursesAdmin: number[] = [];
   const courseRolesObject = JSON.parse(tokenData.courseRoles);
   for (const courseId in courseRolesObject) {

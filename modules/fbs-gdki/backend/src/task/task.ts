@@ -15,7 +15,7 @@ export async function createTask(userData: JwtPayload, task: Omit<task, '_id'>) 
     return responseFromDb;
 }
 
-export async function deleteTaskById(userData: JwtPayload, taskId: String) {
+export async function deleteTaskById(userData: JwtPayload, taskId: string) {
     if(!authenticate(userData)) {
         return 403;
     }
@@ -46,7 +46,7 @@ export async function updateTask(userData: JwtPayload, task: task) {
     return response;
 }
 
-export async function getTaskById(userData: JwtPayload, taskId: String) {
+export async function getTaskById(userData: JwtPayload, taskId: string) {
     if(!authenticate(userData)) {
         return 403;
     }
@@ -58,7 +58,7 @@ export async function getTaskById(userData: JwtPayload, taskId: String) {
     const response = taskCollection.findOne(findQuery);
     return response;
 }
-export async function getTaskTextById(userData: JwtPayload, taskId: String) {
+export async function getTaskTextById(userData: JwtPayload, taskId: string) {
     if(!authenticate(userData)) {
         return 403;
     }
@@ -67,10 +67,12 @@ export async function getTaskTextById(userData: JwtPayload, taskId: String) {
     const findQuery = {
         _id: new mongoDB.ObjectId(taskId)
     };
-    const response: task = taskCollection.findOne(findQuery);
-
-    if(!isTaskPublic(response)) {
+    const response: task | null = await taskCollection.findOne(findQuery) as task;
+    if(response === null) {
         return 404;
+    }
+    if(!isTaskPublic(response)) {
+        return 400;
     }
     const text = getTextFromTask(response);
     if(typeof text === 'number') {

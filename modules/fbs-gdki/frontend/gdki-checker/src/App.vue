@@ -24,13 +24,13 @@ import { EditorState } from '@codemirror/state'
 import { basicSetup } from 'codemirror'
 import { python } from '@codemirror/lang-python'
 import storeService from './services/storeService'
+import codeService from './services/codeService'
 
 const editorContainer = ref(null)
 const outputContainer = ref(null)
 const output = ref('')
 const isRunning = ref(false)
 let editorView = null
-let pyodide = null
 
 onMounted(async () => {
   // Initialize editor
@@ -59,33 +59,6 @@ onMounted(async () => {
     parent: editorContainer.value
   })
 
-  // Load Pyodide - You may need to adjust the URL based on the version
-  output.value = "Loading Python environment (Pyodide)...\nThis may take a moment on first load."
-  
-  try {
-    // Load Pyodide script dynamically
-    const script = document.createElement('script')
-    script.src = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
-    document.head.appendChild(script)
-    
-    script.onload = async () => {
-      try {
-        // Initialize Pyodide
-        pyodide = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
-        })
-        output.value = "Python environment loaded. Ready to execute code!"
-      } catch (err) {
-        output.value = `Error loading Pyodide: ${err.message}`
-      }
-    }
-    
-    script.onerror = () => {
-      output.value = "Failed to load Pyodide. Please check your connection and try again."
-    }
-  } catch (err) {
-    output.value = `Error setting up Python environment: ${err.message}`
-  }
 })
 
 const saveCode = async () => {
@@ -94,12 +67,6 @@ const saveCode = async () => {
 const getCode = async () => {
   const response = await storeService.getCodeFromTask(1)
   const code = response.data.text
-  console.log(code)
-  console.log(code)
-  console.log(code)
-  console.log(code)
-  console.log(code)
-  console.log(code)
   console.log(code)
   console.log(code)
   console.log(code)
@@ -115,45 +82,11 @@ const getCode = async () => {
 }
 
 const runCode = async () => {
-  if (!pyodide || isRunning.value) return
-  
   isRunning.value = true
   output.value = "Running...\n"
-  
-  try {
-    const code = editorView.state.doc.toString()
-    
-    pyodide.runPython(`
-      import sys
-      from io import StringIO
-      sys.stdout = StringIO()
-      sys.stderr = StringIO()
-    `)
-    
-    try {
-      await pyodide.runPythonAsync(code)
-      
-      const stdout = pyodide.runPython("sys.stdout.getvalue()")
-      const stderr = pyodide.runPython("sys.stderr.getvalue()")
-      
-      if (stderr) {
-        output.value = `Error:\n${stderr}`
-      } else {
-        output.value = stdout || "Code executed successfully (no output)"
-      }
-    } catch (err) {
-      output.value = `Execution error: ${err.message}`
-    }
-    
-    pyodide.runPython(`
-      sys.stdout = sys.__stdout__
-      sys.stderr = sys.__stderr__
-    `)
-  } catch (err) {
-    output.value = `System error: ${err.message}`
-  } finally {
-    isRunning.value = false
-  }
+  const resp = await codeService.executeCode("1", await getCode())
+  console.log(resp);
+  output.value = resp;
 }
 
 onBeforeUnmount(() => {

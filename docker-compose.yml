@@ -347,6 +347,17 @@ services:
     depends_on:
       - gdki-backend
 
+  jupyter-kernel-gateway:
+    build: modules/fbs-gdki/jupyter-kernel-gateway/
+    ports:
+      - "8889:8888"
+    volumes:
+      - ./data:/home/jovyan/work  # Optional: mount local notebooks
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    networks:
+      - fbs
+
 networks:
   classroom:
   fbs:

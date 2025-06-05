@@ -1,13 +1,14 @@
 import { Request, Response} from "express"
+import { executePythonCode } from "../code/code";
 
 export const executeCode = async (req: Request, res: Response, ) => {
   try {
     if (req.user == undefined) {
       res.sendStatus(401);
     } else {
-      const taskId = Number(req.params.task); 
+      const taskId = (req.params.task) as string; 
       const code = req.body.code as string;
-      const data = await  
+      const data = await executePythonCode(req.user, taskId, code);
       res.send(data);
     }
   } catch (error) {
