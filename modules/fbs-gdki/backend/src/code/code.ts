@@ -14,5 +14,4 @@ export async function executePythonCode(userData: JwtPayload, taskId: string, co
     console.log("Der Bumms wurde ausgeführt");
     console.log(response);
     return response;
-
 }

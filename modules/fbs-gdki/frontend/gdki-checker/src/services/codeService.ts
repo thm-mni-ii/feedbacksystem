@@ -13,7 +13,7 @@ class codeService {
                 }
             }
         );
-            console.log('Response:', response);
+            return response;
         } catch (error) {
             console.error('Error sending request:', error);
         }

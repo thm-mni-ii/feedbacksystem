@@ -1,65 +1,32 @@
-interface KernelSpec {
-  name: string;
-  spec: {
-    display_name: string;
-    language: string;
+import WebSocket from 'ws';
+
+interface ExecutionResult {
+  status: 'ok' | 'error' | 'abort';
+  results: any[];
+  execution_count?: number;
+  error?: {
+    name: string;
+    message: string;
+    traceback: string[];
   };
-}
-
-interface KernelInfo {
-  id: string;
-  name: string;
-}
-
-interface ExecuteRequest {
-  code: string;
-  silent?: boolean;
-  store_history?: boolean;
-  user_expressions?: Record<string, string>;
-  allow_stdin?: boolean;
-}
-
-interface ExecuteResult {
-  execution_count: number;
-  data: {
-    'text/plain'?: string;
-    'text/html'?: string;
-    'image/png'?: string;
-    [key: string]: any;
-  };
-  metadata: Record<string, any>;
-}
-
-interface ExecuteResponse {
-  msg_id: string;
-  msg_type: string;
-  content: ExecuteResult | { execution_count: number; status: string };
 }
 
 class JupyterKernelClient {
-  private baseUrl: string;
   private kernelId: string | null = null;
+  private baseUrl: string;
+  private sessionId: string;
 
   constructor(baseUrl: string = 'http://jupyter-kernel-gateway:8888') {
     this.baseUrl = baseUrl;
-  }
-
-  async getKernelSpecs(): Promise<Record<string, KernelSpec>> {
-    const response = await fetch(`${this.baseUrl}/api/kernelspecs`);
-    if (!response.ok) {
-      throw new Error(`Failed to get kernel specs: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data.kernelspecs;
+    this.sessionId = this.generateId('session');
   }
 
   async startKernel(kernelName: string = 'python3'): Promise<string> {
-    console.log(`${this.baseUrl}/api/kernels`);
     const response = await fetch(`${this.baseUrl}/api/kernels`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Host': 'localhost:8888'
+        'Host': 'localhost:8888', 
       },
       body: JSON.stringify({
         name: kernelName,
@@ -75,94 +42,225 @@ class JupyterKernelClient {
     return kernel.id;
   }
 
-  async getKernels(): Promise<KernelInfo[]> {
-    const response = await fetch(`${this.baseUrl}/api/kernels`);
-    if (!response.ok) {
-      throw new Error(`Failed to get kernels: ${response.statusText}`);
-    }
-    return await response.json();
-  }
-
-  async executeCode(code: string): Promise<any> {
+  async executeCode(code: string, timeout: number = 30000): Promise<ExecutionResult> {
     if (!this.kernelId) {
       throw new Error('No kernel started. Call startKernel() first.');
     }
 
-    const executeRequest: ExecuteRequest = {
-      code,
-      silent: false,
-      store_history: true,
-      user_expressions: {},
-      allow_stdin: false,
-    };
+    return new Promise((resolve, reject) => {
+      // Use ws:// for WebSocket, not http://
+      const wsUrl = this.baseUrl.replace('http://', 'ws://') + `/api/kernels/${this.kernelId}/channels`;
+      const ws = new WebSocket(wsUrl);
 
-    const response = await fetch(`${this.baseUrl}/api/kernels/${this.kernelId}/execute`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(executeRequest),
+      const msgId = this.generateId('msg');
+      const executionResults: any[] = [];
+      let executionCount: number | undefined;
+      let timeoutId: NodeJS.Timeout;
+
+      // Set up timeout
+      timeoutId = setTimeout(() => {
+        ws.close();
+        reject(new Error(`Code execution timed out after ${timeout}ms`));
+      }, timeout);
+
+      ws.on('open', () => {
+        console.log('WebSocket connected');
+        
+        const message = {
+          header: {
+            msg_id: msgId,
+            msg_type: 'execute_request',
+            username: 'user',
+            session: this.sessionId,
+            date: new Date().toISOString(),
+            version: '5.3'
+          },
+          parent_header: {},
+          metadata: {},
+          content: {
+            code: code,
+            silent: false,
+            store_history: true,
+            user_expressions: {},
+            allow_stdin: false,
+            stop_on_error: true
+          },
+          channel: 'shell'
+        };
+
+        ws.send(JSON.stringify(message));
+      });
+
+      ws.on('message', (data: Buffer) => {
+        try {
+          const message = JSON.parse(data.toString());
+          
+          // Only process messages related to our execution
+          if (message.parent_header?.msg_id !== msgId) {
+            return;
+          }
+
+          console.log('Received message type:', message.msg_type);
+
+          switch (message.msg_type) {
+            case 'stream':
+              // stdout/stderr output
+              executionResults.push({
+                type: 'stream',
+                name: message.content.name, // 'stdout' or 'stderr'
+                text: message.content.text
+              });
+              break;
+
+            case 'execute_result':
+              // Return values from expressions
+              executionResults.push({
+                type: 'execute_result',
+                data: message.content.data,
+                metadata: message.content.metadata
+              });
+              break;
+
+            case 'display_data':
+              // Rich display content
+              executionResults.push({
+                type: 'display_data',
+                data: message.content.data,
+                metadata: message.content.metadata
+              });
+              break;
+
+            case 'error':
+              // Execution errors
+              clearTimeout(timeoutId);
+              ws.close();
+              resolve({
+                status: 'error',
+                results: executionResults,
+                error: {
+                  name: message.content.ename,
+                  message: message.content.evalue,
+                  traceback: message.content.traceback
+                }
+              });
+              return;
+
+            case 'execute_reply':
+              // Execution finished
+              clearTimeout(timeoutId);
+              ws.close();
+              
+              executionCount = message.content.execution_count;
+              const status = message.content.status;
+              
+              resolve({
+                status: status,
+                results: executionResults,
+                execution_count: executionCount,
+                ...(status === 'error' && {
+                  error: {
+                    name: message.content.ename || 'Unknown',
+                    message: message.content.evalue || 'Unknown error',
+                    traceback: message.content.traceback || []
+                  }
+                })
+              });
+              return;
+          }
+        } catch (error) {
+          console.error('Error parsing message:', error);
+        }
+      });
+
+      ws.on('error', (error) => {
+        clearTimeout(timeoutId);
+        console.error('WebSocket error:', error);
+        reject(error);
+      });
+
+      ws.on('close', (code, reason) => {
+        clearTimeout(timeoutId);
+        console.log('WebSocket closed:', code, reason.toString());
+      });
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to execute code: ${response.statusText}`);
-    }
-
-    return await response.json();
   }
 
-  // Get kernel status
-  async getKernelStatus(): Promise<any> {
-    if (!this.kernelId) {
-      throw new Error('No kernel started.');
-    }
-
-    const response = await fetch(`${this.baseUrl}/api/kernels/${this.kernelId}`);
-    if (!response.ok) {
-      throw new Error(`Failed to get kernel status: ${response.statusText}`);
-    }
-    return await response.json();
-  }
-
-  // Shutdown kernel
-  async shutdownKernel(): Promise<void> {
+  async stopKernel(): Promise<void> {
     if (!this.kernelId) {
       return;
     }
 
     const response = await fetch(`${this.baseUrl}/api/kernels/${this.kernelId}`, {
       method: 'DELETE',
+      headers: {
+        'Host': 'localhost:8888',
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to shutdown kernel: ${response.statusText}`);
+      throw new Error(`Failed to stop kernel: ${response.statusText}`);
     }
 
     this.kernelId = null;
   }
-}
 
-
-// For use in React/Next.js components
-export class JupyterService {
-  private client: JupyterKernelClient;
-
-  constructor(baseUrl?: string) {
-    this.client = new JupyterKernelClient(baseUrl);
-  }
-
-  async initialize(): Promise<void> {
-    await this.client.startKernel();
-  }
-
-  async runPythonCode(code: string): Promise<any> {
-    return await this.client.executeCode(code);
-  }
-
-  async cleanup(): Promise<void> {
-    await this.client.shutdownKernel();
+  private generateId(prefix: string): string {
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }
 
-export { JupyterKernelClient };
+// Usage example
+async function example() {
+  const client = new JupyterKernelClient();
+
+  try {
+    // Start kernel
+    console.log('Starting kernel...');
+    const kernelId = await client.startKernel('python3');
+    console.log('Kernel started:', kernelId);
+
+    // Execute Python code
+    console.log('Executing code...');
+    const result = await client.executeCode(`
+import pandas as pd
+import numpy as np
+
+# Create some data
+data = {'A': [1, 2, 3], 'B': [4, 5, 6]}
+df = pd.DataFrame(data)
+print("DataFrame:")
+print(df)
+print("\\nSum of column A:", df['A'].sum())
+
+# Return a value
+df.describe()
+    `);
+
+    console.log('Execution completed!');
+    console.log('Status:', result.status);
+    console.log('Results:');
+    
+    result.results.forEach((output, index) => {
+      console.log(`\n--- Output ${index + 1} (${output.type}) ---`);
+      if (output.type === 'stream') {
+        console.log(output.text);
+      } else if (output.type === 'execute_result' || output.type === 'display_data') {
+        console.log(output.data);
+      }
+    });
+
+    if (result.error) {
+      console.error('Error:', result.error);
+    }
+
+    // Clean up
+    await client.stopKernel();
+    console.log('Kernel stopped');
+
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+export { JupyterKernelClient, ExecutionResult };
 export default JupyterKernelClient;

@@ -83,10 +83,10 @@ const getCode = async () => {
 
 const runCode = async () => {
   isRunning.value = true
-  output.value = "Running...\n"
-  const resp = await codeService.executeCode("1", await getCode())
-  console.log(resp);
-  output.value = resp;
+  output.value = "Running...\n";
+  const response = await codeService.executeCode("1", editorView.state.doc.toString());
+  output.value = response.data.results[0].text;
+  isRunning.value = false
 }
 
 onBeforeUnmount(() => {
