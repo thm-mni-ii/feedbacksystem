@@ -98,6 +98,10 @@
           *ngIf="submissionTypeOfTask() === 'text'"
           (update)="updateSubmissionContent($event)"
         ></app-submission-text>
+        <app-submission-code
+          *ngIf="submissionTypeOfTask() === 'code'"
+          (update)="updateSubmissionContent($event)"
+        ></app-submission-code>
         <app-submission-spreadsheet
           *ngIf="submissionTypeOfTask() === 'spreadsheet'"
           (update)="updateSubmissionContent($event)"

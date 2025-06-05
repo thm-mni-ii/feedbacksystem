@@ -9,19 +9,20 @@ import {
   AfterViewInit,
   TemplateRef,
 } from "@angular/core";
-import * as mammoth from "mammoth";
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
 import { MatDialog } from "@angular/material/dialog";
+import * as mammoth from "mammoth";
 
 @Component({
-  selector: "app-submission-text",
-  templateUrl: "./submission-text.component.html",
-  styleUrls: ["./submission-text.component.scss"],
+  selector: "app-submission-code",
+  templateUrl: "./submission-code.component.html",
+  styleUrls: ["./submission-code.component.scss"],
 })
-export class SubmissionTextComponent implements OnInit, AfterViewInit {
+export class SubmissionCodeComponent implements OnInit, AfterViewInit {
   toSubmit = "";
+  highlightedText = "";
   @Input() title?: string;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
@@ -30,25 +31,6 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
   titleText: string = "Abgabe Text:";
   isCodeFile: boolean = false;
   fileType: string = "txt";
-
-  extractionMode: "text" | "all" = "text";
-  detectedFileType = "markup";
-
-  onExtractOptionSelected(mode: "text" | "all") {
-    this.extractionMode = mode;
-    this.fileInput.nativeElement.value = null;
-    this.fileInput.nativeElement.click();
-  }
-
-  editorConfig = {
-    editable: true,
-    spellcheck: true,
-    height: "200px",
-    minHeight: "150px",
-    placeholder: "Schreibe hier deine Lösung...",
-    translate: "no",
-    toolbarHiddenButtons: [[], []],
-  };
 
   constructor(
     private parsrService: ParsrService,
@@ -72,21 +54,6 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     this.highlightCode();
   }
 
-  toggleEditor() {
-    if (!this.isCodeFile) {
-      // Wenn wir vom Texteditor zum Codeeditor wechseln: HTML neu formatieren
-      const beautified = this.beautifyHtml(this.toSubmit);
-      this.toSubmit = this.decodeHtmlEntities(beautified); // Hier Entities decodieren
-    }
-    this.isCodeFile = !this.isCodeFile;
-  }
-
-  decodeHtmlEntities(html: string): string {
-    const textarea = document.createElement("textarea");
-    textarea.innerHTML = html;
-    return textarea.value;
-  }
-
   getLanguageByFileType(fileType: string): string {
     const languages: { [key: string]: string } = {
       js: "javascript",
@@ -103,85 +70,37 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return languages[fileType] || "javascript";
   }
 
-  onTextChange(content: string) {
+  onCodeChange(content: string) {
     this.toSubmit = content;
-    this.detectedFileType = this.detectFileType(); // <--- NEU
     this.update.emit({ content: this.toSubmit });
     this.highlightCode();
   }
 
-  onCodeChange(content: string) {
-    this.toSubmit = content;
-    this.detectedFileType = this.detectFileType();
-    console.log("Highlighting triggered", this.detectedFileType);
-    this.highlightCode(this.detectedFileType);
-    this.update.emit({ content: this.toSubmit });
-  }
-
-  @ViewChild("codeBlock", { static: false }) codeBlock!: ElementRef;
-
   highlightCode(fileType?: string) {
-    if (this.toSubmit && this.isCodeFile && this.codeBlock) {
+    if (this.toSubmit && this.isCodeFile) {
       const detectedFileType = fileType || this.detectFileType();
-      this.detectedFileType = detectedFileType;
       const language = this.getLanguageByFileType(detectedFileType);
 
-      let content = this.toSubmit;
-      if (language === "markup") {
-        content = this.formatHtml(content);
-      }
-
       if (prism.languages[language]) {
-        const highlighted = prism.highlight(
-          content,
+        this.highlightedText = prism.highlight(
+          this.toSubmit,
           prism.languages[language],
           language
         );
-        this.codeBlock.nativeElement.innerHTML = highlighted;
+      } else {
+        console.warn(
+          "Keine passende Sprache für Prism gefunden:",
+          detectedFileType
+        );
       }
     }
   }
 
-  beautifyHtml(html: string): string {
-    return (
-      html
-        // Neue Zeile vor bestimmten HTML-Tags
-        .replace(
-          /<(\/?(p|h[1-6]|li|div|table|tr|td|section|article|header|footer|ul|ol))\b/g,
-          "\n<$1"
-        )
-        // Zeilenumbruch vor Attributen wie class, src, alt, style
-        .replace(
-          /(<[^>]+?)\s+(class|src|alt|style|href|id|name|data-[^=]+)=/g,
-          "\n  $1\n  $2="
-        )
-        // Mehrfache Zeilenumbrüche auf nur einen reduzieren
-        .replace(/\n{2,}/g, "\n")
-        // Überflüssige Leerzeichen entfernen
-        .trim()
-    );
-  }
-
-  formatHtml(html: string): string {
-    const parser = new DOMParser();
-    const document = parser.parseFromString(html, "text/html");
-    return document.body.innerHTML;
-  }
-
   detectFileType(): string {
-    const htmlIndicators = [
-      "<html",
-      "<head",
-      "<body",
-      "<div",
-      "<p",
-      "<h1",
-      "<table",
-      "<!DOCTYPE",
-    ];
-    const lowerContent = this.toSubmit.toLowerCase();
-
-    if (htmlIndicators.some((tag) => lowerContent.includes(tag))) {
+    if (
+      this.toSubmit.startsWith("<!DOCTYPE html") ||
+      this.toSubmit.includes("<html>")
+    ) {
       return "html";
     }
     if (this.toSubmit.includes("import") || this.toSubmit.includes("export")) {
@@ -196,11 +115,14 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return "txt";
   }
 
+  uploadFile() {
+    this.fileInput.nativeElement.click();
+  }
+
   handleFileInput(event: any) {
     const file = event.target.files[0];
     if (file) {
-      const includeImages = this.extractionMode === "all";
-      this.processFile(file, includeImages);
+      this.processFile(file);
     }
   }
 
@@ -212,12 +134,9 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       if (this.fileType === "pdf") {
         this.toSubmit = await this.extractPdfText(file, includeImages);
         this.isCodeFile = false;
-        this.fileType = "html";
       } else if (this.fileType === "docx") {
-        this.toSubmit = await this.extractWordText(file, includeImages);
-        this.toSubmit = this.beautifyHtml(this.toSubmit);
+        this.toSubmit = await this.extractWordText(file);
         this.isCodeFile = false;
-        this.fileType = "html";
       } else if (
         this.fileType === "txt" ||
         this.checkIfCodeFile(this.fileType)
@@ -285,26 +204,14 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     });
   }
 
-  async extractWordText(file: File, includeImages: boolean): Promise<string> {
+  async extractWordText(file: File): Promise<string> {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsArrayBuffer(file);
       reader.onload = async () => {
         const arrayBuffer = reader.result as ArrayBuffer;
         const result = await mammoth.convertToHtml({ arrayBuffer });
-
-        let html = result.value;
-        if (!includeImages) {
-          // Nur die Bildinformationen beibehalten (alt/src), aber nicht das volle <img>-Tag
-          html = html.replace(
-            /<img[^>]*src="([^"]+)"[^>]*>/g,
-            (_match, src) => {
-              const fileName = src.split("/").pop(); // extrahiert nur den Dateinamen
-              return `<p>[Bild: ${fileName}]</p>`;
-            }
-          );
-        }
-        resolve(html);
+        resolve(result.value);
       };
     });
   }
