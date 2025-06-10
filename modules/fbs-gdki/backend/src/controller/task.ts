@@ -86,3 +86,19 @@ export const getTaskText = async (req: Request, res: Response, ) => {
     res.sendStatus(500);
   }
 };
+export const getAllAvailableTasks = async (req: Request, res: Response, ) => {
+  try {
+    if (req.user == undefined) {
+      res.sendStatus(401);
+    } else {
+        const result = await getTaskById(req.user);
+        if(typeof result === "number") {
+            res.sendStatus(result);
+        }
+        res.send(result);
+    }
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};

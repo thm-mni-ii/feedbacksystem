@@ -80,3 +80,15 @@ export async function getTaskTextById(userData: JwtPayload, taskId: string) {
     }
     return text;
 }
+export async function getAllTasks(userData: JwtPayload) {
+    if(!authenticate(userData)) {
+        return 403;
+    }
+    const database: mongoDB.Db = await connect();
+    const taskCollection = database.collection("task");
+    const findQuery = {
+        _id: new mongoDB.ObjectId(taskId)
+    };
+    const response = taskCollection.findOne(findQuery);
+    return response
+}

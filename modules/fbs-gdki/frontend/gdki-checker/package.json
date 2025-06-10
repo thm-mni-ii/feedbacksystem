@@ -21,7 +21,8 @@
     "axios": "^1.9.0",
     "codemirror": "^6.0.1",
     "vue": "^3.3.4",
-    "vue-jsx": "^0.2.9"
+    "vue-jsx": "^0.2.9",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.4.0",

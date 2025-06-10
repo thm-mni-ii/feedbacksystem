@@ -9,5 +9,6 @@ router.delete("/api/v1/deleteTask:taskId", authenticateToken, deleteTask)
 router.put("/api/v1/putTask:taskId", authenticateToken, putTask)
 router.get("/api/v1/getTask:taskId", authenticateToken, getTask)
 router.get("api/v1/getTaskText:taskId", authenticateToken, getTaskText)
+router.get("api/v1/getAllAvailableTasks", authenticateToken, )
 
 export default router;
