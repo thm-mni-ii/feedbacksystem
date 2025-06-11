@@ -63,7 +63,7 @@ const editSkillDialog = ref(false)
 const skill = ref<Skill>({} as Skill)
 const isNew = ref<boolean>(true)
 
-const tickLabels = { 0: 'Easy 🌱', 1: 'Intermediate ⚙️', 2: 'Advanced 🔥', 3: 'Expert 🧠' }
+const tickLabels = { 0: 'Lvl 1 🌱', 1: 'Lvl 2 ⚙️', 2: 'Lvl 3 🔥', 3: 'Lvl 4🧠' }
 
 const snackbar = ref({
   show: false,
@@ -144,5 +144,8 @@ defineExpose({
   .responsive-dialog {
     width: 50%;
   }
+}
+::v-deep(.v-slider .v-slider__tick-label) {
+  font-size: 5px;
 }
 </style>
