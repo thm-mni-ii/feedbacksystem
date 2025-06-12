@@ -9,11 +9,13 @@ import {
   AfterViewInit,
   TemplateRef,
 } from "@angular/core";
-import * as mammoth from "mammoth";
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
 import { MatDialog } from "@angular/material/dialog";
+import * as mammoth from "mammoth";
+
+export type SubmissionMode = "code" | "wysiwyg" | "plain" | "free";
 
 @Component({
   selector: "app-submission-text",
@@ -22,23 +24,24 @@ import { MatDialog } from "@angular/material/dialog";
 })
 export class SubmissionTextComponent implements OnInit, AfterViewInit {
   toSubmit = "";
+  highlightedText = "";
+
   @Input() title?: string;
+  @Input() mode: SubmissionMode = "free";
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
+
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
   @ViewChild("errorDialog") errorDialogTemplate!: TemplateRef<any>;
+  @ViewChild("codeBlock", { static: false }) codeBlock!: ElementRef;
+
   processing: boolean = false;
   titleText: string = "Abgabe Text:";
   isCodeFile: boolean = false;
   fileType: string = "txt";
+  currentMode: SubmissionMode = "plain";
 
   extractionMode: "text" | "all" = "text";
   detectedFileType = "markup";
-
-  onExtractOptionSelected(mode: "text" | "all") {
-    this.extractionMode = mode;
-    this.fileInput.nativeElement.value = null;
-    this.fileInput.nativeElement.click();
-  }
 
   editorConfig = {
     editable: true,
@@ -61,6 +64,14 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
       this.titleText = this.title;
     }
 
+    this.currentMode = this.mode;
+
+    if (this.mode === "code") {
+      this.isCodeFile = true;
+    } else if (this.mode === "wysiwyg" || this.mode === "plain") {
+      this.isCodeFile = false;
+    }
+
     this.parsrService.testConnection().subscribe({
       error: (err) => {
         console.error("Backend nicht erreichbar:", err.message);
@@ -72,74 +83,43 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     this.highlightCode();
   }
 
-  toggleEditor() {
-    if (!this.isCodeFile) {
-      // Wenn wir vom Texteditor zum Codeeditor wechseln: HTML neu formatieren
-      const beautified = this.beautifyHtml(this.toSubmit);
-      this.toSubmit = this.decodeHtmlEntities(beautified); // Hier Entities decodieren
+  switchToMode(newMode: SubmissionMode) {
+    if (newMode === "code") {
+      this.isCodeFile = true;
+    } else {
+      if (this.isCodeFile && (newMode === "wysiwyg" || newMode === "plain")) {
+        // When switching from code to text editor: format HTML
+        const beautified = this.beautifyHtml(this.toSubmit);
+        this.toSubmit = this.decodeHtmlEntities(beautified);
+      }
+      this.isCodeFile = false;
     }
-    this.isCodeFile = !this.isCodeFile;
+    this.currentMode = newMode;
+    this.highlightCode();
+  }
+
+  toggleEditor() {
+    if (this.currentMode === "code") {
+      this.switchToMode("wysiwyg");
+    } else {
+      this.switchToMode("code");
+    }
+  }
+
+  onExtractOptionSelected(mode: "text" | "all") {
+    this.extractionMode = mode;
+    this.fileInput.nativeElement.value = null;
+    this.fileInput.nativeElement.click();
+  }
+
+  uploadFile() {
+    this.fileInput.nativeElement.click();
   }
 
   decodeHtmlEntities(html: string): string {
     const textarea = document.createElement("textarea");
     textarea.innerHTML = html;
     return textarea.value;
-  }
-
-  getLanguageByFileType(fileType: string): string {
-    const languages: { [key: string]: string } = {
-      js: "javascript",
-      ts: "typescript",
-      html: "markup",
-      css: "css",
-      python: "python",
-      java: "java",
-      cpp: "cpp",
-      ruby: "ruby",
-      php: "php",
-      json: "json",
-    };
-    return languages[fileType] || "javascript";
-  }
-
-  onTextChange(content: string) {
-    this.toSubmit = content;
-    this.detectedFileType = this.detectFileType(); // <--- NEU
-    this.update.emit({ content: this.toSubmit });
-    this.highlightCode();
-  }
-
-  onCodeChange(content: string) {
-    this.toSubmit = content;
-    this.detectedFileType = this.detectFileType();
-    console.log("Highlighting triggered", this.detectedFileType);
-    this.highlightCode(this.detectedFileType);
-    this.update.emit({ content: this.toSubmit });
-  }
-
-  @ViewChild("codeBlock", { static: false }) codeBlock!: ElementRef;
-
-  highlightCode(fileType?: string) {
-    if (this.toSubmit && this.isCodeFile && this.codeBlock) {
-      const detectedFileType = fileType || this.detectFileType();
-      this.detectedFileType = detectedFileType;
-      const language = this.getLanguageByFileType(detectedFileType);
-
-      let content = this.toSubmit;
-      if (language === "markup") {
-        content = this.formatHtml(content);
-      }
-
-      if (prism.languages[language]) {
-        const highlighted = prism.highlight(
-          content,
-          prism.languages[language],
-          language
-        );
-        this.codeBlock.nativeElement.innerHTML = highlighted;
-      }
-    }
   }
 
   beautifyHtml(html: string): string {
@@ -166,6 +146,22 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     const parser = new DOMParser();
     const document = parser.parseFromString(html, "text/html");
     return document.body.innerHTML;
+  }
+
+  getLanguageByFileType(fileType: string): string {
+    const languages: { [key: string]: string } = {
+      js: "javascript",
+      ts: "typescript",
+      html: "markup",
+      css: "css",
+      python: "python",
+      java: "java",
+      cpp: "cpp",
+      ruby: "ruby",
+      php: "php",
+      json: "json",
+    };
+    return languages[fileType] || "javascript";
   }
 
   detectFileType(): string {
@@ -196,6 +192,58 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     return "txt";
   }
 
+  highlightCode(fileType?: string) {
+    if (this.toSubmit && this.isCodeFile) {
+      const detectedFileType = fileType || this.detectFileType();
+      this.detectedFileType = detectedFileType;
+      const language = this.getLanguageByFileType(detectedFileType);
+
+      let content = this.toSubmit;
+      if (language === "markup") {
+        content = this.formatHtml(content);
+      }
+
+      if (prism.languages[language]) {
+        this.highlightedText = prism.highlight(
+          content,
+          prism.languages[language],
+          language
+        );
+
+        // Update code block if it exists
+        if (this.codeBlock) {
+          this.codeBlock.nativeElement.innerHTML = this.highlightedText;
+        }
+      } else {
+        console.warn(
+          "Keine passende Sprache für Prism gefunden:",
+          detectedFileType
+        );
+      }
+    }
+  }
+
+  updateSubmission(content: string) {
+    this.toSubmit = content;
+    this.detectedFileType = this.detectFileType();
+    this.update.emit({ content: this.toSubmit });
+    this.highlightCode();
+  }
+
+  onTextChange(content: string) {
+    this.toSubmit = content;
+    this.detectedFileType = this.detectFileType();
+    this.update.emit({ content: this.toSubmit });
+    this.highlightCode();
+  }
+
+  onCodeChange(content: string) {
+    this.toSubmit = content;
+    this.detectedFileType = this.detectFileType();
+    this.update.emit({ content: this.toSubmit });
+    this.highlightCode(this.detectedFileType);
+  }
+
   handleFileInput(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -211,19 +259,26 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     try {
       if (this.fileType === "pdf") {
         this.toSubmit = await this.extractPdfText(file, includeImages);
-        this.isCodeFile = false;
+        if (this.currentMode === "free") {
+          this.switchToMode("wysiwyg");
+        }
         this.fileType = "html";
       } else if (this.fileType === "docx") {
         this.toSubmit = await this.extractWordText(file, includeImages);
         this.toSubmit = this.beautifyHtml(this.toSubmit);
-        this.isCodeFile = false;
+        if (this.currentMode === "free") {
+          this.switchToMode("wysiwyg");
+        }
         this.fileType = "html";
       } else if (
         this.fileType === "txt" ||
         this.checkIfCodeFile(this.fileType)
       ) {
         this.toSubmit = await this.extractPlainText(file);
-        this.isCodeFile = this.checkIfCodeFile(this.fileType);
+        const isCode = this.checkIfCodeFile(this.fileType);
+        if (this.currentMode === "free") {
+          this.switchToMode(isCode ? "code" : "plain");
+        }
       } else {
         throw new Error("Dateityp nicht unterstützt.");
       }
@@ -285,7 +340,7 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
     });
   }
 
-  async extractWordText(file: File, includeImages: boolean): Promise<string> {
+  async extractWordText(file: File, includeImages = false): Promise<string> {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsArrayBuffer(file);
@@ -359,5 +414,24 @@ export class SubmissionTextComponent implements OnInit, AfterViewInit {
 
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+  }
+
+  get showModeSelector(): boolean {
+    return this.mode === "free";
+  }
+
+  get showToggleButton(): boolean {
+    return this.mode === "free";
+  }
+
+  get showExtractMenu(): boolean {
+    return this.currentMode !== "code";
+  }
+
+  get acceptedFileTypes(): string {
+    if (this.currentMode === "code") {
+      return ".pdf,.docx,.txt,.java,.ts,.js,.py,.cpp,.c,.go,.rb,.php,.html,.css";
+    }
+    return ".pdf,.docx,.txt,.java,.ts,.js,.py";
   }
 }

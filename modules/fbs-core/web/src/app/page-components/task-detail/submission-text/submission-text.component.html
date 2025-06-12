@@ -1,25 +1,63 @@
-<div style="display: flex; justify-content: space-between; align-items: center">
-  <h3>{{ titleText }}</h3>
+<div
+  style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  "
+>
+  <h3>{{ mode !== "plain" ? titleText : "" }}</h3>
 
-  <mat-menu #extractionMenu="matMenu">
-    <button mat-menu-item (click)="onExtractOptionSelected('text')">
-      Nur Text (PDF/Word)
+  <div *ngIf="showModeSelector" class="mode-selector">
+    <mat-button-toggle-group
+      [(value)]="currentMode"
+      (change)="switchToMode($event.value)"
+    >
+      <mat-button-toggle value="plain">Text</mat-button-toggle>
+      <mat-button-toggle value="wysiwyg">WYSIWYG</mat-button-toggle>
+      <mat-button-toggle value="code">Code</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <div class="action-buttons">
+    <ng-container *ngIf="showExtractMenu">
+      <mat-menu #extractionMenu="matMenu">
+        <button mat-menu-item (click)="onExtractOptionSelected('text')">
+          Nur Text (PDF/Word)
+        </button>
+        <button mat-menu-item (click)="onExtractOptionSelected('all')">
+          Alles (Text + Bilder)
+        </button>
+      </mat-menu>
+
+      <button mat-button color="primary" [matMenuTriggerFor]="extractionMenu">
+        Text aus Datei lesen
+      </button>
+    </ng-container>
+
+    <button
+      *ngIf="!showExtractMenu"
+      mat-button
+      color="primary"
+      (click)="uploadFile()"
+    >
+      Code aus Datei lesen
     </button>
-    <button mat-menu-item (click)="onExtractOptionSelected('all')">
-      Alles (Text + Bilder)
+
+    <button
+      *ngIf="showToggleButton"
+      mat-button
+      color="accent"
+      (click)="toggleEditor()"
+    >
+      {{ isCodeFile ? "Wechsel zu Text-Editor" : "Wechsel zu Code-Editor" }}
     </button>
-  </mat-menu>
 
-  <button mat-button color="primary" [matMenuTriggerFor]="extractionMenu">
-    Text aus Datei lesen
-  </button>
-
-  <button mat-button color="accent" (click)="toggleEditor()">
-    {{ isCodeFile ? "Wechsel zu Text-Editor" : "Wechsel zu Code-Editor" }}
-  </button>
-  <button mat-button color="warn" (click)="downloadSubmission()">
-    Abgabe herunterladen
-  </button>
+    <button mat-button color="warn" (click)="downloadSubmission()">
+      Abgabe herunterladen
+    </button>
+  </div>
 </div>
 
 <input
@@ -27,10 +65,9 @@
   #fileInput
   style="display: none"
   (change)="handleFileInput($event)"
-  accept=".pdf,.docx,.txt,.java,.ts,.js,.py"
+  [accept]="acceptedFileTypes"
 />
 
-<!-- Ladeanzeige -->
 <div *ngIf="processing" class="loading-overlay">
   <div class="loading-popup">
     <mat-spinner></mat-spinner>
@@ -38,8 +75,24 @@
   </div>
 </div>
 
-<!-- Normaler Texteditor -->
-<div *ngIf="!isCodeFile" class="editor-container">
+<div *ngIf="currentMode === 'plain' && !isCodeFile" class="editor-container">
+  <mat-form-field
+    style="width: 100%"
+    class="user-input-text"
+    appearance="outline"
+  >
+    <mat-label>{{ titleText }}</mat-label>
+    <textarea
+      style="height: 60px"
+      matInput
+      type="text"
+      (ngModelChange)="updateSubmission($event)"
+      [(ngModel)]="toSubmit"
+    ></textarea>
+  </mat-form-field>
+</div>
+
+<div *ngIf="currentMode === 'wysiwyg' && !isCodeFile" class="editor-container">
   <angular-editor
     [config]="editorConfig"
     [(ngModel)]="toSubmit"
@@ -49,7 +102,6 @@
   </angular-editor>
 </div>
 
-<!-- Code-Editor mit Highlighting -->
 <app-code-editor
   *ngIf="isCodeFile"
   [codeType]="getLanguageByFileType(fileType)"

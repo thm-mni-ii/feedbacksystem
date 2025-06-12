@@ -96,12 +96,19 @@
         ></app-submission-file>
         <app-submission-text
           *ngIf="submissionTypeOfTask() === 'text'"
+          mode="plain"
           (update)="updateSubmissionContent($event)"
         ></app-submission-text>
-        <app-submission-code
-          *ngIf="submissionTypeOfTask() === 'code'"
+        <app-submission-text
+          *ngIf="submissionTypeOfTask() === 'rich'"
+          mode="wysiwyg"
           (update)="updateSubmissionContent($event)"
-        ></app-submission-code>
+        ></app-submission-text>
+        <app-submission-text
+          *ngIf="submissionTypeOfTask() === 'code'"
+          mode="code"
+          (update)="updateSubmissionContent($event)"
+        ></app-submission-text>
         <app-submission-spreadsheet
           *ngIf="submissionTypeOfTask() === 'spreadsheet'"
           (update)="updateSubmissionContent($event)"

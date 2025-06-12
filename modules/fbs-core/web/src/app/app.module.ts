@@ -47,8 +47,6 @@ import { TaskPreviewComponent } from "./page-components/course-detail/task-previ
 import { SubmissionFileComponent } from "./page-components/task-detail/submission-file/submission-file.component";
 import { SubmissionTextComponent } from "./page-components/task-detail/submission-text/submission-text.component";
 import { SubmissionSpreadsheetComponent } from "./page-components/task-detail/submission-spreadsheet/submission-spreadsheet.component";
-import { SubmissionCodeComponent } from "./page-components/task-detail/submission-code/submission-code.component";
-import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
 import { ResultsComponent } from "./page-components/results/results.component";
 import { DropzoneComponent } from "./tool-components/dropzone/dropzone.component";
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
@@ -113,6 +111,8 @@ import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.comp
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component";
 import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
+import { AngularEditorModule } from "@kolkov/angular-editor";
+import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -164,8 +164,6 @@ export const httpInterceptorProviders = [
     SubmissionFileComponent,
     SubmissionTextComponent,
     SubmissionSpreadsheetComponent,
-    SubmissionCodeComponent,
-    CodeEditorComponent,
     ResultsComponent,
     MyCoursesComponent,
     LoginComponent,
@@ -209,6 +207,7 @@ export const httpInterceptorProviders = [
     FbsSciCheckComponent,
     SkipLinkComponent,
     UnstyledLinkComponent,
+    CodeEditorComponent,
   ],
   imports: [
     BrowserModule,
@@ -243,6 +242,7 @@ export const httpInterceptorProviders = [
     MatSortModule,
     I18NextModule.forRoot(),
     SqlPlaygroundModule,
+    AngularEditorModule,
   ],
   entryComponents: [
     DataprivacyDialogComponent,

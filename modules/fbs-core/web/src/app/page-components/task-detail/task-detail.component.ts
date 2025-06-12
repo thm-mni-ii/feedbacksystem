@@ -259,14 +259,17 @@ export class TaskDetailComponent implements OnInit {
 
   public submissionTypeOfTask(): String {
     const mediaType = this.task?.mediaType;
-    if (mediaType?.toLowerCase().includes("text")) {
-      return "text";
-    } else if (mediaType?.toLowerCase().includes("spreadsheet")) {
-      return "spreadsheet";
-    } else if (mediaType?.toLowerCase().includes("code")) {
-      return "code";
-    } else {
-      return "file";
+    switch (mediaType) {
+      case "text/plain":
+        return "text";
+      case "application/x-spreadsheet":
+        return "spreadsheet";
+      case "text/html":
+        return "rich";
+      case "text/sql":
+        return "code";
+      default:
+        return "file";
     }
   }
 
