@@ -61,6 +61,7 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
     MatStepperModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
+    MatMenuModule,
     DragDropModule,
   ],
   exports: [

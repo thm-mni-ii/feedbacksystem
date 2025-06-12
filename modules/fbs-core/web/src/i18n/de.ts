@@ -260,6 +260,8 @@ export const germanTranslation = {
   "dialog.task.new.toggle-no-deadline": "Ohne Deadline",
   "dialog.task.new.label-mediatype": "Medientyp",
   "dialog.task.new.option-text": "Text",
+  "dialog.task.new.option-rich-text": "Text mit Markup",
+  "dialog.task.new.option-code": "Code",
   "dialog.task.new.option-file": "Datei",
   "dialog.task.new.option-calculation": "Berechnung",
   "dialog.task.new.label-requirement": "Verbindlichkeit",

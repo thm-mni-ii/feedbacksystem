@@ -254,6 +254,8 @@ export const englishTranslation = {
   "dialog.task.new.toggle-no-deadline": "No deadline",
   "dialog.task.new.label-mediatype": "Media type",
   "dialog.task.new.option-text": "Text",
+  "dialog.task.new.option-rich-text": "Text with markup",
+  "dialog.task.new.option-code": "Code",
   "dialog.task.new.option-file": "File",
   "dialog.task.new.option-calculation": "Calculation",
   "dialog.task.new.label-requirement": "Requirement",
