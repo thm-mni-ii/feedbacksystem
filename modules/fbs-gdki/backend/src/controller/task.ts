@@ -86,6 +86,7 @@ export const getTaskText = async (req: Request, res: Response, ) => {
     res.sendStatus(500);
   }
 };
+/*
 export const getAllAvailableTasks = async (req: Request, res: Response, ) => {
   try {
     if (req.user == undefined) {
@@ -102,3 +103,4 @@ export const getAllAvailableTasks = async (req: Request, res: Response, ) => {
     res.sendStatus(500);
   }
 };
+*/

@@ -80,6 +80,7 @@ export async function getTaskTextById(userData: JwtPayload, taskId: string) {
     }
     return text;
 }
+/*
 export async function getAllTasks(userData: JwtPayload) {
     if(!authenticate(userData)) {
         return 403;
@@ -92,3 +93,4 @@ export async function getAllTasks(userData: JwtPayload) {
     const response = taskCollection.findOne(findQuery);
     return response
 }
+*/
