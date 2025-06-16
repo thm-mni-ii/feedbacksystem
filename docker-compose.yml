@@ -259,7 +259,7 @@ services:
       context: modules/fbs-eat/eat
     restart: always
     ports:
-      - 5002:8050
+      - 5001:8050
     networks:
       - fbs
     environment:
