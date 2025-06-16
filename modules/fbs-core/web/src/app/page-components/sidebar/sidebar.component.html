@@ -112,6 +112,15 @@
 
         <button
           mat-list-item
+          (click)="moveAndHideSidebar('/time-tracking')"
+          aria-label="Time Tracking"
+        >
+          <mat-icon aria-hidden="true">view_kanban</mat-icon>
+          <p>FBS Time Tracking</p>
+        </button>
+
+        <button
+          mat-list-item
           (click)="moveAndHideSidebar('/sci-check')"
           aria-label="FBS SciCheck öffnen"
         >

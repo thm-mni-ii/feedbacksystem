@@ -115,6 +115,7 @@ import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.comp
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component";
 import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
+import { FbsTimeTrackingComponent } from "./page-components/fbs-time-tracking/fbs-time-tracking.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -210,6 +211,7 @@ export const httpInterceptorProviders = [
     GroupDetailComponent,
     GroupDeregisterDialogComponent,
     FbsKanbanComponent,
+    FbsTimeTrackingComponent,
     FbsSciCheckComponent,
     SkipLinkComponent,
     UnstyledLinkComponent,
