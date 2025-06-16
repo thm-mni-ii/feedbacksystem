@@ -7,7 +7,7 @@ services:
     user: root
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3307:3306"
+      - "127.0.0.1:3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: twRuvi2ejllDdA4nnQLa08O
       MYSQL_DATABASE: fbs
@@ -40,8 +40,8 @@ services:
       - mongodb
       - minio
     ports:
-      - "127.0.0.1:8444:443"
-      - "127.0.0.1:8083:80"
+      - "127.0.0.1:443:443"
+      - "127.0.0.1:80:80"
     volumes:
       - ./data/upload-dir:/upload-dir
       - ./conf/fbs-core.api:/usr/local/fbs-core.api/conf
@@ -97,7 +97,7 @@ services:
       POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - 5433:5432
+      - 5432:5432
     volumes:
       - ./data/postgres2:/var/lib/postgresql/data
     networks:
@@ -133,7 +133,7 @@ services:
       POSTGRES_PASSWORD: R!7pWqY@K5zE3Xt&g9L1MfD
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "8433:5432"
+      - "8432:5432"
     volumes:
       - ./data/psql-sharing:/var/lib/postgresql/data
     networks:
@@ -175,8 +175,8 @@ services:
   minio:
     image: minio/minio:RELEASE.2022-10-29T06-21-33Z
     ports:
-      - "127.0.0.1:9003:9000"
-      - "127.0.0.1:9004:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - ./data/minio_storage:/data
     environment:
@@ -203,7 +203,7 @@ services:
       - psql-checker
       - psql-sharing
     ports:
-      - "127.0.0.1:8082:8081"
+      - "127.0.0.1:8081:8081"
     environment:
       BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
@@ -275,7 +275,7 @@ services:
       context: modules/fbs-collab
     restart: always
     ports:
-      - 1235:1234
+      - 1234:1234
     networks:
       - fbs
     environment:
