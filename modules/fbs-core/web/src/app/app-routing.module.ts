@@ -25,6 +25,7 @@ import { GroupDetailComponent } from "./page-components/group-detail/group-detai
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
+import { FbsTimeTrackingComponent } from "./page-components/fbs-time-tracking/fbs-time-tracking.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -117,6 +118,13 @@ const routes: Routes = [
       {
         path: "kanban",
         component: FbsKanbanComponent,
+        canActivate: [AuthGuard],
+      },
+
+      // Kanban
+      {
+        path: "time-tracking",
+        component: FbsTimeTrackingComponent,
         canActivate: [AuthGuard],
       },
 
