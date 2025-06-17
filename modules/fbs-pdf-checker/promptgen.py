@@ -50,7 +50,6 @@ def extract_score_robust(text):
     return None, None, cleaned_text
 
 async def run_evaluation(muster_preprocessed, abgabe_preprocessed, prompt_type="Tutor", model="qwen3:32b"):
-    print("LLM RUN_EVALUATION CALLED!")
     max_score = calculate_max_score(muster_preprocessed)
     system_msg = create_system_msg(muster_preprocessed, prompt_type)
     muster_json = json.dumps(muster_preprocessed, ensure_ascii=False)

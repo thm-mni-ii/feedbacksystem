@@ -34,12 +34,14 @@ async def process_pdf_and_score(
         if not muster_doc:
             raise ValueError(f"Keine Musterlösung für {course_id}/{task_id} gefunden.")
         muster_abgabe = muster_doc["abgabe"]
+        muster_preprocessed_all = preprocessor.preprocess_text(muster_abgabe)
 
         aufgaben_bewertungen = []
         for task in preprocessed:
             title = task["title"]
             abgabe_preprocessed = task["preprocessed"]
 
+            muster_sections = muster_preprocessed_all
 
             result = await promptgen.run_evaluation(muster_sections, abgabe_preprocessed)
             result["title"] = title
