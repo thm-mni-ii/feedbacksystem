@@ -310,6 +310,19 @@ services:
     depends_on:
       - qcm-backend
 
+  pdf-checker:
+    build:
+      context: ./modules/fbs-pdf-checker
+    ports:
+      - "4444:80"
+    networks:
+      - fbs
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URL: "mongodb://mongodb:12345"
+      LLM_URL: "http://example:1234/v1"
+
 networks:
   classroom:
   fbs:
