@@ -1,8 +1,16 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import DialogConfirm from '@/dialog/DialogConfirm.vue'
+import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+const manageSkill = (skillId: number) => {
+  router.push(`/manageSkill/${skillId}`)
+}
 
 const deleteDialogRef = ref()
+const skillDialogRef = ref()
 
 const deleteSkill = async (id: number) => {
   const confirmed = await deleteDialogRef.value.openDialog(
@@ -17,9 +25,25 @@ const deleteSkill = async (id: number) => {
     console.log('Delete cancelled')
   }
 }
+const editSkill = async () => {
+  const result = await skillDialogRef.value.openDialog(123, {
+    name: props.name,
+    description: props.description,
+    difficulty: props.difficulty,
+    progress: props.progress,
+    id: 123
+  })
+
+  if (result) {
+    console.log('Skill wurde bearbeitet')
+  } else {
+    console.log('Bearbeiten abgebrochen')
+  }
+}
 
 const props = defineProps<{
   difficulty: number
+  id: number
   name: string
   progress: number
   description: string
@@ -44,6 +68,9 @@ const difficultyLabel = computed(() => {
 })
 </script>
 <template>
+  <DialogConfirm ref="deleteDialogRef" />
+  <DialogAddSkill ref="skillDialogRef" />
+
   <v-card variant="tonal" class="pa-4">
     <div class="d-flex justify-space-between align-center mb-2">
       <div class="text-h6">{{ name }}</div>
@@ -71,20 +98,17 @@ const difficultyLabel = computed(() => {
 
     <v-card-actions>
       <v-btn class="bg-primary-light">Learn for Skill</v-btn>
+      <v-btn prepend-icon="mdi-cog" color="dark-grey" variant="tonal" @click="manageSkill(props.id)"
+        >Manage skill</v-btn
+      >
       <v-tooltip text="Edit Skill" location="bottom">
-        <template v-slot:activator="{ props }">
-          <v-btn
-            v-bind="props"
-            icon="mdi-pencil"
-            size="x-small"
-            color="black"
-            @click="console.log('edit')"
-          >
+        <template #activator="{ props }">
+          <v-btn v-bind="props" icon="mdi-pencil" size="x-small" color="black" @click="editSkill()">
           </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip text="Delete Skill" location="bottom">
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-btn
             v-bind="props"
             icon="mdi-delete"
@@ -98,7 +122,6 @@ const difficultyLabel = computed(() => {
       </v-tooltip>
     </v-card-actions>
   </v-card>
-  <DialogConfirm ref="deleteDialogRef" />
 </template>
 <style scoped>
 .wrap-subtitle {

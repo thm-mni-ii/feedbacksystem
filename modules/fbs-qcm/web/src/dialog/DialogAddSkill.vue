@@ -24,28 +24,28 @@
               <v-text-field v-model="skill.name" label="Name"></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field v-model="skill.description" label="Description"></v-text-field>
+              <v-textarea v-model="skill.description" label="Description"></v-textarea>
               <v-switch v-model="skill.isPublic" label="is Public" color="primary"></v-switch>
             </v-col>
             <v-col cols="12">
               <div class="text-caption">Difficulty</div>
-
               <v-slider
                 v-model="skill.difficulty"
                 :max="3"
                 :ticks="tickLabels"
                 show-ticks="always"
+                thumb-color="primary"
                 step="1"
                 tick-size="4"
-                track-color="primary"
               ></v-slider>
             </v-col>
           </v-row>
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="_cancel">Cancel</v-btn>
-        <v-btn v-if="isNew" @click="createSkill">Add</v-btn>
+        <v-btn variant="tonal" @click="_cancel">Cancel</v-btn>
+        <v-btn v-if="isNew" color="primary" variant="tonal" @click="createSkill">Add</v-btn>
+        <v-btn v-else color="primary" variant="tonal" @click="updateSkill">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -54,7 +54,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type Skill from '@/model/Skill'
-import type Course from '@/model/Course'
 import skillService from '@/services/skill.service'
 import catalogService from '@/services/catalog.service'
 
@@ -82,6 +81,18 @@ const createSkill = () => {
     .catch((error) => {
       console.log(error)
       openSnackbar('Error creating Skill: ' + error.response.data)
+    })
+}
+
+const updateSkill = () => {
+  skillService
+    .updateSkill(skill.value.id, skill.value)
+    .then(() => {
+      _confirm()
+    })
+    .catch((error) => {
+      console.log(error)
+      openSnackbar('Error updating Skill: ' + error.response.data)
     })
 }
 

@@ -44,11 +44,11 @@ const createNewSkill = (courseId: number) => {
       </div>
       <div v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
         <v-tooltip text="Edit course" location="bottom">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
               icon="mdi-cog"
-              size="small"
+              size="x-small"
               color="black"
               @click="console.log('works')"
             >
@@ -56,11 +56,11 @@ const createNewSkill = (courseId: number) => {
           </template>
         </v-tooltip>
         <v-tooltip text="Tooltip" location="bottom">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
-              class="mx-1"
-              size="small"
+              class="mx-2"
+              size="x-small"
               icon="mdi-pencil"
               color="black"
               @click="console.log('edit')"
@@ -69,11 +69,11 @@ const createNewSkill = (courseId: number) => {
           </template>
         </v-tooltip>
         <v-tooltip text="Create new Skill" location="bottom">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
               icon="mdi-plus"
-              size="small"
+              size="x-small"
               color="black"
               @click="createNewSkill()"
             >

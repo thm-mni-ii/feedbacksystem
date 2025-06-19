@@ -31,6 +31,14 @@ const skillData = [
   }
 ]
 
+const skill = {
+  id: 4,
+  name: 'C++',
+  difficulty: 4,
+  description:
+    'C++ is used to create computer programs, and is one of the most used language in game development.'
+} as Skill
+
 const studyProgress = [
   { skillId: 1, progress: 23 },
   { skillId: 2, progress: 65 },
@@ -52,11 +60,23 @@ class SkillService {
     //   }
     // )
   }
+  getSkill(skillId: string): Promise<AxiosResponse<Skill>> {
+    return Promise.resolve({
+      data: skill as AxiosResponse<Skill>
+    })
+    // return axios.get(
+    //   `/api_v1/skills/${skillId}`,
+    //   {
+    //     headers: {
+    //       authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+    //     }
+    //   }
+    // )
+  }
   getAllStudyProgress(courseId: number) {
     return Promise.resolve({
       data: studyProgress as AxiosResponse<[]>
     })
-
     // return axios.get(
     //   `api_v1/skillProgress/${course.id}/${skillId}`,
     //   {
@@ -79,6 +99,15 @@ class SkillService {
         authorization: `Bearer ${localStorage.getItem('jsessionid')}`
       }
     })
+  }
+  removeQuestion(questionId: number) {
+    console.log(questionId)
+    console.log('REMOVE QUESTION FROM SKILL')
+    // return axios.delete(`/api_v1/skill/removeQuestion`, question, {
+    //   headers: {
+    //     authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+    //   }
+    // })
   }
 }
 

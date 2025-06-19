@@ -3,7 +3,7 @@
     <v-card :title="deleteTitle" :text="deleteMessage">
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="tonal" color="red" @click="_cancel"> Cancel </v-btn>
+        <v-btn variant="tonal" @click="_cancel"> Cancel </v-btn>
         <v-btn variant="tonal" color="primary-dark" @click="_confirm">
           {{ deleteConfirmBtnText }}
         </v-btn>

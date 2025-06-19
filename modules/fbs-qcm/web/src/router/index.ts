@@ -63,6 +63,11 @@ const router = createRouter({
       path: '/questionCatalogs',
       name: 'questionCatalogs',
       component: () => import('../views/CatalogOverview.vue')
+    },
+    {
+      path: '/manageSkill/:skillId?',
+      name: 'manageSkill',
+      component: () => import('../views/ManageSkillView.vue')
     }
     // {
     //   path: "/:pathMatch(.*)*",

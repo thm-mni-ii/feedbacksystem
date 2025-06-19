@@ -10,6 +10,7 @@ import StudyHeader from '@/components/StudyHeader.vue'
 import { useRoute } from 'vue-router'
 import { watch, computed } from 'vue'
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
+import DialogAddSkill from '../dialog/DialogAddSkill.vue'
 
 const catalogs = ref<Catalog[]>([])
 const studyProgress = ref<{ skillId: number; progress: number }[]>([])
@@ -64,7 +65,7 @@ onMounted(async () => {
     :name="courseInformation.name ?? ''"
     :description="courseInformation.description ?? ''"
     :progress="averageProgress ?? 0"
-    :totalSkills="skills.length ?? 0"
+    :total-skills="skills.length ?? 0"
   />
   <v-row justify="center" class="mt-4">
     <v-col v-for="(skill, index) in skills" :key="index" cols="8" md="4" class="ma-2">
