@@ -7,6 +7,7 @@ import skillService from '@/services/skill.service'
 import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
 import DialogAddQuestion from '@/dialog/DialogAddQuestion.vue'
 import DialogConfirm from '@/dialog/DialogConfirm.vue'
+import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
 
 import type Question from '@/model/Question'
 
@@ -23,6 +24,7 @@ const snackbarText = ref('')
 const dialogEditQuestion = ref<typeof DialogEditQuestion>()
 const dialogAddQuestion = ref<typeof DialogAddQuestion>()
 const dialogRemoveQuestion = ref<typeof DialogConfirm>()
+const dialogEditSkill = ref<typeof DialogAddSkill>()
 
 const difficultyColor = computed(
   () =>
@@ -57,7 +59,7 @@ onMounted(() => {
   fetchSkill()
 })
 
-const backToDashboard = () => router.push('/study/2')
+const backToDashboard = () => router.back()
 
 const openSnackbar = (text: string) => {
   snackbarText.value = text
@@ -100,21 +102,27 @@ const removeQuestion = async (question: Question) => {
   }
 }
 
-const addQuestion = async () => {
-  if (!dialogEditQuestion.value) return
-  const result = await dialogEditQuestion.value.openDialog()
-  if (result) {
-    openSnackbar('Question created')
-    loadQuestions()
-  }
-}
-
 const addQuestionToSkill = async () => {
   if (!dialogAddQuestion.value) return
-  const result = await dialogAddQuestion.value.openDialog()
+  const result = await dialogAddQuestion.value.openDialog(allQuestions.value, false)
   if (result) {
     openSnackbar('Question added to skill')
     loadQuestions()
+  }
+}
+const editSkill = async () => {
+  const result = await dialogEditSkill.value.openDialog(123, {
+    name: skill.value.name,
+    description: skill.value.description,
+    difficulty: skill.value.difficulty,
+    progress: skill.value.progress,
+    id: 123
+  })
+
+  if (result) {
+    console.log('Skill wurde bearbeitet')
+  } else {
+    console.log('Bearbeiten abgebrochen')
   }
 }
 </script>
@@ -122,6 +130,7 @@ const addQuestionToSkill = async () => {
 <template>
   <DialogEditQuestion ref="dialogEditQuestion" />
   <DialogAddQuestion ref="dialogAddQuestion" />
+  <DialogAddSkill ref="dialogEditSkill" />
   <DialogConfirm ref="dialogRemoveQuestion" />
 
   <v-card
@@ -155,7 +164,7 @@ const addQuestionToSkill = async () => {
             size="small"
             color="primary"
             variant="flat"
-            @click="createNewSkill()"
+            @click="editSkill()"
           >
             <v-icon icon="mdi-pencil" />
           </v-btn>

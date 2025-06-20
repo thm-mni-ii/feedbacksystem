@@ -65,7 +65,7 @@ defineExpose({
   <v-dialog v-model="AddQuestionDialog" class="w-100 w-md-75">
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="text-h4 ma-2 border-b-md border-primary">Choose a Question</span>
+        <span class="text-h4 ma-2 border-b-md border-primary">Select a Question</span>
         <v-btn icon variant="text" @click="_cancel">
           <v-icon>mdi-close</v-icon>
         </v-btn>
