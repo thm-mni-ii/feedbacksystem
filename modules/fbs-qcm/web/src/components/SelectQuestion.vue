@@ -18,8 +18,8 @@
           :key="tag.tag"
           :color="selectedTags.includes(tag.tag) ? 'primary' : 'grey-darken-1'"
           label
-          @click="toggleTag(tag.tag)"
           class="cursor-pointer ma-1"
+          @click="toggleTag(tag.tag)"
         >
           {{ tag.tag }} ({{ tag.count }})
         </v-chip>
@@ -34,8 +34,8 @@
           :key="tag"
           closable
           color="primary"
-          @click:close="removeTag(tag)"
           class="ma-1"
+          @click:close="removeTag(tag)"
         >
           {{ tag }}
         </v-chip>
@@ -47,9 +47,7 @@
 
     <div class="mt-6">
       <div class="mt-6">
-        <div class="text-h6 border-b-md border-primary">
-          Which question would you like to forward to?
-        </div>
+        <div class="text-h6 border-b-md border-primary">Select a Question</div>
 
         <div class="mt-2" style="max-height: 300px; overflow-y: auto">
           <v-virtual-scroll :items="filteredQuestions" height="300" item-height="56">
@@ -137,6 +135,7 @@ const scoreValidationError = ref('')
 const correctScore = ref<number | null>(null)
 const incorrectScore = ref<number | null>(null)
 const currentQuestionVar = ref(props.currentQuestion)
+const isInCatalogEditPage = () => window.location.pathname.includes('/editCatalog')
 
 const fetchTags = async () => {
   try {
@@ -173,20 +172,22 @@ const fetchCurrentScores = async () => {
 
 onMounted(() => {
   fetchTags()
-  fetchCurrentScores()
+  if (isInCatalogEditPage()) {
+    fetchCurrentScores()
+  }
 })
-
 watch(
   () => props.show,
   (newValue) => {
     if (newValue) {
       fetchTags()
-      fetchCurrentScores()
+      if (isInCatalogEditPage()) {
+        fetchCurrentScores()
+      }
       scoreValidationError.value = ''
     }
   }
 )
-
 const filteredQuestions = computed(() => {
   let filtered = props.questionOptions
 

@@ -65,7 +65,7 @@ defineExpose({
   <v-dialog v-model="AddQuestionDialog" class="w-100 w-md-75">
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="text-h4 ma-2 border-b-md border-primary">Choose a Question</span>
+        <span class="text-h4 ma-2 border-b-md border-primary">Select a Question</span>
         <v-btn icon variant="text" @click="_cancel">
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -79,7 +79,7 @@ defineExpose({
         @question-changed="handleQuestionChange"
       ></SelectQuestion>
       <v-divider></v-divider>
-      <v-card-text v-if="showInput" class="mt-6">
+      <v-card-text v-if="showInputVar" class="mt-6">
         <div class="border-b-md border-primary mb-1 pb-1">
           <div class="text-h6">Forwarding Threshold</div>
           <small class="text-caption">
@@ -92,7 +92,7 @@ defineExpose({
           step="5"
           :error-messages="scoreValidationError ? [scoreValidationError] : []"
         >
-          <template v-slot:append>
+          <template #append>
             <v-text-field
               v-model="nodeData"
               density="compact"

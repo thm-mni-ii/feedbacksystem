@@ -12,7 +12,7 @@
     </template>
   </v-snackbar>
 
-  <v-dialog v-model="editCatalogDialog" width="500px">
+  <v-dialog v-model="editSkillDialog" class="responsive-dialog">
     <v-card>
       <v-card-title>
         <span>Add New Skill</span>
@@ -21,15 +21,31 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-text-field v-model="catalog.name" label="Name"></v-text-field>
-              <v-switch v-model="catalog.isPublic" label="is Public" color="primary"></v-switch>
+              <v-text-field v-model="skill.name" label="Name"></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-textarea v-model="skill.description" label="Description"></v-textarea>
+              <v-switch v-model="skill.isPublic" label="is Public" color="primary"></v-switch>
+            </v-col>
+            <v-col cols="12">
+              <div class="text-caption">Difficulty</div>
+              <v-slider
+                v-model="skill.difficulty"
+                :max="3"
+                :ticks="tickLabels"
+                show-ticks="always"
+                thumb-color="primary"
+                step="1"
+                tick-size="4"
+              ></v-slider>
             </v-col>
           </v-row>
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="_cancel">Cancel</v-btn>
-        <v-btn v-if="isNew" @click="createCatalog">Add</v-btn>
+        <v-btn variant="tonal" @click="_cancel">Cancel</v-btn>
+        <v-btn v-if="isNew" color="primary" variant="tonal" @click="createSkill">Add</v-btn>
+        <v-btn v-else color="primary" variant="tonal" @click="updateSkill">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -37,18 +53,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type Catalog from '@/model/Catalog'
-import axios from 'axios'
-import type Course from '@/model/Course'
-import courseService from '@/services/course.service'
+import type Skill from '@/model/Skill'
+import skillService from '@/services/skill.service'
 import catalogService from '@/services/catalog.service'
 
-const editCatalogDialog = ref(false)
+const editSkillDialog = ref(false)
 
-const catalog = ref<Catalog>({} as Catalog)
-const allCourses = ref<Course[]>([])
-const allCatalogs = ref<Catalog[]>([])
+const skill = ref<Skill>({} as Skill)
 const isNew = ref<boolean>(true)
+
+const tickLabels = { 0: 'Lvl 1 🌱', 1: 'Lvl 2 ⚙️', 2: 'Lvl 3 🔥', 3: 'Lvl 4🧠' }
 
 const snackbar = ref({
   show: false,
@@ -57,51 +71,28 @@ const snackbar = ref({
   timeout: 5000
 })
 
-const getMyCourses = () => {
-  courseService
-    .getMyCourses()
-    .then((response) => {
-      allCourses.value = response.data as Course[]
-    })
-    .catch((error) => {
-      console.log(error)
-    })
-}
-
-const updateCatalogs = () => {
-  // get all catalogs from the course selected
-  if (catalog.value.course) {
-    axios
-      .get(`api_v1/catalogs/${catalog.value.course}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-        }
-      })
-      .then((response) => {
-        allCatalogs.value = response.data as Catalog[]
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }
-}
-
-const changeCourse = () => {
-  catalog.value.requirements = [] as number[]
-
-  updateCatalogs()
-}
-
-const createCatalog = () => {
-  console.log(catalog.value)
-  catalogService
-    .postCatalog(catalog.value)
+const createSkill = () => {
+  console.log(skill.value)
+  skillService
+    .createNewSkill(skill.value)
     .then(() => {
       _confirm()
     })
     .catch((error) => {
       console.log(error)
-      openSnackbar('Error creating catalog: ' + error.response.data)
+      openSnackbar('Error creating Skill: ' + error.response.data)
+    })
+}
+
+const updateSkill = () => {
+  skillService
+    .updateSkill(skill.value.id, skill.value)
+    .then(() => {
+      _confirm()
+    })
+    .catch((error) => {
+      console.log(error)
+      openSnackbar('Error updating Skill: ' + error.response.data)
     })
 }
 
@@ -125,19 +116,15 @@ const openSnackbar = (text: string) => {
 // Promise resolve
 const resolvePromise = ref<Function | undefined>(undefined)
 
-const openDialog = (courseId: number, editCatalog?: Catalog) => {
-  if (editCatalog !== undefined) {
-    //as new instance
-    catalog.value = { ...editCatalog }
+const openDialog = (courseId: number, editSkill?: Skill) => {
+  if (editSkill !== undefined) {
+    skill.value = { ...editSkill }
     isNew.value = false
   } else {
     isNew.value = true
-    catalog.value.course = courseId
+    skill.value.course = courseId
   }
-  editCatalogDialog.value = true
-
-  getMyCourses()
-  updateCatalogs()
+  editSkillDialog.value = true
 
   return new Promise((resolve) => {
     resolvePromise.value = resolve
@@ -145,12 +132,12 @@ const openDialog = (courseId: number, editCatalog?: Catalog) => {
 }
 
 const _confirm = () => {
-  editCatalogDialog.value = false
+  editSkillDialog.value = false
   resolvePromise.value && resolvePromise.value(true)
 }
 
 const _cancel = () => {
-  editCatalogDialog.value = false
+  editSkillDialog.value = false
   resolvePromise.value && resolvePromise.value(false)
 }
 
@@ -159,3 +146,17 @@ defineExpose({
   openDialog
 })
 </script>
+<style scoped>
+.responsive-dialog {
+  width: 75%;
+}
+
+@media (min-width: 1000px) {
+  .responsive-dialog {
+    width: 50%;
+  }
+}
+::v-deep(.v-slider .v-slider__tick-label) {
+  font-size: 5px;
+}
+</style>
