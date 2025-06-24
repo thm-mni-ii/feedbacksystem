@@ -7,8 +7,10 @@ import de.thm.ii.fbs.services.persistence.TaskService
 import de.thm.ii.fbs.services.persistence.storage.MinioStorageService
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
+@Service
 class PdfCheckerService extends CheckerService with CheckerServiceOnMainFileUpload {
   @Autowired
   private val restTemplate: RestTemplate = null
