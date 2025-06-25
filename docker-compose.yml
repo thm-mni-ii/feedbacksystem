@@ -330,6 +330,7 @@ services:
       - JWT_SECRET=8Dsupersecurekeydf0
       - MONGODB_URL=mongodb://mongodb_gdki:27017/
       - FBS_BASE_URL=https://core:443
+      - LLM_URL=http://host.docker.internal:1338/v1/chat/completions
     depends_on:
       - mongodb_gdki
 
