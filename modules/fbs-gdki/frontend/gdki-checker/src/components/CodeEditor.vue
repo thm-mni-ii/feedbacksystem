@@ -75,16 +75,46 @@ onMounted(async () => {
           minHeight: "100%"
         },
         ".cm-editor": {
-          height: "100%"
-        },
-        ".cm-focused": {
-          outline: "none"
-        },
-        // Enhanced syntax highlighting - these classes are provided by the python() extension
-        "&.cm-editor .cm-content": {
+          height: "100%",
           backgroundColor: "#ffffff"
         },
-        // Python syntax highlighting colors
+        ".cm-focused": {
+          outline: "2px solid #007acc",
+          outlineOffset: "-2px"
+        },
+        ".cm-activeLine": {
+          backgroundColor: "#f0f8ff !important"
+        },
+        ".cm-selectionBackground": {
+          backgroundColor: "#b3d4fc !important",
+          borderRadius: "0px"
+        },
+        ".cm-selectionMatch": {
+          backgroundColor: "#b3d4fc !important"
+        },
+        ".cm-searchMatch": {
+          backgroundColor: "#ffff00 !important",
+          outline: "1px solid #ff8c00"
+        },
+        ".cm-line": {
+          position: "relative"
+        },
+        ".cm-cursor": {
+          borderLeft: "2px solid #000000",
+          height: "1.2em"
+        },
+        ".cm-dropCursor": {
+          borderLeft: "2px solid #007acc"
+        },
+        ".cm-gutters": {
+          backgroundColor: "#f8f8f8",
+          borderRight: "1px solid #e1e1e1"
+        },
+        ".cm-lineNumbers .cm-gutterElement": {
+          color: "#999999 !important"
+        },
+        
+        // Enhanced Python syntax highlighting colors
         ".tok-keyword": { 
           color: "#0000ff !important", 
           fontWeight: "bold" 
@@ -92,18 +122,23 @@ onMounted(async () => {
         ".tok-string": { 
           color: "#008000 !important" 
         },
+        ".tok-string2": { 
+          color: "#008000 !important" 
+        },
         ".tok-comment": { 
           color: "#808080 !important", 
           fontStyle: "italic" 
         },
         ".tok-number": { 
-          color: "#ff6600 !important" 
+          color: "#ff6600 !important",
+          fontWeight: "500"
         },
         ".tok-operator": { 
-          color: "#000000 !important" 
+          color: "#666666 !important",
+          fontWeight: "bold"
         },
         ".tok-punctuation": { 
-          color: "#000000 !important" 
+          color: "#333333 !important" 
         },
         ".tok-function": { 
           color: "#795e26 !important",
@@ -123,6 +158,121 @@ onMounted(async () => {
         ".tok-docstring": {
           color: "#008000 !important",
           fontStyle: "italic"
+        },
+        ".tok-className": {
+          color: "#267f99 !important",
+          fontWeight: "bold"
+        },
+        ".tok-propertyName": {
+          color: "#0451a5 !important"
+        },
+        ".tok-literal": {
+          color: "#0000ff !important",
+          fontWeight: "bold"
+        },
+        ".tok-self": {
+          color: "#9b59b6 !important",
+          fontWeight: "bold",
+          fontStyle: "italic"
+        },
+        ".tok-bool": {
+          color: "#0000ff !important",
+          fontWeight: "bold"
+        },
+        ".tok-null": {
+          color: "#0000ff !important",
+          fontWeight: "bold"
+        },
+        ".tok-escape": {
+          color: "#ee0000 !important",
+          fontWeight: "bold"
+        },
+        ".tok-invalid": {
+          color: "#ff0000 !important",
+          backgroundColor: "#ffeeee !important",
+          textDecoration: "underline wavy red"
+        },
+        ".tok-meta": {
+          color: "#555555 !important"
+        },
+        ".tok-atom": {
+          color: "#219 !important"
+        },
+        ".tok-bracket": {
+          color: "#997 !important",
+          fontWeight: "bold"
+        },
+        ".tok-tag": {
+          color: "#170 !important",
+          fontWeight: "bold"
+        },
+        ".tok-attribute": {
+          color: "#00c !important"
+        },
+        ".tok-link": {
+          color: "#00c !important",
+          textDecoration: "underline"
+        },
+        ".tok-strikethrough": {
+          textDecoration: "line-through"
+        },
+        ".tok-emphasis": {
+          fontStyle: "italic"
+        },
+        ".tok-strong": {
+          fontWeight: "bold"
+        },
+        ".tok-heading": {
+          fontWeight: "bold",
+          color: "#00c !important"
+        },
+        ".tok-regexp": {
+          color: "#d44950 !important"
+        },
+        ".tok-unit": {
+          color: "#164 !important"
+        },
+        ".tok-content": {
+          color: "#219 !important"
+        },
+        ".tok-labelName": {
+          color: "#0451a5 !important",
+          fontWeight: "bold"
+        },
+        ".tok-typeName": {
+          color: "#267f99 !important",
+          fontWeight: "bold"
+        },
+        ".tok-namespace": {
+          color: "#0451a5 !important"
+        },
+        ".tok-macroName": {
+          color: "#795e26 !important",
+          fontWeight: "bold"
+        },
+        ".tok-constant": {
+          color: "#0451a5 !important",
+          fontWeight: "bold"
+        },
+        ".tok-moduleKeyword": {
+          color: "#af00db !important",
+          fontWeight: "bold"
+        },
+        ".tok-controlKeyword": {
+          color: "#af00db !important",
+          fontWeight: "bold"
+        },
+        ".tok-operatorKeyword": {
+          color: "#af00db !important",
+          fontWeight: "bold"
+        },
+        ".tok-modifier": {
+          color: "#0451a5 !important",
+          fontWeight: "bold"
+        },
+        ".tok-special": {
+          color: "#e45649 !important",
+          fontWeight: "bold"
         }
       }, { dark: false }),
       EditorView.lineWrapping
@@ -142,10 +292,9 @@ const saveCode = async () => {
 const hint = async () => {
     hints.value = "Loading hint...";
     try {
-        const result = await codeService.getHint("685118ee475d85b7e5feba18", editorView.state.doc.toString())
+        const result = await codeService.getHint("6863f874ace6c37e391a41a9", editorView.state.doc.toString())
         const res1 = result.data.choices[0].message.content;
         console.log(res1);
-        // Assuming the result contains the hint text
         if (result && result.data) {
             hints.value = res1;
         } else if (result) {
@@ -210,14 +359,24 @@ const runCode = async () => {
     isRunning.value = true
     output.value = "Running...\n";
     const response = await codeService.executeCode("1", editorView.state.doc.toString());
+    console.log(response);
     if(response.data.status == "error") {
         const errorMessage = `${response.data.error.name}\n${response.data.error.message}`;
         output.value = errorMessage;
         isRunning.value = false;
         return;
     }
-    output.value = response.data.results[0].text;
-    isRunning.value = false
+    if(response.data.status != "ok") {
+      output.value = "Error creating code"
+      isRunning.value = false
+    }
+    if(response.data.results.length === 0) {
+      output.value = "No print statement"
+      isRunning.value = false
+    } else {
+      output.value = response.data.results[0].text;
+      isRunning.value = false
+    }
 }
 
 onBeforeUnmount(() => {
@@ -431,6 +590,21 @@ onBeforeUnmount(() => {
   height: 100% !important;
 }
 
+.editor-container :deep(.cm-line) {
+  position: relative;
+  z-index: 1;
+}
+
+.editor-container :deep(.cm-selectionLayer) {
+  z-index: -1;
+}
+
+.editor-container :deep(.cm-selectionBackground) {
+  position: absolute !important;
+  pointer-events: none;
+  mix-blend-mode: normal !important;
+}
+
 /* Additional syntax highlighting support */
 .editor-container :deep(.cm-editor .cm-content) {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace !important;
@@ -464,10 +638,52 @@ onBeforeUnmount(() => {
     color: #ffb74d;
   }
 
-  /* Dark mode syntax highlighting */
+  /* Enhanced dark mode syntax highlighting */
   .editor-container :deep(.cm-editor) {
     background-color: #1e1e1e !important;
     color: #d4d4d4 !important;
+  }
+  
+  .editor-container :deep(.cm-activeLine) {
+    background-color: #2d2d30 !important;
+  }
+  
+  .editor-container :deep(.cm-selectionBackground) {
+    background-color: #264f78 !important;
+    border-radius: 0px;
+    position: absolute !important;
+    pointer-events: none;
+  }
+  
+  .editor-container :deep(.cm-selectionMatch) {
+    background-color: #264f78 !important;
+  }
+  
+  .editor-container :deep(.cm-searchMatch) {
+    background-color: #515c6a !important;
+    outline: "1px solid #007acc"
+  }
+  
+  .editor-container :deep(.cm-line) {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .editor-container :deep(.cm-selectionLayer) {
+    z-index: -1;
+  }
+  
+  .editor-container :deep(.cm-cursor) {
+    border-left-color: #ffffff !important;
+  }
+  
+  .editor-container :deep(.cm-gutters) {
+    background-color: #252526 !important;
+    border-right-color: #3e3e42 !important;
+  }
+  
+  .editor-container :deep(.cm-lineNumbers .cm-gutterElement) {
+    color: #858585 !important;
   }
   
   .editor-container :deep(.tok-keyword) { 
@@ -475,6 +691,10 @@ onBeforeUnmount(() => {
   }
   
   .editor-container :deep(.tok-string) { 
+    color: #ce9178 !important;
+  }
+  
+  .editor-container :deep(.tok-string2) { 
     color: #ce9178 !important;
   }
   
@@ -486,12 +706,137 @@ onBeforeUnmount(() => {
     color: #b5cea8 !important;
   }
   
+  .editor-container :deep(.tok-operator) { 
+    color: #d4d4d4 !important;
+  }
+  
   .editor-container :deep(.tok-function) { 
     color: #dcdcaa !important;
   }
   
   .editor-container :deep(.tok-variableName) { 
     color: #9cdcfe !important;
+  }
+  
+  .editor-container :deep(.tok-definition) {
+    color: #dcdcaa !important;
+  }
+  
+  .editor-container :deep(.tok-builtin) {
+    color: #4ec9b0 !important;
+  }
+  
+  .editor-container :deep(.tok-className) {
+    color: #4ec9b0 !important;
+  }
+  
+  .editor-container :deep(.tok-propertyName) {
+    color: #9cdcfe !important;
+  }
+  
+  .editor-container :deep(.tok-literal) {
+    color: #569cd6 !important;
+  }
+  
+  .editor-container :deep(.tok-self) {
+    color: #c586c0 !important;
+  }
+  
+  .editor-container :deep(.tok-bool) {
+    color: #569cd6 !important;
+  }
+  
+  .editor-container :deep(.tok-null) {
+    color: #569cd6 !important;
+  }
+  
+  .editor-container :deep(.tok-escape) {
+    color: #d7ba7d !important;
+  }
+  
+  .editor-container :deep(.tok-invalid) {
+    color: #f44747 !important;
+    background-color: #5a1d1d !important;
+  }
+  
+  .editor-container :deep(.tok-meta) {
+    color: #808080 !important;
+  }
+  
+  .editor-container :deep(.tok-atom) {
+    color: #4fc1ff !important;
+  }
+  
+  .editor-container :deep(.tok-bracket) {
+    color: #da70d6 !important;
+  }
+  
+  .editor-container :deep(.tok-tag) {
+    color: #569cd6 !important;
+  }
+  
+  .editor-container :deep(.tok-attribute) {
+    color: #9cdcfe !important;
+  }
+  
+  .editor-container :deep(.tok-link) {
+    color: #3794ff !important;
+  }
+  
+  .editor-container :deep(.tok-heading) {
+    color: #569cd6 !important;
+  }
+  
+  .editor-container :deep(.tok-regexp) {
+    color: #d16969 !important;
+  }
+  
+  .editor-container :deep(.tok-unit) {
+    color: #b5cea8 !important;
+  }
+  
+  .editor-container :deep(.tok-content) {
+    color: #ce9178 !important;
+  }
+  
+  .editor-container :deep(.tok-labelName) {
+    color: #c8c8c8 !important;
+  }
+  
+  .editor-container :deep(.tok-typeName) {
+    color: #4ec9b0 !important;
+  }
+  
+  .editor-container :deep(.tok-namespace) {
+    color: #4ec9b0 !important;
+  }
+  
+  .editor-container :deep(.tok-macroName) {
+    color: #dcdcaa !important;
+  }
+  
+  .editor-container :deep(.tok-constant) {
+    color: #4fc1ff !important;
+  }
+  
+  .editor-container :deep(.tok-moduleKeyword) {
+    color: #c586c0 !important;
+  }
+  
+  .editor-container :deep(.tok-controlKeyword) {
+    color: #c586c0 !important;
+  }
+  
+  .editor-container :deep(.tok-operatorKeyword) {
+    color: #c586c0 !important;
+  }
+  
+  .editor-container :deep(.tok-modifier) {
+    color: #569cd6 !important;
+  }
+  
+  .editor-container :deep(.tok-special) {
+    color: #ff6b6b !important;
   }
 }
 </style>

@@ -20,16 +20,22 @@ export async function generateHint(userData: JwtPayload, taskId: string, code: s
     const query = {
         _id: new mongoDB.ObjectId(taskId)
     }
-    const task = await taskCollection.findOne(query) as task;
+    const task = await taskCollection.findOne(query) as any;
     const taskText = task.text;
+    const answer = task.example;
     const result = await executePythonCode(userData, taskId, code);
     let resultText = "";
+    console.log(result);
     if(result.status === "error") {
         resultText = result.error?.name + "\n" + result.error?.message;
     } else {
-        resultText = result.results[0].text;
+        if(result.results.length === 0) {
+            resultText = ""
+        } else {
+            resultText = result.results[0].text;
+        }
     }
-    const prompt = generatePrompt(code, resultText, taskText);
+    const prompt = generatePrompt(code, resultText, taskText, answer);
     const url = process.env.LLM_URL
     const req = {
         model: 'Qwen/Qwen2.5-72B-Instruct',
@@ -65,21 +71,24 @@ export async function generateHint(userData: JwtPayload, taskId: string, code: s
     }
 }
 
-function generatePrompt(code: string, result: string, taskText: string) {
+function generatePrompt(code: string, result: string, taskText: string, answer: string) {
     let prompt: string = "Follow these rules strictly: \
         1. NEVER write or complete the student’s code. \
         2. ONLY provide guiding hints, explanations, or questions. \
         3. For errors: Explain the issue, but don’t fix it. \
         4. For working code: Suggest improvements via questions (e.g., \"Have you considered...?\"). \
         5. Output in JSON (format below). \
+        6. Do not return the Example Answer. \
         **Exercise**: {exercise} \
         **Student's Attempt**: {attempt} \
-         **Result From Student's Attempt**: {result} \
+        **Example Answer**: {answer} \
         **Output Language**: {language} \
         Response Requirements: \
-        Error Analysis (if errors exist): Briefly explain the issue. \
+        Error Analysis (if errors exist): Briefly explain the issue. Only inculde it if the error stops the code from running or is very egrigous.\
         Concept Hint: A nudge toward the solution (not the answer). \
         Suggested Improvement: A question or hint for better approach.  \
+        If no clear path to the goal is visible, try to nudge the user twowards the Example Answer.\
+        If the provided code already produces the correct result, do not produce any hints or improvement. Just mention the success.\
         The output should be in JSON format, with the following scheme.  \
         {  \
         \"Error Analysis\": \"<if applicable>\",  \
@@ -102,7 +111,7 @@ function generatePrompt(code: string, result: string, taskText: string) {
         "
     prompt = prompt.replace(/{exercise}/g, taskText)
     .replace(/{attempt}/g, code)
-    .replace(/{result}/g, result)
-    .replace(/{language}/g, "English");
+    .replace(/{answer}/g, answer)
+    .replace(/{language}/g, "German");
     return prompt
 }
