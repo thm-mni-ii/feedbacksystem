@@ -55,7 +55,7 @@ const router = createRouter({
       component: () => import('../views/AllQuestionsView.vue')
     },
     {
-      path: '/study/:courseId?',
+      path: '/study/:courseId',
       name: 'study',
       component: () => import('../views/StudyDashboardView.vue')
     },

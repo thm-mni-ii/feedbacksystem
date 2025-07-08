@@ -8,14 +8,14 @@ import skillService from '@/services/skill.service'
 import SkillCard from '@/components/SkillCard.vue'
 import StudyHeader from '@/components/StudyHeader.vue'
 import { useRoute } from 'vue-router'
-import { watch, computed } from 'vue'
+import { computed } from 'vue'
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogAddSkill from '../dialog/DialogAddSkill.vue'
 
 const catalogs = ref<Catalog[]>([])
 const studyProgress = ref<{ skillId: number; progress: number }[]>([])
 const route = useRoute()
-const courseId = route.params.courseId
+const courseId = computed(() => route.params.courseId)
 const courseInformation = ref<{}>({})
 const skills = ref<Skill[]>([])
 
@@ -30,8 +30,8 @@ const getSkillProgress = (skillId: number): number => {
   return progressItem?.progress ?? 0
 }
 
-async function loadSkills() {
-  const { data } = await skillService.getSkills()
+async function loadSkills(courseId: number) {
+  const { data } = await skillService.getSkills(courseId)
   skills.value = data
 }
 
@@ -48,13 +48,14 @@ async function loadCatalogsFromCourse(courseId: number) {
 async function loadCourseInformation(courseId: number) {
   const { data } = await courseService.getCoreCourse(courseId)
   courseInformation.value = data
+  console.log(courseInformation.value)
 }
 
 onMounted(async () => {
-  await loadSkills()
+  await loadCourseInformation(Number(courseId.value))
+  await loadSkills(courseId.value)
   await loadStudyProgress()
-  await loadCatalogsFromCourse(Number(courseId))
-  await loadCourseInformation(Number(courseId))
+  await loadCatalogsFromCourse(Number(courseId.value))
 })
 </script>
 

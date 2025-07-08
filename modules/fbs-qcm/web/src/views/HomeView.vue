@@ -23,14 +23,7 @@
       <v-col v-for="course in myCourses" :key="course.id" cols="8" md="4" class="ma-2">
         <v-card :title="course.name" class="mx-auto" :subtitle="course.description">
           <v-card-actions>
-            <v-btn class="bg-primary-light" @click="startStudy(course.id)">Go to course</v-btn>
-            <v-btn
-              v-if="authStore.decodedToken?.globalRole == 'ADMIN'"
-              prepend-icon="mdi-cog"
-              color="dark-grey"
-              variant="tonal"
-              >Edit course</v-btn
-            >
+            <v-btn class="bg-primary-light" @click="startStudy(course)">Go to course</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -71,34 +64,17 @@ onMounted(async () => {
     .getMyCourses()
     .then((response) => {
       myCourses.value = response.data as Course[]
-      console.log(myCourses.value)
+      console.log('MY COURSES --->', myCourses.value)
     })
     .catch((error) => {
       console.log(error)
+      console.log('MY COURSES --->', myCourses.value)
     })
 })
 
-const loadCatalogsFromCourse = (courseId: number) => {
-  const course = myCourses.value.find((course) => course.id === courseId)
-  if (course) {
-    axios
-      .get(`api_v1/catalogs/${course.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-        }
-      })
-      .then((response) => {
-        course.catalogs = response.data as Catalog[]
-      })
-      .catch((error) => {
-        console.log(error)
-        course.catalogs = []
-      })
-  }
-}
-
-const startStudy = (courseId: number) => {
-  router.push(`/study/${courseId}`)
+const startStudy = (course: Course) => {
+  console.log(course)
+  router.push(`/study/${course.id}`)
 }
 </script>
 

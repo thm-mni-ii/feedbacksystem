@@ -1,229 +1,217 @@
 import { Request, Response } from "express";
-import { addQuestionToSkill, createSkill, removeQuestionFromSkill } from "../skill/skill";
+import { JwtPayload } from "jsonwebtoken";
+import {
+  addQuestionToSkill,
+  createSkill,
+  removeQuestionFromSkill,
+  getSkillsByCourse,
+} from "../skill/skill";
 import { SkillInsertion } from "../model/utilInterfaces";
 
-const putQuestionToSkill = ( async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-        const skillId = req.params.skillId;
-        const questionId = req.params.questionId;
-        const response: number | Object = await addQuestionToSkill(req.user, skillId, questionId)
-        if(response === -1) {
-          res.sendStatus(500);
-        } else if(response === -2) {
-          res.sendStatus(403);
-        } else {
-          res.send(response);
-        }
-    }
-    console.log("kein Nutzer gefunden");
-    res.sendStatus(500); 
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
+// Hilfsfunktion für User-Check
+function requireUser(req: Request, res: Response): boolean {
+  if (!req.user) {
+    res.sendStatus(401);
+    return false;
   }
-});
+  return true;
+}
 
-const deleteQuestionFromSkill = ( async (req: Request, res: Response) => {
+const getSkillsForCourse = async (req: Request, res: Response) => {
   try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-        const skillId = req.params.skillId;
-        const questionId = req.params.questionId;
-        const response: number | Object = removeQuestionFromSkill(req.user, skillId, questionId)
-        if(response === -1) {
-          res.sendStatus(500);
-        } else if(response === -2) {
-          res.sendStatus(403);
-        } else {
-          res.send(response);
-        }
-    }
-    console.log("kein Nutzer gefunden");
-    res.sendStatus(500); 
+    console.log("ROUTE HIT", req.params);
+    const courseId = req.params.courseId;
+    const user = req.user as JwtPayload;
+    const result = await getSkillsByCourse(user, courseId);
+    res.json(result);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.sendStatus(500);
   }
-});
+};
 
-const postSkill = ( async (req: Request, res: Response) => {
+const putQuestionToSkill = async (req: Request, res: Response) => {
   try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const requestData = req.body;
-      const dataInsert: SkillInsertion = {
-        name: requestData.name,
-        course: requestData.course,
-        requirements: requestData.requirements
-      }
-      const response: number | Object = createSkill(req.user, dataInsert);
-      if(response === -1) {
-        res.sendStatus(500);
-      } else if(response === -2) {
-        res.sendStatus(403);
-      } else {
-        res.send(response);
-      }
-    }
-    console.log("kein Nutzer gefunden");
-    res.sendStatus(500); 
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
+    if (!requireUser(req, res)) return;
 
-const deleteSkill = ( async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const skillId = req.params.skillId;
-        //Methodenimplementierung
-    }
-    console.log("kein Nutzer gefunden");
-    res.sendStatus(500); 
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
+    const skillId = req.params.skillId;
+    const questionId = req.params.questionId;
+    const user = req.user as JwtPayload;
 
-const editSkill = ( async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const skillId = req.params.skillId;
-        //Methodenimplementierung
-    }
-    console.log("kein Nutzer gefunden");
-    res.sendStatus(500); 
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
+    const response: number | Object = await addQuestionToSkill(
+      user,
+      skillId,
+      questionId
+    );
+    if (response === -1) return res.sendStatus(500);
+    if (response === -2) return res.sendStatus(403);
 
-const getLearnSessionQuestion = ( async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const skillId = req.params.learnSessionId;
-        //Methodenimplementierung
-    }
-    console.log("no user found");
-    res.sendStatus(500); 
+    res.send(response);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.sendStatus(500);
   }
-});
+};
 
-const getLearnSessionSettings = ( async (req: Request, res: Response) => {
+const deleteQuestionFromSkill = async (req: Request, res: Response) => {
   try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const learnSessionId = req.params.learnSessionId;
-        //Methodenimplementierung
-    }
-    console.log("no user found");
-    res.sendStatus(500); 
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
+    if (!requireUser(req, res)) return;
 
-const putLearnSessionSettings = ( async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const learnSessionId = req.params.learnSessionId;
-        //Methodenimplementierung
-    }
-    console.log("no user found");
-    res.sendStatus(500); 
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
+    const skillId = req.params.skillId;
+    const questionId = req.params.questionId;
+    const user = req.user as JwtPayload;
 
-const getSkill = ( async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const skillId = req.params.skillId;
-        //Methodenimplementierung
-    }
-    console.log("no user found");
-    res.sendStatus(500); 
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
+    const response: number | Object = await removeQuestionFromSkill(
+      user,
+      skillId,
+      questionId
+    );
+    if (response === -1) return res.sendStatus(500);
+    if (response === -2) return res.sendStatus(403);
 
-const postLearnSession = ( async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-        //Methodenimplementierung
-    }
-    res.sendStatus(500); 
+    res.send(response);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.sendStatus(500);
   }
-});
+};
 
-const endLearnSession = ( async (req: Request, res: Response) => {
+const postSkill = async (req: Request, res: Response) => {
   try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const learnSessionId = req.params.learnSessionId;
-        //Methodenimplementierung
-    }
-    console.log("kein Nutzer gefunden");
-    res.sendStatus(500); 
+    if (!requireUser(req, res)) return;
+
+    const requestData = req.body;
+    const dataInsert: SkillInsertion = {
+      name: requestData.name,
+      course: requestData.course,
+      requirements: requestData.requirements,
+    };
+    const user = req.user as JwtPayload;
+    const response: number | Object = await createSkill(user, dataInsert);
+    if (response === -1) return res.sendStatus(500);
+    if (response === -2) return res.sendStatus(403);
+
+    res.send(response);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.sendStatus(500);
   }
-});
+};
+
+const deleteSkill = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    const skillId = req.params.skillId;
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
+const editSkill = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    const skillId = req.params.skillId;
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
+const getLearnSessionQuestion = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    const learnSessionId = req.params.learnSessionId;
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
+const getLearnSessionSettings = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    const learnSessionId = req.params.learnSessionId;
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
+const putLearnSessionSettings = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    const learnSessionId = req.params.learnSessionId;
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
+const getSkill = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    const skillId = req.params.skillId;
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
+const postLearnSession = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
+const endLearnSession = async (req: Request, res: Response) => {
+  try {
+    if (!requireUser(req, res)) return;
+
+    const learnSessionId = req.params.learnSessionId;
+    // TODO: Methodenimplementierung
+    res.sendStatus(501); // Not Implemented
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+};
+
 export {
-    putQuestionToSkill,
-    deleteQuestionFromSkill,
-    postSkill,
-    editSkill,
-    deleteSkill,
-    getLearnSessionQuestion,
-    getLearnSessionSettings,
-    putLearnSessionSettings,
-    getSkill,
-    postLearnSession,
-    endLearnSession
+  putQuestionToSkill,
+  deleteQuestionFromSkill,
+  postSkill,
+  editSkill,
+  deleteSkill,
+  getLearnSessionQuestion,
+  getLearnSessionSettings,
+  putLearnSessionSettings,
+  getSkill,
+  postLearnSession,
+  endLearnSession,
+  getSkillsForCourse,
 };
