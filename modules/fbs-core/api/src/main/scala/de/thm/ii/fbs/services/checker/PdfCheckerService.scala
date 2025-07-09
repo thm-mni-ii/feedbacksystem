@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.checker
 import de.thm.ii.fbs.model.task.Task
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, User}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceOnMainFileUpload}
-import de.thm.ii.fbs.services.persistence.TaskService
+import de.thm.ii.fbs.services.persistence.{SubmissionService, TaskService}
 import de.thm.ii.fbs.services.persistence.storage.MinioStorageService
 import de.thm.ii.fbs.util.RestTemplateFactory
 import org.json.JSONObject
@@ -19,18 +19,22 @@ class PdfCheckerService extends CheckerService with CheckerServiceOnMainFileUplo
   private val taskService: TaskService = null
   @Autowired
   private val storageService: MinioStorageService = null
+  @Autowired
+  private val submissionService: SubmissionService = null
 
   @Value("${services.pdfChecker.baseUrl}")
   private val baseUrl: String = null
 
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     val task = taskService.getOne(taskID).get
-    sendRequest("/submission/", new JSONObject()
+    val response = sendRequest("/submission/", new JSONObject()
       .put("submission_id", submissionID.toString)
       .put("student_id", fu.id.toString)
       .put("course_id", task.courseID.toString)
       .put("task_id", task.id.toString)
       .put("abgabe", storageService.getSolutionFileFromBucket(submissionID)))
+
+    submissionService.storeResult(submissionID, cc.id, 0, response.getString("abgabe"), "")
   }
 
   override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
