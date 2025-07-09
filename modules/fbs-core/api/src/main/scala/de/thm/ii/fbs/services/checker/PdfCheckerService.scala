@@ -48,7 +48,7 @@ class PdfCheckerService extends CheckerService with CheckerServiceOnMainFileUplo
     val headers = new HttpHeaders()
     headers.set("Content-Type", "application/json")
     new JSONObject(
-      restTemplate.postForEntity(baseUrl + urlSuffix, new HttpEntity(body.toString, headers), classOf[String])
+      restTemplate.postForEntity(baseUrl + urlSuffix, new HttpEntity(body.toString, headers), classOf[String]).getBody
     )
   }
 }
