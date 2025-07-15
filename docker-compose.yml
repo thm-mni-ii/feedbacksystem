@@ -281,6 +281,17 @@ services:
       - FBS_ROOT_URL=https://core:443
       - NODE_TLS_REJECT_UNAUTHORIZED=0
 
+  parsr:
+    image: axarev/parsr
+    container_name: parsr
+    ports:
+      - "3002:3001"
+    volumes:
+      - ./data/parsr:/usr/src/app/output
+    restart: unless-stopped
+    networks:
+      - fbs
+
   qcm-backend:
     build:
       context: modules/fbs-qcm/api/backend
