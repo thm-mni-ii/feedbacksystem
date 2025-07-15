@@ -1,7 +1,7 @@
 <template>
   <DialogEditCatalog ref="dialogEditCatalog" />
   <DialogConfirmVue ref="dialogConfirm" />
-  <v-container class="text-center py-8">
+  <v-container class="text-center pt-8">
     <div class="pa-8 elevation-2 rounded-lg" style="background-color: #f5f5f5">
       <v-icon icon="mdi-lightbulb-on-outline" size="48" color="primary" class="mb-4" />
       <h1 class="text-h4 font-weight-bold mb-2">Question Catalogs</h1>
@@ -19,7 +19,9 @@
         :key="course.id"
         @group:selected="loadCatalogsFromCourse(course.id)"
       >
-        <v-expansion-panel-title> {{ course.name }} </v-expansion-panel-title>
+        <v-expansion-panel-title style="background-color: #f5f5f5">
+          {{ course.name }}
+        </v-expansion-panel-title>
         <v-expansion-panel-text>
           <v-list>
             <v-list-subheader>Catalogs</v-list-subheader>
@@ -32,7 +34,6 @@
                 <v-btn color="primary" variant="tonal" class="mr-2" @click="startSession(catalog)">
                   Start Session
                 </v-btn>
-                <!-- manage questions with icon -->
                 <span v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
                   <v-btn
                     prepend-icon="mdi-cog"
