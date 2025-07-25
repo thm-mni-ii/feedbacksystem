@@ -31,7 +31,8 @@
               <div class="text-caption">Difficulty</div>
               <v-slider
                 v-model="skill.difficulty"
-                :max="3"
+                :min="1"
+                :max="4"
                 :ticks="tickLabels"
                 show-ticks="always"
                 thumb-color="primary"
@@ -55,14 +56,13 @@
 import { ref } from 'vue'
 import type Skill from '@/model/Skill'
 import skillService from '@/services/skill.service'
-import catalogService from '@/services/catalog.service'
 
 const editSkillDialog = ref(false)
 
 const skill = ref<Skill>({} as Skill)
 const isNew = ref<boolean>(true)
 
-const tickLabels = { 0: 'Lvl 1 🌱', 1: 'Lvl 2 ⚙️', 2: 'Lvl 3 🔥', 3: 'Lvl 4🧠' }
+const tickLabels = { 1: 'Lvl 1 🌱', 2: 'Lvl 2 ⚙️', 3: 'Lvl 3 🔥', 4: 'Lvl 4🧠' }
 
 const snackbar = ref({
   show: false,
@@ -72,9 +72,9 @@ const snackbar = ref({
 })
 
 const createSkill = () => {
-  console.log(skill.value)
+  console.log('SKILL --->', skill.value)
   skillService
-    .createNewSkill(skill.value)
+    .createNewSkill(skill.value.course, skill.value)
     .then(() => {
       _confirm()
     })
@@ -86,25 +86,13 @@ const createSkill = () => {
 
 const updateSkill = () => {
   skillService
-    .updateSkill(skill.value.id, skill.value)
+    .updateSkill(skill.value._id, skill.value)
     .then(() => {
       _confirm()
     })
     .catch((error) => {
       console.log(error)
       openSnackbar('Error updating Skill: ' + error.response.data)
-    })
-}
-
-const updateCatalog = () => {
-  catalogService
-    .putCatalog(catalog.value)
-    .then(() => {
-      _confirm()
-    })
-    .catch((error) => {
-      console.log(error)
-      openSnackbar('Error updating catalog: ' + error.response.data)
     })
 }
 
@@ -118,11 +106,18 @@ const resolvePromise = ref<Function | undefined>(undefined)
 
 const openDialog = (courseId: number, editSkill?: Skill) => {
   if (editSkill !== undefined) {
+    console.log('EDIT SKILL --->', editSkill)
     skill.value = { ...editSkill }
     isNew.value = false
   } else {
     isNew.value = true
-    skill.value.course = courseId
+    skill.value = {
+      name: '',
+      description: '',
+      isPublic: true,
+      difficulty: 1,
+      course: courseId
+    } as Skill
   }
   editSkillDialog.value = true
 

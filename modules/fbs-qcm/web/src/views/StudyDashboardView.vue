@@ -8,7 +8,7 @@ import skillService from '@/services/skill.service'
 import SkillCard from '@/components/SkillCard.vue'
 import StudyHeader from '@/components/StudyHeader.vue'
 import { useRoute } from 'vue-router'
-import { watch, computed } from 'vue'
+import { computed } from 'vue'
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogAddSkill from '../dialog/DialogAddSkill.vue'
 
@@ -31,12 +31,12 @@ const getSkillProgress = (skillId: number): number => {
 }
 
 async function loadSkills() {
-  const { data } = await skillService.getSkills()
+  const { data } = await skillService.getSkills(Number(courseId))
   skills.value = data
 }
 
 async function loadStudyProgress() {
-  const { data } = await skillService.getAllStudyProgress()
+  const { data } = await skillService.getAllStudyProgress(Number(courseId))
   studyProgress.value = data
 }
 
@@ -55,7 +55,12 @@ onMounted(async () => {
   await loadStudyProgress()
   await loadCatalogsFromCourse(Number(courseId))
   await loadCourseInformation(Number(courseId))
+  console.log('Skills loaded:', skills.value)
 })
+
+async function reloadSkills() {
+  await loadSkills()
+}
 </script>
 
 <template>
@@ -66,15 +71,18 @@ onMounted(async () => {
     :description="courseInformation.description ?? ''"
     :progress="averageProgress ?? 0"
     :total-skills="skills.length ?? 0"
+    :reload-skills="reloadSkills"
   />
   <v-row justify="center" class="mt-4">
     <v-col v-for="(skill, index) in skills" :key="index" cols="8" md="4" class="ma-2">
       <SkillCard
-        :id="skill.id ?? ''"
+        :_id="skill._id ?? ''"
         :name="skill.name ?? ''"
         :description="skill.description ?? ''"
         :difficulty="skill.difficulty ?? 0"
         :progress="getSkillProgress(skill.id) ?? 0"
+        @skill-deleted="reloadSkills"
+        @skill-updated="reloadSkills"
       />
     </v-col>
   </v-row>

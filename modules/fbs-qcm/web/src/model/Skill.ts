@@ -1,5 +1,5 @@
 export default interface Skill {
-  id: number
+  _id: string
   name: string
   courseId: number
   description: string

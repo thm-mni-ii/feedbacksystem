@@ -3,13 +3,19 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import DialogConfirm from '@/dialog/DialogConfirm.vue'
 import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
+import skillService from '@/services/skill.service'
 
 const props = defineProps<{
-  id: number
+  _id: string
   name: string
   description: string
   difficulty: number
   progress: number
+}>()
+
+const emit = defineEmits<{
+  (e: 'skillDeleted', id: string): void
+  (e: 'skillUpdated', id: string, updatedFields: Partial<Skill>): void
 }>()
 
 const router = useRouter()
@@ -38,20 +44,21 @@ const difficultyLabel = computed(
 )
 
 const handleManageSkill = () => {
-  router.push(`/manageSkill/${props.id}`)
+  router.push(`/manageSkill/${props._id}`)
 }
 
 const handleEditSkill = async () => {
-  const result = await dialogEditSkillRef.value.openDialog(props.id, {
+  const result = await dialogEditSkillRef.value.openDialog(props._id, {
     name: props.name,
     description: props.description,
     difficulty: props.difficulty,
     progress: props.progress,
-    id: props.id
+    _id: props._id
   })
 
   if (result) {
     console.log('Skill wurde bearbeitet')
+    emit('skillUpdated', props._id, result)
   }
 }
 
@@ -63,7 +70,13 @@ const handleDeleteSkill = async () => {
   )
 
   if (confirmed) {
-    console.log('Deleting skill with ID:', props.id)
+    try {
+      console.log('Deleting skill:', props._id)
+      await skillService.removeSkill(props._id)
+      emit('skillDeleted', props._id)
+    } catch (error) {
+      console.error('Error deleting skill:', error)
+    }
   }
 }
 </script>
@@ -97,36 +110,39 @@ const handleDeleteSkill = async () => {
       rounded="lg"
     />
 
-    <v-card-actions>
-      <v-btn class="bg-primary-light">Learn for Skill</v-btn>
-      <v-btn prepend-icon="mdi-cog" color="dark-grey" variant="tonal" @click="handleManageSkill">
-        Manage skill
-      </v-btn>
+    <v-card-actions class="d-flex justify-space-between flex-wrap align-center pa-0">
+      <div class="d-flex flex-wrap gap-2">
+        <v-btn class="bg-primary-light">Learn for Skill</v-btn>
 
-      <v-tooltip text="Edit Skill" location="bottom">
-        <template #activator="{ props: tooltipProps }">
-          <v-btn
-            v-bind="tooltipProps"
-            icon="mdi-pencil"
-            size="x-small"
-            color="black"
-            @click="handleEditSkill"
-          />
-        </template>
-      </v-tooltip>
+        <v-btn prepend-icon="mdi-cog" color="dark-grey" variant="tonal" @click="handleManageSkill">
+          Manage skill
+        </v-btn>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <v-tooltip text="Edit Skill" location="bottom">
+          <template #activator="{ props: tooltipProps }">
+            <v-btn
+              v-bind="tooltipProps"
+              icon="mdi-pencil"
+              size="x-small"
+              color="black"
+              @click="handleEditSkill"
+            />
+          </template>
+        </v-tooltip>
 
-      <v-tooltip text="Delete Skill" location="bottom">
-        <template #activator="{ props: tooltipProps }">
-          <v-btn
-            v-bind="tooltipProps"
-            icon="mdi-delete"
-            size="x-small"
-            color="error"
-            class="mr-2"
-            @click="handleDeleteSkill"
-          />
-        </template>
-      </v-tooltip>
+        <v-tooltip text="Delete Skill" location="bottom">
+          <template #activator="{ props: tooltipProps }">
+            <v-btn
+              v-bind="tooltipProps"
+              icon="mdi-delete"
+              size="x-small"
+              color="error"
+              @click="handleDeleteSkill"
+            />
+          </template>
+        </v-tooltip>
+      </div>
     </v-card-actions>
   </v-card>
 </template>

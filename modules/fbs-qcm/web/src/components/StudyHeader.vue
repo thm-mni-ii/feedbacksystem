@@ -2,10 +2,14 @@
 import { computed, ref } from 'vue'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/stores/authStore'
+import { useRoute } from 'vue-router'
+
 import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
 
 const authStore = useAuthStore()
 const dialogAddSkill = ref<typeof DialogAddSkill>()
+const route = useRoute()
+const courseId = route.params.courseId
 
 const props = defineProps<{
   name: string
@@ -14,6 +18,7 @@ const props = defineProps<{
   lastStudySession?: Date
   totalSkills?: number
   totalQuestions?: number
+  reloadSkills?: () => void
 }>()
 
 const formattedDate = computed(() =>
@@ -22,9 +27,8 @@ const formattedDate = computed(() =>
 const createNewSkill = (courseId: number) => {
   if (dialogAddSkill.value) {
     dialogAddSkill.value.openDialog(courseId).then((result: boolean) => {
-      if (result) {
-        console.log('Create new skill')
-        loadCatalogsFromCourse(courseId)
+      if (result && props.reloadSkills) {
+        props.reloadSkills()
       } else {
         console.log('Cancel')
       }
@@ -75,7 +79,7 @@ const createNewSkill = (courseId: number) => {
               icon="mdi-plus"
               size="x-small"
               color="black"
-              @click="createNewSkill()"
+              @click="createNewSkill(courseId)"
             >
             </v-btn>
           </template>
