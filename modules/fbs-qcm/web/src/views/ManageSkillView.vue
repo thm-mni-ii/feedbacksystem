@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import questionService from '@/services/question.service'
 import skillService from '@/services/skill.service'
+import questionService from '@/services/question.service' // Neuer Import
+import type Question from '@/model/Question'
 
 import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
 import DialogAddQuestion from '@/dialog/DialogAddQuestion.vue'
 import DialogConfirm from '@/dialog/DialogConfirm.vue'
 import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
 
-import type Question from '@/model/Question'
-
 const route = useRoute()
 const router = useRouter()
-const skillId = route.params.skillId
+const skillId = route.params.skillId as string
 const skill = ref<Skill>({})
 const allQuestions = ref<Question[]>([])
+const availableQuestions = ref<Question[]>([]) // neue Variable
 const totalQuestions = ref<number>(0)
 
 const snackbar = ref(false)
@@ -54,11 +54,6 @@ const headers = [
   { title: 'Remove', key: 'remove', sortable: false }
 ]
 
-onMounted(() => {
-  loadQuestions()
-  fetchSkill()
-})
-
 const backToDashboard = () => router.back()
 
 const openSnackbar = (text: string) => {
@@ -72,10 +67,29 @@ const fetchSkill = async () => {
 }
 
 const loadQuestions = async () => {
-  const res = await questionService.getAllQuestions()
-  allQuestions.value = res.data
-  totalQuestions.value = res.data.length
+  try {
+    const res = await skillService.getSkillQuestions(skillId)
+    allQuestions.value = res.data
+    totalQuestions.value = res.data.length
+  } catch (error) {
+    console.error('Error loading questions for skill:', error)
+  }
 }
+
+const loadAvailableQuestions = async () => {
+  try {
+    const res = await questionService.getAllQuestions()
+    availableQuestions.value = res.data
+  } catch (error) {
+    console.error('Error loading all questions:', error)
+  }
+}
+
+onMounted(() => {
+  loadQuestions()
+  fetchSkill()
+  loadAvailableQuestions() // lade alle Fragen
+})
 
 const editQuestion = async (question: Question) => {
   if (!dialogEditQuestion.value) return
@@ -96,7 +110,7 @@ const removeQuestion = async (question: Question) => {
     'Remove'
   )
   if (confirmed) {
-    await skillService.removeQuestion(question._id)
+    await skillService.removeQuestion(skillId, question._id)
     loadQuestions()
     openSnackbar(`Removed question ${question._id}`)
   }
@@ -104,19 +118,27 @@ const removeQuestion = async (question: Question) => {
 
 const addQuestionToSkill = async () => {
   if (!dialogAddQuestion.value) return
-  const result = await dialogAddQuestion.value.openDialog(allQuestions.value, false)
+  // Öffne den Dialog und übergebe availableQuestions
+  const result = await dialogAddQuestion.value.openDialog(availableQuestions.value, false)
   if (result) {
-    openSnackbar('Question added to skill')
-    loadQuestions()
+    try {
+      // Löst den POST-Request aus, um die aus dem Dialog erhaltene Question-ID zuzuordnen.
+      await skillService.addQuestionToSkill(skillId, result.selectedQuestion)
+      openSnackbar('Question added to skill')
+      loadQuestions() // Skill-spezifische Fragen neu laden
+    } catch (error) {
+      console.error('Error adding question to skill:', error)
+      openSnackbar('Failed to add question')
+    }
   }
 }
 const editSkill = async () => {
-  const result = await dialogEditSkill.value.openDialog(123, {
+  const result = await dialogEditSkill.value.openDialog(skill.value._id, {
     name: skill.value.name,
     description: skill.value.description,
     difficulty: skill.value.difficulty,
     progress: skill.value.progress,
-    id: 123
+    _id: skill.value._id
   })
 
   if (result) {

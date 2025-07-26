@@ -1,5 +1,6 @@
 import type Skill from '@/model/Skill'
 import axios, { type AxiosResponse } from 'axios'
+import type Question from '@/model/Question'
 
 class SkillService {
   getSkills(courseId: number): Promise<AxiosResponse<Skill[]>> {
@@ -11,7 +12,7 @@ class SkillService {
   }
 
   getSkill(skillId: string): Promise<AxiosResponse<Skill>> {
-    return axios.get(`/api_v1/skills/${skillId}`, {
+    return axios.get(`/api_v1/getSkill/${skillId}`, {
       headers: {
         authorization: `Bearer ${localStorage.getItem('jsessionid')}`
       }
@@ -71,6 +72,35 @@ class SkillService {
 
   removeSkill(skillId: string | number) {
     return axios.delete(`/api_v1/deleteSkill/${skillId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+
+  getSkillQuestions(skillId: string): Promise<AxiosResponse<any>> {
+    return axios.get(`/api_v1/skillQuestions/${skillId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+
+  addQuestionToSkill(skillId: string, questionId: string): Promise<AxiosResponse<any>> {
+    return axios.post(
+      `/api_v1/addQuestionToSkill/${skillId}/${questionId}`,
+      // Wenn kein zusätzlicher Body nötig ist, kann null übergeben werden
+      null,
+      {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
+      }
+    )
+  }
+
+  getTotalQuestions(courseId: number): Promise<AxiosResponse<{ totalQuestions: number }>> {
+    return axios.get(`/api_v1/totalQuestions/${courseId}`, {
       headers: {
         authorization: `Bearer ${localStorage.getItem('jsessionid')}`
       }

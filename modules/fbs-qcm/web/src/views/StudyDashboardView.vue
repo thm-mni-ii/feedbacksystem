@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import courseService from '@/services/course.service'
 import type Catalog from '@/model/Catalog'
 import type Skill from '@model/Skill'
@@ -7,17 +8,16 @@ import catalogService from '@/services/catalog.service'
 import skillService from '@/services/skill.service'
 import SkillCard from '@/components/SkillCard.vue'
 import StudyHeader from '@/components/StudyHeader.vue'
-import { useRoute } from 'vue-router'
-import { computed } from 'vue'
 import DialogConfirmVue from '../dialog/DialogConfirm.vue'
 import DialogAddSkill from '../dialog/DialogAddSkill.vue'
 
 const catalogs = ref<Catalog[]>([])
 const studyProgress = ref<{ skillId: number; progress: number }[]>([])
 const route = useRoute()
-const courseId = route.params.courseId
+const courseId = Number(route.params.courseId)
 const courseInformation = ref<{}>({})
 const skills = ref<Skill[]>([])
+const totalQuestions = ref<number>(0) // Neue Variable für alle Fragen des Kurses
 
 const averageProgress = computed(() => {
   if (!studyProgress.value.length) return 0
@@ -31,12 +31,12 @@ const getSkillProgress = (skillId: number): number => {
 }
 
 async function loadSkills() {
-  const { data } = await skillService.getSkills(Number(courseId))
+  const { data } = await skillService.getSkills(courseId)
   skills.value = data
 }
 
 async function loadStudyProgress() {
-  const { data } = await skillService.getAllStudyProgress(Number(courseId))
+  const { data } = await skillService.getAllStudyProgress(courseId)
   studyProgress.value = data
 }
 
@@ -50,16 +50,27 @@ async function loadCourseInformation(courseId: number) {
   courseInformation.value = data
 }
 
+async function loadTotalQuestions() {
+  try {
+    const { data } = await skillService.getTotalQuestions(courseId)
+    totalQuestions.value = data.totalQuestions
+  } catch (error) {
+    console.error('Error loading total questions:', error)
+  }
+}
+
 onMounted(async () => {
   await loadSkills()
   await loadStudyProgress()
-  await loadCatalogsFromCourse(Number(courseId))
-  await loadCourseInformation(Number(courseId))
+  await loadCatalogsFromCourse(courseId)
+  await loadCourseInformation(courseId)
+  await loadTotalQuestions()
   console.log('Skills loaded:', skills.value)
 })
 
 async function reloadSkills() {
   await loadSkills()
+  await loadTotalQuestions() // Neu laden, wenn sich Skills ändern
 }
 </script>
 
@@ -71,6 +82,7 @@ async function reloadSkills() {
     :description="courseInformation.description ?? ''"
     :progress="averageProgress ?? 0"
     :total-skills="skills.length ?? 0"
+    :total-questions="totalQuestions"
     :reload-skills="reloadSkills"
   />
   <v-row justify="center" class="mt-4">

@@ -2,11 +2,15 @@ import { Request, Response } from "express";
 import {
   addQuestionToSkill,
   createSkill,
-  removeQuestionFromSkill,
   getSkillsByCourse,
   getSkillProgressByCourse,
   deleteSkill as deleteSkillService,
   updateSkill,
+  getSkillService,
+  getQuestionsForSkillService,
+  addQuestionToSkillService,
+  removeQuestionFromSkillService,
+  getTotalQuestionsForCourseService,
 } from "../skill/skill";
 import { SkillInsertion } from "../model/utilInterfaces";
 
@@ -25,35 +29,6 @@ const putQuestionToSkill = async (req: Request, res: Response) => {
       );
       if (response === -1) {
         return res.sendStatus(500);
-      } else if (response === -2) {
-        res.sendStatus(403);
-      } else {
-        res.send(response);
-      }
-    }
-    console.log("kein Nutzer gefunden");
-    res.sendStatus(500);
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-};
-
-const deleteQuestionFromSkill = async (req: Request, res: Response) => {
-  try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
-    }
-    if (req.user !== undefined) {
-      const skillId = req.params.skillId;
-      const questionId = req.params.questionId;
-      const response: number | Object = removeQuestionFromSkill(
-        req.user,
-        skillId,
-        questionId
-      );
-      if (response === -1) {
-        res.sendStatus(500);
       } else if (response === -2) {
         res.sendStatus(403);
       } else {
@@ -196,18 +171,19 @@ const putLearnSessionSettings = async (req: Request, res: Response) => {
 
 const getSkill = async (req: Request, res: Response) => {
   try {
-    if (req.user === undefined) {
-      res.sendStatus(401);
+    if (!req.user) {
+      return res.sendStatus(401);
     }
-    if (req.user !== undefined) {
-      const skillId = req.params.skillId;
-      //Methodenimplementierung
+    const skillId = req.params.skillId;
+
+    const skill = await getSkillService(req.user, skillId);
+    if (!skill) {
+      return res.status(404).send("Skill not found");
     }
-    console.log("no user found");
-    res.sendStatus(500);
+    return res.json(skill);
   } catch (error) {
     console.log(error);
-    res.sendStatus(500);
+    return res.sendStatus(500);
   }
 };
 
@@ -271,9 +247,70 @@ const getSkillProgressForCourse = async (req: Request, res: Response) => {
   }
 };
 
+const getSkillQuestions = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.sendStatus(401);
+    const skillId = req.params.skillId;
+    const questions = await getQuestionsForSkillService(req.user, skillId);
+    return res.json(questions);
+  } catch (error) {
+    console.error("Error in getSkillQuestions:", error);
+    return res.sendStatus(500);
+  }
+};
+
+const postAddQuestionToSkill = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.sendStatus(401);
+    // Hole Skill- und Question-ID aus den URL-Parametern
+    const { skillId, questionId } = req.params;
+    const result = await addQuestionToSkillService(
+      req.user,
+      skillId,
+      questionId
+    );
+    if (result === -1) return res.sendStatus(500);
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error("Error adding question to skill:", error);
+    res.sendStatus(500);
+  }
+};
+
+const removeQuestionFromSkill = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.sendStatus(401);
+    const { skillId, questionId } = req.params;
+    const result = await removeQuestionFromSkillService(
+      req.user,
+      skillId,
+      questionId
+    );
+    if (result === -1) return res.sendStatus(500);
+    if (result.deletedCount === 0)
+      return res.status(404).send("Mapping not found");
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error("Error removing question from skill:", error);
+    res.sendStatus(500);
+  }
+};
+
+const getTotalQuestionsForCourse = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.sendStatus(401);
+    const courseId = Number(req.params.courseId);
+    const total = await getTotalQuestionsForCourseService(req.user, courseId);
+    if (total === -1) return res.sendStatus(500);
+    return res.json({ totalQuestions: total });
+  } catch (error) {
+    console.error("Error in getTotalQuestionsForCourse:", error);
+    res.sendStatus(500);
+  }
+};
+
 export {
   putQuestionToSkill,
-  deleteQuestionFromSkill,
   postSkill,
   editSkill,
   deleteSkill,
@@ -285,4 +322,8 @@ export {
   endLearnSession,
   getSkillsForCourse,
   getSkillProgressForCourse,
+  getSkillQuestions,
+  postAddQuestionToSkill,
+  removeQuestionFromSkill,
+  getTotalQuestionsForCourse,
 };

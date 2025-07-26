@@ -52,22 +52,10 @@ const createNewSkill = (courseId: number) => {
             <v-btn
               v-bind="props"
               icon="mdi-cog"
+              class="mx-2"
               size="x-small"
               color="black"
               @click="console.log('works')"
-            >
-            </v-btn>
-          </template>
-        </v-tooltip>
-        <v-tooltip text="Tooltip" location="bottom">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              class="mx-2"
-              size="x-small"
-              icon="mdi-pencil"
-              color="black"
-              @click="console.log('edit')"
             >
             </v-btn>
           </template>

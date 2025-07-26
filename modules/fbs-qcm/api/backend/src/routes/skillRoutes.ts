@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { authenticateToken } from "../authenticateToken";
 import {
-  deleteQuestionFromSkill,
   deleteSkill,
   editSkill,
+  removeQuestionFromSkill,
   endLearnSession,
   getLearnSessionQuestion,
   getSkill,
@@ -13,6 +13,9 @@ import {
   putQuestionToSkill,
   getSkillsForCourse,
   getSkillProgressForCourse,
+  getSkillQuestions,
+  postAddQuestionToSkill,
+  getTotalQuestionsForCourse,
 } from "../controller/skill";
 
 const router = Router();
@@ -22,10 +25,15 @@ router.put(
   authenticateToken,
   putQuestionToSkill
 );
+router.post(
+  "/api_v1/addQuestionToSkill/:skillId/:questionId",
+  authenticateToken,
+  postAddQuestionToSkill
+);
 router.delete(
   "/api_v1/removeQuestionFromSkill/:skillId/:questionId",
   authenticateToken,
-  deleteQuestionFromSkill
+  removeQuestionFromSkill
 );
 router.post("/api_v1/createSkill/", authenticateToken, postSkill);
 router.put("/api_v1/skill/:skillId", authenticateToken, editSkill);
@@ -56,6 +64,16 @@ router.get(
   "/api_v1/skillProgress/:courseId",
   authenticateToken,
   getSkillProgressForCourse
+);
+router.get(
+  "/api_v1/skillQuestions/:skillId",
+  authenticateToken,
+  getSkillQuestions
+);
+router.get(
+  "/api_v1/totalQuestions/:courseId",
+  authenticateToken,
+  getTotalQuestionsForCourse
 );
 
 export default router;
