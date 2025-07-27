@@ -25,7 +25,7 @@ export class FbsSciCheckComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const url = `https://feedback.mni.thm.de/scicheck/#/login?token=${this.token}&iframe=true`;
+    const url = `https://localhost/scicheck/#/login?token=${this.token}&iframe=true`;
     this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.cdr.detach(); // stops iframe from reloading
     return this.safeUrl;

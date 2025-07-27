@@ -25,7 +25,7 @@ export class FbsTimeTrackingComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const url = `https://feedback.mni.thm.de/kanban/time/?token=${this.token}&iframe=true`;
+    const url = `http://localhost:4173/kanban/time/?token=${this.token}&iframe=true`;
     this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.cdr.detach(); // stops iframe from reloading
     return this.safeUrl;

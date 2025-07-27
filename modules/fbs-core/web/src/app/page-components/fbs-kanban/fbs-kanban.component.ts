@@ -25,7 +25,7 @@ export class FbsKanbanComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const url = `https://feedback.mni.thm.de/kanban?token=${this.token}&iframe=true`;
+    const url = `http://localhost:4173/kanban?token=${this.token}&iframe=true`;
     this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.cdr.detach(); // stops iframe from reloading
     return this.safeUrl;
