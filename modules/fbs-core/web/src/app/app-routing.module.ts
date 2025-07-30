@@ -24,6 +24,8 @@ import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-model
 import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
+import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
+import { FbsTimeTrackingComponent } from "./page-components/fbs-time-tracking/fbs-time-tracking.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -104,24 +106,42 @@ const routes: Routes = [
         component: AnalyticsToolComponent,
         canActivate: [AuthGuard],
       },
+
       // Modelling
       {
         path: "modelling",
         component: FbsModellingComponent,
         canActivate: [AuthGuard],
       },
+
       // Kanban
       {
         path: "kanban",
         component: FbsKanbanComponent,
         canActivate: [AuthGuard],
       },
+
+      // Kanban
+      {
+        path: "time-tracking",
+        component: FbsTimeTrackingComponent,
+        canActivate: [AuthGuard],
+      },
+
       // Sci-Check
       {
         path: "sci-check",
         component: FbsSciCheckComponent,
         canActivate: [AuthGuard],
       },
+
+      // Questionary
+      {
+        path: "questionary",
+        component: FbsQuestionaryComponent,
+        canActivate: [AuthGuard],
+      },
+
       // Admin
       {
         path: "admin/user-management",

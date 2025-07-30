@@ -3,6 +3,7 @@
   (click)="isSelectable ? toggleSelection() : null"
   class="task-container"
   id="{{ task.id }}"
+  tabindex="-1"
 >
   <div class="task-title">
     <section *ngIf="isSelectable" (click)="$event.stopPropagation()">
@@ -33,7 +34,12 @@
         >school</mat-icon
       >
     </span>
-    <span>{{ task.name }}</span>
+    <app-unstyled-link
+      [href]="
+        !isSelectable ? ['/courses', courseId, 'task', task.id].join('/') : null
+      "
+      >{{ task.name }}</app-unstyled-link
+    >
   </div>
   <span class="meta">
     <mat-icon class="visibility" *ngIf="task.isPrivate"

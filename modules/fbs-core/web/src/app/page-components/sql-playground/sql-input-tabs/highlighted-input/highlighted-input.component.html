@@ -1,5 +1,5 @@
 <form [formGroup]="groupForm">
-  <div class="code-container line-numbers">
+  <div class="code-container line-numbers" role="heading" aria-level="4">
     <textarea
       #textArea
       placeholder="{{
@@ -9,6 +9,7 @@
       formControlName="content"
       spellcheck="false"
       (keydown.tab)="onTab($event)"
+      (keydown.shift.enter)="onEnter($event)"
       wrap="hard"
     ></textarea>
     <pre

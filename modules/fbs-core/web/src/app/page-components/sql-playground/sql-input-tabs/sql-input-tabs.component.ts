@@ -1,13 +1,13 @@
 import {
-  Component,
-  OnInit,
   AfterViewChecked,
   AfterViewInit,
+  Component,
   ElementRef,
-  ViewChild,
-  HostListener,
   EventEmitter,
+  HostListener,
+  OnInit,
   Output,
+  ViewChild,
 } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -26,6 +26,7 @@ import * as SqlInputTabsActions from "./state/sql-input-tabs.actions";
 import * as fromSqlInputTabs from "./state/sql-input-tabs.selectors";
 import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { FormControl, FormGroup } from "@angular/forms";
+import { SubmissionService } from "../../../service/submission.service";
 import { Input } from "@angular/core";
 import { MongoPlaygroundService } from "../../../service/mongo-playground.service";
 
@@ -84,6 +85,7 @@ export class SqlInputTabsComponent
     private authService: AuthService,
     private courseRegistrationService: CourseRegistrationService,
     private taskService: TaskService,
+    private submissionService: SubmissionService,
     private prismService: PrismService,
     private store: Store,
     private mongoService: MongoPlaygroundService
@@ -119,7 +121,9 @@ export class SqlInputTabsComponent
     this.tabs$.subscribe((tabs) => {
       this.tabs = tabs;
     });
-    this.activeTab$.subscribe((activeTab) => (this.activeTab = activeTab));
+    this.activeTab$.subscribe((activeTab) => {
+      this.activeTab = activeTab;
+    });
   }
 
   closeTab(index: number) {
@@ -220,6 +224,7 @@ export class SqlInputTabsComponent
 
   changeCourse(index: number, course: Course) {
     this.store.dispatch(SqlInputTabsActions.changeCourse({ index, course }));
+    this.getTasks(course.id);
   }
 
   changeTask(index: number, task: Task) {
@@ -253,14 +258,15 @@ export class SqlInputTabsComponent
   }
 
   updateTabContent(index: number, content: string) {
-    console.log("utca");
     this.store.dispatch(
       SqlInputTabsActions.updateTabContent({ index, content })
     );
   }
 
   submissionToTask() {
-    // Implement the method logic
+    this.store.dispatch(
+      SqlInputTabsActions.submissionToTask({ index: this.activeTabIndex })
+    );
   }
 
   trackByIndex(index: number, obj: any): any {

@@ -16,6 +16,7 @@ import { PrismService } from "src/app/service/prism.service";
 import { Store } from "@ngrx/store";
 import * as SqlInputTabsActions from "../state/sql-input-tabs.actions";
 import * as fromSqlInputTabs from "../state/sql-input-tabs.selectors";
+import { MatButton } from "@angular/material/button";
 
 @Component({
   selector: "app-highlighted-input",
@@ -26,6 +27,7 @@ export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
   @ViewChild("textArea") textArea!: ElementRef;
   @ViewChild("codeContent") codeContent!: ElementRef;
   @ViewChild("pre") pre!: ElementRef;
+  @Input() submit: MatButton;
 
   subs: Subscription[] = [];
   codeType = "sql";
@@ -123,6 +125,11 @@ export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
 
     // put caret at right position again
     event.target.selectionStart = event.target.selectionEnd = start + 1;
+  }
+
+  onEnter(event) {
+    event.preventDefault();
+    this.submit?.focus();
   }
 
   cleanText(text: string) {

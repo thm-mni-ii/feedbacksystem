@@ -33,7 +33,6 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSliderModule } from "@angular/material/slider";
 import { MatTabsModule } from "@angular/material/tabs";
-
 import { NewCourseComponent } from "./page-components/new-course/new-course.component";
 import { SearchCoursesComponent } from "./page-components/search-courses/search-courses.component";
 import { CoursePreviewComponent } from "./page-components/course-preview/course-preview.component";
@@ -47,6 +46,7 @@ import { CourseResultsComponent } from "./page-components/course-detail/course-r
 import { TaskPreviewComponent } from "./page-components/course-detail/task-preview/task-preview.component";
 import { SubmissionFileComponent } from "./page-components/task-detail/submission-file/submission-file.component";
 import { SubmissionTextComponent } from "./page-components/task-detail/submission-text/submission-text.component";
+import { SubmissionSpreadsheetComponent } from "./page-components/task-detail/submission-spreadsheet/submission-spreadsheet.component";
 import { ResultsComponent } from "./page-components/results/results.component";
 import { DropzoneComponent } from "./tool-components/dropzone/dropzone.component";
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
@@ -63,7 +63,6 @@ import { NewCheckerDialogComponent } from "./dialogs/new-checker-dialog/new-chec
 import { ConfirmDialogComponent } from "./dialogs/confirm-dialog/confirm-dialog.component";
 import { TextConfirmDialogComponent } from "./dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "./dialogs/new-db-dialog/new-db-dialog.component";
-
 import {
   NgxMatDatetimePickerModule,
   NgxMatNativeDateModule,
@@ -77,7 +76,6 @@ import { TaskPointsDialogComponent } from "./dialogs/task-points-dialog/task-poi
 import { GoToComponent } from "./page-components/goto/goto.component";
 import { GotoLinksDialogComponent } from "./dialogs/goto-links-dialog/goto-links-dialog.component";
 import { EvaluationResultsComponent } from "./page-components/course-detail/course-results/evaluation-results/evaluation-results.component";
-import { SubmissionSpreadsheetComponent } from "./page-components/task-detail/submission-spreadsheet/submission-spreadsheet.component";
 import { SpreadsheetComponent } from "./dialogs/spreadsheet-dialog/spreadsheet/spreadsheet.component";
 import { SpreadsheetDialogComponent } from "./dialogs/spreadsheet-dialog/spreadsheet-dialog.component";
 import { SubtaskResultsComponent } from "./page-components/subtask-results/subtask-results.component";
@@ -90,16 +88,15 @@ import { MatSortModule } from "@angular/material/sort";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
-
 import "mathlive";
 import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
 import { SharePlaygroundLinkDialogComponent } from "./dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
 import { I18NextModule } from "angular-i18next";
 import { I18N_PROVIDERS } from "./util/i18n";
 import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
-
 import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
@@ -112,6 +109,11 @@ import { GroupDetailComponent } from "./page-components/group-detail/group-detai
 import { GroupDeregisterDialogComponent } from "./dialogs/group-deregister-dialog/group-deregister-dialog.component";
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
+import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component";
+import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
+import { AngularEditorModule } from "@kolkov/angular-editor";
+import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
+import { FbsTimeTrackingComponent } from "./page-components/fbs-time-tracking/fbs-time-tracking.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -124,7 +126,6 @@ export class ApiURIHttpInterceptor implements HttpInterceptor {
       // url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
       // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
-
     return next.handle(clonedRequest).pipe(
       tap((event) => {
         if (event instanceof HttpResponse) {
@@ -135,7 +136,6 @@ export class ApiURIHttpInterceptor implements HttpInterceptor {
     );
   }
 }
-
 export const httpInterceptorProviders = [
   { provide: HTTP_INTERCEPTORS, useClass: ApiURIHttpInterceptor, multi: true },
 ];
@@ -197,16 +197,20 @@ export const httpInterceptorProviders = [
     MathInputComponent,
     SharePlaygroundLinkDialogComponent,
     FbsModellingComponent,
+    FbsQuestionaryComponent,
     LanguageMenuComponent,
     MyGroupsComponent,
     GroupSelectionComponent,
     NewGroupDialogComponent,
     GroupPreviewComponent,
-    GroupPreviewComponent,
     GroupDetailComponent,
     GroupDeregisterDialogComponent,
     FbsKanbanComponent,
+    FbsTimeTrackingComponent,
     FbsSciCheckComponent,
+    SkipLinkComponent,
+    UnstyledLinkComponent,
+    CodeEditorComponent,
   ],
   imports: [
     BrowserModule,
@@ -241,6 +245,7 @@ export const httpInterceptorProviders = [
     MatSortModule,
     I18NextModule.forRoot(),
     SqlPlaygroundModule,
+    AngularEditorModule,
   ],
   entryComponents: [
     DataprivacyDialogComponent,
@@ -265,5 +270,4 @@ export class AppModule {}
 export function tokenGetter() {
   return localStorage.getItem("token");
 }
-
 registerLocaleData(localeDe, localeDeExtra);

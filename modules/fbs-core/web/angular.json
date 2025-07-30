@@ -22,11 +22,16 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets", { "glob": "**/*", "input": "node_modules/katex/dist", "output": "." }],
+            "assets": ["src/favicon.ico", "src/assets", { "glob": "**/*", "input": "node_modules/katex/dist", "output": "." }, {
+              "glob": "**/*",
+              "input": "node_modules/@kolkov/angular-editor/assets/icons",
+              "output": "assets/ae-icons/"
+            }],
             "styles": [
               "src/theme.scss",
               "src/styles.scss",
-              "node_modules/katex/dist/katex.min.css"
+              "node_modules/katex/dist/katex.min.css",
+              "node_modules/@kolkov/angular-editor/themes/default.scss"
             ],
             "scripts": [
               "node_modules/marked/marked.min.js",

@@ -1,0 +1,59 @@
+.code-container {
+  margin: 0 auto;
+  position: relative;
+  //overflow: none;
+  min-height: 100px;
+  border: 1.5px solid rgba(0, 0, 0, 0.87);
+  border-radius: 5px;
+}
+
+.text-area-code-editor {
+  &,
+  &:focus {
+    box-shadow: none;
+    outline: 0;
+    border: 0;
+  }
+}
+
+.text-area-code-editor,
+.pre,
+.code {
+  tab-size: 4;
+  margin: 0;
+  padding: 0;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 1em;
+  line-height: 1.5;
+  height: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  overflow: hidden;
+}
+
+.pre {
+  min-height: inherit;
+  z-index: 1;
+  padding: 15px 0 0 70px;
+  border-radius: 5px;
+  .code {
+    min-height: inherit;
+    border-radius: 5px;
+  }
+}
+
+.text-area-code-editor {
+  caret-color: rgb(0, 0, 0);
+  text-align: left;
+  display: block;
+  resize: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  width: 100%;
+  color: transparent;
+  background: transparent;
+  z-index: 2;
+  padding: 15px 0 0 70px;
+}
