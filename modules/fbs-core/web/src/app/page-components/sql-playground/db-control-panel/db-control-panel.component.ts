@@ -24,7 +24,7 @@ export class DbControlPanelComponent implements OnInit {
   @Output() submitStatement = new EventEmitter<string>();
   @Output() mongoDbSelected = new EventEmitter<string>();
   @Output() schemaReload = new EventEmitter<void>();
-  @Output() dbChanged = new EventEmitter<'postgres' | 'mongo'>();
+  @Output() dbChanged = new EventEmitter<"postgres" | "mongo">();
 
   isAdmin: boolean;
   selectedTab: number = 0;
@@ -68,12 +68,11 @@ export class DbControlPanelComponent implements OnInit {
     this.store.dispatch(activateDatabase({ id }));
   }
 
-  dbChangedToParent(db: 'postgres' | 'mongo') {
+  dbChangedToParent(db: "postgres" | "mongo") {
     this.dbChanged.emit(db);
   }
 
   mongoDbSelectedToParent(event: string) {
     this.mongoDbSelected.emit(event);
   }
-
 }

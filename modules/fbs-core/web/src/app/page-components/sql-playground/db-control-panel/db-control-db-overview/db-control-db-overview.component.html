@@ -3,19 +3,27 @@
     <mat-form-field appearance="fill" class="form-field-spacing">
       <mat-label>
         {{
-          "sql-playground.db-control-panel.templates.selected-db-type" | i18nextEager
+          "sql-playground.db-control-panel.templates.selected-db-type"
+            | i18nextEager
         }}
       </mat-label>
-      <mat-select [(value)]="selectedDbType" (selectionChange)="onDbTypeChange($event.value)">
-        <mat-option [value]="null" disabled>-- Datenbanktyp wählen --</mat-option>
+      <mat-select
+        [(value)]="selectedDbType"
+        (selectionChange)="onDbTypeChange($event.value)"
+      >
+        <mat-option [value]="null" disabled
+          >-- Datenbanktyp wählen --</mat-option
+        >
         <mat-option value="postgres">PostgreSQL</mat-option>
         <mat-option value="mongo">MongoDB</mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>{{
-          "sql-playground.db-control-panel.overview.selectDatabase" | i18nextEager
+      <mat-label
+        >{{
+          "sql-playground.db-control-panel.overview.selectDatabase"
+            | i18nextEager
         }}
       </mat-label>
       <mat-select
@@ -25,8 +33,11 @@
       >
         <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
           {{
-            selectedDbType === 'mongo'
-              ? db.name.replace('mongo_playground_student_' + token.id + '_', '')
+            selectedDbType === "mongo"
+              ? db.name.replace(
+                  "mongo_playground_student_" + token.id + "_",
+                  ""
+                )
               : db.name
           }}
         </mat-option>
@@ -62,7 +73,8 @@
         (click)="resetMongoDatabase()"
       >
         {{
-          "sql-playground.db-control-panel.overview.resetDbButton" | i18nextEager
+          "sql-playground.db-control-panel.overview.resetDbButton"
+            | i18nextEager
         }}
       </button>
 
@@ -91,7 +103,7 @@
   <div *ngIf="backend.type === 'collaborative'">
     <p>Sie sind mit dem Co-Working verbunden.</p>
     <p>
-      Datenbankname: {{ databaseInformation?.name ?? "-" }}<br/>
+      Datenbankname: {{ databaseInformation?.name ?? "-" }}<br />
       Datenbankursprung: {{ databaseInformation?.owner ?? "-" }}
     </p>
     <p>

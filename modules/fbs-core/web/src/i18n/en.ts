@@ -329,7 +329,8 @@ export const englishTranslation = {
   "sql-playground.db-control-panel.tab-db": "DB",
   "sql-playground.db-control-panel.tab-templates": "Templates",
   "sql-playground.db-control-panel.tab-coworking": "Co-Working",
-  "sql-playground.db-control-panel.templates.selected-db-type": "Selected Databasetype",
+  "sql-playground.db-control-panel.templates.selected-db-type":
+    "Selected Databasetype",
   "sql-playground.db-control-panel.templates.templates": "Templates",
   "sql-playground.db-control-panel.templates.none-option": "None",
   "sql-playground.db-control-panel.templates.insert-button": "Insert",

@@ -9,7 +9,8 @@
     <app-db-control-db-overview
       [selectedMongoDbId]="selectedMongoDbId"
       (mongoDbSelected)="mongoDbSelectedToParent($event)"
-      (schemaReload)="schemaReload.emit()">
+      (schemaReload)="schemaReload.emit()"
+    >
     </app-db-control-db-overview>
   </mat-tab>
   <mat-tab
@@ -17,8 +18,10 @@
   >
     <app-db-control-templates
       (submitStatement)="submitStatementToParent($event)"
-      (dbChanged)="dbChangedToParent($event)">
-    ></app-db-control-templates>
+      (dbChanged)="dbChangedToParent($event)"
+    >
+      ></app-db-control-templates
+    >
   </mat-tab>
   <mat-tab
     label="{{ 'sql-playground.db-control-panel.tab-coworking' | i18nextEager }}"

@@ -4,7 +4,6 @@ import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { SqlPlaygroundService } from "../../service/sql-playground.service";
 import { Store } from "@ngrx/store";
-import { loadDatabases } from "../../page-components/sql-playground/db-control-panel/state/databases.actions";
 
 /**
  * Updates course information in dialog
@@ -34,7 +33,7 @@ export class NewDbDialogComponent {
 
     this.dialogRef.close({
       success: true,
-      name: this.name.value
+      name: this.name.value,
     });
   }
 

@@ -1,18 +1,18 @@
 <div class="container">
   <mat-form-field appearance="fill">
-    <mat-label>{{
+    <mat-label
+      >{{
         "sql-playground.db-control-panel.templates.templates" | i18nextEager
       }}
     </mat-label>
     <mat-select [(value)]="selectedTemplateId">
       <mat-option
-      >--
+        >--
         {{
           "sql-playground.db-control-panel.templates.none-option" | i18nextEager
         }}
         --
-      </mat-option
-      >
+      </mat-option>
       <mat-optgroup
         *ngFor="let category of categories$ | async"
         [label]="category.name"

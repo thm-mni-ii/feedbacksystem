@@ -1,21 +1,30 @@
-import {Component, Input, OnInit, SimpleChanges} from '@angular/core';
-import { Subject } from 'rxjs';
-import { MongoPlaygroundService } from 'src/app/service/mongo-playground.service';
-import { AuthService } from 'src/app/service/auth.service';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from "@angular/core";
+import { Subject } from "rxjs";
+import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
+import { AuthService } from "src/app/service/auth.service";
 
 @Component({
-  selector: 'app-db-scheme-mongo-indexes',
-  templateUrl: './db-scheme-indexes.component.html',
-  styleUrls: ['../../db-scheme.component.scss'],
+  selector: "app-db-scheme-mongo-indexes",
+  templateUrl: "./db-scheme-indexes.component.html",
+  styleUrls: ["../../db-scheme.component.scss"],
 })
-export class DbSchemeMongoIndexesComponent implements OnInit {
+export class DbSchemeMongoIndexesComponent implements OnInit, OnChanges {
   @Input() reloadTrigger: Subject<void>;
   @Input() dbName: string;
 
   indexes: any[] = [];
   userId: number;
 
-  constructor(private mongoService: MongoPlaygroundService, private auth: AuthService) {}
+  constructor(
+    private mongoService: MongoPlaygroundService,
+    private auth: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -26,18 +35,21 @@ export class DbSchemeMongoIndexesComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['dbName'] && changes['dbName'].currentValue)
-      this.loadData();
+    if (changes["dbName"] && changes["dbName"].currentValue) this.loadData();
   }
 
   loadData(): void {
     this.userId = this.auth.getToken().id;
 
     const prefix = `mongo_playground_student_${this.userId}_`;
-    const dbSuffix = this.dbName.startsWith(prefix) ? this.dbName.split(prefix)[1] : this.dbName;
+    const dbSuffix = this.dbName.startsWith(prefix)
+      ? this.dbName.split(prefix)[1]
+      : this.dbName;
 
-    this.mongoService.getMongoIndexes(this.userId, dbSuffix).subscribe((res) => {
-      this.indexes = res;
-    });
+    this.mongoService
+      .getMongoIndexes(this.userId, dbSuffix)
+      .subscribe((res) => {
+        this.indexes = res;
+      });
   }
 }
