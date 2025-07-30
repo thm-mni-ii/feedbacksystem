@@ -5,7 +5,6 @@ package de.thm.ii.fbs.controller.v2
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.mongodb.MongoCommandException
-import com.mongodb.client.MongoClients
 import de.thm.ii.fbs.model.v2.group.Group
 import de.thm.ii.fbs.model.v2.playground.*
 import de.thm.ii.fbs.model.v2.playground.api.*
@@ -100,12 +99,12 @@ class PlaygroundController(
         @PathVariable("dbId") dbId: String,
         @RequestBody commandDTO: MongoShellCommandDTO
     ): Any {
-
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             val db = mongoClient.getDatabase(databaseName)
 
@@ -123,16 +122,18 @@ class PlaygroundController(
                 "find" -> collection!!.find(parsed.filter ?: Document()).toList()
 
                 "insert" -> {
-                    if (parsed.document == null || parsed.collection == null)
+                    if (parsed.document == null || parsed.collection == null) {
                         throw IllegalArgumentException("Insert requires document and collection")
+                    }
 
                     db.getCollection(parsed.collection).insertOne(parsed.document)
                     mapOf("status" to "success")
                 }
 
                 "insertMany" -> {
-                    if (parsed.pipeline == null || parsed.collection == null)
+                    if (parsed.pipeline == null || parsed.collection == null) {
                         throw IllegalArgumentException("insertMany requires array of documents and collection")
+                    }
 
                     db.getCollection(parsed.collection).insertMany(parsed.pipeline)
                     mapOf("status" to "success")
@@ -153,7 +154,7 @@ class PlaygroundController(
                     mapOf("deletedCount" to result.deletedCount)
                 }
 
-                "deleteOne" ->  {
+                "deleteOne" -> {
                     val result = collection!!.deleteOne(parsed.filter!!)
                     mapOf("deletedCount" to result.deletedCount)
                 }
@@ -202,8 +203,9 @@ class PlaygroundController(
     ): Any? {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
         }
 
         val mongoTemplate = mongoPlaygroundService.createMongoTemplate(currentToken, databaseName)
@@ -214,9 +216,11 @@ class PlaygroundController(
             }
         }
 
-        val query = Query(Criteria().apply {
-            filter.forEach { (key, value) -> this.and(key).`is`(value) }
-        })
+        val query = Query(
+            Criteria().apply {
+                filter.forEach { (key, value) -> this.and(key).`is`(value) }
+            }
+        )
 
         MongoSecurityValidator.validate(mongoQuery.operation, mongoQuery)
         return when (mongoQuery.operation) {
@@ -246,9 +250,11 @@ class PlaygroundController(
 
             "find" -> {
                 if (mongoQuery.projection != null) {
-                    val queryWithProjection = Query(Criteria().apply {
-                        filter.forEach { (key, value) -> this.and(key).`is`(value) }
-                    })
+                    val queryWithProjection = Query(
+                        Criteria().apply {
+                            filter.forEach { (key, value) -> this.and(key).`is`(value) }
+                        }
+                    )
 
                     queryWithProjection.fields().apply {
                         mongoQuery.projection.forEach { (key, value) ->
@@ -257,7 +263,9 @@ class PlaygroundController(
                         }
                     }
                     mongoTemplate.find(queryWithProjection, Document::class.java, mongoQuery.collection)
-                } else mongoTemplate.find(query, Document::class.java, mongoQuery.collection)
+                } else {
+                    mongoTemplate.find(query, Document::class.java, mongoQuery.collection)
+                }
             }
 
             "aggregate" -> {
@@ -270,10 +278,11 @@ class PlaygroundController(
             }
 
             "update" -> {
-                if (mongoQuery.upsert)
+                if (mongoQuery.upsert) {
                     mongoTemplate.upsert(query, up, mongoQuery.collection)
-                else
+                } else {
                     mongoTemplate.updateFirst(query, up, mongoQuery.collection)
+                }
             }
 
             "delete" -> mongoTemplate.remove(query, mongoQuery.collection)
@@ -322,8 +331,9 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             return db.listCollectionNames().toList()
                 .filter { it != "mongo_playground_database" && it != "system.views" }
@@ -342,8 +352,9 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             val count = db.getCollection(collectionName).countDocuments()
 
@@ -364,11 +375,13 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
-            if (!db.listCollectionNames().contains(collection))
+            if (!db.listCollectionNames().contains(collection)) {
                 throw NotFoundException()
+            }
 
             db.getCollection(collection).drop()
         }
@@ -391,8 +404,9 @@ class PlaygroundController(
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             mongoClient.getDatabase(databaseName).drop()
         }
@@ -409,8 +423,9 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             val collections = db.listCollectionNames()
                 .filter { it != "mongo_playground_database" }
@@ -433,8 +448,9 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             db.createView(request.viewName, request.collectionSource, request.pipeline)
         }
@@ -451,8 +467,9 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             return db.listCollections()
                 .mapNotNull { collection ->
@@ -463,7 +480,9 @@ class PlaygroundController(
                         if (type == "view") {
                             val source = collection.getString("viewOn") ?: ""
                             mapOf("name" to name, "source" to source)
-                        } else null
+                        } else {
+                            null
+                        }
                     } catch (e: Exception) {
                         println("Fehler beim Verarbeiten einer Collection: ${e.message}")
                         null
@@ -485,13 +504,15 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             val collectionsNames = db.listCollectionNames().toList()
 
-            if (!collectionsNames.contains(viewName))
+            if (!collectionsNames.contains(viewName)) {
                 throw NotFoundException()
+            }
 
             db.getCollection(viewName).drop()
         }
@@ -509,8 +530,9 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             val index = Document(request.index)
             val indexName = db.getCollection(request.collection).createIndex(index)
@@ -523,15 +545,16 @@ class PlaygroundController(
     @ResponseBody
     fun getMongoIndexes(
         @CurrentToken currentToken: LegacyToken,
-        @PathVariable("dbId") dbId: String,
+        @PathVariable("dbId") dbId: String
     ): List<Map<String, Any>> {
         val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
             return db.listCollectionNames()
                 .filter { it !in listOf("system.views", "mongo_playground_database") }
@@ -575,19 +598,22 @@ class PlaygroundController(
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
 
-            if (!mongoClient.listDatabaseNames().contains(databaseName))
+            if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
+            }
 
-            if (!db.listCollectionNames().contains(collection))
+            if (!db.listCollectionNames().contains(collection)) {
                 throw NotFoundException()
+            }
 
             try {
                 db.getCollection(collection).dropIndex(indexName)
             } catch (ex: MongoCommandException) {
-                if (ex.errorCode == 27)
+                if (ex.errorCode == 27) {
                     throw NotFoundException()
-                else
+                } else {
                     throw ex
+                }
             }
         }
     }

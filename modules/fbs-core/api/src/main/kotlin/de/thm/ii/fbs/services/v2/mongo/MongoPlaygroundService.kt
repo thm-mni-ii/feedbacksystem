@@ -4,11 +4,11 @@ import com.mongodb.ConnectionString
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import de.thm.ii.fbs.model.v2.security.LegacyToken
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.mongodb.MongoDatabaseFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory
 import org.springframework.stereotype.Service
-import org.springframework.beans.factory.annotation.Value
 
 @Service
 class MongoPlaygroundService {

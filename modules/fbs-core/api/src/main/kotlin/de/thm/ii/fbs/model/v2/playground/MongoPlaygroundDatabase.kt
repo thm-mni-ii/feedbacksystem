@@ -34,5 +34,5 @@ class MongoPlaygroundDatabase(
     var deleted: Boolean = false,
 
     @Id
-    var id: String? = null,
+    var id: String? = null
 )
