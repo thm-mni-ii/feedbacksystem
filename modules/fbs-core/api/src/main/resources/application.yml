@@ -101,8 +101,6 @@ spring:
   #      ddl-auto: create-drop
   data:
     mongodb:
-      repositories:
-        type: none
       sqlchecker:
         uri: ${MONGODB_URI:mongodb://localhost:27017/}
         database: ${MONGODB_DATABASE:sql-checker}
