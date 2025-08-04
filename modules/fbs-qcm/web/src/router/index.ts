@@ -45,11 +45,6 @@ const router = createRouter({
       component: () => import('../views/QuestionView.vue')
     },
     {
-      path: '/deleteQuestion',
-      name: 'delete',
-      component: () => import('../views/DeleteQuestionView.vue')
-    },
-    {
       path: '/allQuestions',
       name: 'allQuestions',
       component: () => import('../views/AllQuestionsView.vue')

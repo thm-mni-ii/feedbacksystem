@@ -22,7 +22,7 @@ class SkillService {
     try {
       const response = await axios.put(`/api_v1/skill/${skillId}`, payload, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          authorization: `Bearer ${localStorage.getItem('jsessionid')}` // 'token' -> 'jsessionid'
         }
       })
       return response.data
