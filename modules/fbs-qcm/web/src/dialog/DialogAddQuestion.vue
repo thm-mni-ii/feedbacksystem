@@ -49,7 +49,7 @@ const _cancel = () => {
   AddQuestionDialog.value = false
   resolvePromise.value && resolvePromise.value(null)
 }
-const handleQuestionChange = (question: string) => {
+const handleQuestionChange = (question: Ref<string>) => {
   selectedQuestion.value = question.value
   console.log(selectedQuestion.value)
   console.log(question.value)

@@ -1,113 +1,110 @@
 import type Skill from '@/model/Skill'
 import axios, { type AxiosResponse } from 'axios'
-
-const skillData = [
-  {
-    id: 1,
-    name: 'SQL',
-    difficulty: 3,
-    description:
-      'learn about the standard language for storing, manipulating and retrieving data in databases'
-  },
-  {
-    id: 2,
-    name: 'Python',
-    difficulty: 1,
-    description: 'A high-level, general-purpose programming language. '
-  },
-  {
-    id: 3,
-    name: 'Javascript',
-    difficulty: 2,
-    description:
-      'A programming language and core technology of the World Wide Web, alongside HTML and CSS'
-  },
-  {
-    id: 4,
-    name: 'C++',
-    difficulty: 4,
-    description:
-      'C++ is used to create computer programs, and is one of the most used language in game development.'
-  }
-]
-
-const skill = {
-  id: 4,
-  name: 'C++',
-  difficulty: 4,
-  description:
-    'C++ is used to create computer programs, and is one of the most used language in game development.'
-} as Skill
-
-const studyProgress = [
-  { skillId: 1, progress: 23 },
-  { skillId: 2, progress: 65 },
-  { skillId: 3, progress: 47 },
-  { skillId: 4, progress: 82 }
-]
+import type Question from '@/model/Question'
 
 class SkillService {
   getSkills(courseId: number): Promise<AxiosResponse<Skill[]>> {
-    return Promise.resolve({
-      data: skillData as AxiosResponse<Skill[]>
+    return axios.get(`/api_v1/courseSkills/${courseId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
     })
-    // return axios.get(
-    //   `/api_v1/courseSkills/${courseId}`,
-    //   {
-    //     headers: {
-    //       authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-    //     }
-    //   }
-    // )
   }
+
   getSkill(skillId: string): Promise<AxiosResponse<Skill>> {
-    return Promise.resolve({
-      data: skill as AxiosResponse<Skill>
+    return axios.get(`/api_v1/getSkill/${skillId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
     })
-    // return axios.get(
-    //   `/api_v1/skills/${skillId}`,
-    //   {
-    //     headers: {
-    //       authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-    //     }
-    //   }
-    // )
   }
-  getAllStudyProgress(courseId: number) {
-    return Promise.resolve({
-      data: studyProgress as AxiosResponse<[]>
+  async updateSkill(skillId: string, payload: any) {
+    try {
+      const response = await axios.put(`/api_v1/skill/${skillId}`, payload, {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem('jsessionid')}` // 'token' -> 'jsessionid'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Skills:', error)
+      throw error
+    }
+  }
+
+  getAllStudyProgress(courseId: number): Promise<AxiosResponse<any>> {
+    return axios.get(`/api_v1/skillProgress/${courseId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
     })
-    // return axios.get(
-    //   `api_v1/skillProgress/${course.id}/${skillId}`,
-    //   {
-    //     headers: {
-    //       authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-    //     }
-    //   }
-    // )
   }
+
   createNewSkill(courseId: number, skill: Skill) {
-    return axios.post(`/api_v1/skill/`, skill, {
+    const plainSkill = JSON.parse(JSON.stringify(skill))
+    console.log('SKILL SERVICE - Skill to insert:', plainSkill)
+    return axios.post(
+      `/api_v1/createSkill/`,
+      { ...plainSkill, course: courseId },
+      {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
+      }
+    )
+  }
+
+  editSkill(skillId: string, skill: Skill) {
+    return axios.put(`/api_v1/editSkill/${skillId}`, skill, {
       headers: {
         authorization: `Bearer ${localStorage.getItem('jsessionid')}`
       }
     })
   }
-  editSkill(skill: Skill) {
-    return axios.put(`/api_v1/skill/`, skill, {
+
+  removeQuestion(skillId: string, questionId: string) {
+    return axios.delete(`/api_v1/removeQuestionFromSkill/${skillId}/${questionId}`, {
       headers: {
         authorization: `Bearer ${localStorage.getItem('jsessionid')}`
       }
     })
   }
-  removeQuestion(questionId: number) {
-    console.log(questionId)
-    console.log('REMOVE QUESTION FROM SKILL')
-    // return axios.delete(`/api_v1/skill/removeQuestion`, question, {
-    //   headers: {
-    //     authorization: `Bearer ${localStorage.getItem('jsessionid')}`
-    //   }
-    // })
+
+  removeSkill(skillId: string | number) {
+    return axios.delete(`/api_v1/deleteSkill/${skillId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+
+  getSkillQuestions(skillId: string): Promise<AxiosResponse<any>> {
+    return axios.get(`/api_v1/skillQuestions/${skillId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
+  }
+
+  addQuestionToSkill(skillId: string, questionId: string): Promise<AxiosResponse<any>> {
+    return axios.post(
+      `/api_v1/addQuestionToSkill/${skillId}/${questionId}`,
+      // Wenn kein zusätzlicher Body nötig ist, kann null übergeben werden
+      null,
+      {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+        }
+      }
+    )
+  }
+
+  getTotalQuestions(courseId: number): Promise<AxiosResponse<{ totalQuestions: number }>> {
+    return axios.get(`/api_v1/totalQuestions/${courseId}`, {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('jsessionid')}`
+      }
+    })
   }
 }
 
