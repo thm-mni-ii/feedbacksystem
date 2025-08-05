@@ -1,6 +1,6 @@
 import * as mongoDB from "mongodb";
-import { connect } from "../db";
-import type { JwtPayload } from "../model/utilInterfaces";
+import { connect } from "../mongo/mongo";
+import type { JwtPayload } from "jsonwebtoken";
 
 // Beispiel: Starte eine Lern-Session, speichere z. B. user, course und startTime in der Collection "learnSession"
 export async function startLearnSessionService(
@@ -17,7 +17,13 @@ export async function startLearnSessionService(
       status: "ongoing",
       // Weitere Felder nach Bedarf
     });
-    return session.ops[0]; // oder session.insertedId u.ä.
+    return {
+      insertedId: session.insertedId,
+      course: courseId,
+      user: tokenData.user,
+      startTime: new Date(),
+      status: "ongoing",
+    };
   } catch (error) {
     console.error("Error in startLearnSessionService:", error);
     return null;

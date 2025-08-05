@@ -5,7 +5,7 @@ import {
   submitLearnAnswer,
   endLearnSession,
 } from "../controller/learnSession";
-import { authenticateToken } from "../middleware/authenticateToken";
+import { authenticateToken } from "../authenticateToken";
 
 const router = express.Router();
 
