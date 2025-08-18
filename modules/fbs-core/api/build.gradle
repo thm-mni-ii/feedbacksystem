@@ -61,7 +61,7 @@ dependencies {
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
     implementation 'org.apache.commons:commons-compress:1.27.1'
     implementation group: 'org.ldaptive', name: 'ldaptive', version: '2.1.1'
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
     implementation 'com.udojava:EvalEx:2.7'
     implementation 'org.mongodb:bson:4.10.2'
     implementation 'org.mongodb:mongodb-driver-core:4.10.2'
