@@ -1,23 +1,18 @@
 <div class="container">
-  <p class="info-text" *ngIf="activeDb$ | async as activeDb">
-    {{
-      "sql-playground.db-control-panel.templates.selected-db" | i18nextEager
-    }}:
-    <span class="highlight">{{ activeDb[0]?.name }}</span>
-  </p>
-
   <mat-form-field appearance="fill">
-    <mat-label>{{
-      "sql-playground.db-control-panel.templates.templates" | i18nextEager
-    }}</mat-label>
+    <mat-label
+      >{{
+        "sql-playground.db-control-panel.templates.templates" | i18nextEager
+      }}
+    </mat-label>
     <mat-select [(value)]="selectedTemplateId">
       <mat-option
         >--
         {{
           "sql-playground.db-control-panel.templates.none-option" | i18nextEager
         }}
-        --</mat-option
-      >
+        --
+      </mat-option>
       <mat-optgroup
         *ngFor="let category of categories$ | async"
         [label]="category.name"

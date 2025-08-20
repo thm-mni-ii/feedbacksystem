@@ -5,23 +5,40 @@
       [yScrollable]="false"
       title="{{ 'sql-playground.results' | i18nextEager }}"
     >
-      <app-dynamic-result-table></app-dynamic-result-table>
+      <ng-container *ngIf="selectedDbType === 'postgres'; else mongoOutput">
+        <app-dynamic-result-table></app-dynamic-result-table>
+      </ng-container>
+
+      <ng-template #mongoOutput>
+        <div class="mongo-output" *ngIf="mongoRawResult$ | async as result">
+          <pre><code class="language-json">{{ result | json }}</code></pre>
+        </div>
+      </ng-template>
     </app-bordered-container>
   </div>
+
   <div class="input-grid">
     <app-bordered-container [input]="true" title="Queries">
       <app-sql-input-tabs
+        [dbType]="selectedDbType"
+        [dbName]="mongoDbId"
+        [schemaReload]="schemaReload$"
         (submitStatement)="submitStatement($event)"
       ></app-sql-input-tabs>
     </app-bordered-container>
   </div>
+
   <div class="db-grid">
     <app-bordered-container
       title="{{ 'sql-playground.control' | i18nextEager }}"
     >
       <app-db-control-panel
+        [selectedMongoDbId]="mongoDbId"
         (changeActiveDbId)="changeActiveDbId($event)"
         (submitStatement)="submitStatement($event)"
+        (dbChanged)="onDbChanged($event)"
+        (mongoDbSelected)="onMongoDbSelected($event)"
+        (schemaReload)="schemaReload$.next()"
       ></app-db-control-panel>
     </app-bordered-container>
   </div>
@@ -30,19 +47,11 @@
       [yScrollable]="true"
       title="{{ 'sql-playground.dbSchema' | i18nextEager }}"
     >
-      <app-db-scheme-tables
-        title="{{ 'sql-playground.tables' | i18nextEager }}"
+      <app-db-scheme
+        [reloadTrigger]="schemaReload$"
+        [dbName]="mongoDbId"
         (submitStatement)="submitStatement($event)"
-      ></app-db-scheme-tables>
-      <app-db-scheme-views
-        title="{{ 'sql-playground.views' | i18nextEager }}"
-      ></app-db-scheme-views>
-      <app-db-scheme-routines
-        title="{{ 'sql-playground.storedProcedures' | i18nextEager }}"
-      ></app-db-scheme-routines>
-      <app-db-scheme-triggers
-        title="{{ 'sql-playground.triggers' | i18nextEager }}"
-      ></app-db-scheme-triggers>
+      ></app-db-scheme>
     </app-bordered-container>
   </div>
 </div>

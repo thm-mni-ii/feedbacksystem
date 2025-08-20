@@ -12,7 +12,7 @@ import {
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Store } from "@ngrx/store";
-import { Observable, of } from "rxjs";
+import { Observable, of, Subject } from "rxjs";
 import { map, take } from "rxjs/operators";
 import { AuthService } from "src/app/service/auth.service";
 import { CourseRegistrationService } from "src/app/service/course-registration.service";
@@ -27,6 +27,8 @@ import * as fromSqlInputTabs from "./state/sql-input-tabs.selectors";
 import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { FormControl, FormGroup } from "@angular/forms";
 import { SubmissionService } from "../../../service/submission.service";
+import { Input } from "@angular/core";
+import { MongoPlaygroundService } from "../../../service/mongo-playground.service";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -36,7 +38,11 @@ import { SubmissionService } from "../../../service/submission.service";
 export class SqlInputTabsComponent
   implements OnInit, AfterViewChecked, AfterViewInit
 {
+  @Input() dbType: "postgres" | "mongo" = "postgres";
+  @Input() dbName!: string;
+  @Input() schemaReload!: Subject<void>;
   @Output() submitStatement = new EventEmitter<string>();
+
   isPending: boolean;
   activeTabIndex: number;
   tabs: QueryTab[];
@@ -53,7 +59,7 @@ export class SqlInputTabsComponent
   @ViewChild("pre", { static: true }) pre!: ElementRef;
 
   highlighted = false;
-  codeType = "sql";
+  codeType: "sql" | "json" = "sql";
 
   groupForm = new FormGroup({
     content: new FormControl(""),
@@ -81,7 +87,8 @@ export class SqlInputTabsComponent
     private taskService: TaskService,
     private submissionService: SubmissionService,
     private prismService: PrismService,
-    private store: Store
+    private store: Store,
+    private mongoService: MongoPlaygroundService
   ) {}
 
   ngAfterViewChecked() {
@@ -96,6 +103,7 @@ export class SqlInputTabsComponent
   }
 
   ngOnInit(): void {
+    this.codeType = this.dbType === "mongo" ? "json" : "sql";
     const userID = this.authService.getToken().id;
     this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
 
@@ -192,10 +200,12 @@ export class SqlInputTabsComponent
       .pipe(take(1))
       .subscribe((isEmpty) => {
         if (isEmpty) {
-          this.snackbar.open("Sie haben keine Lösung abgegeben", "Ups!");
+          this.snackbar.open("Sie haben keine Lösung abgegeben", "Fehler");
         } else {
           this.activeTabIndex$.pipe(take(1)).subscribe((index) => {
-            this.store.dispatch(SqlInputTabsActions.submission({ index }));
+            const query = this.tabs[index].content;
+
+            this.submitStatement.emit(query);
           });
         }
       });

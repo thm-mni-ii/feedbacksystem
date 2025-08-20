@@ -341,7 +341,8 @@ export const englishTranslation = {
   "sql-playground.db-control-panel.tab-db": "DB",
   "sql-playground.db-control-panel.tab-templates": "Templates",
   "sql-playground.db-control-panel.tab-coworking": "Co-Working",
-  "sql-playground.db-control-panel.templates.selected-db": "Selected DB",
+  "sql-playground.db-control-panel.templates.selected-db-type":
+    "Selected Databasetype",
   "sql-playground.db-control-panel.templates.templates": "Templates",
   "sql-playground.db-control-panel.templates.none-option": "None",
   "sql-playground.db-control-panel.templates.insert-button": "Insert",
@@ -350,6 +351,7 @@ export const englishTranslation = {
   "sql-playground.db-control-panel.overview.selectDatabase": "Select Database",
   "sql-playground.db-control-panel.overview.deleteButton": "Delete",
   "sql-playground.db-control-panel.overview.newDbButton": "New DB",
+  "sql-playground.db-control-panel.overview.resetDbButton": "Reset DB",
   "sql-playground.db-control-panel.overview.changeCollaborativeModeButton":
     "Switch to Private Mode",
   "sql-playground.db-control-panel.co-working.select-group": "Select Group",

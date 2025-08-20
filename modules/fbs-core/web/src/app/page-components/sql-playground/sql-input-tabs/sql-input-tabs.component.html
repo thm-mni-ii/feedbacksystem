@@ -109,6 +109,7 @@
       <div class="inputField">
         <app-highlighted-input
           [index]="index"
+          [language]="codeType"
           (update)="updateTabContent(activeTabIndex, $event.content)"
           [submit]="submit"
           aria-label="SQL Eingabefeld"

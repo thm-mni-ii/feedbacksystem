@@ -41,6 +41,7 @@ export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
 
   private lastUpdated: string;
   @Input() index!: number;
+  @Input() language!: string;
 
   get contentControl() {
     return this.groupForm.get("content")?.value;

@@ -36,7 +36,7 @@ class LegacySqlCheckerService(@Value("${services.masterRunner.insecure}") insecu
 
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
-  @Value("${spring.data.mongodb.uri}")
+  @Value("${spring.data.mongodb.sqlchecker.uri}")
   private val mongodbUrl: String = null
 
   override def notifyChecker(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
