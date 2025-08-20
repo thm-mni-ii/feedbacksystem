@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/stores/authStore'
 import { useRoute } from 'vue-router'
+import router from '@/router'
 
 import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
 
@@ -20,6 +21,10 @@ const props = defineProps<{
   totalQuestions?: number
   reloadSkills?: () => void
 }>()
+
+const startLearnSession = () => {
+  router.push({ name: 'studySession', params: { courseId } })
+}
 
 const formattedDate = computed(() =>
   props.lastStudySession ? format(new Date(props.lastStudySession), 'dd MMM yyyy, HH:mm') : '–'
@@ -47,19 +52,6 @@ const createNewSkill = (courseId: number) => {
         <p class="text-body-1 mt-2">{{ description }}</p>
       </div>
       <div v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
-        <v-tooltip text="Edit course" location="bottom">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon="mdi-cog"
-              class="mx-2"
-              size="x-small"
-              color="black"
-              @click="console.log('works')"
-            >
-            </v-btn>
-          </template>
-        </v-tooltip>
         <v-tooltip text="Create new Skill" location="bottom">
           <template #activator="{ props }">
             <v-btn
@@ -90,7 +82,7 @@ const createNewSkill = (courseId: number) => {
             <strong class="border-b">Total Questions:</strong><br />
             <span>{{ totalQuestions ?? '-' }}</span>
           </v-col>
-          <v-btn class="bg-primary-light mt-2">Learn for Course </v-btn>
+          <v-btn class="bg-primary-light mt-2" @click="startLearnSession">Learn for Course </v-btn>
           <v-spacer></v-spacer>
           <v-btn class="bg-primary-light mt-2">Test your skills</v-btn>
         </v-row>

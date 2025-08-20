@@ -1,82 +1,141 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import courseService from '@/services/course.service'
+import questionService from '@/services/question.service'
+// import studyService from '@/services/study.service' // Later for queue logic
+import CatalogSession from '../components/CatalogSession.vue'
 
-const startLearnSession = async () => {
-  const courseId = ... // z. B. aus route.params
+const route = useRoute()
+const courseId = Number(route.params.courseId)
+const courseInformation = ref<{ name?: string }>({})
+
+// Question queue simulation
+const questionData = ref<any>(null)
+const progressBar = ref<number>(1)
+
+// Feedback state
+const showFeedback = ref<boolean>(false)
+const currentQuestionScore = ref<number>(0)
+const formattedScore = computed(() => (currentQuestionScore.value * 100).toFixed(2))
+const scoreEmoji = computed(() => {
+  if (currentQuestionScore.value < 0.1) return '💀'
+  if (currentQuestionScore.value < 0.4) return '😐'
+  if (currentQuestionScore.value < 0.6) return '🙂'
+  return '😎'
+})
+
+const sessionOver = ref<boolean>(false)
+
+async function loadCourseInformation(courseId: number) {
+  const { data } = await courseService.getCoreCourse(courseId)
+  courseInformation.value = data
+}
+
+async function loadQuestion() {
+  // Later: use studyService.currentQuestion()
+  const { data } = await questionService.getQuestion('67f7f553d93fb13cd308e80c')
+  questionData.value = data
+}
+
+const submitAnswer = async (answer: any) => {
+  console.log('Submitted answer:', answer)
+
   try {
-    const res = await sessionService.startLearnSession(courseId, ""); // Falls kein zusätzlicher Parameter notwendig ist oder anders übergeben
-    sessionId.value = res.data.sessionId;
-    // Lade die erste Frage
-    await loadCurrentQuestion();
+    const submitResponse = await sessionService.submitAnswer(
+      questionData.value._id,
+      answer,
+      sessionId.value
+    )
+    currentQuestionScore.value = submitResponse.data.correct.score
+    showFeedback.value = true
+
+    const res = await sessionService.getCurrentQuestion(sessionId.value)
+    console.log(res.data)
+
+    if (res.data.catalog === 'over') {
+      console.log('Catalog finished. Ending Session.')
+
+      await sessionService.endSession(sessionId.value)
+      catalogStatus.value = 'over'
+
+      const catalogScoreRes = await catalogService.getCatalogScore(sessionId.value)
+      catalogScore.value = catalogScoreRes.data.score
+      catalogEvaluation.value = catalogScoreRes.data
+
+      console.log('Catalog Score:', catalogScoreRes.data)
+    } else {
+      catalogStatus.value = null
+      questionData.value = res.data
+    }
+
+    progressBar.value++
   } catch (error) {
-    console.error("Error starting learn session:", error);
+    console.error('Error submitting Answer:', error)
   }
 }
+
+const nextQuestion = async () => {
+  showFeedback.value = false
+  progressBar.value++
+
+  if (progressBar.value > 10) {
+    sessionOver.value = true
+    return
+  }
+
+  await loadQuestion()
+}
+
+onMounted(async () => {
+  await loadCourseInformation(courseId)
+  await loadQuestion()
+})
 </script>
 
 <template>
-  <v-card v-if="showErrorPage" class="h-52 mx-auto">
-    <h2>Error: Could not find the page you're looking for</h2>
-  </v-card>
-  <v-form v-else class="mt-12">
-    <v-sheet
-      class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
-      elevation="4"
-      height="auto"
-      width="80%"
-      rounded
-    >
-      <v-responsive class="mx-auto" width="85%">
-        <h3 class="text-h3 my-8 font-weight-black text-blue-grey-darken-2">
-          {{ catalog.name }}
-        </h3>
-        <div class="d-flex flex-row mb-8">
-          <v-progress-linear
-            min="0"
-            :max="8"
-            color="primary"
-            height="8"
-            :model-value="progressBar"
-            stream
-            rounded
-          ></v-progress-linear>
-        </div>
-        <div v-if="catalogStatus == 'over' && !showFeedback">
-          <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">
-            Finished!🎉 Here's your Summary:
-          </h4>
-          <SessionFeedback :questionReport="catalogEvaluation.questionReport" />
-          <h3 class="text-blue-grey-darken-2">
-            Total Score: {{ (catalogScore * 100).toFixed(2) }} %
-          </h3>
-          <v-btn
-            variant="tonal"
-            class="mx-auto my-8"
-            type="button"
-            append-icon="mdi-arrow-right-bold-outline"
-            @click="router.push('/')"
-          >
-            Go back
-          </v-btn>
-        </div>
-        <div v-if="showFeedback">
-          <h4 class="text-h4 my-8 font-weight-black text-blue-grey-darken-2">You scored:</h4>
-          <p class="text-blue-grey-darken-2">{{ formattedScore }} % {{ scoreEmoji }}</p>
-          <v-btn
-            variant="tonal"
-            class="mx-auto my-8"
-            type="button"
-            append-icon="mdi-arrow-right-bold-outline"
-            @click="showFeedback = false"
-          >
-            next
-          </v-btn>
-        </div>
-        <CatalogSession
-          v-if="questionData && catalogStatus == null && !showFeedback"
-          :question="questionData"
-          @submit-answer="submitAnswer"
-        />
-      </v-responsive>
-    </v-sheet>
-  </v-form>
+  <v-sheet
+    class="d-flex align-center justify-center flex-wrap flex-column text-center mx-auto my-14 px-4"
+    elevation="4"
+    height="auto"
+    width="80%"
+    rounded
+  >
+    <v-responsive class="mx-auto" width="85%">
+      <h3 class="text-h3 mt-8 font-weight-black text-blue-grey-darken-2">
+        {{ courseInformation.name }}
+      </h3>
+
+      <v-progress-linear
+        class="my-6"
+        :model-value="progressBar"
+        :max="10"
+        height="8"
+        color="primary"
+        rounded
+        stream
+      />
+
+      <div v-if="sessionOver && !showFeedback">
+        <h4 class="text-h4 my-8 font-weight-black text-primary">Session finished 🎉</h4>
+        <v-btn variant="tonal" @click="$router.push('/')">Go back</v-btn>
+      </div>
+
+      <!-- Feedback -->
+      <div v-if="showFeedback">
+        <h4 class="text-h4 my-8 font-weight-black text-primary">You scored:</h4>
+        <p class="text-blue-grey-darken-2">
+          <b>{{ formattedScore }} % {{ scoreEmoji }}</b>
+        </p>
+        <v-btn variant="tonal" class="my-4" @click="nextQuestion"> Next </v-btn>
+      </div>
+
+      <!-- Current Question -->
+      <CatalogSession
+        v-if="questionData && !showFeedback && !sessionOver"
+        :question="questionData"
+        @submit-answer="submitAnswer"
+      />
+    </v-responsive>
+  </v-sheet>
 </template>
