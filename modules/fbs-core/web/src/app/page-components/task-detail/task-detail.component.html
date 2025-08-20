@@ -96,6 +96,17 @@
         ></app-submission-file>
         <app-submission-text
           *ngIf="submissionTypeOfTask() === 'text'"
+          mode="plain"
+          (update)="updateSubmissionContent($event)"
+        ></app-submission-text>
+        <app-submission-text
+          *ngIf="submissionTypeOfTask() === 'rich'"
+          mode="wysiwyg"
+          (update)="updateSubmissionContent($event)"
+        ></app-submission-text>
+        <app-submission-text
+          *ngIf="submissionTypeOfTask() === 'code'"
+          mode="code"
           (update)="updateSubmissionContent($event)"
         ></app-submission-text>
         <app-submission-spreadsheet
@@ -173,7 +184,7 @@
         *ngIf="submissions"
         [submissions]="submissions"
         [context]="{ uid: uid, cid: courseId, tid: task.id }"
-        [isText]="task?.mediaType === 'text/plain'"
+        [isText]="task?.mediaType.startsWith('text/')"
       ></app-results>
       <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
     </mat-card-content>

@@ -1,27 +1,49 @@
 <div class="container">
   <div *ngIf="backend.type === 'local'">
-    <div>
-      <p class="spinner-wrapper" *ngIf="activeDb$ | async as activeDb">
-        {{ "sql-playground.db-control-panel.overview.version" | i18nextEager }}:
-        <span class="highlight">{{ activeDb[0]?.version }}</span>
-        &nbsp;&nbsp;<mat-spinner *ngIf="pending" [diameter]="24"></mat-spinner>
-      </p>
-    </div>
+    <mat-form-field appearance="fill" class="form-field-spacing">
+      <mat-label>
+        {{
+          "sql-playground.db-control-panel.templates.selected-db-type"
+            | i18nextEager
+        }}
+      </mat-label>
+      <mat-select
+        [(value)]="selectedDbType"
+        (selectionChange)="onDbTypeChange($event.value)"
+      >
+        <mat-option [value]="null" disabled
+          >-- Datenbanktyp wählen --</mat-option
+        >
+        <mat-option value="postgres">PostgreSQL</mat-option>
+        <mat-option value="mongo">MongoDB</mat-option>
+      </mat-select>
+    </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>{{
-        "sql-playground.db-control-panel.overview.selectDatabase" | i18nextEager
-      }}</mat-label>
+      <mat-label
+        >{{
+          "sql-playground.db-control-panel.overview.selectDatabase"
+            | i18nextEager
+        }}
+      </mat-label>
       <mat-select
         [(value)]="selectedDb"
         (selectionChange)="activateDatabase($event.value)"
-        [disabled]="collaborativeMode"
+        [disabled]="collaborativeMode || !selectedDbType"
       >
         <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
-          {{ db.name }}
+          {{
+            selectedDbType === "mongo"
+              ? db.name.replace(
+                  "mongo_playground_student_" + token.id + "_",
+                  ""
+                )
+              : db.name
+          }}
         </mat-option>
       </mat-select>
     </mat-form-field>
+
     <div class="btn-container">
       <button
         mat-raised-button
@@ -43,6 +65,19 @@
           "sql-playground.db-control-panel.overview.newDbButton" | i18nextEager
         }}
       </button>
+
+      <button
+        mat-raised-button
+        class="orange-btn"
+        *ngIf="selectedDbType === 'mongo' && selectedDb"
+        (click)="resetMongoDatabase()"
+      >
+        {{
+          "sql-playground.db-control-panel.overview.resetDbButton"
+            | i18nextEager
+        }}
+      </button>
+
       <button
         mat-raised-button
         color="accent"

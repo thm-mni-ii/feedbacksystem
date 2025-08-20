@@ -150,20 +150,20 @@ const handleSubmit = async () => {
         <EditChoiceQuestion
           v-if="question.questiontype === 'Choice'"
           :question="question"
-          :isNew="isNew"
+          :is-new="isNew"
           @update="handleUpdate"
         />
         <EditFillInTheBlanks
           v-if="question.questiontype === 'FillInTheBlanks'"
           :question="question"
-          :isNew="isNew"
+          :is-new="isNew"
           @update="handleUpdate"
         />
       </v-form>
     </v-card-text>
 
     <v-card-actions>
-      <v-btn color="red" variant="tonal" class="mx-4 mb-4" @click="$emit('cancel')">Cancel</v-btn>
+      <v-btn variant="tonal" class="mx-4 mb-4" @click="$emit('cancel')">Cancel</v-btn>
       <v-btn color="primary" variant="tonal" class="mx-4 mb-4" @click="handleSubmit">{{
         isNew ? 'Save' : 'Update'
       }}</v-btn>

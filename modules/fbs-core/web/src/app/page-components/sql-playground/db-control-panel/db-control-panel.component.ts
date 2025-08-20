@@ -19,14 +19,17 @@ import { selectAllDatabases } from "src/app/page-components/sql-playground/db-co
 })
 export class DbControlPanelComponent implements OnInit {
   @Input() activeDbId: number;
+  @Input() selectedMongoDbId: string | null = null;
   @Output() changeActiveDbId = new EventEmitter<number>();
   @Output() submitStatement = new EventEmitter<string>();
+  @Output() mongoDbSelected = new EventEmitter<string>();
+  @Output() schemaReload = new EventEmitter<void>();
+  @Output() dbChanged = new EventEmitter<"postgres" | "mongo">();
 
   isAdmin: boolean;
   selectedTab: number = 0;
   activeDb: Database;
   collaborativeMode: boolean = false;
-
   databases$: Observable<Database[]>;
 
   constructor(private auth: AuthService, private store: Store) {}
@@ -63,5 +66,13 @@ export class DbControlPanelComponent implements OnInit {
 
   onActivateDatabase(id: number) {
     this.store.dispatch(activateDatabase({ id }));
+  }
+
+  dbChangedToParent(db: "postgres" | "mongo") {
+    this.dbChanged.emit(db);
+  }
+
+  mongoDbSelectedToParent(event: string) {
+    this.mongoDbSelected.emit(event);
   }
 }

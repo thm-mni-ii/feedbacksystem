@@ -2,13 +2,14 @@ import express from "express";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "./utils/enum";
-import catalogRoutes from './routes/catalogRoutes';
-import courseRoutes from './routes/courseRoutes';
-import questionRoutes from './routes/questionRoutes';
-import sessionRoutes from './routes/sessionRoutes';
-import submissionRoutes from './routes/submissionRoutes';
-import tagRoutes from './routes/tagRoutes';
-import userRoutes from './routes/userRoutes';
+import catalogRoutes from "./routes/catalogRoutes";
+import courseRoutes from "./routes/courseRoutes";
+import questionRoutes from "./routes/questionRoutes";
+import sessionRoutes from "./routes/sessionRoutes";
+import submissionRoutes from "./routes/submissionRoutes";
+import skillRoutes from "./routes/skillRoutes";
+import tagRoutes from "./routes/tagRoutes";
+import userRoutes from "./routes/userRoutes";
 import cors from "cors";
 import { insertQuestionsInCatalog } from "./utils/insert_questionsInCatalog";
 import { insertQuestions } from "./utils/insert_question";
@@ -34,7 +35,7 @@ async function createDatabaseAndCollection() {
     const submissionCollection: mongoDB.Collection =
       db.collection("submission");
     const userCollection: mongoDB.Collection = db.collection("user");
-      db.collection("questionInCatalog");
+    db.collection("questionInCatalog");
     const cataloginCourseCollection: mongoDB.Collection =
       db.collection("catalogInCourse");
     await insertQuestions();
@@ -47,7 +48,7 @@ async function createDatabaseAndCollection() {
       course: 1,
       catalog: new mongoDB.ObjectId("67f7f3b7d93fb13cd308e807"),
       requirements: [],
-      isPublic: true
+      isPublic: true,
     });
     submissionCollection.insertOne({
       _id: new mongoDB.ObjectId("664b63aefa0e9768d9ffd02a"),
@@ -78,14 +79,15 @@ async function startServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
- 
-  app.use('', catalogRoutes);
-  app.use('', courseRoutes);
-  app.use('', questionRoutes);
-  app.use('', sessionRoutes);
-  app.use('', submissionRoutes);
-  app.use('', tagRoutes);
-  app.use('', userRoutes);
+  app.use("", catalogRoutes);
+  app.use("", courseRoutes);
+  app.use("", questionRoutes);
+  app.use("", sessionRoutes);
+  app.use("", submissionRoutes);
+  app.use("", tagRoutes);
+  app.use("", userRoutes);
+  app.use("", skillRoutes);
+  // app.use("", learnSessionRoutes);
 
   app.listen(3000, () => console.log("LISTENING on port 3000"));
 }

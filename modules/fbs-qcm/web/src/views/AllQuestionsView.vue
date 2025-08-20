@@ -84,8 +84,8 @@ onMounted(loadQuestions)
             color="primary"
             icon="mdi-pencil"
             class="me-2"
-            @click="editQuestion(item)"
             size="small"
+            @click="editQuestion(item)"
           />
         </div>
       </template>
