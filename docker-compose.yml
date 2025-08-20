@@ -38,6 +38,7 @@ services:
       - runner
       - mongodb
       - minio
+      - mongodb-playground
     ports:
       - "127.0.0.1:443:443"
       - "127.0.0.1:80:80"
@@ -58,7 +59,7 @@ services:
       - MASTER_RUNNER_TLS_INSECURE=true
       - MONGODB_URI=mongodb://mongodb:27017/sql-checker
       - MONGODB_DATABASE=sql-checker
-      - MONGODB_PLAYGROUND_URI=mongodb://mongodb-playground:27018/playground-db
+      - MONGODB_PLAYGROUND_URI=mongodb://mongodb-playground:27017/playground-db
       - MONGODB_PLAYGROUND_DATABASE=playground-db
       - SELF_URL=https://core
       - MINIO_URL=http://minio
