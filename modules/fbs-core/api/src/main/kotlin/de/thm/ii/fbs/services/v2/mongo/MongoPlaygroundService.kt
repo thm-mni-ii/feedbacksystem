@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets
 class MongoPlaygroundService {
     @Value("\${spring.data.mongodb.playground.uri}")
     private lateinit var mongoUri: String
+
     @Value("\${spring.data.mongodb.playground.authSource}")
     private lateinit var authSource: String
 
