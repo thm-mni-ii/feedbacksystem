@@ -107,6 +107,7 @@ spring:
       playground:
         uri: ${MONGODB_PLAYGROUND_URI:mongodb://localhost:27018}
         database: ${MONGODB_PLAYGROUND_DATABASE:playground-db}
+        authSource: ${MONGODB_PLAYGROUND_AUTH_SOURCE:playground-db}
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
