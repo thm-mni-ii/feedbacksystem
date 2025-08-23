@@ -1,0 +1,18 @@
+[project]
+name = "fbs-pdf-checker"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "motor",
+    "httpx",
+    "pymupdf",
+    "pydantic-settings",
+    "spacy",
+    "de-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl",
+    "python-multipart"
+]
+
