@@ -70,6 +70,8 @@ services:
   assa:
     url: ${ASSA_URL:}
     token: ${ASSA_TOKEN:}
+  pdfChecker:
+    baseUrl: ${SQL_CHECKER_URL:}
 integrations:
   names: [modelling, feedbackApp, eat, kanban, sciCheck]
   modelling:
