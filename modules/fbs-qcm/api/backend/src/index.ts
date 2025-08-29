@@ -10,6 +10,7 @@ import submissionRoutes from "./routes/submissionRoutes";
 import skillRoutes from "./routes/skillRoutes";
 import tagRoutes from "./routes/tagRoutes";
 import userRoutes from "./routes/userRoutes";
+import learnSessionRoutes from "./routes/learnSessionRoutes";
 import cors from "cors";
 import { insertQuestionsInCatalog } from "./utils/insert_questionsInCatalog";
 import { insertQuestions } from "./utils/insert_question";
@@ -87,7 +88,7 @@ async function startServer() {
   app.use("", tagRoutes);
   app.use("", userRoutes);
   app.use("", skillRoutes);
-  // app.use("", learnSessionRoutes);
+  app.use("", learnSessionRoutes);
 
   app.listen(3000, () => console.log("LISTENING on port 3000"));
 }

@@ -2,28 +2,22 @@ import * as mongoDB from "mongodb";
 import { connect } from "../mongo/mongo";
 import type { JwtPayload } from "jsonwebtoken";
 
-// Beispiel: Starte eine Lern-Session, speichere z. B. user, course und startTime in der Collection "learnSession"
 export async function startLearnSessionService(
   tokenData: JwtPayload,
   courseId: number
 ) {
   try {
     const database: mongoDB.Db = await connect();
-    const sessionCollection = database.collection("learnSession");
+    const sessionCollection: mongoDB.Collection =
+      database.collection("learnSession");
     const session = await sessionCollection.insertOne({
       course: courseId,
-      user: tokenData.user,
+      user: tokenData.id, // oder tokenData._id
       startTime: new Date(),
       status: "ongoing",
-      // Weitere Felder nach Bedarf
+      type: "study",
     });
-    return {
-      insertedId: session.insertedId,
-      course: courseId,
-      user: tokenData.user,
-      startTime: new Date(),
-      status: "ongoing",
-    };
+    return { insertedId: session.insertedId };
   } catch (error) {
     console.error("Error in startLearnSessionService:", error);
     return null;
@@ -49,7 +43,6 @@ export async function getCurrentLearnQuestionService(
   }
 }
 
-// Nimmt eine Antwort entgegen und speichert sie in der Collection "learnAnswer" o.ä.
 export async function submitLearnAnswerService(
   tokenData: JwtPayload,
   sessionId: string,

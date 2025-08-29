@@ -4,6 +4,7 @@ import {
   getCurrentLearnQuestion,
   submitLearnAnswer,
   endLearnSession,
+  getOngoingLearnSession,
 } from "../controller/learnSession";
 import { authenticateToken } from "../authenticateToken";
 
@@ -24,6 +25,11 @@ router.put(
   "/api_v1/endLearnSession/:sessionId",
   authenticateToken,
   endLearnSession
+);
+router.get(
+  "/api_v1/getOngoingLearnSession",
+  authenticateToken,
+  getOngoingLearnSession
 );
 
 export default router;

@@ -11,7 +11,12 @@ import { connect } from "../mongo/mongo";
 import { getCurrentQuestion } from "../question/question";
 import { CatalogAccess, SessionStatus } from "../utils/enum";
 import { authenticateInCatalog } from "../authenticate";
-import { checkIfOngoingSessionExist, getOngoingSession, SessionReturn, Session } from "./sessionUtils";
+import {
+  checkIfOngoingSessionExist,
+  getOngoingSession,
+  SessionReturn,
+  Session,
+} from "./sessionUtils";
 import { currentQuestion } from "../controller/catalog";
 
 export async function postSession(
@@ -117,7 +122,8 @@ export async function endSingleSession(
   }
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
-  const submissionCollection: mongoDB.Collection = database.collection("submission");
+  const submissionCollection: mongoDB.Collection =
+    database.collection("submission");
   const session = await getOngoingSession(tokenData.id, sessionCollection);
   if (session === null) {
     return -1;
@@ -131,7 +137,11 @@ export async function endSingleSession(
   const finder = {
     _id: session._id,
   };
-  await setAllRemainingQuestionsFalse(tokenData, sessionId, submissionCollection);
+  await setAllRemainingQuestionsFalse(
+    tokenData,
+    sessionId,
+    submissionCollection
+  );
   let duration = session.duration;
   if (session.status === SessionStatus.ongoing) {
     const currentTime = new Date();
@@ -157,9 +167,17 @@ export async function endSingleSession(
   return 1;
 }
 
-async function setAllRemainingQuestionsFalse(tokenData: JwtPayload, sessionId: string, submissionCollection: mongoDB.Collection) {
-  const currentQuestion = await getCurrentQuestion(tokenData, sessionId)
-  if(currentQuestion === -2 || currentQuestion === -1 || currentQuestion.catalog === "over") {
+async function setAllRemainingQuestionsFalse(
+  tokenData: JwtPayload,
+  sessionId: string,
+  submissionCollection: mongoDB.Collection
+) {
+  const currentQuestion = await getCurrentQuestion(tokenData, sessionId);
+  if (
+    currentQuestion === -2 ||
+    currentQuestion === -1 ||
+    currentQuestion.catalog === "over"
+  ) {
     return;
   } else {
     const submission = {
@@ -167,11 +185,15 @@ async function setAllRemainingQuestionsFalse(tokenData: JwtPayload, sessionId: s
       question: currentQuestion._id,
       answer: null,
       evaluation: 0,
-      timeStamp: new Date,
+      timeStamp: new Date(),
       session: new mongoDB.ObjectId(sessionId),
     };
     await submissionCollection.insertOne(submission);
-    await setAllRemainingQuestionsFalse(tokenData, sessionId, submissionCollection);
+    await setAllRemainingQuestionsFalse(
+      tokenData,
+      sessionId,
+      submissionCollection
+    );
   }
 }
 
@@ -379,19 +401,19 @@ export async function getPausedSessions(user: number) {
 async function getSessionData(query: object) {
   const database: mongoDB.Db = await connect();
   const sessionCollection: mongoDB.Collection = database.collection("sessions");
-  const result: Session[] = await sessionCollection
+  const result: Session[] = (await sessionCollection
     .find(query)
     .sort({ time: -1 })
-    .toArray() as unknown as Session[];
+    .toArray()) as unknown as Session[];
   return result;
 }
 
 async function createSessionReturn(session: Session) {
   const sessionReturn: SessionReturn = {
     user: session.user,
-    catalogId: session.catalogId,
-    courseId: session.courseId,
-    status: getSessionStatusAsText(session.status),
+    catalogId: session.catalogId ?? undefined,
+    courseId: session.courseId ?? -1,
+    status: getSessionStatusAsText(session.status) ?? "unknown",
     time: session.duration,
   };
   return sessionReturn;

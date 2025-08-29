@@ -5,12 +5,14 @@ import {
   submitLearnAnswerService,
   endLearnSessionService,
 } from "../learnSession/learnSession";
+import * as mongoDB from "mongodb";
+import { connect } from "../mongo/mongo";
 
-// Startet eine neue Lern-Session für einen Kurs.
 export const startLearnSession = async (req: Request, res: Response) => {
+  console.log("START LEARN SESSION ---->", req);
+  console.log(req.body);
   try {
     if (!req.user) return res.sendStatus(401);
-    // Erwarte im Body z. B. { course: number, additionalParams... }
     const { course } = req.body;
     const session = await startLearnSessionService(req.user, course);
     if (!session) return res.sendStatus(500);
@@ -21,7 +23,6 @@ export const startLearnSession = async (req: Request, res: Response) => {
   }
 };
 
-// Liefert die aktuelle Frage der Lern-Session
 export const getCurrentLearnQuestion = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.sendStatus(401);
@@ -35,7 +36,6 @@ export const getCurrentLearnQuestion = async (req: Request, res: Response) => {
   }
 };
 
-// Nimmt eine Antwort für die aktuelle Frage entgegen
 export const submitLearnAnswer = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.sendStatus(401);
@@ -50,7 +50,6 @@ export const submitLearnAnswer = async (req: Request, res: Response) => {
   }
 };
 
-// Beendet die Lern-Session
 export const endLearnSession = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.sendStatus(401);
@@ -60,6 +59,28 @@ export const endLearnSession = async (req: Request, res: Response) => {
     return res.sendStatus(200);
   } catch (error) {
     console.error("Error ending learn session:", error);
+    res.sendStatus(500);
+  }
+};
+
+export const getOngoingLearnSession = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.sendStatus(401);
+    const courseId = req.query.courseId
+      ? Number(req.query.courseId)
+      : undefined;
+    const database: mongoDB.Db = await connect();
+    const sessionCollection: mongoDB.Collection =
+      database.collection("learnSession");
+    const query: any = {
+      user: req.user.id,
+      status: "ongoing",
+    };
+    if (courseId !== undefined) query.course = courseId;
+    const session = await sessionCollection.findOne(query);
+    res.json(session);
+  } catch (error) {
+    console.error("Error getting ongoing learn session:", error);
     res.sendStatus(500);
   }
 };

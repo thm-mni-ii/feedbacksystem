@@ -1,20 +1,17 @@
 <script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { ref, computed, onMounted } from 'vue'
 import courseService from '@/services/course.service'
-import questionService from '@/services/question.service'
-// import studyService from '@/services/study.service' // Later for queue logic
+import studyService from '@/services/study.service'
 import CatalogSession from '../components/CatalogSession.vue'
 
 const route = useRoute()
 const courseId = Number(route.params.courseId)
+const sessionId = ref('')
 const courseInformation = ref<{ name?: string }>({})
 
-// Question queue simulation
 const questionData = ref<any>(null)
 const progressBar = ref<number>(1)
-
-// Feedback state
 const showFeedback = ref<boolean>(false)
 const currentQuestionScore = ref<number>(0)
 const formattedScore = computed(() => (currentQuestionScore.value * 100).toFixed(2))
@@ -24,7 +21,6 @@ const scoreEmoji = computed(() => {
   if (currentQuestionScore.value < 0.6) return '🙂'
   return '😎'
 })
-
 const sessionOver = ref<boolean>(false)
 
 async function loadCourseInformation(courseId: number) {
@@ -32,64 +28,63 @@ async function loadCourseInformation(courseId: number) {
   courseInformation.value = data
 }
 
-async function loadQuestion() {
-  // Later: use studyService.currentQuestion()
-  const { data } = await questionService.getQuestion('67f7f553d93fb13cd308e80c')
-  questionData.value = data
+// Holt die aktuelle Frage aus der Study Session
+async function loadCurrentQuestion() {
+  const res = await studyService.getCurrentQuestion(sessionId.value)
+  questionData.value = res.data
+  // Optional: sessionOver.value = ... falls keine Frage mehr
+  if (!res.data || res.data.sessionOver) {
+    sessionOver.value = true
+  }
 }
 
+// Antwort absenden und Feedback anzeigen
 const submitAnswer = async (answer: any) => {
-  console.log('Submitted answer:', answer)
-
   try {
-    const submitResponse = await sessionService.submitAnswer(
-      questionData.value._id,
-      answer,
-      sessionId.value
-    )
-    currentQuestionScore.value = submitResponse.data.correct.score
+    const submitResponse = await studyService.submitAnswer(sessionId.value, answer)
+    currentQuestionScore.value = submitResponse.data.score ?? 0
     showFeedback.value = true
 
-    const res = await sessionService.getCurrentQuestion(sessionId.value)
-    console.log(res.data)
-
-    if (res.data.catalog === 'over') {
-      console.log('Catalog finished. Ending Session.')
-
-      await sessionService.endSession(sessionId.value)
-      catalogStatus.value = 'over'
-
-      const catalogScoreRes = await catalogService.getCatalogScore(sessionId.value)
-      catalogScore.value = catalogScoreRes.data.score
-      catalogEvaluation.value = catalogScoreRes.data
-
-      console.log('Catalog Score:', catalogScoreRes.data)
-    } else {
-      catalogStatus.value = null
-      questionData.value = res.data
+    // Prüfe, ob die Session vorbei ist
+    if (submitResponse.data.sessionOver) {
+      sessionOver.value = true
+      await studyService.endStudySession(sessionId.value)
     }
-
-    progressBar.value++
   } catch (error) {
     console.error('Error submitting Answer:', error)
   }
 }
 
+// Nächste Frage laden
 const nextQuestion = async () => {
   showFeedback.value = false
   progressBar.value++
+  await loadCurrentQuestion()
+}
 
-  if (progressBar.value > 10) {
-    sessionOver.value = true
-    return
+// Prüft, ob eine laufende Study Session existiert, sonst startet eine neue
+async function checkOrStartSession() {
+  const ongoingRes = await studyService.checkOngoingStudySession(courseId)
+  const ongoingSession = Array.isArray(ongoingRes.data)
+    ? ongoingRes.data.find(
+        (s) => s.courseId === courseId && s.status !== 'ended' && s.type === 'study'
+      )
+    : ongoingRes.data && ongoingRes.data.type === 'study'
+      ? ongoingRes.data
+      : null
+  if (ongoingSession) {
+    sessionId.value = ongoingSession._id || ongoingSession.sessionId
+    await loadCurrentQuestion()
+  } else {
+    const res = await studyService.startStudySession(courseId)
+    sessionId.value = res.data.insertedId || res.data.sessionId || res.data._id
+    await loadCurrentQuestion()
   }
-
-  await loadQuestion()
 }
 
 onMounted(async () => {
   await loadCourseInformation(courseId)
-  await loadQuestion()
+  await checkOrStartSession()
 })
 </script>
 
