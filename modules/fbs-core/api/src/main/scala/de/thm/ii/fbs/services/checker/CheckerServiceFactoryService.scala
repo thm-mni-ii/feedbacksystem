@@ -25,6 +25,7 @@ class CheckerServiceFactoryService {
     case "excel" => applicationContext.getBean(classOf[ExcelCheckerService])
     case "sql-checker" => applicationContext.getBean(classOf[LegacySqlCheckerService])
     case "ai-supported-sql-analyser" => applicationContext.getBean(classOf[AiSupportedSqlAnalysisService])
+    case "pdf-checker" => applicationContext.getBean(classOf[PdfCheckerService])
     case _: String => applicationContext.getBean(classOf[RemoteCheckerService])
   }
 }

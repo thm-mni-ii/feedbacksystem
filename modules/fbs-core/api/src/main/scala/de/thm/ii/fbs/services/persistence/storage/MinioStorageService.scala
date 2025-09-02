@@ -32,6 +32,10 @@ class MinioStorageService {
     minioService.getObjectAsString(bucketName, s"$id/$fileName")
   }
 
+  def getFileContentBucketBytes(bucketName: String, id: Int, fileName: String): Array[Byte] = {
+    minioService.getObjectAsBytes(bucketName, s"$id/$fileName")
+  }
+
   def getFileFromBucket(bucketName: String, objName: String): File =
     minioService.getObjectAsFile(bucketName, objName)
 
@@ -44,6 +48,15 @@ class MinioStorageService {
   def getSolutionFileFromBucket(sid: Int): String = getFileContentBucket(storageBucketName.SUBMISSIONS_BUCKET, sid, storageFileName.SOLUTION_FILE)
 
   /**
+   * Gets the Content of the solution file
+   *
+   * @param sid Submission id
+   * @return The Solution file content
+   */
+  def getSolutionFileFromBucketAsBytes(sid: Int): Array[Byte] =
+    getFileContentBucketBytes(storageBucketName.SUBMISSIONS_BUCKET, sid, storageFileName.SOLUTION_FILE)
+
+  /**
     * Gets the Content of the main file
     *
     * @param ccid Checkrunner id
@@ -52,12 +65,30 @@ class MinioStorageService {
   def getMainFileFromBucket(ccid: Int): String = getFileContentBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, ccid, storageFileName.MAIN_FILE)
 
   /**
+   * Gets the Content of the main file
+   *
+   * @param ccid Checkrunner id
+   * @return The Solution file content
+   */
+  def getMainFileFromBucketAsBytes(ccid: Int): Array[Byte] =
+    getFileContentBucketBytes(storageBucketName.CHECKER_CONFIGURATION_BUCKET, ccid, storageFileName.MAIN_FILE)
+
+  /**
     * Gets the Content of the secondary file
     *
     * @param ccid Checkrunner id
     * @return The Solution file content
     */
   def getSecondaryFileFromBucket(ccid: Int): String = getFileContentBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, ccid, storageFileName.SECONDARY_FILE)
+
+  /**
+   * Gets the Content of the secondary file
+   *
+   * @param ccid Checkrunner id
+   * @return The Solution file content
+   */
+  def getSecondaryFileFromBucketAsBytes(ccid: Int): Array[Byte] =
+    getFileContentBucketBytes(storageBucketName.CHECKER_CONFIGURATION_BUCKET, ccid, storageFileName.SECONDARY_FILE)
 
   /**
     * Delete the Configuration Folder with all Files inside
