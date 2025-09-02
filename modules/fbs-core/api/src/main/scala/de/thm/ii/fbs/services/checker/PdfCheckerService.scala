@@ -36,7 +36,7 @@ class PdfCheckerService extends CheckerService with CheckerServiceOnMainFileUplo
       .put("student_id", fu.id.toString)
       .put("course_id", task.courseID.toString)
       .put("task_id", task.id.toString)
-      .put("abgabe", storageService.getSolutionFileFromBucket(submissionID)))
+      .put("abgabe", encoder.encodeToString(storageService.getSolutionFileFromBucketAsBytes(submissionID))))
 
     submissionService.storeResult(submissionID, cc.id, 0, response.getString("abgabe"), "")
   }

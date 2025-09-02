@@ -48,6 +48,15 @@ class MinioStorageService {
   def getSolutionFileFromBucket(sid: Int): String = getFileContentBucket(storageBucketName.SUBMISSIONS_BUCKET, sid, storageFileName.SOLUTION_FILE)
 
   /**
+   * Gets the Content of the solution file
+   *
+   * @param sid Submission id
+   * @return The Solution file content
+   */
+  def getSolutionFileFromBucketAsBytes(sid: Int): Array[Byte] =
+    getFileContentBucketBytes(storageBucketName.SUBMISSIONS_BUCKET, sid, storageFileName.SOLUTION_FILE)
+
+  /**
     * Gets the Content of the main file
     *
     * @param ccid Checkrunner id
