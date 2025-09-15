@@ -2,6 +2,7 @@ package de.thm.ii.fbs.services.checker
 
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, User}
 import de.thm.ii.fbs.model.checker.sqlRunner
+import de.thm.ii.fbs.model.checker.sqlRunner.Response.ResponseParseException
 import de.thm.ii.fbs.services.persistence.storage.MinioStorageService
 import de.thm.ii.fbs.services.persistence.{SubmissionService, TaskService}
 import org.json.JSONObject
@@ -58,10 +59,17 @@ class SqlRunnerCheckerService(@Value("${services.sqlRunner.insecure}") insecure:
       requestEntity,
       Class.forName("java.lang.String"),
     )
-    val response = sqlRunner.Response.fromJson(responseEntity.getBody.toString)
     var exit_code = 1
     var resultText = "Your Query didn't produce the correct result"
     breakable {
+      val response = try {
+        sqlRunner.Response.fromJson(responseEntity.getBody.toString)
+      } catch {
+        case e: ResponseParseException => {
+          resultText = s"Error in ${e.location}: ${e.error}"
+          break
+        }
+      }
       for ((ok, i) <- response.equal.zipWithIndex) {
         if (ok) {
           val description = sections.getJSONObject(i).getString("description")

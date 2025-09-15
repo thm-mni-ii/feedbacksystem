@@ -11,6 +11,11 @@ case class Response(
 object Response {
   def fromJson(body: String): Response = {
     val objs = new JSONObject(body)
+    if (objs.has("error")) {
+      throw ResponseParseException(objs.getString("location"), objs.getString("error"))
+    }
     Response(objs.getJSONArray("equal").toList.asScala.toSeq.asInstanceOf[Seq[Boolean]])
   }
+
+  case class ResponseParseException(location: String, error: String) extends Exception
 }
