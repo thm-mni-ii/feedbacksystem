@@ -22,9 +22,7 @@ import java.nio.file.Path
   */
 @Service
 @Primary
-class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService with CheckerServiceHandle {
-  protected val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
-
+class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends HttpCheckerService(insecure) with CheckerServiceHandle {
   @Autowired
   private val fsStorageService: FsStorageService = null
   @Autowired
