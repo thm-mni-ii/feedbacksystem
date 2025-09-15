@@ -53,7 +53,6 @@ class SqlRunnerCheckerService(@Value("${services.sqlRunner.insecure}") insecure:
       submission = submission,
     )
 
-    println(request.toJson.toString)
     val requestEntity = new RequestEntity[String](request.toJson.toString, headers, HttpMethod.POST, new URI(url))
     val responseEntity = this.restTemplate.exchange(
       requestEntity,
