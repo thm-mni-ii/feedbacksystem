@@ -320,10 +320,11 @@ export class TaskDetailComponent implements OnInit {
       )
       .subscribe(
         () => {
-          this.refreshByPolling(true);
           this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
             duration: 3000,
           });
+          this.pending = true;
+          this.ngOnInit();
         },
         (error) => {
           console.error(error);
