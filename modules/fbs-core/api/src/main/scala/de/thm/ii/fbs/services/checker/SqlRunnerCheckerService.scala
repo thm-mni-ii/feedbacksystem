@@ -27,6 +27,8 @@ class SqlRunnerCheckerService(@Value("${services.sqlRunner.insecure}") insecure:
 
   @Value("${services.sqlRunner.url}")
   private val url: String = null
+  @Value("${services.sqlRunner.sharedSecret}")
+  private val sharedSecret: String = null
 
   /**
    * Notify about the new submission
@@ -48,6 +50,7 @@ class SqlRunnerCheckerService(@Value("${services.sqlRunner.insecure}") insecure:
 
     val headers = new HttpHeaders()
     headers.setContentType(MediaType.APPLICATION_JSON)
+    headers.setBearerAuth(sharedSecret)
     val request = sqlRunner.Request(
       environment = schema,
       solutions = solutions,

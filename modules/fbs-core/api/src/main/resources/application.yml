@@ -72,6 +72,7 @@ services:
     token: ${ASSA_TOKEN:}
   sqlRunner:
     url: ${SQL_RUNNER_URL:}
+    sharedSecret: ${SQL_RUNNER_SHARED_SECRET:}
     insecure: ${SQL_RUNNER_INSECURE:false}
 integrations:
   names: [modelling, feedbackApp, eat, kanban, sciCheck]
