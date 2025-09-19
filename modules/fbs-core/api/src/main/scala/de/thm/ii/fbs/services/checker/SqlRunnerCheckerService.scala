@@ -3,11 +3,13 @@ package de.thm.ii.fbs.services.checker
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, User}
 import de.thm.ii.fbs.model.checker.sqlRunner
 import de.thm.ii.fbs.model.checker.sqlRunner.Response.ResponseParseException
+import de.thm.ii.fbs.model.checker.sqlRunner.{ResultSet, SolutionRequest}
+import de.thm.ii.fbs.services.misc.CompareTableJsonBuilder
 import de.thm.ii.fbs.services.persistence.storage.MinioStorageService
 import de.thm.ii.fbs.services.persistence.{SubmissionService, TaskService}
-import org.json.JSONObject
+import org.json.{JSONArray, JSONObject}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
-import org.springframework.http.{HttpHeaders, HttpMethod, MediaType, RequestEntity}
+import org.springframework.http.{HttpHeaders, HttpMethod, MediaType, RequestEntity, ResponseEntity}
 import org.springframework.stereotype.Service
 
 import java.net.URI
@@ -42,11 +44,7 @@ class SqlRunnerCheckerService(@Value("${services.sqlRunner.insecure}") insecure:
     val schema = minioStorageService.getSecondaryFileFromBucket(cc.id)
     val submission = minioStorageService.getSolutionFileFromBucket(submissionID);
     val sections = new JSONObject(minioStorageService.getMainFileFromBucket(cc.id)).getJSONArray("sections")
-    val solutions = sections.iterator()
-      .map(o => Seq(o.asInstanceOf[JSONObject].getString("query"), Optional.ofNullable(o.asInstanceOf[JSONObject].getString("order")).orElse("fix") match {
-        case "variable" => "NormalizeAll"
-        case _ => "NoNormalization"
-      }).asJava).toSeq
+    val solutions = transformSections(sections)
 
     val headers = new HttpHeaders()
     headers.setContentType(MediaType.APPLICATION_JSON)
@@ -62,29 +60,59 @@ class SqlRunnerCheckerService(@Value("${services.sqlRunner.insecure}") insecure:
       requestEntity,
       Class.forName("java.lang.String"),
     )
-    var exit_code = 1
+    val (exitCode, resultText, compareTable) = extractResponse(responseEntity.getBody.toString, sections, solutions.head.rowNormalisation == "SortRows")
+
+    submissionService.storeResult(submissionID, cc.id, exitCode, resultText, compareTable.map(o => o.toString()).orNull)
+  }
+
+  private def transformSections(sections: JSONArray) = {
+    sections.iterator()
+      .map(o => SolutionRequest(
+        o.asInstanceOf[JSONObject].getString("query"),
+        Optional.ofNullable(o.asInstanceOf[JSONObject].getString("order")).orElse("fix") match {
+          case "variable" => "SortRows"
+          case _ => "NoNormalization"
+        },
+        "NumberColumnsByOrder",
+        o.asInstanceOf[JSONObject].getString("description") == "OK",
+      )).toSeq
+  }
+
+  private def extractResponse(responseBody: String, sections: JSONArray, ignoreOrder: Boolean) = {
+    var exitCode = 1
     var resultText = "Your Query didn't produce the correct result"
+    var compareTable: Option[JSONObject] = None
     breakable {
       val response = try {
-        sqlRunner.Response.fromJson(responseEntity.getBody.toString)
+        sqlRunner.Response.fromJson(responseBody)
       } catch {
         case e: ResponseParseException => {
           resultText = s"Error in ${e.location}: ${e.error}"
           break
         }
       }
-      for ((ok, i) <- response.equal.zipWithIndex) {
-        if (ok) {
+      var acceptedResultSet: Option[ResultSet] = None
+      breakable {
+        for ((solution, i) <- response.solutions.zipWithIndex) {
           val description = sections.getJSONObject(i).getString("description")
-          if (description == "OK") {
-            exit_code = 0
+          if (description == "OK" && acceptedResultSet.isEmpty) {
+            acceptedResultSet = solution.resultSet
           }
-          resultText = description
-          break
+          if (solution.eq) {
+            if (description == "OK") {
+              exitCode = 0
+            }
+            resultText = description
+            break
+          }
         }
       }
+      compareTable = Some(CompareTableJsonBuilder.buildCompareTable(
+        acceptedResultSet.getOrElse(ResultSet.empty),
+        response.submissionResultSet.getOrElse(ResultSet.empty),
+        ignoreOrder
+      ))
     }
-
-    submissionService.storeResult(submissionID, cc.id, exit_code, resultText, null)
+    (exitCode, resultText, compareTable)
   }
 }
