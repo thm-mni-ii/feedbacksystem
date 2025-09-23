@@ -58,7 +58,7 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-      - uses: actions/setup-node@v3.8.1
+      - uses: actions/setup-node@v4.0.3
         if: ${{ inputs.setupNode }}
         with:
           node-version: "16.13.1"
@@ -89,7 +89,7 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-      - uses: actions/setup-node@v3.8.1
+      - uses: actions/setup-node@v4.0.3
         if: ${{ inputs.setupNode }}
         with:
           node-version: "16.13.1"
