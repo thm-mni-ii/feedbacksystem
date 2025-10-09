@@ -127,3 +127,8 @@ url:
     time: 300
 storage:
   uploadDir: /upload-dir
+
+privacy:
+  cleanUsers:
+    enabled: ${PRIVACY_ENABLE_CLEAN_USERS:false}
+    secondsAfterLastLogin: ${PRIVACY_CLEAN_USER_SECONDS_AFTER_LAST_LOGIN:15768000}

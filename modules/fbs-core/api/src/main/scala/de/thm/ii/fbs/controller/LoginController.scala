@@ -72,6 +72,7 @@ class LoginController extends CasClientConfigurerAdapter {
         .orElse(loadUserFromLdap(name).map(u => userService.create(u, null)))
         .foreach(u => {
           val token = authService.createToken(u)
+          userService.updateLastLogin(u.id)
           val co = new Cookie("jwt", token)
           co.setPath("/")
           co.setHttpOnly(false)
@@ -123,7 +124,7 @@ class LoginController extends CasClientConfigurerAdapter {
       login match {
         case Some((user)) =>
           val localUser = userService.find(user.username).getOrElse(userService.create(user, null))
-          authService.renewAuthentication(localUser, response)
+          authService.newAuthentication(localUser, response)
         case None => throw new UnauthorizedException()
       }
     } else {
@@ -147,7 +148,7 @@ class LoginController extends CasClientConfigurerAdapter {
     } yield user
 
     login match {
-      case Some(user) => authService.renewAuthentication(user, response)
+      case Some(user) => authService.newAuthentication(user, response)
       case None => throw new UnauthorizedException()
     }
   }
@@ -174,7 +175,7 @@ class LoginController extends CasClientConfigurerAdapter {
     )
 
     user match {
-      case Some(user) => authService.renewAuthentication(user, response)
+      case Some(user) => authService.newAuthentication(user, response)
       case None => throw new UnauthorizedException()
     }
   }

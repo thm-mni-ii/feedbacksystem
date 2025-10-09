@@ -1,9 +1,10 @@
 package de.thm.ii.fbs.model
 
 import java.security.Principal
-
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import org.json.JSONObject
+
+import java.sql.{Date, Timestamp}
 
 /**
   * User object
@@ -18,7 +19,7 @@ import org.json.JSONObject
 class User(val prename: String, val surname: String, val email: String,
            val username: String,
            @JsonScalaEnumeration(value = classOf[GlobalRoleType]) val globalRole: GlobalRole.Value,
-           val alias: Option[String] = None, val id: Int = 0) extends Principal {
+           val alias: Option[String] = None, val lastLogin: Option[Date] = None, val id: Int = 0) extends Principal {
   /**
     * @return unique username
     */

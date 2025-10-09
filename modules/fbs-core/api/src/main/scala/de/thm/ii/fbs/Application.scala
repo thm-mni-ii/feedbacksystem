@@ -12,6 +12,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.unit.DataSize
 
 import java.nio.file.{Files, Paths}
@@ -26,6 +27,7 @@ import javax.servlet.MultipartConfigElement
   * @author Andrej Sajenko
   */
 @SpringBootApplication(exclude = { Array(classOf[SecurityAutoConfiguration]) })
+@EnableScheduling
 class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired

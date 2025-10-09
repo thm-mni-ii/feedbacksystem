@@ -1,8 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import java.math.BigInteger
-import java.sql.{ResultSet, SQLException}
-
+import java.sql.{Date, ResultSet, SQLException}
 import de.thm.ii.fbs.model.{GlobalRole, User}
 import de.thm.ii.fbs.util.{DB, Hash}
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,6 +24,15 @@ class UserService {
   def getAll(ignoreDeleted: Boolean = true): List[User] =
     DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user"
       + (if (ignoreDeleted)  " where deleted = 0" else ""), (res, _) => parseResult(res))
+
+  /**
+   * Get all stored users
+   * @param ignoreDeleted Ignores deleted users
+   * @return List of users
+   */
+  def getUsersWithLastLoginBefore(before: Date, ignoreDeleted: Boolean = true): List[User] =
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user WHERE last_login < ?"
+      + (if (ignoreDeleted)  " and deleted = 0" else ""), (res, _) => parseResult(res), before)
 
   /**
     * Find the first user by id
@@ -110,6 +118,14 @@ class UserService {
   }
 
   /**
+   * Sets the last_login of the user to now
+   * @param id The user id.
+   * @return True if successfully updated
+   */
+  def updateLastLogin(id: Int): Boolean =
+    DB.update("UPDATE user SET last_login = now() WHERE user_id = ?", id) == 1
+
+  /**
     * Get the password for the user with the given username
     * @param username the username of the user to get the password for
     */
@@ -123,6 +139,7 @@ class UserService {
     username = res.getString("username"),
     globalRole = GlobalRole.parse(res.getInt("global_role")),
     alias = Option(res.getString("alias")),
+    lastLogin = Option(res.getDate("last_login")),
     id = res.getInt("user_id")
   )
 }

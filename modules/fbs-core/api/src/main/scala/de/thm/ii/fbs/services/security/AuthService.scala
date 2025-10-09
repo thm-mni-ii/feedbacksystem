@@ -48,6 +48,16 @@ class AuthService {
   }
 
   /**
+   * Generate a new token and append it to the response header and updates the user last login.
+   * @param user The user
+   * @param res The response
+   */
+  def newAuthentication(user: User, res: HttpServletResponse): Unit = {
+    this.userService.updateLastLogin(user.id)
+    this.renewAuthentication(user, res)
+  }
+
+  /**
     * Check for valid authentication information and return the user associated with the authentication.
     * @param req The http request
     * @param res The http response (nullable)
