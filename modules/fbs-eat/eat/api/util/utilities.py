@@ -302,6 +302,17 @@ def select_all_exercises_in_course(local_df, course_value):
     return exercise_value
 
 
+def select_all_courses(local_df):
+    """
+
+    :param local_df:
+    :param course_value:
+    :return:
+    """
+    course_value = list(local_df.CourseName.unique())
+    return course_value
+
+
 def convert_time(date_time):
     """
     converts the format of two given times
