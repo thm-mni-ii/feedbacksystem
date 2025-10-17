@@ -46,7 +46,7 @@ class TaskExportService {
           val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
           val `export` = TaskExport(task, ccs.map(cc => {
             val main = addCCFileAndGetName(cc, cc.mainFileUploaded, storageService.getFileMainFile, storageFileName.MAIN_FILE, filesForTask)
-            val secondary = addCCFileAndGetName(cc, cc.secondaryFileUploaded, storageService.getFileScondaryFile, storageFileName.SECONDARY_FILE, filesForTask)
+            val secondary = addCCFileAndGetName(cc, cc.secondaryFileUploaded, storageService.getFileSecondaryFile, storageFileName.SECONDARY_FILE, filesForTask)
             ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
           }))
           val descrFile = writeToTmpFile(task.id, `export`)
