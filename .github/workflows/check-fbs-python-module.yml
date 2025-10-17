@@ -20,7 +20,7 @@ jobs:
       - name: Add Problem Matcher
         run: |
           echo "::add-matcher::.github/problem-matchers/python.json"
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install and configure Poetry
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install and configure Poetry
