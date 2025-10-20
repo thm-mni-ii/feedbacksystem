@@ -47,11 +47,9 @@ class SpreadsheetService {
 
   private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[String] =
     (start to end).map(i => {
-      val cell = sheet.getRow(i).getCell(col)
-      val res = if (cell == null) {
-        ""
-      } else {
-        cell.getCellType match {
+      val cell = Option(sheet.getRow(i)).flatMap(row => Option(row.getCell(col)))
+      cell match {
+        case Some(cell) => cell.getCellType match {
           case CellType.FORMULA => try {
             germanFormat.format(cell.getNumericCellValue)
           } catch {
@@ -66,8 +64,8 @@ class SpreadsheetService {
           case CellType.STRING => cell.getStringCellValue
           case _ => ""
         }
+        case None => ""
       }
-      res
     })
 
   private def setCell(sheet: XSSFSheet, cords: Cords, value: String): Unit = {
