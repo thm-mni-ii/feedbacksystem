@@ -11,6 +11,7 @@ import { AuthService } from "src/app/service/auth.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import * as SqlPlaygroundActions from "./state/sql-playground.actions";
 import * as fromSqlPlayground from "./state/sql-playground.selectors";
+import * as TemplateActions from "./db-control-panel/state/templates.actions";
 import { BackendService } from "./collab/backend.service";
 import { HttpClient } from "@angular/common/http";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
@@ -52,6 +53,12 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
       | "postgres"
       | "mongo";
     this.selectedDbType = savedDbType ?? "postgres";
+    this.store.dispatch(
+      TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
+    );
+    this.store.dispatch(
+      TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
+    );
     this.titlebar.emitTitle("SQL Playground");
 
     const fullDbName = localStorage.getItem("playground-mongo-db-full");
@@ -185,6 +192,9 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
     if (dbType === "postgres") this.mongoDbId = null;
 
     this.schemaReload$.next();
+    this.store.dispatch(
+      TemplateActions.setFilterLanguage({ filterLanguage: dbType })
+    );
   }
 
   onMongoDbSelected(fullDbName: string) {

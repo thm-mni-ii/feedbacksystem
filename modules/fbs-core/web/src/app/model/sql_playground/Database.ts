@@ -1,5 +1,5 @@
 export interface Database {
-  id: number;
+  id: number | string;
   name: string;
   version: string;
   dbType: string;

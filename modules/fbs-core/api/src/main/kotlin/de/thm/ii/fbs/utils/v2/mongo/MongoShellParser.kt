@@ -14,6 +14,10 @@ data class ParsedMongoShellCommand(
 object MongoShellParser {
     private val shellRegex = Regex("""db\.(\w+)\.(\w+)\(([\s\S]*)\)""", RegexOption.IGNORE_CASE)
     private val createViewRegex = Regex("""db\.createView\(([\s\S]+)\)""", RegexOption.IGNORE_CASE)
+    private val splitRegex = Regex("""[\n;]""")
+
+    fun batchParse(commands: String): List<ParsedMongoShellCommand> =
+        commands.split(splitRegex).filter { cmd -> cmd.trim() != "" }.map { cmd -> parse(cmd) }
 
     fun parse(command: String): ParsedMongoShellCommand {
         val trimmed = command.trim()
@@ -80,6 +84,19 @@ object MongoShellParser {
                         document = parsed as Document
                     )
                 }
+            }
+
+            "insertMany" -> {
+                val parsed = Document.parse("{ temp: $args }")["temp"]
+
+                if (parsed !is List<*>) {
+                    throw UnsupportedOperationException("$operation is only supported with arguments as list")
+                }
+                return ParsedMongoShellCommand(
+                    operation = "insertMany",
+                    collection = collection,
+                    pipeline = parsed.map { it as Document }
+                )
             }
 
             "update" -> {

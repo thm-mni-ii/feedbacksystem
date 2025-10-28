@@ -1,7 +1,10 @@
 import { createAction, props } from "@ngrx/store";
 import { Database } from "src/app/model/sql_playground/Database";
 
-export const loadDatabases = createAction("[Databases] Load Databases");
+export const loadDatabases = createAction(
+  "[Databases] Load Databases",
+  props<{ dbType: "postgres" | "mongo" }>()
+);
 export const loadDatabasesSuccess = createAction(
   "[Databases] Load Databases Success",
   props<{ databases: Database[] }>()
@@ -13,7 +16,7 @@ export const loadDatabasesFailure = createAction(
 
 export const createDatabase = createAction(
   "[Databases] Create Database",
-  props<{ name: string }>()
+  props<{ name: string; dbType: "postgres" | "mongo" }>()
 );
 export const createDatabaseSuccess = createAction(
   "[Databases] Create Database Success",
@@ -26,11 +29,11 @@ export const createDatabaseFailure = createAction(
 
 export const deleteDatabase = createAction(
   "[Databases] Delete Database",
-  props<{ id: number }>()
+  props<{ id: number | string; dbType: "postgres" | "mongo" }>()
 );
 export const deleteDatabaseSuccess = createAction(
   "[Databases] Delete Database Success",
-  props<{ id: number }>()
+  props<{ id: number | string }>()
 );
 export const deleteDatabaseFailure = createAction(
   "[Databases] Delete Database Failure",
@@ -39,13 +42,25 @@ export const deleteDatabaseFailure = createAction(
 
 export const activateDatabase = createAction(
   "[Databases] Activate Database",
-  props<{ id: number }>()
+  props<{ id: number | string; dbType: "postgres" | "mongo" }>()
 );
 export const activateDatabaseSuccess = createAction(
   "[Databases] Activate Database Success",
-  props<{ id: number }>()
+  props<{ id: number | string }>()
 );
 export const activateDatabaseFailure = createAction(
   "[Databases] Activate Database Failure",
+  props<{ error: any }>()
+);
+
+export const resetMongoDatabase = createAction(
+  "[Databases] Reset Mongo Database",
+  props<{ id: string }>()
+);
+export const resetMongoDatabaseSuccess = createAction(
+  "[Databases] Reset Mongo Database Success"
+);
+export const resetMongoDatabaseFailure = createAction(
+  "[Databases] Reset Mongo Database Failure",
   props<{ error: any }>()
 );
