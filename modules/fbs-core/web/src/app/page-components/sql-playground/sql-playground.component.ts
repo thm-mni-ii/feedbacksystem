@@ -56,6 +56,9 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
     this.store.dispatch(
       TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
     );
+    this.store.dispatch(
+      TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
+    );
     this.titlebar.emitTitle("SQL Playground");
 
     const fullDbName = localStorage.getItem("playground-mongo-db-full");
