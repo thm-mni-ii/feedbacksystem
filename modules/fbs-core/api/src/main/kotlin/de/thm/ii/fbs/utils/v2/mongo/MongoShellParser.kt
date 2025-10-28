@@ -17,7 +17,7 @@ object MongoShellParser {
     private val splitRegex = Regex("""[\n;]""")
 
     fun batchParse(commands: String): List<ParsedMongoShellCommand> =
-        commands.split(splitRegex). filter { cmd -> cmd.trim() != "" }.map { cmd -> parse(cmd) }
+        commands.split(splitRegex).filter { cmd -> cmd.trim() != "" }.map { cmd -> parse(cmd) }
 
     fun parse(command: String): ParsedMongoShellCommand {
         val trimmed = command.trim()
