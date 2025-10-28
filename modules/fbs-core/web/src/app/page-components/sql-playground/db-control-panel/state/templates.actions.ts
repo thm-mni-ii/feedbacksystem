@@ -1,12 +1,19 @@
 import { createAction, props } from "@ngrx/store";
-import { SqlTemplates } from "../../../../model/sql_playground/SqlTemplates";
+import {
+  Template,
+  TemplateLanguage,
+} from "../../../../model/sql_playground/Template";
 import { TemplateCategory } from "../../../../model/sql_playground/TemplateCategory";
 
 export const addTemplates = createAction(
   "[Templates] Add Templates",
-  props<{ templates: SqlTemplates[] }>()
+  props<{ templates: Template[] }>()
 );
 export const addCategories = createAction(
   "[Templates] Add Categories",
   props<{ categories: TemplateCategory[] }>()
+);
+export const setFilterLanguage = createAction(
+  "[Templates] SetFilter Language",
+  props<{ filterLanguage: TemplateLanguage }>()
 );
