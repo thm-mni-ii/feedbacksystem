@@ -21,6 +21,7 @@ import java.time.Instant
 import java.util
 import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -136,6 +137,7 @@ class SubmissionController {
   @ResponseBody
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
              @RequestParam file: MultipartFile, @RequestParam additionalInformation: Optional[String],
+             @RequestParam("checkerOrders") checkerOrders: Optional[util.List[String]],
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
@@ -160,8 +162,10 @@ class SubmissionController {
             minioStorageService.storeSolutionFileInBucket(submission.id, file)
 
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
-              val checkerService = checkerServiceFactoryService(cc.checkerType)
-              checkerService.notify(tid, submission.id, cc, user)
+              if (checkerOrders.isEmpty || checkerOrders.get().contains(cc.ord.toString)) {
+                val checkerService = checkerServiceFactoryService(cc.checkerType)
+                checkerService.notify(tid, submission.id, cc, user)
+              }
             })
             submission
 
@@ -188,6 +192,7 @@ class SubmissionController {
     */
   @PutMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}"))
   def resubmit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, @PathVariable("sid") sid: Int,
+               @RequestParam("checkerOrders") checkerOrders: Optional[util.List[String]],
                req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
@@ -202,10 +207,11 @@ class SubmissionController {
             throw new ConflictException("resubmit is not supported for this submission")
           }
 
-          submissionService.clearResults(sid, uid)
           checkerConfigurationService.getAll(cid, tid).foreach(cc => {
-            val checkerService = checkerServiceFactoryService(cc.checkerType)
-            checkerService.notify(tid, sid, cc, user)
+            if (checkerOrders.isEmpty || checkerOrders.get().contains(cc.ord.toString)) {
+              val checkerService = checkerServiceFactoryService(cc.checkerType)
+              checkerService.notify(tid, submission.id, cc, user)
+            }
           })
         case None => throw new ResourceNotFoundException()
       }
