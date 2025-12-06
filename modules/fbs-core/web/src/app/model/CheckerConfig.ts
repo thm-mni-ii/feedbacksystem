@@ -4,6 +4,8 @@ export interface CheckerConfig {
   mainFileUploaded?: boolean;
   secondaryFileUploaded?: boolean;
   ord: number;
+  stagedFeedbackEnabled?: boolean;
+  initialOrdLimit?: number;
   checkerTypeInformation: {
     showHints: boolean;
     showHintsAt: number;

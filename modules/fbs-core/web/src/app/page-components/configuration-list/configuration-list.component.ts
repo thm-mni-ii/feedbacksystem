@@ -11,6 +11,10 @@ import { AuthService } from "../../service/auth.service";
 import { Roles } from "../../model/Roles";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { CheckerFileType } from "../../enums/checkerFileType";
+import {
+  StagedFeedbackConfig,
+  StagedFeedbackConfigService,
+} from "../../service/staged-feedback-config.service";
 
 @Component({
   selector: "app-configuration-list",
@@ -21,6 +25,11 @@ export class ConfigurationListComponent implements OnInit {
   configurations: Observable<CheckerConfig[]> = of();
   courseId: number;
   taskId: number;
+  stagedFeedbackConfig: StagedFeedbackConfig = {
+    enabled: true,
+    initialOrdLimit: 1,
+  };
+  maxOrder = 1;
 
   constructor(
     private checkerService: CheckerService,
@@ -28,7 +37,8 @@ export class ConfigurationListComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: AuthService,
     private dialog: MatDialog,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private stagedFeedbackConfigService: StagedFeedbackConfigService
   ) {}
 
   ngOnInit(): void {
@@ -36,12 +46,63 @@ export class ConfigurationListComponent implements OnInit {
       if (params) {
         this.courseId = params.id;
         this.taskId = params.tid;
-        this.configurations = this.checkerService.getChecker(
+        this.loadConfigurations();
+        this.loadStagedConfig();
+      }
+    });
+  }
+
+  private loadConfigurations() {
+    this.configurations = this.checkerService.getChecker(
+      this.courseId,
+      this.taskId
+    );
+    this.configurations.subscribe((configs) => {
+      this.maxOrder = configs.length || 1;
+      if (
+        this.stagedFeedbackConfig.initialOrdLimit === undefined ||
+        this.stagedFeedbackConfig.initialOrdLimit > this.maxOrder
+      ) {
+        this.stagedFeedbackConfig = {
+          ...this.stagedFeedbackConfig,
+          initialOrdLimit: Math.min(
+            this.maxOrder,
+            this.stagedFeedbackConfig.initialOrdLimit || 1
+          ),
+        };
+        this.stagedFeedbackConfigService.set(
           this.courseId,
-          this.taskId
+          this.taskId,
+          this.stagedFeedbackConfig
         );
       }
     });
+  }
+
+  private loadStagedConfig() {
+    const stored = this.stagedFeedbackConfigService.get(
+      this.courseId,
+      this.taskId
+    );
+    if (stored) {
+      this.stagedFeedbackConfig = stored;
+    }
+  }
+
+  saveStagedConfig() {
+    if (this.stagedFeedbackConfig.initialOrdLimit < 1) {
+      this.stagedFeedbackConfig.initialOrdLimit = 1;
+    }
+    this.stagedFeedbackConfigService.set(
+      this.courseId,
+      this.taskId,
+      this.stagedFeedbackConfig
+    );
+    this.snackbar.open(
+      "Einstellung für gestuftes Feedback gespeichert.",
+      "OK",
+      { duration: 3000 }
+    );
   }
 
   isAuthorized(): boolean {

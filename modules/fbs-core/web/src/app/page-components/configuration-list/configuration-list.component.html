@@ -24,6 +24,40 @@
     </button>
   </div>
 
+  <mat-card class="card settings-card">
+    <div class="settings-card__header">
+      <div>
+        <h3>{{ "configuration.staged-feedback.title" | i18nextEager }}</h3>
+        <p>{{ "configuration.staged-feedback.hint" | i18nextEager }}</p>
+      </div>
+      <mat-slide-toggle
+        color="primary"
+        [(ngModel)]="stagedFeedbackConfig.enabled"
+        (change)="saveStagedConfig()"
+      >
+        {{ "configuration.staged-feedback.toggle" | i18nextEager }}
+      </mat-slide-toggle>
+    </div>
+    <div class="settings-card__content" *ngIf="stagedFeedbackConfig.enabled">
+      <mat-form-field appearance="outline">
+        <mat-label>{{
+          "configuration.staged-feedback.limit-label" | i18nextEager
+        }}</mat-label>
+        <input
+          matInput
+          type="number"
+          [(ngModel)]="stagedFeedbackConfig.initialOrdLimit"
+          [min]="1"
+          [max]="maxOrder"
+          (change)="saveStagedConfig()"
+        />
+        <mat-hint>{{
+          "configuration.staged-feedback.limit-hint" | i18nextEager
+        }}</mat-hint>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
   <mat-card class="card" *ngFor="let configuration of configurations | async">
     <span>{{ configuration.checkerType }}</span>
 

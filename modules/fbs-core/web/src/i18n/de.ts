@@ -51,6 +51,14 @@ export const germanTranslation = {
   "password.save": "Speichern",
   "configuration.back-to-task": "Zurück zum Aufgabe",
   "configuration.add-checker": "Überprüfung hinzufügen",
+  "configuration.staged-feedback.title": "Gestuftes Feedback",
+  "configuration.staged-feedback.hint":
+    "Lege fest, bis zu welcher Checker-Reihenfolge die erste Abgabe direkt ausgeführt wird.",
+  "configuration.staged-feedback.toggle": "Gestuftes Feedback aktivieren",
+  "configuration.staged-feedback.limit-label":
+    "Checker-Reihenfolge für die erste Prüfung",
+  "configuration.staged-feedback.limit-hint":
+    "Checker mit gleicher oder niedrigerer Reihenfolge laufen sofort, alle höheren erst nach Klick im Aufgaben-Detail.",
   "configuration.download-primary-file": "Hauptdatei herunterladen",
   "configuration.download-secondary-file": "Nebendatei herunterladen",
   "configuration.edit-checker": "Überprüfung bearbeiten",
@@ -319,6 +327,12 @@ export const germanTranslation = {
   "task.detail.previousUnsolvedTaskTooltip": "Vorherige ungelöste Aufgabe",
   "task.detail.previousTaskTooltip": "Vorherige Aufgabe",
   "task.detail.submit": "Abgeben",
+  "task.detail.detailedFeedback.hint":
+    "Deine letzte Abgabe war nicht korrekt. Möchtest du ausführliches Feedback generieren?",
+  "task.detail.detailedFeedback.trigger":
+    "Ausführliches Feedback generieren",
+  "task.detail.detailedFeedback.pending":
+    "Das ausführliche Feedback wird berechnet. Bitte warten ...",
   "task.detail.tooltip.nextTaskTooltip": "Nächste Aufgabe",
   "task.detail.tooltip.nextUnsolvedTask": "Nächste ungelöste Aufgabe",
   "task.submission.file.upload.label": "Abgabe hochladen",

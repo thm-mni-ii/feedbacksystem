@@ -180,6 +180,29 @@
           </div>
         </div>
       </mat-card-actions>
+      <div *ngIf="showDetailedFeedbackBox" class="detailed-feedback">
+        <div class="detailed-feedback-text">
+          {{ "task.detail.detailedFeedback.hint" | i18nextEager }}
+        </div>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="requestDetailedFeedback()"
+        >
+          {{ "task.detail.detailedFeedback.trigger" | i18nextEager }}
+        </button>
+      </div>
+      <div
+        *ngIf="detailedFeedbackPending"
+        class="detailed-feedback pending"
+      >
+        <div class="detailed-feedback-status">
+          <mat-spinner [diameter]="20"></mat-spinner>
+          <span>
+            {{ "task.detail.detailedFeedback.pending" | i18nextEager }}
+          </span>
+        </div>
+      </div>
       <app-results
         *ngIf="submissions"
         [submissions]="submissions"
