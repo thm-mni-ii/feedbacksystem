@@ -1,4 +1,7 @@
 import { Injectable } from "@angular/core";
+import { TaskService } from "./task.service";
+import { Observable } from "rxjs";
+import { map, mergeMap } from "rxjs/operators";
 
 export interface StagedFeedbackConfig {
   enabled: boolean;
@@ -9,24 +12,42 @@ export interface StagedFeedbackConfig {
   providedIn: "root",
 })
 export class StagedFeedbackConfigService {
+  constructor(private taskService: TaskService) {}
+
   private key(courseId: number, taskId: number): string {
     return `fbs.stagedFeedback.${courseId}.${taskId}`;
   }
 
-  get(courseId: number, taskId: number): StagedFeedbackConfig | null {
-    const raw = localStorage.getItem(this.key(courseId, taskId));
-    if (!raw) {
-      return null;
-    }
-    try {
-      return JSON.parse(raw);
-    } catch (e) {
-      console.error("Invalid staged feedback config in storage", e);
-      return null;
-    }
+  get(
+    courseId: number,
+    taskId: number
+  ): Observable<StagedFeedbackConfig | null> {
+    return this.taskService.getTask(courseId, taskId).pipe(
+      map((task) =>
+        task.stagedFeedbackEnabled !== undefined &&
+        task.stagedFeedbackLimit !== undefined
+          ? {
+              enabled: task.stagedFeedbackEnabled,
+              initialOrdLimit: task.stagedFeedbackLimit,
+            }
+          : null
+      )
+    );
   }
 
-  set(courseId: number, taskId: number, config: StagedFeedbackConfig): void {
-    localStorage.setItem(this.key(courseId, taskId), JSON.stringify(config));
+  set(
+    courseId: number,
+    taskId: number,
+    config: StagedFeedbackConfig
+  ): Observable<void> {
+    return this.taskService.getTask(courseId, taskId).pipe(
+      mergeMap((task) =>
+        this.taskService.updateTask(courseId, taskId, {
+          ...task,
+          stagedFeedbackEnabled: config.enabled,
+          stagedFeedbackLimit: config.initialOrdLimit,
+        })
+      )
+    );
   }
 }

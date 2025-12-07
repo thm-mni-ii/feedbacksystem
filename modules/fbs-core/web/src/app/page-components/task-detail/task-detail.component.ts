@@ -51,7 +51,7 @@ export class TaskDetailComponent implements OnInit {
   detailedFeedbackPending = false;
   expectedResultCountAfterRequest: number | null = null;
   stagedFeedbackConfig: StagedFeedbackConfig = {
-    enabled: true,
+    enabled: false,
     initialOrdLimit: 1,
   };
 
@@ -234,18 +234,18 @@ export class TaskDetailComponent implements OnInit {
   }
 
   private loadStagedFeedbackConfig() {
-    const stored = this.stagedFeedbackConfigService.get(
-      this.courseId,
-      this.task.id
-    );
-    if (stored) {
-      this.stagedFeedbackConfig = stored;
-    } else {
-      this.stagedFeedbackConfig = {
-        enabled: true,
-        initialOrdLimit: 1,
-      };
-    }
+    this.stagedFeedbackConfigService
+      .get(this.courseId, this.task.id)
+      .subscribe((stored) => {
+        if (stored) {
+          this.stagedFeedbackConfig = stored;
+        } else {
+          this.stagedFeedbackConfig = {
+            enabled: false,
+            initialOrdLimit: 1,
+          };
+        }
+      });
   }
 
   ngOnInit() {

@@ -192,10 +192,7 @@
           {{ "task.detail.detailedFeedback.trigger" | i18nextEager }}
         </button>
       </div>
-      <div
-        *ngIf="detailedFeedbackPending"
-        class="detailed-feedback pending"
-      >
+      <div *ngIf="detailedFeedbackPending" class="detailed-feedback pending">
         <div class="detailed-feedback-status">
           <mat-spinner [diameter]="20"></mat-spinner>
           <span>

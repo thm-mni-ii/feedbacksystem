@@ -329,8 +329,7 @@ export const germanTranslation = {
   "task.detail.submit": "Abgeben",
   "task.detail.detailedFeedback.hint":
     "Deine letzte Abgabe war nicht korrekt. Möchtest du ausführliches Feedback generieren?",
-  "task.detail.detailedFeedback.trigger":
-    "Ausführliches Feedback generieren",
+  "task.detail.detailedFeedback.trigger": "Ausführliches Feedback generieren",
   "task.detail.detailedFeedback.pending":
     "Das ausführliche Feedback wird berechnet. Bitte warten ...",
   "task.detail.tooltip.nextTaskTooltip": "Nächste Aufgabe",

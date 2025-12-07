@@ -26,7 +26,7 @@ export class ConfigurationListComponent implements OnInit {
   courseId: number;
   taskId: number;
   stagedFeedbackConfig: StagedFeedbackConfig = {
-    enabled: true,
+    enabled: false,
     initialOrdLimit: 1,
   };
   maxOrder = 1;
@@ -80,29 +80,28 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   private loadStagedConfig() {
-    const stored = this.stagedFeedbackConfigService.get(
-      this.courseId,
-      this.taskId
-    );
-    if (stored) {
-      this.stagedFeedbackConfig = stored;
-    }
+    this.stagedFeedbackConfigService
+      .get(this.courseId, this.taskId)
+      .subscribe((stored) => {
+        if (stored) {
+          this.stagedFeedbackConfig = stored;
+        }
+      });
   }
 
   saveStagedConfig() {
     if (this.stagedFeedbackConfig.initialOrdLimit < 1) {
       this.stagedFeedbackConfig.initialOrdLimit = 1;
     }
-    this.stagedFeedbackConfigService.set(
-      this.courseId,
-      this.taskId,
-      this.stagedFeedbackConfig
-    );
-    this.snackbar.open(
-      "Einstellung für gestuftes Feedback gespeichert.",
-      "OK",
-      { duration: 3000 }
-    );
+    this.stagedFeedbackConfigService
+      .set(this.courseId, this.taskId, this.stagedFeedbackConfig)
+      .subscribe(() => {
+        this.snackbar.open(
+          "Einstellung für gestuftes Feedback gespeichert.",
+          "OK",
+          { duration: 3000 }
+        );
+      });
   }
 
   isAuthorized(): boolean {
