@@ -39,64 +39,95 @@
       </mat-slide-toggle>
     </div>
     <div class="settings-card__content" *ngIf="stagedFeedbackConfig.enabled">
-      <mat-form-field appearance="outline">
-        <mat-label>{{
+      <div class="staged-control">
+        <span class="staged-control-label">{{
           "configuration.staged-feedback.limit-label" | i18nextEager
-        }}</mat-label>
-        <input
-          matInput
-          type="number"
-          [(ngModel)]="stagedFeedbackConfig.initialOrdLimit"
-          [min]="1"
-          [max]="maxOrder"
-          (change)="saveStagedConfig()"
-        />
-        <mat-hint>{{
-          "configuration.staged-feedback.limit-hint" | i18nextEager
-        }}</mat-hint>
-      </mat-form-field>
+        }}</span>
+        <div class="staged-control-input">
+          <button
+            mat-icon-button
+            color="primary"
+            (click)="adjustLimit(-1)"
+            [disabled]="stagedFeedbackConfig.initialOrdLimit <= 1"
+            matTooltip="Reduzieren"
+          >
+            <mat-icon>expand_more</mat-icon>
+          </button>
+          <div class="value">
+            {{ stagedFeedbackConfig.initialOrdLimit }}
+          </div>
+          <button
+            mat-icon-button
+            color="primary"
+            (click)="adjustLimit(1)"
+            [disabled]="stagedFeedbackConfig.initialOrdLimit >= maxOrder"
+            matTooltip="Erhöhen"
+          >
+            <mat-icon>expand_less</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="staged-control-hint">
+        {{ "configuration.staged-feedback.limit-hint" | i18nextEager }}
+      </div>
     </div>
   </mat-card>
 
-  <mat-card class="card" *ngFor="let configuration of configurations | async">
-    <span>{{ configuration.checkerType }}</span>
+  <ng-container *ngFor="let configuration of configurations | async">
+    <mat-card class="card">
+      <div class="checker-info">
+        <span *ngIf="stagedFeedbackConfig.enabled" class="checker-order"
+          >#{{ configuration.ord }}</span
+        >
+        <span>{{ configuration.checkerType }}</span>
+      </div>
 
-    <span class="spacer"></span>
+      <span class="spacer"></span>
 
-    <button
-      mat-icon-button
-      color="primary"
-      [disabled]="!configuration.mainFileUploaded"
-      (click)="downloadMainFile(configuration)"
-      matTooltip="{{ 'configuration.download-primary-file' | i18nextEager }}"
-    >
-      <mat-icon>save_alt</mat-icon>
-    </button>
-    <button
-      mat-icon-button
-      color="primary"
-      [disabled]="!configuration.secondaryFileUploaded"
-      (click)="downloadSecondaryFile(configuration)"
-      matTooltip="{{ 'configuration.download-secondary-file' | i18nextEager }}"
-    >
-      <mat-icon>save_alt</mat-icon>
-    </button>
+      <button
+        mat-icon-button
+        color="primary"
+        [disabled]="!configuration.mainFileUploaded"
+        (click)="downloadMainFile(configuration)"
+        matTooltip="{{ 'configuration.download-primary-file' | i18nextEager }}"
+      >
+        <mat-icon>save_alt</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        color="primary"
+        [disabled]="!configuration.secondaryFileUploaded"
+        (click)="downloadSecondaryFile(configuration)"
+        matTooltip="{{
+          'configuration.download-secondary-file' | i18nextEager
+        }}"
+      >
+        <mat-icon>save_alt</mat-icon>
+      </button>
 
-    <button
-      mat-icon-button
-      color="primary"
-      (click)="editConfig(configuration)"
-      matTooltip="{{ 'configuration.edit-checker' | i18nextEager }}"
-    >
-      <mat-icon>edit</mat-icon>
-    </button>
-    <button
-      mat-icon-button
-      color="primary"
-      (click)="deleteConfig(configuration)"
-      matTooltip="{{ 'configuration' | i18nextEager }}"
-    >
-      <mat-icon>delete</mat-icon>
-    </button>
-  </mat-card>
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="editConfig(configuration)"
+        matTooltip="{{ 'configuration.edit-checker' | i18nextEager }}"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="deleteConfig(configuration)"
+        matTooltip="{{ 'configuration' | i18nextEager }}"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-card>
+    <div
+      *ngIf="
+        stagedFeedbackConfig.enabled &&
+        configuration.ord === stagedFeedbackConfig.initialOrdLimit
+      "
+      class="staged-divider"
+    ></div>
+  </ng-container>
 </div>

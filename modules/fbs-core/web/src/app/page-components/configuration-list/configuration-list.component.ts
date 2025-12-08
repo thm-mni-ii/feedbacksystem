@@ -58,24 +58,11 @@ export class ConfigurationListComponent implements OnInit {
       this.taskId
     );
     this.configurations.subscribe((configs) => {
-      this.maxOrder = configs.length || 1;
-      if (
-        this.stagedFeedbackConfig.initialOrdLimit === undefined ||
-        this.stagedFeedbackConfig.initialOrdLimit > this.maxOrder
-      ) {
-        this.stagedFeedbackConfig = {
-          ...this.stagedFeedbackConfig,
-          initialOrdLimit: Math.min(
-            this.maxOrder,
-            this.stagedFeedbackConfig.initialOrdLimit || 1
-          ),
-        };
-        this.stagedFeedbackConfigService.set(
-          this.courseId,
-          this.taskId,
-          this.stagedFeedbackConfig
-        );
-      }
+      this.maxOrder =
+        configs.length > 0
+          ? Math.max(...configs.map((c) => c.ord || 1))
+          : 1;
+      this.normalizeLimit();
     });
   }
 
@@ -84,13 +71,12 @@ export class ConfigurationListComponent implements OnInit {
       .get(this.courseId, this.taskId)
       .subscribe((stored) => {
         this.stagedFeedbackConfig = stored;
+        this.normalizeLimit();
       });
   }
 
   saveStagedConfig() {
-    if (this.stagedFeedbackConfig.initialOrdLimit < 1) {
-      this.stagedFeedbackConfig.initialOrdLimit = 1;
-    }
+    this.normalizeLimit();
     this.stagedFeedbackConfigService
       .set(this.courseId, this.taskId, this.stagedFeedbackConfig)
       .subscribe(() => {
@@ -100,6 +86,21 @@ export class ConfigurationListComponent implements OnInit {
           { duration: 3000 }
         );
       });
+  }
+
+  adjustLimit(delta: number) {
+    this.stagedFeedbackConfig.initialOrdLimit += delta;
+    this.normalizeLimit();
+    this.saveStagedConfig();
+  }
+
+  private normalizeLimit() {
+    if (this.stagedFeedbackConfig.initialOrdLimit < 1) {
+      this.stagedFeedbackConfig.initialOrdLimit = 1;
+    }
+    if (this.stagedFeedbackConfig.initialOrdLimit > this.maxOrder) {
+      this.stagedFeedbackConfig.initialOrdLimit = this.maxOrder;
+    }
   }
 
   isAuthorized(): boolean {
@@ -149,8 +150,6 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   editConfig(checker: CheckerConfig) {
-    // this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, "test").subscribe(
-    // )
     this.dialog
       .open(NewCheckerDialogComponent, {
         height: "auto",
