@@ -329,7 +329,7 @@ export const germanTranslation = {
   "task.detail.submit": "Abgeben",
   "task.detail.detailedFeedback.hint":
     "Deine letzte Abgabe war nicht korrekt. Möchtest du ausführliches Feedback generieren?",
-  "task.detail.detailedFeedback.trigger": "Ausführliches Feedback generieren",
+  "task.detail.detailedFeedback.trigger": "Feedback generieren",
   "task.detail.detailedFeedback.pending":
     "Das ausführliche Feedback wird berechnet. Bitte warten ...",
   "task.detail.tooltip.nextTaskTooltip": "Nächste Aufgabe",
@@ -385,7 +385,7 @@ export const germanTranslation = {
   "sql-playground.input.tooltip.downloadTab": "Tab herunterladen",
   "sql-playground.input.tooltip.downloadAllTabs": "Alle Tabs herunterladen",
   "sql-playground.input.label.newQuery": "New_Query",
-  "sql-playground.input.label.taskDescription": "Aufgabenbeschreibung:",
+  "sql-playground.input.label.taskDescription": "Beschreibung",
   "sql-playground.input.label.errorMessage": "Fehlermeldung:",
   "sql-playground.input.label.execute": "Ausführen",
   "sql-playground.input.tooltip.selectTask":

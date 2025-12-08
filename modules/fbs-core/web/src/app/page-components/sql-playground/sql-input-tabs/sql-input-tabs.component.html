@@ -1,4 +1,4 @@
-<div class="actions-container" role="toolbar" aria-label="Tab-Aktionen">
+﻿<div class="actions-container" role="toolbar" aria-label="Tab-Aktionen">
   <button
     mat-flat-button
     matTooltip="{{
@@ -115,58 +115,100 @@
           aria-label="SQL Eingabefeld"
         ></app-highlighted-input>
       </div>
-      <div
-        class="error-message"
-        *ngIf="activeTab?.error && activeTab?.isSubmitMode"
-        role="alert"
-        aria-live="assertive"
-      >
-        <strong>{{
-          "sql-playground.input.label.errorMessage" | i18nextEager
-        }}</strong>
-        <pre>{{ activeTab?.errorMsg }}</pre>
-      </div>
     </mat-tab>
   </ng-container>
 </mat-tab-group>
 
 <div class="bottom-container" role="region" aria-label="SQL Aktionen">
-  <button
-    #submit
-    [disabled]="(isSubmissionEmpty() | async) || isPending"
-    mat-flat-button
-    color="accent"
-    class="excuteBtn"
-    (click)="submission()"
-    aria-label="SQL ausführen"
-  >
-    <span class="spinner" *ngIf="isPending">
-      <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
-    </span>
-    <span *ngIf="!isPending">{{
-      "sql-playground.input.label.execute" | i18nextEager
-    }}</span>
-  </button>
+  <div class="row action-row">
+    <button
+      #submit
+      [disabled]="(isSubmissionEmpty() | async) || isPending"
+      mat-flat-button
+      color="accent"
+      class="excuteBtn"
+      (click)="submission()"
+      aria-label="SQL ausführen"
+    >
+      <span class="spinner" *ngIf="isPending">
+        <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
+      </span>
+      <span *ngIf="!isPending">{{
+        "sql-playground.input.label.execute" | i18nextEager
+      }}</span>
+    </button>
+    <mat-icon
+      class="state submit-item"
+      *ngIf="isPending"
+      aria-label="Wird verarbeitet"
+    >
+      <mat-spinner [diameter]="24"></mat-spinner>
+      {{ "sql-playground.input.label.processing" | i18nextEager }}
+    </mat-icon>
+  </div>
 
-  <button
-    mat-flat-button
-    color="grey"
-    class="submitBtn"
-    *ngIf="!activeTab?.isSubmitMode"
-    matTooltip="{{ 'sql-playground.input.tooltip.selectTask' | i18nextEager }}"
-    [matTooltipPosition]="'above'"
-    (click)="updateMode(activeTabIndex, true)"
-    aria-label="Abgabemodus aktivieren"
+  <div
+    class="row error-block"
+    *ngIf="
+      errorMessages.length && activeTab?.isSubmitMode && !activeTab?.everCorrect
+    "
   >
-    {{ "sql-playground.input.label.submit" | i18nextEager }}
-    <mat-icon aria-hidden="true">insert_drive_file</mat-icon>
-  </button>
-  <div class="submit-container" *ngIf="activeTab?.isSubmitMode">
+    <strong>{{
+      "sql-playground.input.label.errorMessage" | i18nextEager
+    }}</strong>
+    <div class="error-list">
+      <pre *ngFor="let msg of errorMessages">{{ msg }}</pre>
+    </div>
+  </div>
+
+  <div class="row submit-container" *ngIf="!activeTab?.isSubmitMode">
+    <button
+      mat-flat-button
+      color="grey"
+      class="submitBtn"
+      matTooltip="{{
+        'sql-playground.input.tooltip.selectTask' | i18nextEager
+      }}"
+      [matTooltipPosition]="'above'"
+      (click)="updateMode(activeTabIndex, true)"
+      aria-label="Abgabemodus aktivieren"
+    >
+      {{ "sql-playground.input.label.submit" | i18nextEager }}
+      <mat-icon aria-hidden="true">insert_drive_file</mat-icon>
+    </button>
+  </div>
+
+  <div
+    class="row staged-feedback"
+    *ngIf="
+      activeTab?.isSubmitMode &&
+      !activeTab?.everCorrect &&
+      showDetailedFeedbackBox(activeTab)
+    "
+  >
+    <span>{{ "task.detail.detailedFeedback.hint" | i18nextEager }}</span>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="requestDetailedFeedback()"
+      [disabled]="isPending"
+    >
+      {{ "task.detail.detailedFeedback.trigger" | i18nextEager }}
+    </button>
+  </div>
+
+  <div class="row staged-feedback pending" *ngIf="activeTab?.detailedPending">
+    <mat-spinner [diameter]="20"></mat-spinner>
+    <span>{{ "task.detail.detailedFeedback.pending" | i18nextEager }}</span>
+  </div>
+
+  <div class="row submit-container" *ngIf="activeTab?.isSubmitMode">
     <button
       [disabled]="
         isCheckerEmpty ||
         (isSubmissionEmpty() | async) ||
-        hasDeadlinePassed(activeTab?.selectedTask)
+        hasDeadlinePassed(activeTab?.selectedTask) ||
+        isPending
       "
       mat-flat-button
       color="accent"
@@ -174,45 +216,9 @@
       (click)="submissionToTask()"
       aria-label="Lösung abgeben"
     >
-      <span class="spinner" *ngIf="isPending">
-        <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
-      </span>
-      <span *ngIf="!isPending">{{
-        "sql-playground.input.label.submit" | i18nextEager
-      }}</span>
+      <span>{{ "sql-playground.input.label.submit" | i18nextEager }}</span>
     </button>
 
-    <mat-icon
-      class="submit-item"
-      [ngStyle]="{ color: isDescriptionMode === true ? 'black' : 'grey' }"
-      matTooltip="{{
-        'sql-playground.input.tooltip.showDescription' | i18nextEager
-      }}"
-      (click)="isDescriptionMode = !isDescriptionMode"
-      aria-label="Aufgabenbeschreibung anzeigen"
-      tabindex="0"
-      role="button"
-      >remove_red_eye</mat-icon
-    >
-
-    <mat-icon
-      class="submit-item material-icons color_red"
-      matTooltip="{{
-        'sql-playground.input.tooltip.submissionStatusWrong' | i18nextEager
-      }}"
-      *ngIf="activeTab?.isSubmitted && !isPending && !activeTab?.isCorrect"
-      aria-label="Abgabe nicht korrekt"
-      >cancel</mat-icon
-    >
-    <mat-icon
-      class="submit-item material-icons color_green"
-      matTooltip="{{
-        'sql-playground.input.tooltip.submissionStatusCorrect' | i18nextEager
-      }}"
-      *ngIf="activeTab?.isSubmitted && !isPending && activeTab?.isCorrect"
-      aria-label="Abgabe korrekt"
-      >check_circle</mat-icon
-    >
     <mat-icon
       class="state submit-item"
       *ngIf="isPending"
@@ -223,8 +229,48 @@
     </mat-icon>
 
     <button
+      *ngIf="!isPending"
+      mat-button
+      class="submit-item eye-btn"
+      [color]="isDescriptionMode ? 'primary' : undefined"
+      (click)="isDescriptionMode = !isDescriptionMode"
+      aria-label="Aufgabentext anzeigen"
+      matTooltip="{{
+        'sql-playground.input.tooltip.showDescription' | i18nextEager
+      }}"
+    >
+      <mat-icon aria-hidden="true">remove_red_eye</mat-icon>
+      <span class="eye-label">{{
+        "sql-playground.input.label.taskDescription" | i18nextEager
+      }}</span>
+    </button>
+
+    <mat-icon
+      class="submit-item material-icons color_green"
+      matTooltip="{{
+        'sql-playground.input.tooltip.submissionStatusCorrect' | i18nextEager
+      }}"
+      *ngIf="!isPending && activeTab?.everCorrect"
+      aria-label="Abgabe korrekt"
+      >check_circle</mat-icon
+    >
+
+    <mat-icon
+      class="submit-item material-icons color_red"
+      matTooltip="{{
+        'sql-playground.input.tooltip.submissionStatusWrong' | i18nextEager
+      }}"
+      *ngIf="
+        !isPending && !activeTab?.everCorrect && activeTab?.isCorrect === false
+      "
+      aria-label="Abgabe nicht korrekt"
+      >error</mat-icon
+    >
+
+    <button
+      *ngIf="!isPending"
       [disabled]="!activeTab?.selectedCourse || isPending"
-      class="courseBtn submit-item"
+      class="courseBtn submit-item flex-grow"
       mat-button
       [matMenuTriggerFor]="task"
       matTooltip="{{ activeTab?.selectedTaskName }}"
@@ -246,7 +292,7 @@
 
     <button
       [disabled]="isPending"
-      class="courseBtn submit-item"
+      class="courseBtn submit-item flex-grow"
       mat-button
       [matMenuTriggerFor]="course"
       matTooltip="{{ activeTab?.selectedCourseName }}"
@@ -260,7 +306,7 @@
         (click)="changeCourse(activeTabIndex, course)"
         mat-menu-item
         *ngFor="let course of courses | async"
-        aria-label="Kurs {{ course.name }} auswählen"
+        attr.aria-label="Kurs {{ course.name }} auswählen"
       >
         {{ course.name }}
       </button>

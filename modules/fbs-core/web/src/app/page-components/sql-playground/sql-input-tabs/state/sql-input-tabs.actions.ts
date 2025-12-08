@@ -94,7 +94,20 @@ export const setPending = createAction(
 );
 export const setSubmissionResult = createAction(
   "[SQL Input Tabs] Set Submission Result",
-  props<{ isCorrect: boolean; error: boolean; errorMsg: string | null }>()
+  props<{
+    isCorrect: boolean;
+    error: boolean;
+    errorMsg: string | null;
+    everCorrect?: boolean;
+  }>()
+);
+export const setSubmissionData = createAction(
+  "[SQL Input Tabs] Set Submission Data",
+  props<{ submissionId: number; results: any[] }>()
+);
+export const setDetailedPending = createAction(
+  "[SQL Input Tabs] Set Detailed Pending",
+  props<{ pending: boolean }>()
 );
 export const submitStatement = createAction(
   "[SQL Input Tabs] Submit Statement",

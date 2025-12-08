@@ -59,9 +59,7 @@ export class ConfigurationListComponent implements OnInit {
     );
     this.configurations.subscribe((configs) => {
       this.maxOrder =
-        configs.length > 0
-          ? Math.max(...configs.map((c) => c.ord || 1))
-          : 1;
+        configs.length > 0 ? Math.max(...configs.map((c) => c.ord || 1)) : 1;
       this.normalizeLimit();
     });
   }

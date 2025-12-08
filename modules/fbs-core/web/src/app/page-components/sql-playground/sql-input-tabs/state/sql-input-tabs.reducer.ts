@@ -37,6 +37,10 @@ export const sqlInputTabsReducer = createReducer(
             selectedTaskName: "Task",
             active: [],
             createdAt: Date.now(),
+            lastSubmissionId: undefined,
+            lastResults: [],
+            detailedPending: false,
+            everCorrect: false,
           },
     ].sort((a, b) => a.createdAt - b.createdAt),
     activeTabIndex: state.tabs.length,
@@ -121,6 +125,14 @@ export const sqlInputTabsReducer = createReducer(
             selectedCourseName: course.name,
             selectedTask: undefined,
             selectedTaskName: "Task",
+            lastSubmissionId: undefined,
+            lastResults: [],
+            detailedPending: false,
+            isSubmitted: false,
+            isCorrect: false,
+            everCorrect: false,
+            error: false,
+            errorMsg: null,
           }
         : tab
     ),
@@ -129,7 +141,19 @@ export const sqlInputTabsReducer = createReducer(
     ...state,
     tabs: state.tabs.map((tab, i) =>
       i === index
-        ? { ...tab, selectedTask: task, selectedTaskName: task.name }
+        ? {
+            ...tab,
+            selectedTask: task,
+            selectedTaskName: task.name,
+            lastSubmissionId: undefined,
+            lastResults: [],
+            detailedPending: false,
+            isSubmitted: false,
+            isCorrect: false,
+            everCorrect: false,
+            error: false,
+            errorMsg: null,
+          }
         : tab
     ),
   })),
@@ -169,15 +193,43 @@ export const sqlInputTabsReducer = createReducer(
   })),
   on(
     SqlInputTabsActions.setSubmissionResult,
-    (state, { isCorrect, error, errorMsg }) => ({
+    (state, { isCorrect, error, errorMsg, everCorrect }) => ({
       ...state,
       tabs: state.tabs.map((tab, i) =>
         i === state.activeTabIndex
-          ? { ...tab, isCorrect, error, errorMsg, isSubmitted: true }
+          ? {
+              ...tab,
+              isCorrect,
+              error,
+              errorMsg,
+              isSubmitted: true,
+              detailedPending: false,
+              everCorrect:
+                everCorrect !== undefined
+                  ? everCorrect
+                  : tab.everCorrect || isCorrect,
+            }
           : tab
       ),
     })
   ),
+  on(
+    SqlInputTabsActions.setSubmissionData,
+    (state, { submissionId, results }) => ({
+      ...state,
+      tabs: state.tabs.map((tab, i) =>
+        i === state.activeTabIndex
+          ? { ...tab, lastSubmissionId: submissionId, lastResults: results }
+          : tab
+      ),
+    })
+  ),
+  on(SqlInputTabsActions.setDetailedPending, (state, { pending }) => ({
+    ...state,
+    tabs: state.tabs.map((tab, i) =>
+      i === state.activeTabIndex ? { ...tab, detailedPending: pending } : tab
+    ),
+  })),
   on(SqlInputTabsActions.submitStatement, (state, {}) => state),
   on(SqlInputTabsActions.waitForSubDoneFailure, (state) => state),
   on(SqlInputTabsActions.submissionToTaskFailure, (state) => state)

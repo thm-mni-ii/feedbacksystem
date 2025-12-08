@@ -315,7 +315,7 @@ export const englishTranslation = {
   "task.detail.submit": "Submit",
   "task.detail.detailedFeedback.hint":
     "Your last submission was not correct. Do you want to generate detailed feedback?",
-  "task.detail.detailedFeedback.trigger": "Generate detailed feedback",
+  "task.detail.detailedFeedback.trigger": "Generate feedback",
   "task.detail.detailedFeedback.pending":
     "Detailed feedback is being generated. Please wait ...",
   "task.detail.tooltip.nextTask": "Next task",
@@ -379,17 +379,13 @@ export const englishTranslation = {
   "sql-playground.input.tooltip.downloadTab": "Download tab",
   "sql-playground.input.tooltip.downloadAllTabs": "Download all tabs",
   "sql-playground.input.label.newQuery": "New Query",
-  "sql-playground.input.label.taskDescription": "Task Description:",
+  "sql-playground.input.label.taskDescription": "Description:",
   "sql-playground.input.label.errorMessage": "Error Message:",
   "sql-playground.input.label.execute": "Execute",
   "sql-playground.input.tooltip.selectTask":
     "Select a task from your course and submit the statement directly.",
   "sql-playground.input.label.submit": "Submit",
   "sql-playground.input.tooltip.showDescription": "Show Description",
-  "sql-playground.input.tooltip.submissionStatusWrong":
-    "Submission Status: Your submission was incorrect.",
-  "sql-playground.input.tooltip.submissionStatusCorrect":
-    "Submission Status: Your submission was correct.",
   "sql-playground.input.label.processing": "Processing",
   "sql-playground.input.tooltip.close": "Close",
   "sql-playground.input.new-query": "New Query",
