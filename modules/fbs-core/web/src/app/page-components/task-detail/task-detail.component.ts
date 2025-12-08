@@ -13,7 +13,7 @@ import { AuthService } from "../../service/auth.service";
 import { Submission } from "../../model/Submission";
 import { SubmissionService } from "../../service/submission.service";
 import { tap, map, mergeMap, concatMap, takeWhile } from "rxjs/operators";
-import { of, from } from "rxjs";
+import { of, from, Observable } from "rxjs";
 import { Roles } from "../../model/Roles";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
@@ -216,36 +216,39 @@ export class TaskDetailComponent implements OnInit {
       (checkerConfigs) => {
         this.checkerConfigs = checkerConfigs.sort((a, b) => a.ord - b.ord);
         this.isCheckerEmpty = checkerConfigs.length === 0;
-        this.loadStagedFeedbackConfig();
-        const orders = this.checkerConfigs.map((c) => c.ord);
-        if (!this.stagedFeedbackConfig.enabled) {
-          this.initialCheckerOrders = orders;
-          this.deferredCheckerOrders = [];
-          return;
-        }
-        const limit =
-          this.stagedFeedbackConfig.initialOrdLimit ??
-          (orders.length ? orders[0] : 1);
-        this.initialCheckerOrders = orders.filter((ord) => ord <= limit);
-        this.deferredCheckerOrders = orders.filter((ord) => ord > limit);
+        this.loadStagedFeedbackConfig().subscribe((stagedFeedbackConfig) => {
+          const orders = this.checkerConfigs.map((c) => c.ord);
+          if (!stagedFeedbackConfig.enabled) {
+            this.initialCheckerOrders = orders;
+            this.deferredCheckerOrders = [];
+            return;
+          }
+          const limit =
+            stagedFeedbackConfig.initialOrdLimit ??
+            (orders.length ? orders[0] : 1);
+          this.initialCheckerOrders = orders.filter((ord) => ord <= limit);
+          this.deferredCheckerOrders = orders.filter((ord) => ord > limit);
+        });
       },
       (error) => console.error(error)
     );
   }
 
-  private loadStagedFeedbackConfig() {
-    this.stagedFeedbackConfigService
+  private loadStagedFeedbackConfig(): Observable<StagedFeedbackConfig> {
+    return this.stagedFeedbackConfigService
       .get(this.courseId, this.task.id)
-      .subscribe((stored) => {
-        if (stored) {
-          this.stagedFeedbackConfig = stored;
-        } else {
-          this.stagedFeedbackConfig = {
-            enabled: false,
-            initialOrdLimit: 1,
-          };
-        }
-      });
+      .pipe(
+        tap((stored) => {
+          if (stored) {
+            this.stagedFeedbackConfig = stored;
+          } else {
+            this.stagedFeedbackConfig = {
+              enabled: false,
+              initialOrdLimit: 1,
+            };
+          }
+        })
+      );
   }
 
   ngOnInit() {
