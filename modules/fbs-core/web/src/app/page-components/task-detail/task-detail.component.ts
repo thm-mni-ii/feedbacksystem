@@ -237,18 +237,7 @@ export class TaskDetailComponent implements OnInit {
   private loadStagedFeedbackConfig(): Observable<StagedFeedbackConfig> {
     return this.stagedFeedbackConfigService
       .get(this.courseId, this.task.id)
-      .pipe(
-        tap((stored) => {
-          if (stored) {
-            this.stagedFeedbackConfig = stored;
-          } else {
-            this.stagedFeedbackConfig = {
-              enabled: false,
-              initialOrdLimit: 1,
-            };
-          }
-        })
-      );
+      .pipe(tap((config) => (this.stagedFeedbackConfig = config)));
   }
 
   ngOnInit() {

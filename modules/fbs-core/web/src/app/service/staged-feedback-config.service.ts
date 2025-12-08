@@ -14,24 +14,12 @@ export interface StagedFeedbackConfig {
 export class StagedFeedbackConfigService {
   constructor(private taskService: TaskService) {}
 
-  private key(courseId: number, taskId: number): string {
-    return `fbs.stagedFeedback.${courseId}.${taskId}`;
-  }
-
-  get(
-    courseId: number,
-    taskId: number
-  ): Observable<StagedFeedbackConfig | null> {
+  get(courseId: number, taskId: number): Observable<StagedFeedbackConfig> {
     return this.taskService.getTask(courseId, taskId).pipe(
-      map((task) =>
-        task.stagedFeedbackEnabled !== undefined &&
-        task.stagedFeedbackLimit !== undefined
-          ? {
-              enabled: task.stagedFeedbackEnabled,
-              initialOrdLimit: task.stagedFeedbackLimit,
-            }
-          : null
-      )
+      map((task) => ({
+        enabled: !!task.stagedFeedbackEnabled,
+        initialOrdLimit: task.stagedFeedbackLimit ?? 1,
+      }))
     );
   }
 

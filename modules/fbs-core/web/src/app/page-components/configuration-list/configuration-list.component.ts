@@ -83,9 +83,7 @@ export class ConfigurationListComponent implements OnInit {
     this.stagedFeedbackConfigService
       .get(this.courseId, this.taskId)
       .subscribe((stored) => {
-        if (stored) {
-          this.stagedFeedbackConfig = stored;
-        }
+        this.stagedFeedbackConfig = stored;
       });
   }
 
