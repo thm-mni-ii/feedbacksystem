@@ -26,7 +26,6 @@ import { CheckerConfig } from "src/app/model/CheckerConfig";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import * as SqlInputTabsActions from "./state/sql-input-tabs.actions";
 import * as fromSqlInputTabs from "./state/sql-input-tabs.selectors";
-import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { FormControl, FormGroup } from "@angular/forms";
 import { SubmissionService } from "../../../service/submission.service";
 import { Input } from "@angular/core";
