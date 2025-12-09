@@ -1,5 +1,6 @@
-import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
+import { Component, Inject, ViewChild } from "@angular/core";
 import { I18NEXT_SERVICE, ITranslationService } from "angular-i18next";
+import { MatMenu } from "@angular/material/menu";
 
 /**
  * Language Menu
@@ -11,8 +12,8 @@ import { I18NEXT_SERVICE, ITranslationService } from "angular-i18next";
   exportAs: "languageMenu",
 })
 export class LanguageMenuComponent {
-  @ViewChild("menu")
-  menu: ElementRef;
+  @ViewChild("menu", { static: true })
+  menu: MatMenu;
   constructor(
     @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
   ) {}
