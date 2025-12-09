@@ -2,7 +2,7 @@
 <mat-expansion-panel
   class="routine"
   *ngFor="let routine of routines$ | async; index as i"
-  aria-label="Routine {{ routine.name }}"
+  attr.aria-label="Routine {{ routine.name }}"
 >
   <mat-expansion-panel-header>
     <mat-panel-title>
@@ -27,7 +27,7 @@
     <span
       class="routine-definition"
       *ngFor="let param of routine.parameters.split(',')"
-      aria-label="Parameter: {{ param }}"
+      attr.aria-label="Parameter: {{ param }}"
     >
       {{ param }} <br />
     </span>

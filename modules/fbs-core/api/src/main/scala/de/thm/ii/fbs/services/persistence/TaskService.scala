@@ -28,7 +28,8 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, requirement_type , attempts ,hide_result" +
+    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, " +
+      "requirement_type, attempts, hide_result, staged_feedback_enabled, staged_feedback_limit" +
       " FROM task WHERE course_id = ?",
       (res, _) => parseResult(res), cid)
 
@@ -40,7 +41,7 @@ class TaskService {
     */
   def getOne(id: Int): Option[Task] =
     DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id," +
-      " requirement_type, attempts ,hide_result FROM task WHERE task_id = ?",
+      " requirement_type, attempts, hide_result, staged_feedback_enabled, staged_feedback_limit FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
@@ -52,11 +53,11 @@ class TaskService {
     */
   def create(cid: Int, task: Task): Task =
     DB.insert("INSERT INTO task (name, is_private, media_type, description, deadline, " +
-      "media_information, course_id, requirement_type, attempts,hide_result) VALUES " +
-      "(?, ?, ?, ?, ?, ?, ?, ?,?,?);",
+      "media_information, course_id, requirement_type, attempts, hide_result, staged_feedback_enabled, staged_feedback_limit) VALUES " +
+      "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
       task.name, task.isPrivate, task.mediaType, task.description,
       parseTimestamp(task.deadline).orNull, task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull,
-      cid, task.requirementType, task.attempts.orNull, task.hideResult)
+      cid, task.requirementType, task.attempts.orNull, task.hideResult, task.stagedFeedbackEnabled, task.stagedFeedbackLimit.orNull)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(id)) match {
       case Some(task) => task
@@ -75,11 +76,12 @@ class TaskService {
     1 == DB.update(
       """
         |UPDATE task SET name = ?, is_private = ?, media_type = ?, description = ?, deadline = ?, media_information = ?,
-        |requirement_type = ?, attempts = ?, hide_result = ?
+        |requirement_type = ?, attempts = ?, hide_result = ?, staged_feedback_enabled = ?, staged_feedback_limit = ?
         |WHERE task_id = ? AND course_id = ?
         |""".stripMargin,
       task.name, task.isPrivate, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
-      task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, task.attempts.orNull, task.hideResult, tid, cid)
+      task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, task.attempts.orNull,
+      task.hideResult, task.stagedFeedbackEnabled, task.stagedFeedbackLimit.orNull, tid, cid)
 
   def updateBatch(courseId: Int, batch: TaskBatch): Boolean = {
     val arguments = List[Any](
@@ -187,7 +189,9 @@ class TaskService {
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
     requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"),
     attempts = Option(res.getInt("attempts")).filter(_ => !res.wasNull()),
-    hideResult = res.getBoolean("hide_result")
+    hideResult = res.getBoolean("hide_result"),
+    stagedFeedbackEnabled = res.getBoolean("staged_feedback_enabled"),
+    stagedFeedbackLimit = Option(res.getInt("staged_feedback_limit")).filter(_ => !res.wasNull()),
   )
 
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),

@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { EventEmitter, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { SubTaskResult } from "../model/SubTaskResult";
@@ -41,11 +41,17 @@ export class SubmissionService {
     uid: number,
     cid: number,
     tid: number,
-    sid: number
+    sid: number,
+    checkerOrders?: Array<number | string>
   ): Observable<void> {
+    let params = new HttpParams();
+    checkerOrders?.forEach(
+      (order) => (params = params.append("checkerOrders", order.toString()))
+    );
     return this.http.put<void>(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`,
-      {}
+      {},
+      { params }
     );
   }
 
@@ -74,7 +80,8 @@ export class SubmissionService {
     cid: number,
     tid: number,
     solution: File | object | string,
-    additionalInformation?: Record<string, any>
+    additionalInformation?: Record<string, any>,
+    checkerOrders?: Array<number | string>
   ): Observable<Submission> {
     const formData: FormData = new FormData();
     let formSolution;
@@ -96,6 +103,9 @@ export class SubmissionService {
         JSON.stringify(additionalInformation)
       );
     }
+    checkerOrders?.forEach((order) =>
+      formData.append("checkerOrders", order.toString())
+    );
     return this.http.post<Submission>(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`,
       formData
