@@ -19,7 +19,7 @@ import {
   selectDatabasesError,
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
 import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
-import { map } from "rxjs/operators";
+import { map, take } from "rxjs/operators";
 import {
   BackendDefintion,
   DatabaseInformation,
@@ -275,7 +275,7 @@ export class DbControlDbOverviewComponent implements OnInit {
   }
 
   getTempURI() {
-    this.databases$.subscribe((databases) => {
+    this.databases$.pipe(take(1)).subscribe((databases) => {
       const selectedDb = databases.find((db) => db.id === this.selectedDb);
       if (selectedDb) {
         this.playgroundService

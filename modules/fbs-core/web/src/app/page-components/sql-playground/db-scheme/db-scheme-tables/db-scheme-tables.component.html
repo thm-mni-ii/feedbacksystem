@@ -2,7 +2,7 @@
   <p class="title" role="heading" aria-level="4" tabindex="0">Tables</p>
   <mat-expansion-panel
     *ngFor="let table of updatedTables$ | async; index as i"
-    aria-label="Tabelle {{ table.name }}"
+    attr.aria-label="Tabelle {{ table.name }}"
   >
     <mat-expansion-panel-header>
       <mat-panel-title>
@@ -16,7 +16,7 @@
             'sql-playground.db-schema.tables.tooltip.button' | i18nextEager
           }}"
           (click)="showTableData($event, table.name)"
-          aria-label="Tabellendaten von {{ table.name }} anzeigen"
+          attr.aria-label="Tabellendaten von {{ table.name }} anzeigen"
         >
           <mat-icon aria-hidden="true">table_chart</mat-icon>
         </button>
@@ -24,20 +24,20 @@
     </mat-expansion-panel-header>
     <ul
       class="attribute-list"
-      aria-label="Tabellenspalten von {{ table.name }}"
+      attr.aria-label="Tabellenspalten von {{ table.name }}"
     >
       <li *ngFor="let column of table.columns; index as j">
         <span class="attribute">
           <span
             [ngClass]="{ 'primary-key': column.isPrimaryKey }"
-            aria-label="Spaltenname: {{ column.name }}{{
+            attr.aria-label="Spaltenname: {{ column.name }}{{
               column.isPrimaryKey ? ', Primärschlüssel' : ''
             }}"
           >
             {{ column.name }}
           </span>
           <span>
-            <i aria-label="Datentyp: {{ column.udtName }}">{{
+            <i attr.aria-label="Datentyp: {{ column.udtName }}">{{
               column.udtName
             }}</i>
           </span>
@@ -61,7 +61,7 @@
       <div *ngIf="table.constraints !== undefined">
         <li
           *ngFor="let constraint of table.constraints.constraints; index as k"
-          aria-label="Constraint: {{ constraint.name }}, Typ: {{
+          attr.aria-label="Constraint: {{ constraint.name }}, Typ: {{
             constraint.type
           }}, Spalte: {{ constraint.columnName }}{{
             constraint.checkClause

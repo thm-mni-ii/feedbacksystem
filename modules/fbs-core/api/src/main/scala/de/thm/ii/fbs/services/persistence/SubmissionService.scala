@@ -199,6 +199,17 @@ class SubmissionService {
       "WHERE submission_id = ? AND user_id = ?", sid, uid)
 
   /**
+   * Removes all results stored for this submission
+   *
+   * @param sid The submission id
+   * @param cid The configuration id
+   * @return True if results where deleted
+   */
+  def deleteResult(sid: Int, cid: Int): Boolean =
+    0 < DB.update("DELETE checker_result FROM checker_result " +
+      "WHERE submission_id = ? AND configuration_id = ?", sid, cid)
+
+  /**
     * Delete a submission by id
     *
     * @param sid The submission id
