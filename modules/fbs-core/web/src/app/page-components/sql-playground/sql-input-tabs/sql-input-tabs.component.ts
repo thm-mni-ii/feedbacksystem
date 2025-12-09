@@ -261,7 +261,9 @@ export class SqlInputTabsComponent
 
   private filterTasks() {
     this.filteredTasksFromCourse = this.allTasksFromCourse.filter(
-      (task) => task.mediaType === "text/plain" && !this.hasDeadlinePassed(task)
+      (task) =>
+        (task.mediaType === "text/plain" || task.mediaType === "text/sql") &&
+        !this.hasDeadlinePassed(task)
     );
 
     if (this.filteredTasksFromCourse.length < 1) {
