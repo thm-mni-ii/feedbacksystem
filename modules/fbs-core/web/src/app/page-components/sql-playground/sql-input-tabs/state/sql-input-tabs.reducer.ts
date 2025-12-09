@@ -14,6 +14,27 @@ const initialState: SqlInputTabsState = {
   pending: false,
 };
 
+const createEmptyTab = (): QueryTab => ({
+  id: crypto.randomUUID(),
+  name: "New Query",
+  content: "",
+  error: false,
+  errorMsg: null,
+  isCorrect: false,
+  isSubmitted: false,
+  isSubmitMode: false,
+  selectedCourse: undefined,
+  selectedTask: undefined,
+  selectedCourseName: "Course",
+  selectedTaskName: "Task",
+  active: [],
+  createdAt: Date.now(),
+  lastSubmissionId: undefined,
+  lastResults: [],
+  detailedPending: false,
+  everCorrect: false,
+});
+
 export const sqlInputTabsReducer = createReducer(
   initialState,
   on(SqlInputTabsActions.addTab, (state, { tab }) => ({
@@ -22,40 +43,31 @@ export const sqlInputTabsReducer = createReducer(
       ...state.tabs,
       tab
         ? { ...tab, createdAt: tab.createdAt ?? Date.now() }
-        : {
-            id: crypto.randomUUID(),
-            name: "New Query",
-            content: "",
-            error: false,
-            errorMsg: null,
-            isCorrect: false,
-            isSubmitted: false,
-            isSubmitMode: false,
-            selectedCourse: undefined,
-            selectedTask: undefined,
-            selectedCourseName: "Course",
-            selectedTaskName: "Task",
-            active: [],
-            createdAt: Date.now(),
-            lastSubmissionId: undefined,
-            lastResults: [],
-            detailedPending: false,
-            everCorrect: false,
-          },
+        : createEmptyTab(),
     ].sort((a, b) => a.createdAt - b.createdAt),
     activeTabIndex: state.tabs.length,
   })),
   on(SqlInputTabsActions.closeTab, (state, { index }) => {
     const tabs = state.tabs.filter((_, i) => i !== index);
+
+    // Wenn keine Tabs mehr vorhanden sind, erstelle einen neuen leeren Tab
+    if (tabs.length === 0) {
+      return {
+        ...state,
+        tabs: [createEmptyTab()],
+        activeTabIndex: 0,
+      };
+    }
+
     return {
       ...state,
       tabs,
-      activeTabIndex: tabs.length - 1,
+      activeTabIndex: Math.min(state.activeTabIndex, tabs.length - 1),
     };
   }),
   on(SqlInputTabsActions.closeAllTabs, (state) => ({
     ...state,
-    tabs: [],
+    tabs: [createEmptyTab()],
     activeTabIndex: 0,
   })),
   on(SqlInputTabsActions.updateTabContent, (state, { index, content }) => {
