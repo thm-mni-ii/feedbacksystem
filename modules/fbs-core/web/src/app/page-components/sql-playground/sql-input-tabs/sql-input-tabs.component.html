@@ -45,7 +45,7 @@
   >
     <mat-tab
       [disabled]="isPending"
-      aria-label="Tab {{
+      attr.aria-label="Tab {{
         tab.name ||
           ('sql-playground.input.label.newQuery' | i18nextEager) +
             ' ' +
@@ -70,7 +70,7 @@
           *ngFor="let active of tab.active"
           class="circle"
           [ngStyle]="{ 'background-color': active.color }"
-          aria-label="Aktiv: {{ active.id }}"
+          attr.aria-label="Aktiv: {{ active.id }}"
         >
           {{ active.id[0] }}
         </div>
@@ -284,7 +284,7 @@
         (click)="changeTask(activeTabIndex, task)"
         mat-menu-item
         *ngFor="let task of filteredTasksFromCourse"
-        aria-label="Aufgabe {{ task.name }} auswählen"
+        attr.aria-label="Aufgabe {{ task.name }} auswählen"
       >
         {{ task.name }}
       </button>
