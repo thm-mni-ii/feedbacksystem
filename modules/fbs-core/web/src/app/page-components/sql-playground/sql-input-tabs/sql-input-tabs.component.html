@@ -137,6 +137,23 @@
         "sql-playground.input.label.execute" | i18nextEager
       }}</span>
     </button>
+
+    <button
+      mat-flat-button
+      color="grey"
+      class="submitBtn"
+      matTooltip="{{
+        'sql-playground.input.tooltip.selectTask' | i18nextEager
+      }}"
+      [matTooltipPosition]="'above'"
+      (click)="updateMode(activeTabIndex, true)"
+      aria-label="Abgabemodus aktivieren"
+      *ngIf="!activeTab?.isSubmitMode"
+    >
+      {{ "sql-playground.input.label.submit" | i18nextEager }}
+      <mat-icon aria-hidden="true">insert_drive_file</mat-icon>
+    </button>
+
     <mat-icon
       class="state submit-item"
       *ngIf="isPending"
@@ -159,23 +176,6 @@
     <div class="error-list">
       <pre *ngFor="let msg of errorMessages">{{ msg }}</pre>
     </div>
-  </div>
-
-  <div class="row submit-container" *ngIf="!activeTab?.isSubmitMode">
-    <button
-      mat-flat-button
-      color="grey"
-      class="submitBtn"
-      matTooltip="{{
-        'sql-playground.input.tooltip.selectTask' | i18nextEager
-      }}"
-      [matTooltipPosition]="'above'"
-      (click)="updateMode(activeTabIndex, true)"
-      aria-label="Abgabemodus aktivieren"
-    >
-      {{ "sql-playground.input.label.submit" | i18nextEager }}
-      <mat-icon aria-hidden="true">insert_drive_file</mat-icon>
-    </button>
   </div>
 
   <div
