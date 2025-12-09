@@ -13,7 +13,7 @@ import {
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Store } from "@ngrx/store";
-import { Observable, of, Subject, Subscription } from "rxjs";
+import { Observable, of, Subject, Subscription, combineLatest } from "rxjs";
 import { map, take } from "rxjs/operators";
 import { AuthService } from "src/app/service/auth.service";
 import { CourseRegistrationService } from "src/app/service/course-registration.service";
@@ -26,6 +26,7 @@ import { CheckerConfig } from "src/app/model/CheckerConfig";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import * as SqlInputTabsActions from "./state/sql-input-tabs.actions";
 import * as fromSqlInputTabs from "./state/sql-input-tabs.selectors";
+import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { FormControl, FormGroup } from "@angular/forms";
 import { SubmissionService } from "../../../service/submission.service";
 import { Input } from "@angular/core";
@@ -113,7 +114,19 @@ export class SqlInputTabsComponent
     const userID = this.authService.getToken().id;
     this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
 
-    this.isPending$ = this.store.select(fromSqlInputTabs.selectPending);
+    const queryPending$ = this.store.select(
+      fromSqlPlayground.selectIsQueryPending
+    );
+    const submissionPending$ = this.store.select(
+      fromSqlInputTabs.selectPending
+    );
+
+    this.isPending$ = combineLatest([queryPending$, submissionPending$]).pipe(
+      map(
+        ([queryPending, submissionPending]) => queryPending || submissionPending
+      )
+    );
+
     this.tabs$ = this.store.select(fromSqlInputTabs.selectTabs);
     this.activeTab$ = this.store.select(fromSqlInputTabs.selectActiveTab);
     this.activeTabIndex$ = this.store.select(
@@ -203,9 +216,7 @@ export class SqlInputTabsComponent
 
   isSubmissionEmpty(): Observable<boolean> {
     return this.activeTab$.pipe(
-      map(
-        (activeTab) => !activeTab || activeTab.content === "" || this.isPending
-      )
+      map((activeTab) => !activeTab || activeTab.content === "")
     );
   }
 
