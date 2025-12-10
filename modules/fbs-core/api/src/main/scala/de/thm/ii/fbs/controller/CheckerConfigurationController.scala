@@ -56,7 +56,7 @@ class CheckerConfigurationController {
   def getAll(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CheckrunnerConfiguration] = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR || p.role == CourseRole.STUDENT)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.getAll(cid, tid)
