@@ -373,6 +373,8 @@ export const englishTranslation = {
   "sql-playground.db-control-panel.co-working.delete": "End",
   "sql-playground.db-control-panel.co-working.co": "Connect",
   "sql-playground.db-control-panel.co-working.new": "Start",
+  "sql-playground.db-control-panel.co-working.mongo-warning":
+    "Playground sharing currently only works with PostgreSQL databases. Please switch to PostgreSQL to use this feature.",
   "sql-playground.input.highlighted.placeholder":
     "Insert code here (PostgreSQL)",
   "sql-playground.input.tooltip.closeAllTabs": "Close all tabs",

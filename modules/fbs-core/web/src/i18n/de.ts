@@ -379,6 +379,8 @@ export const germanTranslation = {
   "sql-playground.db-control-panel.co-working.delete": "Beenden",
   "sql-playground.db-control-panel.co-working.co": "Beitreten",
   "sql-playground.db-control-panel.co-working.new": "Teilen",
+  "sql-playground.db-control-panel.co-working.mongo-warning":
+    "Playground-Freigabe funktioniert derzeit nur mit PostgreSQL-Datenbanken. Bitte wechseln Sie zu PostgreSQL, um diese Funktion zu nutzen.",
   "sql-playground.input.highlighted.placeholder":
     "Hier Code einfügen (PostgreSQL)",
   "sql-playground.input.tooltip.closeAllTabs": "Schließe alle Tabs",

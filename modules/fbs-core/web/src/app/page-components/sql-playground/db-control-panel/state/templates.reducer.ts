@@ -1,17 +1,26 @@
 import { createReducer, on } from "@ngrx/store";
-import { SqlTemplates } from "../../../../model/sql_playground/SqlTemplates";
+import {
+  Template,
+  TemplateLanguage,
+} from "../../../../model/sql_playground/Template";
 import { TemplateCategory } from "../../../../model/sql_playground/TemplateCategory";
-import { addCategories, addTemplates } from "./templates.actions";
+import {
+  addCategories,
+  addTemplates,
+  setFilterLanguage,
+} from "./templates.actions";
 
 export interface TemplatesState {
-  templates: SqlTemplates[];
+  templates: Template[];
   categories: TemplateCategory[];
+  filterLanguage: TemplateLanguage;
   error: any;
 }
 
 export const initialState: TemplatesState = {
   templates: [],
   categories: [],
+  filterLanguage: "postgres",
   error: null,
 };
 
@@ -24,5 +33,9 @@ export const templatesReducer = createReducer(
   on(addCategories, (state, { categories }) => ({
     ...state,
     categories: [...state.categories, ...categories],
+  })),
+  on(setFilterLanguage, (state, { filterLanguage }) => ({
+    ...state,
+    filterLanguage,
   }))
 );
