@@ -14,7 +14,6 @@ import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
 import de.thm.ii.fbs.services.v2.mongo.MongoPlaygroundService
 import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
-import de.thm.ii.fbs.utils.v2.exceptions.BadRequestException
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import de.thm.ii.fbs.utils.v2.mongo.MongoSecurityValidator
