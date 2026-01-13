@@ -125,3 +125,34 @@ mat-radio-button {
   display: flex;
   justify-content: center;
 }
+
+.detailed-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 12px 16px;
+  border: 1px solid #a8c9f5;
+  border-radius: 8px;
+  background: #e7f0fb;
+
+  .detailed-feedback-text {
+    color: #0f3f80;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .detailed-feedback-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0f3f80;
+    font-weight: 500;
+  }
+
+  &.pending {
+    justify-content: flex-start;
+  }
+}
