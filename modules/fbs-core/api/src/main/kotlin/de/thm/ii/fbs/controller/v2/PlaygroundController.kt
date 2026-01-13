@@ -5,6 +5,7 @@ package de.thm.ii.fbs.controller.v2
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.mongodb.MongoCommandException
+import com.mongodb.MongoException
 import de.thm.ii.fbs.model.v2.group.Group
 import de.thm.ii.fbs.model.v2.playground.*
 import de.thm.ii.fbs.model.v2.playground.api.*
@@ -13,15 +14,19 @@ import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
 import de.thm.ii.fbs.services.v2.mongo.MongoPlaygroundService
 import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
+import de.thm.ii.fbs.utils.v2.exceptions.BadRequestException
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import de.thm.ii.fbs.utils.v2.mongo.MongoSecurityValidator
 import de.thm.ii.fbs.utils.v2.mongo.MongoShellParser
 import org.bson.Document
+import org.json.JSONObject
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import kotlin.jvm.optionals.getOrNull
 
@@ -114,81 +119,81 @@ class PlaygroundController(
                 val collectionName = parsed.collection
                 val collection = collectionName?.let { db.getCollection(it) }
 
-                println("parsed = $parsed")
-                println("document = ${parsed.document}")
-                println("database: $databaseName")
+                try {
+                    return@map when (parsed.operation) {
+                        "find" -> collection!!.find(parsed.filter ?: Document()).toList()
 
-                return@map when (parsed.operation) {
-                    "find" -> collection!!.find(parsed.filter ?: Document()).toList()
+                        "insert" -> {
+                            if (parsed.document == null || parsed.collection == null) {
+                                throw IllegalArgumentException("Insert requires document and collection")
+                            }
 
-                    "insert" -> {
-                        if (parsed.document == null || parsed.collection == null) {
-                            throw IllegalArgumentException("Insert requires document and collection")
+                            db.getCollection(parsed.collection).insertOne(parsed.document)
+                            mapOf("status" to "success")
                         }
 
-                        db.getCollection(parsed.collection).insertOne(parsed.document)
-                        mapOf("status" to "success")
-                    }
+                        "insertMany" -> {
+                            if (parsed.pipeline == null || parsed.collection == null) {
+                                throw IllegalArgumentException("insertMany requires array of documents and collection")
+                            }
 
-                    "insertMany" -> {
-                        if (parsed.pipeline == null || parsed.collection == null) {
-                            throw IllegalArgumentException("insertMany requires array of documents and collection")
+                            db.getCollection(parsed.collection).insertMany(parsed.pipeline)
+                            mapOf("status" to "success")
                         }
 
-                        db.getCollection(parsed.collection).insertMany(parsed.pipeline)
-                        mapOf("status" to "success")
+                        "update" -> {
+                            val result = collection!!.updateOne(parsed.filter!!, parsed.update!!)
+                            mapOf("matched" to result.matchedCount, "modified" to result.modifiedCount)
+                        }
+
+                        "deleteMany" -> {
+                            val result = collection!!.deleteMany(parsed.filter!!)
+                            mapOf("deletedCount" to result.deletedCount)
+                        }
+
+                        "delete" -> {
+                            val result = collection!!.deleteMany(parsed.filter!!)
+                            mapOf("deletedCount" to result.deletedCount)
+                        }
+
+                        "deleteOne" -> {
+                            val result = collection!!.deleteOne(parsed.filter!!)
+                            mapOf("deletedCount" to result.deletedCount)
+                        }
+
+                        "aggregate" -> collection!!.aggregate(parsed.pipeline!!).toList()
+
+                        "getIndexes" -> collection!!.listIndexes().map { it }.toList()
+
+                        "createIndex" -> {
+                            val name = collection!!.createIndex(parsed.document!!)
+                            mapOf("createdIndex" to name)
+                        }
+
+                        "dropIndex" -> {
+                            collection!!.dropIndex(parsed.document!!["indexName"].toString())
+                            mapOf("status" to "success")
+                        }
+
+                        "countDocuments" -> collection!!.countDocuments(parsed.filter ?: Document())
+
+                        "dropCollection" -> {
+                            collection!!.drop()
+                            mapOf("status" to "collection dropped")
+                        }
+
+                        "createView" -> {
+                            val source = parsed.document!!["source"] as String
+                            db.createView(parsed.collection!!, source, parsed.pipeline!!)
+                            mapOf("status" to "view created")
+                        }
+
+                        "showCollections" -> db.listCollectionNames().toList()
+
+                        else -> throw UnsupportedOperationException("Unsupported operation: ${parsed.operation}")
                     }
-
-                    "update" -> {
-                        val result = collection!!.updateOne(parsed.filter!!, parsed.update!!)
-                        mapOf("matched" to result.matchedCount, "modified" to result.modifiedCount)
-                    }
-
-                    "deleteMany" -> {
-                        val result = collection!!.deleteMany(parsed.filter!!)
-                        mapOf("deletedCount" to result.deletedCount)
-                    }
-
-                    "delete" -> {
-                        val result = collection!!.deleteMany(parsed.filter!!)
-                        mapOf("deletedCount" to result.deletedCount)
-                    }
-
-                    "deleteOne" -> {
-                        val result = collection!!.deleteOne(parsed.filter!!)
-                        mapOf("deletedCount" to result.deletedCount)
-                    }
-
-                    "aggregate" -> collection!!.aggregate(parsed.pipeline!!).toList()
-
-                    "getIndexes" -> collection!!.listIndexes().map { it }.toList()
-
-                    "createIndex" -> {
-                        val name = collection!!.createIndex(parsed.document!!)
-                        mapOf("createdIndex" to name)
-                    }
-
-                    "dropIndex" -> {
-                        collection!!.dropIndex(parsed.document!!["indexName"].toString())
-                        mapOf("status" to "success")
-                    }
-
-                    "countDocuments" -> collection!!.countDocuments(parsed.filter ?: Document())
-
-                    "dropCollection" -> {
-                        collection!!.drop()
-                        mapOf("status" to "collection dropped")
-                    }
-
-                    "createView" -> {
-                        val source = parsed.document!!["source"] as String
-                        db.createView(parsed.collection!!, source, parsed.pipeline!!)
-                        mapOf("status" to "view created")
-                    }
-
-                    "showCollections" -> db.listCollectionNames().toList()
-
-                    else -> throw UnsupportedOperationException("Unsupported operation: ${parsed.operation}")
+                } catch (e: MongoException) {
+                    return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(JSONObject().put("message", e.message).toString())
                 }
             }
         }
