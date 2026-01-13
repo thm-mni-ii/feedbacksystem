@@ -1,50 +1,74 @@
 <div class="container">
-  <mat-form-field class="select" appearance="fill">
-    <mat-label>{{
-      "sql-playground.db-control-panel.co-working.select-group" | i18nextEager
-    }}</mat-label>
-    <mat-select [(ngModel)]="selectedGroup">
-      <mat-option *ngFor="let db of groups$ | async" [value]="db.id">
-        {{ db.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field class="select" appearance="fill">
-    <mat-label>{{
-      "sql-playground.db-control-panel.co-working.select-database"
-        | i18nextEager
-    }}</mat-label>
-    <mat-select [(ngModel)]="selectedDatabase">
-      <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
-        {{ db.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <div class="btn-container">
-    <button
-      mat-raised-button
-      color="accent"
-      class="co-working-btn"
-      [disabled]="(backend$ | async).type === 'collaborative'"
-      (click)="join()"
-    >
-      {{ "sql-playground.db-control-panel.co-working.co" | i18nextEager }}
-    </button>
-    <button
-      mat-raised-button
-      class="new-btn"
-      [disabled]="(backend$ | async).type === 'collaborative'"
-      (click)="create()"
-    >
-      {{ "sql-playground.db-control-panel.co-working.new" | i18nextEager }}
-    </button>
-    <button
-      mat-raised-button
-      color="warn"
-      [disabled]="(backend$ | async).type !== 'collaborative'"
-      (click)="disconect()"
-    >
-      {{ "sql-playground.db-control-panel.co-working.delete" | i18nextEager }}
-    </button>
-  </div>
+  <mat-card
+    *ngIf="(currentDbType$ | async) === 'mongo'"
+    class="mongo-warning"
+    style="
+      margin-bottom: 16px;
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+    "
+  >
+    <mat-card-content>
+      <div style="display: flex; align-items: center; gap: 8px">
+        <mat-icon style="color: #ff9800; width: 70px">warning</mat-icon>
+        <span>
+          {{
+            "sql-playground.db-control-panel.co-working.mongo-warning"
+              | i18nextEager
+          }}
+        </span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <ng-container *ngIf="(currentDbType$ | async) === 'postgres'">
+    <mat-form-field class="select" appearance="fill">
+      <mat-label>{{
+        "sql-playground.db-control-panel.co-working.select-group" | i18nextEager
+      }}</mat-label>
+      <mat-select [(ngModel)]="selectedGroup">
+        <mat-option *ngFor="let db of groups$ | async" [value]="db.id">
+          {{ db.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="select" appearance="fill">
+      <mat-label>{{
+        "sql-playground.db-control-panel.co-working.select-database"
+          | i18nextEager
+      }}</mat-label>
+      <mat-select [(ngModel)]="selectedDatabase">
+        <mat-option *ngFor="let db of databases$ | async" [value]="db.id">
+          {{ db.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="btn-container">
+      <button
+        mat-raised-button
+        color="accent"
+        class="co-working-btn"
+        [disabled]="(backend$ | async).type === 'collaborative'"
+        (click)="join()"
+      >
+        {{ "sql-playground.db-control-panel.co-working.co" | i18nextEager }}
+      </button>
+      <button
+        mat-raised-button
+        class="new-btn"
+        [disabled]="(backend$ | async).type === 'collaborative'"
+        (click)="create()"
+      >
+        {{ "sql-playground.db-control-panel.co-working.new" | i18nextEager }}
+      </button>
+      <button
+        mat-raised-button
+        color="warn"
+        [disabled]="(backend$ | async).type !== 'collaborative'"
+        (click)="disconect()"
+      >
+        {{ "sql-playground.db-control-panel.co-working.delete" | i18nextEager }}
+      </button>
+    </div>
+  </ng-container>
 </div>
