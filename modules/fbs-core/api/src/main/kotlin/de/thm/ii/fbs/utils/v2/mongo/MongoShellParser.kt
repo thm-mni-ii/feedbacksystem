@@ -14,7 +14,7 @@ data class ParsedMongoShellCommand(
 object MongoShellParser {
     private val shellRegex = Regex("""db\.(\w+)\.(\w+)\(([\s\S]*)\)""", RegexOption.IGNORE_CASE)
     private val createViewRegex = Regex("""db\.createView\(([\s\S]+)\)""", RegexOption.IGNORE_CASE)
-    private val splitRegex = Regex("""[\n;]""")
+    private val splitRegex = Regex(""";""")
 
     fun batchParse(commands: String): List<ParsedMongoShellCommand> =
         commands.split(splitRegex).filter { cmd -> cmd.trim() != "" }.map { cmd -> parse(cmd) }
