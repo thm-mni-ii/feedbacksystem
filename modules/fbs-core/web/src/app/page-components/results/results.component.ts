@@ -49,7 +49,9 @@ export class ResultsComponent implements OnInit {
     this.allSubmissions = submissions;
     if (lengthHasChanged) {
       this.selectLast();
-      this.display(submissions[submissions.length - 1]);
+      const last = submissions[submissions.length - 1];
+      this.display(last);
+      this.getSubmissionContent(last);
     }
   }
 
@@ -66,6 +68,20 @@ export class ResultsComponent implements OnInit {
   submission: Submission;
 
   mathResult: Array<[string, string]> | null;
+
+  private readonly FEEDBACK_HEADER = /^\uFEFF?\s*#\s*Feedback\b/i;
+
+  get renderAsMarkdown(): boolean {
+    return !!(
+      this.isText &&
+      typeof this.submissionContent === "string" &&
+      this.FEEDBACK_HEADER.test(this.submissionContent)
+    );
+  }
+
+  isFeedbackMarkdown(t: unknown): boolean {
+    return typeof t === "string" && this.FEEDBACK_HEADER.test(t);
+  }
 
   handleSubmission(event): void {
     this.submission = this.allSubmissions.find(

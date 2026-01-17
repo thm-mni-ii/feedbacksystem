@@ -38,7 +38,7 @@ class PdfCheckerService extends CheckerService with CheckerServiceOnMainFileUplo
       .put("task_id", task.id.toString)
       .put("abgabe", encoder.encodeToString(storageService.getSolutionFileFromBucketAsBytes(submissionID))))
 
-    submissionService.storeResult(submissionID, cc.id, 0, response.getString("abgabe"), "")
+    submissionService.storeResult(submissionID, cc.id, 0, response.getString("abgabe"), "{}")
   }
 
   override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {

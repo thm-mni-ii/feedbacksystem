@@ -4,4 +4,5 @@ from settings import Settings
 settings = Settings()
 client = AsyncIOMotorClient(settings.mongo_url)
 db = client[settings.mongo_db]
-collection = db[settings.mongo_collection]
+collection_solutions = db[settings.mongo_collection_solutions]
+collection_submissions = db[settings.mongo_collection_submissions]
