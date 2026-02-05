@@ -15,7 +15,7 @@ import { setBackend } from "../../state/sql-playground.actions";
 import { loadGroups } from "../state/groups.actions";
 import { selectAllGroups } from "../state/groups.selector";
 import { Group } from "../../../../model/Group";
-import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
+import { SqlPlaygroundService } from "src/app/features/sql-playground/services/sql-playground.service";
 import { selectBackend } from "../../state/sql-playground.selectors";
 import { BackendDefintion } from "../../collab/backend.service";
 import { closeAllTabs } from "../../sql-input-tabs/state/sql-input-tabs.actions";

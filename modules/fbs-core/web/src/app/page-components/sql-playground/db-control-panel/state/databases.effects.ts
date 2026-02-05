@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { of } from "rxjs";
 import { catchError, map, mergeMap, switchMap } from "rxjs/operators";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
+import { SqlPlaygroundService } from "src/app/features/sql-playground/services/sql-playground.service";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import {

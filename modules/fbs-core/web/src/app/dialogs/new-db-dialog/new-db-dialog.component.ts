@@ -2,7 +2,7 @@ import { Component, Inject } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { SqlPlaygroundService } from "../../service/sql-playground.service";
+import { SqlPlaygroundService } from "src/app/features/sql-playground/services/sql-playground.service";
 import { Store } from "@ngrx/store";
 
 /**

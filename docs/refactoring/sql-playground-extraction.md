@@ -122,7 +122,39 @@ npm run build
 
 ---
 
-### ⏳ Step 4: Move Service
+### ✅ Step 4: Move Service (DONE)
+**Date**: 2026-02-05  
+**Actions**:
+- Created `features/sql-playground/services/` directory
+- Moved `sql-playground.service.ts` from `service/` to `features/sql-playground/services/`
+- Updated model imports within service (relative paths to `../models/`)
+- Updated 5 import statements across components/effects/dialogs
+- Deleted old `service/sql-playground.service.ts`
+
+**Files Modified**:
+- `page-components/sql-playground/db-control-panel/db-control-db-overview/` (1 import)
+- `page-components/sql-playground/db-control-panel/db-control-co-working/` (1 import)
+- `page-components/sql-playground/db-control-panel/state/databases.effects.ts` (1 import)
+- `page-components/sql-playground/state/sql-playground.effects.ts` (1 import)
+- `dialogs/new-db-dialog/new-db-dialog.component.ts` (1 import)
+
+**Service Strategy**:
+- Kept `providedIn: 'root'` - service remains globally available
+- No need to add to feature module providers
+
+**Validation**:
+```bash
+npm run build
+# Expected: Build succeeds
+grep -r "service/sql-playground" src/app
+# Expected: no results
+```
+
+**Commit**: `refactor(sql-playground): move service to feature folder`
+
+---
+
+### ⏳ Step 5: Move Components & State
 **Goal**: Relocate API service to feature directory
 
 **Move Operations**:

@@ -9,7 +9,7 @@ import {
   withLatestFrom,
   retry,
 } from "rxjs/operators";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
+import { SqlPlaygroundService } from "src/app/features/sql-playground/services/sql-playground.service";
 import { AuthService } from "src/app/service/auth.service";
 import * as SqlPlaygroundActions from "./sql-playground.actions";
 import { selectActiveDb } from "./sql-playground.selectors";

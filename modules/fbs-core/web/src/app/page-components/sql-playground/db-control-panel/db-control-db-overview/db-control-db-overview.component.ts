@@ -19,7 +19,7 @@ import {
   selectDatabasesForCurrentType,
   selectDatabasesError,
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
-import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
+import { SqlPlaygroundService } from "src/app/features/sql-playground/services/sql-playground.service";
 import { map, take } from "rxjs/operators";
 import {
   BackendDefintion,
