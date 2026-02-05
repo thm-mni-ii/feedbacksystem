@@ -11,7 +11,7 @@ import {
   selectAllCategories,
   selectTemplatesError,
 } from "../state/templates.selectors";
-import { NewSqlTemplateComponent } from "../../../../../dialogs/new-sql-template/new-sql-template.component";
+import { NewSqlTemplateComponent } from "../../../dialogs/new-sql-template/new-sql-template.component";
 import { AuthService } from "../../../../../service/auth.service";
 import { JWTToken } from "../../../../../model/JWTToken";
 import { Database } from "../../../models/Database";

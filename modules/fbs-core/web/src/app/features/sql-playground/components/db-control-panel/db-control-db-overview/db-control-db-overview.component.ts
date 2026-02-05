@@ -6,8 +6,8 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../../../../service/auth.service";
 import { MatDialog } from "@angular/material/dialog";
 import { TextConfirmDialogComponent } from "../../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
-import { NewDbDialogComponent } from "../../../../../dialogs/new-db-dialog/new-db-dialog.component";
-import { SharePlaygroundLinkDialogComponent } from "../../../../../dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
+import { NewDbDialogComponent } from "../../../dialogs/new-db-dialog/new-db-dialog.component";
+import { SharePlaygroundLinkDialogComponent } from "../../../dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 import {
   loadDatabases,
   createDatabase,

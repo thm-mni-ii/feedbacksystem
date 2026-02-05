@@ -1,13 +1,11 @@
-import { isDevMode, NgModule } from "@angular/core";
+import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { SqlPlaygroundRoutingModule } from "./sql-playground-routing.module";
 import { StoreModule } from "@ngrx/store";
 import { EffectsModule } from "@ngrx/effects";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { I18NextModule } from "angular-i18next";
-import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { MaterialComponentsModule } from "../../modules/material-components/material-components.module";
-import { I18N_PROVIDERS } from "../../util/i18n";
 
 // Components
 import { SqlPlaygroundComponent } from "./components/sql-playground.component";
@@ -28,6 +26,11 @@ import { DbSchemeCollectionsComponent } from "./components/db-scheme/db-scheme-m
 import { DbSchemeMongoViewsComponent } from "./components/db-scheme/db-scheme-mongo/db-scheme-views/db-scheme-mongo-views.component";
 import { DbSchemeMongoIndexesComponent } from "./components/db-scheme/db-scheme-mongo/db-scheme-indexes/db-scheme-indexes.component";
 import { BorderedContainerComponent } from "./components/bordered-container/bordered-container.component";
+
+// Dialogs
+import { NewDbDialogComponent } from "./dialogs/new-db-dialog/new-db-dialog.component";
+import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
+import { SharePlaygroundLinkDialogComponent } from "./dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 
 // State
 import { sqlPlaygroundReducer } from "./components/state/sql-playground.reducer";
@@ -62,6 +65,9 @@ import { GroupsEffects } from "./components/db-control-panel/state/groups.effect
     DbSchemeMongoViewsComponent,
     DbSchemeMongoIndexesComponent,
     BorderedContainerComponent,
+    NewDbDialogComponent,
+    NewSqlTemplateComponent,
+    SharePlaygroundLinkDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -69,19 +75,13 @@ import { GroupsEffects } from "./components/db-control-panel/state/groups.effect
     MaterialComponentsModule,
     ReactiveFormsModule,
     FormsModule,
-    StoreModule.forRoot({}),
-    StoreDevtoolsModule.instrument({
-      maxAge: 25,
-      logOnly: !isDevMode(),
-      autoPause: true,
-    }),
+    I18NextModule,
     StoreModule.forFeature("sqlPlayground", sqlPlaygroundReducer),
     StoreModule.forFeature("sqlInputTabs", sqlInputTabsReducer),
     StoreModule.forFeature("dynamicResultTable", dynamicResultTableReducer),
     StoreModule.forFeature("databases", databasesReducer),
     StoreModule.forFeature("templates", templatesReducer),
     StoreModule.forFeature("groups", groupsReducer),
-    EffectsModule.forRoot(),
     EffectsModule.forFeature([
       SqlPlaygroundEffects,
       SqlInputTabsEffects,
@@ -89,7 +89,6 @@ import { GroupsEffects } from "./components/db-control-panel/state/groups.effect
       DatabasesEffects,
       GroupsEffects,
     ]),
-    I18NextModule.forRoot(),
   ],
   exports: [
     SqlPlaygroundComponent,
@@ -107,6 +106,5 @@ import { GroupsEffects } from "./components/db-control-panel/state/groups.effect
     HighlightedInputComponent,
     BorderedContainerComponent,
   ],
-  providers: [I18N_PROVIDERS],
 })
 export class SqlPlaygroundFeatureModule {}
