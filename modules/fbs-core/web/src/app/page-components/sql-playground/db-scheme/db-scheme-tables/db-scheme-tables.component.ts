@@ -2,8 +2,8 @@ import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable, combineLatest } from "rxjs";
 import { map } from "rxjs/operators";
-import { Constraint } from "src/app/model/sql_playground/Constraint";
-import { Table } from "src/app/model/sql_playground/Table";
+import { Constraint } from "src/app/features/sql-playground/models/Constraint";
+import { Table } from "src/app/features/sql-playground/models/Table";
 import * as fromSqlPlayground from "../../state/sql-playground.selectors";
 
 @Component({

@@ -14,10 +14,10 @@ import {
 import { NewSqlTemplateComponent } from "src/app/dialogs/new-sql-template/new-sql-template.component";
 import { AuthService } from "src/app/service/auth.service";
 import { JWTToken } from "src/app/model/JWTToken";
-import { Database } from "src/app/model/sql_playground/Database";
+import { Database } from "src/app/features/sql-playground/models/Database";
 import { selectAllDatabases } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
-import { Template } from "../../../../model/sql_playground/Template";
-import { TemplateCategory } from "../../../../model/sql_playground/TemplateCategory";
+import { Template } from "src/app/features/sql-playground/models/Template";
+import { TemplateCategory } from "src/app/features/sql-playground/models/TemplateCategory";
 import { Roles } from "../../../../model/Roles";
 
 @Component({

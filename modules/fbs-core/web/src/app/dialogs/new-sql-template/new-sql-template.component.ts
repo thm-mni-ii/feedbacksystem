@@ -2,8 +2,8 @@ import { Component, Inject } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { NewDbDialogComponent } from "../new-db-dialog/new-db-dialog.component";
-import { Template } from "src/app/model/sql_playground/Template";
-import { TemplateCategory } from "src/app/model/sql_playground/TemplateCategory";
+import { Template } from "src/app/features/sql-playground/models/Template";
+import { TemplateCategory } from "src/app/features/sql-playground/models/TemplateCategory";
 
 @Component({
   selector: "app-new-sql-template",

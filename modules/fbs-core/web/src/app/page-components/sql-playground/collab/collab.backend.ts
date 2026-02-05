@@ -12,7 +12,7 @@ import { Observable, of } from "rxjs";
 import {
   QueryTab,
   queryTabEquals,
-} from "src/app/model/sql_playground/QueryTab";
+} from "src/app/features/sql-playground/models/QueryTab";
 
 export class CollaborativeBackend implements Backend {
   private provider: HocuspocusProvider;

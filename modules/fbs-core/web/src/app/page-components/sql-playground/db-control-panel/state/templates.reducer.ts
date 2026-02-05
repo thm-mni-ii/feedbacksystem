@@ -2,8 +2,8 @@ import { createReducer, on } from "@ngrx/store";
 import {
   Template,
   TemplateLanguage,
-} from "../../../../model/sql_playground/Template";
-import { TemplateCategory } from "../../../../model/sql_playground/TemplateCategory";
+} from "src/app/features/sql-playground/models/Template";
+import { TemplateCategory } from "src/app/features/sql-playground/models/TemplateCategory";
 import {
   addCategories,
   addTemplates,

@@ -1,17 +1,17 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Constraint } from "../model/sql_playground/Constraint";
-import { Database } from "../model/sql_playground/Database";
-import { Routine } from "../model/sql_playground/Routine";
-import { SQLExecuteResponse } from "../model/sql_playground/SQLExecuteResponse";
+import { Constraint } from "../features/sql-playground/models/Constraint";
+import { Database } from "../features/sql-playground/models/Database";
+import { Routine } from "../features/sql-playground/models/Routine";
+import { SQLExecuteResponse } from "../features/sql-playground/models/SQLExecuteResponse";
 import {
   SQLPlaygroundShare,
   SQLResponse,
-} from "../model/sql_playground/SQLResponse";
-import { Table } from "../model/sql_playground/Table";
-import { Trigger } from "../model/sql_playground/Trigger";
-import { View } from "../model/sql_playground/View";
+} from "../features/sql-playground/models/SQLResponse";
+import { Table } from "../features/sql-playground/models/Table";
+import { Trigger } from "../features/sql-playground/models/Trigger";
+import { View } from "../features/sql-playground/models/View";
 
 @Injectable({
   providedIn: "root",

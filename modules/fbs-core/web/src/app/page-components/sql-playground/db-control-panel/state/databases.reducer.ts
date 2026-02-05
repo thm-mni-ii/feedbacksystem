@@ -1,5 +1,5 @@
 import { createReducer, on } from "@ngrx/store";
-import { Database } from "src/app/model/sql_playground/Database";
+import { Database } from "src/app/features/sql-playground/models/Database";
 import {
   loadDatabases,
   loadDatabasesSuccess,

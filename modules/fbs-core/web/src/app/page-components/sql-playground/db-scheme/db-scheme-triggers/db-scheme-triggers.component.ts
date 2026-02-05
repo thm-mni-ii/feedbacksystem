@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
-import { Trigger } from "src/app/model/sql_playground/Trigger";
+import { Trigger } from "src/app/features/sql-playground/models/Trigger";
 import * as fromSqlPlayground from "../../state/sql-playground.selectors";
 
 @Component({

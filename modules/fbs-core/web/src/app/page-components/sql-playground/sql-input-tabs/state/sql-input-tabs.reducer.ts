@@ -1,5 +1,5 @@
 import { createReducer, on } from "@ngrx/store";
-import { QueryTab } from "src/app/model/sql_playground/QueryTab";
+import { QueryTab } from "src/app/features/sql-playground/models/QueryTab";
 import * as SqlInputTabsActions from "./sql-input-tabs.actions";
 
 export interface SqlInputTabsState {

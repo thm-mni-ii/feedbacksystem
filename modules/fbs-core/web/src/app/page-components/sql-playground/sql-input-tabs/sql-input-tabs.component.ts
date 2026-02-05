@@ -21,7 +21,7 @@ import { PrismService } from "src/app/service/prism.service";
 import { TaskService } from "src/app/service/task.service";
 import { Course } from "src/app/model/Course";
 import { Task } from "src/app/model/Task";
-import { QueryTab } from "src/app/model/sql_playground/QueryTab";
+import { QueryTab } from "src/app/features/sql-playground/models/QueryTab";
 import { CheckerConfig } from "src/app/model/CheckerConfig";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import * as SqlInputTabsActions from "./state/sql-input-tabs.actions";

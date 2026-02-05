@@ -1,11 +1,11 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable, Subject } from "rxjs";
-import { Table } from "src/app/model/sql_playground/Table";
-import { View } from "src/app/model/sql_playground/View";
-import { Trigger } from "src/app/model/sql_playground/Trigger";
-import { Routine } from "src/app/model/sql_playground/Routine";
-import { Constraint } from "src/app/model/sql_playground/Constraint";
+import { Table } from "src/app/features/sql-playground/models/Table";
+import { View } from "src/app/features/sql-playground/models/View";
+import { Trigger } from "src/app/features/sql-playground/models/Trigger";
+import { Routine } from "src/app/features/sql-playground/models/Routine";
+import { Constraint } from "src/app/features/sql-playground/models/Constraint";
 import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { MongoPlaygroundService } from "../../../service/mongo-playground.service";
 import { AuthService } from "../../../service/auth.service";

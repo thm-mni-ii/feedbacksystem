@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { first } from "rxjs/operators";
-import { QueryTab } from "../../../model/sql_playground/QueryTab";
+import { QueryTab } from "src/app/features/sql-playground/models/QueryTab";
 import { Store } from "@ngrx/store";
 import { selectBackend } from "../state/sql-playground.selectors";
 import { LocalBackend } from "./local.backend";

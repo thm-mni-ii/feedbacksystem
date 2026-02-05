@@ -1,10 +1,10 @@
 import { createReducer, on } from "@ngrx/store";
 import * as SqlPlaygroundActions from "./sql-playground.actions";
-import { Routine } from "src/app/model/sql_playground/Routine";
-import { Trigger } from "src/app/model/sql_playground/Trigger";
-import { View } from "src/app/model/sql_playground/View";
-import { Table } from "src/app/model/sql_playground/Table";
-import { Constraint } from "src/app/model/sql_playground/Constraint";
+import { Routine } from "src/app/features/sql-playground/models/Routine";
+import { Trigger } from "src/app/features/sql-playground/models/Trigger";
+import { View } from "src/app/features/sql-playground/models/View";
+import { Table } from "src/app/features/sql-playground/models/Table";
+import { Constraint } from "src/app/features/sql-playground/models/Constraint";
 import { BackendDefintion } from "../collab/backend.service";
 
 export interface SqlPlaygroundState {

@@ -1,5 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import { Database } from "src/app/model/sql_playground/Database";
+import { Database } from "src/app/features/sql-playground/models/Database";
 
 export const loadDatabases = createAction(
   "[Databases] Load Databases",

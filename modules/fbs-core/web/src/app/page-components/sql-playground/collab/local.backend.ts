@@ -6,7 +6,7 @@ import {
   AwarenessState,
   DatabaseInformation,
 } from "./backend.service";
-import { QueryTab } from "../../../model/sql_playground/QueryTab";
+import { QueryTab } from "src/app/features/sql-playground/models/QueryTab";
 
 export class LocalBackend implements Backend {
   setMeta(_databaseInformation: DatabaseInformation): Observable<void> {

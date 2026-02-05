@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Roles } from "src/app/model/Roles";
-import { Database } from "src/app/model/sql_playground/Database";
+import { Database } from "src/app/features/sql-playground/models/Database";
 import { AuthService } from "src/app/service/auth.service";
 import {
   loadDatabases,
