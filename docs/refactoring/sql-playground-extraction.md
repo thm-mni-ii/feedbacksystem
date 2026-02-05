@@ -311,8 +311,8 @@ Navigate to: `http://localhost:4200/sqlplayground`
 - [x] Step 1: Structure + Documentation ✅
 - [x] Step 2: Feature Module Shell ✅
 - [x] Step 3: Move Models ✅
-- [ ] Step 4: Move Service
-- [ ] Step 5: Move Components & State
+- [x] Step 4: Move Service ✅
+- [x] Step 5: Move Components & State ✅
 - [ ] Step 6: Move Dialogs & Finalize Routing
 
-**Next Action**: Execute Step 4
+**Next Action**: Execute Step 6
