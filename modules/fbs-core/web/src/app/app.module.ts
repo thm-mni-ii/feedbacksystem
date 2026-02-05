@@ -101,6 +101,7 @@ import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
 import { SqlPlaygroundModule } from "./page-components/sql-playground/sql-playground.module";
+import { SqlPlaygroundFeatureModule } from "./features/sql-playground/sql-playground.module"; // Step 2: New feature module shell
 import { MyGroupsComponent } from "./page-components/my-groups/my-groups.component";
 import { GroupSelectionComponent } from "./page-components/course-detail/group-selection/group-selection.component";
 import { NewGroupDialogComponent } from "./dialogs/new-group-dialog/new-group-dialog.component";
@@ -245,6 +246,7 @@ export const httpInterceptorProviders = [
     MatSortModule,
     I18NextModule.forRoot(),
     SqlPlaygroundModule,
+    SqlPlaygroundFeatureModule, // Step 2: Import new feature module shell (alongside old module temporarily)
     AngularEditorModule,
   ],
   entryComponents: [
