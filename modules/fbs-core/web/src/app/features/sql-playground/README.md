@@ -3,11 +3,11 @@
 ## Overview
 Isolated SQL Playground functionality extracted from core app structure into a dedicated feature module.
 
-**Status**: ✅ Step 1 - Structure Created
+**Status**:  Step 1 - Structure Created
 
 ---
 
-## 📍 Entry Points
+## Entry Points
 
 ### Routes
 - **Path**: `/sqlplayground`
@@ -22,7 +22,7 @@ Isolated SQL Playground functionality extracted from core app structure into a d
 
 ---
 
-## 🗂️ Components Inventory
+## Components Inventory
 
 ### Main Component
 - `sql-playground.component.ts` - Main playground container
@@ -59,7 +59,7 @@ Isolated SQL Playground functionality extracted from core app structure into a d
 
 ---
 
-## 🔌 Services
+## Services
 
 ### Dedicated Service
 - `service/sql-playground.service.ts` - API client (214 lines)
@@ -71,7 +71,7 @@ Isolated SQL Playground functionality extracted from core app structure into a d
 
 ---
 
-## 📦 Models (11 files)
+## Models (11 files)
 
 **Location**: `model/sql_playground/`
 
@@ -89,7 +89,7 @@ Isolated SQL Playground functionality extracted from core app structure into a d
 
 ---
 
-## 🗄️ State Management (NgRx)
+## State Management (NgRx)
 
 ### Feature Stores (5 slices)
 1. **`sqlPlayground`** - Main playground state
@@ -112,7 +112,7 @@ Isolated SQL Playground functionality extracted from core app structure into a d
 
 ---
 
-## 🪟 Dialogs (3 playground-specific)
+## Dialogs (3 playground-specific)
 
 **Location**: `dialogs/`
 
@@ -122,36 +122,36 @@ Isolated SQL Playground functionality extracted from core app structure into a d
 
 ---
 
-## 🔗 Core Dependencies (DO NOT MOVE)
+## Core Dependencies (DO NOT MOVE)
 
 ### Authentication & Authorization
-- ✅ `guards/auth.guard.ts` - Route protection
-- ✅ `service/auth.service.ts` - JWT handling/user context
-- ✅ HTTP interceptors (JWT attachment)
+-  `guards/auth.guard.ts` - Route protection
+-  `service/auth.service.ts` - JWT handling/user context
+-  HTTP interceptors (JWT attachment)
 
 ### State Management
-- ✅ Core `@ngrx/store` setup (app.module.ts)
-- ✅ User/role selectors from core state
-- ✅ `StoreDevtoolsModule` configuration
+-  Core `@ngrx/store` setup (app.module.ts)
+-  User/role selectors from core state
+-  `StoreDevtoolsModule` configuration
 
 ### Models
-- ✅ `model/User.ts` - User entity
-- ✅ `model/Group.ts` - Group entity (collaboration)
-- ✅ `model/JWTToken.ts` - Token structure
+-  `model/User.ts` - User entity
+-  `model/Group.ts` - Group entity (collaboration)
+-  `model/JWTToken.ts` - Token structure
 
 ### Shared Modules
-- ✅ `modules/material-components.module.ts` - Angular Material
-- ✅ `I18NextModule` - Internationalization
-- ✅ `util/i18n.ts` - I18N_PROVIDERS
+-  `modules/material-components.module.ts` - Angular Material
+-  `I18NextModule` - Internationalization
+-  `util/i18n.ts` - I18N_PROVIDERS
 
 ### HTTP Client
-- ✅ Angular `HttpClient` (configured in core)
+-  Angular `HttpClient` (configured in core)
 
 ---
 
-## 🎯 Migration Plan (6 Steps)
+##  Migration Plan (6 Steps)
 
-### ✅ Step 1: Create Feature Folder + Documentation
+###  Step 1: Create Feature Folder + Documentation
 **Status**: DONE
 - Created `features/sql-playground/` directory
 - Documented complete inventory and plan
@@ -185,7 +185,7 @@ Isolated SQL Playground functionality extracted from core app structure into a d
 
 ---
 
-## ✅ Validation Checklist
+## Validation Checklist
 
 After each step:
 - [ ] `npm run start` succeeds (no TypeScript errors)
@@ -200,28 +200,28 @@ After each step:
 
 ---
 
-## 🚫 Constraints
+## Constraints
 
 ### Must NOT Change
-- ❌ Route path (`/sqlplayground`)
-- ❌ AuthGuard behavior
-- ❌ API endpoint URLs
-- ❌ UI behavior or layout
-- ❌ Data flow or state management logic
-- ❌ Database schema (backend)
-- ❌ i18n keys
+-  Route path (`/sqlplayground`)
+-  AuthGuard behavior
+-  API endpoint URLs
+-  UI behavior or layout
+-  Data flow or state management logic
+-  Database schema (backend)
+-  i18n keys
 
 ### Must Preserve
-- ✅ All component functionality
-- ✅ NgRx store slices and selectors
-- ✅ Service API contracts
-- ✅ Dialog behaviors
-- ✅ Accessibility attributes
-- ✅ Styles and theming
+-  All component functionality
+-  NgRx store slices and selectors
+-  Service API contracts
+-  Dialog behaviors
+-  Accessibility attributes
+-  Styles and theming
 
 ---
 
-## 📂 Target Structure (After Migration)
+##  Target Structure (After Migration)
 
 ```
 features/sql-playground/
@@ -282,7 +282,7 @@ features/sql-playground/
 
 ---
 
-## 🔍 Related Backend Migrations
+##  Related Backend Migrations
 
 Database migrations that support this feature (API contract reference):
 - `08_sql_playground.sql` - Initial tables
@@ -293,7 +293,7 @@ Database migrations that support this feature (API contract reference):
 
 ---
 
-## 📝 Notes
+##  Notes
 
 - Module uses `StoreModule.forFeature()` for each NgRx slice (6 total)
 - Uses `EffectsModule.forFeature()` for async operations
