@@ -9,10 +9,7 @@ import {
   DatabaseInformation,
 } from "./backend.service";
 import { Observable, of } from "rxjs";
-import {
-  QueryTab,
-  queryTabEquals,
-} from "../../models/QueryTab";
+import { QueryTab, queryTabEquals } from "../../models/QueryTab";
 
 export class CollaborativeBackend implements Backend {
   private provider: HocuspocusProvider;

@@ -5,10 +5,7 @@ import { Constraint } from "../models/Constraint";
 import { Database } from "../models/Database";
 import { Routine } from "../models/Routine";
 import { SQLExecuteResponse } from "../models/SQLExecuteResponse";
-import {
-  SQLPlaygroundShare,
-  SQLResponse,
-} from "../models/SQLResponse";
+import { SQLPlaygroundShare, SQLResponse } from "../models/SQLResponse";
 import { Table } from "../models/Table";
 import { Trigger } from "../models/Trigger";
 import { View } from "../models/View";

@@ -1,8 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import {
-  Template,
-  TemplateLanguage,
-} from "../../../models/Template";
+import { Template, TemplateLanguage } from "../../../models/Template";
 import { TemplateCategory } from "../../../models/TemplateCategory";
 
 export const addTemplates = createAction(

@@ -2,10 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
-import {
-  addTemplates,
-  addCategories,
-} from "../state/templates.actions";
+import { addTemplates, addCategories } from "../state/templates.actions";
 import {
   selectTemplatesForCurrentFilterLanguage,
   selectAllCategories,

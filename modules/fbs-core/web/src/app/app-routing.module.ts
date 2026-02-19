@@ -95,7 +95,10 @@ const routes: Routes = [
       //sql playground
       {
         path: "sqlplayground",
-        loadChildren: () => import("./features/sql-playground/sql-playground.module").then(m => m.SqlPlaygroundFeatureModule),
+        loadChildren: () =>
+          import("./features/sql-playground/sql-playground.module").then(
+            (m) => m.SqlPlaygroundFeatureModule
+          ),
         canActivate: [AuthGuard],
       },
 
