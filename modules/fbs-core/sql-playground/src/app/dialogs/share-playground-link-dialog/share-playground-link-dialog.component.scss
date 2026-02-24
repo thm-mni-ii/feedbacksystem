@@ -1,0 +1,25 @@
+.container {
+  height: 100%;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  button {
+    margin-left: 16px;
+  }
+}
+
+.content {
+  display: block;
+  margin-top: 10px;
+}
+
+.uri{
+  margin-top: 30px;
+  button {
+    margin-left: 20px;
+  }
+}
+
+

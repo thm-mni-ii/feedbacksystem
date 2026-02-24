@@ -1,0 +1,45 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.highlight {
+  font-style: italic;
+  color: #405e9a;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.btn-container {
+  // align items vertically
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 10px;
+  margin: 15px 0;
+}
+
+.new-btn {
+  color: white;
+  background-color: rgb(72, 179, 51);
+}
+
+button {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-wrapper {
+  margin: 10px 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.select {
+  margin-top: 10px;
+}

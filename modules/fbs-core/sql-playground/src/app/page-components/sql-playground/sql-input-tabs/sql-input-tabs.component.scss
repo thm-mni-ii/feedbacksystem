@@ -1,0 +1,257 @@
+.inputField {
+  width: 97%;
+  margin-top: 15px;
+  margin-left: 1.5%;
+  margin-right: 1.5%;
+  margin-bottom: 10px;
+  //position: absolute;
+}
+
+.downloadBtn {
+  left: 1.5%;
+  color: rgba(0, 0, 0, 0.54);
+
+  &:hover {
+    color: black;
+  }
+}
+
+.submission-inactive-container button {
+  color: rgba(0, 0, 0, 0.54);
+
+  &:hover {
+    color: black;
+  }
+}
+
+.submitBtn {
+  color: rgba(0, 0, 0, 0.54);
+  background-color: rgba(219, 219, 219, 0.54);
+
+  &:hover {
+    color: black;
+  }
+}
+
+.closeBtn {
+  margin-left: 12px;
+  margin-right: 5px;
+  color: rgba(0, 0, 0, 0.54);
+
+  &:hover {
+    color: black;
+  }
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bottom-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  grid-gap: 20px;
+  margin-top: 5px;
+  margin-left: 10px;
+  margin-right: 55px;
+  margin-bottom: 10px;
+
+}
+
+.courseBtn {
+  background-color: rgba(219, 219, 219, 0.54);
+  font-weight: normal;
+  border-radius: 5px;
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.description {
+  margin: 0px 15px 15px;
+  font-size: smaller;
+}
+
+.error-message {
+  margin: 0px 15px 15px;
+  font-size: smaller;
+}
+
+.submit-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.action-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.submit-item {
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.material-icons.color_green {
+  color: #00db00;
+}
+
+.material-icons.color_red {
+  color: #e20000;
+}
+
+.title {
+  font-family: sans-serif;
+  font-size: medium;
+  font-style: oblique;
+}
+
+.actions-container {
+  //grid row
+  display: grid;
+  grid-template-rows: 1fr;
+  float: right;
+
+  button {
+    color: rgba(0, 0, 0, 0.54);
+
+    transition: 0.2s;
+
+    &:hover {
+      color: black;
+
+    }
+
+    margin: 6px 2px 2px 10px;
+    min-width: 0 !important;
+    padding: 0;
+
+    mat-icon {
+      //outline
+      border: rgba(0, 0, 0, 0.55) 2px solid;
+      border-radius: 10%;
+      padding: 1px 2px 2px 2px;
+
+      transition: 0.2s;
+
+      &:hover {
+        border: rgba(0, 0, 0, 0.56) 2px solid;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+      }
+    }
+  }
+
+  // margin-left: 10px;
+  // margin-right: 10px;
+  // cursor: pointer;
+}
+
+.circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  background-color: white;
+}
+
+.bottom-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+
+    &.submit-container {
+      .flex-grow {
+        flex: 1 1 160px;
+        justify-content: space-between;
+      }
+    }
+    
+    &.action-row {
+      justify-content: center;
+      gap: 20px;
+    }
+  }
+
+  .error-block {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    background: #fff6f6;
+    border: 1px solid #f5c2c2;
+    border-radius: 6px;
+    padding: 10px 12px;
+
+    .error-list {
+      width: 100%;
+      pre {
+        margin: 4px 0 0;
+        white-space: pre-wrap;
+      }
+    }
+  }
+}
+
+.staged-feedback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid #a8c9f5;
+  border-radius: 6px;
+  background: #e7f0fb;
+  color: #0f3f80;
+  font-weight: 500;
+
+  &.pending {
+    justify-content: flex-start;
+  }
+}
+
+.eye-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  .eye-label {
+    font-size: 13px;
+  }
+}
+
+.submit-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+
+  &.error {
+    color: #c62828;
+  }
+  &.success {
+    color: #2e7d32;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}

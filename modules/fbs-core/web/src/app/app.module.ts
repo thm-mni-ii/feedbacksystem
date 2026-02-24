@@ -100,7 +100,7 @@ import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/l
 import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
-import { SqlPlaygroundModule } from "./page-components/sql-playground/sql-playground.module";
+import { FbsSqlPlaygroundComponent } from "./page-components/fbs-sql-playground/fbs-sql-playground.component";
 import { MyGroupsComponent } from "./page-components/my-groups/my-groups.component";
 import { GroupSelectionComponent } from "./page-components/course-detail/group-selection/group-selection.component";
 import { NewGroupDialogComponent } from "./dialogs/new-group-dialog/new-group-dialog.component";
@@ -208,6 +208,7 @@ export const httpInterceptorProviders = [
     FbsKanbanComponent,
     FbsTimeTrackingComponent,
     FbsSciCheckComponent,
+    FbsSqlPlaygroundComponent,
     SkipLinkComponent,
     UnstyledLinkComponent,
     CodeEditorComponent,
@@ -244,7 +245,6 @@ export const httpInterceptorProviders = [
     MatTableModule,
     MatSortModule,
     I18NextModule.forRoot(),
-    SqlPlaygroundModule,
     AngularEditorModule,
   ],
   entryComponents: [

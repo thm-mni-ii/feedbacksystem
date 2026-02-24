@@ -18,7 +18,7 @@ import { ParticipantsComponent } from "./tool-components/participants/participan
 import { GoToComponent } from "./page-components/goto/goto.component";
 import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.component";
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
-import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
+import { FbsSqlPlaygroundComponent } from "./page-components/fbs-sql-playground/fbs-sql-playground.component";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
@@ -96,7 +96,7 @@ const routes: Routes = [
       //sql playground
       {
         path: "sqlplayground",
-        component: SqlPlaygroundComponent,
+        component: FbsSqlPlaygroundComponent,
         canActivate: [AuthGuard],
       },
 
