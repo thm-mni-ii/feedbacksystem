@@ -1,0 +1,93 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.page-header {
+  background: #181825;
+  border-bottom: 1px solid #313244;
+  padding: 1.5rem 2rem;
+
+  h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #cba6f7;
+    letter-spacing: 0.02em;
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6c7086;
+  }
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.placeholder-card {
+  background: #181825;
+  border: 1px solid #313244;
+  border-radius: 12px;
+  padding: 2.5rem 3rem;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+
+  .placeholder-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
+
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.4rem;
+    color: #cdd6f4;
+  }
+
+  p {
+    color: #a6adc8;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.info-item {
+  background: #1e1e2e;
+  border: 1px solid #313244;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6c7086;
+  }
+
+  .value {
+    font-size: 0.9rem;
+    color: #a6e3a1;
+    font-family: 'Courier New', monospace;
+  }
+}
