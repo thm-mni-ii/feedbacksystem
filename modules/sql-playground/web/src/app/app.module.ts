@@ -5,15 +5,20 @@ import { HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { I18NextModule } from 'angular-i18next';
+import { JwtModule } from '@auth0/angular-jwt';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { SqlPlaygroundPageComponent } from './sql-playground-page/sql-playground-page.component';
 import { MaterialComponentsModule } from './modules/material-components/material-components.module';
 import { I18N_PROVIDERS } from './util/i18n';
+import { SqlPlaygroundModule } from './features/sql-playground/sql-playground.module';
+
+export function tokenGetter(): string | null {
+  return localStorage.getItem('token');
+}
 
 @NgModule({
-  declarations: [AppComponent, SqlPlaygroundPageComponent],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -23,6 +28,8 @@ import { I18N_PROVIDERS } from './util/i18n';
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
     I18NextModule.forRoot(),
+    JwtModule.forRoot({ config: { tokenGetter } }),
+    SqlPlaygroundModule,
   ],
   providers: [...I18N_PROVIDERS],
   bootstrap: [AppComponent],
