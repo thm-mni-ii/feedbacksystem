@@ -1,0 +1,47 @@
+<div class="container">
+  <mat-form-field appearance="fill">
+    <mat-label
+      >{{
+        "sql-playground.db-control-panel.templates.templates" | i18nextEager
+      }}
+    </mat-label>
+    <mat-select [(value)]="selectedTemplateId">
+      <mat-option
+        >--
+        {{
+          "sql-playground.db-control-panel.templates.none-option" | i18nextEager
+        }}
+        --
+      </mat-option>
+      <mat-optgroup
+        *ngFor="let category of categories$ | async"
+        [label]="category.name"
+      >
+        <mat-option
+          *ngFor="let template of templates$ | async"
+          [value]="template.id"
+        >
+          {{ template.name }}
+        </mat-option>
+      </mat-optgroup>
+    </mat-select>
+  </mat-form-field>
+  <button
+    mat-raised-button
+    class="insert-btn"
+    [disabled]="selectedTemplateId === 0 || selectedTemplateId === undefined"
+    (click)="insertTemplate()"
+  >
+    {{
+      "sql-playground.db-control-panel.templates.insert-button" | i18nextEager
+    }}
+  </button>
+  <button
+    *ngIf="isAdmin"
+    mat-raised-button
+    class="orange-btn"
+    (click)="editTemplates()"
+  >
+    {{ "sql-playground.db-control-panel.templates.edit-button" | i18nextEager }}
+  </button>
+</div>
