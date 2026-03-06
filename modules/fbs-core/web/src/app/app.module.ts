@@ -94,6 +94,7 @@ import { MathInputComponent } from "./tool-components/math-input/math-input.comp
 import { SharePlaygroundLinkDialogComponent } from "./dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
+import { SqlPlaygroundIframeComponent } from "./page-components/sql-playground-iframe/sql-playground-iframe.component";
 import { I18NextModule } from "angular-i18next";
 import { I18N_PROVIDERS } from "./util/i18n";
 import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
@@ -208,6 +209,7 @@ export const httpInterceptorProviders = [
     FbsKanbanComponent,
     FbsTimeTrackingComponent,
     FbsSciCheckComponent,
+    SqlPlaygroundIframeComponent,
     SkipLinkComponent,
     UnstyledLinkComponent,
     CodeEditorComponent,
