@@ -67,10 +67,10 @@
           },
           "configurations": {
             "production": {
-              "browserTarget": "sql-playground:build:production"
+              "buildTarget": "sql-playground:build:production"
             },
             "development": {
-              "browserTarget": "sql-playground:build:development"
+              "buildTarget": "sql-playground:build:development"
             }
           },
           "defaultConfiguration": "development"
