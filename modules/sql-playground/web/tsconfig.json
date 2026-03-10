@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "src/app/page-components/sql-playground/*": ["src/app/features/sql-playground/*"]
+      "src/app/page-components/sql-playground/*": [
+        "src/app/features/sql-playground/*"
+      ]
     },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
@@ -11,9 +13,15 @@
     "module": "es2015",
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "target": "es2020",
-    "typeRoots": ["node_modules/@types"],
-    "lib": ["es2017", "dom"],
-    "skipLibCheck": true
+    "target": "ES2022",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2017",
+      "dom"
+    ],
+    "skipLibCheck": true,
+    "useDefineForClassFields": false
   }
 }
