@@ -39,6 +39,30 @@ app-sql-input-tabs {
     width: 100%;
   }
 
+  // Bare matInput inside tab label: legacy Angular Material applied
+  // `border: none; background: transparent; padding: 0` via .mat-input-element.
+  // MDC does NOT apply this reset without a mat-form-field wrapper.
+  // Restore the old fully borderless, transparent look.
+  .mdc-tab__text-label .mat-mdc-input-element {
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    font-size: 14px;
+    color: currentColor;
+    width: 150px;
+    height: 24px;
+    line-height: 24px;
+    vertical-align: middle;
+    display: inline-block;
+
+    &::placeholder {
+      color: rgba(0, 0, 0, 0.42);
+    }
+  }
+
   .mat-expansion-panel-body {
     padding: 5px 0 10px 0 !important;
   }
