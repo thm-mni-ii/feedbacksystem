@@ -17,6 +17,7 @@ import { ResultTab } from "../../../../model/ResultTab";
 import { Subscription } from "rxjs";
 
 @Component({
+  standalone: false,
   selector: "app-dynamic-result-table-tab",
   templateUrl: "./dynamic-result-table-tab.component.html",
   styleUrls: ["./dynamic-result-table-tab.component.scss"],

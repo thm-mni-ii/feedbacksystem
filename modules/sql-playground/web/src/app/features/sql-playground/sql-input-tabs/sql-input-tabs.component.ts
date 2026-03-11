@@ -34,6 +34,7 @@ import { MongoPlaygroundService } from "../../../service/mongo-playground.servic
 import { CheckerService } from "src/app/service/checker.service";
 
 @Component({
+  standalone: false,
   selector: "app-sql-input-tabs",
   templateUrl: "./sql-input-tabs.component.html",
   styleUrls: ["./sql-input-tabs.component.scss"],

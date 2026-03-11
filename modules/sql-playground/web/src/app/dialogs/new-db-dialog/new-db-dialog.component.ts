@@ -9,6 +9,7 @@ import { Store } from "@ngrx/store";
  * Updates course information in dialog
  */
 @Component({
+  standalone: false,
   selector: "app-new-db-dialog",
   templateUrl: "./new-db-dialog.component.html",
   styleUrls: ["./new-db-dialog.component.scss"],

@@ -5,6 +5,7 @@ import { Routine } from "src/app/model/sql_playground/Routine";
 import * as fromSqlPlayground from "../../state/sql-playground.selectors";
 
 @Component({
+  standalone: false,
   selector: "app-db-scheme-routines",
   templateUrl: "./db-scheme-routines.component.html",
   styleUrls: ["../db-scheme.component.scss"],

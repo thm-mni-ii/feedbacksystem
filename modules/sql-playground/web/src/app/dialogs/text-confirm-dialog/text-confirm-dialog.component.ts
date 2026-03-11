@@ -8,6 +8,7 @@ import {
 import { MAT_DIALOG_DATA as MAT_DIALOG_DATA, MatDialogRef as MatDialogRef } from "@angular/material/dialog";
 
 @Component({
+  standalone: false,
   selector: "app-text-confirm-dialog",
   templateUrl: "./text-confirm-dialog.component.html",
   styleUrls: ["./text-confirm-dialog.component.scss"],

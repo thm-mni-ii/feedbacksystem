@@ -7,6 +7,7 @@ import { Table } from "src/app/model/sql_playground/Table";
 import * as fromSqlPlayground from "../../state/sql-playground.selectors";
 
 @Component({
+  standalone: false,
   selector: "app-db-scheme-tables",
   templateUrl: "./db-scheme-tables.component.html",
   styleUrls: ["../db-scheme.component.scss"],

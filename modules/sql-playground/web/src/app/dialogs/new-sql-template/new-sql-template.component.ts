@@ -6,6 +6,7 @@ import { Template } from "src/app/model/sql_playground/Template";
 import { TemplateCategory } from "src/app/model/sql_playground/TemplateCategory";
 
 @Component({
+  standalone: false,
   selector: "app-new-sql-template",
   templateUrl: "./new-sql-template.component.html",
   styleUrls: ["./new-sql-template.component.scss"],

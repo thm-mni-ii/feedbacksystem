@@ -19,6 +19,7 @@ import * as fromSqlInputTabs from "../state/sql-input-tabs.selectors";
 import { MatButton as MatButton } from "@angular/material/button";
 
 @Component({
+  standalone: false,
   selector: "app-highlighted-input",
   templateUrl: "./highlighted-input.component.html",
   styleUrls: ["./highlighted-input.component.scss"],

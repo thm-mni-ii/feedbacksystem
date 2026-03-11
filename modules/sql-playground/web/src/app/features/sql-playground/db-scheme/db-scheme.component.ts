@@ -12,6 +12,7 @@ import { AuthService } from "../../../service/auth.service";
 import { EventEmitter, Output } from "@angular/core";
 
 @Component({
+  standalone: false,
   selector: "app-db-scheme",
   templateUrl: "./db-scheme.component.html",
   styleUrls: ["./db-scheme.component.scss"],

@@ -8,6 +8,7 @@ import * as fromSqlPlayground from "../state/sql-playground.selectors";
 import { MatTabGroup as MatTabGroup } from "@angular/material/tabs";
 
 @Component({
+  standalone: false,
   selector: "app-dynamic-result-table",
   templateUrl: "./dynamic-result-table.component.html",
   styleUrls: ["./dynamic-result-table.component.scss"],

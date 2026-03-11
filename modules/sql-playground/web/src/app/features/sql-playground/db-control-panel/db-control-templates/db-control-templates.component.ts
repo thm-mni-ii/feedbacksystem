@@ -21,6 +21,7 @@ import { TemplateCategory } from "../../../../model/sql_playground/TemplateCateg
 import { Roles } from "../../../../model/Roles";
 
 @Component({
+  standalone: false,
   selector: "app-db-control-templates",
   templateUrl: "./db-control-templates.component.html",
   styleUrls: ["./db-control-templates.component.scss"],

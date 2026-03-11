@@ -10,6 +10,7 @@ import { MongoPlaygroundService } from "src/app/service/mongo-playground.service
 import { AuthService } from "src/app/service/auth.service";
 
 @Component({
+  standalone: false,
   selector: "app-db-scheme-mongo-views",
   templateUrl: "./db-scheme-mongo-views.component.html",
   styleUrls: ["../../db-scheme.component.scss"],

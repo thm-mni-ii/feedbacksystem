@@ -31,6 +31,7 @@ import {
 } from "../../state/sql-playground.selectors";
 
 @Component({
+  standalone: false,
   selector: "app-db-control-db-overview",
   templateUrl: "./db-control-db-overview.component.html",
   styleUrls: ["./db-control-db-overview.component.scss"],

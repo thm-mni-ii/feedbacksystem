@@ -3,6 +3,7 @@ import { MatDialogRef as MatDialogRef, MAT_DIALOG_DATA as MAT_DIALOG_DATA } from
 import { MatSnackBar as MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
+  standalone: false,
   selector: "app-db-uri-link-dialog",
   templateUrl: "./share-playground-link-dialog.component.html",
   styleUrls: ["./share-playground-link-dialog.component.scss"],

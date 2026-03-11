@@ -5,6 +5,7 @@ import { Trigger } from "src/app/model/sql_playground/Trigger";
 import * as fromSqlPlayground from "../../state/sql-playground.selectors";
 
 @Component({
+  standalone: false,
   selector: "app-db-scheme-triggers",
   templateUrl: "./db-scheme-triggers.component.html",
   styleUrls: ["../db-scheme.component.scss"],

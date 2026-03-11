@@ -21,6 +21,7 @@ import { BackendDefintion } from "../../collab/backend.service";
 import { closeAllTabs } from "../../sql-input-tabs/state/sql-input-tabs.actions";
 
 @Component({
+  standalone: false,
   selector: "app-db-control-co-working",
   templateUrl: "./db-control-co-working.component.html",
   styleUrls: ["./db-control-co-working.component.scss"],

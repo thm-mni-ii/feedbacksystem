@@ -19,6 +19,7 @@ import Prism from "prismjs";
 import "prismjs/components/prism-json";
 
 @Component({
+  standalone: false,
   selector: "app-sql-playground-management",
   templateUrl: "./sql-playground.component.html",
   styleUrls: ["./sql-playground.component.scss"],
