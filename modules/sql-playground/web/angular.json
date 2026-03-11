@@ -30,7 +30,8 @@
               "src/theme.scss",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": ["prismjs", "file-saver"]
           },
           "configurations": {
             "production": {

@@ -1,4 +1,4 @@
-@import "../../../colors.scss";
+@use "../../../colors" as *;
 
 .container {
   height: 100%;
