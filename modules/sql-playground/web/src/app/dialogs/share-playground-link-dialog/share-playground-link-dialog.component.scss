@@ -5,8 +5,9 @@
 .actions {
   display: flex;
   justify-content: flex-end;
+  padding: 8px 0 !important;
   button {
-    margin-left: 16px;
+    margin-left: 8px;
   }
 }
 

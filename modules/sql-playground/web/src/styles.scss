@@ -16,25 +16,29 @@ body {
 }
 
 app-db-control-panel {
-  // MDC tabs: .mat-tab-label → .mdc-tab
-  .mdc-tab {
-    min-width: 25px !important;
-    padding: 5px;
+  // MDC form field: remove extra bottom spacing added by subscript wrapper
+  .mat-mdc-form-field-subscript-wrapper {
+    height: 0;
   }
-
-  // MDC form field: .mat-form-field-wrapper → .mat-mdc-form-field-subscript-wrapper
   .mat-mdc-text-field-wrapper {
-    margin-bottom: -1.25em;
+    padding-bottom: 0;
   }
 }
 
 app-sql-input-tabs {
-  // MDC tabs: .mat-tab-label → .mdc-tab
+  // Each tab holds a name input + icon buttons — needs a minimum width
   .mdc-tab {
     min-width: 230px !important;
   }
 
-  // Expansion panel body class unchanged in MDC
+  // Tab label content: input + icon buttons must lay out in a row
+  .mdc-tab__text-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+    width: 100%;
+  }
+
   .mat-expansion-panel-body {
     padding: 5px 0 10px 0 !important;
   }
@@ -45,11 +49,12 @@ app-db-scheme-table {
     padding: 5px 0 10px 0 !important;
   }
 
-  // MDC expansion panel: .mat-content → .mat-expansion-panel-content (inner) or mat-expansion-panel-header
+  // mat-content is still used inside expansion panel header
   .mat-content {
     display: grid;
     grid-template-columns: 5fr 1fr;
     grid-gap: 10px;
+    overflow: visible;
   }
 }
 
@@ -57,6 +62,39 @@ app-db-scheme-routines {
   .mat-expansion-panel-body {
     padding: 5px 0 10px 0 !important;
   }
+}
+
+// MDC dialog: restore consistent spacing
+.mat-mdc-dialog-container {
+  .mat-mdc-dialog-content {
+    padding: 0 24px !important;
+    max-height: 65vh;
+  }
+  .mat-mdc-dialog-actions {
+    padding: 8px 24px 16px !important;
+    justify-content: flex-end;
+    gap: 8px;
+    // MDC removes margin between buttons — restore it
+    button + button {
+      margin-left: 8px;
+    }
+  }
+}
+
+// MDC mat-card: restore title flex alignment lost in MDC
+.mat-mdc-card-title {
+  display: flex !important;
+  align-items: center !important;
+}
+
+// MDC table: restore compact row height
+.mat-mdc-row,
+.mat-mdc-header-row {
+  height: 36px !important;
+}
+.mat-mdc-cell,
+.mat-mdc-header-cell {
+  padding: 5px 15px !important;
 }
 
 // Prism.js line numbers plugin

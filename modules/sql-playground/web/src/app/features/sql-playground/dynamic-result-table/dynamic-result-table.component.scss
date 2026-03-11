@@ -65,10 +65,33 @@
   color: #f44336;
 }
 
-mat-card-title {
-  display: flex;
+mat-card-title,
+.mat-mdc-card-title {
+  display: flex !important;
   justify-content: flex-start;
   align-items: center;
+  // Restore legacy card-title typography (MDC uses headline-6 which is heavier)
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  margin-bottom: 0 !important;
+}
+
+// MDC: mat-card-header gains extra top padding — restore legacy compact spacing
+.mat-mdc-card-header {
+  padding-bottom: 8px !important;
+}
+
+// MDC: mat-card-actions (used here as the component root wrapper) becomes
+// display:flex which shrinks inner mat-card. Reset to block so card fills width.
+mat-card-actions {
+  display: block !important;
+  padding: 0 !important;
+}
+
+.info-card {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .spinner {

@@ -65,8 +65,10 @@
   color: #f44336;
 }
 
-mat-card-title {
-  display: flex;
+// MDC card: mat-card-title renders as .mat-mdc-card-title
+mat-card-title,
+.mat-mdc-card-title {
+  display: flex !important;
   justify-content: flex-start;
   align-items: center;
 }
