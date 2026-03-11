@@ -16,21 +16,25 @@ body {
 }
 
 app-db-control-panel {
-  .mat-tab-label {
+  // MDC tabs: .mat-tab-label → .mdc-tab
+  .mdc-tab {
     min-width: 25px !important;
     padding: 5px;
   }
 
-  .mat-form-field-wrapper {
+  // MDC form field: .mat-form-field-wrapper → .mat-mdc-form-field-subscript-wrapper
+  .mat-mdc-text-field-wrapper {
     margin-bottom: -1.25em;
   }
 }
 
 app-sql-input-tabs {
-  .mat-tab-label {
+  // MDC tabs: .mat-tab-label → .mdc-tab
+  .mdc-tab {
     min-width: 230px !important;
   }
 
+  // Expansion panel body class unchanged in MDC
   .mat-expansion-panel-body {
     padding: 5px 0 10px 0 !important;
   }
@@ -41,6 +45,7 @@ app-db-scheme-table {
     padding: 5px 0 10px 0 !important;
   }
 
+  // MDC expansion panel: .mat-content → .mat-expansion-panel-content (inner) or mat-expansion-panel-header
   .mat-content {
     display: grid;
     grid-template-columns: 5fr 1fr;

@@ -16,8 +16,8 @@ import { AuthService } from "src/app/service/auth.service";
 import { SubmissionService } from "src/app/service/submission.service";
 import { CheckerService } from "src/app/service/checker.service";
 import { PrismService } from "src/app/service/prism.service";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatSnackBar as MatSnackBar } from "@angular/material/snack-bar";
+import { MatDialog as MatDialog } from "@angular/material/dialog";
 import * as SqlPlaygroundActions from "../../state/sql-playground.actions";
 
 @Injectable()

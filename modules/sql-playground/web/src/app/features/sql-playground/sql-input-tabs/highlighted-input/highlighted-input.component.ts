@@ -16,7 +16,7 @@ import { PrismService } from "src/app/service/prism.service";
 import { Store } from "@ngrx/store";
 import * as SqlInputTabsActions from "../state/sql-input-tabs.actions";
 import * as fromSqlInputTabs from "../state/sql-input-tabs.selectors";
-import { MatLegacyButton as MatButton } from "@angular/material/legacy-button";
+import { MatButton as MatButton } from "@angular/material/button";
 
 @Component({
   selector: "app-highlighted-input",

@@ -10,8 +10,8 @@ import {
   Output,
   ViewChild,
 } from "@angular/core";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatDialog as MatDialog } from "@angular/material/dialog";
+import { MatSnackBar as MatSnackBar } from "@angular/material/snack-bar";
 import { Store } from "@ngrx/store";
 import { Observable, of, Subject, Subscription, combineLatest } from "rxjs";
 import { map, take } from "rxjs/operators";

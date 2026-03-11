@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog as MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import {
   addTemplates,

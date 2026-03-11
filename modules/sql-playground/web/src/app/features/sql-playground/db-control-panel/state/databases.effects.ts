@@ -4,7 +4,7 @@ import { of } from "rxjs";
 import { catchError, map, mergeMap, switchMap } from "rxjs/operators";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatSnackBar as MatSnackBar } from "@angular/material/snack-bar";
 import {
   loadDatabases,
   loadDatabasesSuccess,
