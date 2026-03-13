@@ -16,51 +16,48 @@ body {
 }
 
 app-db-control-panel {
-  // MDC form field: remove extra bottom spacing added by subscript wrapper
-  .mat-mdc-form-field-subscript-wrapper {
-    height: 0;
+  .mat-mdc-tab {
+    min-width: 25px !important;
+    padding: 5px;
   }
-  .mat-mdc-text-field-wrapper {
-    padding-bottom: 0;
+
+  .mat-mdc-form-field-subscript-wrapper {
+    min-height: 0;
+    padding: 0;
+  }
+
+  .mat-mdc-form-field-bottom-align::before {
+    display: none;
   }
 }
 
 app-sql-input-tabs {
-  // Each tab holds a name input + icon buttons — needs a minimum width
-  .mdc-tab {
+  .mat-mdc-tab {
     min-width: 230px !important;
   }
 
-  // Tab label content: input + icon buttons must lay out in a row
-  .mdc-tab__text-label {
-    display: inline-flex !important;
-    align-items: center !important;
-    overflow: visible !important;
+  .mat-mdc-tab .mdc-tab__text-label {
+    display: inline-flex;
+    align-items: center;
+    overflow: visible;
     width: 100%;
   }
 
-  // Bare matInput inside tab label: legacy Angular Material applied
-  // `border: none; background: transparent; padding: 0` via .mat-input-element.
-  // MDC does NOT apply this reset without a mat-form-field wrapper.
-  // Restore the old fully borderless, transparent look.
-  .mdc-tab__text-label .mat-mdc-input-element {
+  .mat-mdc-tab .mat-mdc-input-element {
     border: none;
     background: transparent;
     outline: none;
     padding: 0;
     margin: 0;
     font: inherit;
-    font-size: 14px;
     color: currentColor;
     width: 150px;
-    height: 24px;
-    line-height: 24px;
-    vertical-align: middle;
-    display: inline-block;
+  }
 
-    &::placeholder {
-      color: rgba(0, 0, 0, 0.42);
-    }
+  .mat-mdc-tab .mat-mdc-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
   }
 
   .mat-expansion-panel-body {
@@ -88,38 +85,7 @@ app-db-scheme-routines {
   }
 }
 
-// MDC dialog: restore consistent spacing
-.mat-mdc-dialog-container {
-  .mat-mdc-dialog-content {
-    padding: 0 24px !important;
-    max-height: 65vh;
-  }
-  .mat-mdc-dialog-actions {
-    padding: 8px 24px 16px !important;
-    justify-content: flex-end;
-    gap: 8px;
-    // MDC removes margin between buttons — restore it
-    button + button {
-      margin-left: 8px;
-    }
-  }
-}
 
-// MDC mat-card: restore title flex alignment lost in MDC
-.mat-mdc-card-title {
-  display: flex !important;
-  align-items: center !important;
-}
-
-// MDC table: restore compact row height
-.mat-mdc-row,
-.mat-mdc-header-row {
-  height: 36px !important;
-}
-.mat-mdc-cell,
-.mat-mdc-header-cell {
-  padding: 5px 15px !important;
-}
 
 // Prism.js line numbers plugin
 .line-numbers .line-numbers-rows {

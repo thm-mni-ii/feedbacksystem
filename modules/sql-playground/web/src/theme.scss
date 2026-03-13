@@ -16,8 +16,7 @@ $light-theme: mat.m2-define-light-theme((
     accent: $accent,
     warn: $warn,
   ),
-  typography: mat.m2-define-typography-config(),
-  density: -2
+  typography: mat.m2-define-typography-config()
 ));
 
 @include mat.all-component-themes($light-theme);

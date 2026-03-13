@@ -70,11 +70,6 @@ mat-card-title,
   display: flex !important;
   justify-content: flex-start;
   align-items: center;
-  // Restore legacy card-title typography (MDC uses headline-6 which is heavier)
-  font-size: 16px !important;
-  font-weight: 400 !important;
-  letter-spacing: normal !important;
-  margin-bottom: 0 !important;
 }
 
 // MDC: mat-card-header gains extra top padding — restore legacy compact spacing
@@ -87,11 +82,6 @@ mat-card-title,
 mat-card-actions {
   display: block !important;
   padding: 0 !important;
-}
-
-.info-card {
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .spinner {
