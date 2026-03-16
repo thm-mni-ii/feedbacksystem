@@ -16,31 +16,41 @@ body {
 }
 
 app-db-control-panel {
+    .mat-mdc-tab-header {
+    --mat-tab-container-height: 36px;
+  }
+
   .mat-mdc-tab {
-    min-width: 25px !important;
-    padding: 5px;
+    flex: 1 1 33%;
+    max-width: 33%;
+  }
+    .mat-mdc-tab .mdc-tab__text-label {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
   }
 
   .mat-mdc-form-field-subscript-wrapper {
-    min-height: 0;
-    padding: 0;
+    height: 0;
   }
 
-  .mat-mdc-form-field-bottom-align::before {
-    display: none;
+  .mat-mdc-text-field-wrapper {
+    padding-bottom: 0 !important;
   }
 }
 
 app-sql-input-tabs {
   .mat-mdc-tab {
-    min-width: 230px !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
   }
 
   .mat-mdc-tab .mdc-tab__text-label {
     display: inline-flex;
     align-items: center;
+    gap: 4px;
     overflow: visible;
-    width: 100%;
+    width: auto;
   }
 
   .mat-mdc-tab .mat-mdc-input-element {
@@ -49,20 +59,32 @@ app-sql-input-tabs {
     outline: none;
     padding: 0;
     margin: 0;
+    height: 24px;
+    line-height: 24px;
     font: inherit;
     color: currentColor;
-    width: 150px;
+    width: 90px;
   }
 
   .mat-mdc-tab .mat-mdc-icon-button {
     width: 32px;
     height: 32px;
+    min-width: 32px;
     padding: 4px;
   }
 
   .mat-expansion-panel-body {
     padding: 5px 0 10px 0 !important;
   }
+
+ .mat-mdc-tab-header {
+    --mat-tab-container-height: 36px;
+  }
+
+  .mat-mdc-tab .mdc-tab__content {
+    align-items: center;
+  }
+
 }
 
 app-db-scheme-table {
