@@ -117,6 +117,7 @@ export class DbControlDbOverviewComponent implements OnInit {
   deleteDatabase() {
     const selectedDb = this.selectedDb;
     const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
+      panelClass: "sql-playground-delete-confirm-dialog",
       data: {
         title: "Datenbank löschen",
         message: "Möchten Sie die Datenbank wirklich löschen?",
@@ -182,6 +183,7 @@ export class DbControlDbOverviewComponent implements OnInit {
 
   resetMongoDatabase() {
     const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
+      panelClass: "sql-playground-delete-confirm-dialog",
       data: {
         title: "Datenbank resetten",
         message: "Möchten Sie wirklich alle Inhalte dieser MongoDB löschen?",

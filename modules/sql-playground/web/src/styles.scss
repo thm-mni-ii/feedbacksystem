@@ -21,12 +21,17 @@ app-db-control-panel {
   }
 
   .mat-mdc-tab {
-    flex: 1 1 33%;
-    max-width: 33%;
+    flex-basis: 0;
+    flex-grow: 1;
+    min-width: 0;
+    padding: 0 24px;
   }
+
+  .mat-mdc-tab .mdc-tab__content {
+  justify-content: center;
+}
     .mat-mdc-tab .mdc-tab__text-label {
-    display: inline-flex;
-    align-items: center;
+    justify-content: center;
     white-space: nowrap;
   }
 
@@ -107,7 +112,66 @@ app-db-scheme-routines {
   }
 }
 
+// Override MDC dialog styles for delete confirmation dialog to fix spacing and ensure content is fully visible without scrolling.
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-surface {
+  padding: 24px;
+}
 
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-title {
+  margin: 0 0 12px;
+  padding: 0;
+  min-height: 0;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-content {
+  margin: 0 0 12px;
+  padding: 0;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.87);
+  max-height: none;
+}
+
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-content + br {
+  display: none;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-content + br + div {
+  margin: 0;
+  padding: 0;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-form-field {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 4px;
+  // Align error text with input text inset used by MDC filled form field.
+  padding: 0 16px;
+}
+
+
+
+.sql-playground-delete-confirm-dialog .mat-mdc-input-element,
+.sql-playground-delete-confirm-dialog .mdc-floating-label,
+.sql-playground-delete-confirm-dialog strong {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-form-field-error {
+  color: #f44336;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-actions {
+  margin: 0;
+  padding: 8px 0 0;
+  justify-content: flex-end;
+  gap: 8px;
+}
 
 // Prism.js line numbers plugin
 .line-numbers .line-numbers-rows {

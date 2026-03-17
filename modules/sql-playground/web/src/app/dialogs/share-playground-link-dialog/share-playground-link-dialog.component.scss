@@ -1,13 +1,15 @@
 .container {
-  height: 100%;
+  display: block;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
-  padding: 8px 0 !important;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 0 0;
   button {
-    margin-left: 8px;
+    margin-left: 0;
   }
 }
 
@@ -17,9 +19,13 @@
 }
 
 .uri{
-  margin-top: 30px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
   button {
-    margin-left: 20px;
+    margin-left: 0;
   }
 }
 

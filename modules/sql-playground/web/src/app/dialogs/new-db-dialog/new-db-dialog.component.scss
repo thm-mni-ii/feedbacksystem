@@ -1,5 +1,5 @@
 .container {
-  height: 100%;
+  display: block;
 }
 
 mat-form-field {
@@ -9,10 +9,11 @@ mat-form-field {
 .actions {
   display: flex;
   justify-content: flex-end;
-  // MDC dialog actions reset padding — compensate
-  padding: 8px 0 !important;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
   button {
-    margin-left: 8px;
+    margin-left: 0;
   }
 }
 
@@ -30,3 +31,5 @@ mat-form-field {
   justify-content: center;
   align-items: center;
 }
+
+
