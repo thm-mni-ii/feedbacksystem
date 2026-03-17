@@ -62,7 +62,6 @@ import { MenuBarComponent } from "./tool-components/menu-bar/menu-bar.component"
 import { NewCheckerDialogComponent } from "./dialogs/new-checker-dialog/new-checker-dialog.component";
 import { ConfirmDialogComponent } from "./dialogs/confirm-dialog/confirm-dialog.component";
 import { TextConfirmDialogComponent } from "./dialogs/text-confirm-dialog/text-confirm-dialog.component";
-import { NewDbDialogComponent } from "./dialogs/new-db-dialog/new-db-dialog.component";
 import {
   NgxMatDatetimePickerModule,
   NgxMatNativeDateModule,
@@ -86,12 +85,10 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
-import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import "mathlive";
 import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
-import { SharePlaygroundLinkDialogComponent } from "./dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
 import { SqlPlaygroundIframeComponent } from "./page-components/sql-playground-iframe/sql-playground-iframe.component";
@@ -101,7 +98,6 @@ import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/l
 import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
-import { SqlPlaygroundModule } from "./page-components/sql-playground/sql-playground.module";
 import { MyGroupsComponent } from "./page-components/my-groups/my-groups.component";
 import { GroupSelectionComponent } from "./page-components/course-detail/group-selection/group-selection.component";
 import { NewGroupDialogComponent } from "./dialogs/new-group-dialog/new-group-dialog.component";
@@ -192,11 +188,8 @@ export const httpInterceptorProviders = [
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
     AnalyticsToolComponent,
-    NewDbDialogComponent,
-    NewSqlTemplateComponent,
     ExportTasksDialogComponent,
     MathInputComponent,
-    SharePlaygroundLinkDialogComponent,
     FbsModellingComponent,
     FbsQuestionaryComponent,
     LanguageMenuComponent,
@@ -246,7 +239,6 @@ export const httpInterceptorProviders = [
     MatTableModule,
     MatSortModule,
     I18NextModule.forRoot(),
-    SqlPlaygroundModule,
     AngularEditorModule,
   ],
   entryComponents: [
