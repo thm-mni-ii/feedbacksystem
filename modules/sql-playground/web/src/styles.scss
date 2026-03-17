@@ -42,6 +42,13 @@ app-db-control-panel {
   .mat-mdc-text-field-wrapper {
     padding-bottom: 0 !important;
   }
+
+  // Allow long button labels to wrap instead of overflowing at narrow widths
+  button.mat-mdc-raised-button .mdc-button__label {
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+  }
 }
 
 app-sql-input-tabs {
@@ -112,25 +119,25 @@ app-db-scheme-routines {
   }
 }
 
-// Override MDC dialog styles for delete confirmation dialog to fix spacing and ensure content is fully visible without scrolling.
+// Override MDC dialog styles for delete confirmation dialog to fix spacing 
 .sql-playground-delete-confirm-dialog .mat-mdc-dialog-surface {
-  padding: 24px;
+  padding: 16px 24px !important; 
 }
 
 .sql-playground-delete-confirm-dialog .mat-mdc-dialog-title {
-  margin: 0 0 12px;
-  padding: 0;
+  margin: 0 0 8px !important;
+  padding: 0 !important;
   min-height: 0;
   line-height: 1.4;
   color: rgba(0, 0, 0, 0.87);
 }
 
 .sql-playground-delete-confirm-dialog .mat-mdc-dialog-content {
-  margin: 0 0 12px;
-  padding: 0;
-  line-height: 1.4;
-  color: rgba(0, 0, 0, 0.87);
-  max-height: none;
+   display: flex !important;
+   gap: 4px; // espace contrôlé entre lignes
+   padding: 0 !important;
+   margin: 0 !important;
+
 }
 
 
@@ -145,7 +152,7 @@ app-db-scheme-routines {
 
 .sql-playground-delete-confirm-dialog .mat-mdc-form-field {
   width: 100%;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .sql-playground-delete-confirm-dialog .mat-mdc-form-field-subscript-wrapper {

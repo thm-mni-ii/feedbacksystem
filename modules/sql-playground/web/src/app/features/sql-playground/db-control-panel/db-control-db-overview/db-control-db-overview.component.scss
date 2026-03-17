@@ -50,9 +50,10 @@ mat-form-field {
 button.mat-mdc-raised-button,
 button.mat-mdc-button,
 button.mat-mdc-flat-button {
-  height: 30px;
+  height: auto;
   min-height: 30px;
-  line-height: 30px;
+  line-height: 1.2;
+  padding: 4px 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
