@@ -163,7 +163,9 @@ export class DbControlDbOverviewComponent implements OnInit {
       })
       .afterClosed()
       .subscribe((res) => {
-        if (!res || !res.success || !res.name) {
+        if (!res || !res.success) return;
+
+        if (!res.name) {
           this.snackbar.open("Fehler beim Erstellen der Datenbank", "Ok", {
             duration: 3000,
           });

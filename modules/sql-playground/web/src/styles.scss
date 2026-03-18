@@ -16,8 +16,8 @@ body {
 }
 
 app-db-control-panel {
-    .mat-mdc-tab-header {
-    --mat-tab-container-height: 36px;
+  .mat-mdc-tab-header {
+  --mat-tab-container-height: 36px;
   }
 
   .mat-mdc-tab {
@@ -134,7 +134,7 @@ app-db-scheme-routines {
 
 .sql-playground-delete-confirm-dialog .mat-mdc-dialog-content {
    display: flex !important;
-   gap: 4px; // espace contrôlé entre lignes
+   gap: 4px; 
    padding: 0 !important;
    margin: 0 !important;
 
@@ -157,7 +157,6 @@ app-db-scheme-routines {
 
 .sql-playground-delete-confirm-dialog .mat-mdc-form-field-subscript-wrapper {
   margin-top: 4px;
-  // Align error text with input text inset used by MDC filled form field.
   padding: 0 16px;
 }
 

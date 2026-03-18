@@ -241,11 +241,7 @@ export const httpInterceptorProviders = [
     I18NextModule.forRoot(),
     AngularEditorModule,
   ],
-  entryComponents: [
-    DataprivacyDialogComponent,
-    CreateGuestUserDialogComponent,
-    ImpressumDialogComponent,
-  ],
+
   providers: [
     CookieService,
     httpInterceptorProviders,

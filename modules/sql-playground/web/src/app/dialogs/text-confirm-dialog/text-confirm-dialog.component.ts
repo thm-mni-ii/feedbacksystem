@@ -26,8 +26,6 @@ export class TextConfirmDialogComponent {
     public dialogRef: MatDialogRef<TextConfirmDialogComponent>
   ) {}
 
-  text: string = "";
-
   textMatcher = new UntypedFormControl("", [
     Validators.required,
     (control: AbstractControl): ValidationErrors | null => {
@@ -38,7 +36,7 @@ export class TextConfirmDialogComponent {
   ]);
 
   confirm(ok: boolean) {
-    if (this.text === this.data.textToRepeat) {
+    if (this.textMatcher.value === this.data.textToRepeat) {
       this.dialogRef.close(ok);
     }
   }
