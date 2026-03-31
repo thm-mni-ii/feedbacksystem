@@ -341,6 +341,16 @@ services:
     depends_on:
       - qcm-backend
 
+  sql-playground:
+    build:
+      context: modules/sql-playground/web
+    environment:
+      - FBS_CORE_URL=https://core
+    ports:
+      - 4201:80
+    networks:
+      - fbs
+
 networks:
   classroom:
   fbs:
