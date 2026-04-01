@@ -147,14 +147,21 @@
               <mat-icon>keyboard_arrow_left</mat-icon>
             </button>
           </div>
+          <div class="center">
           <button
-            [disabled]="isCheckerEmpty || deadlinePassed || isSubmissionEmpty()"
+            [disabled]="isCheckerEmpty || deadlinePassed || isSubmissionEmpty() || !role"
             mat-flat-button
             color="accent"
             (click)="submission()"
           >
             {{ "task.detail.submit" | i18nextEager }}
           </button>
+
+          </div>
+
+          <p *ngIf="!role" class="registration-error">
+            {{ "course.message.not-registered-user" | i18nextEager }}
+          </p>
           <div class="center margin-left-right">
             <button
               [disabled]="isLastTask()"
