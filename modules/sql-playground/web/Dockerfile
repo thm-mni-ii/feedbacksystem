@@ -20,9 +20,12 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy Angular build output
 COPY --from=builder /app/dist/sql-playground /usr/share/nginx/html
 
-# Copy custom nginx config (SPA routing support)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx config template (SPA routing + API proxy)
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
 
+# envsubst substitutes $FBS_CORE_URL at container start; nginx:alpine
+# images automatically process /etc/nginx/templates/*.template into
+# /etc/nginx/conf.d/ before nginx launches.
 CMD ["nginx", "-g", "daemon off;"]
