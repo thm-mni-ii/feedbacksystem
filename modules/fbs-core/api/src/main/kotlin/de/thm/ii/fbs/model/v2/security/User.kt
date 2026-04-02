@@ -3,6 +3,7 @@
 package de.thm.ii.fbs.model.v2.security
 
 import javax.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "user")
@@ -12,5 +13,8 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    var id: Int? = null
+    var id: Int? = null,
+
+    @Column(name = "last_login")
+    var lastLogin: LocalDateTime? = null
 )

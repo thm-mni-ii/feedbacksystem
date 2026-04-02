@@ -37,6 +37,10 @@ message:
 security:
   basic:
     enabled: false
+  userCleanup:
+    enabled: ${USER_CLEANUP_ENABLED:true}
+    inactiveDaysLimit: ${USER_CLEANUP_DAYS:365}
+    checkSchedule: ${USER_CLEANUP_CRON:0 0 3 * * SUN}
   antiBruteForce:
     trustedProxyCount: ${TRUSTED_PROXIES:0}
     interval: ${BRUTEFORCE_INTERVAL:600}
