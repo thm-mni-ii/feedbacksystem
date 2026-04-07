@@ -7,7 +7,7 @@ import de.thm.ii.fbs.util.{DB, Hash}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-
+import java.time.LocalDateTime
 /**
   * Handles the creation, deletion and modifications of user persistant state.
   */

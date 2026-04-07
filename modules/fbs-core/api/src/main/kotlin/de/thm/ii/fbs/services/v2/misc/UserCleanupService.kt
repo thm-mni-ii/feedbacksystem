@@ -5,12 +5,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class UserCleanupService(
-    private val userRepository: UserRepository, 
+    private val userRepository: UserRepository,
     @Value("\${security.userCleanup.enabled:false}")
     private val enabled: Boolean,
     @Value("\${security.userCleanup.inactiveDaysLimit:365}")
@@ -27,13 +27,18 @@ class UserCleanupService(
         }
 
         val cutoffDate = LocalDateTime.now().minusDays(inactiveDaysLimit)
-        logger.info("Starte Cleanup für Benutzer, die seit $cutoffDate inaktiv sind.")
+        logger.info("Starte Anonymisierung für Benutzer inaktiv seit $cutoffDate.")
 
         try {
-            val deletedCount = userRepository.deleteByLastLoginBefore(cutoffDate)
-            logger.info("Cleanup erfolgreich: $deletedCount inaktive Benutzer wurden gelöscht.")
+            val inactiveUsers = userRepository.findByLastLoginBefore(cutoffDate)
+            inactiveUsers.forEach { user ->
+                userRepository.deleteUserCourseEntries(user.id!!)
+            }
+
+            val affectedRows = userRepository.anonymizeInactiveUsers(cutoffDate)
+            logger.info("Cleanup erfolgreich: $affectedRows Benutzer anonymisiert.")
         } catch (e: Exception) {
-            logger.error("Fehler beim Löschen inaktiver Benutzer: ${e.message}", e)
+            logger.error("Fehler beim Cleanup: ${e.message}", e)
         }
     }
 }

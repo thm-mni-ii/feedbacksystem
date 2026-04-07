@@ -73,7 +73,9 @@ class LegalController {
   def acceptTermsOfUse(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req)
     user.id match {
-      case `uid` => userService.updateAgreementToPrivacyFor(user.id, agreed = true)
+      case `uid` =>
+        userService.updateAgreementToPrivacyFor(user.id, agreed = true)
+        userService.updateLastLogin(user.id)
       case _ => throw new ForbiddenException()
     }
   }

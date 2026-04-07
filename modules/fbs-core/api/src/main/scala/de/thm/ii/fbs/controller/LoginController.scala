@@ -124,6 +124,7 @@ class LoginController extends CasClientConfigurerAdapter {
       login match {
         case Some((user)) =>
           val localUser = userService.find(user.username).getOrElse(userService.create(user, null))
+          userService.updateLastLogin(localUser.id)
           authService.newAuthentication(localUser, response)
         case None => throw new UnauthorizedException()
       }
@@ -175,7 +176,9 @@ class LoginController extends CasClientConfigurerAdapter {
     )
 
     user match {
-      case Some(user) => authService.newAuthentication(user, response)
+      case Some(user) => 
+      userService.updateLastLogin(user.id)
+      authService.newAuthentication(user, response)
       case None => throw new UnauthorizedException()
     }
   }
