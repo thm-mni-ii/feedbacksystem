@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v3.8.1
         if: ${{ inputs.setupNode }}
         with:
-          node-version: "16.13.1"
+          node-version: "18.20.4"
       - name: Add Problem Matcher
         run: echo "::add-matcher::.github/problem-matchers/validate-api-docs.json"
       - run: bash ./scripts/ci/validate-api-docs/validate-api-docs.sh

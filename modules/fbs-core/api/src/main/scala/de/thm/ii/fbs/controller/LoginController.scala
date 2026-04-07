@@ -149,7 +149,8 @@ class LoginController extends CasClientConfigurerAdapter {
     } yield user
 
     login match {
-      case Some(user) => authService.newAuthentication(user, response)
+      case Some(user) =>
+        authService.newAuthentication(user, response)
       case None => throw new UnauthorizedException()
     }
   }
@@ -176,9 +177,7 @@ class LoginController extends CasClientConfigurerAdapter {
     )
 
     user match {
-      case Some(user) => 
-      userService.updateLastLogin(user.id)
-      authService.newAuthentication(user, response)
+      case Some(user) => authService.newAuthentication(user, response)
       case None => throw new UnauthorizedException()
     }
   }

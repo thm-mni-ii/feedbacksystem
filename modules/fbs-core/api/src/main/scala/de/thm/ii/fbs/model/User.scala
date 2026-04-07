@@ -4,7 +4,7 @@ import java.security.Principal
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import org.json.JSONObject
 
-import java.sql.{Date, Timestamp}
+import java.sql.Timestamp
 
 /**
   * User object
@@ -19,7 +19,7 @@ import java.sql.{Date, Timestamp}
 class User(val prename: String, val surname: String, val email: String,
            val username: String,
            @JsonScalaEnumeration(value = classOf[GlobalRoleType]) val globalRole: GlobalRole.Value,
-           val alias: Option[String] = None, val lastLogin: Option[Date] = None, val id: Int = 0) extends Principal {
+           val alias: Option[String] = None, val lastLogin: Option[Timestamp] = None, val id: Int = 0) extends Principal {
   /**
     * @return unique username
     */

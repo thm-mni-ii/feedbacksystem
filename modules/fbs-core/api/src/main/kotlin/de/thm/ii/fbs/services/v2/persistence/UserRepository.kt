@@ -15,25 +15,33 @@ interface UserRepository : JpaRepository<User, Int> {
 
     @Modifying
     @Transactional
-    @Query("""
-        UPDATE User u 
-        SET u.username = CONCAT('duser ', u.id), 
-            u.prename = 'Deleted User', 
-            u.surname = 'Deleted User', 
+    @Query(
+        value = """
+        UPDATE `user` u
+        SET u.username = CONCAT('duser ', u.user_id),
+            u.prename = 'Deleted User',
+            u.surname = 'Deleted User',
             u.email = '',
-            u.lastLogin = null 
-        WHERE u.lastLogin < :cutoffDate
-    """)
+            u.last_login = NULL
+        WHERE u.last_login < :cutoffDate
+        """,
+        nativeQuery = true
+    )
     fun anonymizeInactiveUsers(@Param("cutoffDate") cutoffDate: LocalDateTime): Int
 
     @Modifying
     @Transactional
-    @Query("""
-        UPDATE User u 
+    @Query(
+        """
+        UPDATE User u
         SET u.lastLogin = :now
         WHERE u.id = :id
-    """)
-    fun updateLastLogin(@Param("id") id: Int, @Param("now") now: LocalDateTime): Int
+        """
+    )
+    fun updateLastLogin(
+        @Param("id") id: Int,
+        @Param("now") now: LocalDateTime
+    ): Int
 
     fun findByLastLoginBefore(cutoffDate: LocalDateTime): List<User>
 

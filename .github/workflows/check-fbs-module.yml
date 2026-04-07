@@ -61,7 +61,7 @@ jobs:
       - uses: actions/setup-node@v3.8.1
         if: ${{ inputs.setupNode }}
         with:
-          node-version: "16.13.1"
+          node-version: "18.20.4"
       - uses: gradle/gradle-build-action@v2
         name: Lint ${{ inputs.name }}
         with:
@@ -92,7 +92,7 @@ jobs:
       - uses: actions/setup-node@v3.8.1
         if: ${{ inputs.setupNode }}
         with:
-          node-version: "16.13.1"
+          node-version: "18.20.4"
       - uses: gradle/gradle-build-action@v2
         name: Run ${{ inputs.name }} Tests
         with:

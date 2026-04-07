@@ -22,7 +22,7 @@ class UserService {
     * @return List of users
     */
   def getAll(ignoreDeleted: Boolean = true): List[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user"
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user"
       + (if (ignoreDeleted)  " where deleted = 0" else ""), (res, _) => parseResult(res))
 
   /**
@@ -31,7 +31,7 @@ class UserService {
    * @return List of users
    */
   def getUsersWithLastLoginBefore(before: Date, ignoreDeleted: Boolean = true): List[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user WHERE last_login < ?"
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user WHERE last_login < ?"
       + (if (ignoreDeleted)  " and deleted = 0" else ""), (res, _) => parseResult(res), before)
 
   /**
@@ -40,7 +40,7 @@ class UserService {
     * @return The found user
     */
   def find(id: Int): Option[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user where user_id = ?", (res, _) =>
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where user_id = ?", (res, _) =>
       parseResult(res), id).headOption
 
   /**
@@ -49,7 +49,7 @@ class UserService {
     * @return The found user
     */
   def find(username: String): Option[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user where username = ?", (res, _) =>
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where username = ?", (res, _) =>
       parseResult(res), username).headOption
 
   /**
@@ -139,7 +139,7 @@ class UserService {
     username = res.getString("username"),
     globalRole = GlobalRole.parse(res.getInt("global_role")),
     alias = Option(res.getString("alias")),
-    lastLogin = Option(res.getDate("last_login")),
+    lastLogin = Option(res.getTimestamp("last_login")),
     id = res.getInt("user_id")
   )
 }
