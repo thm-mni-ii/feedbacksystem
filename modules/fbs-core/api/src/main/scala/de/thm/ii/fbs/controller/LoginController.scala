@@ -68,7 +68,7 @@ class LoginController extends CasClientConfigurerAdapter {
       } else {
         name = casUser.getName
       }
-      userService.find(name)
+      userService.findActive(name)
         .orElse(loadUserFromLdap(name).map(u => userService.create(u, null)))
         .foreach(u => {
           val token = authService.createToken(u)
@@ -123,7 +123,7 @@ class LoginController extends CasClientConfigurerAdapter {
 
       login match {
         case Some((user)) =>
-          val localUser = userService.find(user.username).getOrElse(userService.create(user, null))
+          val localUser = userService.findActive(user.username).getOrElse(userService.create(user, null))
           userService.updateLastLogin(localUser.id)
           authService.newAuthentication(localUser, response)
         case None => throw new UnauthorizedException()
@@ -172,7 +172,7 @@ class LoginController extends CasClientConfigurerAdapter {
         loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
-              .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))
+              .map(user => userService.findActive(user.username).getOrElse(userService.create(user, null)))
           } yield ldapUser} else {None})
     )
 

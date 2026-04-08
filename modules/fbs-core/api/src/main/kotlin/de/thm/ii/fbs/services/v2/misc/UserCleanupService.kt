@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
-class UserCleanupService(
+open class UserCleanupService(
     private val userRepository: UserRepository,
     @Value("\${security.userCleanup.enabled:false}")
     private val enabled: Boolean,
@@ -20,7 +20,7 @@ class UserCleanupService(
 
     @Scheduled(cron = "\${security.userCleanup.checkSchedule:0 0 3 * * SUN}")
     @Transactional
-    fun cleanupInactiveUsers() {
+    open fun cleanupInactiveUsers() {
         if (!enabled) {
             logger.debug("Benutzer-Cleanup ist deaktiviert.")
             return
@@ -30,13 +30,9 @@ class UserCleanupService(
         logger.info("Starte Anonymisierung für Benutzer inaktiv seit $cutoffDate.")
 
         try {
-            val inactiveUsers = userRepository.findByLastLoginBefore(cutoffDate)
-            inactiveUsers.forEach { user ->
-                userRepository.deleteUserCourseEntries(user.id!!)
-            }
-
+            val inactiveUsers = userRepository.findUsersToAnonymize(cutoffDate)
             val affectedRows = userRepository.anonymizeInactiveUsers(cutoffDate)
-            logger.info("Cleanup erfolgreich: $affectedRows Benutzer anonymisiert.")
+            logger.info("Cleanup erfolgreich: $affectedRows von ${inactiveUsers.size} inaktiven Benutzern anonymisiert.")
         } catch (e: Exception) {
             logger.error("Fehler beim Cleanup: ${e.message}", e)
         }

@@ -22,8 +22,13 @@ interface UserRepository : JpaRepository<User, Int> {
             u.prename = 'Deleted User',
             u.surname = 'Deleted User',
             u.email = '',
+            u.password = NULL,
+            u.alias = NULL,
+            u.deleted = 1,
             u.last_login = NULL
-        WHERE u.last_login < :cutoffDate
+        WHERE u.deleted = 0
+            AND u.last_login IS NOT NULL
+            AND u.last_login < :cutoffDate
         """,
         nativeQuery = true
     )
@@ -43,10 +48,15 @@ interface UserRepository : JpaRepository<User, Int> {
         @Param("now") now: LocalDateTime
     ): Int
 
-    fun findByLastLoginBefore(cutoffDate: LocalDateTime): List<User>
-
-    @Modifying
-    @Transactional
-    @Query(value = "DELETE FROM user_course WHERE user_id = :userId", nativeQuery = true)
-    fun deleteUserCourseEntries(@Param("userId") userId: Int)
+    @Query(
+        value = """
+        SELECT u.user_id, u.username, u.last_login
+        FROM `user` u
+        WHERE u.deleted = 0
+            AND u.last_login IS NOT NULL
+            AND u.last_login < :cutoffDate
+        """,
+        nativeQuery = true
+    )
+    fun findUsersToAnonymize(@Param("cutoffDate") cutoffDate: LocalDateTime): List<User>
 }

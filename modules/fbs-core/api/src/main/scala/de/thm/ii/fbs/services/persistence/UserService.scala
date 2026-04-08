@@ -44,12 +44,30 @@ class UserService {
       parseResult(res), id).headOption
 
   /**
+    * Find the first active user by id.
+    * @param id The users id
+    * @return The found user
+    */
+  def findActive(id: Int): Option[User] =
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where user_id = ? and deleted = 0", (res, _) =>
+      parseResult(res), id).headOption
+
+  /**
     * Find the first user by username
     * @param username username
     * @return The found user
     */
   def find(username: String): Option[User] =
     DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where username = ?", (res, _) =>
+      parseResult(res), username).headOption
+
+  /**
+    * Find the first active user by username.
+    * @param username username
+    * @return The found user
+    */
+  def findActive(username: String): Option[User] =
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where username = ? and deleted = 0", (res, _) =>
       parseResult(res), username).headOption
 
   /**
@@ -112,9 +130,11 @@ class UserService {
     * @return True if successfully updated
     */
   def delete(id: Int): Boolean = {
-    DB.update("DELETE FROM user_course WHERE user_id = ?", id)
-    1 == DB.update("UPDATE user SET prename = 'Deleted User', surname = 'Deleted User', " +
-    "username = 'duser " + id + "', email = '' WHERE user_id = ?", id)
+    1 == DB.update(
+      "UPDATE user SET prename = 'Deleted User', surname = 'Deleted User', username = CONCAT('duser ', user_id), " +
+      "email = '', password = NULL, alias = NULL, deleted = 1, last_login = NULL WHERE user_id = ? AND deleted = 0",
+      id
+    )
   }
 
   /**
@@ -130,6 +150,13 @@ class UserService {
     * @param username the username of the user to get the password for
     */
   def getPassword(username: String): Option[String] = DB.query("SELECT password FROM user WHERE username = ?",
+    (res, _) => res.getString("password"), username).headOption
+
+  /**
+    * Get the password for the active user with the given username
+    * @param username the username of the user to get the password for
+    */
+  def getActivePassword(username: String): Option[String] = DB.query("SELECT password FROM user WHERE username = ? AND deleted = 0",
     (res, _) => res.getString("password"), username).headOption
 
   private def parseResult(res: ResultSet): User = new User(

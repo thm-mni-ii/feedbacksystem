@@ -63,7 +63,7 @@ class AuthService {
     * @param res The http response (nullable)
     * @return The user.
     */
-  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(userService.find) match {
+  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(userService.findActive) match {
       case Some(user) =>
         if (res != null) renewAuthentication(user, res)
         user
@@ -75,7 +75,7 @@ class AuthService {
     * @param token The authentication token
     * @return The user.
     */
-  def authorize(token: String): User = userService.find(authorizeToken(token)) match {
+  def authorize(token: String): User = userService.findActive(authorizeToken(token)) match {
       case Some(user) => user
       case None => throw new UnauthorizedException
     }
