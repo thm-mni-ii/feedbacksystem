@@ -10,7 +10,7 @@ import {
   deleteDatabase,
   activateDatabase,
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.actions";
-import { selectAllDatabases } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
+import { selectDatabasesForCurrentType } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
 
 @Component({
   selector: "app-db-control-panel",
@@ -20,7 +20,7 @@ import { selectAllDatabases } from "src/app/page-components/sql-playground/db-co
 export class DbControlPanelComponent implements OnInit {
   @Input() activeDbId: number;
   @Input() selectedMongoDbId: string | null = null;
-  @Output() changeActiveDbId = new EventEmitter<number>();
+  @Output() changeActiveDbId = new EventEmitter<number | string>();
   @Output() submitStatement = new EventEmitter<string>();
   @Output() mongoDbSelected = new EventEmitter<string>();
   @Output() schemaReload = new EventEmitter<void>();
@@ -38,8 +38,14 @@ export class DbControlPanelComponent implements OnInit {
     const globalRole = this.auth.getToken().globalRole;
     this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
 
-    this.store.dispatch(loadDatabases());
-    this.databases$ = this.store.select(selectAllDatabases);
+    // Load databases based on the stored db type (postgres or mongo)
+    const dbType =
+      (localStorage.getItem("playground-db-type") as "postgres" | "mongo") ||
+      "postgres";
+    this.store.dispatch(loadDatabases({ dbType }));
+
+    // Use selector to get databases for current type from state
+    this.databases$ = this.store.select(selectDatabasesForCurrentType);
 
     this.databases$.subscribe((databases) => {
       this.activeDb = databases.find((database) => database.active);
@@ -57,15 +63,24 @@ export class DbControlPanelComponent implements OnInit {
   }
 
   onCreateDatabase(name: string) {
-    this.store.dispatch(createDatabase({ name }));
+    const dbType =
+      (localStorage.getItem("playground-db-type") as "postgres" | "mongo") ||
+      "postgres";
+    this.store.dispatch(createDatabase({ name, dbType }));
   }
 
-  onDeleteDatabase(id: number) {
-    this.store.dispatch(deleteDatabase({ id }));
+  onDeleteDatabase(id: number | string) {
+    const dbType =
+      (localStorage.getItem("playground-db-type") as "postgres" | "mongo") ||
+      "postgres";
+    this.store.dispatch(deleteDatabase({ id, dbType }));
   }
 
-  onActivateDatabase(id: number) {
-    this.store.dispatch(activateDatabase({ id }));
+  onActivateDatabase(id: number | string) {
+    const dbType =
+      (localStorage.getItem("playground-db-type") as "postgres" | "mongo") ||
+      "postgres";
+    this.store.dispatch(activateDatabase({ id, dbType }));
   }
 
   dbChangedToParent(db: "postgres" | "mongo") {

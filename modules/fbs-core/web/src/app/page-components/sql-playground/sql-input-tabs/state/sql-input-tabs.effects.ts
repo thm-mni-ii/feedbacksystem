@@ -196,18 +196,41 @@ export class SqlInputTabsEffects {
       switchMap(([{ index }, activeTab]) => {
         this.store.dispatch(SqlInputTabsActions.setPending({ pending: true }));
         const token = this.authService.getToken();
-        return this.submissionService
-          .submitSolution(
-            token.id,
-            activeTab.selectedCourse.id,
-            activeTab.selectedTask.id,
-            this.cleanUpTextAreaRegx(activeTab.content)
+        return this.checkerService
+          .getChecker(activeTab.selectedCourse.id, activeTab.selectedTask.id)
+          .pipe(
+            switchMap((checkerConfigs) => {
+              const stagedEnabled =
+                activeTab.selectedTask?.stagedFeedbackEnabled;
+              const stagedLimit =
+                activeTab.selectedTask?.stagedFeedbackLimit ?? 1;
+              const initialOrders =
+                stagedEnabled && checkerConfigs.length > 0
+                  ? checkerConfigs
+                      .filter((c) => c.ord <= stagedLimit)
+                      .map((c) => c.ord)
+                  : undefined;
+              return this.submissionService.submitSolution(
+                token.id,
+                activeTab.selectedCourse.id,
+                activeTab.selectedTask.id,
+                this.cleanUpTextAreaRegx(activeTab.content),
+                undefined,
+                initialOrders
+              );
+            })
           )
           .pipe(
             switchMap((subResult) => {
               this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
                 duration: 3000,
               });
+              this.store.dispatch(
+                SqlInputTabsActions.setSubmissionData({
+                  submissionId: subResult.id,
+                  results: subResult.results || [],
+                })
+              );
               this.store.dispatch(
                 SqlInputTabsActions.waitForSubDone({ index, sid: subResult.id })
               );
@@ -252,26 +275,73 @@ export class SqlInputTabsEffects {
             takeWhile((sub) => !sub.done, true),
             switchMap((res) => {
               if (res.done) {
+                console.log(
+                  "waitForSubDone - Submission fertig, ID:",
+                  res.id,
+                  "Results:",
+                  res.results
+                );
                 this.store.dispatch(
                   SqlInputTabsActions.setPending({ pending: false })
                 );
-                if (res.results[0].exitCode == 0) {
-                  this.store.dispatch(
-                    SqlInputTabsActions.setSubmissionResult({
-                      isCorrect: true,
-                      error: false,
-                      errorMsg: null,
+                const hasFailure = res.results.some((r) => r.exitCode !== 0);
+                this.store.dispatch(
+                  SqlInputTabsActions.setSubmissionData({
+                    submissionId: res.id,
+                    results: res.results,
+                  })
+                );
+
+                // Hole ALLE Submissions um everCorrect korrekt zu berechnen
+                const token = this.authService.getToken();
+                return this.submissionService
+                  .getAllSubmissions(
+                    token.id,
+                    activeTab.selectedCourse.id,
+                    activeTab.selectedTask.id
+                  )
+                  .pipe(
+                    switchMap((allSubs) => {
+                      console.log(
+                        "waitForSubDone - Alle Submissions:",
+                        allSubs.map((s: any) => ({
+                          id: s.id,
+                          time: s.submissionTime,
+                        }))
+                      );
+                      // Prüfe ob irgendeine Submission jemals ALLE Checks bestanden hat
+                      const everCorrect = allSubs.some((s: any) => {
+                        const subResults = s.results || [];
+                        return (
+                          subResults.length > 0 &&
+                          subResults.every((r: any) => r.exitCode === 0)
+                        );
+                      });
+
+                      if (!hasFailure) {
+                        this.store.dispatch(
+                          SqlInputTabsActions.setSubmissionResult({
+                            isCorrect: true,
+                            error: false,
+                            errorMsg: null,
+                            everCorrect: true,
+                          })
+                        );
+                      } else {
+                        this.store.dispatch(
+                          SqlInputTabsActions.setSubmissionResult({
+                            isCorrect: false,
+                            error: true,
+                            errorMsg:
+                              res.results.find((r) => r.exitCode !== 0)
+                                ?.resultText || res.results[0]?.resultText,
+                            everCorrect: everCorrect,
+                          })
+                        );
+                      }
+                      return of(SqlInputTabsActions.waitForSubDoneSuccess());
                     })
                   );
-                } else {
-                  this.store.dispatch(
-                    SqlInputTabsActions.setSubmissionResult({
-                      isCorrect: false,
-                      error: true,
-                      errorMsg: res.results[0].resultText,
-                    })
-                  );
-                }
               }
               return of(SqlInputTabsActions.waitForSubDoneSuccess());
             }),

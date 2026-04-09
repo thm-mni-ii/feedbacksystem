@@ -1,7 +1,7 @@
 <p class="title" role="heading" aria-level="4" tabindex="0">Views</p>
 <mat-expansion-panel
   *ngFor="let view of views$ | async; index as i"
-  aria-label="View {{ view.table }}"
+  attr.aria-label="View {{ view.table }}"
 >
   <mat-expansion-panel-header>
     <mat-panel-title>
@@ -10,7 +10,7 @@
   </mat-expansion-panel-header>
   <pre
     class="view-definition"
-    aria-label="Definition der View {{ view.table }}"
+    attr.aria-label="Definition der View {{ view.table }}"
     >{{ view.definition }}</pre
   >
 </mat-expansion-panel>

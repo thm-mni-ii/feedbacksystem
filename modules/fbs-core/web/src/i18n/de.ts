@@ -51,6 +51,14 @@ export const germanTranslation = {
   "password.save": "Speichern",
   "configuration.back-to-task": "Zurück zum Aufgabe",
   "configuration.add-checker": "Überprüfung hinzufügen",
+  "configuration.staged-feedback.title": "Gestuftes Feedback",
+  "configuration.staged-feedback.hint":
+    "Lege fest, bis zu welcher Checker-Reihenfolge die erste Abgabe direkt ausgeführt wird.",
+  "configuration.staged-feedback.toggle": "Gestuftes Feedback aktivieren",
+  "configuration.staged-feedback.limit-label":
+    "Checker-Reihenfolge für die erste Prüfung",
+  "configuration.staged-feedback.limit-hint":
+    "Checker mit gleicher oder niedrigerer Reihenfolge laufen sofort, alle höheren erst nach Klick im Aufgaben-Detail.",
   "configuration.download-primary-file": "Hauptdatei herunterladen",
   "configuration.download-secondary-file": "Nebendatei herunterladen",
   "configuration.edit-checker": "Überprüfung bearbeiten",
@@ -319,6 +327,11 @@ export const germanTranslation = {
   "task.detail.previousUnsolvedTaskTooltip": "Vorherige ungelöste Aufgabe",
   "task.detail.previousTaskTooltip": "Vorherige Aufgabe",
   "task.detail.submit": "Abgeben",
+  "task.detail.detailedFeedback.hint":
+    "Deine letzte Abgabe war nicht korrekt. Möchtest du ausführliches Feedback generieren?",
+  "task.detail.detailedFeedback.trigger": "Feedback generieren",
+  "task.detail.detailedFeedback.pending":
+    "Das ausführliche Feedback wird berechnet. Bitte warten ...",
   "task.detail.tooltip.nextTaskTooltip": "Nächste Aufgabe",
   "task.detail.tooltip.nextUnsolvedTask": "Nächste ungelöste Aufgabe",
   "task.submission.file.upload.label": "Abgabe hochladen",
@@ -366,13 +379,15 @@ export const germanTranslation = {
   "sql-playground.db-control-panel.co-working.delete": "Beenden",
   "sql-playground.db-control-panel.co-working.co": "Beitreten",
   "sql-playground.db-control-panel.co-working.new": "Teilen",
+  "sql-playground.db-control-panel.co-working.mongo-warning":
+    "Playground-Freigabe funktioniert derzeit nur mit PostgreSQL-Datenbanken. Bitte wechseln Sie zu PostgreSQL, um diese Funktion zu nutzen.",
   "sql-playground.input.highlighted.placeholder":
     "Hier Code einfügen (PostgreSQL)",
   "sql-playground.input.tooltip.closeAllTabs": "Schließe alle Tabs",
   "sql-playground.input.tooltip.downloadTab": "Tab herunterladen",
   "sql-playground.input.tooltip.downloadAllTabs": "Alle Tabs herunterladen",
   "sql-playground.input.label.newQuery": "New_Query",
-  "sql-playground.input.label.taskDescription": "Aufgabenbeschreibung:",
+  "sql-playground.input.label.taskDescription": "Beschreibung",
   "sql-playground.input.label.errorMessage": "Fehlermeldung:",
   "sql-playground.input.label.execute": "Ausführen",
   "sql-playground.input.tooltip.selectTask":

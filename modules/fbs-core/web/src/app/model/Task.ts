@@ -9,6 +9,8 @@ export interface Task {
   mediaInformation?:
     | SpreadsheetMediaInformation
     | SpreadsheetResponseMediaInformation;
+  stagedFeedbackEnabled?: boolean;
+  stagedFeedbackLimit?: number;
 }
 
 export interface SpreadsheetMediaInformation {

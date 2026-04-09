@@ -18,6 +18,10 @@ export interface QueryTab {
   active: BackendUser[];
   createdAt: number;
   result?: any;
+  lastSubmissionId?: number;
+  lastResults?: any[];
+  detailedPending?: boolean;
+  everCorrect?: boolean;
 }
 
 export function queryTabEquals(

@@ -30,6 +30,8 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("courseID") courseID: Int = 0,
                 @JsonProperty("attempts") attempts: Option[Int] = None,
                 @JsonProperty("hideResult") hideResult: Boolean = false,
+                @JsonProperty("stagedFeedbackEnabled") stagedFeedbackEnabled: Boolean = false,
+                @JsonProperty("stagedFeedbackLimit") stagedFeedbackLimit: Option[Int] = None,
                ) {
   def getExtensionFromMimeType(mimeType: String): (MediaType, String) = {
     mediaType match {

@@ -18,3 +18,8 @@ export const selectActiveTab = createSelector(
   selectSqlInputTabsState,
   (state: SqlInputTabsState) => state.tabs[state.activeTabIndex]
 );
+
+export const selectPending = createSelector(
+  selectSqlInputTabsState,
+  (state: SqlInputTabsState) => state.pending
+);

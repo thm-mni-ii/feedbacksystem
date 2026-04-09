@@ -8,6 +8,7 @@ import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
@@ -21,6 +22,7 @@ import java.time.Instant
 import java.util
 import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -51,6 +53,8 @@ class SubmissionController {
   private val userService: UserService = null
   @Autowired
   private val courseService: CourseService = null
+  @Autowired
+  private val traceLogService: TraceLogService = null
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
   private val objectMapper = new ObjectMapper();
@@ -136,6 +140,7 @@ class SubmissionController {
   @ResponseBody
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
              @RequestParam file: MultipartFile, @RequestParam additionalInformation: Optional[String],
+             @RequestParam("checkerOrders") checkerOrders: Optional[util.List[String]],
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
@@ -160,8 +165,15 @@ class SubmissionController {
             minioStorageService.storeSolutionFileInBucket(submission.id, file)
 
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
-              val checkerService = checkerServiceFactoryService(cc.checkerType)
-              checkerService.notify(tid, submission.id, cc, user)
+              if (checkerOrders.isEmpty || checkerOrders.get().contains(cc.ord.toString)) {
+                val tracePayload = new JSONObject().put("isResubmit", false);
+                traceLogService.create("checker.start", Some(tracePayload), userId = Some(uid), courseId = Some(cid), taskId = Some(tid),
+                  checkerId = Some(cc.id), submissionId = Some(submission.id))
+                val checkerService = checkerServiceFactoryService(cc.checkerType)
+                checkerService.notify(tid, submission.id, cc, user)
+                traceLogService.create("checker.finish", Some(tracePayload), userId = Some(uid), courseId = Some(cid), taskId = Some(tid),
+                  checkerId = Some(cc.id), submissionId = Some(submission.id))
+              }
             })
             submission
 
@@ -188,6 +200,7 @@ class SubmissionController {
     */
   @PutMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}"))
   def resubmit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, @PathVariable("sid") sid: Int,
+               @RequestParam("checkerOrders") checkerOrders: Optional[util.List[String]],
                req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
@@ -202,10 +215,16 @@ class SubmissionController {
             throw new ConflictException("resubmit is not supported for this submission")
           }
 
-          submissionService.clearResults(sid, uid)
           checkerConfigurationService.getAll(cid, tid).foreach(cc => {
-            val checkerService = checkerServiceFactoryService(cc.checkerType)
-            checkerService.notify(tid, sid, cc, user)
+            if (checkerOrders.isEmpty || checkerOrders.get().contains(cc.ord.toString)) {
+              val tracePayload = new JSONObject().put("isResubmit", true);
+              traceLogService.create("checker.start", Some(tracePayload), userId = Some(uid), courseId = Some(cid), taskId = Some(tid),
+                checkerId = Some(cc.id), submissionId = Some(submission.id))
+              val checkerService = checkerServiceFactoryService(cc.checkerType)
+              checkerService.notify(tid, submission.id, cc, user)
+              traceLogService.create("checker.finish", Some(tracePayload), userId = Some(uid), courseId = Some(cid), taskId = Some(tid),
+                checkerId = Some(cc.id), submissionId = Some(submission.id))
+            }
           })
         case None => throw new ResourceNotFoundException()
       }

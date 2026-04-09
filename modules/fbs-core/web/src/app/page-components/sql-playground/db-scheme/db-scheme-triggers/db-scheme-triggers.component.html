@@ -1,7 +1,7 @@
 <p class="title" role="heading" aria-level="4" tabindex="0">Triggers</p>
 <mat-expansion-panel
   *ngFor="let trigger of triggers$ | async; index as i"
-  aria-label="Trigger {{ trigger.name }}"
+  attr.aria-label="Trigger {{ trigger.name }}"
 >
   <mat-expansion-panel-header>
     <mat-panel-title>
@@ -14,13 +14,13 @@
     [attr.aria-label]="'Details zu Trigger ' + trigger.name"
   >
     <span
-      aria-label="Ausführung: {{ trigger.timing }} {{
+      attr.aria-label="Ausführung: {{ trigger.timing }} {{
         trigger.manipulation
       }} auf Tabelle {{ trigger.objecttable }}"
     >
       {{ trigger.timing }} {{ trigger.manipulation }} {{ trigger.objecttable }}
     </span>
-    <span aria-label="Für jede {{ trigger.orientation }}">
+    <span attr.aria-label="Für jede {{ trigger.orientation }}">
       FOR EACH {{ trigger.orientation }}
     </span>
     <pre class="trigger-definition" aria-label="Trigger-Anweisung">{{

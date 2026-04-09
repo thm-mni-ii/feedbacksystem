@@ -7,7 +7,8 @@ import { AuthService } from "src/app/service/auth.service";
 import { MatDialog } from "@angular/material/dialog";
 import { loadDatabases } from "src/app/page-components/sql-playground/db-control-panel/state/databases.actions";
 import {
-  selectAllDatabases,
+  selectDatabasesForCurrentType,
+  selectCurrentDbType,
   selectDatabasesError,
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
 import { setBackend } from "../../state/sql-playground.actions";
@@ -29,6 +30,7 @@ export class DbControlCoWorkingComponent implements OnInit {
   groups$: Observable<Group[]>;
   error$: Observable<any>;
   backend$: Observable<BackendDefintion>;
+  currentDbType$: Observable<"postgres" | "mongo">;
   selectedDatabase: number = 0;
   selectedGroup: number = 0;
   token = this.authService.getToken();
@@ -47,9 +49,17 @@ export class DbControlCoWorkingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(loadDatabases());
+    // Get current db type from localStorage (defaults to postgres for co-working)
+    const dbType =
+      (localStorage.getItem("playground-db-type") as "postgres" | "mongo") ||
+      "postgres";
+
+    this.store.dispatch(loadDatabases({ dbType }));
     this.store.dispatch(loadGroups());
-    this.databases$ = this.store.select(selectAllDatabases);
+
+    // Use selector to get databases for current type from state
+    this.databases$ = this.store.select(selectDatabasesForCurrentType);
+    this.currentDbType$ = this.store.select(selectCurrentDbType);
     this.groups$ = this.store.select(selectAllGroups);
     this.error$ = this.store.select(selectDatabasesError);
     this.backend$ = this.store.select(selectBackend);
@@ -78,7 +88,7 @@ export class DbControlCoWorkingComponent implements OnInit {
                 type: "collaborative",
                 id: this.selectedGroup.toString(),
                 database: {
-                  id: database.id,
+                  id: database.id as number,
                   name: database.name,
                   owner: this.authService.getToken().username,
                 },

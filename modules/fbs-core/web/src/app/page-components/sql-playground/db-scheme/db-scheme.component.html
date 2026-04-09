@@ -1,7 +1,9 @@
 <div class="scheme-container" *ngIf="selectedDbType">
   <h2>{{ title }}</h2>
   <ng-container *ngIf="selectedDbType === 'postgres'">
-    <app-db-scheme-tables></app-db-scheme-tables>
+    <app-db-scheme-tables
+      (submitStatement)="submitStatement.emit($event)"
+    ></app-db-scheme-tables>
     <app-db-scheme-views></app-db-scheme-views>
     <app-db-scheme-triggers></app-db-scheme-triggers>
     <app-db-scheme-routines></app-db-scheme-routines>
