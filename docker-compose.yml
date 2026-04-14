@@ -47,6 +47,16 @@ services:
       - ./conf/fbs-core.api:/usr/local/fbs-core.api/conf
     environment:
       - SERVER_HOST=https://localhost
+      # SSO / SAML can be configured either here via environment variables
+      # or via ./conf/fbs-core.api/application.yml, which is mounted below.
+      # Typical productive setup behind Shibboleth or another trusted proxy:
+      # - SSO_LOGIN_URL=
+      # - SSO_RETURN_URL_PARAMETER=
+      # - SSO_PRINCIPAL_HEADER_NAMES=X-Forwarded-User,eppn,Remote-User,SM_USER
+      # - SSO_SUCCESS_URL=/login
+      # - SSO_FAILURE_URL=/login?ssoError=1
+      # - LDAP_ENABLED=true
+      # - LDAP_ALLOW_LOGIN=false
       - KAFKA_ADDRESS=kafka1:9092
       - MYSQL_URI=jdbc:mysql://mysql1:3306
       - MYSQL_USER=root

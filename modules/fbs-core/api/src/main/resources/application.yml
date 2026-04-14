@@ -1,10 +1,10 @@
-cas:
-  authentication-url-patterns: /api/v1/login
+sso:
   client-host-url: ${SERVER_HOST:https://localhost}
-  server-login-url: https://cas.thm.de/cas/login
-  server-url-prefix: https://cas.thm.de/cas/
-  validation-type: CAS3
-  validation-url-patterns: /api/v1/login/cas
+  login-url: ${SSO_LOGIN_URL:}
+  return-url-parameter: ${SSO_RETURN_URL_PARAMETER:}
+  principal-header-names: ${SSO_PRINCIPAL_HEADER_NAMES:X-Forwarded-User,Remote-User,SM_USER,eppn}
+  success-url: ${SSO_SUCCESS_URL:/login}
+  failure-url: ${SSO_FAILURE_URL:/login?ssoError=1}
 compile:
   production: true
 jwt:

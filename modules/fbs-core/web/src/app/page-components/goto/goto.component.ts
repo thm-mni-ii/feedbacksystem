@@ -28,7 +28,7 @@ export class GoToComponent implements OnInit {
     if (this.authService.isAuthenticated()) {
       this.goToService.goTo();
     } else {
-      window.location.href = `https://cas.thm.de/cas/login?service=${window.location.origin}/api/v1/login/cas`;
+      this.authService.startSingleSignOnLogin();
     }
   }
 }

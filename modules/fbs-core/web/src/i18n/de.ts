@@ -1,6 +1,6 @@
 export const germanTranslation = {
   "login.login": "Anmelden",
-  "login.loginWithCas": "Mit CAS Anmelden",
+  "login.loginWithSso": "Mit Single Sign-On anmelden",
   "login.or": "Or",
   "login.localLogin": "Lokale Anmeldung",
   "login.username": "Nutzername",
@@ -177,7 +177,7 @@ export const germanTranslation = {
   "dialog.confirm.label.confirm": "Ja",
   "dialog.user.guest.create.heading": "Neuen Benutzer erstellen",
   "dialog.user.guest.create.note":
-    "Hinweis: Alle Benutzer des Central Authentication Service (CAS) können sich in das System einloggen. Ein lokaler Benutzer ist ein normaler Benutzer, ist jedoch darauf beschränkt, sich lokal anzumelden. Dieser Benutzertyp ist ausschließlich für externe Personen gedacht.",
+    "Hinweis: Alle Benutzer des konfigurierten Single-Sign-On-Anbieters können sich in das System einloggen. Ein lokaler Benutzer ist ein normaler Benutzer, ist jedoch darauf beschränkt, sich lokal anzumelden. Dieser Benutzertyp ist ausschließlich für externe Personen gedacht.",
   "dialog.user.guest.create.firstname-label": "Vorname",
   "dialog.user.guest.create.firstname-error": "Das Feld ist erforderlich!",
   "dialog.user.guest.create.lastname-label": "Nachname",

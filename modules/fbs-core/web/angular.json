@@ -22,11 +22,20 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets", { "glob": "**/*", "input": "node_modules/katex/dist", "output": "." }, {
-              "glob": "**/*",
-              "input": "node_modules/@kolkov/angular-editor/assets/icons",
-              "output": "assets/ae-icons/"
-            }],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/katex/dist",
+                "output": "."
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@kolkov/angular-editor/assets/icons",
+                "output": "assets/ae-icons/"
+              }
+            ],
             "styles": [
               "src/theme.scss",
               "src/styles.scss",
@@ -45,7 +54,12 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "allowedCommonJsDependencies": ["chart.js", "file-saver"]
+            "allowedCommonJsDependencies": [
+              "mammoth",
+              "prismjs",
+              "chart.js",
+              "file-saver"
+            ]
           },
           "configurations": {
             "production": {
@@ -104,7 +118,10 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }

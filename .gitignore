@@ -1,4 +1,6 @@
 .gradle/
+.gradle-user/
+.gradle-user-home/
 .idea/
 .settings/
 .vscode/

@@ -25,6 +25,7 @@ Intelligent, personalized feedback for students using artificial intelligence
 - [Install](#install)
   - [Development](#development)
   - [Production](#production)
+- [Single Sign-On](#single-sign-on)
 - [API](#api)
 - [License](#license)
 
@@ -112,6 +113,24 @@ helm repo add thm-mni-ii https://thm-mni-ii.github.io/helm-charts
 ```
 helm install -n <namepsace> --create-namespace --wait -f vals.yaml fbs thm-mni-ii/feedbackssystem
 ```
+
+## Single Sign-On
+
+CAS is no longer required for seamless LMS login.
+The Feedbacksystem backend now supports a generic SSO flow that can be integrated with SAML/Shibboleth or another trusted upstream identity provider.
+
+Relevant entrypoints and configuration:
+
+- Backend SSO entrypoint: `/api/v1/login/sso`
+- Temporary legacy alias during migration: `/api/v1/login/cas`
+- Example runtime configuration: `conf/fbs-core.api/application.yml`
+- Detailed migration and proxy setup guide: `docs/sso-saml.md`
+
+Recommended productive mode:
+
+- Protect `/api/v1/login/sso` with a reverse proxy or SAML service provider.
+- Forward the authenticated user in a trusted header such as `X-Forwarded-User`.
+- Keep `ldap.enabled=true` and `ldap.allowLogin=false` if LDAP should only provision unknown SSO users.
 
 ## API
 

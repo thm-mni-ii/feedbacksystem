@@ -62,7 +62,7 @@ button {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  .cas {
+  .sso {
     background-color: green;
   }
 }
@@ -103,16 +103,6 @@ button {
       font-size: 16px;
     }
   }
-}
-
-#cas-login {
-  align-self: center;
-  color: blue;
-  text-decoration: underline;
-}
-
-#cas-login:hover {
-  cursor: pointer;
 }
 
 .github-link {

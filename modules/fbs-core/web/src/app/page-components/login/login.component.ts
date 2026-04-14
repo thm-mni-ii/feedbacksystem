@@ -1,6 +1,5 @@
-import { Component, Inject, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
-import { DOCUMENT } from "@angular/common";
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
@@ -22,10 +21,10 @@ export class LoginComponent implements OnInit {
   password: string;
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private auth: AuthService,
     private dialog: MatDialog,
-    @Inject(DOCUMENT) private document: Document,
     private snackbar: MatSnackBar,
     private legalService: LegalService,
     private cookieService: CookieService,
@@ -33,6 +32,19 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const requestedRoute = this.route.snapshot.queryParamMap.get("route");
+    if (requestedRoute) {
+      localStorage.setItem("route", requestedRoute);
+    }
+
+    if (this.route.snapshot.queryParamMap.get("ssoError")) {
+      this.snackbar.open(
+        "Die Anmeldung über Single Sign-On konnte nicht abgeschlossen werden.",
+        "OK",
+        { duration: 4000 }
+      );
+    }
+
     const token = this.cookieService.get("jwt");
     if (token) {
       localStorage.setItem("token", token);
@@ -85,13 +97,12 @@ export class LoginComponent implements OnInit {
   }
 
   /**
-   * Redirect to cas login
+   * Redirect to the configured single sign-on login
    */
-  casLogin() {
-    const getUrl = window.location;
-    const baseUrl = getUrl.protocol + "//" + getUrl.host;
-    this.document.location.href =
-      "https://cas.thm.de/cas/login?service=" + baseUrl + "/api/v1/login/cas";
+  ssoLogin() {
+    this.auth.startSingleSignOnLogin(
+      this.route.snapshot.queryParamMap.get("route")
+    );
   }
 
   private checktermsOfUse(uid: number) {
