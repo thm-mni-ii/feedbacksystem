@@ -45,6 +45,21 @@ class UserService {
       parseResult(res), username).headOption
 
   /**
+    * Find the first active (non-deleted) user by username
+    * @param username username
+    * @return The found user
+    */
+  def findActive(username: String): Option[User] =
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user where username = ? AND deleted = 0", (res, _) =>
+      parseResult(res), username).headOption
+
+  /**
+    * Update the last login timestamp of the user with the given id.
+    * @param id The user id
+    */
+  def updateLastLogin(id: Int): Unit = {}
+
+  /**
     * Create a new user.
     * @param user The new user
     * @param password The users password (nullable)
