@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, UnauthorizedException}
 import de.thm.ii.fbs.model.{GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.UserService
-import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService, SingleSignOnService}
+import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService, SamlService, SamlUser, SingleSignOnService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 
 /**
@@ -28,6 +29,8 @@ class LoginController {
   private val ldapService: LdapService = null
   @Autowired
   private val singleSignOnService: SingleSignOnService = null
+  @Autowired(required = false)
+  private val samlService: SamlService = null
 
   @Value("${ldap.attributeNames.uid}")
   private val uidAttributeName: String = null
@@ -92,9 +95,12 @@ class LoginController {
     }
   }
 
-  private def authenticateExternalUser(username: String, route: String, response: HttpServletResponse): Unit = {
+  private def authenticateExternalUser(username: String, route: String, response: HttpServletResponse,
+                                       samlUser: Option[SamlUser] = None): Unit = {
     val authenticatedUser = userService.findActive(username)
       .orElse(loadUserFromLdap(username).map(u => userService.create(u, null)))
+      .orElse(samlUser.map(su => userService.create(
+        new User(su.prename, su.surname, su.email, su.username, GlobalRole.USER), null)))
 
     authenticatedUser match {
       case Some(user) =>
@@ -210,6 +216,57 @@ class LoginController {
     user match {
       case Some(user) => authService.renewAuthentication(user, response)
       case None => throw new UnauthorizedException()
+    }
+  }
+
+  /**
+    * Returns the SAML SP metadata XML.
+    *
+    * The IdP must import this metadata to trust the SP.
+    * URL: GET /api/v1/login/saml/metadata
+    */
+  @RequestMapping(value = Array("/saml/metadata"), method = Array(RequestMethod.GET),
+    produces = Array("application/samlmetadata+xml", MediaType.APPLICATION_XML_VALUE))
+  def samlMetadata(): ResponseEntity[String] = {
+    if (samlService == null) {
+      ResponseEntity.status(503).body("SAML is not enabled (set saml.enabled=true)")
+    } else {
+      ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType("application/samlmetadata+xml"))
+        .body(samlService.buildMetadataXml())
+    }
+  }
+
+  /**
+    * SAML Assertion Consumer Service (ACS) endpoint.
+    *
+    * The IdP POSTs the SAMLResponse here after the user authenticates.
+    * RelayState carries the frontend route to redirect to after login.
+    *
+    * URL: POST /api/v1/login/saml/acs
+    */
+  @RequestMapping(value = Array("/saml/acs"), method = Array(RequestMethod.POST))
+  def samlAcs(
+    @RequestParam(value = "SAMLResponse", required = true) samlResponse: String,
+    @RequestParam(value = "RelayState", required = false) relayState: String,
+    request: HttpServletRequest,
+    response: HttpServletResponse
+  ): Unit = {
+    if (samlService == null) {
+      redirect(response, singleSignOnService.buildFailureRedirect(relayState))
+    } else {
+      try {
+        samlService.extractUser(samlResponse, request) match {
+          case Some(samlUser) => authenticateExternalUser(samlUser.username, relayState, response, Some(samlUser))
+          case None =>
+            logger.warn("SAML ACS: could not extract principal from SAMLResponse")
+            redirect(response, singleSignOnService.buildFailureRedirect(relayState))
+        }
+      } catch {
+        case e: Throwable =>
+          logger.error("SAML ACS error", e)
+          redirect(response, singleSignOnService.buildFailureRedirect(relayState))
+      }
     }
   }
 

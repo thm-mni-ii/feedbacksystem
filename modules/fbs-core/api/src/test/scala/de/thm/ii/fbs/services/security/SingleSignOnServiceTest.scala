@@ -12,7 +12,8 @@ class SingleSignOnServiceTest {
     "target",
     "X-Forwarded-User,SM_USER",
     "/login",
-    "/login?ssoError=1"
+    "/login?ssoError=1",
+    false
   )
 
   @Test
