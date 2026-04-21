@@ -4,7 +4,6 @@ import de.thm.ii.fbs.TestApplication
 import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.task.Task
 import de.thm.ii.fbs.model.{CheckResult, Submission}
-import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.junit.{Assert, Before, Test}
 import org.springframework.beans.factory.annotation.Autowired
@@ -72,7 +71,7 @@ class SubmissionServiceTest {
   @Test
   def testGetOrHiddenWithoutHidden(): Unit = {
     val task = createTask(None)
-    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0,
+    val submission = Submission(new java.util.Date(), task.id, done = true, 0,
       results = List(CheckResult(1, "Test", "test", 1, null)).toArray,
       additionalInformation = None)
     val res = submissionService.getOrHidden(submission, hideResult = false, adminPrivileged = false)
@@ -84,7 +83,7 @@ class SubmissionServiceTest {
   @Test
   def testGetOrHiddenWithHidden(): Unit = {
     val task = createTask(None)
-    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0,
+    val submission = Submission(new java.util.Date(), task.id, done = true, 0,
       results = List(CheckResult(1, "Test", "test", 1, null)).toArray,
       additionalInformation = None)
     val res = submissionService.getOrHidden(submission, hideResult = true, adminPrivileged = false)
@@ -96,7 +95,7 @@ class SubmissionServiceTest {
   @Test
   def testGetOrHiddenWithHiddenAdmin(): Unit = {
     val task = createTask(None)
-    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0,
+    val submission = Submission(new java.util.Date(), task.id, done = true, 0,
       results = List(CheckResult(1, "Test", "test", 1, null)).toArray,
       additionalInformation = None)
     val res = submissionService.getOrHidden(submission, hideResult = true, adminPrivileged = true)
