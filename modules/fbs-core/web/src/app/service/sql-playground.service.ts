@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Constraint } from "../model/sql_playground/Constraint";
@@ -19,12 +19,25 @@ import { View } from "../model/sql_playground/View";
 export class SqlPlaygroundService {
   constructor(private http: HttpClient) {}
 
+  private buildOptions(courseId?: number) {
+    if (courseId == null) {
+      return {};
+    }
+
+    return {
+      params: new HttpParams().set("courseId", courseId.toString()),
+    };
+  }
+
   /**
    * Load all databases for a user
    * @param uid User id
    */
-  getDatabases(uid: number): Observable<Database[]> {
-    return this.http.get<Database[]>(`/api/v2/playground/${uid}/databases`);
+  getDatabases(uid: number, courseId?: number): Observable<Database[]> {
+    return this.http.get<Database[]>(
+      `/api/v2/playground/${uid}/databases`,
+      this.buildOptions(courseId)
+    );
   }
 
   /**
@@ -72,13 +85,15 @@ export class SqlPlaygroundService {
   submitStatement(
     uid: number,
     dbId: number,
-    statement: string
+    statement: string,
+    courseId?: number
   ): Observable<SQLExecuteResponse> {
     return this.http.post<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/execute`,
       {
         statement: statement,
-      }
+      },
+      this.buildOptions(courseId)
     );
   }
 
@@ -103,9 +118,15 @@ export class SqlPlaygroundService {
    * @param rId Result id
    * @returns SQL Response
    */
-  getResults(uid: number, dbId: number, rId: number): Observable<SQLResponse> {
+  getResults(
+    uid: number,
+    dbId: number,
+    rId: number,
+    courseId?: number
+  ): Observable<SQLResponse> {
     return this.http.get<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/results/${rId}`
+      `/api/v2/playground/${uid}/databases/${dbId}/results/${rId}`,
+      this.buildOptions(courseId)
     );
   }
 
@@ -115,9 +136,14 @@ export class SqlPlaygroundService {
    * @param dbId Database id
    * @returns all Results
    */
-  getResultsList(uid: number, dbId: number): Observable<Database[]> {
+  getResultsList(
+    uid: number,
+    dbId: number,
+    courseId?: number
+  ): Observable<Database[]> {
     return this.http.get<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/results`
+      `/api/v2/playground/${uid}/databases/${dbId}/results`,
+      this.buildOptions(courseId)
     );
   }
 
@@ -127,9 +153,10 @@ export class SqlPlaygroundService {
    * @param dbId Database id
    * @returns all Tables
    */
-  getTables(uid: number, dbId: number): Observable<Table[]> {
+  getTables(uid: number, dbId: number, courseId?: number): Observable<Table[]> {
     return this.http.get<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/tables`
+      `/api/v2/playground/${uid}/databases/${dbId}/tables`,
+      this.buildOptions(courseId)
     );
   }
 
@@ -139,9 +166,14 @@ export class SqlPlaygroundService {
    * @param dbId Database id
    * @returns all Constraints
    */
-  getConstraints(uid: number, dbId: number): Observable<Constraint[]> {
+  getConstraints(
+    uid: number,
+    dbId: number,
+    courseId?: number
+  ): Observable<Constraint[]> {
     return this.http.get<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/constraints`
+      `/api/v2/playground/${uid}/databases/${dbId}/constraints`,
+      this.buildOptions(courseId)
     );
   }
 
@@ -151,9 +183,10 @@ export class SqlPlaygroundService {
    * @param dbId Database id
    * @returns all Views
    */
-  getViews(uid: number, dbId: number): Observable<View[]> {
+  getViews(uid: number, dbId: number, courseId?: number): Observable<View[]> {
     return this.http.get<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/views`
+      `/api/v2/playground/${uid}/databases/${dbId}/views`,
+      this.buildOptions(courseId)
     );
   }
 
@@ -163,9 +196,14 @@ export class SqlPlaygroundService {
    * @param dbId Database id
    * @returns all Triggers
    */
-  getTriggers(uid: number, dbId: number): Observable<Trigger[]> {
+  getTriggers(
+    uid: number,
+    dbId: number,
+    courseId?: number
+  ): Observable<Trigger[]> {
     return this.http.get<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/triggers`
+      `/api/v2/playground/${uid}/databases/${dbId}/triggers`,
+      this.buildOptions(courseId)
     );
   }
 
@@ -175,9 +213,14 @@ export class SqlPlaygroundService {
    * @param dbId Database id
    * @returns all Routines
    */
-  getRoutines(uid: number, dbId: number): Observable<Routine[]> {
+  getRoutines(
+    uid: number,
+    dbId: number,
+    courseId?: number
+  ): Observable<Routine[]> {
     return this.http.get<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/routines`
+      `/api/v2/playground/${uid}/databases/${dbId}/routines`,
+      this.buildOptions(courseId)
     );
   }
 

@@ -25,16 +25,17 @@ class SqlPlaygroundCheckerService(
     private val idService: IdService
 ) : RemoteCheckerV2Service(insecure, masterRunnerURL) {
 
-    fun submit(query: SqlPlaygroundQuery) {
+    fun submit(query: SqlPlaygroundQuery, userId: Int, username: String, readOnly: Boolean = false) {
         this.sendToRunner(
             SqlPlaygroundRunnerArguments(
                 query.id!!,
-                RunnerUser(query.runIn.owner.id!!, query.runIn.owner.username),
+                RunnerUser(userId, username),
                 query.statement,
                 RunnerDatabase(
                     query.runIn.id!!,
                     query.runIn.name
-                )
+                ),
+                readOnly = readOnly
             )
         )
     }

@@ -9,7 +9,7 @@ import {
 } from "@angular/core";
 import { Subject } from "rxjs";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
-import { AuthService } from "src/app/service/auth.service";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 
 @Component({
   selector: "app-db-scheme-collections",
@@ -26,7 +26,7 @@ export class DbSchemeCollectionsComponent implements OnInit, OnChanges {
 
   constructor(
     private mongoService: MongoPlaygroundService,
-    private auth: AuthService
+    private playgroundContext: PlaygroundContextService
   ) {}
 
   ngOnInit(): void {
@@ -46,10 +46,15 @@ export class DbSchemeCollectionsComponent implements OnInit, OnChanges {
   }
 
   loadData(): void {
-    this.dbName = localStorage.getItem("playground-mongo-db")!;
-    this.userId = this.auth.getToken().id;
+    this.dbName = this.dbName || localStorage.getItem("playground-mongo-db")!;
+    if (!this.dbName) {
+      this.collections = [];
+      return;
+    }
 
-    const userId = this.auth.getToken().id;
+    this.userId = this.playgroundContext.userId;
+
+    const userId = this.playgroundContext.userId;
     const prefix = `mongo_playground_student_${this.userId}_`;
     const dbSuffix = this.dbName.startsWith(prefix)
       ? this.dbName.split(prefix)[1]
@@ -57,13 +62,18 @@ export class DbSchemeCollectionsComponent implements OnInit, OnChanges {
 
     setTimeout(() => {
       this.mongoService
-        .getMongoCollections(userId, dbSuffix)
+        .getMongoCollections(userId, dbSuffix, this.playgroundContext.courseId)
         .subscribe((cols) => {
           this.collections = cols.map((col) => ({ name: col, count: 0 }));
 
           cols.forEach((col, idx) => {
             this.mongoService
-              .getCollectionCount(userId, dbSuffix, col)
+              .getCollectionCount(
+                userId,
+                dbSuffix,
+                col,
+                this.playgroundContext.courseId
+              )
               .subscribe((count) => {
                 this.collections[idx].count = count;
               });

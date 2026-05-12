@@ -42,6 +42,7 @@ export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
   private lastUpdated: string;
   @Input() index!: number;
   @Input() language!: string;
+  @Input() readOnly: boolean = false;
 
   get contentControl() {
     return this.groupForm.get("content")?.value;
@@ -74,9 +75,12 @@ export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
         .select(fromSqlInputTabs.selectTabs)
         .pipe(map((tabs) => tabs[this.index]))
         .subscribe((activeTab) => {
-          this.groupForm.setValue({
-            content: activeTab?.content ?? "",
-          });
+          this.groupForm.setValue(
+            {
+              content: activeTab?.content ?? "",
+            },
+            { emitEvent: false }
+          );
           this.render(activeTab?.content ?? "");
         })
     );
@@ -85,6 +89,10 @@ export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
       this.groupForm.valueChanges
         .pipe(map((val: any) => val.content))
         .subscribe((content: string) => {
+          if (this.readOnly) {
+            return;
+          }
+
           this.render(content);
 
           if (content !== this.lastUpdated) {
@@ -113,6 +121,10 @@ export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
   }
 
   onTab(event) {
+    if (this.readOnly) {
+      return;
+    }
+
     event.preventDefault();
     var start = event.target.selectionStart;
     var end = event.target.selectionEnd;

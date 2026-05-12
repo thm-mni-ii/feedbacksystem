@@ -11,6 +11,8 @@ data class SqlPlaygroundRunnerArguments(
     val statement: String,
     @JsonProperty("database")
     val database: RunnerDatabase,
+    @JsonProperty("readOnly")
+    val readOnly: Boolean = false,
     @JsonProperty("runner")
     val runner: Runner = Runner(RunnerType.SQL_PLAYGROUND),
     @JsonProperty("mode")

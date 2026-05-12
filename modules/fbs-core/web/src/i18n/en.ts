@@ -162,6 +162,8 @@ export const englishTranslation = {
   "course.participants.tutorOption.label": "Tutor",
   "course.participants.actions.label": "Actions",
   "course.participants.unregisterUser.tooltip": "Unregister User",
+  "course.participants.inspectPlayground.tooltip":
+    "Open playground in read-only mode",
   "dialog.all-submissions.label.close": "Close",
   "dialog.confirm.label.abort": "Cancel",
   "dialog.confirm.label.confirm": "Yes",
@@ -393,6 +395,14 @@ export const englishTranslation = {
   "sql-playground.input.new-query": "New Query",
   "sql-playground.input.course": "Course",
   "sql-playground.input.task": "Task",
+  "sql-playground.read-only.banner":
+    "You are viewing the playground in read-only mode of",
+  "sql-playground.read-only.hint":
+    "Changes are blocked. MongoDB allows read-only queries only.",
+  "sql-playground.read-only.select-db":
+    "You can switch between existing databases without changing the student's active selection.",
+  "sql-playground.read-only.execute-hint":
+    "PostgreSQL execution is disabled in this mode. MongoDB allows find and aggregate queries only.",
   "sql-playground.result-table.create-first-query":
     "Create your first query in the input field below",
   "sql-playground.result-table.sql-error": "SQL Error",

@@ -10,10 +10,12 @@
       [selectedMongoDbId]="selectedMongoDbId"
       (mongoDbSelected)="mongoDbSelectedToParent($event)"
       (schemaReload)="schemaReload.emit()"
+      (dbChanged)="dbChangedToParent($event)"
     >
     </app-db-control-db-overview>
   </mat-tab>
   <mat-tab
+    *ngIf="!readOnly"
     label="{{ 'sql-playground.db-control-panel.tab-templates' | i18nextEager }}"
   >
     <app-db-control-templates
@@ -24,6 +26,7 @@
     >
   </mat-tab>
   <mat-tab
+    *ngIf="!readOnly"
     label="{{ 'sql-playground.db-control-panel.tab-coworking' | i18nextEager }}"
   >
     <app-db-control-co-working></app-db-control-co-working>

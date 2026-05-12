@@ -7,4 +7,5 @@ case class SqlPlaygroundRunArgs(@JsonProperty("executionId") executionId: Int,
                                 @JsonProperty("user") user: User,
                                 @JsonProperty("statement") statement: String,
                                 @JsonProperty("database") database: Database,
+                                @JsonProperty("readOnly") readOnly: Boolean,
                                 @JsonProperty("mode") mode: String)

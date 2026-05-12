@@ -75,7 +75,7 @@ class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: Playgr
     val dbOperations = initDBOperations()
     val deleteDatabase = SqlPlaygroundMode.shouldDeleteDatabase(sqlRunArgs.mode)
 
-    con.initCon(dbOperations).flatMap(_ => {
+    con.initCon(dbOperations, allowUserWrite = !sqlRunArgs.readOnly).flatMap(_ => {
       executeAndCollectInformation(dbOperations)
     }) transform {
       case s@Success(_) =>

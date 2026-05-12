@@ -1,4 +1,10 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable, Subject } from "rxjs";
 import { Table } from "src/app/model/sql_playground/Table";
@@ -7,8 +13,6 @@ import { Trigger } from "src/app/model/sql_playground/Trigger";
 import { Routine } from "src/app/model/sql_playground/Routine";
 import { Constraint } from "src/app/model/sql_playground/Constraint";
 import * as fromSqlPlayground from "../state/sql-playground.selectors";
-import { MongoPlaygroundService } from "../../../service/mongo-playground.service";
-import { AuthService } from "../../../service/auth.service";
 import { EventEmitter, Output } from "@angular/core";
 
 @Component({
@@ -16,9 +20,10 @@ import { EventEmitter, Output } from "@angular/core";
   templateUrl: "./db-scheme.component.html",
   styleUrls: ["./db-scheme.component.scss"],
 })
-export class DbSchemeComponent implements OnInit {
+export class DbSchemeComponent implements OnInit, OnChanges {
   @Input() title: string;
   @Input() dbName: string;
+  @Input() dbType: "postgres" | "mongo";
   @Input() reloadTrigger: Subject<void>;
   @Output() submitStatement = new EventEmitter<string>();
 
@@ -30,11 +35,7 @@ export class DbSchemeComponent implements OnInit {
   selectedDbType: "postgres" | "mongo" | null = null;
   collections$: Observable<string[]>;
 
-  constructor(
-    private store: Store,
-    private mongoService: MongoPlaygroundService,
-    private auth: AuthService
-  ) {
+  constructor(private store: Store) {
     this.selectedDbType = localStorage.getItem("playground-db-type") as
       | "postgres"
       | "mongo"
@@ -42,18 +43,31 @@ export class DbSchemeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.selectedDbType = this.dbType || this.selectedDbType;
+
     if (this.selectedDbType === "postgres") {
-      this.tables$ = this.store.select(fromSqlPlayground.selectTables);
-      this.views$ = this.store.select(fromSqlPlayground.selectViews);
-      this.triggers$ = this.store.select(fromSqlPlayground.selectTriggers);
-      this.routines$ = this.store.select(fromSqlPlayground.selectRoutines);
-      this.constraints$ = this.store.select(
-        fromSqlPlayground.selectConstraints
-      );
+      this.initPostgresSelectors();
     }
 
     if (this.reloadTrigger) {
       this.reloadTrigger.subscribe(() => {});
     }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["dbType"]?.currentValue) {
+      this.selectedDbType = changes["dbType"].currentValue;
+      if (this.selectedDbType === "postgres") {
+        this.initPostgresSelectors();
+      }
+    }
+  }
+
+  private initPostgresSelectors(): void {
+    this.tables$ = this.store.select(fromSqlPlayground.selectTables);
+    this.views$ = this.store.select(fromSqlPlayground.selectViews);
+    this.triggers$ = this.store.select(fromSqlPlayground.selectTriggers);
+    this.routines$ = this.store.select(fromSqlPlayground.selectRoutines);
+    this.constraints$ = this.store.select(fromSqlPlayground.selectConstraints);
   }
 }

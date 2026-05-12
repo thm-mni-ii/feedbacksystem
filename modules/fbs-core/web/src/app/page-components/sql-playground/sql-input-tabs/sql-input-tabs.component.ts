@@ -32,6 +32,7 @@ import { SubmissionService } from "../../../service/submission.service";
 import { Input } from "@angular/core";
 import { MongoPlaygroundService } from "../../../service/mongo-playground.service";
 import { CheckerService } from "src/app/service/checker.service";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -43,6 +44,7 @@ export class SqlInputTabsComponent
 {
   @Input() dbType: "postgres" | "mongo" = "postgres";
   @Input() dbName!: string;
+  @Input() readOnly: boolean = false;
   @Input() schemaReload!: Subject<void>;
   @Output() submitStatement = new EventEmitter<string>();
 
@@ -85,6 +87,10 @@ export class SqlInputTabsComponent
   private subs: Subscription[] = [];
   private lastCourseId?: number;
 
+  get isEditorReadOnly(): boolean {
+    return this.readOnly && this.dbType === "postgres";
+  }
+
   constructor(
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
@@ -95,7 +101,8 @@ export class SqlInputTabsComponent
     private prismService: PrismService,
     private store: Store,
     private mongoService: MongoPlaygroundService,
-    private checkerService: CheckerService
+    private checkerService: CheckerService,
+    private playgroundContext: PlaygroundContextService
   ) {}
 
   ngAfterViewChecked() {
@@ -110,9 +117,12 @@ export class SqlInputTabsComponent
   }
 
   ngOnInit(): void {
+    this.readOnly = this.readOnly || this.playgroundContext.isReadOnly();
     this.codeType = this.dbType === "mongo" ? "json" : "sql";
     const userID = this.authService.getToken().id;
-    this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
+    this.courses = this.readOnly
+      ? of([])
+      : this.courseRegistrationService.getRegisteredCourses(userID);
 
     const queryPending$ = this.store.select(
       fromSqlPlayground.selectIsQueryPending
@@ -154,6 +164,10 @@ export class SqlInputTabsComponent
   }
 
   closeTab(index: number) {
+    if (this.readOnly) {
+      return;
+    }
+
     this.openConfirmDialog(
       "Möchtest du wirklich diesen Tab schließen?",
       "Achtung der Inhalt wird nicht gespeichert!"
@@ -172,6 +186,10 @@ export class SqlInputTabsComponent
     if (event) {
       event.stopPropagation();
     }
+    if (this.readOnly) {
+      return;
+    }
+
     this.store.dispatch(SqlInputTabsActions.addTab({}));
   }
 
@@ -179,6 +197,10 @@ export class SqlInputTabsComponent
     if (event) {
       event.stopPropagation();
     }
+    if (this.readOnly) {
+      return;
+    }
+
     this.openConfirmDialog(
       "Möchtest du wirklich alle Tabs schließen?",
       "Achtung der Inhalt wird nicht gespeichert!"
@@ -221,6 +243,10 @@ export class SqlInputTabsComponent
   }
 
   submission(): void {
+    if (this.readOnly && this.dbType === "postgres") {
+      return;
+    }
+
     this.isSubmissionEmpty()
       .pipe(take(1))
       .subscribe((isEmpty) => {
@@ -289,12 +315,19 @@ export class SqlInputTabsComponent
   }
 
   updateTabContent(index: number, content: string) {
+    if (this.isEditorReadOnly) {
+      return;
+    }
+
     this.store.dispatch(
       SqlInputTabsActions.updateTabContent({ index, content })
     );
   }
 
   submissionToTask() {
+    if (this.readOnly) {
+      return;
+    }
     this.store.dispatch(
       SqlInputTabsActions.submissionToTask({ index: this.activeTabIndex })
     );
@@ -305,6 +338,10 @@ export class SqlInputTabsComponent
   }
 
   updateTabName(index: number, name: string) {
+    if (this.readOnly) {
+      return;
+    }
+
     this.store.dispatch(SqlInputTabsActions.updateTabName({ index, name }));
   }
 
@@ -480,6 +517,9 @@ export class SqlInputTabsComponent
   }
 
   private fetchLatestSubmission(tab: QueryTab, forceRefresh = false) {
+    if (this.readOnly) {
+      return;
+    }
     const courseId = tab?.selectedCourse?.id;
     const taskId = tab?.selectedTask?.id;
     if (!courseId || !taskId) {

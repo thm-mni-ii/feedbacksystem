@@ -75,7 +75,7 @@ class SqlPlaygroundShareVerticle extends ScalaVerticle {
         queryTimeout = config.getInteger("SQL_QUERY_TIMEOUT_S", 60)
       )
       val conn = getConnection(runArgs).get
-      conn.initCon(ops).flatMap(_ => {
+      conn.initCon(ops, allowUserWrite = true).flatMap(_ => {
         ops.createDB(conn.operationCon.get).flatMap(_ => {
           ops.createPostgresqlUser(conn.queryCon.get, runArgs.id, runArgs.password).flatMap(_ => {
             ops.queryFutureWithTimeout(conn.queryCon.get, dump).map(_ => Unit)
