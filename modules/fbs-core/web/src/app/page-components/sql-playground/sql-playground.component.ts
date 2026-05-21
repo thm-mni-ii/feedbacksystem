@@ -110,7 +110,7 @@ export class SqlPlaygroundComponent
     this.isQueryPending$ = this.store.select(
       fromSqlPlayground.selectIsQueryPending
     );
-    this.backendService.setupBackendHandler();
+    this.backendService.setupBackendHandler(this.readOnly);
 
     if (this.selectedDbType === "mongo") {
       const userId = this.playgroundContext.userId;
@@ -153,16 +153,14 @@ export class SqlPlaygroundComponent
   }
 
   submitStatement(statement: string) {
-    if (this.selectedDbType === "postgres") {
-      if (this.readOnly) {
-        this.snackbar.open(
-          "PostgreSQL-Abfragen sind im Nur-Lese-Modus deaktiviert",
-          "Ok",
-          { duration: 3000 }
-        );
-        return;
-      }
+    if (this.readOnly) {
+      this.snackbar.open("Abfragen sind im Nur-Lese-Modus deaktiviert", "Ok", {
+        duration: 3000,
+      });
+      return;
+    }
 
+    if (this.selectedDbType === "postgres") {
       this.store.dispatch(SqlPlaygroundActions.submitStatement({ statement }));
       return;
     }

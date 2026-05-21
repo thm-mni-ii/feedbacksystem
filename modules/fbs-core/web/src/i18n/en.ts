@@ -397,12 +397,11 @@ export const englishTranslation = {
   "sql-playground.input.task": "Task",
   "sql-playground.read-only.banner":
     "You are viewing the playground in read-only mode of",
-  "sql-playground.read-only.hint":
-    "Changes are blocked. MongoDB allows read-only queries only.",
+  "sql-playground.read-only.hint": "Database changes are blocked.",
   "sql-playground.read-only.select-db":
     "You can switch between existing databases without changing the student's active selection.",
   "sql-playground.read-only.execute-hint":
-    "PostgreSQL execution is disabled in this mode. MongoDB allows find and aggregate queries only.",
+    "PostgreSQL and MongoDB queries are disabled in this mode.",
   "sql-playground.result-table.create-first-query":
     "Create your first query in the input field below",
   "sql-playground.result-table.sql-error": "SQL Error",

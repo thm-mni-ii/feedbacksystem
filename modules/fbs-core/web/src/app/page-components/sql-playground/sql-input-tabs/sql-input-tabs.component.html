@@ -130,11 +130,7 @@
   <div class="row action-row">
     <button
       #submit
-      [disabled]="
-        (isSubmissionEmpty() | async) ||
-        isPending ||
-        (readOnly && dbType === 'postgres')
-      "
+      [disabled]="(isSubmissionEmpty() | async) || isPending || readOnly"
       mat-flat-button
       color="accent"
       class="excuteBtn"

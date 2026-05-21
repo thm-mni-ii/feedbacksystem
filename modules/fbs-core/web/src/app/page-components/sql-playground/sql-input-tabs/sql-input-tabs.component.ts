@@ -88,7 +88,7 @@ export class SqlInputTabsComponent
   private lastCourseId?: number;
 
   get isEditorReadOnly(): boolean {
-    return this.readOnly && this.dbType === "postgres";
+    return this.readOnly;
   }
 
   constructor(
@@ -143,7 +143,11 @@ export class SqlInputTabsComponent
       fromSqlInputTabs.selectActiveTabIndex
     );
 
-    this.store.dispatch(SqlInputTabsActions.loadTabsFromLocalStorage());
+    if (this.readOnly) {
+      this.store.dispatch(SqlInputTabsActions.closeAllTabs());
+    } else {
+      this.store.dispatch(SqlInputTabsActions.loadTabsFromLocalStorage());
+    }
 
     this.subs.push(
       this.isPending$.subscribe((isPending) => (this.isPending = isPending))
@@ -243,7 +247,7 @@ export class SqlInputTabsComponent
   }
 
   submission(): void {
-    if (this.readOnly && this.dbType === "postgres") {
+    if (this.readOnly) {
       return;
     }
 
@@ -315,7 +319,7 @@ export class SqlInputTabsComponent
   }
 
   updateTabContent(index: number, content: string) {
-    if (this.isEditorReadOnly) {
+    if (this.readOnly) {
       return;
     }
 

@@ -42,8 +42,6 @@ class PlaygroundController(
     private val mongoPlaygroundService: MongoPlaygroundService,
     private val jdbcTemplate: JdbcTemplate
 ) {
-    private val mongoReadOnlyOperations = setOf("find", "aggregate", "getIndexes", "countDocuments", "showCollections")
-
     @GetMapping
     @ResponseBody
     fun index(
@@ -116,6 +114,10 @@ class PlaygroundController(
         @RequestBody commandDTO: MongoShellCommandDTO
     ): Any {
         val readOnly = requestedUserId != currentToken.id
+        if (readOnly) {
+            throw ForbiddenException("MongoDB execution is disabled in read-only playground views.")
+        }
+
         val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
@@ -127,9 +129,6 @@ class PlaygroundController(
 
             return MongoShellParser.batchParse(commandDTO.command).map { parsed ->
                 MongoSecurityValidator.validateShellCommand(commandDTO.command)
-                if (readOnly && parsed.operation !in mongoReadOnlyOperations) {
-                    throw ForbiddenException("Only read-only MongoDB operations are allowed in this playground view.")
-                }
 
                 val collectionName = parsed.collection
                 val collection = collectionName?.let { db.getCollection(it) }
@@ -225,8 +224,8 @@ class PlaygroundController(
         @RequestBody mongoQuery: MongoPlaygroundQueryDTO
     ): Any? {
         val readOnly = requestedUserId != currentToken.id
-        if (readOnly && mongoQuery.operation !in mongoReadOnlyOperations) {
-            throw ForbiddenException("Only read-only MongoDB operations are allowed in this playground view.")
+        if (readOnly) {
+            throw ForbiddenException("MongoDB execution is disabled in read-only playground views.")
         }
 
         val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)

@@ -407,12 +407,11 @@ export const germanTranslation = {
   "sql-playground.input.task": "Aufgabe",
   "sql-playground.read-only.banner":
     "Sie betrachten den Playground im Nur-Lese-Modus von",
-  "sql-playground.read-only.hint":
-    "Änderungen sind gesperrt. MongoDB erlaubt nur lesende Abfragen.",
+  "sql-playground.read-only.hint": "Datenbankänderungen sind gesperrt.",
   "sql-playground.read-only.select-db":
     "Sie können zwischen den vorhandenen Datenbanken wechseln, ohne den aktiven Stand des Studierenden zu verändern.",
   "sql-playground.read-only.execute-hint":
-    "PostgreSQL-Abfragen sind in diesem Modus deaktiviert. MongoDB erlaubt nur find- und aggregate-Abfragen.",
+    "In diesem Modus sind PostgreSQL- und MongoDB-Abfragen deaktiviert.",
   "sql-playground.result-table.create-first-query":
     "Erstelle deine erste Query im unteren Eingabefeld",
   "sql-playground.result-table.sql-error": "SQL Error",

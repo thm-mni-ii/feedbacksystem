@@ -9,6 +9,10 @@ import {
 import { QueryTab } from "../../../model/sql_playground/QueryTab";
 
 export class LocalBackend implements Backend {
+  private tabs: QueryTab[] = [];
+
+  constructor(private persistTabs: boolean = true) {}
+
   setMeta(_databaseInformation: DatabaseInformation): Observable<void> {
     return undefined;
   }
@@ -42,7 +46,7 @@ export class LocalBackend implements Backend {
         i++;
       }
     }
-    localStorage.setItem("tabs", JSON.stringify({ tabs: currentState }));
+    this.saveTabs(currentState);
     return of();
   }
   emitResultChange(_event: ChangeEvent<ResultTab>): Observable<void> {
@@ -56,9 +60,22 @@ export class LocalBackend implements Backend {
   }
 
   private loadLocalStorage(): QueryTab[] {
+    if (!this.persistTabs) {
+      return this.tabs;
+    }
+
     return (JSON.parse(localStorage.getItem("tabs"))?.tabs ?? []).map(
       (tab) => ({ id: crypto.randomUUID(), ...tab })
     );
+  }
+
+  private saveTabs(tabs: QueryTab[]) {
+    if (!this.persistTabs) {
+      this.tabs = tabs;
+      return;
+    }
+
+    localStorage.setItem("tabs", JSON.stringify({ tabs }));
   }
 
   streamMetaChanges(): Observable<{ key: string; value: any }> {
