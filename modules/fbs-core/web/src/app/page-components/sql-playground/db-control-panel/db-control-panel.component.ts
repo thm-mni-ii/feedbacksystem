@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Roles } from "src/app/model/Roles";
@@ -35,6 +36,7 @@ export class DbControlPanelComponent implements OnInit {
   databases$: Observable<Database[]>;
 
   constructor(
+    private route: ActivatedRoute,
     private auth: AuthService,
     private store: Store,
     private playgroundContext: PlaygroundContextService
@@ -44,6 +46,11 @@ export class DbControlPanelComponent implements OnInit {
     const globalRole = this.auth.getToken().globalRole;
     this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
     this.readOnly = this.readOnly || this.playgroundContext.isReadOnly();
+    this.route.queryParamMap.subscribe((params) => {
+      if (!this.readOnly && this.isCoWorkingTab(params.get("controlTab"))) {
+        this.selectedTab = 2;
+      }
+    });
 
     // Load databases based on the stored db type (postgres or mongo)
     const dbType =
@@ -96,5 +103,9 @@ export class DbControlPanelComponent implements OnInit {
 
   mongoDbSelectedToParent(event: string) {
     this.mongoDbSelected.emit(event);
+  }
+
+  private isCoWorkingTab(tab: string | null): boolean {
+    return tab === "co-working" || tab === "coworking";
   }
 }

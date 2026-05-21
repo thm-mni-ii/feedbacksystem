@@ -11,12 +11,12 @@
     </button>
   </div>
 
-  <table>
+  <table class="group-table">
     <tr>
       <th>{{ "course.select-group" | i18nextEager }}</th>
       <th>{{ "course.group" | i18nextEager }}</th>
       <th>{{ "course.group-membership" | i18nextEager }}</th>
-      <th *ngIf="isAuthorized()">{{ "course.settings" | i18nextEager }}</th>
+      <th>{{ "course.participants.actions.label" | i18nextEager }}</th>
     </tr>
     <ng-container *ngFor="let group of groups$ | async; let i = index">
       <tr *ngIf="(!student && group.visible) || student">
@@ -36,15 +36,34 @@
         </td>
         <td>{{ group.name }}</td>
         <td>{{ group.currentMembership }} / {{ group.membership }}</td>
-        <td *ngIf="isAuthorized()">
-          <button
-            class="table-settings-button"
-            mat-icon-button
-            [matMenuTriggerFor]="settings"
-            matTooltip="{{ 'course.settings' | i18nextEager }}"
-          >
-            <mat-icon>settings</mat-icon>
-          </button>
+        <td>
+          <div class="group-actions">
+            <button
+              *ngIf="isAuthorized()"
+              class="table-settings-button"
+              mat-icon-button
+              [matMenuTriggerFor]="settings"
+              matTooltip="{{ 'course.settings' | i18nextEager }}"
+            >
+              <mat-icon>settings</mat-icon>
+            </button>
+            <button
+              *ngIf="isAuthorized() || isRegisteredGroup(group)"
+              mat-icon-button
+              [routerLink]="['/', 'sqlplayground']"
+              [queryParams]="{
+                controlTab: 'co-working',
+                groupId: group.id,
+                groupName: group.name
+              }"
+              matTooltip="{{
+                'sql-playground.db-control-panel.tab-coworking' | i18nextEager
+              }}"
+              aria-label="Co-Working"
+            >
+              <mat-icon>group_work</mat-icon>
+            </button>
+          </div>
           <mat-menu #settings="matMenu">
             <button
               mat-menu-item

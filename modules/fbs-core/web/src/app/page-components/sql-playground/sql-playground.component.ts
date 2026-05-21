@@ -85,9 +85,18 @@ export class SqlPlaygroundComponent
     this.readOnly = this.playgroundContext.isReadOnly();
     this.readOnlyOwnerName = this.playgroundContext.ownerName;
 
-    const savedDbType = (localStorage.getItem("playground-db-type") ||
-      "postgres") as "postgres" | "mongo";
+    const shouldOpenCoWorking = this.isCoWorkingTab(
+      this.route.snapshot.queryParamMap.get("controlTab")
+    );
+    const savedDbType = (shouldOpenCoWorking
+      ? "postgres"
+      : localStorage.getItem("playground-db-type") || "postgres") as
+      | "postgres"
+      | "mongo";
     this.selectedDbType = savedDbType ?? "postgres";
+    if (shouldOpenCoWorking && !this.readOnly) {
+      localStorage.setItem("playground-db-type", "postgres");
+    }
     this.store.dispatch(
       TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
     );
@@ -137,6 +146,10 @@ export class SqlPlaygroundComponent
     return fullName.startsWith(prefix)
       ? fullName.replace(prefix, "")
       : fullName;
+  }
+
+  private isCoWorkingTab(tab: string | null): boolean {
+    return tab === "co-working" || tab === "coworking";
   }
 
   changeActiveDbId(dbId: number) {

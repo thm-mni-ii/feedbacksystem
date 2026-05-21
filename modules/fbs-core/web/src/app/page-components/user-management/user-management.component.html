@@ -60,6 +60,7 @@
       <td mat-cell *matCellDef="let user">
         <mat-select
           value="{{ user.globalRole }}"
+          [disabled]="isDeletedUser(user)"
           (selectionChange)="roleChange(user.id, $event.value)"
         >
           <mat-option value="ADMIN">{{
@@ -87,6 +88,7 @@
             'user-management.tooltip.delete-user' | i18nextEager
           }}"
           color="warn"
+          [disabled]="isDeletedUser(user)"
           (click)="deleteUser(user)"
         >
           <mat-icon>delete</mat-icon>
