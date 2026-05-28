@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.security.v2
 
-import java.util.Date
 import org.junit.Assert
 import org.junit.Test
+import java.util.Date
 
 class AntiBruteForceInterceptorTest {
     @Test
