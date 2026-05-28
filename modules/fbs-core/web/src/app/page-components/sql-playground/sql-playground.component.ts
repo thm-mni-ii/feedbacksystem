@@ -88,11 +88,11 @@ export class SqlPlaygroundComponent
     const shouldOpenCoWorking = this.isCoWorkingTab(
       this.route.snapshot.queryParamMap.get("controlTab")
     );
-    const savedDbType = (shouldOpenCoWorking
-      ? "postgres"
-      : localStorage.getItem("playground-db-type") || "postgres") as
-      | "postgres"
-      | "mongo";
+    const savedDbType = (
+      shouldOpenCoWorking
+        ? "postgres"
+        : localStorage.getItem("playground-db-type") || "postgres"
+    ) as "postgres" | "mongo";
     this.selectedDbType = savedDbType ?? "postgres";
     if (shouldOpenCoWorking && !this.readOnly) {
       localStorage.setItem("playground-db-type", "postgres");
