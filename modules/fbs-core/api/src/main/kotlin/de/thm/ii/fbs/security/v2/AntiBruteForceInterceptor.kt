@@ -92,13 +92,18 @@ class AntiBruteForceInterceptor(
 
     private fun cleanIfNeeded() {
         lock.lock()
-        if (Date().time - lastClean.time / 1000 > interval) {
+        val now = Date()
+        if ((now.time - lastClean.time) / 1000 > interval) {
+            val ipsToRemove = mutableListOf<String>()
             for ((ip, lastLoginAttempt) in logins) {
-                if (lastLoginAttempt.lastAttempt !== null && (Date().time - lastLoginAttempt.lastAttempt.time) / 1000 > interval) {
-                    logins.remove(ip)
+                if (lastLoginAttempt.lastAttempt !== null && (now.time - lastLoginAttempt.lastAttempt.time) / 1000 > interval) {
+                    ipsToRemove.add(ip)
                 }
             }
-            lastClean = Date()
+            for (ip in ipsToRemove) {
+                logins.remove(ip)
+            }
+            lastClean = now
         }
         lock.unlock()
     }
