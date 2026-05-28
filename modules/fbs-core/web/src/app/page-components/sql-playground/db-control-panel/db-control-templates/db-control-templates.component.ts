@@ -59,7 +59,7 @@ export class DbControlTemplatesComponent implements OnInit {
         templates: [
           {
             id: 1,
-            name: "Hotel, Schema (DML)",
+            name: "Hotel, Schema (DDL)",
             language: "postgres",
             category: categories[0],
             templateQuery:
@@ -67,7 +67,7 @@ export class DbControlTemplatesComponent implements OnInit {
           },
           {
             id: 2,
-            name: "Hotel, Daten (DDL)",
+            name: "Hotel, Daten (DML)",
             language: "postgres",
             category: categories[0],
             templateQuery:
@@ -83,7 +83,7 @@ export class DbControlTemplatesComponent implements OnInit {
           },
           {
             id: 4,
-            name: "Ebay, Schema (DML)",
+            name: "Ebay, Schema (DDL)",
             language: "postgres",
             category: categories[0],
             templateQuery:
@@ -91,7 +91,7 @@ export class DbControlTemplatesComponent implements OnInit {
           },
           {
             id: 5,
-            name: "Ebay, Daten (DDL)",
+            name: "Ebay, Daten (DML)",
             language: "postgres",
             category: categories[0],
             templateQuery:
