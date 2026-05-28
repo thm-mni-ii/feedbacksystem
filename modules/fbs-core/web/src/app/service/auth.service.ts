@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { JwtHelperService } from "@auth0/angular-jwt";
-import { Observable } from "rxjs";
-import { of, throwError } from "rxjs";
+import { Observable, of, throwError } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
 import { JWTToken } from "../model/JWTToken";
 
@@ -48,10 +47,13 @@ export class AuthService {
   }
 
   /**
-   * Use the cas authentication method
+   * Starts the configured single sign-on login flow.
    */
-  public casLogin(): Observable<JWTToken> {
-    return throwError("Not implemented yet!"); // TODO: impl cas login
+  public startSingleSignOnLogin(route?: string): void {
+    const target = route
+      ? `/api/v1/login/sso?route=${encodeURIComponent(route)}`
+      : "/api/v1/login/sso";
+    window.location.assign(target);
   }
 
   /**
@@ -118,9 +120,9 @@ export class AuthService {
         mergeMap((token) => {
           const decodedToken = this.decodeToken();
           if (!decodedToken) {
-            return throwError("Decoding the token failed");
+            return throwError(() => new Error("Decoding the token failed"));
           } else if (this.jwtHelper.isTokenExpired(token)) {
-            return throwError("Token expired");
+            return throwError(() => new Error("Token expired"));
           }
           return of(decodedToken);
         })

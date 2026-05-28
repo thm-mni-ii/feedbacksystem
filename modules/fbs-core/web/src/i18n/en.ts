@@ -1,6 +1,6 @@
 export const englishTranslation = {
   "login.login": "Login",
-  "login.loginWithCas": "Login with CAS",
+  "login.loginWithSso": "Login with Single Sign-On",
   "login.or": "Or",
   "login.localLogin": "Local Login",
   "login.username": "Username",
@@ -167,7 +167,7 @@ export const englishTranslation = {
   "dialog.confirm.label.confirm": "Yes",
   "dialog.user.guest.create.heading": "Create new user",
   "dialog.user.guest.create.note":
-    "Note: All users of the Central Authentication Service (CAS) can log into the system. A local user is a regular user but is limited to logging in locally. This user type is intended exclusively for external persons.",
+    "Note: All users of the configured single sign-on provider can log into the system. A local user is a regular user but is limited to logging in locally. This user type is intended exclusively for external persons.",
   "dialog.user.guest.create.firstname-label": "First name",
   "dialog.user.guest.create.firstname-error": "This field is required!",
   "dialog.user.guest.create.lastname-label": "Last name",

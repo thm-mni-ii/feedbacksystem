@@ -1,10 +1,36 @@
-cas:
-  authentication-url-patterns: /api/v1/login
+sso:
   client-host-url: ${SERVER_HOST:https://localhost}
-  server-login-url: https://cas.thm.de/cas/login
-  server-url-prefix: https://cas.thm.de/cas/
-  validation-type: CAS3
-  validation-url-patterns: /api/v1/login/cas
+  login-url: ${SSO_LOGIN_URL:}
+  return-url-parameter: ${SSO_RETURN_URL_PARAMETER:}
+  principal-header-names: ${SSO_PRINCIPAL_HEADER_NAMES:X-Forwarded-User,Remote-User,SM_USER,eppn}
+  success-url: ${SSO_SUCCESS_URL:/login}
+  failure-url: ${SSO_FAILURE_URL:/login?ssoError=1}
+saml:
+  # Set to true to activate SAML SP mode (the app handles the full SAML handshake itself).
+  # When false, the legacy header-injection / SSO_LOGIN_URL flow is used instead.
+  enabled: ${SAML_ENABLED:false}
+  sp:
+    # Entity ID advertised in SP metadata. The IdP uses this to identify the SP.
+    entity-id: ${SAML_SP_ENTITY_ID:${SERVER_HOST:https://localhost}/api/v1/login/saml/metadata}
+    # Assertion Consumer Service URL — where the IdP POSTs the SAMLResponse after login.
+    acs-url: ${SAML_SP_ACS_URL:${SERVER_HOST:https://localhost}/api/v1/login/saml/acs}
+    # Single Logout Service URL.
+    slo-url: ${SAML_SP_SLO_URL:${SERVER_HOST:https://localhost}/api/v1/logout}
+    # SAML attribute name whose value is used as the application username.
+    # For the kristophjunge/test-saml-idp image this is 'uid'.
+    principal-attribute: ${SAML_SP_PRINCIPAL_ATTRIBUTE:uid}
+    # Base64-DER-encoded PKCS8 RSA private key (no PEM headers).
+    # Leave empty to use an ephemeral self-signed key (development only).
+    private-key: ${SAML_SP_PRIVATE_KEY:}
+    # Base64-DER-encoded X.509 certificate matching the private key (no PEM headers).
+    # Leave empty to use an ephemeral self-signed certificate (development only).
+    certificate: ${SAML_SP_CERTIFICATE:}
+  idp:
+    # IdP SSO endpoint (HTTP-Redirect binding).
+    sso-url: ${SAML_IDP_SSO_URL:http://localhost:8080/simplesaml/saml2/idp/SSOService.php}
+    # Base64-DER-encoded IdP signing certificate (no PEM headers).
+    # Leave empty to skip signature validation (development only — insecure).
+    certificate: ${SAML_IDP_CERTIFICATE:}
 compile:
   production: true
 jwt:

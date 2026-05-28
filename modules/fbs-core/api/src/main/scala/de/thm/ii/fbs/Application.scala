@@ -54,11 +54,26 @@ class Application {
   }
 }
 
+private[fbs] object ApplicationConfigResolver {
+  private val defaultConfigLocations = Seq(
+    "classpath:/application.yml",
+    "optional:classpath:/application.override.yml"
+  )
+
+  def resolveExternalConfigPath(candidates: Seq[String]): Option[String] =
+    candidates.find(path => Files.exists(Paths.get(path)))
+
+  def buildArgs(args: Array[String], externalConfigPath: Option[String]): Array[String] = {
+    val configLocations = defaultConfigLocations ++ externalConfigPath.map(path => s"optional:file:$path")
+    s"--spring.config.location=${configLocations.mkString(",")}" +: args
+  }
+}
+
 /**
   * Boot webservice to handle user comminication over a REST Service.
   *
   * @author Andrej Sajenko
-  */
+ */
 object Application extends App {
   private val sc = SSLContext.getInstance("SSL")
   private val managers: Array[TrustManager] = Array(new X509TrustManager {
@@ -72,11 +87,15 @@ object Application extends App {
   sc.init(null, managers, new SecureRandom())
   HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory)
 
-  private val config = if (Files.exists(Paths.get("/usr/local/ws/conf/application.yml"))) {
-    "--spring.config.location=file:/usr/local/ws/conf/application.yml" +: args
-  } else {
-    "--spring.config.location=classpath:/application.yml,optional:classpath:/application.override.yml" +: args
-  }
+  private val externalConfigCandidates = Seq(
+    "/usr/local/fbs-core.api/conf/application.yml",
+    "/usr/local/ws/conf/application.yml"
+  )
+
+  private val config = ApplicationConfigResolver.buildArgs(
+    args,
+    ApplicationConfigResolver.resolveExternalConfigPath(externalConfigCandidates)
+  )
 
   SpringApplication.run(classOf[Application], config: _*)
 

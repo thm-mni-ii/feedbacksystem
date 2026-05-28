@@ -47,23 +47,41 @@ security:
   - JWT: [ ]
 
 paths:
-  /login/cas:
-    post:
+  /login/sso:
+    get:
       security: [ ]
-      operationId: casLogin
+      operationId: ssoLogin
       tags:
         - Login
-      summary: Login into system via the cas protocol
+      summary: Start login via the configured single sign-on provider
+      parameters:
+        - in: query
+          name: route
+          required: false
+          schema:
+            type: string
+          description: Optional frontend route to continue to after login
       responses:
-        "200":
-          description: OK
-          headers:
-            Authorization:
-              description: Bearer
-              schema:
-                type: string
-        "401":
-          description: Unauthorized
+        "302":
+          description: Redirect to the external identity provider or back to the frontend after login
+  /login/cas:
+    get:
+      security: [ ]
+      deprecated: true
+      operationId: legacyCasAliasLogin
+      tags:
+        - Login
+      summary: Legacy alias for externally protected SSO callbacks
+      parameters:
+        - in: query
+          name: route
+          required: false
+          schema:
+            type: string
+          description: Optional frontend route to continue to after login
+      responses:
+        "302":
+          description: Redirect back to the frontend after a trusted upstream authenticated the request
   /login/ldap:
     post:
       security: [ ]

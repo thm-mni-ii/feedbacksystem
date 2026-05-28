@@ -5,8 +5,8 @@ ENV PATH="$PATH:/root/.poetry/bin"
 ENV DASH_DEBUG_MODE False
 
 WORKDIR /app
-# Installiere poetry
-RUN pip install poetry && poetry config virtualenvs.in-project true
+# Installiere poetry und setuptools
+RUN pip install poetry setuptools && poetry config virtualenvs.in-project true
 RUN poetry config virtualenvs.create false
 
 COPY pyproject.toml .
