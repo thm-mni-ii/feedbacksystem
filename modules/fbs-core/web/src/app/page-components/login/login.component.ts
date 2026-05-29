@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     const token = this.cookieService.get("jwt");
     if (token) {
-      localStorage.setItem("token", token);
+      this.auth.storeToken(token);
       this.cookieService.delete("jwt");
     }
 
