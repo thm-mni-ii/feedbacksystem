@@ -8,10 +8,8 @@
           @click="router.push('/allQuestions')"
           >All Questions</v-tab
         >
-        <v-tab
-          @click="router.push('/questionCatalogs')"
-          >Question Catalogs</v-tab
-        >
+        <v-tab @click="router.push('/questionCatalogs')">Question Catalogs</v-tab>
+        <v-tab @click="router.push('/skillGraph')">Skill Graph</v-tab>
       </v-tabs>
     </v-app-bar>
     <v-main>

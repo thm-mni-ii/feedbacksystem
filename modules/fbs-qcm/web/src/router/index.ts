@@ -63,6 +63,11 @@ const router = createRouter({
       path: '/manageSkill/:skillId?',
       name: 'manageSkill',
       component: () => import('../views/ManageSkillView.vue')
+    },
+    {
+      path: '/skillGraph',
+      name: 'skillGraph',
+      component: () => import('../views/SkillGraphView.vue')
     }
     // {
     //   path: "/:pathMatch(.*)*",
