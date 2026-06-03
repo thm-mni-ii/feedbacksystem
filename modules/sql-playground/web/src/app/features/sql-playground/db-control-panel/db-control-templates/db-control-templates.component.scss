@@ -1,0 +1,46 @@
+@use "../../../../../colors" as *;
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 10px;
+  margin: 5px 0;
+}
+
+.highlight {
+  font-style: italic;
+  color: $cPrimary;
+}
+
+.info-text {
+  margin: 2px 0;
+}
+
+button {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.insert-btn {
+  color: white;
+  background-color: $green;
+}
+
+.orange-btn {
+  color: white;
+  background-color: $orange;
+}
+
+// MDC buttons add a larger default min-height; keep legacy compact sizing.
+button.mat-mdc-raised-button,
+button.mat-mdc-button,
+button.mat-mdc-flat-button {
+  height: 30px;
+  min-height: 30px;
+  line-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

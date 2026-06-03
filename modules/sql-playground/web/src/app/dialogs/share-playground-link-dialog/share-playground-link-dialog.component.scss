@@ -1,0 +1,32 @@
+.container {
+  display: block;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 0 0;
+  button {
+    margin-left: 0;
+  }
+}
+
+.content {
+  display: block;
+  margin-top: 10px;
+}
+
+.uri{
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  button {
+    margin-left: 0;
+  }
+}
+
+

@@ -1,0 +1,35 @@
+.container {
+  display: block;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  button {
+    margin-left: 0;
+  }
+}
+
+.choose_docent_tutor_area {
+  height: 150px;
+}
+
+.tag_selection {
+  margin-bottom: 15px;
+  display: block;
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+

@@ -75,7 +75,7 @@ services:
     sharedSecret: ${SQL_RUNNER_SHARED_SECRET:}
     insecure: ${SQL_RUNNER_INSECURE:false}
 integrations:
-  names: [modelling, feedbackApp, eat, kanban, sciCheck]
+  names: [modelling, feedbackApp, eat, kanban, sciCheck, sqlplayground]
   modelling:
     url: ${MODELLING_URL:https://fbs-modelling.mni.thm.de/}
   feedbackApp:
@@ -86,6 +86,8 @@ integrations:
     url: ${KANBAN_URL:/kanban/}
   sciCheck:
     url: ${SCI_CHECK_URL:/scicheck/}
+  sqlplayground:
+    url: ${SQL_PLAYGROUND_URL:http://localhost:4201/}
 spring:
   main:
     allow-bean-definition-overriding: true

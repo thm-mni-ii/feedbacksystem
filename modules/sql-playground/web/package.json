@@ -1,0 +1,48 @@
+{
+  "name": "sql-playground",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --proxy-config proxy.config.json",
+    "build": "ng build",
+    "dist": "ng build --configuration production",
+    "lint": "ng lint"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^21.2.2",
+    "@angular/cdk": "^21.2.1",
+    "@angular/common": "^21.2.2",
+    "@angular/compiler": "^21.2.2",
+    "@angular/core": "^21.2.2",
+    "@angular/forms": "^21.2.2",
+    "@angular/material": "^21.2.1",
+    "@angular/platform-browser": "^21.2.2",
+    "@angular/platform-browser-dynamic": "^21.2.2",
+    "@angular/router": "^21.2.2",
+    "@auth0/angular-jwt": "^5.2.0",
+    "@fontsource/material-icons": "^4.5.4",
+    "@fontsource/roboto": "^4.5.8",
+    "@hocuspocus/provider": "^2.13.5",
+    "@ngrx/effects": "^21.0.1",
+    "@ngrx/entity": "^21.0.1",
+    "@ngrx/store": "^21.0.1",
+    "@ngrx/store-devtools": "^21.0.1",
+    "angular-i18next": "21.0.0-3",
+    "file-saver": "^2.0.5",
+    "i18next": "^25.4.0",
+    "i18next-browser-languagedetector": "^8.0.0",
+    "prismjs": "^1.29.0",
+    "rxjs": "^7.8.2",
+    "yjs": "^13.6.18",
+    "zone.js": "~0.15.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^21.2.1",
+    "@angular/cli": "^21.2.1",
+    "@angular/compiler-cli": "^21.2.2",
+    "@types/file-saver": "^2.0.7",
+    "@types/node": "^18.0.0",
+    "typescript": "~5.9.3"
+  }
+}

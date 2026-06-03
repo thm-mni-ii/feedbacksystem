@@ -1,0 +1,218 @@
+/* You can add global styles to this file, and also import other style files */
+@import "@fontsource/roboto/300.css";
+@import "@fontsource/roboto/400.css";
+@import "@fontsource/roboto/500.css";
+@import "@fontsource/material-icons/index.css";
+@import "prismjs/themes/prism.css";
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0 auto;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  max-width: 1400px;
+}
+
+app-db-control-panel {
+  .mat-mdc-tab-header {
+  --mat-tab-container-height: 36px;
+  }
+
+  .mat-mdc-tab {
+    flex-basis: 0;
+    flex-grow: 1;
+    min-width: 0;
+    padding: 0 24px;
+  }
+
+  .mat-mdc-tab .mdc-tab__content {
+  justify-content: center;
+}
+    .mat-mdc-tab .mdc-tab__text-label {
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    height: 0;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    padding-bottom: 0 !important;
+  }
+
+  // Allow long button labels to wrap instead of overflowing at narrow widths
+  button.mat-mdc-raised-button .mdc-button__label {
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+  }
+}
+
+app-sql-input-tabs {
+  .mat-mdc-tab {
+    min-width: 0 !important;
+    padding: 0 4px !important;
+  }
+
+  .mat-mdc-tab .mdc-tab__text-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    overflow: visible;
+    width: auto;
+  }
+
+  .mat-mdc-tab .mat-mdc-input-element {
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    height: 24px;
+    line-height: 24px;
+    font: inherit;
+    color: currentColor;
+    width: 90px;
+  }
+
+  .mat-mdc-tab .mat-mdc-icon-button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    padding: 4px;
+  }
+
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+
+ .mat-mdc-tab-header {
+    --mat-tab-container-height: 36px;
+  }
+
+  .mat-mdc-tab .mdc-tab__content {
+    align-items: center;
+  }
+
+}
+
+app-db-scheme-table {
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+
+  // mat-content is still used inside expansion panel header
+  .mat-content {
+    display: grid;
+    grid-template-columns: 5fr 1fr;
+    grid-gap: 10px;
+    overflow: visible;
+  }
+}
+
+app-db-scheme-routines {
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+}
+
+// Override MDC dialog styles for delete confirmation dialog to fix spacing 
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-surface {
+  padding: 16px 24px !important; 
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-title {
+  margin: 0 0 8px !important;
+  padding: 0 !important;
+  min-height: 0;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-content {
+   display: flex !important;
+   gap: 4px; 
+   padding: 0 !important;
+   margin: 0 !important;
+
+}
+
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-content + br {
+  display: none;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-content + br + div {
+  margin: 0;
+  padding: 0;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-form-field {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 4px;
+  padding: 0 16px;
+}
+
+
+
+.sql-playground-delete-confirm-dialog .mat-mdc-input-element,
+.sql-playground-delete-confirm-dialog .mdc-floating-label,
+.sql-playground-delete-confirm-dialog strong {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-form-field-error {
+  color: #f44336;
+}
+
+.sql-playground-delete-confirm-dialog .mat-mdc-dialog-actions {
+  margin: 0;
+  padding: 8px 0 0;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+// Prism.js line numbers plugin
+.line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 15px;
+  font-size: 100%;
+  left: 0;
+  width: 3em;
+  letter-spacing: -1px;
+  border-right: 1px solid rgb(87, 87, 87);
+  user-select: none;
+  background-color: rgb(245, 245, 245);
+}
+
+.line-numbers-rows > span {
+  display: block;
+  counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+  content: counter(linenumber);
+  color: rgb(87, 87, 87);
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+  background: #ffffff;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #000000;
+}
