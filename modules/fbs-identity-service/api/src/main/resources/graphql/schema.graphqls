@@ -1,0 +1,71 @@
+type Query {
+    currentUser: User
+    user(id: ID!): User
+    users(filter: UserFilterInput, pagination: PaginationInput): UserPage!
+}
+
+type User {
+    id: ID!
+    prename: String!
+    surname: String!
+    email: String!
+    username: String!
+    globalRole: GlobalRole!
+    alias: String
+}
+
+input UserFilterInput {
+    query: String
+    globalRole: GlobalRole
+}
+
+input PaginationInput {
+    limit: Int!
+    offset: Int
+}
+
+type UserPage {
+    items: [User!]!
+    totalCount: Int!
+}
+
+enum GlobalRole {
+    ADMIN
+    MODERATOR
+    USER
+}
+
+type Mutation {
+    createUser(input: CreateUserInput!): User!
+    changeOwnPassword(input: ChangeOwnPasswordInput!): Boolean!
+    changeUserPassword(input: ChangeUserPasswordInput!): Boolean!
+    updateGlobalRole(input: UpdateGlobalRoleInput!): User
+    deactivateUser(userId: ID!): Boolean!
+}
+
+input CreateUserInput {
+    prename: String!
+    surname: String!
+    email: String!
+    username: String!
+    password: String!
+    globalRole: GlobalRole
+    alias: String
+}
+
+input ChangeOwnPasswordInput {
+    currentPassword: String!
+    newPassword: String!
+    newPasswordRepeat: String!
+}
+
+input ChangeUserPasswordInput {
+    userId: ID!
+    newPassword: String!
+    newPasswordRepeat: String!
+}
+
+input UpdateGlobalRoleInput {
+    userId: ID!
+    globalRole: GlobalRole!
+}
