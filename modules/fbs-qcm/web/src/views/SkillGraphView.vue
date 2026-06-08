@@ -2,8 +2,8 @@
   <DialogEditQuestion ref="dialogEditQuestion" />
 
   <section style="background: linear-gradient(135deg, #81ba24, #36c78e); color: white" class="mb-4">
-    <v-container class="text-center py-10">
-      <v-avatar size="64" class="mb-4" style="background-color: rgba(255, 255, 255, 0.2)">
+    <v-container class="text-center py-4">
+      <v-avatar size="64" class="mb-2" style="background-color: rgba(255, 255, 255, 0.2)">
         <v-icon size="36">mdi-brain</v-icon>
       </v-avatar>
       <h1 class="text-h3 font-weight-bold mb-2">Skill Graph</h1>
@@ -12,18 +12,27 @@
   </section>
 
   <v-container fluid class="pa-4">
-    <!-- Toolbar -->
-    <v-row align="center" class="mb-3">
-      <v-spacer />
-      <v-col cols="auto" class="d-flex gap-2"> </v-col>
-    </v-row>
-
     <v-row>
       <!-- Graph -->
       <v-col cols="12" :md="selectedNodeId ? 8 : 12">
         <v-card elevation="1" rounded="lg">
+          <v-btn
+            density="compact"
+            color="grey"
+            class="mx-1 mt-1"
+            icon="mdi-plus"
+            @click="zoomLevel += 0.1"
+          ></v-btn>
+          <v-btn
+            density="compact"
+            icon="mdi-minus"
+            color="grey"
+            class="mx-1 mt-1"
+            @click="zoomLevel -= 0.1"
+          ></v-btn>
           <v-network-graph
             class="graph"
+            v-model:zoom-level="zoomLevel"
             :nodes="graphNodes"
             :edges="graphEdges"
             :layouts="layouts"
@@ -56,26 +65,48 @@
               <p class="text-body-2 text-medium-emphasis mb-4">
                 {{ selectedNode.data.description }}
               </p>
-              <v-row dense>
-                <v-col cols="4">
-                  <v-card variant="tonal" color="#36C78E" class="text-center pa-2">
-                    <div class="text-h6">{{ tags.filter((t) => !t.parentId).length }}</div>
-                    <div class="text-caption">Root-Tags</div>
-                  </v-card>
-                </v-col>
-                <v-col cols="4">
-                  <v-card variant="tonal" color="#36C78E" class="text-center pa-2">
-                    <div class="text-h6">{{ skills.length }}</div>
-                    <div class="text-caption">Skills</div>
-                  </v-card>
-                </v-col>
-                <v-col cols="4">
-                  <v-card variant="tonal" color="#36C78E" class="text-center pa-2">
+
+              <v-card variant="tonal" class="mb-3">
+                <v-card-title class="text-subtitle-2">Tags</v-card-title>
+                <v-card-text>
+                  <v-chip
+                    v-for="tag in tags.filter((t) => !t.parentId)"
+                    :key="tag.id"
+                    size="small"
+                    color="orange"
+                    variant="tonal"
+                    class="ma-1"
+                  >
+                    {{ tag.label.replace('#', '') }}
+                  </v-chip>
+                </v-card-text>
+              </v-card>
+
+              <v-card variant="tonal" class="mb-3">
+                <v-card-title class="text-subtitle-2">Skills</v-card-title>
+                <v-card-text>
+                  <v-chip
+                    v-for="skill in skills"
+                    :key="skill.id"
+                    size="small"
+                    color="green"
+                    variant="tonal"
+                    class="ma-1"
+                  >
+                    {{ skill.name }}
+                  </v-chip>
+                </v-card-text>
+              </v-card>
+
+              <v-card variant="outlined">
+                <v-card-text class="d-flex justify-space-between align-center">
+                  <div>
+                    <div class="text-caption text-medium-emphasis">Fragen</div>
                     <div class="text-h6">{{ questions.length }}</div>
-                    <div class="text-caption">Fragen</div>
-                  </v-card>
-                </v-col>
-              </v-row>
+                  </div>
+                  <v-icon color="primary">mdi-help-circle-outline</v-icon>
+                </v-card-text>
+              </v-card>
             </template>
 
             <!-- Tag -->
@@ -173,14 +204,31 @@
             </template>
           </v-card-text>
         </v-card>
-        <div class="d-flex gap-2 mt-3">
-          <v-btn size="small" variant="tonal" class="mx-1" prepend-icon="mdi-tag-plus"
-            >Neuer Tag</v-btn
-          >
-          <v-btn size="small" color="success" prepend-icon="mdi-plus" @click="editQuestion">
-            Neue Frage
-          </v-btn>
-        </div>
+        <v-card class="mt-3" elevation="1">
+          <v-card-text>
+            <v-menu>
+              <template #activator="{ props }">
+                <v-btn block color="primary" prepend-icon="mdi-plus" v-bind="props">
+                  Neu erstellen
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item prepend-icon="mdi-help-circle-outline" @click="editQuestion">
+                  <v-list-item-title>Frage hinzufügen</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item prepend-icon="mdi-brain">
+                  <v-list-item-title>Skill hinzufügen</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item prepend-icon="mdi-tag-plus">
+                  <v-list-item-title>Tag hinzufügen</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
@@ -229,139 +277,22 @@ interface Course {
 }
 
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
+
+import { mockSkills, mockTags, mockQuestions } from '@/data/skillGraph.mock'
+
 const course = ref<Course>({
   id: 'course1',
   name: 'Datenbanken WS24/25',
   description: 'Grundlagen der relationalen Datenbanktheorie und -praxis'
 })
 
-const skills = ref<Skill[]>([
-  { id: 's1', name: 'SQL Grundlagen', description: 'Grundlegende SQL-Abfragen' },
-  { id: 's2', name: 'Datenbankdesign', description: 'ER-Modellierung' },
-  { id: 's3', name: 'OOP Konzepte', description: 'Objektorientierung' },
-  { id: 's4', name: 'ER-Modellierung', description: 'ER-Modellierung' },
-  { id: 's5', name: 'SQL Fortgeschritten', description: 'Komplexe SQL-Abfragen' },
-  { id: 's6', name: 'Normalisierung', description: 'Datenbanknormalisierung' },
-  { id: 's7', name: 'Transaktionen', description: 'ACID und Transaktionsmanagement' },
-  { id: 's8', name: 'Indizes', description: 'Performanceoptimierung durch Indizes' },
-  { id: 's9', name: 'Datenbankarchitektur', description: 'Architektur relationaler Datenbanken' },
-  {
-    id: 's10',
-    name: 'Objektorientiertes Design',
-    description: 'Entwurf objektorientierter Systeme'
-  }
-])
+const skills = ref(mockSkills)
+const tags = ref(mockTags)
+const questions = ref(mockQuestions)
 
-const tags = ref<Tag[]>([
-  { id: 't1', label: '#SQL' },
-  { id: 't2', label: '#SQL/select', parentId: 't1' },
-  { id: 't3', label: '#SQL/join', parentId: 't1' },
-  { id: 't4', label: '#SQL/delete', parentId: 't1' },
-  { id: 't5', label: '#SQL/update', parentId: 't1' },
-  { id: 't6', label: '#SQL/insert', parentId: 't1' },
-  { id: 't7', label: '#SQL/group-by', parentId: 't1' },
-  { id: 't8', label: '#SQL/subqueries', parentId: 't1' },
-
-  { id: 't9', label: '#Normalisierung' },
-  { id: 't10', label: '#Normalisierung/1NF', parentId: 't9' },
-  { id: 't11', label: '#Normalisierung/2NF', parentId: 't9' },
-  { id: 't12', label: '#Normalisierung/3NF', parentId: 't9' },
-  { id: 't13', label: '#Normalisierung/BCNF', parentId: 't9' },
-
-  { id: 't14', label: '#ER-Modellierung' },
-  { id: 't15', label: '#ER-Modellierung/Entitäten', parentId: 't14' },
-  { id: 't16', label: '#ER-Modellierung/Beziehungen', parentId: 't14' },
-  { id: 't17', label: '#ER-Modellierung/Kardinalitäten', parentId: 't14' },
-
-  { id: 't18', label: '#Transaktionen' },
-  { id: 't19', label: '#Transaktionen/ACID', parentId: 't18' },
-  { id: 't20', label: '#Transaktionen/Locks', parentId: 't18' },
-  { id: 't21', label: '#Transaktionen/Deadlocks', parentId: 't18' },
-
-  { id: 't22', label: '#Indizes' },
-  { id: 't23', label: '#Indizes/B-Tree', parentId: 't22' },
-  { id: 't24', label: '#Indizes/Hash', parentId: 't22' },
-
-  { id: 't25', label: '#Schlüssel' },
-  { id: 't26', label: '#Schlüssel/Primärschlüssel', parentId: 't25' },
-  { id: 't27', label: '#Schlüssel/Fremdschlüssel', parentId: 't25' },
-  { id: 't28', label: '#Schlüssel/Kandidatschlüssel', parentId: 't25' },
-
-  { id: 't29', label: '#Integrität' },
-  { id: 't30', label: '#Integrität/Referenzielle-Integrität', parentId: 't29' }
-])
-
-const questions = ref<Question[]>([
-  { id: 'q1', text: 'Was ist ein SELECT Statement?', skillId: 's1', tags: ['t3'] },
-  { id: 'q2', text: 'Wie funktioniert INNER JOIN?', skillId: 's1', tags: ['t4'] },
-  { id: 'q3', text: 'DELETE vs. TRUNCATE?', skillId: 's1', tags: ['t5'] },
-  { id: 'q4', text: 'Was ist die 3. Normalform?', skillId: 's2', tags: ['t6', 't16'] },
-  { id: 'q5', text: 'Wie erstellt man ein ER-Diagramm?', skillId: 's2', tags: ['t24'] },
-  { id: 'q6', text: 'Was ist eine Klasse in OOP?', skillId: 's3', tags: ['t9'] },
-  { id: 'q7', text: 'Was ist Polymorphismus?', skillId: 's3', tags: ['t28'] },
-  { id: 'q8', text: 'Wie funktioniert OUTER JOIN?', skillId: 's5', tags: ['t4'] },
-
-  { id: 'q9', text: 'Wofür wird UPDATE verwendet?', skillId: 's1', tags: ['t10'] },
-  { id: 'q10', text: 'Wie funktioniert INSERT INTO?', skillId: 's1', tags: ['t11'] },
-  { id: 'q11', text: 'Wann verwendet man GROUP BY?', skillId: 's5', tags: ['t12'] },
-  { id: 'q12', text: 'Was sind Unterabfragen (Subqueries)?', skillId: 's5', tags: ['t13'] },
-  {
-    id: 'q13',
-    text: 'Was ist der Unterschied zwischen WHERE und HAVING?',
-    skillId: 's5',
-    tags: ['t12']
-  },
-  { id: 'q14', text: 'Wie funktioniert ein CROSS JOIN?', skillId: 's5', tags: ['t4'] },
-
-  { id: 'q15', text: 'Was ist die 1. Normalform?', skillId: 's6', tags: ['t14'] },
-  { id: 'q16', text: 'Was ist die 2. Normalform?', skillId: 's6', tags: ['t15'] },
-  { id: 'q17', text: 'Wann verletzt ein Schema die BCNF?', skillId: 's6', tags: ['t17'] },
-  { id: 'q18', text: 'Warum wird normalisiert?', skillId: 's6', tags: ['t6'] },
-
-  { id: 'q19', text: 'Was bedeutet ACID?', skillId: 's7', tags: ['t19'] },
-  { id: 'q20', text: 'Was ist eine Datenbanktransaktion?', skillId: 's7', tags: ['t18'] },
-  { id: 'q21', text: 'Wozu dienen Locks?', skillId: 's7', tags: ['t20'] },
-  { id: 'q22', text: 'Was ist ein Deadlock?', skillId: 's7', tags: ['t20'] },
-
-  { id: 'q23', text: 'Was ist ein Index?', skillId: 's8', tags: ['t21'] },
-  { id: 'q24', text: 'Wann verbessert ein Index die Performance?', skillId: 's8', tags: ['t21'] },
-  { id: 'q25', text: 'Wie funktioniert ein B-Tree Index?', skillId: 's8', tags: ['t22'] },
-  { id: 'q26', text: 'Wann eignet sich ein Hash-Index?', skillId: 's8', tags: ['t23'] },
-
-  { id: 'q27', text: 'Was ist eine Entität?', skillId: 's4', tags: ['t25'] },
-  { id: 'q28', text: 'Was ist eine Beziehung im ER-Modell?', skillId: 's4', tags: ['t26'] },
-  { id: 'q29', text: 'Was ist eine n:m-Beziehung?', skillId: 's4', tags: ['t26'] },
-  { id: 'q30', text: 'Wie werden Kardinalitäten dargestellt?', skillId: 's4', tags: ['t26'] },
-
-  { id: 'q31', text: 'Was versteht man unter Vererbung?', skillId: 's10', tags: ['t27'] },
-  { id: 'q32', text: 'Was ist Kapselung?', skillId: 's10', tags: ['t30'] },
-  { id: 'q33', text: 'Was bedeutet Abstraktion?', skillId: 's10', tags: ['t29'] },
-  { id: 'q34', text: 'Was ist Methodenüberschreibung?', skillId: 's10', tags: ['t27', 't28'] },
-  {
-    id: 'q35',
-    text: 'Was ist der Unterschied zwischen Klasse und Objekt?',
-    skillId: 's3',
-    tags: ['t9']
-  },
-
-  { id: 'q36', text: 'Was ist ein Primärschlüssel?', skillId: 's2', tags: ['t1'] },
-  { id: 'q37', text: 'Was ist ein Fremdschlüssel?', skillId: 's2', tags: ['t1'] },
-  {
-    id: 'q38',
-    text: 'Was versteht man unter referenzieller Integrität?',
-    skillId: 's9',
-    tags: ['t1']
-  },
-  { id: 'q39', text: 'Was ist eine relationale Datenbank?', skillId: 's9', tags: ['t1'] },
-  {
-    id: 'q40',
-    text: 'Welche Vorteile bieten relationale Datenbanken?',
-    skillId: 's9',
-    tags: ['t1']
-  }
-])
 // ─── UI State ─────────────────────────────────────────────────────────────────
 const selectedNodeId = ref<string | null>(course.value.id)
+const zoomLevel = ref(1)
 const editQuestionDialog = ref(false)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -671,3 +602,4 @@ const removeTagFromQuestion = (questionId: string, tagId: string) => {
   height: 680px;
 }
 </style>
+@/data/skillgraph.mock

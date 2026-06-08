@@ -68,6 +68,11 @@ const router = createRouter({
       path: '/skillGraph',
       name: 'skillGraph',
       component: () => import('../views/SkillGraphView.vue')
+    },
+    {
+      path: '/lab',
+      name: 'AlgorithmLab',
+      component: () => import('../views/AlgorithmLabView.vue')
     }
     // {
     //   path: "/:pathMatch(.*)*",

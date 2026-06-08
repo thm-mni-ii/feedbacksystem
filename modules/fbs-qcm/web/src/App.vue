@@ -10,6 +10,7 @@
         >
         <v-tab @click="router.push('/questionCatalogs')">Question Catalogs</v-tab>
         <v-tab @click="router.push('/skillGraph')">Skill Graph</v-tab>
+        <v-tab @click="router.push('/lab')">Algorithm Lab</v-tab>
       </v-tabs>
     </v-app-bar>
     <v-main>
