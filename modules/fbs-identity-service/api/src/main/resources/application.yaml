@@ -11,8 +11,14 @@ spring:
     username: ${MYSQL_USER:root}
     password: ${MYSQL_PASSWORD:twRuvi2ejllDdA4nnQLa08O}
 
-    jpa:
-      database: mysql
-      hibernate:
-        ddl-auto: none
-      show-sql: true
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=}
+    expires-in: ${JWT_EXPIRES_IN:3600}
+

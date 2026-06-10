@@ -1,0 +1,26 @@
+### Local login - success
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "maxlogin",
+  "password": "test123"
+}
+
+### Local login - wrong password
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "maxlogin",
+  "password": "wrong"
+}
+
+### Local login - unknown user
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "unknownuser",
+  "password": "test123"
+}

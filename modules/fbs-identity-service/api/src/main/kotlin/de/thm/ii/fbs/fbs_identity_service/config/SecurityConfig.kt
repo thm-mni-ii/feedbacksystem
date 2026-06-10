@@ -14,7 +14,7 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/health", "/manifest", "/graphql", "graphiql").permitAll()
+                    .requestMatchers("/health", "/manifest", "/graphql", "/graphiql", "/api/v1/auth/login", "/error").permitAll()
                     .anyRequest().authenticated()
             }
             .build()
