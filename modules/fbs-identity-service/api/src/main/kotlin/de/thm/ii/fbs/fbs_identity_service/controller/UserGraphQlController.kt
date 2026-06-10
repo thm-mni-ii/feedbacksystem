@@ -1,12 +1,12 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
-import de.thm.ii.fbs.fbs_identity_service.dto.ChangeOwnPasswordInput
-import de.thm.ii.fbs.fbs_identity_service.dto.ChangeUserPasswordInput
-import de.thm.ii.fbs.fbs_identity_service.dto.CreateUserInput
-import de.thm.ii.fbs.fbs_identity_service.dto.PaginationInput
-import de.thm.ii.fbs.fbs_identity_service.dto.UpdateGlobalRoleInput
-import de.thm.ii.fbs.fbs_identity_service.dto.UserFilterInput
-import de.thm.ii.fbs.fbs_identity_service.dto.UserPage
+import de.thm.ii.fbs.fbs_identity_service.dto.user.ChangeOwnPasswordInput
+import de.thm.ii.fbs.fbs_identity_service.dto.user.ChangeUserPasswordInput
+import de.thm.ii.fbs.fbs_identity_service.dto.user.CreateUserInput
+import de.thm.ii.fbs.fbs_identity_service.dto.user.PaginationInput
+import de.thm.ii.fbs.fbs_identity_service.dto.user.UpdateGlobalRoleInput
+import de.thm.ii.fbs.fbs_identity_service.dto.user.UserFilterInput
+import de.thm.ii.fbs.fbs_identity_service.dto.user.UserPage
 import de.thm.ii.fbs.fbs_identity_service.model.User
 import de.thm.ii.fbs.fbs_identity_service.service.UserService
 import org.springframework.graphql.data.method.annotation.Argument

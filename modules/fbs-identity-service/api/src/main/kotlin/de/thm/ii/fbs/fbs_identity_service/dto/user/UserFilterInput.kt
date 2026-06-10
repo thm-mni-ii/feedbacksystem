@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.dto
+package de.thm.ii.fbs.fbs_identity_service.dto.user
 
 import de.thm.ii.fbs.fbs_identity_service.model.GlobalRole
 
