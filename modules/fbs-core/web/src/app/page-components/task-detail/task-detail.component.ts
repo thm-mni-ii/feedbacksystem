@@ -43,6 +43,7 @@ export class TaskDetailComponent implements OnInit {
   lastSubmission: Submission;
   pending = false;
   ready = false;
+  role: string = null;
   deadlinePassed = false;
   isCheckerEmpty: boolean;
   checkerConfigs: CheckerConfig[] = [];
@@ -245,6 +246,7 @@ export class TaskDetailComponent implements OnInit {
       .pipe(
         mergeMap((params) => {
           this.courseId = params.id;
+          this.role = this.authService.getToken().courseRoles[this.courseId];
           const taskId = params.tid;
           this.getTasks();
           return this.taskService.getTask(this.courseId, taskId);

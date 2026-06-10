@@ -205,7 +205,7 @@ services:
     networks:
       fbs:
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       timeout: 10s
       interval: 10s
       start_period: 10s
