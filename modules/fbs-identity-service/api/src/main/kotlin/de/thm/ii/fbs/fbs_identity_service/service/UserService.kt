@@ -5,15 +5,19 @@ import de.thm.ii.fbs.fbs_identity_service.model.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
+import kotlin.jvm.optionals.getOrElse
+import kotlin.jvm.optionals.getOrNull
 
 @Service
-class UserService (private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) {
+class UserService (private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder, private val currentUserService: CurrentUserService) {
 
-    // Übergangslösung. Später soll der aktuell authentifizierte/eingeloggte Nutzer zurückgegeben werden
+
     fun getCurrentUser(): User? {
-        return userRepository.findByUsername("admin")?.toModel()
+        return currentUserService.getCurrentUser()
     }
 
     fun findUserById(id: Long): User? {
@@ -98,31 +102,50 @@ class UserService (private val userRepository: UserRepository, private val passw
         return true
     }
 
-    // Später muss hier der authentifizierte Nutzer geprüft werden und aktueller Passwort-Hash geprüft werden
     fun changeOwnPassword(
         currentPassword: String,
         newPassword: String,
         newPasswordRepeat: String
     ): Boolean {
+        val currentUser = currentUserService.getCurrentUser() ?: return false
 
-        return currentPassword.isNotBlank() &&
-                newPassword.isNotBlank() &&
-                newPassword == newPasswordRepeat
+        val userEntity = userRepository.findById(currentUser.id).orElse(null) ?: return false
+
+        val storedPassword = userEntity.password ?: return false
+
+        if (
+            !passwordEncoder.matches(currentPassword, storedPassword) ||
+            newPassword.isBlank() ||
+            newPassword != newPasswordRepeat
+        ) {
+            return false
+        }
+
+        userEntity.password = passwordEncoder.encode(newPassword)
+        userRepository.save(userEntity)
+
+        return true
     }
 
-    // Übergangslösung: Im alten FBS darf ein ADMIN fremde Passwörter ändern; normale Nutzer nur ihr eigenes.
     fun changeUserPassword(
         userId: Long,
         newPassword: String,
         newPasswordRepeat: String
     ): Boolean {
-        if (newPassword.isBlank() || newPassword != newPasswordRepeat) {
+        val currentUser = currentUserService.getCurrentUser() ?: return false
+
+        if (
+            currentUser.globalRole != GlobalRole.ADMIN
+            || newPassword.isBlank()
+            || newPassword != newPasswordRepeat
+        ){
             return false
         }
 
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
-        userEntity.password = passwordEncoder.encode(newPassword)
-        userRepository.save(userEntity)
+        val targetUser = userRepository.findById(userId).orElse(null) ?: return false
+
+        targetUser.password = passwordEncoder.encode(newPassword)
+        userRepository.save(targetUser)
 
         return true
     }
