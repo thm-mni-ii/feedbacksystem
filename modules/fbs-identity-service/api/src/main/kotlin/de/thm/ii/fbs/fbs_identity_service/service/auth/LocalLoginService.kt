@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.service
+package de.thm.ii.fbs.fbs_identity_service.service.auth
 
 import de.thm.ii.fbs.fbs_identity_service.dto.login.LoginResponse
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
@@ -32,6 +32,6 @@ class LocalLoginService (
         return LoginResponse(
             accessToken = token,
             expiresIn = jwtService.getExpiresIn()
-            )
+        )
     }
 }

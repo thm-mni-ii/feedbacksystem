@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.model
+package de.thm.ii.fbs.fbs_identity_service.model.user
 
 enum class GlobalRole(val id: Int) {
     ADMIN(0),

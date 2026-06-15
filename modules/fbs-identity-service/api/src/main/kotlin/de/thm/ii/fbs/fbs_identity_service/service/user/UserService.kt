@@ -1,17 +1,14 @@
-package de.thm.ii.fbs.fbs_identity_service.service
+package de.thm.ii.fbs.fbs_identity_service.service.user
 
-import de.thm.ii.fbs.fbs_identity_service.model.GlobalRole
-import de.thm.ii.fbs.fbs_identity_service.model.User
+import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
+import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
-import org.springframework.security.core.context.SecurityContextHolder
+import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import kotlin.jvm.optionals.getOrElse
-import kotlin.jvm.optionals.getOrNull
 
 @Service
 class UserService (private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder, private val currentUserService: CurrentUserService) {
@@ -57,6 +54,12 @@ class UserService (private val userRepository: UserRepository, private val passw
         )
     }
 
+    fun findActive(username: String): User? {
+        return userRepository.findByUsername(username)
+            ?.takeIf { !it.deleted }
+            ?.toModel()
+    }
+
     fun createUser(
         prename: String,
         surname: String,
@@ -73,6 +76,29 @@ class UserService (private val userRepository: UserRepository, private val passw
             username = username,
             password = passwordEncoder.encode(password),
             globalRole = globalRole?.id ?: GlobalRole.USER.id,
+            alias = alias
+        )
+
+        val savedUserEntity = userRepository.save(userEntity)
+
+        return savedUserEntity.toModel()
+    }
+
+    fun createExternalUser(
+        prename: String,
+        surname: String,
+        email: String,
+        username: String,
+        globalRole: GlobalRole = GlobalRole.USER,
+        alias: String? = null
+    ): User {
+        val userEntity = UserEntity(
+            prename = prename,
+            surname = surname,
+            email = email,
+            username = username,
+            password = null,
+            globalRole = globalRole.id,
             alias = alias
         )
 

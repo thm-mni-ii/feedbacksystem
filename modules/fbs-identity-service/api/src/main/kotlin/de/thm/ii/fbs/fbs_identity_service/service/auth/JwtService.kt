@@ -1,6 +1,6 @@
-package de.thm.ii.fbs.fbs_identity_service.service
+package de.thm.ii.fbs.fbs_identity_service.service.auth
 
-import de.thm.ii.fbs.fbs_identity_service.model.User
+import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.Date
 import javax.crypto.SecretKey
-
 
 @Service
 class JwtService(

@@ -7,8 +7,8 @@ import de.thm.ii.fbs.fbs_identity_service.dto.user.PaginationInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.UpdateGlobalRoleInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.UserFilterInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.UserPage
-import de.thm.ii.fbs.fbs_identity_service.model.User
-import de.thm.ii.fbs.fbs_identity_service.service.UserService
+import de.thm.ii.fbs.fbs_identity_service.model.user.User
+import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
