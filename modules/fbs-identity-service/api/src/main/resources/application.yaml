@@ -40,4 +40,11 @@ app:
   saml:
     enabled: false
     registration-id: adfs
+    principal-attribute: uid
+    prename-attribute: givenName
+    surname-attribute: sn
+    email-attribute: mail
+    success-url: /login
+    failure-url: /login?ssoError=1
+
 
