@@ -1,14 +1,13 @@
 <script setup lang="ts">
-
 const startLearnSession = async () => {
-  const courseId = ... // z. B. aus route.params
+  const courseId = '' // z. B. aus route.params
   try {
-    const res = await sessionService.startLearnSession(courseId, ""); // Falls kein zusätzlicher Parameter notwendig ist oder anders übergeben
-    sessionId.value = res.data.sessionId;
+    const res = await sessionService.startLearnSession(courseId, '') // Falls kein zusätzlicher Parameter notwendig ist oder anders übergeben
+    sessionId.value = res.data.sessionId
     // Lade die erste Frage
-    await loadCurrentQuestion();
+    await loadCurrentQuestion()
   } catch (error) {
-    console.error("Error starting learn session:", error);
+    console.error('Error starting learn session:', error)
   }
 }
 </script>

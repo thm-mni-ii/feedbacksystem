@@ -278,7 +278,7 @@ interface Course {
 
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
 
-import { mockSkills, mockTags, mockQuestions } from '@/data/skillGraph.mock'
+import { mockSkills, mockTags, mockQuestions } from '@/composables/skillgraph.mock.ts'
 
 const course = ref<Course>({
   id: 'course1',
@@ -602,4 +602,3 @@ const removeTagFromQuestion = (questionId: string, tagId: string) => {
   height: 680px;
 }
 </style>
-@/data/skillgraph.mock

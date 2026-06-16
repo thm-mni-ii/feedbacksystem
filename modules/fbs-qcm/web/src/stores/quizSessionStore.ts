@@ -3,7 +3,7 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { AdaptiveQuizAlgorithm, createSession } from '@/data/algorithm'
+import { AdaptiveQuizAlgorithm, createSession } from '@/composables/algorithm'
 import type { Skill, Question, SessionState, NextQuestion, AnswerResult } from '@/data/types'
 
 // ── Dummy-Daten (später durch API ersetzen) ────────────────────────────
