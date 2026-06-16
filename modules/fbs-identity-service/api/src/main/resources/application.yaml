@@ -17,8 +17,27 @@ spring:
       ddl-auto: none
     show-sql: true
 
+# spring:
+#   security:
+#     saml2:
+#       relyingparty:
+#         registration:
+#           adfs:
+#             assertingparty:
+#               entity-id: https://idp.example.com/issuer
+#               verification:
+#                 credentials:
+#                   - certificate-location: classpath:idp.crt
+#               singlesignon:
+#                 url: https://idp.example.com/issuer/sso
+#                 sign-request: false
+
 app:
   jwt:
     secret: ${JWT_SECRET:q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=}
     expires-in: ${JWT_EXPIRES_IN:3600}
+
+  saml:
+    enabled: false
+    registration-id: adfs
 
