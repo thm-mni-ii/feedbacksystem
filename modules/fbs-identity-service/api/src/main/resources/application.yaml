@@ -17,20 +17,17 @@ spring:
       ddl-auto: none
     show-sql: true
 
-# spring:
-#   security:
-#     saml2:
-#       relyingparty:
-#         registration:
-#           adfs:
-#             assertingparty:
-#               entity-id: https://idp.example.com/issuer
-#               verification:
-#                 credentials:
-#                   - certificate-location: classpath:idp.crt
-#               singlesignon:
-#                 url: https://idp.example.com/issuer/sso
-#                 sign-request: false
+  security:
+    saml2:
+      relyingparty:
+        registration:
+          keycloak:
+            entity-id: http://localhost:8080/saml2/metadata/keycloak
+            assertingparty:
+              metadata-uri: http://localhost:8090/realms/fbs/protocol/saml/descriptor
+              singlesignon:
+                sign-request: false
+
 
 app:
   jwt:
@@ -39,12 +36,10 @@ app:
 
   saml:
     enabled: false
-    registration-id: adfs
+    registration-id: keycloak
     principal-attribute: uid
     prename-attribute: givenName
     surname-attribute: sn
     email-attribute: mail
     success-url: /login
     failure-url: /login?ssoError=1
-
-

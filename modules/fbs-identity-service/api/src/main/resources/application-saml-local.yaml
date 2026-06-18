@@ -1,0 +1,22 @@
+app:
+  saml:
+    enabled: true
+    registration-id: keycloak
+    principal-attribute: uid
+    prename-attribute: givenName
+    surname-attribute: sn
+    email-attribute: mail
+    success-url: /login
+    failure-url: /login?ssoError=1
+
+spring:
+  security:
+    saml2:
+      relyingparty:
+        registration:
+          keycloak:
+            entity-id: http://localhost:8080/saml2/metadata/keycloak
+            assertingparty:
+              metadata-uri: http://localhost:8090/realms/fbs/protocol/saml/descriptor
+              singlesignon:
+                sign-request: false
