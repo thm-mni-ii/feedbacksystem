@@ -97,6 +97,10 @@ class UserService (private val userRepository: UserRepository, private val passw
         userEntity.surname = "Deleted User"
         userEntity.email = ""
         userEntity.username = "duser $userId"
+        userEntity.deleted = true
+        userEntity.password = null
+        userEntity.globalRole = GlobalRole.USER.id
+        userEntity.alias = null
         userRepository.save(userEntity)
 
         return true
