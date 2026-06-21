@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrElse
 import kotlin.jvm.optionals.getOrNull
 
@@ -21,7 +22,7 @@ class UserService (private val userRepository: UserRepository, private val passw
     }
 
     fun findUserById(id: Long): User? {
-        return userRepository.findById(id).orElse(null).toModel()
+        return userRepository.findByIdAndDeletedFalse(id)?.toModel()
     }
 
     fun findUsers(query: String?, globalRole: GlobalRole?, limit: Int?, offset: Int?): UserSearchResult {
@@ -81,15 +82,15 @@ class UserService (private val userRepository: UserRepository, private val passw
     }
 
     fun updateGlobalRole(userId: Long, globalRole: GlobalRole): User? {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return null
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return null
         userEntity.globalRole = globalRole.id
         val savedUserEntity = userRepository.save(userEntity)
 
         return savedUserEntity.toModel()
     }
-
+    @Transactional
     fun deactivateUser(userId: Long): Boolean {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return false
 
         userRepository.deleteUserCourseAssignments(userId)
 
@@ -146,7 +147,7 @@ class UserService (private val userRepository: UserRepository, private val passw
             return false
         }
 
-        val targetUser = userRepository.findById(userId).orElse(null) ?: return false
+        val targetUser = userRepository.findByIdAndDeletedFalse(userId) ?: return false
 
         targetUser.password = passwordEncoder.encode(newPassword)
         userRepository.save(targetUser)
@@ -155,7 +156,7 @@ class UserService (private val userRepository: UserRepository, private val passw
     }
 
     fun updateAgreementToPrivacyFor(userId: Long, agreed: Boolean): Boolean {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return false
         userEntity.privacyChecked = agreed
         userRepository.save(userEntity)
 
@@ -163,7 +164,7 @@ class UserService (private val userRepository: UserRepository, private val passw
     }
 
     fun getPrivacyStatusOf(userId: Long): Boolean {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return false
 
         return userEntity.privacyChecked
     }

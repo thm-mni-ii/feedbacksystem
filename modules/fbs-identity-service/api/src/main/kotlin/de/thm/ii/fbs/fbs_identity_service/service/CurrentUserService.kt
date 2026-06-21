@@ -17,7 +17,7 @@ class CurrentUserService(
 
         val userId = jwt.subject.toLongOrNull()  ?: return null
 
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return null
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId)?: return null
 
         return userEntity.toModel()
     }
