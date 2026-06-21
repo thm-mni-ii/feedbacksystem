@@ -37,6 +37,18 @@ modules/fbs-identity-service/api
 ./gradlew bootRun
 ```
 
+## Run with local dev tools such as GraphiQL
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+GraphiQL is then available at:
+
+```
+http://localhost:8080/graphiql
+```
+
 ## Run with local SAML profile
 
 For local SAML testing with Keycloak:
