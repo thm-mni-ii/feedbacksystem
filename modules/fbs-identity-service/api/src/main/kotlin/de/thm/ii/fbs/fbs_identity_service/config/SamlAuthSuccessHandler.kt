@@ -47,7 +47,10 @@ class SamlAuthSuccessHandler(
             ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid SAML principal")
 
         val username = firstAttribute(principal, principalAttribute)
-            ?: principal.name
+            ?: throw ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Required SAML principal attribute is missing"
+            )
 
         val samlUser = SamlUser(
             username = username,
