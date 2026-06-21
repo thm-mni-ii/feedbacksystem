@@ -19,6 +19,6 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:local-development-jwt-secret-change-me-123456}
+    secret: ${JWT_SECRET:q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=}
     expires-in: ${JWT_EXPIRES_IN:3600}
 

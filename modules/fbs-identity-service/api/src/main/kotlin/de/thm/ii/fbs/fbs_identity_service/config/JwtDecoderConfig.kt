@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.config
 
-import java.nio.charset.StandardCharsets
+import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -18,7 +18,7 @@ class JwtDecoderConfig(
     @Bean
     fun jwtDecoder(): JwtDecoder {
         val secretKey = Keys.hmacShaKeyFor(
-            jwtSecret.toByteArray(StandardCharsets.UTF_8)
+            Decoders.BASE64.decode(jwtSecret)
         )
 
         return NimbusJwtDecoder

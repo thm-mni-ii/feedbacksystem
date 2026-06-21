@@ -2,7 +2,7 @@ package de.thm.ii.fbs.fbs_identity_service.service
 
 import de.thm.ii.fbs.fbs_identity_service.model.User
 import io.jsonwebtoken.Jwts
-import java.nio.charset.StandardCharsets
+import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -19,7 +19,7 @@ class JwtService(
     private val expiresIn: Long
 ) {
     private val signingKey: SecretKey =
-    Keys.hmacShaKeyFor(jwtSecret.toByteArray(StandardCharsets.UTF_8))
+        Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret))
 
 
     fun createToken(user: User): String {
