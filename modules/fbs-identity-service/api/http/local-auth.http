@@ -27,6 +27,15 @@ Content-Type: application/json
   "password": "test123"
 }
 
+### Local login with blank username - bad request
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": "test123"
+}
+
 ### Local login - admin
 POST http://localhost:8080/api/v1/auth/login
 Content-Type: application/json
@@ -93,6 +102,24 @@ Content-Type: application/json
   "query": "{ users(pagination: { limit: 10, offset: 0 }) { items { id username globalRole } totalCount } }"
 }
 
+### Query user with invalid ID - validation error
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ user(id: 0) { id username } }"
+}
+
+### Query users with invalid pagination - validation error
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ users(pagination: { limit: 0, offset: -1 }) { totalCount } }"
+}
+
 ### Create user without token - unauthorized
 POST http://localhost:8080/graphql
 Content-Type: application/json
@@ -108,6 +135,15 @@ Content-Type: application/json
 
 {
   "query": "mutation { createUser(input: { prename: \"Blocked\", surname: \"User\", email: \"blocked@example.com\", username: \"blockeduser\", password: \"test123\", globalRole: USER }) { id username globalRole } }"
+}
+
+### Create user with invalid input - validation error
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(input: { prename: \"\", surname: \"User\", email: \"invalid-email\", username: \"validationtest\", password: \"test123\", globalRole: USER, alias: \"alias-that-is-longer-than-twenty-characters\" }) { id username } }"
 }
 
 ### Create managed test user - admin success

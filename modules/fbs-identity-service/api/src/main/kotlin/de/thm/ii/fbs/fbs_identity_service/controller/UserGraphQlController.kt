@@ -14,6 +14,8 @@ import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
 import org.springframework.security.access.prepost.PreAuthorize
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Positive
 
 @Controller
 class UserGraphQlController(
@@ -26,15 +28,15 @@ class UserGraphQlController(
 
     @PreAuthorize("hasRole('ADMIN')")
     @QueryMapping
-    fun user(@Argument id: Long): User? {
+    fun user(@Argument @Positive id: Long): User? {
         return userService.findUserById(id)
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @QueryMapping
     fun users(
-        @Argument filter: UserFilterInput?,
-        @Argument pagination: PaginationInput?
+        @Argument @Valid filter: UserFilterInput?,
+        @Argument @Valid pagination: PaginationInput?
     ): UserPage {
         val result = userService.findUsers(
             query = filter?.query,
@@ -51,7 +53,7 @@ class UserGraphQlController(
 
     @PreAuthorize("hasRole('ADMIN')")
     @MutationMapping
-    fun createUser(@Argument input: CreateUserInput): User {
+    fun createUser(@Argument @Valid input: CreateUserInput): User {
         return userService.createUser(
             prename = input.prename,
             surname = input.surname,
@@ -65,7 +67,7 @@ class UserGraphQlController(
 
     @PreAuthorize("hasRole('ADMIN')")
     @MutationMapping
-    fun updateGlobalRole(@Argument input: UpdateGlobalRoleInput): User? {
+    fun updateGlobalRole(@Argument @Valid input: UpdateGlobalRoleInput): User? {
         return userService.updateGlobalRole(
             userId = input.userId,
             globalRole = input.globalRole
@@ -74,12 +76,12 @@ class UserGraphQlController(
 
     @PreAuthorize("hasRole('ADMIN')")
     @MutationMapping
-    fun deactivateUser(@Argument userId: Long): Boolean {
+    fun deactivateUser(@Argument @Positive userId: Long): Boolean {
         return userService.deactivateUser(userId)
     }
 
     @MutationMapping
-    fun changeOwnPassword(@Argument input: ChangeOwnPasswordInput): Boolean {
+    fun changeOwnPassword(@Argument @Valid input: ChangeOwnPasswordInput): Boolean {
         return userService.changeOwnPassword(
             currentPassword = input.currentPassword,
             newPassword = input.newPassword,
@@ -89,7 +91,7 @@ class UserGraphQlController(
 
     @PreAuthorize("hasRole('ADMIN')")
     @MutationMapping
-    fun changeUserPassword(@Argument input: ChangeUserPasswordInput): Boolean {
+    fun changeUserPassword(@Argument @Valid input: ChangeUserPasswordInput): Boolean {
         return userService.changeUserPassword(
             userId = input.userId,
             newPassword = input.newPassword,
