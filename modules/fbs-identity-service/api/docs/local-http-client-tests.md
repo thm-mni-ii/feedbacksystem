@@ -42,6 +42,10 @@ The HTTP file currently covers:
 * accepting the terms of use for the authenticated user
 * rejecting unauthenticated terms-of-use requests
 * rejecting access to another user's terms-of-use status
+* REST login request validation
+* GraphQL validation for user input fields
+* validation of user IDs and pagination values
+* structured GraphQL validation errors
 
 ## HTTP client variables
 
@@ -60,11 +64,13 @@ These variables are then reused in later requests.
 
 Requests to /graphql without a valid Bearer token return 401 Unauthorized.
 
-GraphQL operations rejected by @PreAuthorize may return HTTP 200 OK with an errors entry in the GraphQL response body.
-
 User-management operations require the ADMIN global role. currentUser and changeOwnPassword are available to every authenticated user.
 
 The terms-of-use endpoints require a valid Bearer token. The user ID in the request path must match the authenticated user. Requests for another user's status return 403 Forbidden, including requests made by an admin.
+
+Invalid REST request bodies return 400 Bad Request.
+
+Invalid GraphQL input returns HTTP 200 OK with an errors entry. Validation errors use the code VALIDATION_ERROR, the classification BAD_REQUEST and contain the affected fields without exposing internal exception details.
 
 ## Note
 
