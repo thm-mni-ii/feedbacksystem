@@ -38,6 +38,17 @@ Content-Type: application/json
 
 > {% client.global.set("adminToken", response.body.accessToken); %}
 
+### GraphQL currentUser with admin token
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+> {% client.global.set("adminUserId", response.body.data.currentUser.id); %}
+
 ### GraphQL currentUser without token - unauthorized
 POST http://localhost:8080/graphql
 Content-Type: application/json
@@ -109,6 +120,29 @@ Content-Type: application/json
 }
 
 > {% client.global.set("managedUserId", response.body.data.createUser.id); %}
+
+### Terms of use without token - unauthorized
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+
+### Get own terms-of-use status - success
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Get another user's terms-of-use status - forbidden
+GET http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Accept terms of use for another user - forbidden
+PUT http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Accept own terms of use - success
+PUT http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Get own terms-of-use status after acceptance
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
 
 ### Query user - forbidden for non-admin
 POST http://localhost:8080/graphql

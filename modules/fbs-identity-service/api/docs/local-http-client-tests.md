@@ -38,6 +38,10 @@ The HTTP file currently covers:
 * changing another user's password as regular user and admin
 * updating a global role as regular user and admin
 * deactivating a user as regular user and admin
+* reading the authenticated user's terms-of-use acceptance status
+* accepting the terms of use for the authenticated user
+* rejecting unauthenticated terms-of-use requests
+* rejecting access to another user's terms-of-use status
 
 ## HTTP client variables
 
@@ -46,6 +50,7 @@ The HTTP file stores returned JWT access tokens in IntelliJ HTTP Client variable
 ```text
 accessToken
 adminToken
+adminUserId
 managedUserId
 ```
 
@@ -58,6 +63,8 @@ Requests to /graphql without a valid Bearer token return 401 Unauthorized.
 GraphQL operations rejected by @PreAuthorize may return HTTP 200 OK with an errors entry in the GraphQL response body.
 
 User-management operations require the ADMIN global role. currentUser and changeOwnPassword are available to every authenticated user.
+
+The terms-of-use endpoints require a valid Bearer token. The user ID in the request path must match the authenticated user. Requests for another user's status return 403 Forbidden, including requests made by an admin.
 
 ## Note
 
