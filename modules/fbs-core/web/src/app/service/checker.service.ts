@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import { CheckerConfig } from "../model/CheckerConfig";
 import { saveAs as importedSaveAs } from "file-saver";
 import { map } from "rxjs/operators";
@@ -92,36 +92,24 @@ export class CheckerService {
    * @param cid Course id
    * @param tid Task id
    * @param ccid Checker Configuration id
-   * @param fType File Type as enum
+   * @param checkerFileType File Type as enum
    * @return Observable that succeeds with the Main File of configured Checker
    */
   public getFile(
     cid: number,
     tid: number,
     ccid: number,
-    fType: CheckerFileType,
-    filename: string
+    checkerFileType: CheckerFileType
   ) {
-    //replace all illegal file characters with underscore
-    filename = filename.replace(/[~"#%&*:<>?/\\{|}. ]+/g, "_");
-    let fExtension: string;
-    switch (fType) {
-      case "main-file":
-        fExtension = "_config.txt";
-        break;
-      case "secondary-file":
-        fExtension = "_secondary.txt";
-        break;
-      default:
-        fExtension = ".txt";
-        break;
-    }
-
-    this.fetchFile(cid, tid, ccid, fType).subscribe((response) => {
-      const blob = new Blob([response], { type: "text/plain" });
-
-      importedSaveAs(blob, filename + fExtension);
-    });
+    this.fetchFileWithHeaders(cid, tid, ccid, checkerFileType).subscribe(
+      (response) => {
+        const fileName = response.headers
+          .get("content-disposition")
+          .split(";")[1]
+          .split("=")[1];
+        importedSaveAs(response.body, fileName);
+      }
+    );
   }
 
   /**
@@ -138,17 +126,30 @@ export class CheckerService {
     ccid: number,
     fType: CheckerFileType
   ): Observable<Blob> {
-    return this.http
-      .get(
-        `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`,
-        { responseType: "arraybuffer" }
-      )
-      .pipe(
-        map(
-          (response) =>
-            new Blob([response], { type: "application/octet-stream" })
-        )
-      );
+    return this.http.get(
+      `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`,
+      { responseType: "blob" }
+    );
+  }
+
+  /**
+   * Fetch the main file of the configuration
+   * @param cid Course id
+   * @param tid Task id
+   * @param ccid Checker Configuration id
+   * @param fType File Type as enum
+   * @return Observable that succeeds with the Main File of configured Checker
+   */
+  public fetchFileWithHeaders(
+    cid: number,
+    tid: number,
+    ccid: number,
+    fType: CheckerFileType
+  ): Observable<HttpResponse<Blob>> {
+    return this.http.get(
+      `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`,
+      { responseType: "blob", observe: "response" }
+    );
   }
 
   /**
@@ -176,9 +177,6 @@ export class CheckerService {
   private uploadFile(file: File, url: string): Observable<void> {
     const formData: FormData = new FormData();
     formData.append("file", file);
-    // let headers = new HttpHeaders({
-    //   'Content-Type': ''
-    // });
     return this.http.put<void>(url, formData);
   }
 }

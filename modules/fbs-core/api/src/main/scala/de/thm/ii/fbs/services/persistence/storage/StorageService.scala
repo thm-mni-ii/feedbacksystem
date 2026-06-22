@@ -109,12 +109,12 @@ class StorageService extends App {
   }
 
   /**
-    * returns a main-file depending whether it is in the bucket or not
+    * returns a secondary-file depending whether it is in the bucket or not
     *
     * @param config CheckrunnerConfiguration
     * @return
     */
-  def getFileScondaryFile(config: CheckrunnerConfiguration): File = {
+  def getFileSecondaryFile(config: CheckrunnerConfiguration): File = {
     if (config.isInBlockStorage) {
       minioStorageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getSecondaryFilePath(config.id))
     } else {
@@ -147,6 +147,23 @@ class StorageService extends App {
       minioService.getStatsOfObject(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(submission.id))
     } else {
       Files.probeContentType(fsStorageService.pathToSolutionFile(submission.id).get.toFile.toPath)
+    }
+  }
+
+  /**
+    * returns a String which represents the content type of a checker configuration
+    *
+    * @param checkerConfig the Checker Configuration
+    * @return
+    */
+  def getContentTypeCheckerConfigFile(checkerConfig: CheckrunnerConfiguration, fileName: String): String = {
+    if (checkerConfig.isInBlockStorage) {
+      minioService.getStatsOfObject(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getFilePath(checkerConfig.id, fileName))
+    } else {
+      Files.probeContentType((fileName match {
+        case storageFileName.MAIN_FILE => fsStorageService.pathToMainFile(checkerConfig.id)
+        case storageFileName.SECONDARY_FILE => fsStorageService.pathToSecondaryFile(checkerConfig.id)
+      }).get.toFile.toPath)
     }
   }
 
