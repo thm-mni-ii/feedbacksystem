@@ -13,7 +13,7 @@ interface UserRepository: JpaRepository <UserEntity, Long> {
 
     fun findByDeletedFalse(): List<UserEntity>
 
-    // Übergangslösung
+    // Übergangslösung, solange Kurszuordnungen noch in der bestehenden FBS-Datenbank liegen.
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM user_course WHERE user_id = :userId", nativeQuery = true)

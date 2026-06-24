@@ -24,7 +24,6 @@ class SamlLoginService(
         }
 
         val user = userService.findActive(username)
-            ?: loadUserFromLdap(username)
             ?: createUserFromSaml(samlUser.copy(username = username))
 
         val token = jwtService.createToken(user)
@@ -34,11 +33,6 @@ class SamlLoginService(
             tokenType = "Bearer",
             expiresIn = jwtService.getExpiresIn()
         )
-    }
-
-    private fun loadUserFromLdap(username: String): User? {
-        // LDAP lookup ergänzen.
-        return null
     }
 
     private fun createUserFromSaml(samlUser: SamlUser): User {
