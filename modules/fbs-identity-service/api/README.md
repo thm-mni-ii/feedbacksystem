@@ -63,6 +63,14 @@ The local SAML setup is documented in:
 docs/saml-local-keycloak.md
 ```
 
+## Automated tests
+
+Automated tests can be executed from this module with:
+
+```bash
+./gradlew test
+```
+
 ## Local manual testing
 
 Some local manual test requests are available for the IntelliJ HTTP Client:
