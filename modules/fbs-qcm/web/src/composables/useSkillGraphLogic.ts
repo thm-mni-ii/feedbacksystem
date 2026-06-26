@@ -1,6 +1,7 @@
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import * as vNG from 'v-network-graph'
-import { ForceLayout, ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/force-layout'
+import { ForceLayout } from 'v-network-graph/lib/force-layout'
+import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/layouts/force'
 import type { Competency, Question } from '@/model/types'
 
 interface Course {
@@ -266,7 +267,7 @@ export function useSkillGraphLogic(
         positionFixedByDrag: false,
         positionFixedByClickWithAltKey: true,
         createSimulation: (d3, nodes, edges) => {
-          const forceLink = d3.forceLink<ForceNodeDatum, ForceEdgeDatum>(edges).id((d) => d.id)
+          const forceLink = d3.forceLink<ForceNodeDatum, ForceEdgeDatum>(edges).id((d: any) => d.id)
           const simulation = d3
             .forceSimulation(nodes)
             .force('edge', forceLink.distance(40).strength(0.5))
