@@ -69,4 +69,4 @@ OPENING_SQUARE_BRACKET: '[';
 CLOSING_SQUARE_BRACKET: ']';
 LEFT: '\\left';
 RIGHT: '\\right';
-UNICODE_EXPO: '⁰'|'¹'|'²'|'³'|'⁴'|'⁵'|'⁶'|'⁷'|'⁸'|'⁹';
+UNICODE_EXPO: '\u2070'|'\u00B9'|'\u00B2'|'\u00B3'|'\u2074'|'\u2075'|'\u2076'|'\u2077'|'\u2078'|'\u2079';

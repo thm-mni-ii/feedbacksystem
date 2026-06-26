@@ -1,14 +1,13 @@
 package de.thm.ii.fbs.services.persistence
 
 import java.math.BigInteger
-import java.sql.{ResultSet, SQLException}
-
+import java.sql.{Date, ResultSet, SQLException}
 import de.thm.ii.fbs.model.{GlobalRole, User}
 import de.thm.ii.fbs.util.{DB, Hash}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-
+import java.time.LocalDateTime
 /**
   * Handles the creation, deletion and modifications of user persistant state.
   */
@@ -23,8 +22,17 @@ class UserService {
     * @return List of users
     */
   def getAll(ignoreDeleted: Boolean = true): List[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user"
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user"
       + (if (ignoreDeleted)  " where deleted = 0" else ""), (res, _) => parseResult(res))
+
+  /**
+   * Get all stored users
+   * @param ignoreDeleted Ignores deleted users
+   * @return List of users
+   */
+  def getUsersWithLastLoginBefore(before: Date, ignoreDeleted: Boolean = true): List[User] =
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user WHERE last_login < ?"
+      + (if (ignoreDeleted)  " and deleted = 0" else ""), (res, _) => parseResult(res), before)
 
   /**
     * Find the first user by id
@@ -32,7 +40,16 @@ class UserService {
     * @return The found user
     */
   def find(id: Int): Option[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user where user_id = ?", (res, _) =>
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where user_id = ?", (res, _) =>
+      parseResult(res), id).headOption
+
+  /**
+    * Find the first active user by id.
+    * @param id The users id
+    * @return The found user
+    */
+  def findActive(id: Int): Option[User] =
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where user_id = ? and deleted = 0", (res, _) =>
       parseResult(res), id).headOption
 
   /**
@@ -41,7 +58,16 @@ class UserService {
     * @return The found user
     */
   def find(username: String): Option[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user where username = ?", (res, _) =>
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where username = ?", (res, _) =>
+      parseResult(res), username).headOption
+
+  /**
+    * Find the first active user by username.
+    * @param username username
+    * @return The found user
+    */
+  def findActive(username: String): Option[User] =
+    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role, last_login FROM user where username = ? and deleted = 0", (res, _) =>
       parseResult(res), username).headOption
 
   /**
@@ -104,16 +130,33 @@ class UserService {
     * @return True if successfully updated
     */
   def delete(id: Int): Boolean = {
-    DB.update("DELETE FROM user_course WHERE user_id = ?", id)
-    1 == DB.update("UPDATE user SET prename = 'Deleted User', surname = 'Deleted User', " +
-    "username = 'duser " + id + "', email = '' WHERE user_id = ?", id)
+    1 == DB.update(
+      "UPDATE user SET prename = 'Deleted User', surname = 'Deleted User', username = CONCAT('duser ', user_id), " +
+      "email = '', password = NULL, alias = NULL, deleted = 1, last_login = NULL WHERE user_id = ? AND deleted = 0",
+      id
+    )
   }
+
+  /**
+   * Sets the last_login of the user to now
+   * @param id The user id.
+   * @return True if successfully updated
+   */
+  def updateLastLogin(id: Int): Boolean =
+    DB.update("UPDATE user SET last_login = now() WHERE user_id = ?", id) == 1
 
   /**
     * Get the password for the user with the given username
     * @param username the username of the user to get the password for
     */
   def getPassword(username: String): Option[String] = DB.query("SELECT password FROM user WHERE username = ?",
+    (res, _) => res.getString("password"), username).headOption
+
+  /**
+    * Get the password for the active user with the given username
+    * @param username the username of the user to get the password for
+    */
+  def getActivePassword(username: String): Option[String] = DB.query("SELECT password FROM user WHERE username = ? AND deleted = 0",
     (res, _) => res.getString("password"), username).headOption
 
   private def parseResult(res: ResultSet): User = new User(
@@ -123,6 +166,7 @@ class UserService {
     username = res.getString("username"),
     globalRole = GlobalRole.parse(res.getInt("global_role")),
     alias = Option(res.getString("alias")),
+    lastLogin = Option(res.getTimestamp("last_login")),
     id = res.getInt("user_id")
   )
 }

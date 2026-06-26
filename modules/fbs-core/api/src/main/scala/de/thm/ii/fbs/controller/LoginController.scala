@@ -68,10 +68,11 @@ class LoginController extends CasClientConfigurerAdapter {
       } else {
         name = casUser.getName
       }
-      userService.find(name)
+      userService.findActive(name)
         .orElse(loadUserFromLdap(name).map(u => userService.create(u, null)))
         .foreach(u => {
           val token = authService.createToken(u)
+          userService.updateLastLogin(u.id)
           val co = new Cookie("jwt", token)
           co.setPath("/")
           co.setHttpOnly(false)
@@ -122,8 +123,9 @@ class LoginController extends CasClientConfigurerAdapter {
 
       login match {
         case Some((user)) =>
-          val localUser = userService.find(user.username).getOrElse(userService.create(user, null))
-          authService.renewAuthentication(localUser, response)
+          val localUser = userService.findActive(user.username).getOrElse(userService.create(user, null))
+          userService.updateLastLogin(localUser.id)
+          authService.newAuthentication(localUser, response)
         case None => throw new UnauthorizedException()
       }
     } else {
@@ -147,7 +149,8 @@ class LoginController extends CasClientConfigurerAdapter {
     } yield user
 
     login match {
-      case Some(user) => authService.renewAuthentication(user, response)
+      case Some(user) =>
+        authService.newAuthentication(user, response)
       case None => throw new UnauthorizedException()
     }
   }
@@ -169,12 +172,12 @@ class LoginController extends CasClientConfigurerAdapter {
         loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
-              .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))
+              .map(user => userService.findActive(user.username).getOrElse(userService.create(user, null)))
           } yield ldapUser} else {None})
     )
 
     user match {
-      case Some(user) => authService.renewAuthentication(user, response)
+      case Some(user) => authService.newAuthentication(user, response)
       case None => throw new UnauthorizedException()
     }
   }

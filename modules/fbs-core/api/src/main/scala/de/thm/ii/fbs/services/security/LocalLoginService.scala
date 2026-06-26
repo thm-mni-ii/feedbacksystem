@@ -19,9 +19,9 @@ class LocalLoginService {
     * @param password the password of the authenticating user
     */
   def login(username: String, password: String): Option[User] = {
-    userService.find(username) match {
+    userService.findActive(username) match {
       case Some(user) =>
-        val passwordHash = userService.getPassword(username).get
+        val passwordHash = userService.getActivePassword(username).get
         if (passwordHash != null) {
           val ok = if (passwordHash.length == 40) { // Check for SHA1 Hash
             migrateSha1(user, password, passwordHash)

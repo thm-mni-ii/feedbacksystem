@@ -48,12 +48,22 @@ class AuthService {
   }
 
   /**
+   * Generate a new token and append it to the response header and updates the user last login.
+   * @param user The user
+   * @param res The response
+   */
+  def newAuthentication(user: User, res: HttpServletResponse): Unit = {
+    this.userService.updateLastLogin(user.id)
+    this.renewAuthentication(user, res)
+  }
+
+  /**
     * Check for valid authentication information and return the user associated with the authentication.
     * @param req The http request
     * @param res The http response (nullable)
     * @return The user.
     */
-  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(userService.find) match {
+  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(userService.findActive) match {
       case Some(user) =>
         if (res != null) renewAuthentication(user, res)
         user
@@ -65,7 +75,7 @@ class AuthService {
     * @param token The authentication token
     * @return The user.
     */
-  def authorize(token: String): User = userService.find(authorizeToken(token)) match {
+  def authorize(token: String): User = userService.findActive(authorizeToken(token)) match {
       case Some(user) => user
       case None => throw new UnauthorizedException
     }
