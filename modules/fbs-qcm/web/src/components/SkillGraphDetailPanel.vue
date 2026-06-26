@@ -75,9 +75,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import CourseDetailPanel from './CourseDetailPanel.vue'
-import CompetencyDetailPanel from './CompetencyDetailPanel.vue'
-import QuestionDetailPanel from './QuestionDetailPanel.vue'
+import CourseDetailPanel from './skillgraph/CourseDetailPanel.vue'
+import CompetencyDetailPanel from './skillgraph/CompetencyDetailPanel.vue'
+import QuestionDetailPanel from './skillgraph/QuestionDetailPanel.vue'
 import type { Competency, Question } from '@/model/types'
 
 interface Props {
