@@ -2,6 +2,7 @@ import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuthGuard } from "./guards/auth.guard";
 import { AdminGuard } from "./guards/admin.guard";
+import { TermsOfUseGuard } from "./guards/terms-of-use.guard";
 import { ChangePasswordComponent } from "./page-components/change-password/change-password.component";
 import { MyCoursesComponent } from "./page-components/my-courses/my-courses.component";
 import { SearchCoursesComponent } from "./page-components/search-courses/search-courses.component";
@@ -33,6 +34,7 @@ const routes: Routes = [
     path: "",
     component: SidebarComponent,
     canActivate: [AuthGuard],
+    canActivateChild: [TermsOfUseGuard],
     children: [
       {
         path: "courses",
