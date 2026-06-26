@@ -26,6 +26,24 @@ class EvaluationResultService {
     results.map(r => evaluateOne(container, r))
   }
 
+  /**
+    * Applies the evaluation result to course results, so course result consumers
+    * use the same pass status as the evaluation view.
+    *
+    * @param container Evaluation Container
+    * @param results   the Course Results
+    * @return Course results with evaluation based pass status
+    */
+  def applyEvaluationStatus(container: List[EvaluationContainer], results: List[CourseResult]): List[CourseResult] = {
+    if (container.isEmpty) {
+      results
+    } else {
+      results.zip(evaluate(container, results)).map {
+        case (courseResult, evaluationResult) => courseResult.copy(passed = evaluationResult.passed)
+      }
+    }
+  }
+
   private def evaluateOne(container: List[EvaluationContainer], result: CourseResult): EvaluationUserResult = {
     val taskResults = result.results.foldLeft(Map[Int, TaskResult]()) { (m, s) => m + (s.task.id -> s) }
     var passed = true
