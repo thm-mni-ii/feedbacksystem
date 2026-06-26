@@ -12,8 +12,8 @@ import scala.util.Failure
 
 class PlaygroundDBConnections(override val vertx: Vertx, override val sqlPoolWithConfig: SqlPoolWithConfig)
   extends DBConnections(vertx, sqlPoolWithConfig) {
-  def initCon(dbOperations: DBOperationsService): Future[Unit] = {
-    super.initCon(dbOperations, "")
+  def initCon(dbOperations: DBOperationsService, allowUserWrite: Boolean): Future[Unit] = {
+    super.initCon(dbOperations, "", allowUserWrite = allowUserWrite)
   }
 
   def close(dbOperations: DBOperationsService, deleteDatabase: Boolean = false): Unit = {
@@ -42,22 +42,27 @@ class PlaygroundDBConnections(override val vertx: Vertx, override val sqlPoolWit
     }
 
     dbOperations.createUserIfNotExist(operationCon.get, password).flatMap(_ => {
-      dbOperations.createDBIfNotExist(operationCon.get).flatMap(dbWasCreated => {
-        giveUserAccessRights(dbOperations, dbWasCreated).map[Option[JDBCClient]](_ => {
+      dbOperations.createDBIfNotExist(operationCon.get).flatMap(_ => {
+        giveUserAccessRights(dbOperations, allowUserWrite).map[Option[JDBCClient]](_ => {
           createPool(dbOperations.dbName, Option(username), Option(password))
         })
       })
     })
   }
 
-  private def giveUserAccessRights(dbOperations: DBOperationsService, dbWasCreated: Boolean): Future[_] = {
-    if (dbWasCreated) {
-      val pool = createPool(dbOperations.dbName)
-      dbOperations.createUserWithWriteAccess(pool.get, skipUserCreation = true).andThen({
+  private def giveUserAccessRights(dbOperations: DBOperationsService, allowUserWrite: Boolean): Future[Unit] = {
+    val pool = createPool(dbOperations.dbName)
+    dbOperations.createUserWithWriteAccess(pool.get, skipUserCreation = true)
+      .flatMap(_ => {
+        if (allowUserWrite) {
+          Future.unit
+        } else {
+          dbOperations.changeUserToReadOnly(pool.get).map(_ => Unit)
+        }
+      })
+      .andThen({
         case _ => closeOptional(pool)
       })
-    } else {
-      Future.unit
-    }
+      .map(_ => Unit)
   }
 }

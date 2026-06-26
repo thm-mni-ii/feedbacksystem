@@ -27,6 +27,7 @@ import {
   changeActiveDbId,
   updateScheme,
 } from "../../state/sql-playground.actions";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 
 @Injectable()
 export class DatabasesEffects {
@@ -35,20 +36,26 @@ export class DatabasesEffects {
     private sqlPlaygroundService: SqlPlaygroundService,
     private mongoPlaygroundService: MongoPlaygroundService,
     private snackbar: MatSnackBar,
-    private authService: AuthService
+    private authService: AuthService,
+    private playgroundContext: PlaygroundContextService
   ) {}
 
   loadDatabases$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadDatabases),
       switchMap((action) => {
-        const userId = this.authService.getToken().id;
+        const userId = this.playgroundContext.userId;
+        const courseId = this.playgroundContext.courseId;
+        const isReadOnly = this.playgroundContext.isReadOnly();
 
         if (action.dbType === "postgres") {
-          return this.sqlPlaygroundService.getDatabases(userId).pipe(
+          return this.sqlPlaygroundService.getDatabases(userId, courseId).pipe(
             switchMap((databases) => {
               if (databases.length == 0) {
-                // create default database if none exists
+                if (isReadOnly) {
+                  return of(loadDatabasesSuccess({ databases: [] }));
+                }
+
                 return of(
                   createDatabase({
                     name: "Standard Datenbank",
@@ -69,32 +76,38 @@ export class DatabasesEffects {
             catchError((error) => of(loadDatabasesFailure({ error })))
           );
         } else if (action.dbType === "mongo") {
-          return this.mongoPlaygroundService.getMongoDatabases(userId).pipe(
-            map((mongoDbNames: string[]) => {
-              const databases = mongoDbNames.map((name) => ({
-                id: name,
-                name: name,
-                version: "",
-                dbType: "MONGO",
-                active: false,
-              }));
+          return this.mongoPlaygroundService
+            .getMongoDatabases(userId, courseId)
+            .pipe(
+              map((mongoDbNames: string[]) => {
+                const databases = mongoDbNames.map((name) => ({
+                  id: name,
+                  name: name,
+                  version: "",
+                  dbType: "MONGO",
+                  active: false,
+                }));
 
-              // Set the stored or first database as active
-              const storedDbId = localStorage.getItem("playground-mongo-db");
-              if (storedDbId && databases.length > 0) {
-                const fullDbId = `mongo_playground_student_${userId}_${storedDbId}`;
-                const dbIndex = databases.findIndex((db) => db.id === fullDbId);
-                if (dbIndex >= 0) {
-                  databases[dbIndex].active = true;
+                // Set the stored or first database as active
+                const storedDbId = isReadOnly
+                  ? null
+                  : localStorage.getItem("playground-mongo-db");
+                if (storedDbId && databases.length > 0) {
+                  const fullDbId = `mongo_playground_student_${userId}_${storedDbId}`;
+                  const dbIndex = databases.findIndex(
+                    (db) => db.id === fullDbId
+                  );
+                  if (dbIndex >= 0) {
+                    databases[dbIndex].active = true;
+                  }
+                } else if (databases.length > 0) {
+                  databases[0].active = true;
                 }
-              } else if (databases.length > 0) {
-                databases[0].active = true;
-              }
 
-              return loadDatabasesSuccess({ databases });
-            }),
-            catchError((error) => of(loadDatabasesFailure({ error })))
-          );
+                return loadDatabasesSuccess({ databases });
+              }),
+              catchError((error) => of(loadDatabasesFailure({ error })))
+            );
         }
 
         return of(loadDatabasesFailure({ error: "Invalid dbType" }));
@@ -198,6 +211,14 @@ export class DatabasesEffects {
         const userId = this.authService.getToken().id;
 
         if (action.dbType === "postgres") {
+          if (this.playgroundContext.isReadOnly()) {
+            return of(
+              activateDatabaseSuccess({ id: action.id }),
+              changeActiveDbId({ dbId: action.id as number }),
+              updateScheme()
+            );
+          }
+
           return this.sqlPlaygroundService
             .activateDatabase(userId, action.id as number)
             .pipe(
@@ -219,10 +240,12 @@ export class DatabasesEffects {
             /^mongo_playground_student_\d+_/,
             ""
           );
-          localStorage.setItem("playground-mongo-db", shortName);
-          this.snackbar.open("MongoDB erfolgreich aktiviert", "Ok", {
-            duration: 3000,
-          });
+          if (!this.playgroundContext.isReadOnly()) {
+            localStorage.setItem("playground-mongo-db", shortName);
+            this.snackbar.open("MongoDB erfolgreich aktiviert", "Ok", {
+              duration: 3000,
+            });
+          }
           return of(activateDatabaseSuccess({ id: action.id }));
         }
 

@@ -172,6 +172,8 @@ export const germanTranslation = {
   "course.participants.tutorOption.label": "Tutor",
   "course.participants.actions.label": "Aktionen",
   "course.participants.unregisterUser.tooltip": "Benutzer austragen",
+  "course.participants.inspectPlayground.tooltip":
+    "Playground im Nur-Lese-Modus öffnen",
   "dialog.all-submissions.label.close": "Schließen",
   "dialog.confirm.label.abort": "Abbrechen",
   "dialog.confirm.label.confirm": "Ja",
@@ -403,6 +405,13 @@ export const germanTranslation = {
   "sql-playground.input.new-query": "Neuer Query",
   "sql-playground.input.course": "Kurs",
   "sql-playground.input.task": "Aufgabe",
+  "sql-playground.read-only.banner":
+    "Sie betrachten den Playground im Nur-Lese-Modus von",
+  "sql-playground.read-only.hint": "Datenbankänderungen sind gesperrt.",
+  "sql-playground.read-only.select-db":
+    "Sie können zwischen den vorhandenen Datenbanken wechseln, ohne den aktiven Stand des Studierenden zu verändern.",
+  "sql-playground.read-only.execute-hint":
+    "In diesem Modus sind PostgreSQL- und MongoDB-Abfragen deaktiviert.",
   "sql-playground.result-table.create-first-query":
     "Erstelle deine erste Query im unteren Eingabefeld",
   "sql-playground.result-table.sql-error": "SQL Error",

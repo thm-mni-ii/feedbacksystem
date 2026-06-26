@@ -1,3 +1,13 @@
+<div class="read-only-banner" *ngIf="readOnly">
+  <mat-icon>visibility</mat-icon>
+  <span>
+    {{ "sql-playground.read-only.banner" | i18nextEager }}
+    <strong *ngIf="readOnlyOwnerName">{{ readOnlyOwnerName }}</strong
+    >.
+    {{ "sql-playground.read-only.hint" | i18nextEager }}
+  </span>
+</div>
+
 <div class="grid">
   <div class="results-grid">
     <app-bordered-container
@@ -22,6 +32,7 @@
       <app-sql-input-tabs
         [dbType]="selectedDbType"
         [dbName]="mongoDbId"
+        [readOnly]="readOnly"
         [schemaReload]="schemaReload$"
         (submitStatement)="submitStatement($event)"
       ></app-sql-input-tabs>
@@ -33,6 +44,7 @@
       title="{{ 'sql-playground.control' | i18nextEager }}"
     >
       <app-db-control-panel
+        [readOnly]="readOnly"
         [selectedMongoDbId]="mongoDbId"
         (changeActiveDbId)="changeActiveDbId($event)"
         (submitStatement)="submitStatement($event)"
@@ -48,6 +60,7 @@
       title="{{ 'sql-playground.dbSchema' | i18nextEager }}"
     >
       <app-db-scheme
+        [dbType]="selectedDbType"
         [reloadTrigger]="schemaReload$"
         [dbName]="mongoDbId"
         (submitStatement)="submitStatement($event)"

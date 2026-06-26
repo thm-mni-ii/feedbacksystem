@@ -1,9 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Roles } from "src/app/model/Roles";
 import { Database } from "src/app/model/sql_playground/Database";
 import { AuthService } from "src/app/service/auth.service";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 import {
   loadDatabases,
   createDatabase,
@@ -18,6 +20,7 @@ import { selectDatabasesForCurrentType } from "src/app/page-components/sql-playg
   styleUrls: ["./db-control-panel.component.scss"],
 })
 export class DbControlPanelComponent implements OnInit {
+  @Input() readOnly: boolean = false;
   @Input() activeDbId: number;
   @Input() selectedMongoDbId: string | null = null;
   @Output() changeActiveDbId = new EventEmitter<number | string>();
@@ -32,11 +35,22 @@ export class DbControlPanelComponent implements OnInit {
   collaborativeMode: boolean = false;
   databases$: Observable<Database[]>;
 
-  constructor(private auth: AuthService, private store: Store) {}
+  constructor(
+    private route: ActivatedRoute,
+    private auth: AuthService,
+    private store: Store,
+    private playgroundContext: PlaygroundContextService
+  ) {}
 
   ngOnInit(): void {
     const globalRole = this.auth.getToken().globalRole;
     this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
+    this.readOnly = this.readOnly || this.playgroundContext.isReadOnly();
+    this.route.queryParamMap.subscribe((params) => {
+      if (!this.readOnly && this.isCoWorkingTab(params.get("controlTab"))) {
+        this.selectedTab = 2;
+      }
+    });
 
     // Load databases based on the stored db type (postgres or mongo)
     const dbType =
@@ -89,5 +103,9 @@ export class DbControlPanelComponent implements OnInit {
 
   mongoDbSelectedToParent(event: string) {
     this.mongoDbSelected.emit(event);
+  }
+
+  private isCoWorkingTab(tab: string | null): boolean {
+    return tab === "co-working" || tab === "coworking";
   }
 }

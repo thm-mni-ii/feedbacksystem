@@ -21,6 +21,7 @@ import {
 } from "src/app/page-components/sql-playground/db-control-panel/state/databases.selectors";
 import { SqlPlaygroundService } from "../../../../service/sql-playground.service";
 import { map, take } from "rxjs/operators";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 import {
   BackendDefintion,
   DatabaseInformation,
@@ -39,6 +40,7 @@ export class DbControlDbOverviewComponent implements OnInit {
   @Input() selectedMongoDbId: string | null = null;
   @Output() mongoDbSelected = new EventEmitter<string>();
   @Output() schemaReload = new EventEmitter<void>();
+  @Output() dbChanged = new EventEmitter<"postgres" | "mongo">();
 
   databases$: Observable<Database[]>;
   error$: Observable<any>;
@@ -52,26 +54,33 @@ export class DbControlDbOverviewComponent implements OnInit {
   databaseInformation: DatabaseInformation;
   selectedDbType: "postgres" | "mongo" | null = null;
   selectedDb: number | string = "";
+  readOnly: boolean = false;
+  readOnlyOwnerName: string | null = null;
 
   constructor(
     private store: Store,
     private snackbar: MatSnackBar,
     private authService: AuthService,
     private dialog: MatDialog,
-    private playgroundService: SqlPlaygroundService
+    private playgroundService: SqlPlaygroundService,
+    public playgroundContext: PlaygroundContextService
   ) {}
 
   onDbTypeChange(type: "postgres" | "mongo") {
     this.selectedDbType = type;
-    localStorage.setItem("playground-db-type", type);
-    location.reload();
+    if (!this.readOnly) {
+      localStorage.setItem("playground-db-type", type);
+    }
+    this.store.dispatch(loadDatabases({ dbType: type }));
+    this.dbChanged.emit(type);
   }
 
   ngOnInit(): void {
-    const dbType = localStorage.getItem("playground-db-type") as
-      | "postgres"
-      | "mongo"
-      | null;
+    this.readOnly = this.playgroundContext.isReadOnly();
+    this.readOnlyOwnerName = this.playgroundContext.ownerName;
+
+    const dbType = (localStorage.getItem("playground-db-type") ||
+      "postgres") as "postgres" | "mongo" | null;
     this.selectedDbType = dbType;
 
     if (dbType === "postgres" || dbType === "mongo") {
@@ -93,11 +102,18 @@ export class DbControlDbOverviewComponent implements OnInit {
     });
 
     this.activeDb$ = this.databases$.pipe(
-      map((databases) => databases.find((database) => database.active))
+      map(
+        (databases) =>
+          databases.find((database) => database.active) ?? databases[0]
+      )
     );
     this.activeDb$.subscribe((activeDb) => {
       if (activeDb) {
         this.selectedDb = activeDb.id;
+        if (this.selectedDbType === "mongo") {
+          this.mongoDbSelected.emit(activeDb.id.toString());
+          this.schemaReload.emit();
+        }
       }
     });
   }

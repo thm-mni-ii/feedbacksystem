@@ -26,6 +26,7 @@ import org.springframework.data.mongodb.core.query.Update
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.bind.annotation.*
 import kotlin.jvm.optionals.getOrNull
 
@@ -38,12 +39,19 @@ class PlaygroundController(
     private val queryRepository: SqlPlaygroundQueryRepository,
     private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
     private val groupRepository: GroupRepository,
-    private val mongoPlaygroundService: MongoPlaygroundService
+    private val mongoPlaygroundService: MongoPlaygroundService,
+    private val jdbcTemplate: JdbcTemplate
 ) {
     @GetMapping
     @ResponseBody
-    fun index(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> =
-        databaseRepository.findByOwner_IdAndDeleted(currentToken.id, false)
+    fun index(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): List<SqlPlaygroundDatabase> {
+        ensureReadAccess(currentToken.id, requestedUserId, courseId)
+        return databaseRepository.findByOwner_IdAndDeleted(requestedUserId, false)
+    }
 
     /*----------------------------------------------------------------------------------------------------------------*/
     @PostMapping
@@ -100,10 +108,17 @@ class PlaygroundController(
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun executeMongoShellCommand(
         @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
         @PathVariable("dbId") dbId: String,
+        @RequestParam(required = false) courseId: Int?,
         @RequestBody commandDTO: MongoShellCommandDTO
     ): Any {
-        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+        val readOnly = requestedUserId != currentToken.id
+        if (readOnly) {
+            throw ForbiddenException("MongoDB execution is disabled in read-only playground views.")
+        }
+
+        val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             if (!mongoClient.listDatabaseNames().contains(databaseName)) {
@@ -203,10 +218,17 @@ class PlaygroundController(
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun executeMongoQuery(
         @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
         @PathVariable("dbId") dbId: String,
+        @RequestParam(required = false) courseId: Int?,
         @RequestBody mongoQuery: MongoPlaygroundQueryDTO
     ): Any? {
-        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+        val readOnly = requestedUserId != currentToken.id
+        if (readOnly) {
+            throw ForbiddenException("MongoDB execution is disabled in read-only playground views.")
+        }
+
+        val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             if (!mongoClient.listDatabaseNames().contains(databaseName)) {
                 throw NotFoundException()
@@ -329,9 +351,11 @@ class PlaygroundController(
     @ResponseBody
     fun getMongoCollections(
         @CurrentToken currentToken: LegacyToken,
-        @PathVariable("dbId") dbId: String
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: String,
+        @RequestParam(required = false) courseId: Int?
     ): List<String> {
-        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+        val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
@@ -349,10 +373,12 @@ class PlaygroundController(
     @ResponseBody
     fun getCollectionCount(
         @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
         @PathVariable("dbId") dbId: String,
-        @PathVariable("collectionName") collectionName: String
+        @PathVariable("collectionName") collectionName: String,
+        @RequestParam(required = false) courseId: Int?
     ): Long {
-        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+        val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
@@ -394,10 +420,15 @@ class PlaygroundController(
 
     @GetMapping("/mongo/list")
     @ResponseBody
-    fun getMongoDatabase(@CurrentToken currentToken: LegacyToken): List<String> {
+    fun getMongoDatabase(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): List<String> {
+        ensureReadAccess(currentToken.id, requestedUserId, courseId)
         return mongoPlaygroundService.getMongoClient().use { mongoClient ->
             mongoClient.listDatabaseNames().filter {
-                it.startsWith("mongo_playground_student_${currentToken.id}_")
+                it.startsWith("mongo_playground_student_${requestedUserId}_")
             }
         }
     }
@@ -465,9 +496,11 @@ class PlaygroundController(
     @ResponseBody
     fun getMongoView(
         @CurrentToken currentToken: LegacyToken,
-        @PathVariable("dbId") dbId: String
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: String,
+        @RequestParam(required = false) courseId: Int?
     ): List<Map<String, String>> {
-        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+        val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
@@ -550,9 +583,11 @@ class PlaygroundController(
     @ResponseBody
     fun getMongoIndexes(
         @CurrentToken currentToken: LegacyToken,
-        @PathVariable("dbId") dbId: String
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: String,
+        @RequestParam(required = false) courseId: Int?
     ): List<Map<String, Any>> {
-        val databaseName = "mongo_playground_student_${currentToken.id}_$dbId"
+        val databaseName = getMongoDatabaseName(currentToken.id, requestedUserId, dbId, courseId)
 
         mongoPlaygroundService.getMongoClient().use { mongoClient ->
             val db = mongoClient.getDatabase(databaseName)
@@ -639,8 +674,13 @@ class PlaygroundController(
 
     @GetMapping("/{dbId}")
     @ResponseBody
-    fun get(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase =
-        getDatabase(currentToken.id, dbId)
+    fun get(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): SqlPlaygroundDatabase =
+        getDatabase(currentToken.id, requestedUserId, dbId, courseId)
 
     @PostMapping("/{dbId}/activate")
     @ResponseBody
@@ -714,12 +754,19 @@ class PlaygroundController(
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun execute(
         @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
         @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?,
         @RequestBody sqlQuery: SqlPlaygroundQueryCreation
     ): SqlPlaygroundQuery {
-        val db = getDatabase(currentToken.id, dbId)
+        if (requestedUserId != currentToken.id) {
+            throw ForbiddenException("PostgreSQL execution is disabled in read-only playground views.")
+        }
+
+        val db = getDatabase(currentToken.id, requestedUserId, dbId, courseId)
+        val readOnly = requestedUserId != currentToken.id
         val query = queryRepository.save(SqlPlaygroundQuery(sqlQuery.statement, db))
-        sqlPlaygroundCheckerService.submit(query)
+        sqlPlaygroundCheckerService.submit(query, currentToken.id, currentToken.username, readOnly)
         return query
     }
 
@@ -727,9 +774,11 @@ class PlaygroundController(
     @ResponseBody
     fun getResults(
         @CurrentToken currentToken: LegacyToken,
-        @PathVariable("dbId") dbId: Int
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?
     ): List<SqlPlaygroundResult> {
-        getDatabase(currentToken.id, dbId)
+        getDatabase(currentToken.id, requestedUserId, dbId, courseId)
         return queryRepository.findByRunIn_id(dbId).mapNotNull { it.result }
     }
 
@@ -737,38 +786,65 @@ class PlaygroundController(
     @ResponseBody
     fun getResult(
         @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
         @PathVariable("dbId") dbId: Int,
-        @PathVariable("qId") qId: Int
+        @PathVariable("qId") qId: Int,
+        @RequestParam(required = false) courseId: Int?
     ): SqlPlaygroundResult {
-        getDatabase(currentToken.id, dbId)
+        getDatabase(currentToken.id, requestedUserId, dbId, courseId)
         return queryRepository.findByRunIn_idAndId(dbId, qId)?.result
             ?: throw NotFoundException()
     }
 
     @GetMapping("/{dbId}/tables")
     @ResponseBody
-    fun getTables(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-        getEntity(currentToken.id, dbId, "tables")
+    fun getTables(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): ArrayNode =
+        getEntity(currentToken.id, requestedUserId, dbId, "tables", courseId)
 
     @GetMapping("/{dbId}/constraints")
     @ResponseBody
-    fun getConstrains(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-        getEntity(currentToken.id, dbId, "constraints")
+    fun getConstrains(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): ArrayNode =
+        getEntity(currentToken.id, requestedUserId, dbId, "constraints", courseId)
 
     @GetMapping("/{dbId}/views")
     @ResponseBody
-    fun getViews(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-        getEntity(currentToken.id, dbId, "views")
+    fun getViews(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): ArrayNode =
+        getEntity(currentToken.id, requestedUserId, dbId, "views", courseId)
 
     @GetMapping("/{dbId}/routines")
     @ResponseBody
-    fun getRoutines(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-        getEntity(currentToken.id, dbId, "routines")
+    fun getRoutines(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): ArrayNode =
+        getEntity(currentToken.id, requestedUserId, dbId, "routines", courseId)
 
     @GetMapping("/{dbId}/triggers")
     @ResponseBody
-    fun getTriggers(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-        getEntity(currentToken.id, dbId, "triggers")
+    fun getTriggers(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("uid") requestedUserId: Int,
+        @PathVariable("dbId") dbId: Int,
+        @RequestParam(required = false) courseId: Int?
+    ): ArrayNode =
+        getEntity(currentToken.id, requestedUserId, dbId, "triggers", courseId)
 
     @GetMapping("/shared-with-group/{groupId}")
     @ResponseBody
@@ -780,8 +856,14 @@ class PlaygroundController(
         return databaseRepository.findByShareWithGroup(groupId)
     }
 
-    private fun getEntity(userId: Int, databaseId: Int, type: String): ArrayNode {
-        getDatabase(userId, databaseId)
+    private fun getEntity(
+        currentUserId: Int,
+        requestedUserId: Int,
+        databaseId: Int,
+        type: String,
+        courseId: Int?
+    ): ArrayNode {
+        getDatabase(currentUserId, requestedUserId, databaseId, courseId)
         return entityRepository.findByDatabase_idAndDatabase_DeletedAndType(databaseId, false, type)?.data
             ?: throw NotFoundException()
     }
@@ -791,10 +873,47 @@ class PlaygroundController(
             entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
         }
 
-    private fun getDatabase(userId: Int, databaseId: Int): SqlPlaygroundDatabase {
+    private fun getDatabase(
+        currentUserId: Int,
+        requestedUserId: Int,
+        databaseId: Int,
+        courseId: Int?
+    ): SqlPlaygroundDatabase {
         val database = databaseRepository.findByIdAndDeleted(databaseId, false) ?: throw NotFoundException()
-        if (database.owner.id == userId) return database
-        if (database.shareWithGroup?.users?.find { it.userId == userId } != null) return database
-        throw NotFoundException()
+        if (database.owner.id == currentUserId) return database
+        if (database.shareWithGroup?.users?.find { it.userId == currentUserId } != null) return database
+        if (database.owner.id == requestedUserId && hasReadOnlyCourseAccess(currentUserId, requestedUserId, courseId)) {
+            return database
+        }
+        throw ForbiddenException("You are not allowed to access this playground.")
     }
+
+    private fun ensureReadAccess(currentUserId: Int, requestedUserId: Int, courseId: Int?) {
+        if (requestedUserId == currentUserId) return
+        if (!hasReadOnlyCourseAccess(currentUserId, requestedUserId, courseId)) {
+            throw ForbiddenException("You are not allowed to access this playground.")
+        }
+    }
+
+    private fun getMongoDatabaseName(currentUserId: Int, requestedUserId: Int, dbId: String, courseId: Int?): String {
+        ensureReadAccess(currentUserId, requestedUserId, courseId)
+        return "mongo_playground_student_${requestedUserId}_$dbId"
+    }
+
+    private fun hasReadOnlyCourseAccess(currentUserId: Int, requestedUserId: Int, courseId: Int?): Boolean {
+        if (courseId == null) return false
+
+        val currentRole = getCourseRole(courseId, currentUserId)
+        val requestedRole = getCourseRole(courseId, requestedUserId)
+
+        return currentRole in setOf(0, 1) && requestedRole == 2
+    }
+
+    private fun getCourseRole(courseId: Int, userId: Int): Int? =
+        jdbcTemplate.query(
+            "SELECT course_role FROM user_course WHERE course_id = ? AND user_id = ?",
+            { resultSet, _ -> resultSet.getInt("course_role") },
+            courseId,
+            userId
+        ).firstOrNull()
 }

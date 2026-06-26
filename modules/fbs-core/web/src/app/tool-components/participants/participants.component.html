@@ -113,6 +113,22 @@
       </th>
       <td mat-cell *matCellDef="let user">
         <button
+          *ngIf="getRole(user.id) === 'STUDENT'"
+          mat-icon-button
+          [routerLink]="['/', 'sqlplayground']"
+          [queryParams]="{
+            viewUserId: user.id,
+            courseId: courseID,
+            readOnly: true,
+            studentName: user.prename + ' ' + user.surname
+          }"
+          matTooltip="{{
+            'course.participants.inspectPlayground.tooltip' | i18nextEager
+          }}"
+        >
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button
           mat-icon-button
           matTooltip="{{
             'course.participants.unregisterUser.tooltip' | i18nextEager

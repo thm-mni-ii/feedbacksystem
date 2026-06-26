@@ -7,7 +7,7 @@ import {
 } from "@angular/core";
 import { Subject } from "rxjs";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
-import { AuthService } from "src/app/service/auth.service";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 
 @Component({
   selector: "app-db-scheme-mongo-indexes",
@@ -23,7 +23,7 @@ export class DbSchemeMongoIndexesComponent implements OnInit, OnChanges {
 
   constructor(
     private mongoService: MongoPlaygroundService,
-    private auth: AuthService
+    private playgroundContext: PlaygroundContextService
   ) {}
 
   ngOnInit(): void {
@@ -39,7 +39,12 @@ export class DbSchemeMongoIndexesComponent implements OnInit, OnChanges {
   }
 
   loadData(): void {
-    this.userId = this.auth.getToken().id;
+    if (!this.dbName) {
+      this.indexes = [];
+      return;
+    }
+
+    this.userId = this.playgroundContext.userId;
 
     const prefix = `mongo_playground_student_${this.userId}_`;
     const dbSuffix = this.dbName.startsWith(prefix)
@@ -47,7 +52,7 @@ export class DbSchemeMongoIndexesComponent implements OnInit, OnChanges {
       : this.dbName;
 
     this.mongoService
-      .getMongoIndexes(this.userId, dbSuffix)
+      .getMongoIndexes(this.userId, dbSuffix, this.playgroundContext.courseId)
       .subscribe((res) => {
         this.indexes = res;
       });

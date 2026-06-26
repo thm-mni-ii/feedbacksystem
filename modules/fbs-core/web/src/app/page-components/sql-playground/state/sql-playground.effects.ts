@@ -10,7 +10,7 @@ import {
   retry,
 } from "rxjs/operators";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
-import { AuthService } from "src/app/service/auth.service";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 import * as SqlPlaygroundActions from "./sql-playground.actions";
 import { selectActiveDb } from "./sql-playground.selectors";
 import { changeActiveDbId, updateScheme } from "./sql-playground.actions";
@@ -20,7 +20,7 @@ export class SqlPlaygroundEffects {
   constructor(
     private actions$: Actions,
     private sqlPlaygroundService: SqlPlaygroundService,
-    private authService: AuthService,
+    private playgroundContext: PlaygroundContextService,
     private store: Store
   ) {}
 
@@ -29,41 +29,48 @@ export class SqlPlaygroundEffects {
       ofType(SqlPlaygroundActions.updateScheme),
       withLatestFrom(this.store.pipe(select(selectActiveDb))),
       mergeMap(([, activeDb]) => {
-        const token = this.authService.getToken();
-        return this.sqlPlaygroundService.getTables(token.id, activeDb).pipe(
-          mergeMap((tables) =>
-            this.sqlPlaygroundService.getConstraints(token.id, activeDb).pipe(
-              mergeMap((constraints) =>
-                this.sqlPlaygroundService.getViews(token.id, activeDb).pipe(
-                  mergeMap((views) =>
+        const userId = this.playgroundContext.userId;
+        const courseId = this.playgroundContext.courseId;
+        return this.sqlPlaygroundService
+          .getTables(userId, activeDb, courseId)
+          .pipe(
+            mergeMap((tables) =>
+              this.sqlPlaygroundService
+                .getConstraints(userId, activeDb, courseId)
+                .pipe(
+                  mergeMap((constraints) =>
                     this.sqlPlaygroundService
-                      .getRoutines(token.id, activeDb)
+                      .getViews(userId, activeDb, courseId)
                       .pipe(
-                        mergeMap((routines) =>
+                        mergeMap((views) =>
                           this.sqlPlaygroundService
-                            .getTriggers(token.id, activeDb)
+                            .getRoutines(userId, activeDb, courseId)
                             .pipe(
-                              map((triggers) =>
-                                SqlPlaygroundActions.updateSchemeSuccess({
-                                  tables,
-                                  constraints,
-                                  views,
-                                  routines,
-                                  triggers,
-                                })
+                              mergeMap((routines) =>
+                                this.sqlPlaygroundService
+                                  .getTriggers(userId, activeDb, courseId)
+                                  .pipe(
+                                    map((triggers) =>
+                                      SqlPlaygroundActions.updateSchemeSuccess({
+                                        tables,
+                                        constraints,
+                                        views,
+                                        routines,
+                                        triggers,
+                                      })
+                                    )
+                                  )
                               )
                             )
                         )
                       )
                   )
                 )
-              )
+            ),
+            catchError((error) =>
+              of(SqlPlaygroundActions.updateSchemeFailure({ error }))
             )
-          ),
-          catchError((error) =>
-            of(SqlPlaygroundActions.updateSchemeFailure({ error }))
-          )
-        );
+          );
       })
     )
   );
@@ -73,13 +80,14 @@ export class SqlPlaygroundEffects {
       ofType(SqlPlaygroundActions.submitStatement),
       withLatestFrom(this.store.pipe(select(selectActiveDb))),
       mergeMap(([{ statement }, activeDb]) => {
-        const token = this.authService.getToken();
+        const userId = this.playgroundContext.userId;
+        const courseId = this.playgroundContext.courseId;
         return this.sqlPlaygroundService
-          .submitStatement(token.id, activeDb, statement)
+          .submitStatement(userId, activeDb, statement, courseId)
           .pipe(
             mergeMap((result) =>
               this.sqlPlaygroundService
-                .getResults(token.id, activeDb, result.id)
+                .getResults(userId, activeDb, result.id, courseId)
                 .pipe(
                   retry(),
                   mergeMap((res) =>

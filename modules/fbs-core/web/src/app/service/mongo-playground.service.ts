@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 
@@ -7,6 +7,16 @@ import { Observable } from "rxjs";
 })
 export class MongoPlaygroundService {
   constructor(private http: HttpClient) {}
+
+  private buildOptions(courseId?: number) {
+    if (courseId == null) {
+      return {};
+    }
+
+    return {
+      params: new HttpParams().set("courseId", courseId.toString()),
+    };
+  }
 
   createMongoDatabase(userId: number, dbName: string): Observable<any> {
     const body = {
@@ -25,21 +35,29 @@ export class MongoPlaygroundService {
     );
   }
 
-  executeMongoQuery(userId: number, dbId: string, query: any): Observable<any> {
+  executeMongoQuery(
+    userId: number,
+    dbId: string,
+    query: any,
+    courseId?: number
+  ): Observable<any> {
     return this.http.post<any>(
       `/api/v2/playground/${userId}/databases/mongo/${dbId}/execute`,
-      query
+      query,
+      this.buildOptions(courseId)
     );
   }
 
   executeMongoShellCommand(
     userId: number,
     dbId: string,
-    command: string
+    command: string,
+    courseId?: number
   ): Observable<any> {
     return this.http.post<any>(
       `/api/v2/playground/${userId}/databases/mongo/${dbId}/shell-execute`,
-      { command }
+      { command },
+      this.buildOptions(courseId)
     );
   }
 
@@ -72,33 +90,43 @@ export class MongoPlaygroundService {
     );
   }
 
-  getMongoDatabases(userId: number): Observable<any> {
+  getMongoDatabases(userId: number, courseId?: number): Observable<any> {
     return this.http.get<any>(
-      `/api/v2/playground/${userId}/databases/mongo/list`
+      `/api/v2/playground/${userId}/databases/mongo/list`,
+      this.buildOptions(courseId)
     );
   }
 
-  getMongoCollections(userId: number, dbSuffix: string) {
+  getMongoCollections(userId: number, dbSuffix: string, courseId?: number) {
     return this.http.get<string[]>(
-      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/collections`
+      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/collections`,
+      this.buildOptions(courseId)
     );
   }
 
-  getMongoViews(userId: number, dbSuffix: string) {
+  getMongoViews(userId: number, dbSuffix: string, courseId?: number) {
     return this.http.get<string[]>(
-      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/views`
+      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/views`,
+      this.buildOptions(courseId)
     );
   }
 
-  getMongoIndexes(userId: number, dbSuffix: string) {
+  getMongoIndexes(userId: number, dbSuffix: string, courseId?: number) {
     return this.http.get<any[]>(
-      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/indexes`
+      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/indexes`,
+      this.buildOptions(courseId)
     );
   }
 
-  getCollectionCount(userId: number, dbSuffix: string, collection: string) {
+  getCollectionCount(
+    userId: number,
+    dbSuffix: string,
+    collection: string,
+    courseId?: number
+  ) {
     return this.http.get<number>(
-      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/collections/${collection}/count`
+      `/api/v2/playground/${userId}/databases/mongo/${dbSuffix}/collections/${collection}/count`,
+      this.buildOptions(courseId)
     );
   }
 }

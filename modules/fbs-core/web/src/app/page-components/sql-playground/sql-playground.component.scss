@@ -1,3 +1,14 @@
+.read-only-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 16px 0;
+  padding: 12px 16px;
+  border-left: 4px solid #1f6feb;
+  background: #eef6ff;
+  color: #16324f;
+}
+
 .container {
   display: block;
   padding: 16px;

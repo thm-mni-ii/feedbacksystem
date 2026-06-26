@@ -85,11 +85,24 @@ export class UserManagementComponent implements OnInit {
     );
   }
 
+  isDeletedUser(user: User): boolean {
+    return (
+      !!user.deleted ||
+      (user.prename === "Deleted User" &&
+        user.surname === "Deleted User" &&
+        /^duser\s+\d+$/.test(user.username))
+    );
+  }
+
   /**
    * User gets deleted
    * @param user The user to delete
    */
   deleteUser(user: User) {
+    if (this.isDeletedUser(user)) {
+      return;
+    }
+
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {

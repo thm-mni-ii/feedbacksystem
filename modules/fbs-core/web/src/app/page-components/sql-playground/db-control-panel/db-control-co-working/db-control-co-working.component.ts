@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Database } from "../../../../model/sql_playground/Database";
@@ -36,11 +37,13 @@ export class DbControlCoWorkingComponent implements OnInit {
   token = this.authService.getToken();
   pending: boolean = false;
 
-  groups: Group[];
+  groups: Group[] = [];
+  selectedGroupName: string | null = null;
 
   collaborativeMode: boolean = false;
 
   constructor(
+    private route: ActivatedRoute,
     private store: Store,
     private snackbar: MatSnackBar,
     private authService: AuthService,
@@ -66,6 +69,20 @@ export class DbControlCoWorkingComponent implements OnInit {
     this.groups$.subscribe((groups) => {
       this.groups = groups;
     });
+    this.route.queryParamMap.subscribe((params) => {
+      const groupId = Number(params.get("groupId"));
+      if (Number.isFinite(groupId) && groupId > 0) {
+        this.selectedGroup = groupId;
+        this.selectedGroupName = params.get("groupName");
+      }
+    });
+  }
+
+  get selectedGroupMissing(): boolean {
+    return (
+      this.selectedGroup > 0 &&
+      !this.groups.some((group) => group.id === this.selectedGroup)
+    );
   }
 
   disconect() {

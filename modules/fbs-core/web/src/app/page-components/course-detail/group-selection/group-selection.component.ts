@@ -92,6 +92,14 @@ export class GroupSelectionComponent implements OnInit {
     );
   }
 
+  isRegisteredGroup(group: Group & { participants: Participant[] }): boolean {
+    return (
+      group.participants?.some(
+        (participant) => participant.user.id === this.userId
+      ) ?? false
+    );
+  }
+
   loadGroups(): void {
     this.groups$ = this.groupService.getGroupList(this.courseId).pipe(
       mergeMap((groups: Group[]) =>

@@ -1,5 +1,6 @@
 ﻿<div class="actions-container" role="toolbar" aria-label="Tab-Aktionen">
   <button
+    *ngIf="!readOnly"
     mat-flat-button
     matTooltip="{{
       'sql-playground.input.tooltip.closeAllTabs' | i18nextEager
@@ -60,7 +61,7 @@
             placeholder="{{
               'sql-playground.input.label.newQuery' | i18nextEager
             }}"
-            [disabled]="isPending"
+            [disabled]="isPending || readOnly"
             [value]="tab.name"
             (change)="updateTabName(index, $any($event.target).value)"
             aria-label="Tabname bearbeiten"
@@ -75,6 +76,7 @@
           {{ active.id[0] }}
         </div>
         <button
+          *ngIf="!readOnly"
           mat-icon-button
           [disabled]="isPending"
           (click)="closeTab(index)"
@@ -83,6 +85,7 @@
           <mat-icon aria-hidden="true">remove_circle_outline</mat-icon>
         </button>
         <button
+          *ngIf="!readOnly"
           mat-icon-button
           [disabled]="isPending"
           (click)="addTab($event)"
@@ -106,10 +109,14 @@
         }}</strong>
         {{ activeTab?.selectedTask.description }}
       </p>
+      <p class="description" *ngIf="readOnly">
+        {{ "sql-playground.read-only.execute-hint" | i18nextEager }}
+      </p>
       <div class="inputField">
         <app-highlighted-input
           [index]="index"
           [language]="codeType"
+          [readOnly]="isEditorReadOnly"
           (update)="updateTabContent(activeTabIndex, $event.content)"
           [submit]="submit"
           aria-label="SQL Eingabefeld"
@@ -123,7 +130,7 @@
   <div class="row action-row">
     <button
       #submit
-      [disabled]="(isSubmissionEmpty() | async) || isPending"
+      [disabled]="(isSubmissionEmpty() | async) || isPending || readOnly"
       mat-flat-button
       color="accent"
       class="excuteBtn"
@@ -148,7 +155,7 @@
       [matTooltipPosition]="'above'"
       (click)="updateMode(activeTabIndex, true)"
       aria-label="Abgabemodus aktivieren"
-      *ngIf="!activeTab?.isSubmitMode"
+      *ngIf="!readOnly && !activeTab?.isSubmitMode"
     >
       {{ "sql-playground.input.label.submit" | i18nextEager }}
       <mat-icon aria-hidden="true">insert_drive_file</mat-icon>
@@ -202,7 +209,10 @@
     <span>{{ "task.detail.detailedFeedback.pending" | i18nextEager }}</span>
   </div>
 
-  <div class="row submit-container" *ngIf="activeTab?.isSubmitMode">
+  <div
+    class="row submit-container"
+    *ngIf="!readOnly && activeTab?.isSubmitMode"
+  >
     <button
       [disabled]="
         isCheckerEmpty ||

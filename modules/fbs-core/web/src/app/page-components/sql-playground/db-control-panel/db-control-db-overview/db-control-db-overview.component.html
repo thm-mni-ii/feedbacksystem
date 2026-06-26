@@ -1,5 +1,12 @@
 <div class="container">
   <div *ngIf="backend.type === 'local'">
+    <p *ngIf="readOnly" class="read-only-note">
+      {{ "sql-playground.read-only.banner" | i18nextEager }}
+      <strong *ngIf="readOnlyOwnerName">{{ readOnlyOwnerName }}</strong
+      >.
+      {{ "sql-playground.read-only.select-db" | i18nextEager }}
+    </p>
+
     <mat-form-field appearance="fill" class="form-field-spacing">
       <mat-label>
         {{
@@ -35,7 +42,7 @@
           {{
             selectedDbType === "mongo"
               ? db.name.replace(
-                  "mongo_playground_student_" + token.id + "_",
+                  "mongo_playground_student_" + playgroundContext.userId + "_",
                   ""
                 )
               : db.name
@@ -44,7 +51,7 @@
       </mat-select>
     </mat-form-field>
 
-    <div class="btn-container">
+    <div class="btn-container" *ngIf="!readOnly">
       <button
         mat-raised-button
         color="warn"

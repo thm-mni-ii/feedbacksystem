@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { first } from "rxjs/operators";
 import { QueryTab } from "../../../model/sql_playground/QueryTab";
 import { Store } from "@ngrx/store";
@@ -63,6 +63,8 @@ export class BackendService {
   private currentBackend: Backend;
   private knowInputState: QueryTab[] = [];
   private currentType?: string;
+  private backendSubscription?: Subscription;
+  private backendHandlerSubscriptions: Subscription[] = [];
 
   constructor(private store: Store, private authService: AuthService) {}
 
@@ -70,94 +72,124 @@ export class BackendService {
     return tabs.findIndex((tab) => tab.id === id);
   }
 
-  setupBackendHandler() {
-    this.store.select(selectBackend).subscribe((backend) => {
-      if (this.currentType === backend.type) return;
-      this.currentType = backend.type;
-      if (backend.type === "local") {
-        this.currentBackend = new LocalBackend();
-      } else if (backend.type === "collaborative") {
-        this.currentBackend = new CollaborativeBackend(
-          backend.id,
-          this.authService.getToken().username,
-          this.authService.loadToken()
-        );
-        this.currentBackend.streamMetaChanges().subscribe(({ key, value }) => {
-          if (key === "database") {
-            this.store.dispatch(
-              setDatabaseInformation({ databaseInformation: value })
-            );
-          }
-        });
-        if (backend.database) this.currentBackend.setMeta(backend.database);
-      }
+  setupBackendHandler(readOnly = false) {
+    this.backendSubscription?.unsubscribe();
+    this.resetBackendHandlerSubscriptions();
+    this.knowInputState = [];
+    this.currentType = undefined;
 
-      /*this.store.dispatch(SqlInputTabsActions.closeAllTabs());
+    this.backendSubscription = this.store
+      .select(selectBackend)
+      .subscribe((backend) => {
+        const effectiveBackend = readOnly
+          ? ({ type: "local" } as BackendDefintion)
+          : backend;
+        const backendKey =
+          effectiveBackend.type === "collaborative"
+            ? `${effectiveBackend.type}:${effectiveBackend.id}`
+            : `${effectiveBackend.type}:${readOnly ? "read-only" : "default"}`;
+
+        if (this.currentType === backendKey) return;
+
+        this.resetBackendHandlerSubscriptions();
+        this.knowInputState = [];
+        this.currentType = backendKey;
+
+        if (effectiveBackend.type === "local") {
+          this.currentBackend = new LocalBackend(!readOnly);
+        } else if (effectiveBackend.type === "collaborative") {
+          this.currentBackend = new CollaborativeBackend(
+            effectiveBackend.id,
+            this.authService.getToken().username,
+            this.authService.loadToken()
+          );
+          this.backendHandlerSubscriptions.push(
+            this.currentBackend
+              .streamMetaChanges()
+              .subscribe(({ key, value }) => {
+                if (key === "database") {
+                  this.store.dispatch(
+                    setDatabaseInformation({ databaseInformation: value })
+                  );
+                }
+              })
+          );
+          if (effectiveBackend.database) {
+            this.currentBackend.setMeta(effectiveBackend.database);
+          }
+        }
+
+        /*this.store.dispatch(SqlInputTabsActions.closeAllTabs());
       this.store.dispatch(DynamicResultTableActions.closeTab({ index: -1 })); // Close all tabs*/
 
-      this.currentBackend.streamInputChanges().subscribe((change) => {
-        /*if (this.i > 10) {
+        this.backendHandlerSubscriptions.push(
+          this.currentBackend.streamInputChanges().subscribe((change) => {
+            /*if (this.i > 10) {
           return;
         }*/
 
-        this.i++;
-        this.store
-          .select(selectInputTabs)
-          .pipe(first())
-          .subscribe((tabs) => {
-            switch (change.event) {
-              case "create":
-                const existingIndex = this.findTabIndex(
-                  tabs,
-                  change.payload.id
-                );
-                if (existingIndex === -1) {
-                  this.store.dispatch(
-                    SqlInputTabsActions.addTab({ tab: change.payload })
-                  );
-                  this.knowInputState.push(change.payload);
+            this.i++;
+            this.store
+              .select(selectInputTabs)
+              .pipe(first())
+              .subscribe((tabs) => {
+                switch (change.event) {
+                  case "create":
+                    const existingIndex = this.findTabIndex(
+                      tabs,
+                      change.payload.id
+                    );
+                    if (existingIndex === -1) {
+                      this.store.dispatch(
+                        SqlInputTabsActions.addTab({ tab: change.payload })
+                      );
+                      this.knowInputState.push(change.payload);
+                    }
+                    break;
+                  case "update":
+                    const updateIndex = this.findTabIndex(
+                      tabs,
+                      change.payload.id
+                    );
+                    if (
+                      updateIndex !== -1 &&
+                      tabs[updateIndex].content !== change.payload.content
+                    ) {
+                      this.store.dispatch(
+                        SqlInputTabsActions.updateTabContent({
+                          index: updateIndex,
+                          content: change.payload.content,
+                        })
+                      );
+                    } else if (
+                      updateIndex !== -1 &&
+                      tabs[updateIndex].name !== change.payload.name
+                    ) {
+                      this.store.dispatch(
+                        SqlInputTabsActions.updateTabName({
+                          index: updateIndex,
+                          name: change.payload.name,
+                        })
+                      );
+                    }
+                    break;
+                  case "delete":
+                    const deleteIndex = this.findTabIndex(tabs, change.id);
+                    if (deleteIndex !== -1) {
+                      this.store.dispatch(
+                        SqlInputTabsActions.closeTab({ index: deleteIndex })
+                      );
+                      this.knowInputState = this.knowInputState.filter(
+                        (tab) => tab.id !== change.id
+                      );
+                    }
+                    break;
                 }
-                break;
-              case "update":
-                const updateIndex = this.findTabIndex(tabs, change.payload.id);
-                if (
-                  updateIndex !== -1 &&
-                  tabs[updateIndex].content !== change.payload.content
-                ) {
-                  this.store.dispatch(
-                    SqlInputTabsActions.updateTabContent({
-                      index: updateIndex,
-                      content: change.payload.content,
-                    })
-                  );
-                } else if (
-                  updateIndex !== -1 &&
-                  tabs[updateIndex].name !== change.payload.name
-                ) {
-                  this.store.dispatch(
-                    SqlInputTabsActions.updateTabName({
-                      index: updateIndex,
-                      name: change.payload.name,
-                    })
-                  );
-                }
-                break;
-              case "delete":
-                const deleteIndex = this.findTabIndex(tabs, change.id);
-                if (deleteIndex !== -1) {
-                  this.store.dispatch(
-                    SqlInputTabsActions.closeTab({ index: deleteIndex })
-                  );
-                  this.knowInputState = this.knowInputState.filter(
-                    (tab) => tab.id !== change.id
-                  );
-                }
-                break;
-            }
-          });
-      });
+              });
+          })
+        );
 
-      /*this.currentBackend.streamResultChanges().subscribe((change) => {
+        /*this.currentBackend.streamResultChanges().subscribe((change) => {
         this.store
           .select(selectResultTabs)
           .pipe(first())
@@ -201,70 +233,80 @@ export class BackendService {
           });
       });*/
 
-      this.store.select(selectInputTabs).subscribe((inputTabs) => {
-        inputTabs.forEach((tab) => {
-          const known =
-            this.knowInputState &&
-            Boolean(
-              this.knowInputState.find((knownTab) => knownTab.id === tab.id)
-            );
-          this.currentBackend
-            .emitInputChange({
-              event: known ? "update" : "create",
-              payload: tab,
-            })
-            .subscribe(() => {});
-        });
-        if (this.knowInputState)
-          this.knowInputState.forEach((knownTab) => {
-            const exists = Boolean(
-              inputTabs.find((tab) => tab.id === knownTab.id)
-            );
-            if (!exists)
+        this.backendHandlerSubscriptions.push(
+          this.store.select(selectInputTabs).subscribe((inputTabs) => {
+            inputTabs.forEach((tab) => {
+              const known =
+                this.knowInputState &&
+                Boolean(
+                  this.knowInputState.find((knownTab) => knownTab.id === tab.id)
+                );
               this.currentBackend
                 .emitInputChange({
-                  event: "delete",
-                  id: knownTab.id,
+                  event: known ? "update" : "create",
+                  payload: tab,
                 })
                 .subscribe(() => {});
-          });
-        this.knowInputState = inputTabs;
-      });
+            });
+            if (this.knowInputState)
+              this.knowInputState.forEach((knownTab) => {
+                const exists = Boolean(
+                  inputTabs.find((tab) => tab.id === knownTab.id)
+                );
+                if (!exists)
+                  this.currentBackend
+                    .emitInputChange({
+                      event: "delete",
+                      id: knownTab.id,
+                    })
+                    .subscribe(() => {});
+              });
+            this.knowInputState = inputTabs;
+          })
+        );
 
-      this.store.select(selectActiveTab).subscribe((activeTab) => {
-        if (activeTab)
+        this.backendHandlerSubscriptions.push(
+          this.store.select(selectActiveTab).subscribe((activeTab) => {
+            if (activeTab)
+              this.currentBackend
+                .announceSelectedInput(activeTab.id)
+                .subscribe(() => {});
+          })
+        );
+
+        this.backendHandlerSubscriptions.push(
           this.currentBackend
-            .announceSelectedInput(activeTab.id)
-            .subscribe(() => {});
-      });
+            .streamSelectedInputs()
+            .subscribe((awarenessStates) => {
+              this.store.dispatch(
+                SqlInputTabsActions.updateActiveTabUsers({ awarenessStates })
+              );
+            })
+        );
 
-      this.currentBackend
-        .streamSelectedInputs()
-        .subscribe((awarenessStates) => {
-          this.store.dispatch(
-            SqlInputTabsActions.updateActiveTabUsers({ awarenessStates })
-          );
-        });
+        this.backendHandlerSubscriptions.push(
+          this.store.select(selectResultset).subscribe(() => {
+            this.currentBackend.announceSchemaChange().subscribe(() => {});
+          })
+        );
 
-      this.store.select(selectResultset).subscribe(() => {
-        this.currentBackend.announceSchemaChange().subscribe(() => {});
-      });
+        this.backendHandlerSubscriptions.push(
+          this.currentBackend.streamSchemaChange().subscribe(() => {
+            this.store.dispatch(updateScheme());
+          })
+        );
 
-      this.currentBackend.streamSchemaChange().subscribe(() => {
-        this.store.dispatch(updateScheme());
-      });
+        setTimeout(() => {
+          this.store
+            .select(selectInputTabs)
+            .pipe(first())
+            .subscribe((inputTabs) => {
+              if (inputTabs.length === 0)
+                this.store.dispatch(SqlInputTabsActions.addTab({}));
+            });
+        }, 1000);
 
-      setTimeout(() => {
-        this.store
-          .select(selectInputTabs)
-          .pipe(first())
-          .subscribe((inputTabs) => {
-            if (inputTabs.length === 0)
-              this.store.dispatch(SqlInputTabsActions.addTab({}));
-          });
-      }, 1000);
-
-      /*this.store.select(selectResultTabs).subscribe((resultTabs) => {
+        /*this.store.select(selectResultTabs).subscribe((resultTabs) => {
         resultTabs.forEach((tab) => {
           this.currentBackend
             .emitResultChange({
@@ -274,6 +316,13 @@ export class BackendService {
             .subscribe(() => {});
         });
       });*/
-    });
+      });
+  }
+
+  private resetBackendHandlerSubscriptions() {
+    this.backendHandlerSubscriptions.forEach((subscription) =>
+      subscription.unsubscribe()
+    );
+    this.backendHandlerSubscriptions = [];
   }
 }

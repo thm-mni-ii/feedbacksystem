@@ -7,4 +7,5 @@ export interface User {
   username: string;
   alias?: string;
   globalRole?: string; // ADMIN, MODERATOR, or USER
+  deleted?: boolean;
 }

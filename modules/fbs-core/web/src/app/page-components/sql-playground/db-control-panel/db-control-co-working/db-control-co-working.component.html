@@ -27,6 +27,9 @@
         "sql-playground.db-control-panel.co-working.select-group" | i18nextEager
       }}</mat-label>
       <mat-select [(ngModel)]="selectedGroup">
+        <mat-option *ngIf="selectedGroupMissing" [value]="selectedGroup">
+          {{ selectedGroupName || selectedGroup }}
+        </mat-option>
         <mat-option *ngFor="let db of groups$ | async" [value]="db.id">
           {{ db.name }}
         </mat-option>

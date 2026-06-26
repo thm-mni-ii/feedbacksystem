@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, OnInit } from "@angular/core";
+import { AfterViewChecked, Component, OnDestroy, OnInit } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Subject, BehaviorSubject, Observable } from "rxjs";
 import { Routine } from "src/app/model/sql_playground/Routine";
@@ -13,8 +13,9 @@ import * as SqlPlaygroundActions from "./state/sql-playground.actions";
 import * as fromSqlPlayground from "./state/sql-playground.selectors";
 import * as TemplateActions from "./db-control-panel/state/templates.actions";
 import { BackendService } from "./collab/backend.service";
-import { HttpClient } from "@angular/common/http";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
+import { ActivatedRoute } from "@angular/router";
+import { PlaygroundContextService } from "src/app/service/playground-context.service";
 
 import Prism from "prismjs";
 import "prismjs/components/prism-json";
@@ -24,7 +25,9 @@ import "prismjs/components/prism-json";
   templateUrl: "./sql-playground.component.html",
   styleUrls: ["./sql-playground.component.scss"],
 })
-export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
+export class SqlPlaygroundComponent
+  implements OnInit, AfterViewChecked, OnDestroy
+{
   activeDb$: Observable<number>;
   resultset$: Observable<any>;
   triggers$: Observable<Trigger[]>;
@@ -37,6 +40,8 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
   mongoDbId: string | null = null;
   schemaReload$ = new Subject<void>();
   mongoRawResult$ = new BehaviorSubject<any>(null);
+  readOnly: boolean = false;
+  readOnlyOwnerName: string | null = null;
 
   constructor(
     private titlebar: TitlebarService,
@@ -44,24 +49,64 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
     private backendService: BackendService,
     private snackbar: MatSnackBar,
     private store: Store,
-    private http: HttpClient,
-    private mongoPlaygroundService: MongoPlaygroundService
+    private mongoPlaygroundService: MongoPlaygroundService,
+    private route: ActivatedRoute,
+    private playgroundContext: PlaygroundContextService
   ) {}
 
   ngOnInit() {
-    const savedDbType = localStorage.getItem("playground-db-type") as
-      | "postgres"
-      | "mongo";
-    this.selectedDbType = savedDbType ?? "postgres";
-    this.store.dispatch(
-      TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
-    );
-    this.store.dispatch(
-      TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
-    );
-    this.titlebar.emitTitle("SQL Playground");
+    const currentUserId = this.authService.getToken().id;
+    const requestedUserIdParam =
+      this.route.snapshot.queryParamMap.get("viewUserId");
+    const courseIdParam = this.route.snapshot.queryParamMap.get("courseId");
+    const requestedUserId = requestedUserIdParam
+      ? Number(requestedUserIdParam)
+      : Number.NaN;
+    const courseId = courseIdParam ? Number(courseIdParam) : Number.NaN;
+    const readOnlyRequested =
+      this.route.snapshot.queryParamMap.get("readOnly") === "true";
 
-    const fullDbName = localStorage.getItem("playground-mongo-db-full");
+    if (
+      readOnlyRequested &&
+      Number.isFinite(requestedUserId) &&
+      Number.isFinite(courseId) &&
+      requestedUserId !== currentUserId
+    ) {
+      this.playgroundContext.setContext({
+        userId: requestedUserId,
+        readOnly: true,
+        courseId,
+        ownerName: this.route.snapshot.queryParamMap.get("studentName"),
+      });
+    } else {
+      this.playgroundContext.reset();
+    }
+
+    this.readOnly = this.playgroundContext.isReadOnly();
+    this.readOnlyOwnerName = this.playgroundContext.ownerName;
+
+    const shouldOpenCoWorking = this.isCoWorkingTab(
+      this.route.snapshot.queryParamMap.get("controlTab")
+    );
+    const savedDbType = (
+      shouldOpenCoWorking
+        ? "postgres"
+        : localStorage.getItem("playground-db-type") || "postgres"
+    ) as "postgres" | "mongo";
+    this.selectedDbType = savedDbType ?? "postgres";
+    if (shouldOpenCoWorking && !this.readOnly) {
+      localStorage.setItem("playground-db-type", "postgres");
+    }
+    this.store.dispatch(
+      TemplateActions.setFilterLanguage({ filterLanguage: this.selectedDbType })
+    );
+    this.titlebar.emitTitle(
+      this.readOnly ? "SQL Playground (Nur-Lese-Modus)" : "SQL Playground"
+    );
+
+    const fullDbName = this.readOnly
+      ? null
+      : localStorage.getItem("playground-mongo-db-full");
     if (fullDbName) this.mongoDbId = this.getDbSuffix(fullDbName);
 
     this.activeDb$ = this.store.select(fromSqlPlayground.selectActiveDb);
@@ -74,31 +119,37 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
     this.isQueryPending$ = this.store.select(
       fromSqlPlayground.selectIsQueryPending
     );
-    this.backendService.setupBackendHandler();
+    this.backendService.setupBackendHandler(this.readOnly);
 
     if (this.selectedDbType === "mongo") {
-      const userId = this.authService.getToken().id;
-      this.http
-        .get<string[]>(`/api/v2/playground/${userId}/databases/mongo/list`)
+      const userId = this.playgroundContext.userId;
+      this.mongoPlaygroundService
+        .getMongoDatabases(userId, this.playgroundContext.courseId)
         .subscribe((dbs) => {
           if (!this.mongoDbId && dbs.length > 0) {
             const fallbackFull = dbs[0];
             const fallbackSuffix = this.getDbSuffix(fallbackFull);
 
             this.mongoDbId = fallbackSuffix;
-            localStorage.setItem("playground-mongo-db-full", fallbackFull);
-            localStorage.setItem("playground-mongo-db", fallbackSuffix);
+            if (!this.readOnly) {
+              localStorage.setItem("playground-mongo-db-full", fallbackFull);
+              localStorage.setItem("playground-mongo-db", fallbackSuffix);
+            }
           }
         });
     }
   }
 
   private getDbSuffix(fullName: string): string {
-    const userId = this.authService.getToken().id;
+    const userId = this.playgroundContext.userId;
     const prefix = `mongo_playground_student_${userId}_`;
     return fullName.startsWith(prefix)
       ? fullName.replace(prefix, "")
       : fullName;
+  }
+
+  private isCoWorkingTab(tab: string | null): boolean {
+    return tab === "co-working" || tab === "coworking";
   }
 
   changeActiveDbId(dbId: number) {
@@ -115,12 +166,19 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
   }
 
   submitStatement(statement: string) {
+    if (this.readOnly) {
+      this.snackbar.open("Abfragen sind im Nur-Lese-Modus deaktiviert", "Ok", {
+        duration: 3000,
+      });
+      return;
+    }
+
     if (this.selectedDbType === "postgres") {
       this.store.dispatch(SqlPlaygroundActions.submitStatement({ statement }));
       return;
     }
 
-    const userId = this.authService.getToken().id;
+    const userId = this.playgroundContext.userId;
     const dbId = this.mongoDbId;
 
     if (!dbId) {
@@ -136,7 +194,12 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
       const parsedQuery = JSON.parse(statement);
 
       this.mongoPlaygroundService
-        .executeMongoQuery(userId, dbId, parsedQuery)
+        .executeMongoQuery(
+          userId,
+          dbId,
+          parsedQuery,
+          this.playgroundContext.courseId
+        )
         .subscribe({
           next: (res) => {
             this.mongoRawResult$.next(res);
@@ -164,7 +227,12 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
       this.mongoRawResult$.next(null);
 
       this.mongoPlaygroundService
-        .executeMongoShellCommand(userId, dbId, statement)
+        .executeMongoShellCommand(
+          userId,
+          dbId,
+          statement,
+          this.playgroundContext.courseId
+        )
         .subscribe({
           next: (res) => {
             this.mongoRawResult$.next(res);
@@ -187,7 +255,9 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
 
   onDbChanged(dbType: "postgres" | "mongo") {
     this.selectedDbType = dbType;
-    localStorage.setItem("playground-db-type", dbType);
+    if (!this.readOnly) {
+      localStorage.setItem("playground-db-type", dbType);
+    }
 
     if (dbType === "postgres") this.mongoDbId = null;
 
@@ -198,15 +268,17 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
   }
 
   onMongoDbSelected(fullDbName: string) {
-    const userId = this.authService.getToken().id;
+    const userId = this.playgroundContext.userId;
     const prefix = `mongo_playground_student_${userId}_`;
     const suffix = fullDbName.startsWith(prefix)
       ? fullDbName.replace(prefix, "")
       : fullDbName;
 
     this.mongoDbId = suffix;
-    localStorage.setItem("playground-mongo-db-full", fullDbName);
-    localStorage.setItem("playground-mongo-db", suffix);
+    if (!this.readOnly) {
+      localStorage.setItem("playground-mongo-db-full", fullDbName);
+      localStorage.setItem("playground-mongo-db", suffix);
+    }
 
     setTimeout(() => {
       this.schemaReload$.next();
@@ -217,5 +289,9 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
     if (this.selectedDbType === "mongo") {
       Prism.highlightAll();
     }
+  }
+
+  ngOnDestroy() {
+    this.playgroundContext.reset();
   }
 }
