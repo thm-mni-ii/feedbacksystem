@@ -3,6 +3,7 @@ import * as vNG from 'v-network-graph'
 import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/layouts/force'
 import type { Competency, Question } from '@/model/types'
+import { skillGraphPalette } from '@/plugins/vuetify'
 
 interface Course {
   id: string
@@ -14,6 +15,24 @@ interface Course {
 const BASE_R = 60
 const STEP_R = 50
 const Q_OFFSET = 50
+
+function hashString(value: string): number {
+  return value.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) | 0, 0)
+}
+
+function lightenHex(hexColor: string, factor: number): string {
+  const safeHex = hexColor.replace('#', '')
+  if (!/^[0-9a-fA-F]{6}$/.test(safeHex)) return skillGraphPalette.chipFallback
+
+  const r = parseInt(safeHex.slice(0, 2), 16)
+  const g = parseInt(safeHex.slice(2, 4), 16)
+  const b = parseInt(safeHex.slice(4, 6), 16)
+  const blend = (channel: number) => Math.round(channel + (255 - channel) * factor)
+
+  return `#${[blend(r), blend(g), blend(b)]
+    .map((channel) => channel.toString(16).padStart(2, '0'))
+    .join('')}`
+}
 
 export function useSkillGraphLogic(
   mockCompetencies: Competency[],
@@ -44,35 +63,23 @@ export function useSkillGraphLogic(
   const competenciesByCategory = (category: string): Competency[] =>
     competencies.value.filter((c) => !c.parentId && c.category === category)
 
+  const colorFromPalette = (seed: string): string => {
+    const palette = skillGraphPalette.competencyPalette
+    const index = Math.abs(hashString(seed)) % palette.length
+    return palette[index]
+  }
+
   const getCompetencyColor = (comp?: Competency): string => {
-    if (!comp) return '#999999'
+    if (!comp) return skillGraphPalette.chipFallback
 
     if (!comp.parentId) {
-      switch (comp.category) {
-        case 'database':
-          return '#43C57C'
-        case 'programming':
-          return '#7B68EE'
-        case 'modeling':
-          return '#FF6B6B'
-        default:
-          return '#999999'
-      }
+      return colorFromPalette(comp.category || comp.id)
     }
 
     const parent = getCompetency(comp.parentId)
-    if (!parent) return '#CCCCCC'
+    if (!parent) return skillGraphPalette.chipFallback
 
-    switch (parent.category) {
-      case 'database':
-        return '#7DDBA3'
-      case 'programming':
-        return '#B19CD9'
-      case 'modeling':
-        return '#FFB3B3'
-      default:
-        return '#DDDDDD'
-    }
+    return lightenHex(getCompetencyColor(parent), 0.2)
   }
 
   function getCompetencyDepth(compId: string): number {
@@ -106,7 +113,7 @@ export function useSkillGraphLogic(
     nodes[course.value.id] = {
       name: course.value.name,
       type: 'course',
-      color: '#ffa700',
+      color: skillGraphPalette.courseNode,
       radius: 17,
       data: course.value
     }
@@ -129,7 +136,7 @@ export function useSkillGraphLogic(
       nodes[q.id] = {
         name: short,
         type: 'question',
-        color: '#a3c1f4',
+        color: skillGraphPalette.questionNode,
         radius: 5,
         data: q
       }
@@ -148,7 +155,7 @@ export function useSkillGraphLogic(
         edges[`e-course-${c.id}`] = {
           source: course.value.id,
           target: c.id,
-          color: '#292929',
+          color: skillGraphPalette.edgeFocus,
           width: 2
         }
       })
@@ -159,7 +166,7 @@ export function useSkillGraphLogic(
         edges[`e-${c.parentId}-${c.id}`] = {
           source: c.parentId!,
           target: c.id,
-          color: '#292929',
+          color: skillGraphPalette.edgeFocus,
           width: 1.5
         }
       })
@@ -169,7 +176,7 @@ export function useSkillGraphLogic(
       edges[`e-${primaryCompId}-${q.id}`] = {
         source: primaryCompId,
         target: q.id,
-        color: '#25252577',
+        color: skillGraphPalette.edgeDefault,
         width: 1
       }
     })
@@ -295,7 +302,7 @@ export function useSkillGraphLogic(
         direction: 'south',
         background: {
           visible: true,
-          color: '#ccd7c76f',
+          color: skillGraphPalette.labelBackground,
           padding: {
             vertical: 2,
             horizontal: 6
@@ -306,12 +313,12 @@ export function useSkillGraphLogic(
           n.type === 'course' ? 13 : n.type?.startsWith('competency-root') ? 12 : 10,
         fontWeight: (n) =>
           n.type === 'course' || n.type?.startsWith('competency-root') ? 'bold' : 'normal',
-        color: '#444444'
+        color: skillGraphPalette.textPrimary
       }
     },
     edge: {
       normal: {
-        color: (e) => e.color ?? '#aaaaaa',
+        color: (e) => e.color ?? skillGraphPalette.edgeDefault,
         width: (e) => e.width ?? 1.5
       }
     }

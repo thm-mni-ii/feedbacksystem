@@ -1,10 +1,7 @@
 <template>
   <div v-if="selectedNode?.type?.startsWith('competency-root') || selectedNode?.type?.startsWith('competency-sub')">
     <!-- Competency Name -->
-    <code
-      class="text-caption d-block pa-2 rounded mb-3"
-      style="background: rgba(0, 0, 0, 0.05)"
-    >
+    <code class="text-caption d-block pa-2 rounded mb-3" :style="nameBadgeStyle">
       {{ selectedNode.data.name }}
     </code>
 
@@ -13,7 +10,12 @@
       <div class="text-caption font-weight-bold text-uppercase mb-1">
         {{ selectedNode.data.category ? 'Kategorie' : 'Keine Kategorie' }}
       </div>
-      <v-chip size="x-small" color="blue" variant="tonal" class="mb-3">
+      <v-chip
+        size="x-small"
+        :color="getCompetencyColor(selectedNode.data)"
+        variant="tonal"
+        class="mb-3"
+      >
         {{ selectedNode.data.category || 'Uncategorized' }}
       </v-chip>
     </template>
@@ -75,14 +77,16 @@
         prepend-icon="mdi-help-circle-outline"
         rounded="lg"
         class="mb-1"
-        style="background: rgba(0, 0, 0, 0.03)"
+        :style="questionItemStyle"
       />
     </v-list>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Competency, Question } from '@/model/types'
+import { skillGraphPalette } from '@/plugins/vuetify'
 
 interface Props {
   selectedNode: any
@@ -93,6 +97,14 @@ interface Props {
 }
 
 defineProps<Props>()
+
+const nameBadgeStyle = computed(() => ({
+  backgroundColor: skillGraphPalette.cardBorder
+}))
+
+const questionItemStyle = computed(() => ({
+  backgroundColor: skillGraphPalette.viewBackground
+}))
 </script>
 
 <style scoped></style>
