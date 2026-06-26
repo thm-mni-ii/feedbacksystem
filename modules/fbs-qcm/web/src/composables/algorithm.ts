@@ -1,396 +1,240 @@
+// composables/algorithm.ts
 // ============================================================
-// algorithm.ts
-// Adaptiver Quiz-Algorithmus
-//
-// Kombiniert:
-//   - KST  → Prerequisite-Logik (Doignon & Falmagne, 1985)
-//   - BKT  → Mastery-Schätzung (Corbett & Anderson, 1994)
-//   - CAT  → Difficulty-basierte Fragenauswahl
-//   - MAB  → Gewichtetes Themen-Sampling (Thompson Sampling)
-//   - ZPD/Flow → Asymmetrische Difficulty-Anpassung
+// Adaptive Quiz Algorithm
+// REFACTORED: Arbeitet mit vereinheitlichtem Competency-System
 // ============================================================
 
 import type {
-  Skill,
+  Competency,
+  CompetencyState,
   Question,
   SessionState,
-  AlgorithmConfig,
   AnswerRecord,
-  AnswerResult,
   NextQuestion,
-  SkillState,
-} from './types'
-import { DEFAULT_CONFIG } from './types'
-import { applyAnswer, initSkillState } from './bkt'
-
-// ============================================================
-// Session-Initialisierung
-// ============================================================
+  AnswerResult,
+  ProgressItem
+} from '@/model/types'
 
 /**
- * Erstellt eine neue SessionState für einen Studenten.
- * Setzt alle Skills ohne Prerequisites direkt auf unlocked.
+ * Session für einen Studierenden erstellen
  *
- * KST: Skills ohne Prerequisite sind im initialen Wissenszustand erreichbar.
+ * Initialisiert Scores für alle Kompetenzen auf 0.0
  */
-export function createSession(
-  studentId: string,
-  skills: Skill[],
-  config: AlgorithmConfig = DEFAULT_CONFIG,
-): SessionState {
-  const skillStates: Record<string, SkillState> = {}
+export function createSession(studentId: string, competencies: Competency[]): SessionState {
+  const competencyStates: Record<string, CompetencyState> = {}
 
-  for (const skill of skills) {
-    const unlocked = skill.prerequisites.length === 0
-    skillStates[skill.id] = initSkillState(
-      skill.id,
-      unlocked,
-      config.defaultBKTParams,
-    )
+  for (const competency of competencies) {
+    competencyStates[competency.id] = {
+      competencyId: competency.id,
+      score: 0,
+      timesAssessed: 0,
+      lastAssessedAt: null
+    }
   }
 
   return {
     studentId,
-    skills: skillStates,
-    currentDifficulty: 0.3,
-    recentQuestionIds: [],
+    competencies: competencyStates,
     history: [],
-    startedAt: Date.now(),
+    recentQuestionIds: []
   }
 }
 
-// ============================================================
-// KST: Prerequisite-Logik
-// ============================================================
-
 /**
- * Prüft ob alle Prerequisites eines Skills gemeistert sind.
- * Wenn ja, wird der Skill freigeschaltet.
+ * Hilfsfunktion: Gewichtete Zufallsauswahl
  *
- * KST: Ein Wissenszustand ist nur erreichbar, wenn alle
- * Vorläufer-Skills beherrscht werden (partielle Ordnung).
+ * Wählt ein Item basierend auf Gewichtung aus
  */
-function checkAndUnlockSkills(
-  skills: Skill[],
-  state: SessionState,
-): { updatedState: SessionState; newlyUnlocked: Skill[] } {
-  const newlyUnlocked: Skill[] = []
-  const updatedSkills = { ...state.skills }
+function weightedSample<T>(items: Array<{ item: T; weight: number }>): T {
+  const totalWeight = items.reduce((sum, x) => sum + x.weight, 0)
 
-  for (const skill of skills) {
-    const skillState = updatedSkills[skill.id]
+  let random = Math.random() * totalWeight
 
-    // Bereits freigeschaltet oder gemeistert → überspringen
-    if (skillState.unlocked || skillState.mastered) continue
+  for (const entry of items) {
+    random -= entry.weight
 
-    // Alle Prerequisites gemeistert?
-    const allPrereqsMet = skill.prerequisites.every(
-      (prereqId) => updatedSkills[prereqId]?.mastered === true,
-    )
-
-    if (allPrereqsMet) {
-      updatedSkills[skill.id] = { ...skillState, unlocked: true }
-      newlyUnlocked.push(skill)
+    if (random <= 0) {
+      return entry.item
     }
   }
 
-  return {
-    updatedState: { ...state, skills: updatedSkills },
-    newlyUnlocked,
-  }
-}
-
-// ============================================================
-// MAB: Gewichtetes Themen-Sampling (Thompson Sampling-inspiriert)
-// ============================================================
-
-/**
- * Berechnet das Sampling-Gewicht eines Skills.
- *
- * MAB Exploration/Exploitation:
- *   - Exploitation: Schwache Skills (niedriges P(L)) bevorzugen
- *   - Exploration:  Lange nicht gefragte Skills + Rauschen
- *
- * ZPD: Skills nahe der aktuellen Fähigkeitsgrenze werden
- * bevorzugt (nicht zu leicht, nicht zu schwer).
- */
-function computeSkillWeight(
-  skillState: SkillState,
-  config: AlgorithmConfig,
-): number {
-  // Nicht zugängliche oder bereits gemeisterte Skills ausschließen
-  if (!skillState.unlocked || skillState.mastered) return 0
-
-  // Exploitation: Schwache Skills bevorzugen
-  const weaknessScore = 1 - skillState.pLearned
-
-  // Exploration: Recency-Bonus für lange nicht gefragte Skills
-  let recencyBonus = 0
-  if (skillState.lastAskedAt === null) {
-    // Noch nie gefragt → stärkerer Bonus
-    recencyBonus = 0.2
-  } else {
-    const hoursSince = (Date.now() - skillState.lastAskedAt) / (1000 * 60 * 60)
-    recencyBonus = Math.min(hoursSince / config.recencyHours, 0.25)
-  }
-
-  // Exploration: Kontrolliertes Rauschen (Thompson Sampling Prinzip)
-  // Statt Beta-Verteilung: vereinfachtes Uniform-Rauschen
-  const noise = Math.random() * config.noiseFactor
-
-  return weaknessScore + recencyBonus + noise
+  return items[0].item
 }
 
 /**
- * Gewichtetes Zufalls-Sampling.
- * Gibt null zurück wenn alle Gewichte 0 sind (alle Skills gemeistert).
+ * Gewichtung für eine Kompetenz berechnen
+ *
+ * Kompetenzen, die weniger getestet wurden, bekommen höhere Gewichtung
+ * Formel: 1 / (timesAssessed + 1)
  */
-function weightedSample<T>(items: [T, number][]): T | null {
-  const totalWeight = items.reduce((sum, [, w]) => sum + w, 0)
-  if (totalWeight === 0) return null
-
-  let rand = Math.random() * totalWeight
-  for (const [item, weight] of items) {
-    rand -= weight
-    if (rand <= 0) return item
-  }
-  // Floating-Point-Fallback
-  return items[items.length - 1][0]
+function competencyWeight(state: CompetencyState): number {
+  return 1 / (state.timesAssessed + 1)
 }
 
 /**
- * Wählt den nächsten Skill per gewichtetem Sampling.
+ * Adaptive Quiz Algorithm
  *
- * Fallback wenn alle gemeistert: zufälliger gemeisterter Skill
- * für Wiederholung (Spaced Repetition Prinzip).
+ * Wählt adaptiv Fragen basierend auf:
+ * - Weniger getestete Kompetenzen
+ * - Aktuelle Score-Werte
+ * - Recent History (um Wiederholungen zu vermeiden)
  */
-function selectSkill(
-  skills: Skill[],
-  state: SessionState,
-  config: AlgorithmConfig,
-): Skill | null {
-  const weighted: [Skill, number][] = skills.map((skill) => [
-    skill,
-    computeSkillWeight(state.skills[skill.id], config),
-  ])
-
-  const selected = weightedSample(weighted)
-  if (selected) return selected
-
-  // Alle gemeistert → Wiederholungsrunde
-  const mastered = skills.filter((s) => state.skills[s.id]?.mastered)
-  if (mastered.length === 0) return null
-  return mastered[Math.floor(Math.random() * mastered.length)]
-}
-
-// ============================================================
-// CAT: Difficulty-basierte Fragenauswahl
-// ============================================================
-
-/**
- * Wählt eine Frage aus dem Pool für den gegebenen Skill.
- *
- * CAT-Prinzip: Wähle die Frage, die dem aktuellen Schwierigkeitsniveau
- * des Studenten am nächsten liegt (maximaler Informationsgewinn).
- *
- * ZPD: Fragen knapp oberhalb der aktuellen Fähigkeit sind optimal.
- * Deshalb leichter Bias nach oben (+0.05).
- */
-function selectQuestion(
-  skillId: string,
-  allQuestions: Question[],
-  state: SessionState,
-  config: AlgorithmConfig,
-): Question | null {
-  const candidates = allQuestions.filter((q) => q.skillId === skillId)
-  if (candidates.length === 0) return null
-
-  // Cooldown: Kürzlich gestellte Fragen ausschließen
-  const cooldownFiltered = candidates.filter(
-    (q) => !state.recentQuestionIds.includes(q.id),
-  )
-
-  // Fallback: Cooldown ignorieren wenn keine Alternativen
-  const pool = cooldownFiltered.length > 0 ? cooldownFiltered : candidates
-
-  // ZPD: Leichter Bias oberhalb des aktuellen Niveaus
-  const targetDifficulty = Math.min(state.currentDifficulty + 0.05, 1.0)
-  const tol = config.difficultyTolerance
-
-  // Gewichtung nach Nähe zur Zieldifficulty
-  const weighted: [Question, number][] = pool.map((q) => {
-    const dist = Math.abs(q.difficulty - targetDifficulty)
-    // Innerhalb der Toleranz: Gewicht proportional zur Nähe
-    // Außerhalb: sehr kleines Restgewicht (kein hartes Ausschließen)
-    const weight = dist <= tol ? (tol - dist) / tol + 0.05 : 0.01
-    return [q, weight]
-  })
-
-  return weightedSample(weighted)
-}
-
-// ============================================================
-// Hauptklasse
-// ============================================================
-
 export class AdaptiveQuizAlgorithm {
-  private config: AlgorithmConfig
-
-  constructor(config: Partial<AlgorithmConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config }
-  }
-
-  // ----------------------------------------------------------
-  // Nächste Frage bestimmen
-  // ----------------------------------------------------------
-
   /**
-   * Gibt die nächste Frage zurück.
-   * Kombiniert KST-Prerequisite-Check, MAB-Sampling, CAT-Auswahl.
+   * Nächste Frage auswählen
    *
-   * Gibt null zurück wenn:
-   * - Keine Skills zugänglich sind
-   * - Kein Fragepool für den gewählten Skill existiert
+   * Strategie:
+   * 1. Wähle eine Kompetenz (gewichtet nach Anzahl Tests)
+   * 2. Wähle eine Frage, die diese Kompetenz testet
+   * 3. Vermeide kürzlich gestellte Fragen
    */
   nextQuestion(
-    skills: Skill[],
-    allQuestions: Question[],
-    state: SessionState,
+    competencies: Competency[],
+    questions: Question[],
+    session: SessionState
   ): NextQuestion | null {
-    const skill = selectSkill(skills, state, this.config)
-    if (!skill) return null
+    if (questions.length === 0) {
+      return null
+    }
 
-    const question = selectQuestion(skill.id, allQuestions, state, this.config)
-    if (!question) return null
+    // Schritt 0: Filtere nur Kompetenzen, die Fragen haben
+    const competenciesWithQuestions = competencies.filter((c) =>
+      questions.some((q) => q.competencyIds.includes(c.id))
+    )
 
-    return { skill, question }
+    if (competenciesWithQuestions.length === 0) {
+      return null
+    }
+
+    // Schritt 1: Wähle Zielkompetenz (gewichtet nach Häufigkeit der Tests)
+    const competency = weightedSample(
+      competenciesWithQuestions.map((c) => ({
+        item: c,
+        weight: competencyWeight(session.competencies[c.id])
+      }))
+    )
+
+    // Schritt 2: Finde Fragen, die diese Kompetenz testen
+    const candidates = questions.filter(
+      (q) => q.competencyIds.includes(competency.id) && !session.recentQuestionIds.includes(q.id)
+    )
+
+    // Fallback: Wenn alle Fragen für diese Kompetenz kürzlich gestellt wurden,
+    // verwende alle verfügbaren Fragen
+    const pool =
+      candidates.length > 0
+        ? candidates
+        : questions.filter((q) => q.competencyIds.includes(competency.id))
+
+    if (pool.length === 0) {
+      return null
+    }
+
+    // Schritt 3: Zufällige Frage aus dem Pool
+    const question = pool[Math.floor(Math.random() * pool.length)]
+
+    return {
+      question,
+      targetCompetency: competency
+    }
   }
 
-  // ----------------------------------------------------------
-  // Antwort verarbeiten
-  // ----------------------------------------------------------
-
   /**
-   * Verarbeitet eine Antwort und aktualisiert den SessionState.
+   * Antwort verarbeiten und Scores aktualisieren
    *
-   * Ablauf:
-   * 1. BKT: P(L) aktualisieren
-   * 2. Difficulty: Asymmetrische Anpassung (ZPD/Flow)
-   * 3. Cooldown-Queue aktualisieren
-   * 4. Antwort in Historie schreiben
-   * 5. KST: Neue Skills freischalten wenn Mastery erreicht
+   * Algorithmus:
+   * - Exponential Moving Average (EMA) für Score-Updates
+   * - Alpha = 0.3 (30% neue Information, 70% alte Information)
+   * - Alle mit dieser Frage assoziierten Kompetenzen werden aktualisiert
    */
   submitAnswer(
     question: Question,
-    isCorrect: boolean,
-    skills: Skill[],
-    state: SessionState,
-  ): { updatedState: SessionState; result: AnswerResult } {
-    const skillId = question.skillId
-    const currentSkillState = state.skills[skillId]
-
-    if (!currentSkillState) {
-      throw new Error(`Skill ${skillId} not found in session state`)
+    score: number,
+    state: SessionState
+  ): {
+    updatedState: SessionState
+    result: AnswerResult
+  } {
+    // Kopie der Kompetenzen erstellen
+    const competencies = {
+      ...state.competencies
     }
 
-    // 1. BKT: P(L) aktualisieren
-    const updatedSkillState = applyAnswer(
-      currentSkillState,
-      isCorrect,
-      this.config.defaultBKTParams,
-      this.config.masteryThreshold,
-      this.config.minAnswersForMastery,
-    )
+    // Alle Kompetenzen dieser Frage aktualisieren
+    for (const competencyId of question.competencyIds) {
+      const current = competencies[competencyId]
 
-    const masteryAchieved =
-      !currentSkillState.mastered && updatedSkillState.mastered
+      if (!current) continue
 
-    // 2. Difficulty-Anpassung (asymmetrisch: ZPD/Flow)
-    // Richtig → langsam hochklettern, Falsch → schneller zurück
-    const updatedDifficulty = isCorrect
-      ? Math.min(state.currentDifficulty + this.config.difficultyStepUp, 1.0)
-      : Math.max(state.currentDifficulty - this.config.difficultyStepDown, 0.0)
+      // Exponential Moving Average: newScore = oldScore + alpha * (newValue - oldScore)
+      const alpha = 0.3
+      const updatedScore = current.score + alpha * (score - current.score)
 
-    // 3. Cooldown-Queue
-    const updatedRecentIds = [
-      question.id,
-      ...state.recentQuestionIds,
-    ].slice(0, this.config.cooldownCount)
+      competencies[competencyId] = {
+        ...current,
+        score: updatedScore,
+        timesAssessed: current.timesAssessed + 1,
+        lastAssessedAt: Date.now()
+      }
+    }
 
-    // 4. Antwort-Historie
+    // Datensatz erstellen
     const record: AnswerRecord = {
       questionId: question.id,
-      skillId,
-      isCorrect,
-      answeredAt: Date.now(),
-      difficulty: question.difficulty,
+      competencyIds: question.competencyIds,
+      score,
+      answeredAt: Date.now()
     }
 
-    // State zusammenbauen
-    let updatedState: SessionState = {
+    // Session updaten
+    const updatedState: SessionState = {
       ...state,
-      skills: {
-        ...state.skills,
-        [skillId]: updatedSkillState,
-      },
-      currentDifficulty: updatedDifficulty,
-      recentQuestionIds: updatedRecentIds,
+      competencies,
       history: [...state.history, record],
+      // Behalte die letzten 5 Fragen zur Vermeidung von Wiederholungen
+      recentQuestionIds: [question.id, ...state.recentQuestionIds].slice(0, 5)
     }
-
-    // 5. KST: Skills freischalten
-    const { updatedState: stateWithUnlocks, newlyUnlocked } =
-      checkAndUnlockSkills(skills, updatedState)
-    updatedState = stateWithUnlocks
-
-    // Session abgeschlossen?
-    const sessionComplete = skills.every(
-      (s) => updatedState.skills[s.id]?.mastered === true,
-    )
 
     const result: AnswerResult = {
-      updatedPLearned: updatedSkillState.pLearned,
-      masteryAchieved,
-      unlockedSkills: newlyUnlocked,
-      sessionComplete,
+      updatedCompetencies: question.competencyIds,
+      sessionComplete: false
     }
 
-    return { updatedState, result }
-  }
-
-  // ----------------------------------------------------------
-  // Fortschritt auslesen
-  // ----------------------------------------------------------
-
-  /**
-   * Gibt den Lernfortschritt aller Skills zurück.
-   * Geeignet für Fortschrittsbalken und Dashboard-Anzeigen.
-   */
-  getProgress(skills: Skill[], state: SessionState) {
-    return skills.map((skill) => {
-      const s = state.skills[skill.id]
-      return {
-        skillId: skill.id,
-        label: skill.label,
-        pLearned: s?.pLearned ?? 0,
-        mastered: s?.mastered ?? false,
-        unlocked: s?.unlocked ?? false,
-        timesAsked: s?.timesAsked ?? 0,
-      }
-    })
+    return {
+      updatedState,
+      result
+    }
   }
 
   /**
-   * Gesamtfortschritt der Session als 0.0–1.0.
-   * Durchschnitt aller P(L)-Werte über freigeschaltete Skills.
+   * Fortschritt für alle Kompetenzen berechnen
+   *
+   * Gibt formatierte Progress-Items für die UI zurück
    */
-  getOverallProgress(skills: Skill[], state: SessionState): number {
-    const unlocked = skills.filter((s) => state.skills[s.id]?.unlocked)
-    if (unlocked.length === 0) return 0
-    const sum = unlocked.reduce(
-      (acc, s) => acc + (state.skills[s.id]?.pLearned ?? 0),
-      0,
+  getProgress(competencies: Competency[], state: SessionState): ProgressItem[] {
+    return competencies.map((c) => ({
+      competencyId: c.id,
+      label: c.name,
+      score: state.competencies[c.id]?.score ?? 0,
+      timesAssessed: state.competencies[c.id]?.timesAssessed ?? 0
+    }))
+  }
+
+  /**
+   * Gesamtpunktzahl berechnen
+   *
+   * Durchschnitt aller Kompetenzscores
+   */
+  getOverallScore(competencies: Competency[], state: SessionState): number {
+    if (competencies.length === 0) {
+      return 0
+    }
+
+    const sum = competencies.reduce(
+      (acc, competency) => acc + (state.competencies[competency.id]?.score ?? 0),
+      0
     )
-    return sum / unlocked.length
+
+    return sum / competencies.length
   }
 }

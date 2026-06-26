@@ -31,9 +31,11 @@ export default createVuetify({
           white: '#FFFFFF',
           error: '#e60000',
           info: '#2196F3',
+          low: '#FB8C00',
+          medium: '#fbe94a',
+          good: '#b8f75b',
           success: '#4CAF50',
-          warning: '#FB8C00',
-          beginner: '#b8f75b'
+          warning: '#FB8C00'
         }
       }
     }

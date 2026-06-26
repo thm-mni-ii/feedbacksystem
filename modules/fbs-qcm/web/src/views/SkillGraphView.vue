@@ -6,7 +6,7 @@
       <v-avatar size="64" class="mb-2" style="background-color: rgba(255, 255, 255, 0.2)">
         <v-icon size="36">mdi-brain</v-icon>
       </v-avatar>
-      <h1 class="text-h3 font-weight-bold mb-2">Skill Graph</h1>
+      <h1 class="text-h3 font-weight-bold mb-2">Kompetenz Graph</h1>
       <p class="text-subtitle-1 opacity-75">Kurs-Kompetenzmodell verwalten</p>
     </v-container>
   </section>
@@ -66,39 +66,28 @@
                 {{ selectedNode.data.description }}
               </p>
 
-              <v-card variant="tonal" class="mb-3">
-                <v-card-title class="text-subtitle-2">Tags</v-card-title>
-                <v-card-text>
-                  <v-chip
-                    v-for="tag in tags.filter((t) => !t.parentId)"
-                    :key="tag.id"
-                    size="small"
-                    color="orange"
-                    variant="tonal"
-                    class="ma-1"
-                  >
-                    {{ tag.label.replace('#', '') }}
-                  </v-chip>
-                </v-card-text>
-              </v-card>
+              <!-- Competencies by Category -->
+              <div v-for="category in getCategories()" :key="category" class="mb-3">
+                <v-card variant="tonal">
+                  <v-card-title class="text-subtitle-2 text-capitalize">
+                    {{ category || 'Ohne Kategorie' }}
+                  </v-card-title>
+                  <v-card-text>
+                    <v-chip
+                      v-for="comp in competenciesByCategory(category)"
+                      :key="comp.id"
+                      size="small"
+                      :color="getCompetencyColor(comp)"
+                      variant="tonal"
+                      class="ma-1"
+                    >
+                      {{ comp.name }}
+                    </v-chip>
+                  </v-card-text>
+                </v-card>
+              </div>
 
-              <v-card variant="tonal" class="mb-3">
-                <v-card-title class="text-subtitle-2">Skills</v-card-title>
-                <v-card-text>
-                  <v-chip
-                    v-for="skill in skills"
-                    :key="skill.id"
-                    size="small"
-                    color="green"
-                    variant="tonal"
-                    class="ma-1"
-                  >
-                    {{ skill.name }}
-                  </v-chip>
-                </v-card-text>
-              </v-card>
-
-              <v-card variant="outlined">
+              <v-card variant="outlined" class="mt-3">
                 <v-card-text class="d-flex justify-space-between align-center">
                   <div>
                     <div class="text-caption text-medium-emphasis">Fragen</div>
@@ -109,47 +98,93 @@
               </v-card>
             </template>
 
-            <!-- Tag -->
-            <template v-else-if="selectedNode?.type?.startsWith('tag')">
+            <!-- Competency (Root Level) -->
+            <template v-else-if="selectedNode?.type?.startsWith('competency-root')">
               <code
                 class="text-caption d-block pa-2 rounded mb-3"
                 style="background: rgba(0, 0, 0, 0.05)"
               >
-                {{ selectedNode.data.label }}
+                {{ selectedNode.data.name }}
               </code>
 
-              <template v-if="selectedNode.data.parentId">
-                <div class="text-caption font-weight-bold text-uppercase mb-1">Eltern-Tag</div>
-                <v-chip size="x-small" color="orange" variant="tonal" class="mb-3">
-                  {{ getTagLabel(selectedNode.data.parentId) }}
-                </v-chip>
-              </template>
+              <div class="text-caption font-weight-bold text-uppercase mb-1">
+                {{ selectedNode.data.category ? 'Kategorie' : 'Keine Kategorie' }}
+              </div>
+              <v-chip size="x-small" color="blue" variant="tonal" class="mb-3">
+                {{ selectedNode.data.category || 'Uncategorized' }}
+              </v-chip>
 
               <div class="text-caption font-weight-bold text-uppercase mb-1">
-                Unter-Tags ({{ childTags(selectedNode.data.id).length }})
+                Sub-Kompetenzen ({{ childCompetencies(selectedNode.data.id).length }})
               </div>
               <div
-                v-if="childTags(selectedNode.data.id).length"
+                v-if="childCompetencies(selectedNode.data.id).length"
                 class="d-flex flex-wrap gap-1 mb-3"
               >
                 <v-chip
-                  v-for="ct in childTags(selectedNode.data.id)"
-                  :key="ct.id"
+                  v-for="cc in childCompetencies(selectedNode.data.id)"
+                  :key="cc.id"
                   size="x-small"
-                  color="orange"
+                  :color="getCompetencyColor(cc)"
                   variant="outlined"
                 >
-                  {{ ct.label.split('/').pop() }}
+                  {{ cc.name }}
                 </v-chip>
               </div>
               <p v-else class="text-caption text-medium-emphasis mb-3">Keine</p>
 
               <div class="text-caption font-weight-bold text-uppercase mb-1">
-                Fragen ({{ questionsWithTag(selectedNode.data.id).length }})
+                Fragen ({{ questionsWithCompetency(selectedNode.data.id).length }})
               </div>
               <v-list density="compact" class="pa-0">
                 <v-list-item
-                  v-for="q in questionsWithTag(selectedNode.data.id)"
+                  v-for="q in questionsWithCompetency(selectedNode.data.id)"
+                  :key="q.id"
+                  :title="q.text"
+                  prepend-icon="mdi-help-circle-outline"
+                  rounded="lg"
+                  class="mb-1"
+                  style="background: rgba(0, 0, 0, 0.03)"
+                />
+              </v-list>
+            </template>
+
+            <!-- Competency (Sub Level) -->
+            <template v-else-if="selectedNode?.type?.startsWith('competency-sub')">
+              <code
+                class="text-caption d-block pa-2 rounded mb-3"
+                style="background: rgba(0, 0, 0, 0.05)"
+              >
+                {{ selectedNode.data.name }}
+              </code>
+
+              <template v-if="selectedNode.data.parentId">
+                <div class="text-caption font-weight-bold text-uppercase mb-1">
+                  Parent-Kompetenz
+                </div>
+                <v-chip
+                  size="x-small"
+                  :color="getCompetencyColor(getCompetency(selectedNode.data.parentId))"
+                  variant="tonal"
+                  class="mb-3"
+                >
+                  {{ getCompetency(selectedNode.data.parentId)?.name }}
+                </v-chip>
+              </template>
+
+              <template v-if="selectedNode.data.description">
+                <div class="text-caption font-weight-bold text-uppercase mb-1">Beschreibung</div>
+                <p class="text-caption text-medium-emphasis mb-3">
+                  {{ selectedNode.data.description }}
+                </p>
+              </template>
+
+              <div class="text-caption font-weight-bold text-uppercase mb-1">
+                Fragen ({{ questionsWithCompetency(selectedNode.data.id).length }})
+              </div>
+              <v-list density="compact" class="pa-0">
+                <v-list-item
+                  v-for="q in questionsWithCompetency(selectedNode.data.id)"
                   :key="q.id"
                   :title="q.text"
                   prepend-icon="mdi-help-circle-outline"
@@ -164,31 +199,37 @@
             <template v-else-if="selectedNode?.type === 'question'">
               <p class="text-body-2 mb-3">{{ selectedNode.data.text }}</p>
 
-              <div class="text-caption font-weight-bold text-uppercase mb-1">Skill</div>
-              <v-chip size="x-small" color="green" variant="tonal" class="mb-3">
-                {{ getSkillName(selectedNode.data.skillId) }}
-              </v-chip>
-
-              <div class="text-caption font-weight-bold text-uppercase mb-1">Tags</div>
+              <div class="text-caption font-weight-bold text-uppercase mb-1">
+                Kompetenzen ({{ selectedNode.data.competencyIds.length }})
+              </div>
               <div class="d-flex flex-wrap gap-1 mb-4">
                 <v-chip
-                  v-for="tagId in selectedNode.data.tags"
-                  :key="tagId"
+                  v-for="compId in selectedNode.data.competencyIds"
+                  :key="compId"
                   size="x-small"
-                  color="orange"
+                  :color="getCompetencyColor(getCompetency(compId))"
                   variant="tonal"
                   closable
-                  @click:close="removeTagFromQuestion(selectedNode.data.id, tagId)"
+                  @click:close="removeCompetencyFromQuestion(selectedNode.data.id, compId)"
                 >
-                  {{ getTagLabel(tagId) }}
+                  {{ getCompetency(compId)?.name }}
                 </v-chip>
                 <v-chip size="x-small" variant="outlined" prepend-icon="mdi-plus">
-                  Tag hinzufügen
+                  Kompetenz hinzufügen
                 </v-chip>
               </div>
 
+              <div class="text-caption font-weight-bold text-uppercase mb-1">Schwierigkeit</div>
+              <v-progress-linear :model-value="selectedNode.data.difficulty * 100" class="mb-3" />
+
               <div class="d-flex gap-2">
-                <v-btn size="small" variant="tonal" prepend-icon="mdi-pencil" class="flex-1-1">
+                <v-btn
+                  size="small"
+                  variant="tonal"
+                  prepend-icon="mdi-pencil"
+                  class="flex-1-1"
+                  @click="editQuestion(selectedNode.data)"
+                >
                   Bearbeiten
                 </v-btn>
                 <v-btn
@@ -204,6 +245,7 @@
             </template>
           </v-card-text>
         </v-card>
+
         <v-card class="mt-3" elevation="1">
           <v-card-text>
             <v-menu>
@@ -214,16 +256,12 @@
               </template>
 
               <v-list>
-                <v-list-item prepend-icon="mdi-help-circle-outline" @click="editQuestion">
+                <v-list-item prepend-icon="mdi-help-circle-outline" @click="editQuestion()">
                   <v-list-item-title>Frage hinzufügen</v-list-item-title>
                 </v-list-item>
 
                 <v-list-item prepend-icon="mdi-brain">
-                  <v-list-item-title>Skill hinzufügen</v-list-item-title>
-                </v-list-item>
-
-                <v-list-item prepend-icon="mdi-tag-plus">
-                  <v-list-item-title>Tag hinzufügen</v-list-item-title>
+                  <v-list-item-title>Kompetenz hinzufügen</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
@@ -240,10 +278,17 @@ import * as vNG from 'v-network-graph'
 import { ForceLayout, ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/force-layout'
 import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
 
+import type { Competency, Question } from '@/model/types'
+import {
+  competencies as mockCompetencies,
+  questions as mockQuestions
+} from '@/composables/skillgraph.mock'
+
 const dialogEditQuestion = ref<typeof DialogEditQuestion>()
-const editQuestion = () => {
+
+const editQuestion = (question?: Question) => {
   if (dialogEditQuestion.value) {
-    dialogEditQuestion.value.openDialog().then((result: boolean) => {
+    dialogEditQuestion.value.openDialog(question).then((result: boolean) => {
       if (result) {
         console.log('Create / Edit Question Successful')
       } else {
@@ -254,22 +299,6 @@ const editQuestion = () => {
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface Tag {
-  id: string
-  label: string
-  parentId?: string
-}
-interface Question {
-  id: string
-  text: string
-  skillId: string
-  tags: string[]
-}
-interface Skill {
-  id: string
-  name: string
-  description: string
-}
 interface Course {
   id: string
   name: string
@@ -278,45 +307,116 @@ interface Course {
 
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
 
-import { mockSkills, mockTags, mockQuestions } from '@/composables/skillgraph.mock.ts'
-
 const course = ref<Course>({
   id: 'course1',
-  name: 'Datenbanken WS24/25',
-  description: 'Grundlagen der relationalen Datenbanktheorie und -praxis'
+  name: 'Datenbanken & OOP',
+  description:
+    'Umfassendes Kurs-Kompetenzmodell für Datenbanken und objektorientierte Programmierung'
 })
 
-const skills = ref(mockSkills)
-const tags = ref(mockTags)
-const questions = ref(mockQuestions)
+const competencies = ref<Competency[]>(mockCompetencies)
+const questions = ref<Question[]>(mockQuestions)
 
 // ─── UI State ─────────────────────────────────────────────────────────────────
 const selectedNodeId = ref<string | null>(course.value.id)
 const zoomLevel = ref(1)
-const editQuestionDialog = ref(false)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const getTagLabel = (id: string) => tags.value.find((t) => t.id === id)?.label ?? id
-const getSkillName = (id: string) => skills.value.find((s) => s.id === id)?.name ?? id
-const childTags = (pid: string) => tags.value.filter((t) => t.parentId === pid)
-const questionsWithTag = (tagId: string) => questions.value.filter((q) => q.tags.includes(tagId))
 
+/**
+ * Finde eine Kompetenz nach ID
+ */
+const getCompetency = (id: string): Competency | undefined =>
+  competencies.value.find((c) => c.id === id)
+
+/**
+ * Alle Kategorien die in den Competencies verwendet werden
+ */
+const getCategories = (): string[] => {
+  const cats = new Set(competencies.value.filter((c) => !c.parentId).map((c) => c.category || ''))
+  return Array.from(cats)
+}
+
+/**
+ * Kompetenzen nach Kategorie filtern
+ */
+const competenciesByCategory = (category: string): Competency[] =>
+  competencies.value.filter((c) => !c.parentId && c.category === category)
+
+/**
+ * Farbe basierend auf Kategorie und Hierarchie-Tiefe
+ */
+const getCompetencyColor = (comp?: Competency): string => {
+  if (!comp) return '#999999'
+
+  // Root-Level (kein parentId) nach Kategorie färben
+  if (!comp.parentId) {
+    switch (comp.category) {
+      case 'database':
+        return '#43C57C'
+      case 'programming':
+        return '#7B68EE'
+      case 'modeling':
+        return '#FF6B6B'
+      default:
+        return '#999999'
+    }
+  }
+
+  // Sub-Level: hellere Varianten
+  const parent = getCompetency(comp.parentId)
+  if (!parent) return '#CCCCCC'
+
+  switch (parent.category) {
+    case 'database':
+      return '#7DDBA3'
+    case 'programming':
+      return '#B19CD9'
+    case 'modeling':
+      return '#FFB3B3'
+    default:
+      return '#DDDDDD'
+  }
+}
+
+/**
+ * Rekursive Tiefe einer Kompetenz in der Hierarchie
+ */
+function getCompetencyDepth(compId: string): number {
+  const comp = competencies.value.find((c) => c.id === compId)
+  if (!comp?.parentId) return 0
+  return 1 + getCompetencyDepth(comp.parentId)
+}
+
+/**
+ * Spezifischste (tiefste) Kompetenz aus einer Liste finden
+ */
+const getMostSpecificCompetency = (compIds: string[]): string =>
+  compIds.reduce((deepest, id) =>
+    getCompetencyDepth(id) > getCompetencyDepth(deepest) ? id : deepest
+  )
+
+/**
+ * Alle Kind-Kompetenzen einer Parent-Kompetenz
+ */
+const childCompetencies = (parentId: string): Competency[] =>
+  competencies.value.filter((c) => c.parentId === parentId)
+
+/**
+ * Alle Fragen, die eine Kompetenz referenzieren (direkt oder indirekt)
+ */
+const questionsWithCompetency = (compId: string): Question[] =>
+  questions.value.filter((q) => q.competencyIds.includes(compId))
+
+/**
+ * Icon basierend auf Node-Typ
+ */
 const nodeIcon = (type?: string) => {
   if (type === 'course') return 'mdi-school'
-  if (type?.startsWith('tag')) return 'mdi-tag'
+  if (type?.startsWith('competency-root')) return 'mdi-brain'
+  if (type?.startsWith('competency-sub')) return 'mdi-puzzle'
   return 'mdi-help-circle'
 }
-
-/** Rekursive Tiefe eines Tags in der Hierarchie */
-function getTagDepth(tagId: string): number {
-  const tag = tags.value.find((t) => t.id === tagId)
-  if (!tag?.parentId) return 0
-  return 1 + getTagDepth(tag.parentId)
-}
-
-/** Spezifischsten (tiefsten) Tag aus einer Liste finden */
-const getMostSpecificTag = (tagIds: string[]): string =>
-  tagIds.reduce((deepest, id) => (getTagDepth(id) > getTagDepth(deepest) ? id : deepest), tagIds[0])
 
 // ─── Graph Nodes ──────────────────────────────────────────────────────────────
 const graphNodes = computed(() => {
@@ -327,30 +427,32 @@ const graphNodes = computed(() => {
     name: course.value.name,
     type: 'course',
     color: '#ffa700',
-    radius: 20,
+    radius: 17,
     data: course.value
   }
 
-  // Tag-Nodes — Größe/Farbe je nach Hierarchietiefe
-  tags.value.forEach((t) => {
-    const depth = getTagDepth(t.id)
-    nodes[t.id] = {
-      name: t.label.split('/').pop()!,
-      type: `tag-${depth}`,
-      color: ['#43C57C', '#7DDBA3', '#B7EDCB'][depth] ?? '#DDF8E7',
-      radius: [14, 11, 10][depth] ?? 9,
-      data: t
+  // Competency-Nodes — Größe/Farbe je nach Hierarchietiefe
+  competencies.value.forEach((c) => {
+    const depth = getCompetencyDepth(c.id)
+    const color = getCompetencyColor(c)
+
+    nodes[c.id] = {
+      name: c.name,
+      type: depth === 0 ? 'competency-root' : 'competency-sub',
+      color: color,
+      radius: depth === 0 ? 12 : 10,
+      data: c
     }
   })
 
   // Frage-Nodes
   questions.value.forEach((q) => {
-    const short = q.text.length > 26 ? q.text.slice(0, 26) + '…' : q.text
+    const short = q.text.length > 28 ? q.text.slice(0, 28) + '…' : q.text
     nodes[q.id] = {
       name: short,
       type: 'question',
-      color: '#F4F1A3',
-      radius: 7,
+      color: '#a3c1f4',
+      radius: 5,
       data: q
     }
   })
@@ -362,38 +464,38 @@ const graphNodes = computed(() => {
 const graphEdges = computed(() => {
   const edges: Record<string, any> = {}
 
-  // Kurs → Root-Tags
-  tags.value
-    .filter((t) => !t.parentId)
-    .forEach((t) => {
-      edges[`e-course-${t.id}`] = {
+  // Kurs → Root-Kompetenzen
+  competencies.value
+    .filter((c) => !c.parentId)
+    .forEach((c) => {
+      edges[`e-course-${c.id}`] = {
         source: course.value.id,
-        target: t.id,
+        target: c.id,
         color: '#292929',
         width: 2
       }
     })
 
-  // Parent-Tag → Child-Tag (gesamte Hierarchie)
-  tags.value
-    .filter((t) => t.parentId)
-    .forEach((t) => {
-      edges[`e-${t.parentId}-${t.id}`] = {
-        source: t.parentId!,
-        target: t.id,
+  // Parent-Kompetenz → Child-Kompetenz (gesamte Hierarchie)
+  competencies.value
+    .filter((c) => c.parentId)
+    .forEach((c) => {
+      edges[`e-${c.parentId}-${c.id}`] = {
+        source: c.parentId!,
+        target: c.id,
         color: '#292929',
         width: 1.5
       }
     })
 
-  // Spezifischster Tag → Frage (ein Edge pro Frage für Übersichtlichkeit)
+  // Spezifischste Kompetenz → Frage (ein Edge pro Frage)
   questions.value.forEach((q) => {
-    const primaryTagId = getMostSpecificTag(q.tags)
-    edges[`e-${primaryTagId}-${q.id}`] = {
-      source: primaryTagId,
+    const primaryCompId = getMostSpecificCompetency(q.competencyIds)
+    edges[`e-${primaryCompId}-${q.id}`] = {
+      source: primaryCompId,
       target: q.id,
       color: '#25252577',
-      width: 1.5
+      width: 1
     }
   })
 
@@ -401,28 +503,28 @@ const graphEdges = computed(() => {
 })
 
 // ─── Radiales Layout ──────────────────────────────────────────────────────────
-const BASE_R = 60 // Radius für Root-Tags
-const STEP_R = 50 // Zusätzlicher Radius pro Tag-Ebene
-const Q_OFFSET = 50 // Abstand der Fragen über der tiefsten Tag-Ebene
+const BASE_R = 60 // Radius für Root-Kompetenzen
+const STEP_R = 50 // Zusätzlicher Radius pro Kompetenz-Ebene
+const Q_OFFSET = 50 // Abstand der Fragen über der tiefsten Kompetenz-Ebene
 
 /**
- * Positioniert einen Tag und rekursiv alle seine Kinder.
+ * Positioniert eine Kompetenz und rekursiv alle ihre Kinder.
  * Kinder werden relativ vom Parent mit konstantem Abstand positioniert.
  */
-function layoutTagRecursive(
-  tagId: string,
+function layoutCompetencyRecursive(
+  compId: string,
   parentPos: { x: number; y: number } | null,
   parentAngle: number,
   sectorWidth: number,
   positions: Record<string, { x: number; y: number }>
 ) {
   // Aktuelle Node-Position setzen
-  positions[tagId] = {
+  positions[compId] = {
     x: parentPos?.x ?? 0,
     y: parentPos?.y ?? 0
   }
 
-  const children = tags.value.filter((t) => t.parentId === tagId)
+  const children = childCompetencies(compId)
   if (children.length === 0) return
 
   // Auffächerung: max. 75 % des Sektors oder pro Kind 0.38 rad
@@ -436,13 +538,13 @@ function layoutTagRecursive(
         : parentAngle
 
     // Kind mit konstantem Abstand (STEP_R) vom Parent positionieren
-    const currentPos = positions[tagId]
+    const currentPos = positions[compId]
     const childPos = {
       x: currentPos.x + STEP_R * Math.cos(childAngle),
       y: currentPos.y + STEP_R * Math.sin(childAngle)
     }
 
-    layoutTagRecursive(child.id, childPos, childAngle, spread / children.length, positions)
+    layoutCompetencyRecursive(child.id, childPos, childAngle, spread / children.length, positions)
   })
 }
 
@@ -452,35 +554,35 @@ const layouts = computed((): vNG.Layouts => {
   // Kurs in der Mitte (fixiert)
   nodes[course.value.id] = { x: 0, y: 0, fixed: true }
 
-  // Tag-Baum aufbauen (mit relativen Positionen vom Parent)
-  const rootTags = tags.value.filter((t) => !t.parentId)
-  rootTags.forEach((rt, ri) => {
-    const angle = (ri / rootTags.length) * 2 * Math.PI - Math.PI / 2
-    const sector = (2 * Math.PI) / rootTags.length
-    // Root-Tags mit BASE_R vom Kurs-Node positionieren
+  // Kompetenz-Baum aufbauen (mit relativen Positionen vom Parent)
+  const rootComps = competencies.value.filter((c) => !c.parentId)
+  rootComps.forEach((rc, ri) => {
+    const angle = (ri / rootComps.length) * 2 * Math.PI - Math.PI / 2
+    const sector = (2 * Math.PI) / rootComps.length
+    // Root-Kompetenzen mit BASE_R vom Kurs-Node positionieren
     const rootPos = {
       x: BASE_R * Math.cos(angle),
       y: BASE_R * Math.sin(angle)
     }
-    layoutTagRecursive(rt.id, rootPos, angle, sector, nodes)
+    layoutCompetencyRecursive(rc.id, rootPos, angle, sector, nodes)
   })
 
-  // Fragen: jenseits des tiefsten Tag-Rings positionieren
-  const maxDepth = Math.max(...tags.value.map((t) => getTagDepth(t.id)))
+  // Fragen: jenseits des tiefsten Kompetenz-Rings positionieren
+  const maxDepth = Math.max(...competencies.value.map((c) => getCompetencyDepth(c.id)))
   const questionR = BASE_R + maxDepth * STEP_R + Q_OFFSET
 
-  // Fragen nach ihrem primären Tag gruppieren, um Überlappungen zu vermeiden
-  const tagQMap = new Map<string, Question[]>()
+  // Fragen nach ihrer primären Kompetenz gruppieren
+  const compQMap = new Map<string, Question[]>()
   questions.value.forEach((q) => {
-    const pid = getMostSpecificTag(q.tags)
-    if (!tagQMap.has(pid)) tagQMap.set(pid, [])
-    tagQMap.get(pid)!.push(q)
+    const pCompId = getMostSpecificCompetency(q.competencyIds)
+    if (!compQMap.has(pCompId)) compQMap.set(pCompId, [])
+    compQMap.get(pCompId)!.push(q)
   })
 
-  tagQMap.forEach((qs, tagId) => {
-    const tagPos = nodes[tagId]
-    if (!tagPos) return
-    const baseAngle = Math.atan2(tagPos.y, tagPos.x)
+  compQMap.forEach((qs, compId) => {
+    const compPos = nodes[compId]
+    if (!compPos) return
+    const baseAngle = Math.atan2(compPos.y, compPos.x)
     const spread = Math.min(0.38, (qs.length - 1) * 0.22)
     qs.forEach((q, qi) => {
       const qAngle =
@@ -499,7 +601,6 @@ const layouts = computed((): vNG.Layouts => {
 const configs = vNG.defineConfigs({
   view: {
     onBeforeInitialDisplay: async () => {
-      // Warte bis ForceLayout Simulation stabilisiert
       return new Promise((resolve) => setTimeout(resolve, 400))
     },
     autoPanAndZoomOnLoad: 'fit-content',
@@ -517,24 +618,13 @@ const configs = vNG.defineConfigs({
           .force(
             'collide',
             d3.forceCollide().radius((d: any) => d.radius + 15)
-          ) // Min. Abstand: radius + 15px
+          )
           .force('center', d3.forceCenter().strength(0.05))
           .alphaMin(0.001)
 
-        // Pre-ticks für schnellere Stabilisierung vor fit-content
         simulation.tick(50)
 
         return simulation
-
-        // * The following are the default parameters for the simulation.
-        // const forceLink = d3.forceLink<ForceNodeDatum, ForceEdgeDatum>(edges).id(d => d.id)
-        // return d3
-        //   .forceSimulation(nodes)
-        //   .force("edge", forceLink.distance(100))
-        //   .force("charge", d3.forceManyBody())
-        //   .force("collide", d3.forceCollide(50).strength(0.2))
-        //   .force("center", d3.forceCenter().strength(0.05))
-        //   .alphaMin(0.001)
       }
     })
   },
@@ -552,15 +642,16 @@ const configs = vNG.defineConfigs({
       direction: 'south',
       background: {
         visible: true,
-        color: '#dafacbab',
+        color: '#ccd7c76f',
         padding: {
           vertical: 2,
           horizontal: 6
         },
         borderRadius: 4
       },
-      fontSize: (n) => (n.type === 'course' ? 13 : n.type === 'tag-0' ? 12 : 10),
-      fontWeight: (n) => (n.type === 'course' || n.type === 'tag-0' ? 'bold' : 'normal'),
+      fontSize: (n) => (n.type === 'course' ? 13 : n.type?.startsWith('competency-root') ? 12 : 10),
+      fontWeight: (n) =>
+        n.type === 'course' || n.type?.startsWith('competency-root') ? 'bold' : 'normal',
       color: '#444444'
     }
   },
@@ -585,14 +676,15 @@ const selectedNode = computed(() =>
 )
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
+
 const deleteQuestion = (id: string) => {
   questions.value = questions.value.filter((q) => q.id !== id)
   if (selectedNodeId.value === id) selectedNodeId.value = null
 }
 
-const removeTagFromQuestion = (questionId: string, tagId: string) => {
+const removeCompetencyFromQuestion = (questionId: string, compId: string) => {
   const q = questions.value.find((q) => q.id === questionId)
-  if (q) q.tags = q.tags.filter((t) => t !== tagId)
+  if (q) q.competencyIds = q.competencyIds.filter((c) => c !== compId)
 }
 </script>
 
