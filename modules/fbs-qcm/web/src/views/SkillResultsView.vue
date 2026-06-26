@@ -6,7 +6,7 @@
         <v-avatar
           size="72"
           class="mb-3"
-          style="background: linear-gradient(135deg, #81ba24, #36c78e)"
+          :style="resultsAvatarStyle"
         >
           <v-icon size="40" color="white">mdi-trophy</v-icon>
         </v-avatar>
@@ -96,6 +96,7 @@ import SkillPerformanceTable from '@/components/results/SkillPerformanceTable.vu
 import SkillDependencyGraph from '@/components/results/SkillDependencyGraph.vue'
 import SkillDetailPanel from '@/components/results/SkillDetailPanel.vue'
 import NextStepsCard from '@/components/results/NextStepsCard.vue'
+import { appPalette } from '@/plugins/vuetify'
 
 // ─── State ────────────────────────────────────────────────────────
 const quizStore = useQuizSessionStore()
@@ -104,6 +105,9 @@ const selectedSkill = ref<SkillVisualization | null>(null)
 
 // ─── Computed ─────────────────────────────────────────────────────
 const results = computed(() => buildSessionResults())
+const resultsAvatarStyle = computed(() => ({
+  background: `linear-gradient(135deg, ${appPalette.headerStart}, ${appPalette.headerEnd})`
+}))
 
 // ─── Lifecycle ────────────────────────────────────────────────────
 onMounted(() => {
@@ -214,17 +218,25 @@ function exportResults() {
 
 <style scoped>
 .skill-results-view {
-  background: linear-gradient(to bottom, #f5f7fa, #ffffff);
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--v-theme-app-surface-muted)),
+    rgb(var(--v-theme-surface))
+  );
   min-height: 100vh;
 }
 
 .results-header {
-  background: linear-gradient(135deg, #81ba24, #36c78e);
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-app-header-start)),
+    rgb(var(--v-theme-app-header-end))
+  );
+  color: rgb(var(--v-theme-white));
+  box-shadow: 0 4px 12px rgba(var(--v-theme-black), 0.12);
 }
 
 :deep(.v-tabs) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(var(--v-theme-app-border-strong), 0.5);
 }
 </style>

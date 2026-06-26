@@ -69,6 +69,7 @@ import type { Core } from 'cytoscape'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.vue'
 import SelectQuestion from '@/components/SelectQuestion.vue'
 import DialogAddQuestion from '@/dialog/DialogAddQuestion.vue'
+import { appPalette } from '@/plugins/vuetify'
 
 const dialogAddQuestion = ref<InstanceType<typeof DialogAddQuestion> | null>(null)
 const route = useRoute()
@@ -88,6 +89,20 @@ const firstQuestion = ref(false)
 const showDeleteModal = ref(false)
 const nodeToDelete = ref<{ id: string; nodeId: string } | null>(null)
 const showValidationError = ref(false)
+const graphTheme = {
+  nodeBg: appPalette.graphPrimary,
+  nodeBorder: appPalette.graphPrimaryDark,
+  nodeText: appPalette.surface,
+  edge: appPalette.graphText,
+  edgeLabelBorder: appPalette.graphMuted,
+  plusBg: appPalette.success,
+  plusBorder: appPalette.successHover,
+  centerBg: appPalette.danger,
+  centerBorder: appPalette.dangerHover,
+  removeButtonBg: appPalette.danger,
+  removeButtonHover: appPalette.dangerHover,
+  modalButtonShadow: appPalette.shadow
+} as const
 
 // Neue Zustandsvariablen hinzufügen, um die aktuellen Scores zu speichern
 const correctScore = ref<number | null>(null)
@@ -228,19 +243,19 @@ onMounted(async () => {
         {
           selector: 'node',
           style: {
-            'background-color': '#3498db',
+            'background-color': graphTheme.nodeBg,
             label: 'data(label)',
             shape: 'rectangle',
-            color: '#ffffff',
+            color: graphTheme.nodeText,
             'text-valign': 'center',
             'text-halign': 'center',
             'border-width': '2px',
-            'border-color': '#2980b9',
+            'border-color': graphTheme.nodeBorder,
             width: '120px',
             height: '40px',
             'font-size': '12px',
             'text-outline-width': '1px',
-            'text-outline-color': '#2980b9',
+            'text-outline-color': graphTheme.nodeBorder,
             'text-wrap': 'wrap',
             'text-max-width': '110px'
           }
@@ -248,16 +263,16 @@ onMounted(async () => {
         {
           selector: 'edge',
           style: {
-            'line-color': '#2c3e50',
-            'target-arrow-color': '#2c3e50',
+            'line-color': graphTheme.edge,
+            'target-arrow-color': graphTheme.edge,
             'target-arrow-shape': 'triangle',
             'curve-style': 'bezier',
             label: 'data(label)',
             'font-size': '12px',
             'font-weight': 'bold',
-            color: '#2c3e50',
+            color: graphTheme.edge,
             'text-background-opacity': 1,
-            'text-background-color': '#ffffff',
+            'text-background-color': graphTheme.nodeText,
             'text-background-padding': '4px',
             'text-background-shape': 'roundrectangle',
             width: '3px',
@@ -265,7 +280,7 @@ onMounted(async () => {
             'arrow-scale': 1.5,
             'text-outline-width': 0,
             'text-border-width': 1,
-            'text-border-color': '#95a5a6',
+            'text-border-color': graphTheme.edgeLabelBorder,
             'text-border-opacity': 1,
             'line-style': 'solid'
           }
@@ -273,14 +288,14 @@ onMounted(async () => {
         {
           selector: 'node[label="+"]',
           style: {
-            'background-color': '#27ae60',
+            'background-color': graphTheme.plusBg,
             label: '+',
             width: '40px',
             height: '40px',
             shape: 'round-rectangle',
             color: 'white',
             'font-size': '24px',
-            'border-color': '#219653',
+            'border-color': graphTheme.plusBorder,
             'text-valign': 'center',
             'text-halign': 'center'
           }
@@ -288,8 +303,8 @@ onMounted(async () => {
         {
           selector: 'node#center',
           style: {
-            'background-color': '#e74c3c',
-            'border-color': '#c0392b',
+            'background-color': graphTheme.centerBg,
+            'border-color': graphTheme.centerBorder,
             width: '150px',
             height: '50px',
             'font-weight': 'bold',
@@ -452,23 +467,23 @@ const attachButtonToExistingNode = (nodeId: string) => {
     button.style.width = '30px'
     button.style.height = '30px'
     button.style.color = 'white'
-    button.style.backgroundColor = '#e74c3c'
+    button.style.backgroundColor = graphTheme.removeButtonBg
     button.style.border = 'none'
     button.style.borderRadius = '50%'
     button.style.cursor = 'pointer'
     button.style.display = 'flex'
     button.style.alignItems = 'center'
     button.style.justifyContent = 'center'
-    button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)'
+    button.style.boxShadow = `0 2px 5px ${graphTheme.modalButtonShadow}`
     button.style.transition = 'transform 0.2s, background-color 0.2s'
 
     button.onmouseover = () => {
-      button.style.backgroundColor = '#c0392b'
+      button.style.backgroundColor = graphTheme.removeButtonHover
       button.style.transform = 'scale(1.1)'
     }
 
     button.onmouseout = () => {
-      button.style.backgroundColor = '#e74c3c'
+      button.style.backgroundColor = graphTheme.removeButtonBg
       button.style.transform = 'scale(1)'
     }
 
@@ -542,7 +557,20 @@ defineExpose({
 <style scoped>
 /* Grundlegende Stile für die Seite */
 .cyto-container {
-  background-color: #f8f9fa;
+  --mc-bg: rgb(var(--v-theme-app-surface-muted));
+  --mc-surface: rgb(var(--v-theme-surface));
+  --mc-text: rgb(var(--v-theme-app-graph-text));
+  --mc-text-muted: rgb(var(--v-theme-app-text-secondary));
+  --mc-border: rgb(var(--v-theme-app-border));
+  --mc-border-strong: rgb(var(--v-theme-app-border-strong));
+  --mc-primary: rgb(var(--v-theme-app-graph-primary));
+  --mc-primary-dark: rgb(var(--v-theme-app-graph-primary-dark));
+  --mc-danger: rgb(var(--v-theme-app-danger));
+  --mc-shadow: rgba(var(--v-theme-black), 0.1);
+  --mc-shadow-strong: rgba(var(--v-theme-black), 0.2);
+  --mc-overlay: rgba(var(--v-theme-black), 0.7);
+  --mc-focus: rgba(var(--v-theme-primary), 0.25);
+  background-color: var(--mc-bg);
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -550,20 +578,20 @@ defineExpose({
 .graph-header {
   text-align: center;
   margin-bottom: 30px;
-  color: #2c3e50;
+  color: var(--mc-text);
 }
 
 .instructions {
-  color: #6c757d;
+  color: var(--mc-text-muted);
   font-size: 14px;
 }
 
 .cyto-graph {
   width: 100%;
   height: 500px; /* Kleiner, da wir nicht zoomen werden */
-  background-color: white;
+  background-color: var(--mc-surface);
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px var(--mc-shadow);
   margin-bottom: 30px;
   overflow: hidden; /* Verhindert Scrollbars */
 }
@@ -589,7 +617,7 @@ node {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--mc-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -599,11 +627,11 @@ node {
 
 /* Modal Content mit verbesserten Farben und Kontrast */
 .modal-content {
-  background-color: #ffffff;
+  background-color: var(--mc-surface);
   border-radius: 8px;
   width: 500px;
   max-width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px var(--mc-shadow-strong);
   overflow: hidden;
   animation: modalAppear 0.3s ease-out;
 }
@@ -621,13 +649,13 @@ node {
 
 /* Modal Header */
 .modal-header {
-  background-color: #3498db;
+  background-color: var(--mc-primary);
   color: white;
   padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--mc-border);
 }
 
 .modal-header h3 {
@@ -647,7 +675,7 @@ node {
 }
 
 .close-button:hover {
-  color: #f1f1f1;
+  color: rgba(var(--v-theme-white), 0.9);
 }
 
 /* Modal Body */
@@ -663,11 +691,11 @@ node {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--mc-text);
 }
 
 .validation-error {
-  color: #e74c3c;
+  color: var(--mc-danger);
   margin-top: 8px;
   font-size: 14px;
 }
@@ -675,17 +703,17 @@ node {
 .form-control {
   width: 100%;
   padding: 12px;
-  border: 2px solid #dcdfe6;
+  border: 2px solid var(--mc-border);
   border-radius: 4px;
   font-size: 16px;
-  color: #333;
+  color: var(--mc-text);
   transition: border-color 0.3s;
 }
 
 .form-control:focus {
-  border-color: #3498db;
+  border-color: var(--mc-primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+  box-shadow: 0 0 0 3px var(--mc-focus);
 }
 
 .question-select {
@@ -702,7 +730,7 @@ node {
 .input-suffix {
   position: absolute;
   right: 12px;
-  color: #6c757d;
+  color: var(--mc-text-muted);
   font-weight: bold;
 }
 
@@ -712,8 +740,8 @@ node {
   justify-content: flex-end;
   gap: 10px;
   padding: 15px 20px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #e0e0e0;
+  background-color: var(--mc-bg);
+  border-top: 1px solid var(--mc-border);
 }
 
 /* Buttons */
@@ -728,25 +756,25 @@ node {
 }
 
 .btn-primary {
-  background-color: #3498db;
+  background-color: var(--mc-primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #2980b9;
+  background-color: var(--mc-primary-dark);
 }
 
 .btn-primary:disabled {
-  background-color: #95a5a6;
+  background-color: var(--mc-border-strong);
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background-color: #95a5a6;
+  background-color: var(--mc-border-strong);
   color: white;
 }
 
 .btn-secondary:hover {
-  background-color: #7f8c8d;
+  background-color: var(--mc-text-muted);
 }
 </style>

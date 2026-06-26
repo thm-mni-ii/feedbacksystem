@@ -34,7 +34,7 @@
             <div class="d-flex">
               <v-slider
                 v-model="slider1"
-                thumb-color="orange"
+                thumb-color="warning"
                 :max="1"
                 :min="0"
                 :step="0.1"
@@ -314,12 +314,12 @@ function answer(score: number) {
   background: linear-gradient(
     180deg,
     rgba(var(--v-theme-surface), 1) 0%,
-    rgba(248, 250, 252, 1) 100%
+    rgba(var(--v-theme-app-surface-muted), 1) 100%
   );
 }
 
 .profile-panels :deep(.v-expansion-panel) {
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(var(--v-theme-app-text-primary), 0.08);
 }
 
 .profile-panels :deep(.profile-panel--active) {
@@ -328,7 +328,7 @@ function answer(score: number) {
   background: linear-gradient(
     180deg,
     rgba(var(--v-theme-primary), 0.05) 0%,
-    rgba(255, 255, 255, 0.9) 100%
+    rgba(var(--v-theme-surface), 0.9) 100%
   );
 }
 

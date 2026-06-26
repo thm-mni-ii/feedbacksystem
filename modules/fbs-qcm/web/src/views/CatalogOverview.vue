@@ -2,7 +2,7 @@
   <DialogEditCatalog ref="dialogEditCatalog" />
   <DialogConfirmVue ref="dialogConfirm" />
   <v-container class="text-center pt-8">
-    <div class="pa-8 elevation-2 rounded-lg" style="background-color: #f5f5f5">
+    <div class="pa-8 elevation-2 rounded-lg" :style="surfaceMutedStyle">
       <v-icon icon="mdi-lightbulb-on-outline" size="48" color="primary" class="mb-4" />
       <h1 class="text-h4 font-weight-bold mb-2">Question Catalogs</h1>
       <h2 class="text-subtitle-1 text-grey-darken-1 mb-4">Scientific Learning Made Simple</h2>
@@ -19,7 +19,7 @@
         :key="course.id"
         @group:selected="loadCatalogsFromCourse(course.id)"
       >
-        <v-expansion-panel-title style="background-color: #f5f5f5">
+        <v-expansion-panel-title :style="surfaceMutedStyle">
           {{ course.name }}
         </v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -94,11 +94,15 @@ import type Course from '../model/Course'
 import type Catalog from '../model/Catalog'
 import catalogService from '@/services/catalog.service'
 import { useAuthStore } from '@/stores/authStore'
+import { appPalette } from '@/plugins/vuetify'
 
 const dialogConfirm = ref<typeof DialogConfirmVue>()
 const dialogEditCatalog = ref<typeof DialogEditCatalog>()
 const router = useRouter()
 const authStore = useAuthStore()
+const surfaceMutedStyle = {
+  backgroundColor: appPalette.surfaceMuted
+}
 
 // Setze den jsessionid-Token direkt nach der Initialisierung
 const jsessionid = router.currentRoute.value.query.jsessionid?.toString()

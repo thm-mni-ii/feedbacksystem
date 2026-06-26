@@ -30,9 +30,9 @@ const difficultyColor = computed(
   () =>
     ({
       1: 'beginner',
-      2: '#ffd625',
-      3: '#f9a825',
-      4: '#d84315'
+      2: 'medium',
+      3: 'low',
+      4: 'error'
     })[skill.value.difficulty]
 )
 
@@ -246,7 +246,7 @@ const editSkill = async () => {
         <div class="d-flex justify-end">
           <v-btn
             icon="mdi-delete"
-            color="red"
+            color="error"
             variant="tonal"
             size="x-small"
             class="mr-2"

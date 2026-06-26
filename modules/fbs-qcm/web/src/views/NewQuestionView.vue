@@ -165,7 +165,7 @@ const handleSubmit = async () => {
               icon="mdi-delete-outline"
               class="ml-10"
               variant="text"
-              color="red"
+              color="error"
               @click="deleteOption(optionIndex)"
             >
               <v-tooltip activator="parent" location="end">Delete Row</v-tooltip>
@@ -176,7 +176,7 @@ const handleSubmit = async () => {
               :key="columnIndex"
               :model-value="isCorrectAnswer(columnIndex, optionIndex)"
               class="ml-10 mr-2"
-              color="green"
+              color="success"
               hide-details
               @update:model-value="
                 (newValue) => toggleCorrectAnswer(columnIndex, optionIndex, newValue)
@@ -211,7 +211,7 @@ const handleSubmit = async () => {
                   icon="mdi-delete-outline"
                   class="ml-9 mr-1"
                   variant="text"
-                  color="red"
+                  color="error"
                   @click="deleteAnswerColumn(columnIndex)"
                 >
                   <v-tooltip activator="parent" location="end">Delete Column</v-tooltip>
