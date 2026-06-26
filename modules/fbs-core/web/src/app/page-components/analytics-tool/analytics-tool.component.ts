@@ -25,8 +25,10 @@ export class AnalyticsToolComponent implements OnInit {
   }
 
   getURL() {
-    this.safeUrl = this.integrationService.getIntegration("eat").pipe(
-      map(({ url }) => this.sanitizer.bypassSecurityTrustResourceUrl(url))
-    );
+    this.safeUrl = this.integrationService
+      .getIntegration("eat")
+      .pipe(
+        map(({ url }) => this.sanitizer.bypassSecurityTrustResourceUrl(url))
+      );
   }
 }

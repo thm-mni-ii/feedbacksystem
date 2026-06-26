@@ -30,7 +30,9 @@ export class IntegrationService {
       .pipe(catchError(() => this.getAllIntegrationsFallback()));
   }
 
-  private getAllIntegrationsFallback(): Observable<Record<string, Integration>> {
+  private getAllIntegrationsFallback(): Observable<
+    Record<string, Integration>
+  > {
     return forkJoin(
       this.fallbackIntegrationNames.map((name) =>
         this.getIntegration(name).pipe(

@@ -50,8 +50,7 @@
       mat-icon-button
       class="green"
       *ngIf="
-        isIntegrationEnabled('classroom') &&
-        externalClassroomService.isJoined()
+        isIntegrationEnabled('classroom') && externalClassroomService.isJoined()
       "
       (click)="joinClassroom()"
       matTooltip="{{ 'course.join-digital-exercise-room' | i18nextEager }}"
