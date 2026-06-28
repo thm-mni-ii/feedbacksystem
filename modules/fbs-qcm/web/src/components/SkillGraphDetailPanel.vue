@@ -1,29 +1,45 @@
 <template>
-  <v-col v-if="selectedNodeId" cols="12" md="4">
-    <v-card elevation="1" rounded="lg">
+  <v-col
+    v-if="selectedNodeId"
+    cols="12"
+    md="4"
+    class="d-flex flex-column fill-height pl-md-2"
+    :style="panelStyles"
+  >
+    <v-card elevation="1" rounded="lg" class="d-flex flex-column flex-grow-1 detail-main-card">
       <!-- Header -->
-      <v-card-title class="d-flex align-center pa-3">
+      <v-card-title class="d-flex align-center pa-3 detail-header">
         <v-icon class="mr-2" :color="selectedNode?.color" size="18">
           {{ nodeIcon(selectedNode?.type) }}
         </v-icon>
         <span
-          class="text-body-1 font-weight-medium"
+          class="text-body-1 font-weight-bold detail-title"
           style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
         >
           {{ selectedNode?.name }}
         </span>
         <v-spacer />
+        <v-btn
+          v-if="selectedNode?.type !== 'course'"
+          class="back-to-course-btn"
+          size="small"
+          variant="tonal"
+          @click="selectCourse"
+        >
+          <v-icon size="18">mdi-arrow-left</v-icon>
+          <v-tooltip activator="parent" location="left">Zurück zum Kurs</v-tooltip>
+        </v-btn>
       </v-card-title>
       <v-divider />
 
       <!-- Content -->
-      <v-card-text class="pa-3">
+      <v-card-text class="pa-3 pa-md-4 detail-content-scroll">
         <!-- Course Panel -->
         <CourseDetailPanel
           :selected-node="selectedNode"
           :questions="questions"
-          :get-categories="getCategories"
-          :competencies-by-category="competenciesByCategory"
+          :root-competencies="rootCompetencies"
+          :child-competencies="childCompetencies"
           :get-competency-color="getCompetencyColor"
         />
 
@@ -49,11 +65,11 @@
     </v-card>
 
     <!-- Action Menu -->
-    <v-card class="mt-3" elevation="1">
+    <v-card class="mt-3 action-card" elevation="0" rounded="lg">
       <v-card-text>
         <v-menu>
           <template #activator="{ props }">
-            <v-btn block color="primary" prepend-icon="mdi-plus" v-bind="props">
+            <v-btn block color="app-graph-primary" prepend-icon="mdi-plus" v-bind="props">
               Neu erstellen
             </v-btn>
           </template>
@@ -74,29 +90,70 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import CourseDetailPanel from './skillgraph/CourseDetailPanel.vue'
 import CompetencyDetailPanel from './skillgraph/CompetencyDetailPanel.vue'
 import QuestionDetailPanel from './skillgraph/QuestionDetailPanel.vue'
 import type { Competency, Question } from '@/model/types'
+import { skillGraphPalette } from '@/plugins/vuetify'
 
 interface Props {
   selectedNodeId: string | null
   selectedNode: any
   questions: Question[]
   nodeIcon: (type?: string) => string
-  getCategories: () => string[]
-  competenciesByCategory: (category: string) => Competency[]
+  rootCompetencies: Competency[]
   getCompetencyColor: (comp?: Competency) => string
   getCompetency: (id: string) => Competency | undefined
   childCompetencies: (parentId: string) => Competency[]
   questionsWithCompetency: (compId: string) => Question[]
   removeCompetencyFromQuestion: (questionId: string, compId: string) => void
+  selectCourse: () => void
   editQuestion: (question?: Question) => void
   deleteQuestion: (id: string) => void
 }
 
 defineProps<Props>()
+
+const panelStyles = {
+  '--sg-panel-bg': skillGraphPalette.panelBackground,
+  '--sg-panel-border': skillGraphPalette.panelBorder,
+  '--sg-panel-shadow': skillGraphPalette.panelShadow,
+  '--sg-panel-header': skillGraphPalette.surfaceMuted,
+  '--sg-text-primary': skillGraphPalette.textPrimary,
+  '--sg-text-secondary': skillGraphPalette.textSecondary,
+  '--sg-accent': skillGraphPalette.accent
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.detail-main-card {
+  min-height: 0;
+  border: 1px solid var(--sg-panel-border);
+  background: var(--sg-panel-bg);
+  box-shadow: 0 8px 24px var(--sg-panel-shadow);
+}
+
+.detail-header {
+  background: var(--sg-panel-header);
+}
+
+.detail-title {
+  color: var(--sg-text-primary);
+}
+
+.detail-content-scroll {
+  min-height: 0;
+  overflow: auto;
+  color: var(--sg-text-secondary);
+}
+
+.back-to-course-btn :deep(.v-icon) {
+  color: var(--sg-accent);
+}
+
+.action-card {
+  border: 1px solid var(--sg-panel-border);
+  background: var(--sg-panel-bg);
+  box-shadow: 0 8px 24px var(--sg-panel-shadow);
+}
+</style>

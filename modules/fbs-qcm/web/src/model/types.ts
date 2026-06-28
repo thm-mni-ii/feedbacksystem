@@ -29,6 +29,7 @@ export interface Question {
   // Array von Competency-IDs, die diese Frage abprüft
   competencyIds: string[]
   difficulty: number
+  excludeFromAlgorithm?: boolean
 }
 
 /**
@@ -59,6 +60,11 @@ export interface SessionState {
   competencies: Record<string, CompetencyState>
   history: AnswerRecord[]
   recentQuestionIds: string[]
+  excludedQuestionIds: string[]
+  // Competency Stickiness: Aktuelle Kompetenz für mehrere Fragen fokussieren
+  currentCompetencyId: string | null
+  // Zähler: Wie viele Fragen wurden bereits zur aktuellen Kompetenz gestellt?
+  questionsInCurrentCompetency: number
 }
 
 /**

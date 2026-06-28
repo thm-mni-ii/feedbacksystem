@@ -1,5 +1,5 @@
 <template>
-  <div v-if="selectedNode?.type === 'question'" class="question-panel">
+  <div v-if="selectedNode?.type === 'question'" class="question-panel" :style="panelStyles">
     <!-- Question Text -->
     <p class="text-body-2 mb-3">{{ selectedNode.data.text }}</p>
 
@@ -26,10 +26,7 @@
 
     <!-- Difficulty -->
     <div class="text-caption font-weight-bold text-uppercase mb-1">Schwierigkeit</div>
-    <v-progress-linear
-      :model-value="selectedNode.data.difficulty * 100"
-      class="mb-3"
-    />
+    <v-progress-linear :model-value="selectedNode.data.difficulty * 100" class="mb-3" />
 
     <!-- Actions -->
     <div class="d-flex gap-2">
@@ -57,6 +54,7 @@
 
 <script setup lang="ts">
 import type { Competency, Question } from '@/model/types'
+import { skillGraphPalette } from '@/plugins/vuetify'
 
 interface Props {
   selectedNode: any
@@ -68,6 +66,30 @@ interface Props {
 }
 
 defineProps<Props>()
+
+const panelStyles = {
+  '--sg-surface-muted': skillGraphPalette.surfaceMuted,
+  '--sg-border': skillGraphPalette.panelBorder,
+  '--sg-text-primary': skillGraphPalette.textPrimary,
+  '--sg-text-secondary': skillGraphPalette.textSecondary
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.question-panel {
+  color: var(--sg-text-primary);
+}
+
+.question-panel :deep(.v-progress-linear) {
+  border-radius: 999px;
+  background: var(--sg-surface-muted);
+}
+
+.question-panel :deep(.v-chip) {
+  border: 1px solid var(--sg-border);
+}
+
+.question-panel :deep(.v-btn) {
+  border: 1px solid var(--sg-border);
+}
+</style>

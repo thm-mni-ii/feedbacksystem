@@ -10,4 +10,5 @@ export default interface Question {
   questiontype: QuestionType
   questionconfiguration: any
   difficulty: number
+  excludeFromAlgorithm?: boolean
 }

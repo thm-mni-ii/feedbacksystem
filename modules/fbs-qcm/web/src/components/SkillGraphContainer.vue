@@ -1,16 +1,23 @@
 <template>
-  <v-card elevation="1" rounded="lg">
-    <div class="d-flex gap-1 pa-1">
+  <v-card
+    elevation="0"
+    rounded="lg"
+    class="graph-card d-flex flex-column overflow-hidden"
+    :style="graphCardStyle"
+  >
+    <div class="graph-toolbar d-flex gap-2 pa-2" :style="graphToolbarStyle">
       <v-btn
-        density="compact"
-        color="grey"
+        density="comfortable"
+        variant="tonal"
         icon="mdi-plus"
+        :style="toolbarButtonStyle"
         @click="zoomLevel += 0.1"
       ></v-btn>
       <v-btn
-        density="compact"
+        density="comfortable"
+        variant="tonal"
         icon="mdi-minus"
-        color="grey"
+        :style="toolbarButtonStyle"
         @click="zoomLevel -= 0.1"
       ></v-btn>
     </div>
@@ -29,6 +36,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import * as vNG from 'v-network-graph'
+import { skillGraphPalette } from '@/plugins/vuetify'
 
 interface Props {
   zoomLevel: number
@@ -50,11 +58,41 @@ const zoomLevel = computed({
   get: () => props.zoomLevel,
   set: (value) => emit('update:zoomLevel', value)
 })
+
+const graphCardStyle = {
+  backgroundColor: skillGraphPalette.surface,
+  border: `1px solid ${skillGraphPalette.panelBorder}`,
+  boxShadow: `0 10px 28px ${skillGraphPalette.panelShadow}`
+}
+
+const graphToolbarStyle = {
+  backgroundColor: `${skillGraphPalette.surface}DE`,
+  border: `1px solid ${skillGraphPalette.panelBorder}`
+}
+
+const toolbarButtonStyle = {
+  color: skillGraphPalette.accent
+}
 </script>
 
 <style scoped>
+.graph-card {
+  flex: 1;
+  min-height: 0;
+}
+
+.graph-toolbar {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
 .graph {
   width: 100%;
-  height: 680px;
+  height: 100%;
+  min-height: 0;
 }
 </style>

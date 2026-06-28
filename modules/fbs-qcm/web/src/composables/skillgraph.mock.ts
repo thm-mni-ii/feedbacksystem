@@ -2,7 +2,7 @@ import type { Competency, Question } from '@/model/types'
 
 export const competencies: Competency[] = [
   // ============================================================
-  // KATEGORIE: SQL
+  // OBERKOMPETENZ: SQL
   // ============================================================
   {
     id: 'c-sql',
@@ -48,7 +48,7 @@ export const competencies: Competency[] = [
   },
 
   // ============================================================
-  // KATEGORIE: Datenbankdesign
+  // OBERKOMPETENZ: Datenbankdesign
   // ============================================================
   {
     id: 'c-db-design',
@@ -88,7 +88,7 @@ export const competencies: Competency[] = [
   },
 
   // ============================================================
-  // KATEGORIE: Normalisierung
+  // OBERKOMPETENZ: Normalisierung
   // ============================================================
   {
     id: 'c-normalization',
@@ -134,7 +134,7 @@ export const competencies: Competency[] = [
   },
 
   // ============================================================
-  // KATEGORIE: Schlüssel & Integrität
+  // OBERKOMPETENZ: Schluessel & Integritaet
   // ============================================================
   {
     id: 'c-keys',
@@ -174,7 +174,7 @@ export const competencies: Competency[] = [
   },
 
   // ============================================================
-  // KATEGORIE: Transaktionen & Concurrency
+  // OBERKOMPETENZ: Transaktionen & Concurrency
   // ============================================================
   {
     id: 'c-transactions',
@@ -215,7 +215,7 @@ export const competencies: Competency[] = [
   },
 
   // ============================================================
-  // KATEGORIE: Indizes & Performance
+  // OBERKOMPETENZ: Indizes & Performance
   // ============================================================
   {
     id: 'c-indexes',
@@ -236,15 +236,8 @@ export const competencies: Competency[] = [
     parentId: 'c-indexes'
   },
 
-  {
-    id: 'c-db-architecture',
-    name: 'Datenbankarchitektur',
-    description: 'Struktur relationaler Datenbanksysteme',
-    category: 'database'
-  },
-
   // ============================================================
-  // KATEGORIE: Objektorientierte Programmierung
+  // OBERKOMPETENZ: Objektorientierte Programmierung
   // ============================================================
   {
     id: 'c-oop',
@@ -300,38 +293,8 @@ export const competencies: Competency[] = [
     name: 'Factory Pattern',
     description: 'Factory-Methode und Abstract Factory',
     parentId: 'c-design-patterns'
-  },
-
-  // ============================================================
-  // KATEGORIE: UML & Modellierung
-  // ============================================================
-  {
-    id: 'c-uml',
-    name: 'UML',
-    description: 'Unified Modeling Language',
-    category: 'modeling'
-  },
-  {
-    id: 'c-uml-class-diag',
-    name: 'Klassendiagramme',
-    description: 'UML Klassendiagramme und Notationen',
-    parentId: 'c-uml'
-  },
-  {
-    id: 'c-uml-sequence-diag',
-    name: 'Sequenzdiagramme',
-    description: 'UML Sequenzdiagramme und Abläufe',
-    parentId: 'c-uml'
   }
 ]
-
-/**
- * QUESTIONS: Refaktoriert
- *
- * Neu:
- * - competencyIds statt skillId + tags
- * - title optional (für Kompatibilität)
- */
 export const questions: Question[] = [
   // SQL: SELECT
   {
@@ -654,22 +617,6 @@ export const questions: Question[] = [
     difficulty: 0.63
   },
 
-  // Datenbankarchitektur
-  {
-    id: 'q39',
-    text: 'Was ist eine relationale Datenbank?',
-    title: 'Was ist eine relationale Datenbank?',
-    competencyIds: ['c-db-architecture'],
-    difficulty: 0.25
-  },
-  {
-    id: 'q40',
-    text: 'Welche Vorteile bieten relationale Datenbanken?',
-    title: 'Welche Vorteile bieten relationale Datenbanken?',
-    competencyIds: ['c-db-architecture'],
-    difficulty: 0.38
-  },
-
   // Transaktionen
   {
     id: 'q19',
@@ -846,35 +793,5 @@ export const questions: Question[] = [
     title: 'Wann verwendet man eine Factory?',
     competencyIds: ['c-pattern-factory'],
     difficulty: 0.66
-  },
-
-  // UML
-  {
-    id: 'q75',
-    text: 'Was zeigt ein Klassendiagramm?',
-    title: 'Was zeigt ein Klassendiagramm?',
-    competencyIds: ['c-uml-class-diag'],
-    difficulty: 0.46
-  },
-  {
-    id: 'q76',
-    text: 'Was zeigt ein Sequenzdiagramm?',
-    title: 'Was zeigt ein Sequenzdiagramm?',
-    competencyIds: ['c-uml-sequence-diag'],
-    difficulty: 0.59
-  },
-  {
-    id: 'q77',
-    text: 'Wie werden Assoziationen dargestellt?',
-    title: 'Wie werden Assoziationen dargestellt?',
-    competencyIds: ['c-uml-class-diag'],
-    difficulty: 0.52
-  },
-  {
-    id: 'q78',
-    text: 'Wie wird Vererbung in UML dargestellt?',
-    title: 'Wie wird Vererbung in UML dargestellt?',
-    competencyIds: ['c-uml-class-diag'],
-    difficulty: 0.48
   }
 ]

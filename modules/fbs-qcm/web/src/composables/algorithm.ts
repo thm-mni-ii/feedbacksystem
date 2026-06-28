@@ -36,7 +36,10 @@ export function createSession(studentId: string, competencies: Competency[]): Se
     studentId,
     competencies: competencyStates,
     history: [],
-    recentQuestionIds: []
+    recentQuestionIds: [],
+    excludedQuestionIds: [],
+    currentCompetencyId: null,
+    questionsInCurrentCompetency: 0
   }
 }
 
@@ -81,62 +84,172 @@ function competencyWeight(state: CompetencyState): number {
  */
 export class AdaptiveQuizAlgorithm {
   /**
-   * Nächste Frage auswählen
+   * Nächste Frage auswählen mit IRT-basierter Schwierigkeitsadaption, Competency Stickiness und hierarchischer Freischaltung
    *
    * Strategie:
-   * 1. Wähle eine Kompetenz (gewichtet nach Anzahl Tests)
-   * 2. Wähle eine Frage, die diese Kompetenz testet
-   * 3. Vermeide kürzlich gestellte Fragen
+   * 1. HIERARCHIE: Nur Kompetenzen mit erfüllten Prerequisites werden angeboten
+   *    - Eltern-Kompetenzen sind immer verfügbar
+   *    - Kind-Kompetenzen brauchen Parent-Score > 0.6 (UNLOCK_THRESHOLD)
+   *    → Damit wird ein "Zweig" von Kompetenzen komplett abgearbeitet
+   * 2. STICKINESS: Falls gerade eine Kompetenz bearbeitet wird und < 5 Fragen gestellt,
+   *    bleib bei dieser Kompetenz (reduziert Kontextwechsel)
+   * 3. Wähle Zielkompetenz (gewichtet nach Anzahl Tests, Score und Hierarchie)
+   * 4. IRT-Adaption: Filtere Fragen nach Schwierigkeit (Rasch-Modell):
+   *    Ideal: |difficulty - studentScore| < 0.2 (50% Erfolgschance)
+   * 5. Vermeide kürzlich gestellte Fragen
+   * 6. Zufällige Auswahl aus dem angepassten Pool
    */
   nextQuestion(
     competencies: Competency[],
     questions: Question[],
     session: SessionState
   ): NextQuestion | null {
-    if (questions.length === 0) {
+    const excludedQuestionIds = new Set(session.excludedQuestionIds)
+    const availableQuestions = questions.filter(
+      (question) => !question.excludeFromAlgorithm && !excludedQuestionIds.has(question.id)
+    )
+
+    if (availableQuestions.length === 0) {
       return null
     }
 
     // Schritt 0: Filtere nur Kompetenzen, die Fragen haben
     const competenciesWithQuestions = competencies.filter((c) =>
-      questions.some((q) => q.competencyIds.includes(c.id))
+      availableQuestions.some((q) => q.competencyIds.includes(c.id))
     )
 
     if (competenciesWithQuestions.length === 0) {
       return null
     }
 
-    // Schritt 1: Wähle Zielkompetenz (gewichtet nach Häufigkeit der Tests)
-    const competency = weightedSample(
-      competenciesWithQuestions.map((c) => ({
-        item: c,
-        weight: competencyWeight(session.competencies[c.id])
-      }))
+    let targetCompetency: Competency
+
+    // SCHRITT 1: Competency Stickiness
+    // Falls gerade eine Kompetenz bearbeitet wird und < 5 Fragen gestellt, bleib dabei
+    const STICKINESS_THRESHOLD = 5
+    if (
+      session.currentCompetencyId &&
+      session.questionsInCurrentCompetency < STICKINESS_THRESHOLD
+    ) {
+      const stickyCompetency = competencies.find((c) => c.id === session.currentCompetencyId)
+      if (
+        stickyCompetency &&
+        availableQuestions.some((q) => q.competencyIds.includes(stickyCompetency.id))
+      ) {
+        targetCompetency = stickyCompetency
+      } else {
+        // Sticky Kompetenz hat keine Fragen mehr, wechsel zu neuer
+        targetCompetency = this.selectNextCompetency(
+          competenciesWithQuestions,
+          session,
+          competencies
+        )
+      }
+    } else {
+      // SCHRITT 2: Wähle neue Zielkompetenz (gewichtet nach Häufigkeit Tests)
+      targetCompetency = this.selectNextCompetency(competenciesWithQuestions, session, competencies)
+    }
+
+    // SCHRITT 3: Finde Fragen für die Zielkompetenz
+    const questionsForCompetency = availableQuestions.filter((q) =>
+      q.competencyIds.includes(targetCompetency.id)
     )
 
-    // Schritt 2: Finde Fragen, die diese Kompetenz testen
-    const candidates = questions.filter(
-      (q) => q.competencyIds.includes(competency.id) && !session.recentQuestionIds.includes(q.id)
+    if (questionsForCompetency.length === 0) {
+      return null
+    }
+
+    // SCHRITT 4: IRT-Schwierigkeitsadaption (Rasch-Modell)
+    // Ideal: Schwierigkeit nahe beim Student-Score (ca. 50% Erfolgschance)
+    const studentScore = session.competencies[targetCompetency.id]?.score ?? 0
+    const DIFFICULTY_WINDOW = 0.2 // Fenster: [score - 0.2, score + 0.2]
+
+    let difficultyAdapted = questionsForCompetency.filter(
+      (q) => Math.abs(q.difficulty - studentScore) <= DIFFICULTY_WINDOW
     )
 
-    // Fallback: Wenn alle Fragen für diese Kompetenz kürzlich gestellt wurden,
-    // verwende alle verfügbaren Fragen
-    const pool =
-      candidates.length > 0
-        ? candidates
-        : questions.filter((q) => q.competencyIds.includes(competency.id))
+    // Fallback 1: Falls keine Fragen im idealen Bereich, nimm nächstbeste
+    if (difficultyAdapted.length === 0) {
+      difficultyAdapted = questionsForCompetency.sort(
+        (a, b) => Math.abs(a.difficulty - studentScore) - Math.abs(b.difficulty - studentScore)
+      )
+    }
+
+    // SCHRITT 5: Vermeide kürzlich gestellte Fragen
+    const candidates = difficultyAdapted.filter((q) => !session.recentQuestionIds.includes(q.id))
+
+    const pool = candidates.length > 0 ? candidates : difficultyAdapted
 
     if (pool.length === 0) {
       return null
     }
 
-    // Schritt 3: Zufällige Frage aus dem Pool
+    // SCHRITT 6: Zufällige Auswahl aus dem adaptierten Pool
     const question = pool[Math.floor(Math.random() * pool.length)]
 
     return {
       question,
-      targetCompetency: competency
+      targetCompetency
     }
+  }
+
+  /**
+   * Hilfsfunktion: Wähle nächste Zielkompetenz mit hierarchischer Freischaltung
+   *
+   * Prerequisite-Based Learning:
+   * - Nur Eltern-Kompetenzen (parentId = null) sind immer verfügbar
+   * - Kind-Kompetenzen werden erst freigegeben, wenn Parent-Kompetenz Score > UNLOCK_THRESHOLD
+   * - Gewichtung: weniger getestet + niedriger Score
+   * - Dadurch wird ein "Zweig" komplett abgearbeitet, bevor man zum nächsten wechselt
+   */
+  private selectNextCompetency(
+    candidates: Competency[],
+    session: SessionState,
+    allCompetencies: Competency[]
+  ): Competency {
+    const UNLOCK_THRESHOLD = 0.6 // 60% Parent-Score erforderlich für Kinder
+    const competenciesByParent = new Map<string | null, Competency[]>()
+
+    // Gruppiere Kompetenzen nach parentId
+    for (const competency of allCompetencies) {
+      const parentId = competency.parentId ?? null
+      if (!competenciesByParent.has(parentId)) {
+        competenciesByParent.set(parentId, [])
+      }
+      competenciesByParent.get(parentId)!.push(competency)
+    }
+
+    // Filtere: Nur Kompetenzen, deren Prerequisite erfüllt ist
+    const fullyUnlockedCandidates = candidates.filter((c) => {
+      // Eltern-Kompetenzen (parentId = null) sind immer verfügbar
+      if (!c.parentId) {
+        return true
+      }
+
+      // Kind-Kompetenzen: Parent muss Score > UNLOCK_THRESHOLD haben
+      const parentScore = session.competencies[c.parentId]?.score ?? 0
+      return parentScore > UNLOCK_THRESHOLD
+    })
+
+    // Fallback: Falls keine Kompetenzen freigegeben sind (z.B. am Anfang), nimm Eltern-Kompetenzen
+    const activePool =
+      fullyUnlockedCandidates.length > 0
+        ? fullyUnlockedCandidates
+        : candidates.filter((c) => !c.parentId)
+
+    return weightedSample(
+      activePool.map((c) => {
+        const state = session.competencies[c.id]
+        // Kombination: weniger getestet + niedriger Score
+        const assessmentWeight = competencyWeight(state) // 1/(timesAssessed+1)
+        const scoreWeight = 1 - state.score // Niedrige Scores bevorzugen
+        const combinedWeight = assessmentWeight * scoreWeight
+        return {
+          item: c,
+          weight: combinedWeight
+        }
+      })
+    )
   }
 
   /**

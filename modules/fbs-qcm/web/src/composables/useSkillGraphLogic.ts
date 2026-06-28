@@ -34,10 +34,7 @@ function lightenHex(hexColor: string, factor: number): string {
     .join('')}`
 }
 
-export function useSkillGraphLogic(
-  mockCompetencies: Competency[],
-  mockQuestions: Question[]
-) {
+export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions: Question[]) {
   // ─── State ────────────────────────────────────────────────────────────
   const course = ref<Course>({
     id: 'course1',
@@ -55,13 +52,7 @@ export function useSkillGraphLogic(
   const getCompetency = (id: string): Competency | undefined =>
     competencies.value.find((c) => c.id === id)
 
-  const getCategories = (): string[] => {
-    const cats = new Set(competencies.value.filter((c) => !c.parentId).map((c) => c.category || ''))
-    return Array.from(cats)
-  }
-
-  const competenciesByCategory = (category: string): Competency[] =>
-    competencies.value.filter((c) => !c.parentId && c.category === category)
+  const rootCompetencies = computed(() => competencies.value.filter((c) => !c.parentId))
 
   const colorFromPalette = (seed: string): string => {
     const palette = skillGraphPalette.competencyPalette
@@ -279,7 +270,10 @@ export function useSkillGraphLogic(
             .forceSimulation(nodes)
             .force('edge', forceLink.distance(40).strength(0.5))
             .force('charge', d3.forceManyBody().strength(-800))
-            .force('collide', d3.forceCollide().radius((d: any) => d.radius + 15))
+            .force(
+              'collide',
+              d3.forceCollide().radius((d: any) => d.radius + 15)
+            )
             .force('center', d3.forceCenter().strength(0.05))
             .alphaMin(0.001)
 
@@ -347,6 +341,10 @@ export function useSkillGraphLogic(
     if (q) q.competencyIds = q.competencyIds.filter((c) => c !== compId)
   }
 
+  const selectCourse = () => {
+    selectedNodeId.value = course.value.id
+  }
+
   return {
     // State
     course,
@@ -363,8 +361,7 @@ export function useSkillGraphLogic(
     eventHandlers,
     // Helpers
     getCompetency,
-    getCategories,
-    competenciesByCategory,
+    rootCompetencies,
     getCompetencyColor,
     getCompetencyDepth,
     childCompetencies,
@@ -372,6 +369,7 @@ export function useSkillGraphLogic(
     nodeIcon,
     // Actions
     deleteQuestion,
-    removeCompetencyFromQuestion
+    removeCompetencyFromQuestion,
+    selectCourse
   }
 }

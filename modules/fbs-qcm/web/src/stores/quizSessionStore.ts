@@ -32,6 +32,8 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     return algo.getProgress(competencies_ref.value, session.value)
   })
 
+  const excludedQuestionIds = computed(() => session.value?.excludedQuestionIds ?? [])
+
   const overallScore = computed(() => {
     if (!session.value) return 0
 
@@ -79,6 +81,17 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
       return
     }
 
+    // Stickiness-Logik: Aktualisiere currentCompetencyId und questionsInCurrentCompetency
+    const targetCompetencyId = currentQuestion.value.targetCompetency.id
+    if (session.value.currentCompetencyId === targetCompetencyId) {
+      // Gleiche Kompetenz: Counter incrementieren
+      session.value.questionsInCurrentCompetency += 1
+    } else {
+      // Neue Kompetenz: Reset auf 1
+      session.value.currentCompetencyId = targetCompetencyId
+      session.value.questionsInCurrentCompetency = 1
+    }
+
     const { updatedState, result } = algo.submitAnswer(
       currentQuestion.value.question,
       score,
@@ -90,6 +103,57 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     lastResult.value = result
 
     advance()
+  }
+
+  function excludeQuestion(questionId: string) {
+    if (!session.value) {
+      return
+    }
+
+    if (session.value.excludedQuestionIds.includes(questionId)) {
+      return
+    }
+
+    session.value = {
+      ...session.value,
+      excludedQuestionIds: [...session.value.excludedQuestionIds, questionId]
+    }
+
+    if (currentQuestion.value?.question.id === questionId) {
+      advance()
+    }
+  }
+
+  function includeQuestion(questionId: string) {
+    if (!session.value) {
+      return
+    }
+
+    if (!session.value.excludedQuestionIds.includes(questionId)) {
+      return
+    }
+
+    session.value = {
+      ...session.value,
+      excludedQuestionIds: session.value.excludedQuestionIds.filter((id) => id !== questionId)
+    }
+  }
+
+  function setExcludedQuestions(questionIds: string[]) {
+    if (!session.value) {
+      return
+    }
+
+    const uniqueQuestionIds = [...new Set(questionIds)]
+
+    session.value = {
+      ...session.value,
+      excludedQuestionIds: uniqueQuestionIds
+    }
+
+    if (currentQuestion.value && uniqueQuestionIds.includes(currentQuestion.value.question.id)) {
+      advance()
+    }
   }
 
   // Reset
@@ -114,10 +178,14 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     progress,
     overallScore,
     historyCount,
+    excludedQuestionIds,
 
     // actions
     setCompetencies,
     setQuestions,
+    setExcludedQuestions,
+    excludeQuestion,
+    includeQuestion,
 
     startSession,
     submitAnswer,

@@ -1,13 +1,15 @@
 <template>
   <DialogEditQuestion ref="dialogEditQuestion" />
 
-  <section :style="viewStyle">
-    <SkillGraphHeader />
-
-    <v-container fluid class="pa-4">
-      <v-row>
+  <section class="skill-graph-view" :style="viewStyle">
+    <v-container fluid class="pa-2 pa-md-3 skill-graph-content">
+      <v-row class="fill-height skill-graph-row" align="stretch">
         <!-- Graph -->
-        <v-col cols="12" :md="selectedNodeId ? 8 : 12">
+        <v-col
+          cols="12"
+          :md="selectedNodeId ? 8 : 12"
+          class="d-flex flex-column fill-height pr-md-2"
+        >
           <SkillGraphContainer
             v-model:zoom-level="zoomLevel"
             :graph-nodes="graphNodes"
@@ -24,13 +26,13 @@
           :selected-node="selectedNode"
           :questions="questions"
           :node-icon="nodeIcon"
-          :get-categories="getCategories"
-          :competencies-by-category="competenciesByCategory"
+          :root-competencies="rootCompetencies"
           :get-competency-color="getCompetencyColor"
           :get-competency="getCompetency"
           :child-competencies="childCompetencies"
           :questions-with-competency="questionsWithCompetency"
           :remove-competency-from-question="removeCompetencyFromQuestion"
+          :select-course="selectCourse"
           :edit-question="editQuestion"
           :delete-question="deleteQuestion"
         />
@@ -42,7 +44,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
-import SkillGraphHeader from '@/components/SkillGraphHeader.vue'
 import SkillGraphContainer from '@/components/SkillGraphContainer.vue'
 import SkillGraphDetailPanel from '@/components/SkillGraphDetailPanel.vue'
 import { useSkillGraphLogic } from '@/composables/useSkillGraphLogic'
@@ -55,7 +56,7 @@ import {
 
 const dialogEditQuestion = ref<typeof DialogEditQuestion>()
 const viewStyle = computed(() => ({
-  backgroundColor: skillGraphPalette.viewBackground
+  background: `linear-gradient(180deg, ${skillGraphPalette.viewBackground} 0%, ${skillGraphPalette.viewBackgroundAlt} 100%)`
 }))
 
 const editQuestion = (question?: Question) => {
@@ -81,13 +82,31 @@ const {
   configs,
   eventHandlers,
   getCompetency,
-  getCategories,
-  competenciesByCategory,
+  rootCompetencies,
   getCompetencyColor,
   childCompetencies,
   questionsWithCompetency,
   nodeIcon,
   deleteQuestion,
-  removeCompetencyFromQuestion
+  removeCompetencyFromQuestion,
+  selectCourse
 } = useSkillGraphLogic(mockCompetencies, mockQuestions)
 </script>
+
+<style scoped>
+.skill-graph-view {
+  height: calc(100dvh - var(--v-layout-top, 0px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.skill-graph-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.skill-graph-row {
+  margin: 0;
+}
+</style>
