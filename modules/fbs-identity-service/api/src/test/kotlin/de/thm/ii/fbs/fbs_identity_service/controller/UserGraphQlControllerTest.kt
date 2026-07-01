@@ -16,7 +16,7 @@ import org.springframework.graphql.test.tester.GraphQlTester
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
 @GraphQlTest(UserGraphQlController::class)
