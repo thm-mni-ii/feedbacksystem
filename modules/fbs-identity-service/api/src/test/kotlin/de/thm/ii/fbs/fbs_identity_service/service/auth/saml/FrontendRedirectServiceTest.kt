@@ -50,4 +50,11 @@ class FrontendRedirectServiceTest {
 
         assertEquals("https://localhost/login", result)
     }
+
+    @Test
+    fun `buildRedirectUrl adds route query parameter`() {
+        val result = service.buildRedirectUrl("/login", "/courses/123")
+
+        assertEquals("https://localhost/login?route=/courses/123", result)
+    }
 }
