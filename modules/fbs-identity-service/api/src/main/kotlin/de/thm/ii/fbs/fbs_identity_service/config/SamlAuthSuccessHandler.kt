@@ -3,6 +3,7 @@ package de.thm.ii.fbs.fbs_identity_service.config
 import de.thm.ii.fbs.fbs_identity_service.model.auth.SamlUser
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.FrontendRedirectService
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlLoginService
+import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlRouteService
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlSessionCleanupService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.http.HttpHeaders
 import org.slf4j.LoggerFactory
+import org.springframework.security.saml2.core.Saml2ParameterNames
 
 @Component
 class SamlAuthSuccessHandler(
@@ -25,6 +27,8 @@ class SamlAuthSuccessHandler(
     private val frontendRedirectService: FrontendRedirectService,
 
     private val samlSessionCleanupService: SamlSessionCleanupService,
+
+    private val routeService: SamlRouteService,
 
     @param:Value("\${app.saml.principal-attribute:uid}")
     private val principalAttribute: String,
@@ -86,11 +90,15 @@ class SamlAuthSuccessHandler(
                 .secure(request.isSecure)
                 .build()
 
+            val route = routeService.sanitize(
+                request.getParameter(Saml2ParameterNames.RELAY_STATE)
+            )
+
             samlSessionCleanupService.clearSession(request, response)
 
             response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString())
 
-            response.sendRedirect(frontendRedirectService.buildRedirectUrl(successPath))
+            response.sendRedirect(frontendRedirectService.buildRedirectUrl(successPath, route))
         } catch (exception: Exception) {
             log.warn("SAML login post-processing failed: {}", exception.message, exception)
 

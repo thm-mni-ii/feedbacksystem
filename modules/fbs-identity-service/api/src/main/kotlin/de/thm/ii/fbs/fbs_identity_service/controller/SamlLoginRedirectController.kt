@@ -1,12 +1,15 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
+import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlRouteService
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.util.UriComponentsBuilder
 
 @RestController
 @RequestMapping("/api/v1/login")
@@ -15,15 +18,29 @@ class SamlLoginRedirectController(
     private val samlEnabled: Boolean,
 
     @param:Value("\${app.saml.registration-id:adfs}")
-    private val registrationId: String
+    private val registrationId: String,
+
+    private val samlRouteService: SamlRouteService
 ) {
 
     @GetMapping("/sso")
-    fun sso(response: HttpServletResponse) {
+    fun sso(@RequestParam(value = "route", required = false) route: String?, response: HttpServletResponse) {
         if (!samlEnabled) {
             throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "SAML is not enabled")
         }
 
-        response.sendRedirect("/saml2/authenticate/$registrationId")
+        val redirectBuilder = UriComponentsBuilder
+            .fromPath("/saml2/authenticate/{registrationId}")
+
+        samlRouteService.sanitize(route)?.let {
+            redirectBuilder.queryParam("route", it)
+        }
+
+        val redirectUrl = redirectBuilder
+            .buildAndExpand(registrationId)
+            .encode()
+            .toUriString()
+
+        response.sendRedirect(redirectUrl)
     }
 }
