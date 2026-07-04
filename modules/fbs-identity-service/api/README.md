@@ -16,6 +16,10 @@ This module contains the initial setup for the FBS identity service.
 * JWT creation and JWT validation
 * Current user resolution through the Spring Security context
 * Local SAML2 login prototype with Keycloak as test IdP
+* SAML success/failure redirect handling
+* Optional SAML route forwarding through RelayState
+* Dockerfile for containerized startup
+* Docker Compose integration using the existing `mysql1` service
 
 ## Working directory
 
@@ -35,6 +39,32 @@ modules/fbs-identity-service/api
 
 ```bash
 ./gradlew bootRun
+```
+
+## Run with Docker Compose
+
+The Identity-Service can also be built and started through the main `docker-compose.yml` from the repository root.
+
+From the repository root:
+
+```bash
+docker compose up --build mysql1 identity-service
+```
+
+The service uses the existing `mysql1` database service from the compose setup.
+
+By default, SAML is disabled for the Docker setup, so no local Keycloak/SAML test environment is required for normal startup.
+
+The health endpoint is available at:
+
+```text
+http://localhost:8080/health
+```
+
+Local login can be tested against:
+
+```text
+POST http://localhost:8080/api/v1/auth/login
 ```
 
 ## Run with local dev tools such as GraphiQL
