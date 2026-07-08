@@ -43,6 +43,10 @@ class SecurityConfig(
                     .requestMatchers(
                         "/health",
                         "/manifest",
+                        "/openapi",
+                        "/openapi/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
                         "/error",
                         "/graphiql",
                         "/graphiql/**"

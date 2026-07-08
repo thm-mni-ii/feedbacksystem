@@ -1,10 +1,19 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
+import de.thm.ii.fbs.fbs_identity_service.dto.legal.LegalTextResponse
+import de.thm.ii.fbs.fbs_identity_service.dto.legal.TermsOfUseAcceptanceResponse
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -12,12 +21,25 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
+@Tag(name = "Legal", description = "Legal text and terms-of-use endpoints")
 @RestController
 @RequestMapping("/api/v1/legal")
 class LegalController(private val userService: UserService, private val currentUserService: CurrentUserService) {
 
-    @GetMapping("/{filename}")
-    fun legalTexts(@PathVariable filename: String): Map<String, String> {
+    @Operation(
+        summary = "Get legal text",
+        description = "Returns a legal text file such as imprint or privacy policy."
+    )
+    @ApiResponses(
+        ApiResponse(responseCode = "200"),
+        ApiResponse(responseCode = "404", description = "Legal text file not found", content = [
+            Content(
+                schema = Schema(hidden = true)
+            )
+        ])
+    )
+    @GetMapping("/{filename}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun legalTexts(@PathVariable filename: String): LegalTextResponse {
         val resourceName = when (filename) {
             "impressum" -> "impressum.md"
             "privacy-text" -> "privacy_text.md"
@@ -29,16 +51,46 @@ class LegalController(private val userService: UserService, private val currentU
             .bufferedReader()
             .use { it.readText() }
 
-        return mapOf("markdown" to text)
+        return LegalTextResponse(text)
     }
 
-    @GetMapping("/termsofuse/{uid}")
-    fun getTermsOfUseAcceptanceStatus(@PathVariable uid: Long): Map<String, Boolean> {
+    @Operation(
+        summary = "Get terms of use acceptance status",
+        description = "Returns whether the user has accepted the terms of use."
+    )
+    @ApiResponses(
+        ApiResponse(responseCode = "200"),
+        ApiResponse(responseCode = "401", description = "User is not authenticated", content = [
+            Content(
+                schema = Schema(hidden = true)
+            )
+        ]
+        ),
+        ApiResponse(responseCode = "403", description = "User is not allowed to access this user id", content = [
+            Content(
+                schema = Schema(hidden = true)
+            )
+        ])
+    )
+    @GetMapping("/termsofuse/{uid}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getTermsOfUseAcceptanceStatus(@PathVariable uid: Long): TermsOfUseAcceptanceResponse {
         val user = requireCurrentUser(uid)
 
-        return mapOf("accepted" to userService.getPrivacyStatusOf(user.id))
+        return TermsOfUseAcceptanceResponse(
+            accepted = userService.getPrivacyStatusOf(user.id)
+        )
     }
 
+    @Operation(
+        summary = "Accept terms of use",
+        description = "Marks the terms of use as accepted for the user."
+    )
+    @ApiResponses(
+        ApiResponse(responseCode = "200"),
+        ApiResponse(responseCode = "401", description = "User is not authenticated"
+        ),
+        ApiResponse(responseCode = "403", description = "User is not allowed to access this user id")
+    )
     @PutMapping("/termsofuse/{uid}")
     fun acceptTermsOfUse(@PathVariable uid: Long) {
         val user = requireCurrentUser(uid)

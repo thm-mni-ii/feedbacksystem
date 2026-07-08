@@ -38,3 +38,7 @@ app:
 info:
   app:
     version: 0.0.1-SNAPSHOT
+
+springdoc:
+  api-docs:
+    path: /openapi
