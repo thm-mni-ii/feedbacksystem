@@ -1,9 +1,9 @@
 package de.thm.ii.fbs.fbs_identity_service.service.auth.saml
 
 import de.thm.ii.fbs.fbs_identity_service.exception.InvalidFrontendRedirectPathException
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class FrontendRedirectServiceTest {
 
@@ -25,7 +25,7 @@ class FrontendRedirectServiceTest {
 
     @Test
     fun `buildRedirectUrl rejects path without leading slash`() {
-        val exception = assertThrows(InvalidFrontendRedirectPathException::class.java) {
+        val exception = assertFailsWith <InvalidFrontendRedirectPathException> {
             service.buildRedirectUrl("login")
         }
 
@@ -34,7 +34,7 @@ class FrontendRedirectServiceTest {
 
     @Test
     fun `buildRedirectUrl rejects protocol relative path`() {
-        val exception = assertThrows(InvalidFrontendRedirectPathException::class.java) {
+        val exception = assertFailsWith <InvalidFrontendRedirectPathException> {
             service.buildRedirectUrl("//evil.example")
         }
 
