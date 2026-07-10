@@ -2,7 +2,7 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlRouteService
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc

@@ -1,12 +1,12 @@
 package de.thm.ii.fbs.fbs_identity_service.service.auth.saml
 
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockHttpSession
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class SamlSessionCleanupServiceTest {
     private val service = SamlSessionCleanupService()

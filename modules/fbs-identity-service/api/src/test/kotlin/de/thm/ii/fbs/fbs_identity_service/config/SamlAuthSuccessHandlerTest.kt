@@ -6,8 +6,6 @@ import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.FrontendRedirectServ
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlLoginService
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlRouteService
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlSessionCleanupService
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
@@ -21,6 +19,8 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.core.Authentication
 import org.springframework.security.saml2.core.Saml2ParameterNames
 import org.springframework.security.saml2.provider.service.authentication.DefaultSaml2AuthenticatedPrincipal
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SamlAuthSuccessHandlerTest {
 
