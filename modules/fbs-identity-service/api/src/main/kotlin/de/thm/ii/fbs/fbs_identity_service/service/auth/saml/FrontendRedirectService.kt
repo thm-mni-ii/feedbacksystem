@@ -1,9 +1,8 @@
 package de.thm.ii.fbs.fbs_identity_service.service.auth.saml
 
+import de.thm.ii.fbs.fbs_identity_service.exception.InvalidFrontendRedirectPathException
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 
 @Component
@@ -32,9 +31,8 @@ class FrontendRedirectService(
         val trimmedPath = path.trim()
 
         if (!trimmedPath.startsWith("/") || trimmedPath.startsWith("//")) {
-            throw ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Invalid frontend redirect path"
+            throw InvalidFrontendRedirectPathException(
+                trimmedPath
             )
         }
 

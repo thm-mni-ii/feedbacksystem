@@ -2,6 +2,7 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 
 import de.thm.ii.fbs.fbs_identity_service.dto.legal.LegalTextResponse
 import de.thm.ii.fbs.fbs_identity_service.dto.legal.TermsOfUseAcceptanceResponse
+import de.thm.ii.fbs.fbs_identity_service.exception.dto.ErrorResponse
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -34,7 +36,7 @@ class LegalController(private val userService: UserService, private val currentU
         ApiResponse(responseCode = "200"),
         ApiResponse(responseCode = "404", description = "Legal text file not found", content = [
             Content(
-                schema = Schema(hidden = true)
+                schema = Schema(implementation = ErrorResponse::class)
             )
         ])
     )
@@ -62,13 +64,13 @@ class LegalController(private val userService: UserService, private val currentU
         ApiResponse(responseCode = "200"),
         ApiResponse(responseCode = "401", description = "User is not authenticated", content = [
             Content(
-                schema = Schema(hidden = true)
+                schema = Schema(implementation = ErrorResponse::class)
             )
         ]
         ),
         ApiResponse(responseCode = "403", description = "User is not allowed to access this user id", content = [
             Content(
-                schema = Schema(hidden = true)
+                schema = Schema(implementation = ErrorResponse::class)
             )
         ])
     )
@@ -87,9 +89,19 @@ class LegalController(private val userService: UserService, private val currentU
     )
     @ApiResponses(
         ApiResponse(responseCode = "200"),
-        ApiResponse(responseCode = "401", description = "User is not authenticated"
+        ApiResponse(responseCode = "401", description = "User is not authenticated", content = [
+            Content(
+                mediaType = APPLICATION_JSON_VALUE,
+                schema = Schema(implementation = ErrorResponse::class)
+            )
+        ]
         ),
-        ApiResponse(responseCode = "403", description = "User is not allowed to access this user id")
+        ApiResponse(responseCode = "403", description = "User is not allowed to access this user id", content = [
+            Content(
+                mediaType = APPLICATION_JSON_VALUE,
+                schema = Schema(implementation = ErrorResponse::class)
+            )
+        ])
     )
     @PutMapping("/termsofuse/{uid}")
     fun acceptTermsOfUse(@PathVariable uid: Long) {
@@ -99,10 +111,10 @@ class LegalController(private val userService: UserService, private val currentU
 
     private fun requireCurrentUser(uid: Long): User {
         val user = currentUserService.getCurrentUser()
-            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not authenticated")
 
         if (user.id != uid) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN)
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not allowed to access this user id")
         }
 
         return user

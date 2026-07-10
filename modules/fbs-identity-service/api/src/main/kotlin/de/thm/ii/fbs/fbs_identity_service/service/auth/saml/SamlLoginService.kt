@@ -1,14 +1,13 @@
 package de.thm.ii.fbs.fbs_identity_service.service.auth.saml
 
 import de.thm.ii.fbs.fbs_identity_service.dto.login.LoginResponse
+import de.thm.ii.fbs.fbs_identity_service.exception.MissingSamlUsernameException
 import de.thm.ii.fbs.fbs_identity_service.model.auth.SamlUser
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.service.auth.JwtService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 
 @Service
 class SamlLoginService(
@@ -20,7 +19,7 @@ class SamlLoginService(
         val username = samlUser.username.trim()
 
         if (username.isBlank()) {
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing SAML username")
+            throw MissingSamlUsernameException()
         }
 
         val user = userService.findActive(username)

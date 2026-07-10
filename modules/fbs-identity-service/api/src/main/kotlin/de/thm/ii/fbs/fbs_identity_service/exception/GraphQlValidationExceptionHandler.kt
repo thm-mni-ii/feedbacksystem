@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.controller
+package de.thm.ii.fbs.fbs_identity_service.exception
 
 import graphql.GraphQLError
 import graphql.GraphqlErrorBuilder

@@ -1,10 +1,9 @@
 package de.thm.ii.fbs.fbs_identity_service.service.auth.saml
 
+import de.thm.ii.fbs.fbs_identity_service.exception.InvalidFrontendRedirectPathException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.springframework.web.server.ResponseStatusException
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.springframework.http.HttpStatus
 
 class FrontendRedirectServiceTest {
 
@@ -26,20 +25,20 @@ class FrontendRedirectServiceTest {
 
     @Test
     fun `buildRedirectUrl rejects path without leading slash`() {
-        val exception = assertThrows(ResponseStatusException::class.java) {
+        val exception = assertThrows(InvalidFrontendRedirectPathException::class.java) {
             service.buildRedirectUrl("login")
         }
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.statusCode)
+        assertEquals("Invalid frontend redirect path: login", exception.message)
     }
 
     @Test
     fun `buildRedirectUrl rejects protocol relative path`() {
-        val exception = assertThrows(ResponseStatusException::class.java) {
+        val exception = assertThrows(InvalidFrontendRedirectPathException::class.java) {
             service.buildRedirectUrl("//evil.example")
         }
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.statusCode)
+        assertEquals("Invalid frontend redirect path: //evil.example", exception.message)
     }
 
     @Test

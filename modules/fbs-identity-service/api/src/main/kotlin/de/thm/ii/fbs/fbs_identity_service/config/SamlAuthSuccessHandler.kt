@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.fbs_identity_service.config
 
+import de.thm.ii.fbs.fbs_identity_service.exception.InvalidSamlPrincipalException
+import de.thm.ii.fbs.fbs_identity_service.exception.MissingSamlPrincipalAttributeException
 import de.thm.ii.fbs.fbs_identity_service.model.auth.SamlUser
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.FrontendRedirectService
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlLoginService
@@ -8,13 +10,11 @@ import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlSessionCleanupSe
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseCookie
 import org.springframework.security.core.Authentication
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.stereotype.Component
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.http.HttpHeaders
 import org.slf4j.LoggerFactory
 import org.springframework.security.saml2.core.Saml2ParameterNames
@@ -65,13 +65,10 @@ class SamlAuthSuccessHandler(
     ) {
         try {
             val principal = authentication.principal as? Saml2AuthenticatedPrincipal
-                ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid SAML principal")
+                ?: throw InvalidSamlPrincipalException()
 
             val username = firstAttribute(principal, principalAttribute)
-                ?: throw ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Required SAML principal attribute is missing"
-                )
+                ?: throw MissingSamlPrincipalAttributeException()
 
             val samlUser = SamlUser(
                 username = username,

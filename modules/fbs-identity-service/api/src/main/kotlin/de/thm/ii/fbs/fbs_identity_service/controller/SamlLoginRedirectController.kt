@@ -1,13 +1,17 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlRouteService
+import de.thm.ii.fbs.fbs_identity_service.exception.dto.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -40,7 +44,12 @@ class SamlLoginRedirectController(
             ),
             ApiResponse(
                 responseCode = "503",
-                description = "SAML is not enabled"
+                description = "SAML is not enabled", content = [
+                    Content(
+                        mediaType = APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = ErrorResponse::class)
+                    )
+                ]
             )
         ]
     )
@@ -65,3 +74,4 @@ class SamlLoginRedirectController(
         response.sendRedirect(redirectUrl)
     }
 }
+
