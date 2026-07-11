@@ -113,7 +113,8 @@ Automated tests can be executed from this module with:
 Some local manual test requests are available for the IntelliJ HTTP Client:
 
 ```
-http/local-auth.http
+http/local-rest.http
+http/local-graphql.http
 ```
 
 The local HTTP client tests are documented in:

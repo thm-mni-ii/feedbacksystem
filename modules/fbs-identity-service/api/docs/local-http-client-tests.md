@@ -1,14 +1,16 @@
 # Local HTTP client tests
 
-This document describes the current local manual test requests for the identity-service.
+This document describes the local manual test requests for the Identity-Service.
 
-The IntelliJ HTTP Client file is located at:
+The IntelliJ HTTP Client requests are split into two files:
 
-```text
-http/local-auth.http
 ```
+http/local-rest.http
+http/local-graphql.http
+```
+`local-rest.http` contains REST requests such as health, manifest, OpenAPI, local login, legal texts, terms of use and SAML redirect checks.
 
-It contains manual requests for testing local authentication, JWT validation and role-based GraphQL authorization.
+`local-graphql.http` contains GraphQL queries and mutations for current user, user management, password changes, role updates and deactivation.
 
 ## Prerequisites
 
@@ -25,53 +27,55 @@ A local MySQL database must be available and the existing FBS user table must co
 
 The first admin user cannot be created through the protected GraphQL API. It must already exist in the local test data or be created through an appropriate local database setup.
 
-## Covered test cases
+## How to use the requests
 
-The HTTP file currently covers:
+Start with the login requests in `local-rest.http`.
 
-* local login with valid and invalid credentials
-* GraphQL access without, with valid and with invalid JWT
-* resolving the authenticated user
-* changing the authenticated user's password
-* querying users as regular user and admin
-* creating users as unauthenticated, regular and admin user
-* changing another user's password as regular user and admin
-* updating a global role as regular user and admin
-* deactivating a user as regular user and admin
-* reading the authenticated user's terms-of-use acceptance status
-* accepting the terms of use for the authenticated user
-* rejecting unauthenticated terms-of-use requests
-* rejecting access to another user's terms-of-use status
-* REST login request validation
-* GraphQL validation for user input fields
-* validation of user IDs and pagination values
-* structured GraphQL validation errors
-
-## HTTP client variables
-
-The HTTP file stores returned JWT access tokens in IntelliJ HTTP Client variables:
-
-```text
+The successful login requests store tokens in IntelliJ HTTP Client variables:
+```
 accessToken
 adminToken
+```
+The GraphQL requests in `local-graphql.http` reuse these tokens.
+
+Some later requests also store user IDs:
+
+```
 adminUserId
 managedUserId
 ```
+These are used by later REST and GraphQL requests. Because of that, some requests should be executed in order.
 
-These variables are then reused in later requests.
+## Covered test cases
+
+The HTTP files cover:
+
+* health, manifest and OpenAPI endpoints
+* local login with valid and invalid credentials
+* REST validation errors and malformed request bodies
+* legal text endpoints
+* terms-of-use status and acceptance
+* GraphQL access with and without JWT
+* current user resolution
+* user queries as regular user and admin
+* user creation as unauthenticated, regular and admin user
+* password changes
+* global role updates
+* user deactivation
+* GraphQL validation errors
 
 ## Expected authorization behavior
 
-Requests to /graphql without a valid Bearer token return 401 Unauthorized.
+Requests to `/graphql` without a valid Bearer token return `401 Unauthorized`.
 
-User-management operations require the ADMIN global role. currentUser and changeOwnPassword are available to every authenticated user.
+User-management operations require the ADMIN global role. `currentUser` and `changeOwnPassword` are available to every authenticated user.
 
-The terms-of-use endpoints require a valid Bearer token. The user ID in the request path must match the authenticated user. Requests for another user's status return 403 Forbidden, including requests made by an admin.
+The terms-of-use endpoints require a valid Bearer token. The user ID in the request path must match the authenticated user. Requests for another user's status return `403 Forbidden`, even when using an admin token.
 
-Invalid REST request bodies return 400 Bad Request.
+Invalid REST request bodies return `400 Bad Request` with the common `ErrorResponse` format.
 
-Invalid GraphQL input returns HTTP 200 OK with an errors entry. Validation errors use the code VALIDATION_ERROR, the classification BAD_REQUEST and contain the affected fields without exposing internal exception details.
+Invalid GraphQL input returns `HTTP 200 OK ` with an errors entry.
 
 ## Note
 
-Local usernames, passwords and user IDs may need to be adjusted to match the local database. The requests should be executed in order because later tests use the test user created by an earlier request.
+Local usernames, passwords and user IDs may need to be adjusted to match the local database.

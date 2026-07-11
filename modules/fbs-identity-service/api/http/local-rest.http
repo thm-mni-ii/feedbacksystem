@@ -1,0 +1,132 @@
+### Health
+GET http://localhost:8080/health
+
+
+### Manifest
+GET http://localhost:8080/manifest
+
+
+### OpenAPI JSON
+GET http://localhost:8080/openapi
+
+
+### Local login - success
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "maxlogin",
+  "password": "test123"
+}
+
+> {% client.global.set("accessToken", response.body.accessToken); %}
+
+
+### Local login - wrong password
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "maxlogin",
+  "password": "wrong"
+}
+
+
+### Local login - unknown user
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "unknownuser",
+  "password": "test123"
+}
+
+
+### Local login with blank username - bad request
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": "test123"
+}
+
+
+### Local login with malformed body - bad request
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username":
+}
+
+
+### Local login - admin
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admintest",
+  "password": "admin123"
+}
+
+> {% client.global.set("adminToken", response.body.accessToken); %}
+
+### SAML login redirect - disabled
+GET http://localhost:8080/api/v1/login/sso
+
+
+### Legal text - impressum
+GET http://localhost:8080/api/v1/legal/impressum
+
+
+### Legal text - privacy text
+GET http://localhost:8080/api/v1/legal/privacy-text
+
+
+### Legal text - not found
+GET http://localhost:8080/api/v1/legal/unknown
+
+
+### Terms of use without token - unauthorized
+GET http://localhost:8080/api/v1/legal/termsofuse/1
+
+
+### Get own terms-of-use status - success
+# Before running this request and the requests below:
+# 1. Run "Local login - admin" in this file to set {{adminToken}}.
+# 2. Run "GraphQL currentUser with admin token" in local-graphql.http to set {{adminUserId}}.
+# 3. Run "Create managed test user - admin success" in local-graphql.http to set {{managedUserId}}.
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+
+### Get another user's terms-of-use status - forbidden
+GET http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
+Authorization: Bearer {{adminToken}}
+
+
+### Accept terms of use for another user - forbidden
+PUT http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
+Authorization: Bearer {{adminToken}}
+
+
+### Accept own terms of use - success
+PUT http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+
+### Get own terms-of-use status after acceptance - success
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Login managed user with changed password
+# Before running this request:
+# Run "Change user password - admin success" in local-graphql.http first.
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "okangenc2",
+  "password": "changedByAdmin123"
+}
