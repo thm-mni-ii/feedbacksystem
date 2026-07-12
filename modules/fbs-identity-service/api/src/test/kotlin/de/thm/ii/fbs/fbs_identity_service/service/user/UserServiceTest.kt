@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.service.user
 
+import de.thm.ii.fbs.fbs_identity_service.exception.UsernameAlreadyExistsException
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
@@ -7,6 +8,7 @@ import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
 import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.kotlin.any
@@ -15,6 +17,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.Optional
 import kotlin.test.assertEquals
@@ -65,7 +68,8 @@ class UserServiceTest {
     @Test
     fun `createUser encodes password and saves user`() {
         whenever(passwordEncoder.encode("plain-password")).thenReturn("encoded-password")
-        whenever(userRepository.save(any<UserEntity>())).thenAnswer { invocation ->
+        whenever(userRepository.existsByUsername("niklas")).thenReturn(false)
+        whenever(userRepository.saveAndFlush(any<UserEntity>())).thenAnswer { invocation ->
             val userEntity = invocation.getArgument<UserEntity>(0)
             UserEntity(
                 id = 42,
@@ -96,7 +100,8 @@ class UserServiceTest {
         assertEquals(GlobalRole.ADMIN, user.globalRole)
 
         val captor = argumentCaptor<UserEntity>()
-        verify(userRepository).save(captor.capture())
+        verify(userRepository).saveAndFlush(captor.capture())
+        verify(userRepository).existsByUsername("niklas")
 
         assertEquals("encoded-password", captor.firstValue.password)
         assertEquals(GlobalRole.ADMIN.id, captor.firstValue.globalRole)
@@ -104,8 +109,34 @@ class UserServiceTest {
     }
 
     @Test
+    fun `createUser with taken username throws UsernameAlreadyExistsException`() {
+        whenever(userRepository.existsByUsername("takenUsername")).thenReturn(true)
+
+        val exception = assertThrows<UsernameAlreadyExistsException> {
+            userService.createUser(
+                prename = "Niklas",
+                surname = "Test",
+                email = "niklas@example.com",
+                username = "takenUsername",
+                password = "plain-password",
+                globalRole = GlobalRole.USER,
+                alias = "ne"
+            )
+        }
+
+        assertEquals(
+            "Username `takenUsername` already exists",
+            exception.message
+        )
+
+        verify(userRepository).existsByUsername("takenUsername")
+        verify(userRepository, never()).saveAndFlush(any<UserEntity>())
+        verify(passwordEncoder, never()).encode(any())
+    }
+
+    @Test
     fun `createExternalUser saves user without password`() {
-        whenever(userRepository.save(any<UserEntity>())).thenAnswer { invocation ->
+        whenever(userRepository.saveAndFlush(any<UserEntity>())).thenAnswer { invocation ->
             val userEntity = invocation.getArgument<UserEntity>(0)
             UserEntity(
                 id = 42,
@@ -120,24 +151,72 @@ class UserServiceTest {
                 globalRole = userEntity.globalRole
             )
         }
+        whenever(userRepository.existsByUsername("samlUser")).thenReturn(false)
 
         val user = userService.createExternalUser(
             prename = "Niklas",
             surname = "Test",
             email = "niklas@example.com",
-            username = "niklas"
+            username = "samlUser"
         )
 
         assertEquals(42, user.id)
-        assertEquals("niklas", user.username)
+        assertEquals("samlUser", user.username)
         assertEquals(GlobalRole.USER, user.globalRole)
 
         val captor = argumentCaptor<UserEntity>()
-        verify(userRepository).save(captor.capture())
+        verify(userRepository).saveAndFlush(captor.capture())
+        verify(userRepository).existsByUsername("samlUser")
 
         assertNull(captor.firstValue.password)
         assertEquals(GlobalRole.USER.id, captor.firstValue.globalRole)
-        verify(passwordEncoder, never()).encode(any())
+    }
+
+    @Test
+    fun `createExternalUser with taken username throws UsernameAlreadyExistsException`() {
+        whenever(userRepository.existsByUsername("takenUsername")).thenReturn(true)
+
+        val exception = assertThrows<UsernameAlreadyExistsException> {
+            userService.createExternalUser(
+                prename = "Niklas",
+                surname = "Test",
+                email = "niklas@example.com",
+                username = "takenUsername",
+                globalRole = GlobalRole.USER,
+                alias = "ne"
+            )
+        }
+
+        assertEquals(
+            "Username `takenUsername` already exists",
+            exception.message
+        )
+
+        verify(userRepository).existsByUsername("takenUsername")
+        verify(userRepository, never()).saveAndFlush(any<UserEntity>())
+    }
+
+    @Test
+    fun `createExternalUser maps database constraint violation to UsernameAlreadyExistsException`() {
+        whenever(userRepository.existsByUsername("takenUsername")).thenReturn(false)
+        whenever(userRepository.saveAndFlush(any<UserEntity>()))
+            .thenThrow(DataIntegrityViolationException("Duplicate username"))
+
+        val exception = assertThrows<UsernameAlreadyExistsException> {
+            userService.createExternalUser(
+                prename = "Niklas",
+                surname = "Test",
+                email = "niklas@example.com",
+                username = "takenUsername",
+                globalRole = GlobalRole.USER,
+                alias = "ne"
+            )
+        }
+
+        assertEquals("Username `takenUsername` already exists", exception.message)
+
+        verify(userRepository).existsByUsername("takenUsername")
+        verify(userRepository).saveAndFlush(any<UserEntity>())
     }
 
     @Test
