@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
@@ -58,7 +59,7 @@ class LegalController(private val userService: UserService, private val currentU
 
     @Operation(
         summary = "Get terms of use acceptance status",
-        description = "Returns whether the user has accepted the terms of use."
+        description = "Returns whether the current user has accepted the terms of use."
     )
     @ApiResponses(
         ApiResponse(responseCode = "200"),
@@ -67,16 +68,12 @@ class LegalController(private val userService: UserService, private val currentU
                 schema = Schema(implementation = ErrorResponse::class)
             )
         ]
-        ),
-        ApiResponse(responseCode = "403", description = "User is not allowed to access this user id", content = [
-            Content(
-                schema = Schema(implementation = ErrorResponse::class)
-            )
-        ])
+        )
     )
-    @GetMapping("/termsofuse/{uid}", produces = [APPLICATION_JSON_VALUE])
-    fun getTermsOfUseAcceptanceStatus(@PathVariable uid: Long): TermsOfUseAcceptanceResponse {
-        val user = requireCurrentUser(uid)
+    @GetMapping("/termsofuse/status", produces = [APPLICATION_JSON_VALUE])
+    fun getTermsOfUseAcceptanceStatus(): TermsOfUseAcceptanceResponse {
+        val user = currentUserService.getCurrentUser()
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not authenticated")
 
         return TermsOfUseAcceptanceResponse(
             accepted = userService.getPrivacyStatusOf(user.id)
@@ -85,38 +82,24 @@ class LegalController(private val userService: UserService, private val currentU
 
     @Operation(
         summary = "Accept terms of use",
-        description = "Marks the terms of use as accepted for the user."
+        description = "Marks the terms of use as accepted for the current user."
     )
     @ApiResponses(
-        ApiResponse(responseCode = "200"),
+        ApiResponse(responseCode = "204"),
         ApiResponse(responseCode = "401", description = "User is not authenticated", content = [
             Content(
                 mediaType = APPLICATION_JSON_VALUE,
                 schema = Schema(implementation = ErrorResponse::class)
             )
         ]
-        ),
-        ApiResponse(responseCode = "403", description = "User is not allowed to access this user id", content = [
-            Content(
-                mediaType = APPLICATION_JSON_VALUE,
-                schema = Schema(implementation = ErrorResponse::class)
-            )
-        ])
+        )
     )
-    @PutMapping("/termsofuse/{uid}")
-    fun acceptTermsOfUse(@PathVariable uid: Long) {
-        val user = requireCurrentUser(uid)
-        userService.updateAgreementToPrivacyFor(user.id, true)
-    }
-
-    private fun requireCurrentUser(uid: Long): User {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping("/termsofuse/accept")
+    fun acceptTermsOfUse() {
         val user = currentUserService.getCurrentUser()
             ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not authenticated")
 
-        if (user.id != uid) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not allowed to access this user id")
-        }
-
-        return user
+        userService.updateAgreementToPrivacyFor(user.id, true)
     }
 }

@@ -38,14 +38,25 @@ adminToken
 ```
 The GraphQL requests in `local-graphql.http` reuse these tokens.
 
-Some later requests also store user IDs and a username:
+Some later requests also store a user ID, username and token:
 
 ```
-adminUserId
 managedUserId
 managedUsername
+managedUserToken
 ```
 These are used by later REST and GraphQL requests. Because of that, some requests should be executed in order.
+
+For the managed-user flow, run the requests in this order:
+
+1. create the managed test user
+2. log in as the managed test user
+3. check the terms-of-use status
+4. accept the terms of use
+5. check the status again
+6. deactivate the managed test user
+
+Deactivation changes the stored username, so the same test username can be used again later.
 
 ## Covered test cases
 
@@ -72,11 +83,11 @@ Requests to `/graphql` without a valid Bearer token return `401 Unauthorized`.
 
 User-management operations require the ADMIN global role. `currentUser` and `changeOwnPassword` are available to every authenticated user.
 
-The terms-of-use endpoints require a valid Bearer token. The user ID in the request path must match the authenticated user. Requests for another user's status return `403 Forbidden`, even when using an admin token.
+Both terms-of-use endpoints operate on the currently authenticated user. The acceptance status is retrieved or updated for the user resolved from the security context.
 
 Invalid REST request bodies return `400 Bad Request` with the common `ErrorResponse` format.
 
-Invalid GraphQL input returns `HTTP 200 OK ` with an errors entry.
+Invalid GraphQL input returns `HTTP 200 OK ` with an `errors` entry.
 
 ## Note
 

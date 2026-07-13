@@ -12,7 +12,6 @@ Content-Type: application/json
   "query": "{ currentUser { id username globalRole } }"
 }
 
-> {% client.global.set("adminUserId", response.body.data.currentUser.id); %}
 
 ### GraphQL currentUser without token - unauthorized
 POST http://localhost:8080/graphql

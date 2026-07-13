@@ -72,6 +72,19 @@ Content-Type: application/json
 
 > {% client.global.set("adminToken", response.body.accessToken); %}
 
+### Local login - managed test user
+# Before running this request:
+# Run "Create managed test user - admin success" in local-graphql.http first.
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{managedUsername}}",
+  "password": "okangenc123"
+}
+
+> {% client.global.set("managedUserToken", response.body.accessToken); %}
+
 ### SAML login redirect - disabled
 GET http://localhost:8080/api/v1/login/sso
 
@@ -88,37 +101,29 @@ GET http://localhost:8080/api/v1/legal/privacy-text
 GET http://localhost:8080/api/v1/legal/unknown
 
 
-### Terms of use without token - unauthorized
-GET http://localhost:8080/api/v1/legal/termsofuse/1
+### Get terms-of-use status without token - unauthorized
+GET http://localhost:8080/api/v1/legal/termsofuse/status
 
 
-### Get own terms-of-use status - success
-# Before running this request and the requests below:
-# 1. Run "Local login - admin" in this file to set {{adminToken}}.
-# 2. Run "GraphQL currentUser with admin token" in local-graphql.http to set {{adminUserId}}.
-# 3. Run "Create managed test user - admin success" in local-graphql.http to set {{managedUserId}}.
-GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
-Authorization: Bearer {{adminToken}}
+### Accept terms of use without token - unauthorized
+PUT http://localhost:8080/api/v1/legal/termsofuse/accept
 
 
-### Get another user's terms-of-use status - forbidden
-GET http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
-Authorization: Bearer {{adminToken}}
+### Get current user's terms-of-use status - success
+# First run "Local login - managed test user" in this file to set {{managedUserToken}}.
+GET http://localhost:8080/api/v1/legal/termsofuse/status
+Authorization: Bearer {{managedUserToken}}
 
 
-### Accept terms of use for another user - forbidden
-PUT http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
-Authorization: Bearer {{adminToken}}
+### Accept terms of use for current user - success
+PUT http://localhost:8080/api/v1/legal/termsofuse/accept
+Authorization: Bearer {{managedUserToken}}
 
 
-### Accept own terms of use - success
-PUT http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
-Authorization: Bearer {{adminToken}}
+### Get current user's terms-of-use status after acceptance - success
+GET http://localhost:8080/api/v1/legal/termsofuse/status
+Authorization: Bearer {{managedUserToken}}
 
-
-### Get own terms-of-use status after acceptance - success
-GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
-Authorization: Bearer {{adminToken}}
 
 ### Login managed user with changed password
 # Before running this request:
