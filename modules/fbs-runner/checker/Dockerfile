@@ -5,7 +5,7 @@ WORKDIR /build
 
 RUN gradle fbs-runner.checker:installDist
 
-FROM eclipse-temurin:21.0.1_12-jre-alpine
+FROM eclipse-temurin:22.0.2_9-jre-alpine
 
 # Install Docker
 RUN apk add --no-cache docker curl postgresql15-client
