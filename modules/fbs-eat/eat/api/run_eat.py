@@ -1,6 +1,7 @@
 """
 runs the eat server and calls all other component builders
 """
+
 import json
 import os
 from dash import Dash, dcc, html
