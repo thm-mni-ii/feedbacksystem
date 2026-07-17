@@ -51,7 +51,6 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
   }
 
   function startSession(studentId = 'student') {
-    // REFACTORED: Nutze competencies_ref statt competencies
     if (competencies_ref.value.length === 0) {
       console.warn('Keine Competencies geladen')
       return

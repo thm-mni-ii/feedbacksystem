@@ -1,0 +1,52 @@
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "fontFamily": "Arial", "primaryColor": "#E8F1FF", "primaryTextColor": "#111827", "lineColor": "#374151", "tertiaryColor": "#F9FAFB"}}}%%
+flowchart LR
+    A([Start]) --> B[Fragenpool filtern]
+    B --> C{Fragen vorhanden}
+    C -->|Nein| Z0([Return null])
+    C -->|Ja| D[Kompetenzen mit Fragen]
+    D --> E{Kompetenzen vorhanden}
+    E -->|Nein| Z0
+    E -->|Ja| F{Sticky aktiv}
+
+    F -->|Ja| G{Sticky gueltig}
+    G -->|Ja| H[Zielkompetenz beibehalten]
+    G -->|Nein| I[Neue Zielkompetenz waehlen]
+    F -->|Nein| I
+
+    I --> I1[Freischaltung pruefen: Child nur bei Parent > 0.6]
+    I1 --> I2{Freigeschaltete da}
+    I2 -->|Ja| I3[Active Pool = freigeschaltet]
+    I2 -->|Nein| I4[Active Pool = Root]
+    I3 --> I5[Gewichtung: wenig getestet + niedriger Score]
+    I4 --> I5
+    I5 --> I6[Gewichtete Zufallsauswahl]
+
+    H --> J[Fragen fuer Zielkompetenz]
+    I6 --> J
+    J --> K{Fragen vorhanden}
+    K -->|Nein| Z0
+    K -->|Ja| L[Difficulty-Filter um Score]
+    L --> M{Treffer im Fenster 0.2}
+    M -->|Ja| N[Pool = Treffer]
+    M -->|Nein| O[Fallback: naechste Difficulty]
+
+    N --> P[Recent-Fragen entfernen]
+    O --> P
+    P --> Q{Kandidaten vorhanden}
+    Q -->|Ja| R[Selection Pool = Kandidaten]
+    Q -->|Nein| S[Selection Pool = Difficulty Pool]
+
+    R --> T{Selection Pool leer}
+    S --> T
+    T -->|Ja| Z0
+    T -->|Nein| U[Direkte Wiederholung verhindern]
+    U --> V{Alternative ohne letzte Frage}
+    V -->|Ja| W[Zufaellig aus Selection Pool]
+    V -->|Nein| X[Globaler Fallback ohne letzte Frage]
+
+    X --> Y{Globale Alternative vorhanden}
+    Y -->|Nein| Z0
+    Y -->|Ja| Z1[Fallback-Frage + passende Kompetenz]
+
+    W --> Z2([Return Frage + Zielkompetenz])
+    Z1 --> Z3([Return Fallback-Paar])

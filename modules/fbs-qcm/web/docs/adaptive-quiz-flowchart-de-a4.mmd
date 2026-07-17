@@ -1,0 +1,58 @@
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "fontFamily": "Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#0F172A", "lineColor": "#334155", "tertiaryColor": "#F8FAFC"}, "flowchart": {"nodeSpacing": 26, "rankSpacing": 34, "curve": "linear"}}}%%
+flowchart TD
+    A([1. Start]) --> B[2. Fragenpool filtern]
+    B --> Bx[Kurz: ausgeschlossene Fragen entfernen]
+    Bx --> C{3. Fragen uebrig}
+    C -->|Nein| Z0([Ende: null])
+    C -->|Ja| D[4. Kompetenzen mit verfuegbaren Fragen filtern]
+
+    D --> E{5. Gefilterte Kompetenzen uebrig}
+    E -->|Nein| Z0
+    E -->|Ja| F{6. Sticky aktiv}
+
+    F -->|Ja| G{7. Sticky gueltig}
+    G -->|Ja| H[8. Zielkompetenz bleibt]
+    G -->|Nein| I[8. Zielkompetenz neu waehlen]
+    F -->|Nein| I
+
+    I --> I1[9. Freischaltung pruefen]
+    I1 --> I1x[Kurz: Child nur bei Parent Score > 0.6]
+    I1x --> I2{10. Freigeschaltete da}
+    I2 -->|Ja| I3[11. Pool = freigeschaltet]
+    I2 -->|Nein| I4[11. Pool = Root]
+    I3 --> I5[12. Gewichtung berechnen]
+    I4 --> I5
+    I5 --> I5x[Kurz: wenig getestet + niedriger Score priorisieren]
+    I5x --> I6[13. Gewichtete Auswahl Zielkompetenz]
+
+    H --> J[14. Fragen der Zielkompetenz]
+    I6 --> J
+    J --> K{15. Fragen vorhanden}
+    K -->|Nein| Z0
+    K -->|Ja| L[16. Difficulty-Filter]
+    L --> Lx[Kurz: Schwierigkeit nahe am Kompetenz-Score]
+    Lx --> M{17. Treffer im Fenster 0.2}
+    M -->|Ja| N[18. Pool = Treffer]
+    M -->|Nein| O[18. Fallback: nach Naehe sortieren]
+
+    N --> P[19. Recent-Fragen entfernen]
+    O --> P
+    P --> Px[Kurz: Wiederholungen minimieren]
+    Px --> Q{20. Kandidaten da}
+    Q -->|Ja| R[21. Selection-Pool = Kandidaten]
+    Q -->|Nein| S[21. Selection-Pool = Difficulty-Pool]
+
+    R --> T{22. Selection-Pool leer}
+    S --> T
+    T -->|Ja| Z0
+    T -->|Nein| U[23. Letzte Frage entfernen]
+    U --> Ux[Kurz: nie direkt dieselbe Frage hintereinander]
+    Ux --> V{24. Alternative vorhanden}
+    V -->|Ja| W[25. Zufaellige Frage aus Pool]
+    V -->|Nein| X[25. Globaler Fallback]
+
+    X --> Y{26. Globale Alternative da}
+    Y -->|Nein| Z0
+    Y -->|Ja| Z1[27. Fallback-Frage + passende Kompetenz]
+    W --> Z2([Ende: Frage + Zielkompetenz])
+    Z1 --> Z3([Ende: Fallback-Paar])

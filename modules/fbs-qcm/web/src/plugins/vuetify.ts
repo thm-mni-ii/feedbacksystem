@@ -59,7 +59,7 @@ export const appPalette = {
     cardBorder: '#D5E1EC',
     chipFallback: '#94A3B8',
     hierarchyDepth1: '#ECF4FF',
-    hierarchyDepth2: '#EEF9F4',
+    hierarchyDepth2: '#EEF4FF',
     hierarchyDepth3: '#ECFBF9',
     hierarchyDepth4: '#F4F8FC',
     competencyPalette: ['#3B82F6', '#0EA5A4', '#22C55E', '#14B8A6', '#6366F1']

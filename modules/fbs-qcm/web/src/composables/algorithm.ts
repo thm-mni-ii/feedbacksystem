@@ -184,8 +184,40 @@ export class AdaptiveQuizAlgorithm {
       return null
     }
 
+    // Harte Regel: Nie exakt dieselbe Frage direkt hintereinander stellen
+    const lastQuestionId = session.history[session.history.length - 1]?.questionId ?? null
+
+    let selectionPool = pool
+
+    if (lastQuestionId) {
+      const withoutLastQuestion = pool.filter((q) => q.id !== lastQuestionId)
+
+      if (withoutLastQuestion.length > 0) {
+        selectionPool = withoutLastQuestion
+      } else {
+        // Fallback für kleine Pools: weiche auf eine andere Frage aus beliebiger Kompetenz aus
+        const globalWithoutLast = availableQuestions.filter((q) => q.id !== lastQuestionId)
+
+        if (globalWithoutLast.length === 0) {
+          // Es existiert nur eine verfügbare Frage insgesamt
+          return null
+        }
+
+        const fallbackQuestion =
+          globalWithoutLast[Math.floor(Math.random() * globalWithoutLast.length)]
+        const fallbackTargetCompetency =
+          competencies.find((c) => fallbackQuestion.competencyIds.includes(c.id)) ??
+          targetCompetency
+
+        return {
+          question: fallbackQuestion,
+          targetCompetency: fallbackTargetCompetency
+        }
+      }
+    }
+
     // SCHRITT 6: Zufällige Auswahl aus dem adaptierten Pool
-    const question = pool[Math.floor(Math.random() * pool.length)]
+    const question = selectionPool[Math.floor(Math.random() * selectionPool.length)]
 
     return {
       question,
