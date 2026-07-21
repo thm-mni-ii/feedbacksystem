@@ -66,4 +66,3 @@ class BuildPropertiesTestConfig {
         return BuildProperties(properties)
     }
 }
-
