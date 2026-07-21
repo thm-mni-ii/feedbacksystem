@@ -15,15 +15,19 @@ class SamlLoginService(
     private val jwtService: JwtService
 ) {
 
-    fun login(samlUser: SamlUser): LoginResponse {
+    fun resolveUser(samlUser: SamlUser): User {
         val username = samlUser.username.trim()
 
         if (username.isBlank()) {
             throw MissingSamlUsernameException()
         }
 
-        val user = userService.findActive(username)
+        return userService.findActive(username)
             ?: createUserFromSaml(samlUser.copy(username = username))
+    }
+
+    fun login(samlUser: SamlUser): LoginResponse {
+        val user = resolveUser(samlUser)
 
         val token = jwtService.createToken(user)
 

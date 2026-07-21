@@ -6,8 +6,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class SamlSessionCleanupService {
 
     private val log = LoggerFactory.getLogger(SamlSessionCleanupService::class.java)

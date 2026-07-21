@@ -22,7 +22,7 @@ class LocalUserDetailsService(
 
         val role = user.toModel().globalRole
 
-        return LocalUserPrincipal(
+        return IdentityUserPrincipal(
             userId = user.id,
             username = user.username,
             password = password,

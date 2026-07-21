@@ -4,7 +4,7 @@ import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-data class LocalUserPrincipal(
+data class IdentityUserPrincipal(
     val userId: Long,
     private val username: String,
     private val password: String,

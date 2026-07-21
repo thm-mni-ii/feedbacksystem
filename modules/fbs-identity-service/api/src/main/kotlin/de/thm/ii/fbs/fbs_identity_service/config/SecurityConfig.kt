@@ -88,6 +88,7 @@ class SecurityConfig(
                     ).permitAll()
                     .requestMatchers("/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/oidc-login").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/impressum").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/privacy-text").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/login/sso").permitAll()
