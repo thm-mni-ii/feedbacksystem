@@ -7,6 +7,7 @@ import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -42,7 +43,14 @@ class LegalController(private val userService: UserService, private val currentU
         ])
     )
     @GetMapping("/{filename}", produces = [APPLICATION_JSON_VALUE])
-    fun legalTexts(@PathVariable filename: String): LegalTextResponse {
+    fun legalTexts(
+        @Parameter(
+            description = "Legal text to retrieve",
+            schema = Schema(
+                allowableValues = ["impressum", "privacy-text"]
+            )
+        )
+        @PathVariable filename: String): LegalTextResponse {
         val resourceName = when (filename) {
             "impressum" -> "impressum.md"
             "privacy-text" -> "privacy_text.md"

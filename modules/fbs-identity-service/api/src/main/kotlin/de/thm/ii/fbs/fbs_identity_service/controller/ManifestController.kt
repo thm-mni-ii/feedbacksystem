@@ -50,6 +50,55 @@ class ManifestController(
     private fun capabilities(): List<Capability> {
         return listOf(
             Capability(
+                id = "identity.oauth2.authorization",
+                type = "oauth2-endpoint",
+                method = "GET",
+                path = "/oauth2/authorize",
+                description = "Starts the OAuth 2.0 Authorization Code Flow with PKCE"
+            ),
+            Capability(
+                id = "identity.oauth2.token",
+                type = "oauth2-endpoint",
+                method = "POST",
+                path = "/oauth2/token",
+                description = "Exchanges an authorization code for an access token and ID token"
+            ),
+            Capability(
+                id = "identity.oauth2.jwks",
+                type = "oauth2-endpoint",
+                method = "GET",
+                path = "/oauth2/jwks",
+                description = "Provides the public keys used to verify issued JWTs"
+            ),
+            Capability(
+                id = "identity.oauth2.authorization-server-metadata",
+                type = "oauth2-endpoint",
+                method = "GET",
+                path = "/.well-known/oauth-authorization-server",
+                description = "Provides the OAuth 2.0 authorization server metadata"
+            ),
+            Capability(
+                id = "identity.oidc.provider-configuration",
+                type = "oidc-endpoint",
+                method = "GET",
+                path = "/.well-known/openid-configuration",
+                description = "Provides the OpenID Connect provider metadata"
+            ),
+            Capability(
+                id = "identity.oidc.userinfo",
+                type = "oidc-endpoint",
+                method = "GET",
+                path = "/userinfo",
+                description = "Provides information about the authenticated user"
+            ),
+            Capability(
+                id = "identity.oidc.local-login",
+                type = "rest-endpoint",
+                method = "POST",
+                path = "/api/v1/auth/oidc-login",
+                description = "Authenticates a local user and continues the active OIDC authorization flow"
+            ),
+            Capability(
                 id = "identity.auth.local-login",
                 type = "rest-endpoint",
                 method = "POST",
