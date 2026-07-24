@@ -176,7 +176,7 @@ const handleSubmit = async () => {
   width: 350px;
 }
 .custom-slider .v-slider-tick-label {
-  color: #36c78e; /* Hier deine Wunschfarbe */
-  font-weight: bold; /* Optional: Schrift dicker machen */
+  color: #2563eb;
+  font-weight: bold;
 }
 </style>

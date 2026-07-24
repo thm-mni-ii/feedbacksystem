@@ -10,7 +10,7 @@
             <v-progress-linear
               :value="results.overallProgress * 100"
               height="6"
-              color="#43C57C"
+              color="primary-dark"
               class="mt-2"
             />
           </div>
@@ -19,7 +19,7 @@
         <!-- Mastered Skills -->
         <v-col cols="12" sm="6" md="3" class="text-center">
           <div class="stat-box">
-            <div class="stat-value" style="color: #43c57c">{{ masteredCount }}</div>
+            <div class="stat-value stat-value-mastered">{{ masteredCount }}</div>
             <div class="stat-label">Gemeistert</div>
             <div class="stat-subtext">von {{ results.skills.length }}</div>
           </div>
@@ -28,7 +28,7 @@
         <!-- Success Rate -->
         <v-col cols="12" sm="6" md="3" class="text-center">
           <div class="stat-box">
-            <div class="stat-value" style="color: #ffa726">{{ successRate }}%</div>
+            <div class="stat-value stat-value-success">{{ successRate }}%</div>
             <div class="stat-label">Erfolgsquote</div>
             <div class="stat-subtext">
               {{ results.correctAnswers }}/{{ results.questionsAnswered }}
@@ -89,7 +89,7 @@
           <v-list density="compact" class="bg-transparent">
             <v-list-item>
               <template #prepend>
-                <v-icon color="green">mdi-check-circle</v-icon>
+                <v-icon color="primary-dark">mdi-check-circle</v-icon>
               </template>
               <v-list-item-title>Richtige Antworten</v-list-item-title>
               <template #append>
@@ -181,8 +181,8 @@ const avgTimePerQuestion = computed(() => {
 
 <style scoped>
 .summary-card {
-  background: linear-gradient(135deg, rgba(129, 186, 36, 0.05), rgba(54, 199, 142, 0.05));
-  border: 1px solid rgba(129, 186, 36, 0.1);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05));
+  border: 1px solid rgba(59, 130, 246, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -206,8 +206,15 @@ const avgTimePerQuestion = computed(() => {
 .stat-value {
   font-size: 32px;
   font-weight: bold;
-  color: #43c57c;
   margin-bottom: 8px;
+}
+
+.stat-value-mastered {
+  color: #2563eb;
+}
+
+.stat-value-success {
+  color: #fb923c;
 }
 
 .stat-label {
@@ -239,7 +246,7 @@ const avgTimePerQuestion = computed(() => {
 }
 
 .status-item:hover {
-  background: #e8eff5;
+  background: #edf4ff;
 }
 
 .status-circle {
@@ -250,7 +257,7 @@ const avgTimePerQuestion = computed(() => {
 }
 
 .status-circle.mastered {
-  background: #43c57c;
+  background: #2563eb;
 }
 
 .status-circle.progress {

@@ -32,7 +32,7 @@ const graphNodes = computed(() => {
   const nodes: Record<string, any> = {}
 
   props.skills.forEach((skill) => {
-    const statusColor = skill.mastered ? '#43C57C' : skill.unlocked ? '#FFA726' : '#BDBDBD'
+    const statusColor = skill.mastered ? '#2563EB' : skill.unlocked ? '#FFA726' : '#BDBDBD'
 
     nodes[skill.skillId] = {
       name: skill.label,

@@ -115,7 +115,7 @@ const sortedSkills = computed(() =>
 }
 
 .skill-row.active {
-  background: #e8f5e9;
+  background: #eff6ff;
 }
 
 .skill-name {
@@ -138,7 +138,7 @@ const sortedSkills = computed(() =>
 }
 
 .status-dot.mastered {
-  background: #43c57c;
+  background: #2563eb;
 }
 
 .status-dot.progress {
@@ -168,7 +168,7 @@ const sortedSkills = computed(() =>
 }
 
 .fill-mastered {
-  background: #43c57c;
+  background: #2563eb;
 }
 
 .fill-progress {
@@ -198,8 +198,8 @@ const sortedSkills = computed(() =>
 }
 
 .success-high {
-  background: #c8e6c9;
-  color: #1b5e20;
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .success-medium {

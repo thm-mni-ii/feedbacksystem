@@ -104,6 +104,7 @@ export class AdaptiveQuizAlgorithm {
     questions: Question[],
     session: SessionState
   ): NextQuestion | null {
+    const MIN_QUESTIONS_PER_COMPETENCY = 5
     const excludedQuestionIds = new Set(session.excludedQuestionIds)
     const availableQuestions = questions.filter(
       (question) => !question.excludeFromAlgorithm && !excludedQuestionIds.has(question.id)
@@ -123,22 +124,24 @@ export class AdaptiveQuizAlgorithm {
     }
 
     let targetCompetency: Competency
+    let forceCurrentCompetency = false
 
-    // SCHRITT 1: Competency Stickiness
-    // Falls gerade eine Kompetenz bearbeitet wird und < 5 Fragen gestellt, bleib dabei
-    const STICKINESS_THRESHOLD = 5
+    // SCHRITT 1: Harte Mindestanzahl je Kompetenz
+    // Bleibe so lange in der aktuellen Kompetenz, bis mindestens 5 Fragen gestellt wurden.
     if (
       session.currentCompetencyId &&
-      session.questionsInCurrentCompetency < STICKINESS_THRESHOLD
+      session.questionsInCurrentCompetency < MIN_QUESTIONS_PER_COMPETENCY
     ) {
-      const stickyCompetency = competencies.find((c) => c.id === session.currentCompetencyId)
-      if (
-        stickyCompetency &&
-        availableQuestions.some((q) => q.competencyIds.includes(stickyCompetency.id))
-      ) {
-        targetCompetency = stickyCompetency
+      const currentCompetency = competencies.find((c) => c.id === session.currentCompetencyId)
+      const hasAnyQuestionForCurrentCompetency =
+        !!currentCompetency &&
+        availableQuestions.some((q) => q.competencyIds.includes(currentCompetency.id))
+
+      if (currentCompetency && hasAnyQuestionForCurrentCompetency) {
+        targetCompetency = currentCompetency
+        forceCurrentCompetency = true
       } else {
-        // Sticky Kompetenz hat keine Fragen mehr, wechsel zu neuer
+        // Falls wirklich keine Frage mehr für diese Kompetenz verfügbar ist, darf gewechselt werden.
         targetCompetency = this.selectNextCompetency(
           competenciesWithQuestions,
           session,
@@ -185,6 +188,8 @@ export class AdaptiveQuizAlgorithm {
     }
 
     // Harte Regel: Nie exakt dieselbe Frage direkt hintereinander stellen
+    // Ausnahme: Bei erzwungener Mindestanzahl pro Kompetenz und Mini-Pool
+    // darf die letzte Frage wiederholt werden, bevor die Kompetenz gewechselt wird.
     const lastQuestionId = session.history[session.history.length - 1]?.questionId ?? null
 
     let selectionPool = pool
@@ -194,6 +199,10 @@ export class AdaptiveQuizAlgorithm {
 
       if (withoutLastQuestion.length > 0) {
         selectionPool = withoutLastQuestion
+      } else if (forceCurrentCompetency) {
+        // In der erzwungenen Phase bleiben wir in derselben Kompetenz,
+        // auch wenn dadurch die letzte Frage erneut kommen kann.
+        selectionPool = pool
       } else {
         // Fallback für kleine Pools: weiche auf eine andere Frage aus beliebiger Kompetenz aus
         const globalWithoutLast = availableQuestions.filter((q) => q.id !== lastQuestionId)

@@ -55,8 +55,8 @@ const dialogEditCatalog = ref<typeof DialogEditCatalog>()
 const router = useRouter()
 const authStore = useAuthStore()
 const heroStyle = computed(() => ({
-  background: `linear-gradient(135deg, ${appPalette.headerStart}, ${appPalette.headerEnd})`,
-  color: appPalette.headerText
+  background: 'linear-gradient(135deg, #0d47a1, #42a5f5)',
+  color: '#ffffff'
 }))
 const heroAvatarStyle = computed(() => ({
   backgroundColor: appPalette.headerAvatar

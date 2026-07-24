@@ -134,67 +134,8 @@ export const competencies: Competency[] = [
   },
 
   // ============================================================
-  // OBERKOMPETENZ: Schluessel & Integritaet
+  // OBERKOMPETENZ: Concurrency
   // ============================================================
-  {
-    id: 'c-keys',
-    name: 'Schlüssel',
-    description: 'Primär-, Fremd- und Kandidatschlüssel',
-    category: 'database'
-  },
-  {
-    id: 'c-key-primary',
-    name: 'Primärschlüssel',
-    description: 'Eindeutige Identifikation von Tupeln',
-    parentId: 'c-keys'
-  },
-  {
-    id: 'c-key-foreign',
-    name: 'Fremdschlüssel',
-    description: 'Referenzielle Integrität',
-    parentId: 'c-keys'
-  },
-  {
-    id: 'c-key-candidate',
-    name: 'Kandidatschlüssel',
-    description: 'Potenzielle Primärschlüssel',
-    parentId: 'c-keys'
-  },
-  {
-    id: 'c-key-composite',
-    name: 'Zusammengesetzte Schlüssel',
-    description: 'Schlüssel aus mehreren Attributen',
-    parentId: 'c-keys'
-  },
-  {
-    id: 'c-integrity',
-    name: 'Datenintegrität',
-    description: 'Referenzielle Integrität, Constraints',
-    parentId: 'c-keys'
-  },
-
-  // ============================================================
-  // OBERKOMPETENZ: Transaktionen & Concurrency
-  // ============================================================
-  {
-    id: 'c-transactions',
-    name: 'Transaktionen',
-    description: 'ACID Properties und Transaktionsmanagement',
-    category: 'database'
-  },
-  {
-    id: 'c-acid',
-    name: 'ACID Properties',
-    description: 'Atomicity, Consistency, Isolation, Durability',
-    parentId: 'c-transactions'
-  },
-  {
-    id: 'c-locks',
-    name: 'Locks & Deadlocks',
-    description: 'Sperrmechanismen und Verklemmungen',
-    parentId: 'c-transactions'
-  },
-
   {
     id: 'c-concurrency',
     name: 'Concurrency Control',
@@ -212,586 +153,373 @@ export const competencies: Competency[] = [
     name: 'Concurrency Issues',
     description: 'Dirty Read, Lost Update, Phantom Read',
     parentId: 'c-concurrency'
-  },
-
-  // ============================================================
-  // OBERKOMPETENZ: Indizes & Performance
-  // ============================================================
-  {
-    id: 'c-indexes',
-    name: 'Indizes',
-    description: 'Performanceoptimierung durch Indizes',
-    category: 'database'
-  },
-  {
-    id: 'c-index-btree',
-    name: 'B-Tree Indizes',
-    description: 'Balancierte Baumindizes',
-    parentId: 'c-indexes'
-  },
-  {
-    id: 'c-index-hash',
-    name: 'Hash Indizes',
-    description: 'Hash-basierte Indizes',
-    parentId: 'c-indexes'
-  },
-
-  // ============================================================
-  // OBERKOMPETENZ: Objektorientierte Programmierung
-  // ============================================================
-  {
-    id: 'c-oop',
-    name: 'Objektorientierte Programmierung',
-    description: 'OOP Konzepte und Prinzipien',
-    category: 'programming'
-  },
-  {
-    id: 'c-oop-basics',
-    name: 'OOP Grundlagen',
-    description: 'Klassen, Objekte, Vererbung',
-    parentId: 'c-oop'
-  },
-  {
-    id: 'c-oop-inheritance',
-    name: 'Vererbung',
-    description: 'Klassenhierarchien und Methodenüberschreibung',
-    parentId: 'c-oop-basics'
-  },
-  {
-    id: 'c-oop-polymorphism',
-    name: 'Polymorphismus',
-    description: 'Methoden- und Operator-Polymorphismus',
-    parentId: 'c-oop'
-  },
-  {
-    id: 'c-oop-encapsulation',
-    name: 'Kapselung',
-    description: 'Datenkapselung und Information Hiding',
-    parentId: 'c-oop'
-  },
-  {
-    id: 'c-oop-abstraction',
-    name: 'Abstraktion',
-    description: 'Abstraktion und Interface Design',
-    parentId: 'c-oop'
-  },
-
-  {
-    id: 'c-design-patterns',
-    name: 'Design Patterns',
-    description: 'Entwurfsmuster und Best Practices',
-    category: 'programming'
-  },
-  {
-    id: 'c-pattern-singleton',
-    name: 'Singleton Pattern',
-    description: 'Singleton-Muster und Variationen',
-    parentId: 'c-design-patterns'
-  },
-  {
-    id: 'c-pattern-factory',
-    name: 'Factory Pattern',
-    description: 'Factory-Methode und Abstract Factory',
-    parentId: 'c-design-patterns'
   }
 ]
-export const questions: Question[] = [
-  // SQL: SELECT
-  {
-    id: 'q1',
-    text: 'Was ist ein SELECT Statement?',
-    title: 'Was ist ein SELECT Statement?',
-    competencyIds: ['c-sql', 'c-sql-select'],
-    difficulty: 0.23
-  },
-  {
-    id: 'q44',
-    text: 'Wie funktioniert ORDER BY?',
-    title: 'Wie funktioniert ORDER BY?',
-    competencyIds: ['c-sql-select'],
-    difficulty: 0.17
-  },
-  {
-    id: 'q45',
-    text: 'Was bewirkt DISTINCT?',
-    title: 'Was bewirkt DISTINCT?',
-    competencyIds: ['c-sql-select'],
-    difficulty: 0.33
-  },
-  {
-    id: 'q46',
-    text: 'Was ist LIMIT?',
-    title: 'Was ist LIMIT?',
-    competencyIds: ['c-sql-select'],
-    difficulty: 0.11
-  },
 
-  // SQL: JOINs
-  {
-    id: 'q2',
-    text: 'Wie funktioniert INNER JOIN?',
-    title: 'Wie funktioniert INNER JOIN?',
-    competencyIds: ['c-sql', 'c-sql-joins'],
-    difficulty: 0.45
-  },
-  {
-    id: 'q8',
-    text: 'Wie funktioniert OUTER JOIN?',
-    title: 'Wie funktioniert OUTER JOIN?',
-    competencyIds: ['c-sql-joins'],
-    difficulty: 0.51
-  },
-  {
-    id: 'q14',
-    text: 'Wie funktioniert ein CROSS JOIN?',
-    title: 'Wie funktioniert ein CROSS JOIN?',
-    competencyIds: ['c-sql-joins'],
-    difficulty: 0.58
-  },
+const difficultyPattern = [0.18, 0.24, 0.31, 0.38, 0.45, 0.53, 0.61, 0.69, 0.77, 0.85]
 
-  // SQL: DML
+const questionBank: Array<{ competencyId: string; prompts: string[] }> = [
   {
-    id: 'q3',
-    text: 'DELETE vs. TRUNCATE?',
-    title: 'DELETE vs. TRUNCATE?',
-    competencyIds: ['c-sql-dml'],
-    difficulty: 0.61
+    competencyId: 'c-sql',
+    prompts: [
+      'Was ist SQL und wofür wird es in relationalen Datenbanken eingesetzt?',
+      'Welche Aufgaben unterscheiden DDL, DML und DCL in SQL?',
+      'Was bedeutet es, dass SQL eine deklarative Sprache ist?',
+      'Welche Rolle spielt das relationale Modell für SQL-Abfragen?',
+      'Wie ist ein einfaches SQL-Statement grundsätzlich aufgebaut?',
+      'Wann sind Aliase für Tabellen und Spalten in SQL sinnvoll?',
+      'Welche Risiken entstehen durch unsauber formulierte SQL-Abfragen?',
+      'Was unterscheidet den SQL-Standard von herstellerspezifischen Dialekten?',
+      'Warum sollte man komplexe Abfragen schrittweise entwickeln und testen?',
+      'Wann ist direktes SQL sinnvoller als die Verwendung eines ORMs?'
+    ]
   },
   {
-    id: 'q9',
-    text: 'Wofür wird UPDATE verwendet?',
-    title: 'Wofür wird UPDATE verwendet?',
-    competencyIds: ['c-sql-dml'],
-    difficulty: 0.28
+    competencyId: 'c-sql-select',
+    prompts: [
+      'Wie filtert eine WHERE-Klausel Datensätze in einer SELECT-Abfrage?',
+      'Wann verwendet man DISTINCT in einer SELECT-Abfrage?',
+      'Wie sortiert ORDER BY nach mehreren Spalten gleichzeitig?',
+      'Wozu dient LIMIT oder FETCH FIRST in einer Abfrage?',
+      'Was ist der Unterschied zwischen WHERE und ORDER BY in der Abfragelogik?',
+      'Wann ist LIKE für die Suche nach Textmustern geeignet?',
+      'Wie verwendet man IN-Listen in SELECT-Abfragen sinnvoll?',
+      'Wann ist BETWEEN für Bereichsabfragen passend?',
+      'Wie behandelt SQL NULL-Werte in Filterbedingungen?',
+      'Wann verbessert ein Spaltenalias die Lesbarkeit eines SELECT-Statements?'
+    ]
   },
   {
-    id: 'q10',
-    text: 'Wie funktioniert INSERT INTO?',
-    title: 'Wie funktioniert INSERT INTO?',
-    competencyIds: ['c-sql-dml'],
-    difficulty: 0.19
-  },
-
-  // SQL: Aggregation
-  {
-    id: 'q11',
-    text: 'Wann verwendet man GROUP BY?',
-    title: 'Wann verwendet man GROUP BY?',
-    competencyIds: ['c-sql-aggregation'],
-    difficulty: 0.49
-  },
-  {
-    id: 'q13',
-    text: 'Was ist der Unterschied zwischen WHERE und HAVING?',
-    title: 'Was ist der Unterschied zwischen WHERE und HAVING?',
-    competencyIds: ['c-sql-aggregation'],
-    difficulty: 0.66
+    competencyId: 'c-sql-joins',
+    prompts: [
+      'Wann verwendet man einen INNER JOIN?',
+      'Worin unterscheidet sich ein LEFT JOIN von einem INNER JOIN?',
+      'Wann kann ein RIGHT JOIN die Lesbarkeit einer Abfrage verschlechtern?',
+      'Was liefert ein FULL OUTER JOIN fachlich betrachtet?',
+      'Was erzeugt ein CROSS JOIN und wann ist das sinnvoll?',
+      'Wie formuliert man eine Join-Bedingung sauber und nachvollziehbar?',
+      'Welche Fehler entstehen bei einer fehlenden oder falschen Join-Bedingung?',
+      'Warum können JOINs zu unerwarteten Duplikaten führen?',
+      'Wie erkennt man in einer Abfrage eine 1:n-Beziehung?',
+      'Wann ist EXISTS besser geeignet als ein JOIN?'
+    ]
   },
   {
-    id: 'q41',
-    text: 'Was macht COUNT(*)?',
-    title: 'Was macht COUNT(*)?',
-    competencyIds: ['c-sql-aggregation'],
-    difficulty: 0.12
+    competencyId: 'c-sql-dml',
+    prompts: [
+      'Wofür dient INSERT INTO in SQL?',
+      'Wann verwendet man INSERT ... SELECT statt einzelner Inserts?',
+      'Wie aktualisiert ein UPDATE gezielt nur bestimmte Datensätze?',
+      'Warum ist eine WHERE-Klausel bei UPDATE besonders kritisch?',
+      'Wann sollte man DELETE statt TRUNCATE einsetzen?',
+      'Wie löscht man abhängige Daten fachlich sauber und nachvollziehbar?',
+      'Was versteht man unter einem Upsert?',
+      'Wann sind Bulk-Inserts für Importprozesse sinnvoll?',
+      'Wie prüft man nach einer DML-Operation die Anzahl betroffener Zeilen?',
+      'Welche Risiken haben DML-Operationen, wenn sie nicht sorgfältig abgesichert sind?'
+    ]
   },
   {
-    id: 'q42',
-    text: 'Wofür wird SUM() verwendet?',
-    title: 'Wofür wird SUM() verwendet?',
-    competencyIds: ['c-sql-aggregation'],
-    difficulty: 0.14
+    competencyId: 'c-sql-aggregation',
+    prompts: [
+      'Was berechnet COUNT(*) in einer SQL-Abfrage?',
+      'Wann verwendet man SUM() für Auswertungen?',
+      'Wie unterscheidet sich AVG() fachlich von SUM() und COUNT()? ',
+      'Wozu dienen MIN() und MAX() in Berichten?',
+      'Wann benötigt man GROUP BY?',
+      'Was ist der Unterschied zwischen WHERE und HAVING?',
+      'Wie aggregiert man Daten pro Kunde oder pro Monat?',
+      'Warum müssen nicht aggregierte Spalten in GROUP BY berücksichtigt werden?',
+      'Wann ist COUNT(DISTINCT ...) fachlich sinnvoll?',
+      'Wie wirken sich NULL-Werte auf Aggregatfunktionen aus?'
+    ]
   },
   {
-    id: 'q43',
-    text: 'Wann verwendet man AVG()?',
-    title: 'Wann verwendet man AVG()?',
-    competencyIds: ['c-sql-aggregation'],
-    difficulty: 0.21
-  },
-
-  // SQL: Subqueries
-  {
-    id: 'q12',
-    text: 'Was sind Unterabfragen (Subqueries)?',
-    title: 'Was sind Unterabfragen (Subqueries)?',
-    competencyIds: ['c-sql-subqueries'],
-    difficulty: 0.73
-  },
-
-  // SQL: Advanced
-  {
-    id: 'q47',
-    text: 'Was ist eine View?',
-    title: 'Was ist eine View?',
-    competencyIds: ['c-sql-advanced'],
-    difficulty: 0.57
+    competencyId: 'c-sql-subqueries',
+    prompts: [
+      'Was ist eine Unterabfrage in SQL?',
+      'Wann setzt man eine skalare Subquery ein?',
+      'Wofür verwendet man EXISTS in Kombination mit Subqueries?',
+      'Wann ist IN mit einer Unterabfrage sinnvoll?',
+      'Was ist eine korrelierte Unterabfrage?',
+      'Welche Performance-Probleme können verschachtelte Unterabfragen verursachen?',
+      'Wann ist ein JOIN besser geeignet als eine Unterabfrage?',
+      'Wie verwendet man eine Unterabfrage im FROM-Teil einer Abfrage?',
+      'Was muss eine Subquery in einer Vergleichsbedingung zurückgeben?',
+      'Wie testet man komplexe verschachtelte SQL-Abfragen schrittweise?'
+    ]
   },
   {
-    id: 'q48',
-    text: 'Welche Vorteile bieten Views?',
-    title: 'Welche Vorteile bieten Views?',
-    competencyIds: ['c-sql-advanced'],
-    difficulty: 0.62
+    competencyId: 'c-sql-advanced',
+    prompts: [
+      'Was ist eine View in einer relationalen Datenbank?',
+      'Wann ist eine materialisierte View sinnvoll?',
+      'Welche Vorteile bieten Views für Sicherheit und Wiederverwendung?',
+      'Was ist eine Stored Procedure?',
+      'Wann verwendet man eine Datenbankfunktion statt einer Procedure?',
+      'Welche Nachteile entstehen durch zu viele Datenbankobjekte?',
+      'Wie versioniert man Views und Procedures in einem Team sauber?',
+      'Wann sind Trigger sinnvoll und wann eher riskant?',
+      'Wie dokumentiert man Geschäftslogik, die in der Datenbank liegt?',
+      'Welche Unterschiede gibt es zwischen logischer und physischer Datenabstraktion?'
+    ]
   },
   {
-    id: 'q49',
-    text: 'Was ist eine Stored Procedure?',
-    title: 'Was ist eine Stored Procedure?',
-    competencyIds: ['c-sql-advanced'],
-    difficulty: 0.79
+    competencyId: 'c-db-design',
+    prompts: [
+      'Welche Ziele verfolgt gutes Datenbankdesign?',
+      'Wie identifiziert man die zentralen Entitäten eines Fachmodells?',
+      'Warum trennt man Stammdaten und Bewegungsdaten?',
+      'Wann benötigt ein Modell eine Zwischentabelle?',
+      'Wie beeinflussen typische Abfragen den Schema-Entwurf?',
+      'Welche Rolle spielen Geschäftsregeln im Datenbankdesign?',
+      'Warum sollte Redundanz bewusst und nicht zufällig entstehen?',
+      'Wie plant man Erweiterbarkeit in einem Datenmodell?',
+      'Wann ist ein denormalisiertes Modell dennoch vertretbar?',
+      'Welche typischen Fehler passieren im frühen Schema-Entwurf?'
+    ]
   },
   {
-    id: 'q50',
-    text: 'Wann verwendet man Stored Procedures?',
-    title: 'Wann verwendet man Stored Procedures?',
-    competencyIds: ['c-sql-advanced'],
-    difficulty: 0.74
-  },
-
-  // ER-Modellierung
-  {
-    id: 'q4',
-    text: 'Was ist die 3. Normalform?',
-    title: 'Was ist die 3. Normalform?',
-    competencyIds: ['c-er-model', 'c-norm-3nf'],
-    difficulty: 0.82
-  },
-  {
-    id: 'q5',
-    text: 'Wie erstellt man ein ER-Diagramm?',
-    title: 'Wie erstellt man ein ER-Diagramm?',
-    competencyIds: ['c-er-model'],
-    difficulty: 0.54
+    competencyId: 'c-er-model',
+    prompts: [
+      'Was zeigt ein ER-Diagramm?',
+      'Wie erkennt man Entitäten in einer fachlichen Beschreibung?',
+      'Was ist der Unterschied zwischen einer Entität und einem Entitätstyp?',
+      'Wie modelliert man Beziehungen im ER-Diagramm?',
+      'Wann ist ein Attribut mehrwertig?',
+      'Welche Schritte gehören zu einem sauberen ER-Entwurf?',
+      'Wie validiert man ein ER-Modell mit Fachanwendern?',
+      'Woran erkennt man, dass in einem ER-Modell Geschäftsregeln fehlen?',
+      'Wie überführt man ein ER-Modell in relationale Tabellen?',
+      'Welche Grenzen hat ein ER-Diagramm bei komplexen Fachregeln?'
+    ]
   },
   {
-    id: 'q27',
-    text: 'Was ist eine Entität?',
-    title: 'Was ist eine Entität?',
-    competencyIds: ['c-er-entities'],
-    difficulty: 0.22
+    competencyId: 'c-ser-model',
+    prompts: [
+      'Worin unterscheidet sich ein SER-Modell von einem fachlichen ER-Modell?',
+      'Wann modelliert man technische statt rein fachlicher Entitäten?',
+      'Wie bildet man Systemgrenzen in einem SER-Modell ab?',
+      'Welche Rolle spielen Schnittstellenobjekte im SER-Modell?',
+      'Wann wird ein fachliches Attribut zu einer eigenen Systementität?',
+      'Wie geht man mit Audit- oder Protokolldaten im SER-Modell um?',
+      'Warum sind Namenskonventionen im SER-Modell besonders wichtig?',
+      'Wie berücksichtigt man Legacy-Systeme im SER-Modell?',
+      'Welche Risiken entstehen durch zu technisches Modellieren?',
+      'Wie verbindet man ein SER-Modell mit dem physischen Datenbankschema?'
+    ]
   },
   {
-    id: 'q28',
-    text: 'Was ist eine Beziehung im ER-Modell?',
-    title: 'Was ist eine Beziehung im ER-Modell?',
-    competencyIds: ['c-er-entities'],
-    difficulty: 0.31
+    competencyId: 'c-er-typ',
+    prompts: [
+      'Was ist ein Entitätstyp?',
+      'Wodurch unterscheiden sich starke und schwache Entitätstypen?',
+      'Wann ist ein Attribut zusammengesetzt?',
+      'Was ist ein abgeleitetes Attribut?',
+      'Wie kennzeichnet man optionale Attribute fachlich sauber?',
+      'Wann sollte ein Attribut ausgelagert statt direkt an einer Entität modelliert werden?',
+      'Welche Attribute eignen sich als identifizierende Merkmale?',
+      'Was unterscheidet einfache, mehrwertige und zusammengesetzte Attribute?',
+      'Wie prüft man, ob ein Attribut fachlich stabil definiert ist?',
+      'Welche Probleme entstehen durch unscharf definierte Attributtypen?'
+    ]
   },
   {
-    id: 'q29',
-    text: 'Was ist eine n:m-Beziehung?',
-    title: 'Was ist eine n:m-Beziehung?',
-    competencyIds: ['c-er-cardinality'],
-    difficulty: 0.55
+    competencyId: 'c-er-entities',
+    prompts: [
+      'Was ist eine Entität?',
+      'Woran erkennt man eine sinnvolle Abgrenzung von Entitäten?',
+      'Wann sollten zwei ähnliche Objekte getrennte Entitäten sein?',
+      'Was beschreibt eine Beziehung zwischen zwei Entitäten?',
+      'Wie modelliert man rekursive Beziehungen?',
+      'Wann benötigt eine Beziehung eigene Attribute?',
+      'Wie findet man fehlende Beziehungen in einem Modell?',
+      'Welche typischen Benennungsfehler gibt es bei Entitäten?',
+      'Warum sollte eine Entität nicht mehrere Fachbedeutungen mischen?',
+      'Wie erkennt man, dass eine Beziehung eigentlich eine eigene Entität sein sollte?'
+    ]
   },
   {
-    id: 'q30',
-    text: 'Wie werden Kardinalitäten dargestellt?',
-    title: 'Wie werden Kardinalitäten dargestellt?',
-    competencyIds: ['c-er-cardinality'],
-    difficulty: 0.47
+    competencyId: 'c-er-cardinality',
+    prompts: [
+      'Was bedeutet eine 1:1-Beziehung?',
+      'Wann liegt eine 1:n-Beziehung vor?',
+      'Was kennzeichnet eine n:m-Beziehung?',
+      'Wie dokumentiert man optionale Teilnahme an Beziehungen?',
+      'Warum ist Kardinalität für das relationale Schema wichtig?',
+      'Wie löst man n:m-Beziehungen in relationalen Tabellen auf?',
+      'Welche Fehler entstehen durch falsch angenommene Kardinalitäten?',
+      'Wie beeinflusst Kardinalität die Integritätsregeln eines Modells?',
+      'Wann kann man eine 1:1-Beziehung in einer Tabelle zusammenführen?',
+      'Wie überprüft man Kardinalitäten mit Beispieldaten?'
+    ]
   },
   {
-    id: 'q64',
-    text: 'Welche Kardinalitäten gibt es?',
-    title: 'Welche Kardinalitäten gibt es?',
-    competencyIds: ['c-er-cardinality'],
-    difficulty: 0.42
+    competencyId: 'c-normalization',
+    prompts: [
+      'Warum normalisiert man relationale Datenmodelle?',
+      'Welche Probleme löst Normalisierung typischerweise?',
+      'Was ist der Zusammenhang zwischen Redundanz und Anomalien?',
+      'Wann ist ein Schema fachlich übernormalisiert?',
+      'Welche Rolle spielen funktionale Abhängigkeiten in der Normalisierung?',
+      'Wie geht man schrittweise von einem unnormalisierten Modell zur 3NF?',
+      'Wann ist Denormalisierung trotz guter Theorie sinnvoll?',
+      'Wie validiert man eine Zerlegung fachlich und technisch?',
+      'Warum verbessert Normalisierung nicht automatisch jede Abfrage?',
+      'Welche Trade-offs entstehen zwischen Lesbarkeit und Normalisierung?'
+    ]
   },
   {
-    id: 'q65',
-    text: 'Wie wird eine n:m-Beziehung relational umgesetzt?',
-    title: 'Wie wird eine n:m-Beziehung relational umgesetzt?',
-    competencyIds: ['c-er-cardinality'],
-    difficulty: 0.75
-  },
-
-  // Normalisierung
-  {
-    id: 'q15',
-    text: 'Was ist die 1. Normalform?',
-    title: 'Was ist die 1. Normalform?',
-    competencyIds: ['c-norm-1nf'],
-    difficulty: 0.41
-  },
-  {
-    id: 'q16',
-    text: 'Was ist die 2. Normalform?',
-    title: 'Was ist die 2. Normalform?',
-    competencyIds: ['c-norm-2nf'],
-    difficulty: 0.68
+    competencyId: 'c-norm-1nf',
+    prompts: [
+      'Was fordert die 1. Normalform?',
+      'Warum verletzen Listen in einer Spalte die 1NF?',
+      'Wie erkennt man Wiederholungsgruppen in einer Tabelle?',
+      'Wie zerlegt man eine Tabelle in die 1. Normalform?',
+      'Was bedeutet ein atomarer Wert im Kontext der 1NF?',
+      'Sind JSON-Spalten im Hinblick auf 1NF problematisch?',
+      'Welche Auswirkungen hat 1NF auf Suchbarkeit und Auswertung?',
+      'Wann ist eine Kindtabelle besser als eine Sammelspalte?',
+      'Wie prüft man, ob Importdaten 1NF-konform sind?',
+      'Welche typischen Gegenbeispiele zur 1NF gibt es in der Praxis?'
+    ]
   },
   {
-    id: 'q17',
-    text: 'Wann verletzt ein Schema die BCNF?',
-    title: 'Wann verletzt ein Schema die BCNF?',
-    competencyIds: ['c-norm-bcnf'],
-    difficulty: 0.94
+    competencyId: 'c-norm-2nf',
+    prompts: [
+      'Was verlangt die 2. Normalform zusätzlich zur 1NF?',
+      'Wann liegt eine partielle Abhängigkeit vor?',
+      'Warum betrifft die 2NF vor allem zusammengesetzte Schlüssel?',
+      'Wie erkennt man Attribute, die nur von einem Teilschlüssel abhängen?',
+      'Wie zerlegt man eine Tabelle in die 2. Normalform?',
+      'Welche Redundanzen beseitigt die 2NF?',
+      'Wann ist eine Tabelle automatisch in der 2NF?',
+      'Wie hängt die 2NF mit Zwischentabellen zusammen?',
+      'Welche Fehler entstehen, wenn man die 2NF nur formal prüft?',
+      'Wie testet man partielle Abhängigkeiten anhand von Beispieldaten?'
+    ]
   },
   {
-    id: 'q18',
-    text: 'Warum wird normalisiert?',
-    title: 'Warum wird normalisiert?',
-    competencyIds: ['c-normalization'],
-    difficulty: 0.37
+    competencyId: 'c-norm-3nf',
+    prompts: [
+      'Was fordert die 3. Normalform zusätzlich zur 2NF?',
+      'Was ist eine transitive Abhängigkeit?',
+      'Wie erkennt man Nicht-Schlüsselattribute, die andere Nicht-Schlüsselattribute bestimmen?',
+      'Wie zerlegt man ein Schema in die 3. Normalform?',
+      'Warum reduziert die 3NF Änderungsanomalien?',
+      'Wann ist eine Lookup-Tabelle ein typisches Ergebnis der 3NF?',
+      'Welche Geschäftsregeln bleiben trotz 3NF außerhalb des Schemas?',
+      'Wie unterscheidet sich 3NF von bloßer Spaltentrennung?',
+      'Wann ist eine 3NF-Zerlegung verlustfrei?',
+      'Welche Beispiele veranschaulichen transitive Abhängigkeiten besonders gut?'
+    ]
   },
   {
-    id: 'q51',
-    text: 'Was sind funktionale Abhängigkeiten?',
-    title: 'Was sind funktionale Abhängigkeiten?',
-    competencyIds: ['c-norm-dependencies'],
-    difficulty: 0.87
+    competencyId: 'c-norm-bcnf',
+    prompts: [
+      'Worin unterscheidet sich BCNF von der 3. Normalform?',
+      'Wann verletzt eine Tabelle BCNF, obwohl sie bereits in 3NF ist?',
+      'Was ist ein Determinant in der BCNF-Betrachtung?',
+      'Warum spielt BCNF oft bei mehreren Kandidatenschlüsseln eine Rolle?',
+      'Wie zerlegt man eine Tabelle in BCNF?',
+      'Welche Nachteile kann eine BCNF-Zerlegung für Abfragen haben?',
+      'Wie prüft man, ob alle Determinanten Superschlüssel sind?',
+      'Wann akzeptiert man bewusst 3NF statt BCNF?',
+      'Welche klassischen Beispiele illustrieren BCNF gut?',
+      'Wie bewertet man den Trade-off zwischen BCNF und Abfragekomfort?'
+    ]
   },
   {
-    id: 'q52',
-    text: 'Was sind transitive Abhängigkeiten?',
-    title: 'Was sind transitive Abhängigkeiten?',
-    competencyIds: ['c-norm-dependencies'],
-    difficulty: 0.91
+    competencyId: 'c-norm-anomalies',
+    prompts: [
+      'Was ist eine Einfügeanomalie?',
+      'Was ist eine Änderungsanomalie?',
+      'Was ist eine Löschanomalie?',
+      'Wie entstehen Anomalien durch Redundanz?',
+      'Woran erkennt man eine Tabelle mit hohem Anomalierisiko?',
+      'Welche Beispieldaten zeigen eine Änderungsanomalie besonders deutlich?',
+      'Warum können NULL-Felder Anomalien verdecken?',
+      'Wie reduziert Normalisierung das Risiko für Anomalien?',
+      'Wann können Anomalien trotz normalisierter Tabellen auftreten?',
+      'Wie erklärt man Anomalien fachlichen Stakeholdern verständlich?'
+    ]
   },
   {
-    id: 'q53',
-    text: 'Welche Anomalien verhindert Normalisierung?',
-    title: 'Welche Anomalien verhindert Normalisierung?',
-    competencyIds: ['c-norm-anomalies'],
-    difficulty: 0.69
+    competencyId: 'c-norm-dependencies',
+    prompts: [
+      'Was ist eine funktionale Abhängigkeit?',
+      'Wie liest man die Notation A -> B?',
+      'Was ist eine vollständige funktionale Abhängigkeit?',
+      'Was ist eine partielle Abhängigkeit?',
+      'Was ist eine transitive Abhängigkeit?',
+      'Wie ermittelt man funktionale Abhängigkeiten aus Fachregeln?',
+      'Wozu dient die Attributhülle in der Analyse?',
+      'Wie helfen funktionale Abhängigkeiten bei der Schlüsselbestimmung?',
+      'Warum lassen sich Abhängigkeiten nicht sicher nur aus Beispieldaten ableiten?',
+      'Welche Fehler entstehen durch falsch angenommene Abhängigkeiten?'
+    ]
   },
   {
-    id: 'q54',
-    text: 'Was ist eine Einfügeanomalie?',
-    title: 'Was ist eine Einfügeanomalie?',
-    competencyIds: ['c-norm-anomalies'],
-    difficulty: 0.65
+    competencyId: 'c-concurrency',
+    prompts: [
+      'Warum braucht man Nebenläufigkeitskontrolle in Datenbanksystemen?',
+      'Welche Probleme entstehen bei gleichzeitigen Schreibzugriffen?',
+      'Was ist der Unterschied zwischen pessimistischem und optimistischem Sperren?',
+      'Wann setzt man Versionierung zur Konflikterkennung ein?',
+      'Wie beeinflusst Concurrency Control die Performance eines Systems?',
+      'Warum können lange Datenbankoperationen die Nebenläufigkeit verschlechtern?',
+      'Wie verhindert man verlorene Updates in Web-Anwendungen?',
+      'Wann ist Serialisierbarkeit für einen Geschäftsfall wichtig?',
+      'Welche Rolle übernimmt das DBMS gegenüber der Anwendung bei Parallelität?',
+      'Wie testet man Race Conditions in datenbanknahen Abläufen?'
+    ]
   },
   {
-    id: 'q55',
-    text: 'Was ist eine Löschanomalie?',
-    title: 'Was ist eine Löschanomalie?',
-    competencyIds: ['c-norm-anomalies'],
-    difficulty: 0.67
-  },
-
-  // Schlüssel
-  {
-    id: 'q36',
-    text: 'Was ist ein Primärschlüssel?',
-    title: 'Was ist ein Primärschlüssel?',
-    competencyIds: ['c-key-primary'],
-    difficulty: 0.18
-  },
-  {
-    id: 'q37',
-    text: 'Was ist ein Fremdschlüssel?',
-    title: 'Was ist ein Fremdschlüssel?',
-    competencyIds: ['c-key-foreign'],
-    difficulty: 0.29
+    competencyId: 'c-isolation-levels',
+    prompts: [
+      'Welche Isolation Levels definiert der SQL-Standard?',
+      'Was erlaubt READ UNCOMMITTED?',
+      'Wann ist READ COMMITTED in der Praxis ausreichend?',
+      'Welche Probleme verhindert REPEATABLE READ?',
+      'Was garantiert SERIALIZABLE?',
+      'Wie wirkt sich ein höheres Isolation Level auf den Durchsatz aus?',
+      'Wann kann Snapshot Isolation sinnvoll sein?',
+      'Warum unterscheiden sich Isolation Levels je nach Datenbanksystem?',
+      'Welche Tests zeigen die Unterschiede zwischen Isolation Levels gut?',
+      'Wie wählt man ein passendes Isolation Level für einen Geschäftsprozess?'
+    ]
   },
   {
-    id: 'q61',
-    text: 'Was ist ein Kandidatschlüssel?',
-    title: 'Was ist ein Kandidatschlüssel?',
-    competencyIds: ['c-key-candidate'],
-    difficulty: 0.72
-  },
-  {
-    id: 'q62',
-    text: 'Was ist ein Surrogatschlüssel?',
-    title: 'Was ist ein Surrogatschlüssel?',
-    competencyIds: ['c-key-composite'],
-    difficulty: 0.53
-  },
-  {
-    id: 'q63',
-    text: 'Wann verwendet man zusammengesetzte Schlüssel?',
-    title: 'Wann verwendet man zusammengesetzte Schlüssel?',
-    competencyIds: ['c-key-composite'],
-    difficulty: 0.61
-  },
-
-  // Integrität
-  {
-    id: 'q38',
-    text: 'Was versteht man unter referenzieller Integrität?',
-    title: 'Was versteht man unter referenzieller Integrität?',
-    competencyIds: ['c-integrity'],
-    difficulty: 0.63
-  },
-
-  // Transaktionen
-  {
-    id: 'q19',
-    text: 'Was bedeutet ACID?',
-    title: 'Was bedeutet ACID?',
-    competencyIds: ['c-acid'],
-    difficulty: 0.76
-  },
-  {
-    id: 'q20',
-    text: 'Was ist eine Datenbanktransaktion?',
-    title: 'Was ist eine Datenbanktransaktion?',
-    competencyIds: ['c-transactions'],
-    difficulty: 0.48
-  },
-  {
-    id: 'q21',
-    text: 'Wozu dienen Locks?',
-    title: 'Wozu dienen Locks?',
-    competencyIds: ['c-locks'],
-    difficulty: 0.71
-  },
-  {
-    id: 'q22',
-    text: 'Was ist ein Deadlock?',
-    title: 'Was ist ein Deadlock?',
-    competencyIds: ['c-locks'],
-    difficulty: 0.83
-  },
-  {
-    id: 'q56',
-    text: 'Was bedeutet Isolation bei ACID?',
-    title: 'Was bedeutet Isolation bei ACID?',
-    competencyIds: ['c-acid'],
-    difficulty: 0.77
-  },
-
-  // Concurrency
-  {
-    id: 'q57',
-    text: 'Was ist ein Lost Update?',
-    title: 'Was ist ein Lost Update?',
-    competencyIds: ['c-concurrency-issues'],
-    difficulty: 0.84
-  },
-  {
-    id: 'q58',
-    text: 'Welche Isolation Levels gibt es?',
-    title: 'Welche Isolation Levels gibt es?',
-    competencyIds: ['c-isolation-levels'],
-    difficulty: 0.95
-  },
-  {
-    id: 'q59',
-    text: 'Was ist Dirty Read?',
-    title: 'Was ist Dirty Read?',
-    competencyIds: ['c-concurrency-issues'],
-    difficulty: 0.86
-  },
-  {
-    id: 'q60',
-    text: 'Was ist Phantom Read?',
-    title: 'Was ist Phantom Read?',
-    competencyIds: ['c-concurrency-issues'],
-    difficulty: 0.92
-  },
-
-  // Indizes
-  {
-    id: 'q23',
-    text: 'Was ist ein Index?',
-    title: 'Was ist ein Index?',
-    competencyIds: ['c-indexes'],
-    difficulty: 0.52
-  },
-  {
-    id: 'q24',
-    text: 'Wann verbessert ein Index die Performance?',
-    title: 'Wann verbessert ein Index die Performance?',
-    competencyIds: ['c-indexes'],
-    difficulty: 0.64
-  },
-  {
-    id: 'q25',
-    text: 'Wie funktioniert ein B-Tree Index?',
-    title: 'Wie funktioniert ein B-Tree Index?',
-    competencyIds: ['c-index-btree'],
-    difficulty: 0.89
-  },
-  {
-    id: 'q26',
-    text: 'Wann eignet sich ein Hash-Index?',
-    title: 'Wann eignet sich ein Hash-Index?',
-    competencyIds: ['c-index-hash'],
-    difficulty: 0.81
-  },
-
-  // OOP
-  {
-    id: 'q6',
-    text: 'Was ist eine Klasse in OOP?',
-    title: 'Was ist eine Klasse in OOP?',
-    competencyIds: ['c-oop-basics'],
-    difficulty: 0.15
-  },
-  {
-    id: 'q7',
-    text: 'Was ist Polymorphismus?',
-    title: 'Was ist Polymorphismus?',
-    competencyIds: ['c-oop-polymorphism'],
-    difficulty: 0.78
-  },
-  {
-    id: 'q31',
-    text: 'Was versteht man unter Vererbung?',
-    title: 'Was versteht man unter Vererbung?',
-    competencyIds: ['c-oop-inheritance'],
-    difficulty: 0.39
-  },
-  {
-    id: 'q32',
-    text: 'Was ist Kapselung?',
-    title: 'Was ist Kapselung?',
-    competencyIds: ['c-oop-encapsulation'],
-    difficulty: 0.43
-  },
-  {
-    id: 'q33',
-    text: 'Was bedeutet Abstraktion?',
-    title: 'Was bedeutet Abstraktion?',
-    competencyIds: ['c-oop-abstraction'],
-    difficulty: 0.59
-  },
-  {
-    id: 'q34',
-    text: 'Was ist Methodenüberschreibung?',
-    title: 'Was ist Methodenüberschreibung?',
-    competencyIds: ['c-oop-inheritance'],
-    difficulty: 0.56
-  },
-  {
-    id: 'q35',
-    text: 'Was ist der Unterschied zwischen Klasse und Objekt?',
-    title: 'Was ist der Unterschied zwischen Klasse und Objekt?',
-    competencyIds: ['c-oop-basics'],
-    difficulty: 0.34
-  },
-
-  // Design Patterns
-  {
-    id: 'q71',
-    text: 'Was ist das Singleton Pattern?',
-    title: 'Was ist das Singleton Pattern?',
-    competencyIds: ['c-pattern-singleton'],
-    difficulty: 0.68
-  },
-  {
-    id: 'q72',
-    text: 'Welche Nachteile hat Singleton?',
-    title: 'Welche Nachteile hat Singleton?',
-    competencyIds: ['c-pattern-singleton'],
-    difficulty: 0.74
-  },
-  {
-    id: 'q73',
-    text: 'Was ist das Factory Pattern?',
-    title: 'Was ist das Factory Pattern?',
-    competencyIds: ['c-pattern-factory'],
-    difficulty: 0.71
-  },
-  {
-    id: 'q74',
-    text: 'Wann verwendet man eine Factory?',
-    title: 'Wann verwendet man eine Factory?',
-    competencyIds: ['c-pattern-factory'],
-    difficulty: 0.66
+    competencyId: 'c-concurrency-issues',
+    prompts: [
+      'Was ist ein Dirty Read?',
+      'Was ist ein Non-Repeatable Read?',
+      'Was ist ein Phantom Read?',
+      'Was ist ein Lost Update?',
+      'In welcher Situation entsteht ein Write Skew?',
+      'Wie kann man Race Conditions im Anwendungscode reproduzierbar machen?',
+      'Welche Probleme treten bei gleichzeitiger Reservierung derselben Ressource auf?',
+      'Wie verhindert man doppelte Buchungen durch parallele Zugriffe?',
+      'Warum sind Nebenläufigkeitsfehler oft schwer reproduzierbar?',
+      'Welche Logs oder Metriken helfen bei der Analyse von Concurrency-Problemen?'
+    ]
   }
 ]
+
+const createQuestions = (competencyId: string, prompts: string[]): Question[] => {
+  if (prompts.length !== 10) {
+    throw new Error(`Expected exactly 10 questions for ${competencyId}, got ${prompts.length}`)
+  }
+
+  return prompts.map((prompt, index) => ({
+    id: `${competencyId}-q${index + 1}`,
+    text: prompt,
+    title: prompt,
+    competencyIds: [competencyId],
+    difficulty: difficultyPattern[index]
+  }))
+}
+
+export const questions: Question[] = questionBank.flatMap(({ competencyId, prompts }) =>
+  createQuestions(competencyId, prompts)
+)

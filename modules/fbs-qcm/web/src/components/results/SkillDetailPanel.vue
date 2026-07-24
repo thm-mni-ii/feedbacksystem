@@ -175,8 +175,8 @@ function getSkillLabel(skillId: string): string {
 }
 
 .status-indicator.mastered {
-  background: #43c57c;
-  box-shadow: 0 0 8px rgba(67, 197, 124, 0.4);
+  background: #2563eb;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
 }
 
 .status-indicator.progress {
@@ -218,7 +218,7 @@ function getSkillLabel(skillId: string): string {
 .difficulty-scale {
   position: relative;
   height: 20px;
-  background: linear-gradient(90deg, #4caf50, #ffc107, #f44336);
+  background: linear-gradient(90deg, #2563eb, #ffc107, #f44336);
   border-radius: 4px;
   margin-top: 8px;
 }
@@ -317,7 +317,7 @@ function getSkillLabel(skillId: string): string {
 }
 
 .timeline-marker.correct {
-  background: #4caf50;
+  background: #2563eb;
 }
 
 .timeline-marker.incorrect {

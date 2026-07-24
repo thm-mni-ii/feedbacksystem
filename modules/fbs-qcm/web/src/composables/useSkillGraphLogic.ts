@@ -12,9 +12,9 @@ interface Course {
 }
 
 // Layout Constants
-const BASE_R = 60
-const STEP_R = 50
-const Q_OFFSET = 50
+const BASE_R = 30
+const STEP_R = 30
+const Q_OFFSET = 30
 
 function hashString(value: string): number {
   return value.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) | 0, 0)
@@ -54,23 +54,9 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
 
   const rootCompetencies = computed(() => competencies.value.filter((c) => !c.parentId))
 
-  const colorFromPalette = (seed: string): string => {
-    const palette = skillGraphPalette.competencyPalette
-    const index = Math.abs(hashString(seed)) % palette.length
-    return palette[index]
-  }
-
   const getCompetencyColor = (comp?: Competency): string => {
     if (!comp) return skillGraphPalette.chipFallback
-
-    if (!comp.parentId) {
-      return colorFromPalette(comp.category || comp.id)
-    }
-
-    const parent = getCompetency(comp.parentId)
-    if (!parent) return skillGraphPalette.chipFallback
-
-    return lightenHex(getCompetencyColor(parent), 0.2)
+    return skillGraphPalette.accent
   }
 
   function getCompetencyDepth(compId: string): number {

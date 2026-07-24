@@ -97,7 +97,7 @@ const createNewSkill = (courseId: number) => {
       </v-col>
 
       <v-col cols="12" md="4" class="d-flex align-center justify-center">
-        <v-progress-circular :model-value="progress" size="100" width="10" color="green-darken-3">
+        <v-progress-circular :model-value="progress" size="100" width="10" color="primary-dark">
           <span class="text-h6">{{ progress }}%</span>
         </v-progress-circular>
       </v-col>

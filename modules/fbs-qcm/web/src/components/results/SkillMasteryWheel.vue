@@ -154,7 +154,7 @@ const segmentAngle = computed(() => (360 / props.skills.length) * (Math.PI / 180
 function getSegmentColor(status: string): string {
   switch (status) {
     case 'mastered':
-      return '#43C57C'
+      return '#2563EB'
     case 'progress':
       return '#FFA726'
     case 'locked':
@@ -168,7 +168,7 @@ function getSegmentColor(status: string): string {
  * Gibt die Farbe für den Mastery-Indikator zurück
  */
 function getMasteryBarColor(pLearned: number): string {
-  if (pLearned >= 0.75) return '#4CAF50'
+  if (pLearned >= 0.75) return '#3B82F6'
   if (pLearned >= 0.5) return '#FFC107'
   return '#F44336'
 }
@@ -363,7 +363,7 @@ function getTooltipText(skill: SkillVisualization): string {
 .center-value {
   font-size: 24px;
   font-weight: 700;
-  fill: #43c57c;
+  fill: #2563eb;
 }
 
 .legend {
@@ -389,7 +389,7 @@ function getTooltipText(skill: SkillVisualization): string {
 }
 
 .legend-color.mastered {
-  background: #43c57c;
+  background: #2563eb;
 }
 
 .legend-color.progress {

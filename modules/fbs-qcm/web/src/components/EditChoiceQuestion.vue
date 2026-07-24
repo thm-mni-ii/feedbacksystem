@@ -203,7 +203,7 @@ onMounted(() => {
             :key="columnIndex"
             :model-value="isCorrectAnswer(columnIndex, optionIndex)"
             class="d-flex justify-center column-items mx-auto"
-            color="green"
+            color="primary-dark"
             width="120"
             hide-details
             @update:model-value="

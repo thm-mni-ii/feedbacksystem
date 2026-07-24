@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { appPalette } from '@/plugins/vuetify'
 import DialogConfirm from '@/dialog/DialogConfirm.vue'
 import DialogAddSkill from '@/dialog/DialogAddSkill.vue'
 import skillService from '@/services/skill.service'
@@ -26,7 +27,7 @@ const dialogEditSkillRef = ref()
 const difficultyColor = computed(
   () =>
     ({
-      1: '#4caf50', // green
+      1: appPalette.graphPrimary,
       2: '#ffd625', // amber
       3: '#f9a825', // orange
       4: '#d84315' // red
@@ -99,11 +100,11 @@ const handleDeleteSkill = async () => {
 
     <v-card-title class="text-overline">
       Progress
-      <div class="text-green-darken-3 text-h3 font-weight-bold">{{ props.progress }} %</div>
+      <div class="progress-value text-h3 font-weight-bold">{{ props.progress }} %</div>
     </v-card-title>
 
     <v-progress-linear
-      color="green-darken-3"
+      :color="appPalette.graphPrimaryDark"
       height="15"
       class="mb-2"
       :model-value="props.progress"
@@ -148,6 +149,10 @@ const handleDeleteSkill = async () => {
 </template>
 
 <style scoped>
+.progress-value {
+  color: #2563eb;
+}
+
 .wrap-subtitle {
   white-space: normal;
   overflow: visible;

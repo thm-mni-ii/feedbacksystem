@@ -16,7 +16,7 @@
           class="text-body-1 font-weight-bold detail-title"
           style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
         >
-          {{ selectedNode?.name }}
+          {{ detailHeaderLabel }}
         </span>
         <v-spacer />
         <v-btn
@@ -95,6 +95,7 @@ import CompetencyDetailPanel from './skillgraph/CompetencyDetailPanel.vue'
 import QuestionDetailPanel from './skillgraph/QuestionDetailPanel.vue'
 import type { Competency, Question } from '@/model/types'
 import { skillGraphPalette } from '@/plugins/vuetify'
+import { computed } from 'vue'
 
 interface Props {
   selectedNodeId: string | null
@@ -112,7 +113,11 @@ interface Props {
   deleteQuestion: (id: string) => void
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+const detailHeaderLabel = computed(() => {
+  return props.selectedNode?.name ?? ''
+})
 
 const panelStyles = {
   '--sg-panel-bg': skillGraphPalette.panelBackground,

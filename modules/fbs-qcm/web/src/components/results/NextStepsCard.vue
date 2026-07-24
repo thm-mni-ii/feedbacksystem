@@ -176,8 +176,8 @@ function getRecommendation() {
 
 <style scoped>
 .next-steps-card {
-  background: linear-gradient(135deg, rgba(129, 186, 36, 0.03), rgba(54, 199, 142, 0.03));
-  border: 1px solid rgba(129, 186, 36, 0.1);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(37, 99, 235, 0.03));
+  border: 1px solid rgba(59, 130, 246, 0.1);
 }
 
 .recommendation {
@@ -212,6 +212,6 @@ function getRecommendation() {
 .stat-value {
   font-size: 18px;
   font-weight: 700;
-  color: #43c57c;
+  color: #2563eb;
 }
 </style>
