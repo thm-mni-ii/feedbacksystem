@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.service.auth
+package de.thm.ii.fbs.fbs_identity_service.service
 
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository

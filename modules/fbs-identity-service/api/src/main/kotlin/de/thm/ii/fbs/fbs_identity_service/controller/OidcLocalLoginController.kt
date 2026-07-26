@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
-import de.thm.ii.fbs.fbs_identity_service.dto.login.LoginRequest
+import de.thm.ii.fbs.fbs_identity_service.dto.auth.LoginRequest
 import de.thm.ii.fbs.fbs_identity_service.security.local.OidcLocalLoginService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content

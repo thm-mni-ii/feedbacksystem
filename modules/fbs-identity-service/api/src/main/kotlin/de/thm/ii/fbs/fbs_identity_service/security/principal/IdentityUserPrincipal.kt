@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.security.local
+package de.thm.ii.fbs.fbs_identity_service.security.principal
 
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import org.springframework.security.core.GrantedAuthority

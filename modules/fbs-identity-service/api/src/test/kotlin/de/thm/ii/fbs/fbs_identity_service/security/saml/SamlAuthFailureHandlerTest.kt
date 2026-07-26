@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.config
+package de.thm.ii.fbs.fbs_identity_service.security.saml
 
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockHttpServletRequest

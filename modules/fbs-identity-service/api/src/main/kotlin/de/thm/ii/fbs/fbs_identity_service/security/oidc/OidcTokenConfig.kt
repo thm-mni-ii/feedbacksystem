@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
-import de.thm.ii.fbs.fbs_identity_service.security.local.IdentityUserPrincipal
+import de.thm.ii.fbs.fbs_identity_service.security.principal.IdentityUserPrincipal
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.core.Authentication

@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.config
+package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey

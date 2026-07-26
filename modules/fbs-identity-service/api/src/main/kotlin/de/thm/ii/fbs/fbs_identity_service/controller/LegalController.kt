@@ -3,7 +3,7 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 import de.thm.ii.fbs.fbs_identity_service.dto.legal.LegalTextResponse
 import de.thm.ii.fbs.fbs_identity_service.dto.legal.TermsOfUseAcceptanceResponse
 import de.thm.ii.fbs.fbs_identity_service.exception.dto.ErrorResponse
-import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
+import de.thm.ii.fbs.fbs_identity_service.service.CurrentUserService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter

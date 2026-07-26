@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
-import de.thm.ii.fbs.fbs_identity_service.security.local.IdentityUserPrincipal
+import de.thm.ii.fbs.fbs_identity_service.security.principal.IdentityUserPrincipal
 import org.junit.jupiter.api.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority

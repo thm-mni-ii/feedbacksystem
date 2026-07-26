@@ -1,25 +1,23 @@
-package de.thm.ii.fbs.fbs_identity_service.config
+package de.thm.ii.fbs.fbs_identity_service.security.saml
 
 import de.thm.ii.fbs.fbs_identity_service.exception.InvalidSamlPrincipalException
 import de.thm.ii.fbs.fbs_identity_service.exception.MissingSamlPrincipalAttributeException
-import de.thm.ii.fbs.fbs_identity_service.model.auth.SamlUser
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
-import de.thm.ii.fbs.fbs_identity_service.security.local.IdentityUserPrincipal
-import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlLoginService
+import de.thm.ii.fbs.fbs_identity_service.security.principal.IdentityUserPrincipal
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.core.Authentication
-import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler
-import org.springframework.stereotype.Component
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache
+import org.springframework.stereotype.Component
 
 @Component
 class SamlAuthSuccessHandler(

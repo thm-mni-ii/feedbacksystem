@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.service.auth
+package de.thm.ii.fbs.fbs_identity_service.service
 
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel

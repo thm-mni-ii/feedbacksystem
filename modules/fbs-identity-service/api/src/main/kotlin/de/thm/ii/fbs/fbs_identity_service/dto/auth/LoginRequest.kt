@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.dto.login
+package de.thm.ii.fbs.fbs_identity_service.dto.auth
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 

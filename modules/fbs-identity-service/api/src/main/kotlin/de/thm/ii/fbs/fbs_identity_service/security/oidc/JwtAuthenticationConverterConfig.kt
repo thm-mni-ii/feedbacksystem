@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.config
+package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

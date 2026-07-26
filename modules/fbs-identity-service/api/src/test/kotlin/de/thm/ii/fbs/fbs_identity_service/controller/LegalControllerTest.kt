@@ -2,7 +2,7 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
-import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
+import de.thm.ii.fbs.fbs_identity_service.service.CurrentUserService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any

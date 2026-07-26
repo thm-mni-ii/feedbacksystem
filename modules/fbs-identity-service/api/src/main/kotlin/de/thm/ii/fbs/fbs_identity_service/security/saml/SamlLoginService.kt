@@ -1,7 +1,7 @@
-package de.thm.ii.fbs.fbs_identity_service.service.auth.saml
+package de.thm.ii.fbs.fbs_identity_service.security.saml
 
 import de.thm.ii.fbs.fbs_identity_service.exception.MissingSamlUsernameException
-import de.thm.ii.fbs.fbs_identity_service.model.auth.SamlUser
+import de.thm.ii.fbs.fbs_identity_service.security.saml.SamlUser
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService

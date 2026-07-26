@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.fbs_identity_service.config
+package de.thm.ii.fbs.fbs_identity_service.security.saml
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
