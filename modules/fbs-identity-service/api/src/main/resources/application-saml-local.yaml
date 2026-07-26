@@ -8,10 +8,7 @@ app:
     prename-attribute: givenName
     surname-attribute: sn
     email-attribute: mail
-    success-path: /login
     failure-path: /login?ssoError=1
-    jwt-cookie-name: jwt
-    jwt-cookie-max-age-seconds: 30
 
 spring:
   security:

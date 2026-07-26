@@ -33,6 +33,7 @@ class AuthServerClientConfig {
             )
             .tokenSettings(
                 TokenSettings.builder()
+                    .authorizationCodeTimeToLive(Duration.ofMinutes(5))
                     .accessTokenTimeToLive(Duration.ofMinutes(10))
                     .build()
             )

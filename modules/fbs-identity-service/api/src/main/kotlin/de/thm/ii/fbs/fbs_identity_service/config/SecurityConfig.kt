@@ -1,6 +1,5 @@
 package de.thm.ii.fbs.fbs_identity_service.config
 
-import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -16,8 +15,8 @@ import org.springframework.security.oauth2.core.oidc.OidcScopes
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
-import org.springframework.security.saml2.provider.service.web.authentication.Saml2AuthenticationRequestResolver
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
+import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 
 @Configuration
@@ -25,7 +24,6 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 class SecurityConfig(
     private val samlAuthSuccessHandler: SamlAuthSuccessHandler,
     private val samlAuthFailureHandler: SamlAuthFailureHandler,
-    private val saml2AuthenticationRequestResolver: ObjectProvider<Saml2AuthenticationRequestResolver>,
     @param:Value("\${app.saml.enabled:false}")
     private val samlEnabled: Boolean
 ) {
@@ -69,7 +67,8 @@ class SecurityConfig(
         http: HttpSecurity,
         @Qualifier("authorizationServerJwtDecoder")
         authorizationServerJwtDecoder: JwtDecoder,
-        jwtAuthenticationConverter: JwtAuthenticationConverter
+        jwtAuthenticationConverter: JwtAuthenticationConverter,
+        requestCache: RequestCache
     ): SecurityFilterChain {
         var security = http
             .csrf { it.disable() }
@@ -87,25 +86,23 @@ class SecurityConfig(
                         "/graphiql/**"
                     ).permitAll()
                     .requestMatchers("/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/oidc-login").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/impressum").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/privacy-text").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/v1/login/sso").permitAll()
                     .requestMatchers("/saml2/**").permitAll()
                     .requestMatchers("/login/saml2/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/graphql").authenticated()
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
+            .requestCache {
+                it.requestCache(requestCache)
+            }
 
         if (samlEnabled) {
             security = security
                 .saml2Login {
                     it
-                        .authenticationRequestResolver(
-                            saml2AuthenticationRequestResolver.getObject()
-                        )
                         .successHandler(samlAuthSuccessHandler)
                         .failureHandler(samlAuthFailureHandler)
                 }

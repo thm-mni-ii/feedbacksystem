@@ -14,38 +14,36 @@ Keycloak:         http://localhost:8090
 Realm:            fbs
 ```
 
-The identity-service acts as the SAML Service Provider.
+The identity-service acts as:
 
-The local SAML login flow is:
+* an OpenID Connect / OAuth 2.0 Authorization Server
+* a SAML Service Provider for authentication against Keycloak
 
-```text
-/api/v1/login/sso?route=/groups 
-    -> validates the optional route
-    -> redirects to /saml2/authenticate/keycloak 
-    -> Spring Security creates the SAML AuthnRequest 
-    -> the route is forwarded as RelayState 
-    -> the browser is redirected to Keycloak
-    -> the user logs in at Keycloak 
-    -> Keycloak sends the SAMLResponse back to /login/saml2/sso/keycloak 
-    -> Spring Security validates the SAMLResponse 
-    -> SamlAuthSuccessHandler is called 
-    -> the local user is resolved or created 
-    -> a JWT is created
-    -> the JWT is written to a short-lived, frontend-readable cookie 
-    -> the temporary SAML/HTTP session is cleared 
-    -> the browser is redirected to the frontend
-    -> the frontend stores the JWT in localStorage and deletes the cookie
-    -> the frontend opens the forwarded route or default page
+SAML is used as an authentication method inside the OIDC Authorization Code Flow.
+
+The local flow is:
+
 ```
-The `LoginResponse` is only used internally. It is not returned as JSON during SAML browser flow.
-
-The temporary cookie uses:
-
-HttpOnly: false<br>
-SameSite: Lax<br>
-Path: /<br>
-Max-Age: configured through jwt-cookie-max-age-seconds<br>
-Secure: enabled when the request uses HTTPS<br>
+/oauth2/authorize
+    -> starts the OIDC Authorization Code Flow
+    -> the original authorization request is stored in the HTTP session
+    -> the user selects SAML login
+    -> Spring Security redirects to /saml2/authenticate/keycloak
+    -> Spring Security creates the SAML AuthnRequest
+    -> the browser is redirected to Keycloak
+    -> the user authenticates at Keycloak
+    -> Keycloak sends the SAMLResponse to /login/saml2/sso/keycloak
+    -> Spring Security validates the SAMLResponse
+    -> SamlAuthSuccessHandler is called
+    -> the local user is resolved or created
+    -> an IdentityUserPrincipal is created
+    -> the SecurityContext is stored in the HTTP session
+    -> the original /oauth2/authorize request is continued
+    -> the Authorization Server creates an authorization code
+    -> the browser is redirected to the configured client callback
+    -> the authorization code is exchanged at /oauth2/token
+    -> the client receives an access token and ID token
+```
 
 ## Start Keycloak
 
@@ -141,23 +139,39 @@ application-saml-local.yaml
 
 ## Test the SAML login
 
-Open:
+Generate PKCE values first:
 
-```text
-http://localhost:8080/api/v1/login/sso
+```bash
+node http/generate-pkce.mjs
 ```
-To test route forwarding, open for example:
 
-```text
-http://localhost:8080/api/v1/login/sso?route=/groups
+Use the generated code challenge and state in an OIDC authorization request:
+
 ```
+http://localhost:8080/oauth2/authorize
+?response_type=code
+&client_id=fbs-test-client
+&redirect_uri=http://127.0.0.1:4200/oauth2/callback
+&scope=openid%20profile
+&code_challenge=<CODE_CHALLENGE>
+&code_challenge_method=S256
+&state=<STATE>
+```
+
+On the login page, select the SAML / Keycloak login.
+
 Expected result:
 * the browser is redirected to Keycloak
+* the user authenticates at Keycloak
 * the local user is resolved or created
-* the JWT is passed to the frontend through the temporary cookie
-* the frontend redirects to `/groups` or the default page
+* the original OIDC authorization request is continued
+* the client callback receives an authorization code and the original state
+* the authorization code can be exchanged at `/oauth2/token`
+* an access token and ID token are returned
 
-Keycloak may reuse an existing browser session. Use a private browser window or clear the Keycloak cookies to test a fresh login.
+The token exchange can be tested with `http/local-oidc.http`.
+
+Keycloak may reuse an existing SSO session and therefore skip the credential form. To test a fresh login, log out from Keycloak or use a browser session without an existing Keycloak session.
 
 ## Known limitations
 
@@ -165,13 +179,14 @@ Keycloak may reuse an existing browser session. Use a private browser window or 
 * AuthnRequests are currently not signed because no SP key pair is configured.
 * SAML assertion encryption has not been tested.
 * Single Logout is not implemented.
-* Frontend logout only removes the JWT from `localStorage`.
-* The JWT is transferred through a frontend-readable cookie and stored in `localStorage`.
-* The complete route flow depends on the corresponding frontend implementation.
+* The frontend has not yet been migrated to the new OIDC Authorization Code Flow with PKCE.
+* The Spring Security login page is currently used for local testing.
+* RSA signing keys are generated when the Identity-Service starts, so issued tokens become invalid after a restart.
+* The public OIDC client currently uses short-lived access tokens without refresh tokens.
 
 For local testing, AuthnRequest signing is disabled:
 
-```bash
+```yaml
 singlesignon:
   sign-request: false
 ```

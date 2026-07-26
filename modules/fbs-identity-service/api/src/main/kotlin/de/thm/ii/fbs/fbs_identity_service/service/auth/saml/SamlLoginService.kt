@@ -1,18 +1,15 @@
 package de.thm.ii.fbs.fbs_identity_service.service.auth.saml
 
-import de.thm.ii.fbs.fbs_identity_service.dto.login.LoginResponse
 import de.thm.ii.fbs.fbs_identity_service.exception.MissingSamlUsernameException
 import de.thm.ii.fbs.fbs_identity_service.model.auth.SamlUser
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
-import de.thm.ii.fbs.fbs_identity_service.service.auth.JwtService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
 import org.springframework.stereotype.Service
 
 @Service
 class SamlLoginService(
-    private val userService: UserService,
-    private val jwtService: JwtService
+    private val userService: UserService
 ) {
 
     fun resolveUser(samlUser: SamlUser): User {
@@ -24,18 +21,6 @@ class SamlLoginService(
 
         return userService.findActive(username)
             ?: createUserFromSaml(samlUser.copy(username = username))
-    }
-
-    fun login(samlUser: SamlUser): LoginResponse {
-        val user = resolveUser(samlUser)
-
-        val token = jwtService.createToken(user)
-
-        return LoginResponse(
-            accessToken = token,
-            tokenType = "Bearer",
-            expiresIn = jwtService.getExpiresIn()
-        )
     }
 
     private fun createUserFromSaml(samlUser: SamlUser): User {

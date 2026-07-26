@@ -24,40 +24,6 @@ class GlobalExceptionHandler {
         )
     }
 
-    @ExceptionHandler(InvalidCredentialsException::class)
-    fun handleInvalidCredentialsException(ex: InvalidCredentialsException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
-
-        return buildErrorResponse(
-            status = HttpStatus.UNAUTHORIZED,
-            message = ex.message,
-            request = request
-        )
-    }
-
-    @ExceptionHandler(InvalidFrontendRedirectPathException::class)
-    fun handleInvalidFrontendRedirectPathException(
-        ex: InvalidFrontendRedirectPathException,
-        request: HttpServletRequest
-    ): ResponseEntity<ErrorResponse> {
-        return buildErrorResponse(
-            status = HttpStatus.INTERNAL_SERVER_ERROR,
-            message = ex.message,
-            request = request
-        )
-    }
-
-    @ExceptionHandler(MissingSamlUsernameException::class)
-    fun handleMissingSamlUsernameException(
-        ex: MissingSamlUsernameException,
-        request: HttpServletRequest
-    ): ResponseEntity<ErrorResponse> {
-        return buildErrorResponse(
-            status = HttpStatus.UNAUTHORIZED,
-            message = ex.message,
-            request = request
-        )
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleMethodArgumentNotValidException(
         ex: MethodArgumentNotValidException,

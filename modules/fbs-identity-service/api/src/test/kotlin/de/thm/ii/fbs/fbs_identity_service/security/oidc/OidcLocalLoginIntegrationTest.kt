@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -112,6 +113,63 @@ class OidcLocalLoginIntegrationTest {
         )
         assertTrue(callbackUrl.contains("code="))
         assertTrue(callbackUrl.contains("state=test-state"))
+    }
+
+    @Test
+    fun `protected request does not replace saved oidc authorization request`() {
+        val session = MockHttpSession()
+
+        mockMvc.get("/oauth2/authorize") {
+            queryParam("response_type", "code")
+            queryParam("client_id", "fbs-test-client")
+            queryParam(
+                "redirect_uri",
+                "http://127.0.0.1:4200/oauth2/callback"
+            )
+            queryParam("scope", "openid profile")
+            queryParam(
+                "code_challenge",
+                "ZKvd7XvDllsX65fhzUdFzFvYti9384GOnbbmpWOpF-Q"
+            )
+            queryParam("code_challenge_method", "S256")
+            queryParam("state", "test-state")
+            this.session = session
+        }
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+
+        mockMvc.get("/api/v1/legal/termsofuse/status") {
+            this.session = session
+        }
+
+        val loginResult = mockMvc.post("/api/v1/auth/oidc-login") {
+            this.session = session
+            contentType = MediaType.APPLICATION_JSON
+            content =
+                """
+            {
+              "username": "maxlogin",
+              "password": "test123"
+            }
+            """.trimIndent()
+        }
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+            .andReturn()
+
+        val redirectUrl = requireNotNull(
+            loginResult.response.redirectedUrl
+        )
+
+        assertTrue(
+            redirectUrl.contains("/oauth2/authorize")
+        )
+
+        assertFalse(
+            redirectUrl.contains("/api/v1/legal/termsofuse/status")
+        )
     }
 
     @Test

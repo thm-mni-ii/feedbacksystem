@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.media.Schema
 import de.thm.ii.fbs.fbs_identity_service.exception.dto.ErrorResponse
-import io.swagger.v3.oas.annotations.headers.Header
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Authentication", description = "Authentication endpoints")
 @RestController
 @RequestMapping("/api/v1/auth")
-class OidcLoginController(
+class OidcLocalLoginController(
     private val oidcLocalLoginService: OidcLocalLoginService,
     private val securityContextRepository: SecurityContextRepository
 ) {

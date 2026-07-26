@@ -9,10 +9,14 @@ This module contains the initial setup for the FBS identity service.
 * Health and manifest endpoints at `/health` and `/manifest`
 * Connection to the existing FBS MySQL database
 * JPA/Hibernate mapping for the existing FBS `user` table
-* Spring Security with local username/password authentication
-* JWT creation, validation, and current-user resolution
-* Local SAML2 login prototype using Keycloak as a test IdP
-* SAML success and failure handling with optional route forwarding through RelayState
+* Local username/password authentication through Spring Security
+* OpenID Connect / OAuth 2.0 Authorization Server
+* Authorization Code Flow with PKCE for public clients
+* RSA-signed access tokens and ID tokens
+* JWT-based Resource Server authentication for protected REST and GraphQL endpoints
+* Current-user resolution from the authenticated access token
+* Local SAML2 login using Keycloak as a test IdP
+* SAML authentication integrated into the OIDC Authorization Code Flow
 * OpenAPI documentation at `/openapi` and Swagger UI
 * Global REST exception handling with a common `ErrorResponse` format
 * Dockerfile and Docker Compose integration using the existing `mysql1` service
@@ -74,6 +78,25 @@ The service manifest is available at:
 http://localhost:8080/manifest
 ```
 
+## OIDC / OAuth 2.0
+
+The Identity-Service acts as an OpenID Connect / OAuth 2.0 Authorization Server.
+
+Important endpoints include:
+
+```
+/oauth2/authorize
+/oauth2/token
+/oauth2/jwks
+/userinfo
+/.well-known/openid-configuration
+/.well-known/oauth-authorization-server
+```
+
+The current local test client uses the Authorization Code Flow with PKCE.
+
+The public client does not use refresh tokens. When an access token expires, a new authorization flow can be started. If the login session is still valid, the user does not need to authenticate again.
+
 ## Run with local dev tools such as GraphiQL
 
 ```bash
@@ -110,11 +133,18 @@ Automated tests can be executed from this module with:
 
 ## Local manual testing
 
-Some local manual test requests are available for the IntelliJ HTTP Client:
+Local manual test requests are available for the IntelliJ HTTP Client:
 
 ```
 http/local-rest.http
 http/local-graphql.http
+http/local-oidc.http
+```
+
+PKCE values for manual OIDC tests can be generated with:
+
+```bash
+node http/generate-pkce.mjs
 ```
 
 The local HTTP client tests are documented in:
@@ -122,3 +152,14 @@ The local HTTP client tests are documented in:
 ```
 docs/local-http-client-tests.md
 ```
+
+## Known limitations
+
+* The frontend has not yet been migrated to the new OIDC Authorization Code Flow with PKCE.
+* The Spring Security login page is currently used for local testing.
+* The Identity-Service is not yet registered as a Service Provider with the productive THM IdP.
+* SAML AuthnRequests are currently not signed.
+* SAML assertion encryption has not been configured or tested.
+* Single Logout is not implemented.
+* RSA signing keys are currently generated when the Identity-Service starts. Tokens issued before a restart therefore become invalid.
+* The public OIDC client currently uses short-lived access tokens without refresh tokens.

@@ -3,7 +3,6 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 import de.thm.ii.fbs.fbs_identity_service.dto.legal.LegalTextResponse
 import de.thm.ii.fbs.fbs_identity_service.dto.legal.TermsOfUseAcceptanceResponse
 import de.thm.ii.fbs.fbs_identity_service.exception.dto.ErrorResponse
-import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
 import io.swagger.v3.oas.annotations.Operation
@@ -15,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

@@ -99,13 +99,6 @@ class ManifestController(
                 description = "Authenticates a local user and continues the active OIDC authorization flow"
             ),
             Capability(
-                id = "identity.auth.local-login",
-                type = "rest-endpoint",
-                method = "POST",
-                path = "/api/v1/auth/login",
-                description = "Authenticates a user with username and password"
-            ),
-            Capability(
                 id = "identity.legal.text.read",
                 type = "rest-endpoint",
                 method = "GET",
@@ -128,15 +121,6 @@ class ManifestController(
                 requiresAuthentication = true,
                 description = "Stores that the current user accepted the terms of use"
             ),
-            Capability(
-                id = "identity.auth.saml-login.start",
-                type = "rest-endpoint",
-                method = "GET",
-                path = "/api/v1/login/sso",
-                description = "Starts the SAML login flow",
-                requiresConfig = "app.saml.enabled=true"
-            ),
-
             Capability(
                 id = "identity.user.current.read",
                 type = "graphql-query",

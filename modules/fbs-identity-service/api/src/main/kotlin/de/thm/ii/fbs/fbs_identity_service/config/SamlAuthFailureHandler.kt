@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.fbs_identity_service.config
 
-import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.FrontendRedirectService
-import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlSessionCleanupService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
@@ -12,12 +10,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class SamlAuthFailureHandler(
-    private val frontendRedirectService: FrontendRedirectService,
-
-    private val samlSessionCleanupService: SamlSessionCleanupService,
 
     @param:Value("\${app.saml.failure-path:/login?ssoError=1}")
     private val failurePath: String
+
 ) : AuthenticationFailureHandler {
 
     private val log = LoggerFactory.getLogger(SamlAuthFailureHandler::class.java)
@@ -34,8 +30,6 @@ class SamlAuthFailureHandler(
             exception
         )
 
-        samlSessionCleanupService.clearSession(request, response)
-
-        response.sendRedirect(frontendRedirectService.buildRedirectUrl(failurePath))
+        response.sendRedirect(failurePath)
     }
 }
