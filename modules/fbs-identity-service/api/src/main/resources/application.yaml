@@ -36,3 +36,12 @@ info:
 springdoc:
   api-docs:
     path: /openapi
+
+security:
+  login-attempts:
+    max-failures-per-ip: 150
+    max-failures-per-username: 10
+    window-seconds: 600
+    cleanup-interval-ms: 60000
+    trusted-proxy-count: ${TRUSTED_PROXIES:0}
+    allow-list: ${BRUTEFORCE_ALLOW_LIST:""}
