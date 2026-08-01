@@ -11,6 +11,9 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.net.URI
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -78,28 +81,14 @@ class OidcLocalLoginIntegrationTest {
         assertTrue(securityContext.authentication.isAuthenticated)
         assertEquals("maxlogin", securityContext.authentication.name)
 
-        val authorizationResult = mockMvc.get("/oauth2/authorize") {
-            queryParam("response_type", "code")
-            queryParam("client_id", "fbs-test-client")
-            queryParam(
-                "redirect_uri",
-                "http://127.0.0.1:4200/oauth2/callback"
+        val authorizationResult = mockMvc.perform(
+            MockMvcRequestBuilders
+                .get(URI.create(authorizationRedirectUrl))
+                .session(session)
+        )
+            .andExpect(
+                MockMvcResultMatchers.status().is3xxRedirection
             )
-            queryParam("scope", "openid profile")
-            queryParam(
-                "code_challenge",
-                "ZKvd7XvDllsX65fhzUdFzFvYti9384GOnbbmpWOpF-Q"
-            )
-            queryParam("code_challenge_method", "S256")
-            queryParam("state", "test-state")
-            queryParam("continue", "")
-            this.session = session
-        }
-            .andExpect {
-                status {
-                    is3xxRedirection()
-                }
-            }
             .andReturn()
 
         val callbackUrl = requireNotNull(

@@ -39,9 +39,9 @@ springdoc:
 
 security:
   login-attempts:
-    max-failures-per-ip: 150
-    max-failures-per-username: 10
-    window-seconds: 600
-    cleanup-interval-ms: 60000
+    max-failures-per-ip: ${LOGIN_MAX_FAILURES_PER_IP:150}
+    max-failures-per-username: ${LOGIN_MAX_FAILURES_PER_USERNAME:10}
+    window-seconds: ${LOGIN_FAILURE_WINDOW_SECONDS:600}
+    cleanup-interval-ms: ${LOGIN_ATTEMPT_CLEANUP_INTERVAL_MS:600000}
     trusted-proxy-count: ${TRUSTED_PROXIES:0}
     allow-list: ${BRUTEFORCE_ALLOW_LIST:""}

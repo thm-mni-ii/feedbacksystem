@@ -31,8 +31,13 @@ class LoginAttemptService(
     private val attemptsByUsername = ConcurrentHashMap<String, AttemptWindow>()
 
     fun recordFailure(ip: String, username: String) {
-        recordAttempt(attemptsByIp, ip)
-        recordAttempt(attemptsByUsername, username)
+        if (maxFailuresPerIp > 0) {
+            recordAttempt(attemptsByIp, ip)
+        }
+
+        if (maxFailuresPerUsername > 0) {
+            recordAttempt(attemptsByUsername, username)
+        }
     }
 
     fun recordSuccess(username: String) {
@@ -49,6 +54,10 @@ class LoginAttemptService(
         key: String,
         maxFailures: Int
     ): Boolean {
+        if (maxFailures <= 0) {
+            return false
+        }
+
         val current = attempts[key] ?: return false
         val now = clock.instant()
 
