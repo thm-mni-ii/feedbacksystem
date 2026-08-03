@@ -7,7 +7,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/fbs?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false&allowMultiQueries=true
+    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/fbs_identity?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false&allowMultiQueries=true
     username: ${MYSQL_USER:root}
     password: ${MYSQL_PASSWORD:twRuvi2ejllDdA4nnQLa08O}
 
@@ -15,13 +15,13 @@ spring:
     database: mysql
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:true}
 
 app:
   frontend:
     base-url: ${FRONTEND_BASE_URL:https://localhost}
   saml:
-    enabled: false
+    enabled: ${APP_SAML_ENABLED:false}
     registration-id: keycloak
     principal-attribute: uid
     prename-attribute: givenName

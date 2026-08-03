@@ -12,6 +12,7 @@ services:
       MYSQL_DATABASE: fbs
     volumes:
       - ./data/mysql1:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     networks:
       fbs:
     healthcheck:
@@ -81,22 +82,22 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - mysql1
+      mysql1:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql1:3306/fbs
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=twRuvi2ejllDdA4nnQLa08O
+      - MYSQL_URI=jdbc:mysql://mysql1:3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - APP_SAML_ENABLED=false
-      - APP_JWT_SECRET=q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=
     networks:
       fbs:
     healthcheck:
       test: curl -f http://localhost:8080/health
       timeout: 10s
       interval: 10s
-      start_period: 10s
+      start_period: 20s
       retries: 3
 
   mysql-checker:

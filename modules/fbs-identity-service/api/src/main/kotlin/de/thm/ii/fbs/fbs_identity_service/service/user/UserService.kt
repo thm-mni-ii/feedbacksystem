@@ -135,11 +135,9 @@ class UserService (private val userRepository: UserRepository, private val passw
 
         return savedUserEntity.toModel()
     }
-    @Transactional
+
     fun deactivateUser(userId: Long): Boolean {
         val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return false
-
-        userRepository.deleteUserCourseAssignments(userId)
 
         userEntity.prename = "Deleted User"
         userEntity.surname = "Deleted User"

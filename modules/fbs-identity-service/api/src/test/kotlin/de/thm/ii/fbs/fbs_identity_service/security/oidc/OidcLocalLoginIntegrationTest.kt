@@ -1,5 +1,12 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
+import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
+import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
+import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
+import de.thm.ii.fbs.fbs_identity_service.security.config.PasswordConfig
+import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -7,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -21,10 +30,41 @@ import kotlin.test.assertTrue
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OidcLocalLoginIntegrationTest {
+class OidcLocalLoginIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
+
+    @Autowired
+    private lateinit var passwordEncoder: PasswordEncoder
+
+    @BeforeEach
+    fun setUp() {
+        if (!userRepository.existsByUsername("oidc-integration-test-user")) {
+            userRepository.save(
+                UserEntity(
+                    prename = "Theo",
+                    surname = "Theo",
+                    email = "theo@example.org",
+                    username = "oidc-integration-test-user",
+                    password = passwordEncoder.encode("test123"),
+                    privacyChecked = true,
+                    deleted = false,
+                    alias = null,
+                    globalRole = GlobalRole.USER.id
+                )
+            )
+        }
+    }
+
+    @AfterEach
+    fun tearDown() {
+        userRepository.findByUsernameAndDeletedFalse("oidc-integration-test-user")
+            ?.let { userRepository.delete(it) }
+    }
 
     @Test
     fun `local oidc login authenticates user in existing session`() {
@@ -58,7 +98,7 @@ class OidcLocalLoginIntegrationTest {
             content =
                 """
             {
-              "username": "maxlogin",
+              "username": "oidc-integration-test-user",
               "password": "test123"
             }
             """.trimIndent()
@@ -79,7 +119,7 @@ class OidcLocalLoginIntegrationTest {
         ) as SecurityContext
 
         assertTrue(securityContext.authentication.isAuthenticated)
-        assertEquals("maxlogin", securityContext.authentication.name)
+        assertEquals("oidc-integration-test-user", securityContext.authentication.name)
 
         val authorizationResult = mockMvc.perform(
             MockMvcRequestBuilders
@@ -138,7 +178,7 @@ class OidcLocalLoginIntegrationTest {
             content =
                 """
             {
-              "username": "maxlogin",
+              "username": "oidc-integration-test-user",
               "password": "test123"
             }
             """.trimIndent()
@@ -171,7 +211,7 @@ class OidcLocalLoginIntegrationTest {
             content =
                 """
             {
-              "username": "maxlogin",
+              "username": "oidc-integration-test-user",
               "password": "wrong-password"
             }
             """.trimIndent()

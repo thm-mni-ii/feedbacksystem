@@ -244,7 +244,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `deactivateUser anonymizes user and deletes existing course assignments`() {
+    fun `deactivateUser anonymizes user`() {
         val userEntity = testUserEntity(
             id = 42,
             username = "niklas",
@@ -254,7 +254,6 @@ class UserServiceTest {
         )
 
         whenever(userRepository.findByIdAndDeletedFalse(42)).thenReturn(userEntity)
-        whenever(userRepository.deleteUserCourseAssignments(42)).thenReturn(3)
 
         val result = userService.deactivateUser(42)
 
@@ -268,7 +267,6 @@ class UserServiceTest {
         assertEquals(GlobalRole.USER.id, userEntity.globalRole)
         assertNull(userEntity.alias)
 
-        verify(userRepository).deleteUserCourseAssignments(42)
         verify(userRepository).save(userEntity)
     }
 
@@ -279,7 +277,6 @@ class UserServiceTest {
         val result = userService.deactivateUser(42)
 
         assertFalse(result)
-        verify(userRepository, never()).deleteUserCourseAssignments(any())
         verify(userRepository, never()).save(any())
     }
 
