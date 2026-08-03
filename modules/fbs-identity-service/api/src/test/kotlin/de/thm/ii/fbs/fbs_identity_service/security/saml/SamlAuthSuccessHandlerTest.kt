@@ -4,7 +4,7 @@ import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.security.principal.IdentityUserPrincipal
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -24,9 +24,9 @@ import kotlin.test.assertTrue
 
 class SamlAuthSuccessHandlerTest {
 
-    private val samlLoginService = Mockito.mock<SamlLoginService>()
+    private val samlLoginService = mock<SamlLoginService>()
 
-    private val securityContextRepository = Mockito.mock<SecurityContextRepository>()
+    private val securityContextRepository = mock<SecurityContextRepository>()
 
     private val handler = SamlAuthSuccessHandler(
         samlLoginService = samlLoginService,
@@ -49,7 +49,7 @@ class SamlAuthSuccessHandlerTest {
             )
         )
 
-        val authentication = Mockito.mock<Authentication>()
+        val authentication = mock<Authentication>()
         whenever(authentication.principal).thenReturn(principal)
 
         val request = MockHttpServletRequest()
@@ -76,10 +76,10 @@ class SamlAuthSuccessHandlerTest {
             )
         )
 
-        val samlAuthentication = Mockito.mock<Authentication>()
+        val samlAuthentication = mock<Authentication>()
         whenever(samlAuthentication.principal).thenReturn(principal)
 
-        val user = Mockito.mock<User>()
+        val user = mock<User>()
         whenever(user.id).thenReturn(1L)
         whenever(user.username).thenReturn("niklas")
         whenever(user.globalRole).thenReturn(GlobalRole.USER)
