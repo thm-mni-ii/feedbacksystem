@@ -1,16 +1,20 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
+import de.thm.ii.fbs.fbs_identity_service.model.user.User
+import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
+import de.thm.ii.fbs.fbs_identity_service.service.user.UserService
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/v1/legal")
-class LegalController {
+class LegalController(private val userService: UserService, private val currentUserService: CurrentUserService) {
 
     @GetMapping("/{filename}")
     fun legalTexts(@PathVariable filename: String): Map<String, String> {
@@ -28,18 +32,27 @@ class LegalController {
         return mapOf("markdown" to text)
     }
 
-    // Terms-of-use-Endpunkte erst aktivieren, wenn der aktuelle Nutzer über Auth/SecurityContext geprüft werden kann
-    // Sonst könnte ein Client den Privacy-Status beliebiger Nutzer lesen oder setzen.
-
-    /*
     @GetMapping("/termsofuse/{uid}")
     fun getTermsOfUseAcceptanceStatus(@PathVariable uid: Long): Map<String, Boolean> {
-        return mapOf("accepted" to userService.getPrivacyStatusOf(uid))
+        val user = requireCurrentUser(uid)
+
+        return mapOf("accepted" to userService.getPrivacyStatusOf(user.id))
     }
 
     @PutMapping("/termsofuse/{uid}")
     fun acceptTermsOfUse(@PathVariable uid: Long) {
-        userService.updateAgreementToPrivacyFor(uid, true)
+        val user = requireCurrentUser(uid)
+        userService.updateAgreementToPrivacyFor(user.id, true)
     }
-    */
+
+    private fun requireCurrentUser(uid: Long): User {
+        val user = currentUserService.getCurrentUser()
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+
+        if (user.id != uid) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN)
+        }
+
+        return user
+    }
 }
