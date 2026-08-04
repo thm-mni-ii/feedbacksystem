@@ -40,12 +40,12 @@ class LegalController(private val userService: UserService, private val currentU
             )
         ])
     )
-    @GetMapping("/{filename}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{filename}", produces = [APPLICATION_JSON_VALUE])
     fun legalTexts(@PathVariable filename: String): LegalTextResponse {
         val resourceName = when (filename) {
             "impressum" -> "impressum.md"
             "privacy-text" -> "privacy_text.md"
-            else -> throw ResponseStatusException(HttpStatus.NOT_FOUND)
+            else -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Legal text file not found")
         }
 
         val text = ClassPathResource(resourceName)
@@ -74,7 +74,7 @@ class LegalController(private val userService: UserService, private val currentU
             )
         ])
     )
-    @GetMapping("/termsofuse/{uid}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/termsofuse/{uid}", produces = [APPLICATION_JSON_VALUE])
     fun getTermsOfUseAcceptanceStatus(@PathVariable uid: Long): TermsOfUseAcceptanceResponse {
         val user = requireCurrentUser(uid)
 

@@ -14,8 +14,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @ExtendWith(MockitoExtension::class)
 class LocalLoginServiceTest {
@@ -56,7 +56,7 @@ class LocalLoginServiceTest {
     fun `login rejects unknown user`() {
         whenever(userRepository.findByUsernameAndDeletedFalse("unknown")).thenReturn(null)
 
-        val exception = assertThrows(InvalidCredentialsException::class.java) {
+        val exception = assertFailsWith<InvalidCredentialsException> {
             localLoginService.login("unknown", "password")
         }
 
@@ -73,7 +73,7 @@ class LocalLoginServiceTest {
         whenever(userRepository.findByUsernameAndDeletedFalse("niklas")).thenReturn(user)
         whenever(passwordEncoder.matches("wrong-password", encodedPassword)).thenReturn(false)
 
-        val exception = assertThrows(InvalidCredentialsException::class.java) {
+        val exception = assertFailsWith<InvalidCredentialsException> {
             localLoginService.login("niklas", "wrong-password")
         }
 
@@ -87,7 +87,7 @@ class LocalLoginServiceTest {
 
         whenever(userRepository.findByUsernameAndDeletedFalse("niklas")).thenReturn(user)
 
-        val exception = assertThrows(InvalidCredentialsException::class.java) {
+        val exception = assertFailsWith<InvalidCredentialsException> {
             localLoginService.login("niklas", "password")
         }
 
@@ -100,7 +100,7 @@ class LocalLoginServiceTest {
     fun `login rejects deleted user`() {
         whenever(userRepository.findByUsernameAndDeletedFalse("deleted-user")).thenReturn(null)
 
-        val exception = assertThrows(InvalidCredentialsException::class.java) {
+        val exception = assertFailsWith<InvalidCredentialsException> {
             localLoginService.login("deleted-user", "password")
         }
 

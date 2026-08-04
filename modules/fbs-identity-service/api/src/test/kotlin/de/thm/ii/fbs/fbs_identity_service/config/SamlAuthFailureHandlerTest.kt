@@ -2,13 +2,13 @@ package de.thm.ii.fbs.fbs_identity_service.config
 
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.FrontendRedirectService
 import de.thm.ii.fbs.fbs_identity_service.service.auth.saml.SamlSessionCleanupService
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.core.AuthenticationException
+import kotlin.test.assertEquals
 
 class SamlAuthFailureHandlerTest {
 
