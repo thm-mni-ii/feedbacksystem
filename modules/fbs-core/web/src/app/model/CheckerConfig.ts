@@ -3,6 +3,8 @@ export interface CheckerConfig {
   checkerType: string;
   mainFileUploaded?: boolean;
   secondaryFileUploaded?: boolean;
+  mainFileName?: string;
+  secondaryFileName?: string;
   ord: number;
   stagedFeedbackEnabled?: boolean;
   initialOrdLimit?: number;
