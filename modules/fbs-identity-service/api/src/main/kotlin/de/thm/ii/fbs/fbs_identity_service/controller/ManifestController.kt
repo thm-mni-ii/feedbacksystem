@@ -1,10 +1,14 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Tag(name = "Manifest", description = "Service metadata and capability overview")
 @RestController
 class ManifestController(
     @param:Value("\${spring.application.name:fbs-identity-service}")
@@ -14,7 +18,11 @@ class ManifestController(
     private val version: String
 ) {
 
-    @GetMapping("/manifest")
+    @Operation(
+        summary = "Get service manifest",
+        description = "Returns service metadata, exposed endpoints and available capabilities of the Identity Service."
+    )
+    @GetMapping("/manifest", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun manifest(): ServiceManifest {
         return ServiceManifest(
             service = serviceName,
