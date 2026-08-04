@@ -24,6 +24,8 @@ import { UserTaskResult } from "../../model/UserTaskResult";
 import { ExportTasksDialogComponent } from "src/app/dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import { Requirement } from "src/app/model/Requirement";
 import { TaskPointsService } from "../../service/task-points.service";
+import { IntegrationService } from "../../service/integration.service";
+import { Integration } from "../../model/Integration";
 
 @Component({
   selector: "app-course-detail",
@@ -48,6 +50,7 @@ export class CourseDetailComponent implements OnInit {
     private feedbackAppService: FeedbackAppService,
     private goToService: GoToService,
     private taskPointsService: TaskPointsService,
+    private integrationService: IntegrationService,
     private cdr: ChangeDetectorRef
   ) {}
   punkte: number = 0;
@@ -58,6 +61,7 @@ export class CourseDetailComponent implements OnInit {
   role: string = null;
   course: Observable<Course> = of();
   openConferences: Observable<string[]>;
+  integrations: Record<string, Integration> = {};
   legends = ["green", "red", "#1E457C"];
   userID: number;
   pointlist: number[] = [];
@@ -107,6 +111,10 @@ export class CourseDetailComponent implements OnInit {
 
     this.calculateCourseProgressBar();
     this.calculateBonusPoints();
+    this.integrationService.getAllIntegrations().subscribe(
+      (integrations) => (this.integrations = integrations),
+      (error) => console.error(error)
+    );
 
     this.role = this.auth.getToken().courseRoles[this.courseID];
     this.userID = this.authService.getToken().id;
@@ -460,6 +468,10 @@ export class CourseDetailComponent implements OnInit {
 
   joinClassroom() {
     this.externalClassroomService.join(this.courseID);
+  }
+
+  isIntegrationEnabled(name: string): boolean {
+    return this.integrations[name] !== undefined;
   }
 
   deleteCourse() {
