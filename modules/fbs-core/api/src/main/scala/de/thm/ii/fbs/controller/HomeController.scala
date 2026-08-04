@@ -42,7 +42,7 @@ class HomeController {
     * @return Forward undefined access to index.
     */
   @RequestMapping(value = Array(
-    "/courses", "/sqlplayground", "/analytics", "/modelling", "/kanban", "/time-tracking", "/sci-check", "/questionary")
+    "/courses", "/sqlplayground", "/analytics", "/modelling", "/kanban", "/sci-check", "/questionary")
   ) // TODO: Remove
   def redirectRoot: String = "forward:/"
 
