@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.service.auth
 
+import de.thm.ii.fbs.fbs_identity_service.exception.InvalidCredentialsException
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
@@ -12,11 +13,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.web.server.ResponseStatusException
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 
 @ExtendWith(MockitoExtension::class)
 class LocalLoginServiceTest {
@@ -57,11 +56,11 @@ class LocalLoginServiceTest {
     fun `login rejects unknown user`() {
         whenever(userRepository.findByUsernameAndDeletedFalse("unknown")).thenReturn(null)
 
-        val exception = assertFailsWith<ResponseStatusException> {
+        val exception = assertThrows(InvalidCredentialsException::class.java) {
             localLoginService.login("unknown", "password")
         }
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.statusCode)
+        assertEquals("Invalid username or password", exception.message)
         verify(passwordEncoder, never()).matches(any(), any())
         verify(jwtService, never()).createToken(any())
     }
@@ -74,11 +73,11 @@ class LocalLoginServiceTest {
         whenever(userRepository.findByUsernameAndDeletedFalse("niklas")).thenReturn(user)
         whenever(passwordEncoder.matches("wrong-password", encodedPassword)).thenReturn(false)
 
-        val exception = assertFailsWith<ResponseStatusException> {
+        val exception = assertThrows(InvalidCredentialsException::class.java) {
             localLoginService.login("niklas", "wrong-password")
         }
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.statusCode)
+        assertEquals("Invalid username or password", exception.message)
         verify(jwtService, never()).createToken(any())
     }
 
@@ -88,11 +87,11 @@ class LocalLoginServiceTest {
 
         whenever(userRepository.findByUsernameAndDeletedFalse("niklas")).thenReturn(user)
 
-        val exception = assertFailsWith<ResponseStatusException> {
+        val exception = assertThrows(InvalidCredentialsException::class.java) {
             localLoginService.login("niklas", "password")
         }
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.statusCode)
+        assertEquals("Invalid username or password", exception.message)
         verify(passwordEncoder, never()).matches(any(), any())
         verify(jwtService, never()).createToken(any())
     }
@@ -101,11 +100,11 @@ class LocalLoginServiceTest {
     fun `login rejects deleted user`() {
         whenever(userRepository.findByUsernameAndDeletedFalse("deleted-user")).thenReturn(null)
 
-        val exception = assertFailsWith<ResponseStatusException> {
+        val exception = assertThrows(InvalidCredentialsException::class.java) {
             localLoginService.login("deleted-user", "password")
         }
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.statusCode)
+        assertEquals("Invalid username or password", exception.message)
         verify(passwordEncoder, never()).matches(any(), any())
         verify(jwtService, never()).createToken(any())
     }

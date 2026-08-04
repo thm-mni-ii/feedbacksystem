@@ -3,6 +3,7 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 import de.thm.ii.fbs.fbs_identity_service.dto.login.LoginRequest
 import de.thm.ii.fbs.fbs_identity_service.dto.login.LoginResponse
 import de.thm.ii.fbs.fbs_identity_service.service.auth.LocalLoginService
+import de.thm.ii.fbs.fbs_identity_service.exception.dto.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -28,9 +29,13 @@ class AuthController (private val localLoginService: LocalLoginService) {
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "200"),
+            ApiResponse(responseCode = "400", description = "Invalid request body", content = [
+                Content(schema = Schema(implementation = ErrorResponse::class)
+                )
+            ]),
             ApiResponse(responseCode = "401", description = "Invalid username or password", content = [
                 Content(
-                    schema = Schema(hidden = true)
+                    schema = Schema(implementation = ErrorResponse::class)
                 )
             ])
         ]
