@@ -38,11 +38,12 @@ adminToken
 ```
 The GraphQL requests in `local-graphql.http` reuse these tokens.
 
-Some later requests also store user IDs:
+Some later requests also store user IDs and a username:
 
 ```
 adminUserId
 managedUserId
+managedUsername
 ```
 These are used by later REST and GraphQL requests. Because of that, some requests should be executed in order.
 
@@ -59,6 +60,7 @@ The HTTP files cover:
 * current user resolution
 * user queries as regular user and admin
 * user creation as unauthenticated, regular and admin user
+* create user with duplicate username
 * password changes
 * global role updates
 * user deactivation

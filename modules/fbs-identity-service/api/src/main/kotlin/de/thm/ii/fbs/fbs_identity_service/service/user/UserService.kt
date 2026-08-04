@@ -1,11 +1,13 @@
 package de.thm.ii.fbs.fbs_identity_service.service.user
 
+import de.thm.ii.fbs.fbs_identity_service.exception.UsernameAlreadyExistsException
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
 import de.thm.ii.fbs.fbs_identity_service.service.auth.CurrentUserService
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -69,6 +71,8 @@ class UserService (private val userRepository: UserRepository, private val passw
         globalRole: GlobalRole?,
         alias: String?
     ): User {
+        requireUsernameAvailable(username)
+
         val userEntity = UserEntity(
             prename = prename,
             surname = surname,
@@ -79,9 +83,9 @@ class UserService (private val userRepository: UserRepository, private val passw
             alias = alias
         )
 
-        val savedUserEntity = userRepository.save(userEntity)
+        val savedUserEntity = saveUser(userEntity)
 
-        return savedUserEntity.toModel()
+        return savedUserEntity
     }
 
     fun createExternalUser(
@@ -92,6 +96,8 @@ class UserService (private val userRepository: UserRepository, private val passw
         globalRole: GlobalRole = GlobalRole.USER,
         alias: String? = null
     ): User {
+        requireUsernameAvailable(username)
+
         val userEntity = UserEntity(
             prename = prename,
             surname = surname,
@@ -102,9 +108,24 @@ class UserService (private val userRepository: UserRepository, private val passw
             alias = alias
         )
 
-        val savedUserEntity = userRepository.save(userEntity)
+        val savedUserEntity = saveUser(userEntity)
 
-        return savedUserEntity.toModel()
+        return savedUserEntity
+    }
+
+    private fun requireUsernameAvailable(username: String) {
+        if (userRepository.existsByUsername(username)) {
+            throw UsernameAlreadyExistsException(username)
+        }
+    }
+
+    private fun saveUser(userEntity: UserEntity): User {
+        return try {
+            userRepository.saveAndFlush(userEntity).toModel()
+        } catch (_: DataIntegrityViolationException) {
+            // Der Username ist aktuell das einzige vom Nutzer gesetzte eindeutige Datenbankfeld.
+            throw UsernameAlreadyExistsException(userEntity.username)
+        }
     }
 
     fun updateGlobalRole(userId: Long, globalRole: GlobalRole): User? {

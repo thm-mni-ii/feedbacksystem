@@ -111,7 +111,20 @@ Content-Type: application/json
   "query": "mutation { createUser(input: { prename: \"Okan\", surname: \"Genc\", email: \"okan.genc@example.com\", username: \"okangenc2\", password: \"okangenc123\", globalRole: USER, alias: \"oggy\" }) { id username globalRole } }"
 }
 
-> {% client.global.set("managedUserId", response.body.data.createUser.id); %}
+> {%
+    client.global.set("managedUserId", response.body.data.createUser.id);
+    client.global.set("managedUsername", response.body.data.createUser.username);
+%}
+
+### Create user with duplicate username - GraphQL error
+# First run "Create managed test user - admin success" to set {{managedUsername}}.
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(input: { prename: \"Niklas\", surname: \"Test\", email: \"niklas@example.com\", username: \"{{managedUsername}}\", password: \"password\", globalRole: USER, alias: \"ne\" }) { id username } }"
+}
 
 
 ### Query user - forbidden for non-admin
