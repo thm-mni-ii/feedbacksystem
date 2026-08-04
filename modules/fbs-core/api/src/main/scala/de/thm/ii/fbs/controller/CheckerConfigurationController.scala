@@ -201,8 +201,10 @@ class CheckerConfigurationController {
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageFileName.MAIN_FILE,
       cc => {
-        this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
+        val fileName = originalFilename(file)
+        this.ccs.setMainFileMetadata(cid, tid, ccid, state = true, fileName)
         cc.mainFileUploaded = true
+        cc.mainFileName = fileName
         notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc)
       })(cid, tid, ccid, file, req, res)
 
@@ -236,8 +238,10 @@ class CheckerConfigurationController {
                           req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageFileName.SECONDARY_FILE,
       cc => {
-        this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true)
+        val fileName = originalFilename(file)
+        this.ccs.setSecondaryFileMetadata(cid, tid, ccid, state = true, fileName)
         cc.secondaryFileUploaded = true
+        cc.secondaryFileName = fileName
         notifyCheckerSecondaryFileUpload(cid, taskService.getOne(tid).get, cc)
       })(cid, tid, ccid, file, req, res)
 
@@ -283,6 +287,8 @@ class CheckerConfigurationController {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
         case Some(checkrunnerConfiguration) =>
           val mainFileInputStream = storageService.getFileContentStream(pathFn)(checkrunnerConfiguration.isInBlockStorage, ccid, fileName)
+          originalFileName(checkrunnerConfiguration, fileName)
+            .foreach(name => res.setHeader("Content-Disposition", s"""attachment;filename="${escapeHeaderFilename(name)}""""))
           mainFileInputStream.transferTo(res.getOutputStream)
         case _ => throw new ResourceNotFoundException()
       }
@@ -326,4 +332,19 @@ class CheckerConfigurationController {
       case _ =>
     }
   }
+
+  private def originalFilename(file: MultipartFile): Option[String] =
+    Option(file.getOriginalFilename)
+      .map(name => name.split("[/\\\\]").last)
+      .map(_.replaceAll("[\\r\\n]", ""))
+      .filter(_.nonEmpty)
+
+  private def originalFileName(cc: CheckrunnerConfiguration, storageName: String): Option[String] = storageName match {
+    case storageFileName.MAIN_FILE => cc.mainFileName
+    case storageFileName.SECONDARY_FILE => cc.secondaryFileName
+    case _ => None
+  }
+
+  private def escapeHeaderFilename(filename: String): String =
+    filename.replace("\\", "\\\\").replace("\"", "\\\"")
 }
