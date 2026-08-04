@@ -113,7 +113,6 @@ import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component
 import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
 import { AngularEditorModule } from "@kolkov/angular-editor";
 import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
-import { FbsTimeTrackingComponent } from "./page-components/fbs-time-tracking/fbs-time-tracking.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -206,7 +205,6 @@ export const httpInterceptorProviders = [
     GroupDetailComponent,
     GroupDeregisterDialogComponent,
     FbsKanbanComponent,
-    FbsTimeTrackingComponent,
     FbsSciCheckComponent,
     SkipLinkComponent,
     UnstyledLinkComponent,

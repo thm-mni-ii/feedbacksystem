@@ -75,7 +75,7 @@ services:
     sharedSecret: ${SQL_RUNNER_SHARED_SECRET:}
     insecure: ${SQL_RUNNER_INSECURE:false}
 integrations:
-  names: [modelling, feedbackApp, eat, kanban, sciCheck]
+  names: ${INTEGRATIONS_NAMES:modelling,feedbackApp,eat,kanban,sciCheck,questionary,classroom}
   modelling:
     url: ${MODELLING_URL:https://fbs-modelling.mni.thm.de/}
   feedbackApp:
@@ -86,6 +86,10 @@ integrations:
     url: ${KANBAN_URL:/kanban/}
   sciCheck:
     url: ${SCI_CHECK_URL:/scicheck/}
+  questionary:
+    url: ${QUESTIONARY_URL:/questionary/}
+  classroom:
+    url: ${CLASSROOM_URL:http://localhost:8085}
 spring:
   main:
     allow-bean-definition-overriding: true
