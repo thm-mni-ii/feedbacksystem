@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import org.springframework.web.server.ResponseStatusException
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 
 @WebMvcTest(AuthController::class)
 @AutoConfigureMockMvc(addFilters = false)

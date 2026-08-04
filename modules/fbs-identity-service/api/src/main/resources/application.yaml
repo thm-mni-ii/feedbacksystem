@@ -17,23 +17,12 @@ spring:
       ddl-auto: none
     show-sql: true
 
-  security:
-    saml2:
-      relyingparty:
-        registration:
-          keycloak:
-            entity-id: http://localhost:8080/saml2/metadata/keycloak
-            assertingparty:
-              metadata-uri: http://localhost:8090/realms/fbs/protocol/saml/descriptor
-              singlesignon:
-                sign-request: false
-
-
 app:
   jwt:
     secret: ${JWT_SECRET:q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=}
     expires-in: ${JWT_EXPIRES_IN:3600}
-
+  frontend:
+    base-url: ${FRONTEND_BASE_URL:https://localhost}
   saml:
     enabled: false
     registration-id: keycloak
@@ -41,5 +30,7 @@ app:
     prename-attribute: givenName
     surname-attribute: sn
     email-attribute: mail
-    success-url: /login
-    failure-url: /login?ssoError=1
+    success-path: /login
+    failure-path: /login?ssoError=1
+    jwt-cookie-name: jwt
+    jwt-cookie-max-age-seconds: 30

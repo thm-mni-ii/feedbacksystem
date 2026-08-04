@@ -1,4 +1,6 @@
 app:
+  frontend:
+    base-url: https://localhost
   saml:
     enabled: true
     registration-id: keycloak
@@ -6,8 +8,10 @@ app:
     prename-attribute: givenName
     surname-attribute: sn
     email-attribute: mail
-    success-url: /login
-    failure-url: /login?ssoError=1
+    success-path: /login
+    failure-path: /login?ssoError=1
+    jwt-cookie-name: jwt
+    jwt-cookie-max-age-seconds: 30
 
 spring:
   security:
