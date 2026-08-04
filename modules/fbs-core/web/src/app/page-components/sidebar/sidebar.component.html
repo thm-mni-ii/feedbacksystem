@@ -68,7 +68,12 @@
           <p>{{ "sidebar.label.users" | i18nextEager }}</p>
         </a>
 
-        <a mat-list-item (click)="goToFBA()" aria-label="Feedback App öffnen">
+        <a
+          mat-list-item
+          *ngIf="isIntegrationEnabled('feedbackApp')"
+          (click)="goToFBA()"
+          aria-label="Feedback App öffnen"
+        >
           <mat-icon aria-hidden="true">question_answer</mat-icon>
           <p>{{ "sidebar.label.feedbackApp" | i18nextEager }}</p>
         </a>
@@ -84,7 +89,10 @@
 
         <a
           mat-list-item
-          *ngIf="showAnalytics || isAdmin || isModerator"
+          *ngIf="
+            isIntegrationEnabled('eat') &&
+            (showAnalytics || isAdmin || isModerator)
+          "
           routerLink="/analytics"
           routerLinkActive="selected"
         >
@@ -94,6 +102,7 @@
 
         <button
           mat-list-item
+          *ngIf="isIntegrationEnabled('modelling')"
           (click)="moveAndHideSidebar('/modelling')"
           aria-label="FBS Modelling öffnen"
         >
@@ -103,6 +112,7 @@
 
         <button
           mat-list-item
+          *ngIf="isIntegrationEnabled('kanban')"
           (click)="moveAndHideSidebar('/kanban')"
           aria-label="FBS Kanban öffnen"
         >
@@ -112,15 +122,7 @@
 
         <button
           mat-list-item
-          (click)="moveAndHideSidebar('/time-tracking')"
-          aria-label="Time Tracking"
-        >
-          <mat-icon aria-hidden="true">view_kanban</mat-icon>
-          <p>FBS Time Tracking</p>
-        </button>
-
-        <button
-          mat-list-item
+          *ngIf="isIntegrationEnabled('sciCheck')"
           (click)="moveAndHideSidebar('/sci-check')"
           aria-label="FBS SciCheck öffnen"
         >
@@ -130,6 +132,7 @@
 
         <button
           mat-list-item
+          *ngIf="isIntegrationEnabled('questionary')"
           (click)="moveAndHideSidebar('/questionary')"
           aria-label="Fragebogen öffnen"
         >
