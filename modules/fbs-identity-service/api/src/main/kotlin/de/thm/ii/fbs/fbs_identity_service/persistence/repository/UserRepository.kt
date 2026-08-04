@@ -18,4 +18,8 @@ interface UserRepository: JpaRepository <UserEntity, Long> {
     @Transactional
     @Query(value = "DELETE FROM user_course WHERE user_id = :userId", nativeQuery = true)
     fun deleteUserCourseAssignments(userId: Long): Int
+
+    fun findByUsernameAndDeletedFalse(username: String): UserEntity?
+
+    fun findByIdAndDeletedFalse(id: Long): UserEntity?
 }

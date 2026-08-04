@@ -7,6 +7,8 @@ Content-Type: application/json
   "password": "test123"
 }
 
+> {% client.global.set("accessToken", response.body.accessToken); %}
+
 ### Local login - wrong password
 POST http://localhost:8080/api/v1/auth/login
 Content-Type: application/json
@@ -23,4 +25,112 @@ Content-Type: application/json
 {
   "username": "unknownuser",
   "password": "test123"
+}
+
+### GraphQL currentUser without token
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+### GraphQL currentUser with token
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+### GraphQL currentUser with invalid token
+POST http://localhost:8080/graphql
+Authorization: Bearer invalid.token.value
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+### Change own password - success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeOwnPassword(input: { currentPassword: \"test123\", newPassword: \"test456\", newPasswordRepeat: \"test456\" }) }"
+}
+
+### Change own password - reset to original
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeOwnPassword(input: { currentPassword: \"test456\", newPassword: \"test123\", newPasswordRepeat: \"test123\" }) }"
+}
+
+### Change own password - wrong current password
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeOwnPassword(input: { currentPassword: \"wrong\", newPassword: \"test456\", newPasswordRepeat: \"test456\" }) }"
+}
+
+### Change user password - forbidden for non-admin
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeUserPassword(input: { userId: 3, newPassword: \"adminchange123\", newPasswordRepeat: \"adminchange123\" }) }"
+}
+
+### Create admin test user - run only if admintest does not exist yet
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(input: { prename: \"Admin\", surname: \"Test\", email: \"admin.test@example.com\", username: \"admintest\", password: \"admin123\", globalRole: ADMIN, alias: \"admin\" }) { id username globalRole } }"
+}
+
+### Local login - admin
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admintest",
+  "password": "admin123"
+}
+
+> {% client.global.set("adminToken", response.body.accessToken); %}
+
+### Change user password - admin success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeUserPassword(input: { userId: 3, newPassword: \"changedByAdmin123\", newPasswordRepeat: \"changedByAdmin123\" }) }"
+}
+
+### Local login - target user with admin changed password
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "maxlogin",
+  "password": "changedByAdmin123"
+}
+
+### Change user password - reset to original
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeUserPassword(input: { userId: 3, newPassword: \"test123\", newPasswordRepeat: \"test123\" }) }"
 }

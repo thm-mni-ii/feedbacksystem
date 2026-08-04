@@ -18,7 +18,8 @@ class JwtService(
     @param:Value("\${app.jwt.expires-in}")
     private val expiresIn: Long
 ) {
-    private val signingKey: SecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret))
+    private val signingKey: SecretKey =
+        Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret))
 
 
     fun createToken(user: User): String {

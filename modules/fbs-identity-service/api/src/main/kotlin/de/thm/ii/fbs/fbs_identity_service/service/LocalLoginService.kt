@@ -17,7 +17,7 @@ class LocalLoginService (
 
     fun login(username: String, password: String): LoginResponse {
 
-        val user = userRepository.findByUsername(username)
+        val user = userRepository.findByUsernameAndDeletedFalse(username)
             ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 
         val storedPassword = user.password

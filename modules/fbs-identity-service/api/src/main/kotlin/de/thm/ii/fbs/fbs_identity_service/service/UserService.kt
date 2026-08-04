@@ -5,19 +5,24 @@ import de.thm.ii.fbs.fbs_identity_service.model.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import kotlin.jvm.optionals.getOrElse
+import kotlin.jvm.optionals.getOrNull
 
 @Service
-class UserService (private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) {
+class UserService (private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder, private val currentUserService: CurrentUserService) {
 
-    // Übergangslösung. Später soll der aktuell authentifizierte/eingeloggte Nutzer zurückgegeben werden
+
     fun getCurrentUser(): User? {
-        return userRepository.findByUsername("admin")?.toModel()
+        return currentUserService.getCurrentUser()
     }
 
     fun findUserById(id: Long): User? {
-        return userRepository.findById(id).orElse(null).toModel()
+        return userRepository.findByIdAndDeletedFalse(id)?.toModel()
     }
 
     fun findUsers(query: String?, globalRole: GlobalRole?, limit: Int?, offset: Int?): UserSearchResult {
@@ -77,15 +82,15 @@ class UserService (private val userRepository: UserRepository, private val passw
     }
 
     fun updateGlobalRole(userId: Long, globalRole: GlobalRole): User? {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return null
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return null
         userEntity.globalRole = globalRole.id
         val savedUserEntity = userRepository.save(userEntity)
 
         return savedUserEntity.toModel()
     }
-
+    @Transactional
     fun deactivateUser(userId: Long): Boolean {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return false
 
         userRepository.deleteUserCourseAssignments(userId)
 
@@ -93,42 +98,65 @@ class UserService (private val userRepository: UserRepository, private val passw
         userEntity.surname = "Deleted User"
         userEntity.email = ""
         userEntity.username = "duser $userId"
+        userEntity.deleted = true
+        userEntity.password = null
+        userEntity.globalRole = GlobalRole.USER.id
+        userEntity.alias = null
         userRepository.save(userEntity)
 
         return true
     }
 
-    // Später muss hier der authentifizierte Nutzer geprüft werden und aktueller Passwort-Hash geprüft werden
     fun changeOwnPassword(
         currentPassword: String,
         newPassword: String,
         newPasswordRepeat: String
     ): Boolean {
+        val currentUser = currentUserService.getCurrentUser() ?: return false
 
-        return currentPassword.isNotBlank() &&
-                newPassword.isNotBlank() &&
-                newPassword == newPasswordRepeat
-    }
+        val userEntity = userRepository.findById(currentUser.id).orElse(null) ?: return false
 
-    // Übergangslösung: Im alten FBS darf ein ADMIN fremde Passwörter ändern; normale Nutzer nur ihr eigenes.
-    fun changeUserPassword(
-        userId: Long,
-        newPassword: String,
-        newPasswordRepeat: String
-    ): Boolean {
-        if (newPassword.isBlank() || newPassword != newPasswordRepeat) {
+        val storedPassword = userEntity.password ?: return false
+
+        if (
+            !passwordEncoder.matches(currentPassword, storedPassword) ||
+            newPassword.isBlank() ||
+            newPassword != newPasswordRepeat
+        ) {
             return false
         }
 
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
         userEntity.password = passwordEncoder.encode(newPassword)
         userRepository.save(userEntity)
 
         return true
     }
 
+    fun changeUserPassword(
+        userId: Long,
+        newPassword: String,
+        newPasswordRepeat: String
+    ): Boolean {
+        val currentUser = currentUserService.getCurrentUser() ?: return false
+
+        if (
+            currentUser.globalRole != GlobalRole.ADMIN
+            || newPassword.isBlank()
+            || newPassword != newPasswordRepeat
+        ){
+            return false
+        }
+
+        val targetUser = userRepository.findByIdAndDeletedFalse(userId) ?: return false
+
+        targetUser.password = passwordEncoder.encode(newPassword)
+        userRepository.save(targetUser)
+
+        return true
+    }
+
     fun updateAgreementToPrivacyFor(userId: Long, agreed: Boolean): Boolean {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return false
         userEntity.privacyChecked = agreed
         userRepository.save(userEntity)
 
@@ -136,7 +164,7 @@ class UserService (private val userRepository: UserRepository, private val passw
     }
 
     fun getPrivacyStatusOf(userId: Long): Boolean {
-        val userEntity = userRepository.findById(userId).orElse(null) ?: return false
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId) ?: return false
 
         return userEntity.privacyChecked
     }
