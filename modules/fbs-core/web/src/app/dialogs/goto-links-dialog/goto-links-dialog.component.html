@@ -16,8 +16,8 @@
       <mat-icon>content_copy</mat-icon>
     </button>
   </mat-form-field>
-  <br />
-  <mat-form-field class="max-width">
+  <br *ngIf="showAppLink" />
+  <mat-form-field class="max-width" *ngIf="showAppLink">
     <mat-label>{{
       "course.goto-links.app-link.label" | i18nextEager
     }}</mat-label>
