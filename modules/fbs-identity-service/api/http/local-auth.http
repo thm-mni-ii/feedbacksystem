@@ -1,0 +1,298 @@
+### Local login - success
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "maxlogin",
+  "password": "test123"
+}
+
+> {% client.global.set("accessToken", response.body.accessToken); %}
+
+### Local login - wrong password
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "maxlogin",
+  "password": "wrong"
+}
+
+### Local login - unknown user
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "unknownuser",
+  "password": "test123"
+}
+
+### Local login with blank username - bad request
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": "test123"
+}
+
+### Local login - admin
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admintest",
+  "password": "admin123"
+}
+
+> {% client.global.set("adminToken", response.body.accessToken); %}
+
+### GraphQL currentUser with admin token
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+> {% client.global.set("adminUserId", response.body.data.currentUser.id); %}
+
+### GraphQL currentUser without token - unauthorized
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+### GraphQL currentUser with token
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+### GraphQL currentUser with invalid token - unauthorized
+POST http://localhost:8080/graphql
+Authorization: Bearer invalid.token.value
+Content-Type: application/json
+
+{
+  "query": "{ currentUser { id username globalRole } }"
+}
+
+### Query users - forbidden for non-admin
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "{ users(pagination: { limit: 10, offset: 0 }) { items { id username globalRole } totalCount } }"
+}
+
+### Query users - admin success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ users(pagination: { limit: 10, offset: 0 }) { items { id username globalRole } totalCount } }"
+}
+
+### Query user with invalid ID - validation error
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ user(id: 0) { id username } }"
+}
+
+### Query users with invalid pagination - validation error
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ users(pagination: { limit: 0, offset: -1 }) { totalCount } }"
+}
+
+### Create user without token - unauthorized
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(input: { prename: \"Blocked\", surname: \"User\", email: \"blocked@example.com\", username: \"blockeduser\", password: \"test123\", globalRole: USER }) { id username globalRole } }"
+}
+
+### Create user - forbidden for non-admin
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(input: { prename: \"Blocked\", surname: \"User\", email: \"blocked@example.com\", username: \"blockeduser\", password: \"test123\", globalRole: USER }) { id username globalRole } }"
+}
+
+### Create user with invalid input - validation error
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(input: { prename: \"\", surname: \"User\", email: \"invalid-email\", username: \"validationtest\", password: \"test123\", globalRole: USER, alias: \"alias-that-is-longer-than-twenty-characters\" }) { id username } }"
+}
+
+### Create managed test user - admin success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(input: { prename: \"Okan\", surname: \"Genc\", email: \"okan.genc@example.com\", username: \"okangenc\", password: \"okangenc123\", globalRole: USER, alias: \"oggy\" }) { id username globalRole } }"
+}
+
+> {% client.global.set("managedUserId", response.body.data.createUser.id); %}
+
+### Terms of use without token - unauthorized
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+
+### Get own terms-of-use status - success
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Get another user's terms-of-use status - forbidden
+GET http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Accept terms of use for another user - forbidden
+PUT http://localhost:8080/api/v1/legal/termsofuse/{{managedUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Accept own terms of use - success
+PUT http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Get own terms-of-use status after acceptance
+GET http://localhost:8080/api/v1/legal/termsofuse/{{adminUserId}}
+Authorization: Bearer {{adminToken}}
+
+### Query user - forbidden for non-admin
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "{ user(id: {{managedUserId}}) { id username globalRole } }"
+}
+
+### Query user - admin success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "{ user(id: {{managedUserId}}) { id username globalRole } }"
+}
+
+### Change own password - success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeOwnPassword(input: { currentPassword: \"test123\", newPassword: \"test456\", newPasswordRepeat: \"test456\" }) }"
+}
+
+### Change own password - reset to original
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeOwnPassword(input: { currentPassword: \"test456\", newPassword: \"test123\", newPasswordRepeat: \"test123\" }) }"
+}
+
+### Change own password - wrong current password
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeOwnPassword(input: { currentPassword: \"wrong\", newPassword: \"test456\", newPasswordRepeat: \"test456\" }) }"
+}
+
+### Change user password - forbidden for non-admin
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeUserPassword(input: { userId: {{managedUserId}}, newPassword: \"changedByAdmin123\", newPasswordRepeat: \"changedByAdmin123\" }) }"
+}
+
+### Change user password - admin success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeUserPassword(input: { userId: {{managedUserId}}, newPassword: \"changedByAdmin123\", newPasswordRepeat: \"changedByAdmin123\" }) }"
+}
+
+### Login managed user with changed password
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "okangenc",
+  "password": "changedByAdmin123"
+}
+
+### Change managed user password - reset
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { changeUserPassword(input: { userId: {{managedUserId}}, newPassword: \"okangenc123\", newPasswordRepeat: \"okangenc123\" }) }"
+}
+
+### Update global role - forbidden for non-admin
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { updateGlobalRole(input: { userId: {{managedUserId}}, globalRole: MODERATOR }) { id username globalRole } }"
+}
+
+### Update global role - admin success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { updateGlobalRole(input: { userId: {{managedUserId}}, globalRole: MODERATOR }) { id username globalRole } }"
+}
+
+### Deactivate user - forbidden for non-admin
+POST http://localhost:8080/graphql
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { deactivateUser(userId: {{managedUserId}}) }"
+}
+
+### Deactivate user - admin success
+POST http://localhost:8080/graphql
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "query": "mutation { deactivateUser(userId: {{managedUserId}}) }"
+}
