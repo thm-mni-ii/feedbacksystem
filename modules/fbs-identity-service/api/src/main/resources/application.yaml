@@ -1,6 +1,6 @@
 spring:
   application:
-    name: identity-demo
+    name: fbs-identity-service
   graphql:
     graphiql:
       enabled: false
@@ -34,3 +34,7 @@ app:
     failure-path: /login?ssoError=1
     jwt-cookie-name: jwt
     jwt-cookie-max-age-seconds: 30
+
+info:
+  app:
+    version: 0.0.1-SNAPSHOT
