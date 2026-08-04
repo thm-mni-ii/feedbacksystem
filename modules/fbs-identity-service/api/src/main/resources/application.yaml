@@ -18,9 +18,6 @@ spring:
     show-sql: true
 
 app:
-  jwt:
-    secret: ${JWT_SECRET:q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=}
-    expires-in: ${JWT_EXPIRES_IN:3600}
   frontend:
     base-url: ${FRONTEND_BASE_URL:https://localhost}
   saml:
@@ -30,10 +27,7 @@ app:
     prename-attribute: givenName
     surname-attribute: sn
     email-attribute: mail
-    success-path: /login
     failure-path: /login?ssoError=1
-    jwt-cookie-name: jwt
-    jwt-cookie-max-age-seconds: 30
 
 info:
   app:

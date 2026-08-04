@@ -2,6 +2,7 @@ package de.thm.ii.fbs.fbs_identity_service.security.local
 
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
+import de.thm.ii.fbs.fbs_identity_service.security.principal.IdentityUserPrincipal
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -22,7 +23,7 @@ class LocalUserDetailsService(
 
         val role = user.toModel().globalRole
 
-        return LocalUserPrincipal(
+        return IdentityUserPrincipal(
             userId = user.id,
             username = user.username,
             password = password,

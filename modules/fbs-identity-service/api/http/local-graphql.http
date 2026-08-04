@@ -1,10 +1,27 @@
-# Before running these GraphQL requests:
-# Run "Local login - success" and "Local login - admin" in local-rest.http first.
-# These requests set {{accessToken}} and {{adminToken}}.
+@baseUrl = http://localhost:8080
+
+# Before running authenticated GraphQL requests:
+#
+# Obtain access tokens through the OIDC Authorization Code Flow with PKCE.
+# See local-oidc.http.
+#
+# Required variables:
+#
+# {{accessToken}}
+#   Access token of a normal USER.
+#
+# {{adminToken}}
+#   Access token of an ADMIN.
+#
+# {{managedUserToken}}
+#   Access token of the managed test user where required.
+#
+# Access tokens are stored as IntelliJ HTTP Client global variables by
+# the token exchange requests in local-oidc.http.
 
 
 ### GraphQL currentUser with admin token
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -14,7 +31,7 @@ Content-Type: application/json
 
 
 ### GraphQL currentUser without token - unauthorized
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Content-Type: application/json
 
 {
@@ -22,7 +39,7 @@ Content-Type: application/json
 }
 
 ### GraphQL currentUser with token
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -31,7 +48,7 @@ Content-Type: application/json
 }
 
 ### GraphQL currentUser with invalid token - unauthorized
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer invalid.token.value
 Content-Type: application/json
 
@@ -40,7 +57,7 @@ Content-Type: application/json
 }
 
 ### Query users - forbidden for non-admin
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -49,7 +66,7 @@ Content-Type: application/json
 }
 
 ### Query users - admin success
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -58,7 +75,7 @@ Content-Type: application/json
 }
 
 ### Query user with invalid ID - validation error
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -67,7 +84,7 @@ Content-Type: application/json
 }
 
 ### Query users with invalid pagination - validation error
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -76,7 +93,7 @@ Content-Type: application/json
 }
 
 ### Create user without token - unauthorized
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Content-Type: application/json
 
 {
@@ -84,7 +101,7 @@ Content-Type: application/json
 }
 
 ### Create user - forbidden for non-admin
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -93,7 +110,7 @@ Content-Type: application/json
 }
 
 ### Create user with invalid input - validation error
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -102,7 +119,7 @@ Content-Type: application/json
 }
 
 ### Create managed test user - admin success
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -117,7 +134,7 @@ Content-Type: application/json
 
 ### Create user with duplicate username - GraphQL error
 # First run "Create managed test user - admin success" to set {{managedUsername}}.
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -128,7 +145,7 @@ Content-Type: application/json
 
 ### Query user - forbidden for non-admin
 # First run "Create managed test user - admin success" to set {{managedUserId}}.
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -137,7 +154,7 @@ Content-Type: application/json
 }
 
 ### Query user - admin success
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -146,7 +163,7 @@ Content-Type: application/json
 }
 
 ### Change own password - success
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -155,7 +172,7 @@ Content-Type: application/json
 }
 
 ### Change own password - reset to original
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -164,7 +181,7 @@ Content-Type: application/json
 }
 
 ### Change own password - wrong current password
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -173,7 +190,7 @@ Content-Type: application/json
 }
 
 ### Change user password - forbidden for non-admin
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -182,7 +199,7 @@ Content-Type: application/json
 }
 
 ### Change user password - admin success
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -191,7 +208,7 @@ Content-Type: application/json
 }
 
 ### Change managed user password - reset
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -200,7 +217,7 @@ Content-Type: application/json
 }
 
 ### Update global role - forbidden for non-admin
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -209,7 +226,7 @@ Content-Type: application/json
 }
 
 ### Update global role - admin success
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -218,7 +235,7 @@ Content-Type: application/json
 }
 
 ### Deactivate user - forbidden for non-admin
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -227,7 +244,7 @@ Content-Type: application/json
 }
 
 ### Deactivate user - admin success
-POST http://localhost:8080/graphql
+POST {{baseUrl}}/graphql
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 

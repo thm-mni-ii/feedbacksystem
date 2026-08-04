@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.service
 
-import de.thm.ii.fbs.fbs_identity_service.model.User
+import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.UserRepository
 import org.springframework.security.core.context.SecurityContextHolder
@@ -13,7 +13,7 @@ class CurrentUserService(
 ) {
 
     fun getCurrentUser(): User? {
-        val jwt = SecurityContextHolder.getContext().authentication?.principal as? Jwt  ?: return null
+        val jwt = SecurityContextHolder.getContext().authentication?.principal as? Jwt ?: return null
 
         val userId = jwt.subject.toLongOrNull()  ?: return null
 

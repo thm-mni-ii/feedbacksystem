@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
-import de.thm.ii.fbs.fbs_identity_service.security.local.LocalUserPrincipal
+import de.thm.ii.fbs.fbs_identity_service.security.principal.IdentityUserPrincipal
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.core.Authentication
@@ -16,7 +16,7 @@ class OidcTokenConfig {
         return OAuth2TokenCustomizer { context ->
             val principal = context.getPrincipal<Authentication>().principal
 
-            if (principal is LocalUserPrincipal) {
+            if (principal is IdentityUserPrincipal) {
                 context.claims
                     .subject(principal.userId.toString())
 
