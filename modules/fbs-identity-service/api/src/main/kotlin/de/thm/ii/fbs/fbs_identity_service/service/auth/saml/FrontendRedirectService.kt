@@ -12,13 +12,19 @@ class FrontendRedirectService(
     private val frontendBaseUrl: String
 ) {
 
-    fun buildRedirectUrl(path: String): String {
+    fun buildRedirectUrl(path: String, route: String? = null): String {
         val safePath = requireInternalPath(path)
 
-        return UriComponentsBuilder
-            .fromUriString(frontendBaseUrl.trimEnd('/'))
-            .path(safePath)
+        val builder = UriComponentsBuilder
+            .fromUriString(frontendBaseUrl.trimEnd('/') + safePath)
+
+        route?.let {
+            builder.queryParam("route", it)
+        }
+
+        return builder
             .build()
+            .encode()
             .toUriString()
     }
 
