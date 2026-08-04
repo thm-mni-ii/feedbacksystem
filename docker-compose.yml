@@ -75,6 +75,30 @@ services:
       start_period: 10s
       retries: 3
 
+  identity-service:
+    build:
+      context: modules/fbs-identity-service/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - mysql1
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql1:3306/fbs
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=twRuvi2ejllDdA4nnQLa08O
+      - APP_SAML_ENABLED=false
+      - APP_JWT_SECRET=q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=
+    networks:
+      fbs:
+    healthcheck:
+      test: curl -f http://localhost:8080/health
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
+
   mysql-checker:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --sql_mode=""
