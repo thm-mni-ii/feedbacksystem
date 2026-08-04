@@ -2,6 +2,7 @@ import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuthGuard } from "./guards/auth.guard";
 import { AdminGuard } from "./guards/admin.guard";
+import { TermsOfUseGuard } from "./guards/terms-of-use.guard";
 import { ChangePasswordComponent } from "./page-components/change-password/change-password.component";
 import { MyCoursesComponent } from "./page-components/my-courses/my-courses.component";
 import { SearchCoursesComponent } from "./page-components/search-courses/search-courses.component";
@@ -25,7 +26,6 @@ import { GroupDetailComponent } from "./page-components/group-detail/group-detai
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-questionary.component";
-import { FbsTimeTrackingComponent } from "./page-components/fbs-time-tracking/fbs-time-tracking.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -33,6 +33,7 @@ const routes: Routes = [
     path: "",
     component: SidebarComponent,
     canActivate: [AuthGuard],
+    canActivateChild: [TermsOfUseGuard],
     children: [
       {
         path: "courses",
@@ -118,13 +119,6 @@ const routes: Routes = [
       {
         path: "kanban",
         component: FbsKanbanComponent,
-        canActivate: [AuthGuard],
-      },
-
-      // Kanban
-      {
-        path: "time-tracking",
-        component: FbsTimeTrackingComponent,
         canActivate: [AuthGuard],
       },
 
