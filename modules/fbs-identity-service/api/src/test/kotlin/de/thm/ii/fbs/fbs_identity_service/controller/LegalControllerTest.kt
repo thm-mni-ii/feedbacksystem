@@ -60,7 +60,7 @@ class LegalControllerTest {
         whenever(currentUserService.getCurrentUser()).thenReturn(user)
         whenever(userService.getPrivacyStatusOf(1L)).thenReturn(true)
 
-        mockMvc.get("/api/v1/legal/termsofuse/1")
+        mockMvc.get("/api/v1/legal/termsofuse/status")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.accepted") { value(true) }
@@ -73,33 +73,14 @@ class LegalControllerTest {
     fun `terms of use status returns unauthorized when user is not authenticated`() {
         whenever(currentUserService.getCurrentUser()).thenReturn(null)
 
-        mockMvc.get("/api/v1/legal/termsofuse/1")
+        mockMvc.get("/api/v1/legal/termsofuse/status")
             .andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.timestamp") { exists() }
                 jsonPath("$.status") { value(401) }
                 jsonPath("$.error") { value("Unauthorized") }
                 jsonPath("$.message") { value("User is not authenticated") }
-                jsonPath("$.path") { value("/api/v1/legal/termsofuse/1") }
-            }
-
-        verify(userService, never()).getPrivacyStatusOf(any())
-    }
-
-    @Test
-    fun `terms of use status returns forbidden when user id does not match current user`() {
-        val user = currentUser(2L)
-
-        whenever(currentUserService.getCurrentUser()).thenReturn(user)
-
-        mockMvc.get("/api/v1/legal/termsofuse/1")
-            .andExpect {
-                status { isForbidden() }
-                jsonPath("$.timestamp") { exists() }
-                jsonPath("$.status") { value(403) }
-                jsonPath("$.error") { value("Forbidden") }
-                jsonPath("$.message") { value("User is not allowed to access this user id") }
-                jsonPath("$.path") { value("/api/v1/legal/termsofuse/1") }
+                jsonPath("$.path") { value("/api/v1/legal/termsofuse/status") }
             }
 
         verify(userService, never()).getPrivacyStatusOf(any())
@@ -111,9 +92,9 @@ class LegalControllerTest {
 
         whenever(currentUserService.getCurrentUser()).thenReturn(user)
 
-        mockMvc.put("/api/v1/legal/termsofuse/1")
+        mockMvc.put("/api/v1/legal/termsofuse/accept")
             .andExpect {
-                status { isOk() }
+                status { isNoContent() }
             }
 
         verify(userService).updateAgreementToPrivacyFor(1L, true)
@@ -123,33 +104,14 @@ class LegalControllerTest {
     fun `accept terms of use returns unauthorized when user is not authenticated`() {
         whenever(currentUserService.getCurrentUser()).thenReturn(null)
 
-        mockMvc.put("/api/v1/legal/termsofuse/1")
+        mockMvc.put("/api/v1/legal/termsofuse/accept")
             .andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.timestamp") { exists() }
                 jsonPath("$.status") { value(401) }
                 jsonPath("$.error") { value("Unauthorized") }
                 jsonPath("$.message") { value("User is not authenticated") }
-                jsonPath("$.path") { value("/api/v1/legal/termsofuse/1") }
-            }
-
-        verify(userService, never()).updateAgreementToPrivacyFor(any(), any())
-    }
-
-    @Test
-    fun `accept terms of use returns forbidden when user id does not match current user`() {
-        val user = currentUser(2L)
-
-        whenever(currentUserService.getCurrentUser()).thenReturn(user)
-
-        mockMvc.put("/api/v1/legal/termsofuse/1")
-            .andExpect {
-                status { isForbidden() }
-                jsonPath("$.timestamp") { exists() }
-                jsonPath("$.status") { value(403) }
-                jsonPath("$.error") { value("Forbidden") }
-                jsonPath("$.message") { value("User is not allowed to access this user id") }
-                jsonPath("$.path") { value("/api/v1/legal/termsofuse/1") }
+                jsonPath("$.path") { value("/api/v1/legal/termsofuse/accept") }
             }
 
         verify(userService, never()).updateAgreementToPrivacyFor(any(), any())

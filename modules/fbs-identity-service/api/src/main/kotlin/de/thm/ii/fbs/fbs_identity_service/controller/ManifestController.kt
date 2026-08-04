@@ -67,7 +67,7 @@ class ManifestController(
                 id = "identity.legal.terms-of-use.read",
                 type = "rest-endpoint",
                 method = "GET",
-                path = "/api/v1/legal/termsofuse/{uid}",
+                path = "/api/v1/legal/termsofuse/status",
                 requiresAuthentication = true,
                 description = "Returns whether the current user accepted the terms of use"
             ),
@@ -75,7 +75,7 @@ class ManifestController(
                 id = "identity.legal.terms-of-use.update",
                 type = "rest-endpoint",
                 method = "PUT",
-                path = "/api/v1/legal/termsofuse/{uid}",
+                path = "/api/v1/legal/termsofuse/accept",
                 requiresAuthentication = true,
                 description = "Stores that the current user accepted the terms of use"
             ),
