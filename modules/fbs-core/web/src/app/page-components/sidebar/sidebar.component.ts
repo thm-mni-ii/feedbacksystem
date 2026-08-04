@@ -10,6 +10,8 @@ import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dat
 import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impressum-dialog.component";
 import { FeedbackAppService } from "../../service/feedback-app.service";
 import { User } from "src/app/model/User";
+import { IntegrationService } from "../../service/integration.service";
+import { Integration } from "../../model/Integration";
 
 /**
  * Root component shows sidenav and titlebar
@@ -26,7 +28,8 @@ export class SidebarComponent implements OnInit {
     private titlebar: TitlebarService,
     private dialog: MatDialog,
     private feedbackAppService: FeedbackAppService,
-    private userservice: UserService
+    private userservice: UserService,
+    private integrationService: IntegrationService
   ) {}
 
   title: Observable<string> = of("");
@@ -38,6 +41,7 @@ export class SidebarComponent implements OnInit {
   isModerator: boolean;
   showAnalytics: boolean;
   user: User;
+  integrations: Record<string, Integration> = {};
 
   ngOnInit() {
     this.userID = this.auth.getToken().id;
@@ -56,6 +60,11 @@ export class SidebarComponent implements OnInit {
 
     this.showAnalytics = Object.values(this.auth.getToken().courseRoles).some(
       (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
+    );
+
+    this.integrationService.getAllIntegrations().subscribe(
+      (integrations) => (this.integrations = integrations),
+      (error) => console.log(error)
     );
   }
 
@@ -98,15 +107,16 @@ export class SidebarComponent implements OnInit {
    * Link to Feedback App
    */
   goToFBA() {
-    this.feedbackAppService.getToken().subscribe((token) => {
-      localStorage.setItem("flutter.authToken", JSON.stringify(token));
-      window.open("/feedbackApp/");
-    });
+    this.feedbackAppService.open(null, true).subscribe(() => {});
   }
 
   moveAndHideSidebar(route: string) {
     console.log("moveAndHideSidebar");
     this.router.navigate([route]);
     this.opened = false;
+  }
+
+  isIntegrationEnabled(name: string): boolean {
+    return this.integrations[name] !== undefined;
   }
 }
