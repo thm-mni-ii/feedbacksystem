@@ -2,20 +2,20 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.info.BuildProperties
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import java.util.Properties
 
 @WebMvcTest(ManifestController::class)
 @AutoConfigureMockMvc(addFilters = false)
-@TestPropertySource(
-    properties = [
-        "spring.application.name=fbs-identity-service",
-        "info.app.version=0.0.1-SNAPSHOT"
-    ]
-)
+@Import(BuildPropertiesTestConfig::class)
 class ManifestControllerTest {
 
     @Autowired
@@ -27,10 +27,10 @@ class ManifestControllerTest {
             .andExpect {
                 status { isOk() }
 
-                jsonPath("$.service") { value("fbs-identity-service") }
-                jsonPath("$.version") { value("0.0.1-SNAPSHOT") }
-                jsonPath("$.description") { exists() }
-
+                jsonPath("$.build.name") { value("fbs-identity-service") }
+                jsonPath("$.build.version") { value("0.0.1-SNAPSHOT") }
+                jsonPath("$.build.time") { value("2026-07-12T16:55:27.620Z") }
+                jsonPath("$.description") { value("Provides authentication, user management and identity functions for the FBS.")}
                 jsonPath("$.endpoints.health") { value("/health") }
                 jsonPath("$.endpoints.manifest") { value("/manifest") }
                 jsonPath("$.endpoints.graphql") { value("/graphql") }
@@ -51,3 +51,19 @@ class ManifestControllerTest {
             }
     }
 }
+
+@TestConfiguration
+class BuildPropertiesTestConfig {
+
+    @Bean
+    fun buildProperties(): BuildProperties {
+        val properties = Properties().apply {
+            setProperty("name", "fbs-identity-service")
+            setProperty("version", "0.0.1-SNAPSHOT")
+            setProperty("time", "2026-07-12T16:55:27.620Z")
+        }
+
+        return BuildProperties(properties)
+    }
+}
+

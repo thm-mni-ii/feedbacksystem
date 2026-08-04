@@ -3,20 +3,26 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.info.BuildProperties
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.Instant
 
 @Tag(name = "Manifest", description = "Service metadata and capability overview")
 @RestController
 class ManifestController(
     @param:Value("\${spring.application.name:fbs-identity-service}")
-    private val serviceName: String,
+    private val fallbackServiceName: String,
 
     @param:Value("\${info.app.version:0.0.1-SNAPSHOT}")
-    private val version: String
+    private val fallbackVersion: String,
+
+    buildPropertiesProvider: ObjectProvider<BuildProperties>
 ) {
+    private val buildProperties = buildPropertiesProvider.ifAvailable
 
     @Operation(
         summary = "Get service manifest",
@@ -25,9 +31,13 @@ class ManifestController(
     @GetMapping("/manifest", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun manifest(): ServiceManifest {
         return ServiceManifest(
-            service = serviceName,
-            version = version,
+            build = ManifestBuildInfo(
+                name = buildProperties?.name ?: fallbackServiceName,
+                version = buildProperties?.version ?: fallbackVersion,
+                time = buildProperties?.time
+            ),
             description = "Provides authentication, user management and identity functions for the FBS.",
+
             endpoints = ManifestEndpoints(
                 health = "/health",
                 manifest = "/manifest",
@@ -153,8 +163,7 @@ class ManifestController(
 }
 
 data class ServiceManifest(
-    val service: String,
-    val version: String,
+    val build: ManifestBuildInfo,
     val description: String,
     val endpoints: ManifestEndpoints,
     val capabilities: List<Capability>
@@ -178,4 +187,10 @@ data class Capability(
     val requiresConfig: String? = null,
     val requiredRole: String? = null,
     val requiresAuthentication: Boolean = false
+)
+
+data class ManifestBuildInfo(
+    val name: String,
+    val version: String,
+    val time : Instant?
 )

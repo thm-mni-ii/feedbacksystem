@@ -58,3 +58,7 @@ tasks.withType<Test> {
 tasks.jar {
 	enabled = false
 }
+
+springBoot {
+	buildInfo()
+}
