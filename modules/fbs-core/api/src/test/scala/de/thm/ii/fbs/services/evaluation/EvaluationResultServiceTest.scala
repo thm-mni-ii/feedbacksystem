@@ -25,7 +25,7 @@ class EvaluationResultServiceTest {
 
   private def buildTask(res: Boolean, id: Int = 1, passedSubTasks: Int = 0) = {
     val task = Task("", Option(""), "", isPrivate = false, "", None, "", id)
-    val taskResult = TaskResult(task, 2, passed = true, passedSubTasks)
+    val taskResult = TaskResult(task, 2, passed = res, passedSubTasks)
 
     (task, taskResult)
   }
@@ -132,6 +132,36 @@ class EvaluationResultServiceTest {
     val expectedRes = List(EvaluationUserResult(null, passed = true, bonusPoints = 2, List(containerRes)))
 
     val res = evaluationResultService.evaluate(List(container), results = List(courseResult))
+
+    Assert.assertEquals(expectedRes, res)
+  }
+
+  /**
+    * Test applying evaluation status to course results.
+    */
+  @Test
+  def applyEvaluationStatusUsesCustomThreshold(): Unit = {
+    val (task1, taskResult1) = buildTask(res = true, id = 1)
+    val (task2, taskResult2) = buildTask(res = false, id = 2)
+    val container = buildContainer(List(task1, task2), toPass = 1)
+    val courseResult = buildCourseRes(passed = false, tasksRes = List(taskResult1, taskResult2))
+    val expectedRes = List(courseResult.copy(passed = true))
+
+    val res = evaluationResultService.applyEvaluationStatus(List(container), results = List(courseResult))
+
+    Assert.assertEquals(expectedRes, res)
+  }
+
+  /**
+    * Test keeping task-based course status without evaluation containers.
+    */
+  @Test
+  def applyEvaluationStatusWithoutContainerKeepsCourseStatus(): Unit = {
+    val (_, taskResult) = buildTask(res = true)
+    val courseResult = buildCourseRes(passed = false, tasksRes = List(taskResult))
+    val expectedRes = List(courseResult)
+
+    val res = evaluationResultService.applyEvaluationStatus(List.empty[EvaluationContainer], results = List(courseResult))
 
     Assert.assertEquals(expectedRes, res)
   }
