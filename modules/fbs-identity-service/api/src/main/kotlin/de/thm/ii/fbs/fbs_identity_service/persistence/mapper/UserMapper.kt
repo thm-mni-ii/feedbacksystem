@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.fbs_identity_service.persistence.mapper
 
-import de.thm.ii.fbs.fbs_identity_service.model.GlobalRole
-import de.thm.ii.fbs.fbs_identity_service.model.User
+import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
+import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 
 fun UserEntity.toModel(): User {

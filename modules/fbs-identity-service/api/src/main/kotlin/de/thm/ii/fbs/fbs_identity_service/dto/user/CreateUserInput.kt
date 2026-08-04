@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.dto.user
 
-import de.thm.ii.fbs.fbs_identity_service.model.GlobalRole
+import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 
 data class CreateUserInput(
     val prename: String,
