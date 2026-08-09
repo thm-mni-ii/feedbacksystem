@@ -24,35 +24,34 @@ class UserService (private val userRepository: UserRepository, private val passw
         return userRepository.findByIdAndDeletedFalse(id)?.toModel()
     }
 
-    fun findUsers(query: String?, globalRole: GlobalRole?, limit: Int?, offset: Int?): UserSearchResult {
-        var result = userRepository.findByDeletedFalse()
-            .map { it.toModel() }
+    fun findUsers(
+        query: String?,
+        globalRole: GlobalRole?,
+        limit: Int?,
+        offset: Int?
+    ): UserSearchResult {
 
-        if (!query.isNullOrBlank()) {
-            result = result.filter {
-                it.username.contains(query, ignoreCase = true) ||
-                        it.prename.contains(query, ignoreCase = true) ||
-                        it.surname.contains(query, ignoreCase = true) ||
-                        it.email.contains(query, ignoreCase = true) ||
-                        it.alias?.contains(query, ignoreCase = true) == true
-            }
-        }
+        val normalizedQuery = query
+            ?.takeIf { it.isNotBlank() }
 
-        if (globalRole != null) {
-            result = result.filter { it.globalRole == globalRole }
-        }
+        val totalCount = userRepository.countUsers(
+            query = normalizedQuery,
+            globalRole = globalRole?.id
+        )
 
-        val totalCount = result.size
         val safeOffset = offset ?: 0
-        val safeLimit = limit ?: result.size
+        val safeLimit = limit ?: totalCount.toInt()
 
-        val pagedItems = result
-            .drop(safeOffset)
-            .take(safeLimit)
+        val items = userRepository.searchUsers(
+            query = normalizedQuery,
+            globalRole = globalRole?.id,
+            limit = safeLimit,
+            offset = safeOffset
+        ).map { it.toModel() }
 
         return UserSearchResult(
-            items = pagedItems,
-            totalCount = totalCount
+            items = items,
+            totalCount = totalCount.toInt()
         )
     }
 

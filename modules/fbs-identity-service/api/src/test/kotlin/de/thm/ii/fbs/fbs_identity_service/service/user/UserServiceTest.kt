@@ -403,15 +403,15 @@ class UserServiceTest {
             email = "niklas@example.com"
         )
 
-        val otherUser = testUserEntity(
-            id = 2,
-            username = "tom",
-            prename = "Tom",
-            surname = "Test",
-            email = "tom@example.com"
-        )
+        whenever(userRepository.countUsers(query = "nIkLaS", globalRole = null)).thenReturn(1)
 
-        whenever(userRepository.findByDeletedFalse()).thenReturn(listOf(matchingUser, otherUser))
+        whenever(userRepository.searchUsers(
+                query = "nIkLaS",
+                globalRole = null,
+                limit = 1,
+                offset = 0
+            )
+        ).thenReturn(listOf(matchingUser))
 
         val result = userService.findUsers(
             query = "nIkLaS",
@@ -424,18 +424,12 @@ class UserServiceTest {
         assertEquals(1, result.items.size)
         assertEquals("niklas", result.items.first().username)
 
-        verify(userRepository).findByDeletedFalse()
+        verify(userRepository).countUsers("nIkLaS", null)
+        verify(userRepository).searchUsers("nIkLaS", null, 1, 0)
     }
 
     @Test
     fun `findUsers applies limit and offset`(){
-        val user1 = testUserEntity(
-            id = 1,
-            username = "niklas",
-            prename = "Niklas",
-            surname = "Test",
-            email = "niklas@example.com"
-        )
 
         val user2 = testUserEntity(
             id = 2,
@@ -445,15 +439,15 @@ class UserServiceTest {
             email = "tom@example.com"
         )
 
-        val user3 = testUserEntity(
-            id = 3,
-            username = "theo",
-            prename = "Theo",
-            surname = "Test",
-            email = "theo@example.com"
-        )
+        whenever(userRepository.countUsers(query = null, globalRole = null)).thenReturn(3)
 
-        whenever(userRepository.findByDeletedFalse()).thenReturn(listOf(user1, user2, user3))
+        whenever(userRepository.searchUsers(
+            query = null,
+            globalRole = null,
+            limit = 1,
+            offset = 1
+        )
+        ).thenReturn(listOf(user2))
 
         val result = userService.findUsers(
             query = null,
@@ -466,7 +460,8 @@ class UserServiceTest {
         assertEquals(1, result.items.size)
         assertEquals("tom", result.items.first().username)
 
-        verify(userRepository).findByDeletedFalse()
+        verify(userRepository).countUsers(null, null)
+        verify(userRepository).searchUsers(null, null, 1, 1)
     }
 
     private fun testUserEntity(
