@@ -17,13 +17,15 @@ http/local-oidc.http
 
 ## Prerequisites
 
+The OIDC signing-key configuration described in the main README must be available before starting the Identity-Service.
+
 The identity-service must be running locally:
 
 ```bash
 ./gradlew bootRun
 ```
 
-A local MySQL database must be available and the existing FBS user table must contain:
+A local MySQL database must be available and the `fbs_identity.user` table must contain:
 
 * a regular test user with a BCrypt-encoded password
 * an admin test user with a BCrypt-encoded password and the ADMIN global role
@@ -119,19 +121,19 @@ Both terms-of-use endpoints operate on the currently authenticated user.
 
 Invalid REST request bodies return `400 Bad Request` with the common `ErrorResponse` format.
 
-Invalid GraphQL input returns `HTTP 200 OK ` with an `errors` entry.
+Invalid GraphQL input returns `HTTP 200 OK` with an `errors` entry.
 
 ## Optional longer token lifetime for manual tests
 
 The access token lifetime is intentionally short.
 
-For longer manual test sessions, the access token lifetime can temporarily be increased in `AuthServerClientConfig`, for example:
+For longer manual test sessions, the access token lifetime can temporarily be increased through the OIDC client configuration, for example by setting:
 
-```
-.accessTokenTimeToLive(Duration.ofMinutes(30))
+```text
+OIDC_ACCESS_TOKEN_TTL_MINUTES=30
 ```
 
-This should only be used for local testing and should not be committed as the default configuration.
+The default value is defined in `application.yaml`. This should only be used for local testing and should not be committed as a changed default configuration.
 
 ## Note
 

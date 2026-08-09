@@ -1,18 +1,18 @@
 # FBS Identity Service
 
-This module contains the initial setup for the FBS identity service.
+This module contains the FBS Identity Service and its authentication and user-management functionality.
 
 ## Current status
 
 * Spring Boot service written in Kotlin and running on Java 17
 * Standalone Gradle build
 * Health and manifest endpoints at `/health` and `/manifest`
-* Connection to the existing FBS MySQL database
-* JPA/Hibernate mapping for the existing FBS `user` table
+* Own `fbs_identity` database withing the existing MySQL instance 
+* JPA/Hibernate mapping for the `user` table
 * Local username/password authentication through Spring Security
 * OpenID Connect / OAuth 2.0 Authorization Server
 * Authorization Code Flow with PKCE for public clients
-* RSA-signed access tokens and ID tokens
+* Persistent RSA-4096 signing key loaded from a PKCS#12 keystore
 * JWT-based Resource Server authentication for protected REST and GraphQL endpoints
 * Current-user resolution from the authenticated access token
 * Local SAML2 login using Keycloak as a test IdP
@@ -23,7 +23,7 @@ This module contains the initial setup for the FBS identity service.
 
 ## Working directory
 
-All commands in this README are meant to be executed from the identity-service API module:
+All commands in this README are meant to be executed from the Identity Service API module:
 
 ```bash
 modules/fbs-identity-service/api
@@ -35,6 +35,23 @@ modules/fbs-identity-service/api
 ./gradlew build
 ```
 
+## Signing key configuration
+
+The Identity Service loads its OIDC signing key from a persistent PKCS#12 keystore.
+
+The following environment variables are required:
+
+```text
+OIDC_SIGNING_KEY_LOCATION
+OIDC_SIGNING_KEY_STORE_PASSWORD
+OIDC_SIGNING_KEY_PASSWORD
+OIDC_SIGNING_KEY_ALIAS
+```
+
+`OIDC_SIGNING_KEY_ALIAS` defaults to `identity-signing`.
+
+Runtime signing keystores are provided externally and are not committed to the repository. The repository only contains a separate test keystore used by automated tests.
+
 ## Run
 
 ```bash
@@ -43,7 +60,7 @@ modules/fbs-identity-service/api
 
 ## Run with Docker Compose
 
-The Identity-Service can also be built and started through the main `docker-compose.yml` from the repository root.
+The Identity Service can also be built and started through the main `docker-compose.yml` from the repository root.
 
 From the repository root:
 
@@ -56,7 +73,7 @@ The service uses the existing mysql1 database service from the compose setup.
 By default, SAML is disabled for the Docker setup, so no local Keycloak/SAML test environment is required for normal startup.
 
 
-## ## API documentation
+## API documentation
 
 The REST API is documented with OpenAPI.
 
@@ -80,7 +97,7 @@ http://localhost:8080/manifest
 
 ## OIDC / OAuth 2.0
 
-The Identity-Service acts as an OpenID Connect / OAuth 2.0 Authorization Server.
+The Identity Service acts as an OpenID Connect / OAuth 2.0 Authorization Server.
 
 Important endpoints include:
 
@@ -96,6 +113,18 @@ Important endpoints include:
 The current local test client uses the Authorization Code Flow with PKCE.
 
 The public client does not use refresh tokens. When an access token expires, a new authorization flow can be started. If the login session is still valid, the user does not need to authenticate again.
+
+The local OIDC configuration can be overridden through environment variables:
+
+```text
+OIDC_ISSUER
+OIDC_CLIENT_ID
+OIDC_CLIENT_REDIRECT_URI
+OIDC_ACCESS_TOKEN_TTL_MINUTES
+OIDC_AUTH_CODE_TTL_MINUTES
+```
+
+Local development defaults are defined in `application.yaml`.
 
 ## Run with local dev tools such as GraphiQL
 
@@ -157,9 +186,9 @@ docs/local-http-client-tests.md
 
 * The frontend has not yet been migrated to the new OIDC Authorization Code Flow with PKCE.
 * The Spring Security login page is currently used for local testing.
-* The Identity-Service is not yet registered as a Service Provider with the productive THM IdP.
-* SAML AuthnRequests are currently not signed.
+* The Identity Service is not yet registered as a Service Provider with the production THM IdP.
+* SAML AuthnRequests are currently not signed because no SAML SP signing key pair is configured.
 * SAML assertion encryption has not been configured or tested.
 * Single Logout is not implemented.
-* RSA signing keys are currently generated when the Identity-Service starts. Tokens issued before a restart therefore become invalid.
 * The public OIDC client currently uses short-lived access tokens without refresh tokens.
+* Production user migration and final cutover have not yet been performed.
