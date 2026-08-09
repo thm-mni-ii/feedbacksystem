@@ -43,21 +43,22 @@ class OidcLocalLoginIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        if (!userRepository.existsByUsername("oidc-integration-test-user")) {
-            userRepository.save(
-                UserEntity(
-                    prename = "Theo",
-                    surname = "Theo",
-                    email = "theo@example.org",
-                    username = "oidc-integration-test-user",
-                    password = passwordEncoder.encode("test123"),
-                    privacyChecked = true,
-                    deleted = false,
-                    alias = null,
-                    globalRole = GlobalRole.USER.id
-                )
+
+        userRepository.findByUsername("oidc-integration-test-user")?.let { userRepository.delete(it) }
+
+        userRepository.save(
+            UserEntity(
+                prename = "Theo",
+                surname = "Theo",
+                email = "theo@example.org",
+                username = "oidc-integration-test-user",
+                password = passwordEncoder.encode("test123"),
+                privacyChecked = true,
+                deleted = false,
+                alias = null,
+                globalRole = GlobalRole.USER.id
             )
-        }
+        )
     }
 
     @AfterEach
