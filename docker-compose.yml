@@ -84,12 +84,18 @@ services:
       - mysql1
     ports:
       - "127.0.0.1:8080:8080"
+    volumes:
+      - ./secrets/identity-signing-key.p12:/run/secrets/identity-signing-key.p12:ro
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql1:3306/fbs
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - APP_SAML_ENABLED=false
       - APP_JWT_SECRET=q/wBOsfT0wROMO8Uw7rTf+VVvgGczWhkoJSDcaqqPpk=
+      - OIDC_SIGNING_KEY_LOCATION=/run/secrets/identity-signing-key.p12
+      - OIDC_SIGNING_KEY_STORE_PASSWORD=changeit
+      - OIDC_SIGNING_KEY_ALIAS=identity-signing
+      - OIDC_SIGNING_KEY_PASSWORD=changeit
     networks:
       fbs:
     healthcheck:

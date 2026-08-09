@@ -45,3 +45,9 @@ security:
     cleanup-interval-ms: ${LOGIN_ATTEMPT_CLEANUP_INTERVAL_MS:600000}
     trusted-proxy-count: ${TRUSTED_PROXIES:0}
     allow-list: ${BRUTEFORCE_ALLOW_LIST:""}
+  oidc:
+    signing-key:
+      location: ${OIDC_SIGNING_KEY_LOCATION}
+      store-password: ${OIDC_SIGNING_KEY_STORE_PASSWORD}
+      alias: ${OIDC_SIGNING_KEY_ALIAS:identity-signing}
+      key-password: ${OIDC_SIGNING_KEY_PASSWORD}
