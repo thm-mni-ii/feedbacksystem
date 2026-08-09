@@ -12,23 +12,33 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import java.util.UUID
+import java.time.Duration
 
 class RegisteredClientInitializerTest {
 
     private val registeredClientRepository = mock<RegisteredClientRepository>()
 
-    private val registeredClientInitializer = RegisteredClientInitializer(registeredClientRepository)
+    private val registeredClientInitializer = RegisteredClientInitializer(
+        registeredClientRepository,
+        clientId = "configured-client",
+        redirectUri = "http://localhost:9999/test-callback",
+        accessTokenTtlMinutes = 10,
+        authorizationCodeTtlMinutes = 5
+    )
 
     @Test
-    fun `registers client when persistent client does not exist`() {
-        whenever(registeredClientRepository.findByClientId("fbs-test-client")).thenReturn(null)
+    fun `registers client with configured values when persistent client does not exist`() {
+        whenever(registeredClientRepository.findByClientId("configured-client")).thenReturn(null)
 
         registeredClientInitializer.run(DefaultApplicationArguments())
 
-        verify(registeredClientRepository).findByClientId("fbs-test-client")
+        verify(registeredClientRepository).findByClientId("configured-client")
         verify(registeredClientRepository).save(
             argThat {
-                clientId == "fbs-test-client"
+                clientId == "configured-client" &&
+                redirectUris.contains("http://localhost:9999/test-callback") &&
+                tokenSettings.accessTokenTimeToLive == Duration.ofMinutes(10) &&
+                tokenSettings.authorizationCodeTimeToLive == Duration.ofMinutes(5)
             }
         )
     }
@@ -37,16 +47,16 @@ class RegisteredClientInitializerTest {
     fun `does not register client when persistent client already exists`() {
         val existingClient =
             RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("fbs-test-client")
+                .clientId("configured-client")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("http://127.0.0.1:4200/oauth2/callback")
+                .redirectUri("http://localhost:9999/test-callback")
                 .build()
 
-        whenever(registeredClientRepository.findByClientId("fbs-test-client")).thenReturn(existingClient)
+        whenever(registeredClientRepository.findByClientId("configured-client")).thenReturn(existingClient)
 
         registeredClientInitializer.run(DefaultApplicationArguments())
 
-        verify(registeredClientRepository).findByClientId("fbs-test-client")
+        verify(registeredClientRepository).findByClientId("configured-client")
         verify(registeredClientRepository, never()).save(any())
     }
 }

@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.security.oauth2.core.AuthorizationGrantType
@@ -15,10 +16,20 @@ import java.util.UUID
 
 @Component
 class RegisteredClientInitializer(
-    private val registeredClientRepository: RegisteredClientRepository
-) : ApplicationRunner {
+    private val registeredClientRepository: RegisteredClientRepository,
 
-    private val clientId = "fbs-test-client"
+    @param:Value("\${security.oidc.client.id}")
+    private val clientId: String,
+
+    @param:Value("\${security.oidc.client.redirect-uri}")
+    private val redirectUri: String,
+
+    @param:Value("\${security.oidc.client.access-token-ttl-minutes}")
+    private val accessTokenTtlMinutes: Long,
+
+    @param:Value("\${security.oidc.client.authorization-code-ttl-minutes}")
+    private val authorizationCodeTtlMinutes: Long
+) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
         if (registeredClientRepository.findByClientId(clientId) == null) {
@@ -31,7 +42,7 @@ class RegisteredClientInitializer(
             .clientId(clientId)
             .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .redirectUri("http://127.0.0.1:4200/oauth2/callback")
+            .redirectUri(redirectUri)
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .clientSettings(
@@ -42,8 +53,8 @@ class RegisteredClientInitializer(
             )
             .tokenSettings(
                 TokenSettings.builder()
-                    .accessTokenTimeToLive(Duration.ofMinutes(10))
-                    .authorizationCodeTimeToLive(Duration.ofMinutes(5))
+                    .accessTokenTimeToLive(Duration.ofMinutes(accessTokenTtlMinutes))
+                    .authorizationCodeTimeToLive(Duration.ofMinutes(authorizationCodeTtlMinutes))
                     .build()
             )
             .build()
