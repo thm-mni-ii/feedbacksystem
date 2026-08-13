@@ -51,9 +51,9 @@ From the repository root:
 docker compose up --build mysql1 identity-service
 ```
 
-The service uses the existing mysql1 database service from the compose setup.
+The Identity-Service uses the existing `mysql1` MySQL service but connects to its own fbs_identity database within the same MySQL instance. The `fbs_identity` database is created during the initial MySQL container setup. 
 
-By default, SAML is disabled for the Docker setup, so no local Keycloak/SAML test environment is required for normal startup.
+By default, SAML is disabled in the Docker Compose configuration, so a local Keycloak/SAML test environment is not required for normal startup.
 
 
 ## ## API documentation
