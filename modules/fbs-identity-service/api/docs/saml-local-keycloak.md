@@ -125,6 +125,8 @@ These are added as SAML attributes to the SAMLResponse. The identity-service rea
 
 ## Start the identity-service with SAML enabled
 
+The Identity-Service also requires the OIDC signing-key configuration described in the main README.
+
 Use the local SAML Spring profile:
 
 ```bash
@@ -181,7 +183,6 @@ Keycloak may reuse an existing SSO session and therefore skip the credential for
 * Single Logout is not implemented.
 * The frontend has not yet been migrated to the new OIDC Authorization Code Flow with PKCE.
 * The Spring Security login page is currently used for local testing.
-* RSA signing keys are generated when the Identity-Service starts, so issued tokens become invalid after a restart.
 * The public OIDC client currently uses short-lived access tokens without refresh tokens.
 
 For local testing, AuthnRequest signing is disabled:
