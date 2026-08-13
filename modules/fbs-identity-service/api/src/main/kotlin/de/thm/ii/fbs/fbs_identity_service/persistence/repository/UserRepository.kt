@@ -18,4 +18,58 @@ interface UserRepository: JpaRepository <UserEntity, Long> {
     fun findByUsernameAndDeletedFalse(username: String): UserEntity?
 
     fun findByIdAndDeletedFalse(id: Long): UserEntity?
+
+    @Query(
+        value = """
+            SELECT *
+            FROM user
+            WHERE deleted = false
+              AND (
+                  :query IS NULL
+                  OR LOWER(username) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(prename) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(surname) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(email) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(alias) LIKE LOWER(CONCAT('%', :query, '%'))
+              )
+              AND (
+                  :globalRole IS NULL
+                  OR global_role = :globalRole
+              )
+            ORDER BY user_id
+            LIMIT :limit OFFSET :offset
+        """,
+        nativeQuery = true
+    )
+    fun searchUsers(
+        query: String?,
+        globalRole: Int?,
+        limit: Int,
+        offset: Int
+    ): List<UserEntity>
+
+    @Query(
+        value = """
+            SELECT COUNT(*)
+            FROM user
+            WHERE deleted = false
+              AND (
+                  :query IS NULL
+                  OR LOWER(username) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(prename) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(surname) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(email) LIKE LOWER(CONCAT('%', :query, '%'))
+                  OR LOWER(alias) LIKE LOWER(CONCAT('%', :query, '%'))
+              )
+              AND (
+                  :globalRole IS NULL
+                  OR global_role = :globalRole
+              )
+        """,
+        nativeQuery = true
+    )
+    fun countUsers(
+        query: String?,
+        globalRole: Int?
+    ): Long
 }
