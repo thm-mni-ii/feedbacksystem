@@ -52,3 +52,8 @@ security:
       redirect-uri: ${OIDC_CLIENT_REDIRECT_URI:http://127.0.0.1:4200/oauth2/callback}
       access-token-ttl-minutes: ${OIDC_ACCESS_TOKEN_TTL_MINUTES:10}
       authorization-code-ttl-minutes: ${OIDC_AUTH_CODE_TTL_MINUTES:5}
+    signing-key:
+      location: ${OIDC_SIGNING_KEY_LOCATION}
+      store-password: ${OIDC_SIGNING_KEY_STORE_PASSWORD}
+      alias: ${OIDC_SIGNING_KEY_ALIAS:identity-signing}
+      key-password: ${OIDC_SIGNING_KEY_PASSWORD}

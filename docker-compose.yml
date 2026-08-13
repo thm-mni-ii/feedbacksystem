@@ -86,11 +86,17 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:8080:8080"
+    volumes:
+      - ./secrets/identity-signing-key.p12:/run/secrets/identity-signing-key.p12:ro
     environment:
       - MYSQL_URI=jdbc:mysql://mysql1:3306
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - APP_SAML_ENABLED=false
+      - OIDC_SIGNING_KEY_LOCATION=/run/secrets/identity-signing-key.p12
+      - OIDC_SIGNING_KEY_STORE_PASSWORD=changeit
+      - OIDC_SIGNING_KEY_ALIAS=identity-signing
+      - OIDC_SIGNING_KEY_PASSWORD=changeit
     networks:
       fbs:
     healthcheck:
