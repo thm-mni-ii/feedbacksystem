@@ -17,6 +17,8 @@
             :layouts="layouts"
             :configs="configs"
             :event-handlers="eventHandlers"
+            :competencies="competencies"
+            :questions="questions"
           />
         </v-col>
 
@@ -72,6 +74,7 @@ const editQuestion = (question?: Question) => {
 }
 
 const {
+  competencies,
   zoomLevel,
   selectedNodeId,
   selectedNode,

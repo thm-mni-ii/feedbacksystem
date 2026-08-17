@@ -13,7 +13,11 @@
             {{ currentQuestion.question.title || currentQuestion.question.text }}
           </h2>
 
-          <p class="mb-4 text-medium-emphasis">Wie gut konntest du diese Frage beantworten?</p>
+          <p class="mb-1 text-medium-emphasis">Wie gut konntest du diese Frage beantworten?</p>
+          <p class="mb-4 text-caption text-medium-emphasis">
+            Demo: Diese Selbsteinschätzung wird als Lernereignis gespeichert. Später ersetzt die
+            automatische Aufgabenbewertung sie durch ein echtes Ergebnis.
+          </p>
           <div class="d-flex">
             <v-slider
               v-model="sliderScoreValue"

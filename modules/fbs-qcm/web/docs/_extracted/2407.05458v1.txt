@@ -1,0 +1,2062 @@
+
+
+===== PAGE 1 =====
+
+A Survey of Models for Cognitive Diagnosis: New
+Developments and Future Directions
+FEI WANG, WEIBO GAO, QI LIU, JIATONG LI, GUANHAO ZHAO, ZHENG ZHANG,
+and ZHENYA HUANG, State Key Laboratory of Cognitive Intelligence, University of Science and Tech-
+nology of China, China
+MENGXIAO ZHU, Anhui Province Key Laboratory of Science Education and Communication, University
+of Science and Technology of China, China
+SHIJIN WANG,iFLYTEK AI Research (Central China), China
+WEI TONG, National Educational Examinations Authority, China
+ENHONG CHEN, State Key Laboratory of Cognitive Intelligence, University of Science and Technology
+of China, China
+Cognitive diagnosis has been developed for decades as an effective measurement tool to evaluate human
+cognitive status such as ability level and knowledge mastery. It has been applied to a wide range of fields
+including education, sport, psychological diagnosis, etc. By providing better awareness of cognitive status, it
+can serve as the basis for personalized services such as well-designed medical treatment, teaching strategy
+and vocational training. This paper aims to provide a survey of current models for cognitive diagnosis,
+with more attention on new developments using machine learning-based methods. By comparing the model
+structures, parameter estimation algorithms, model evaluation methods and applications, we provide a
+relatively comprehensive review of the recent trends in cognitive diagnosis models. Further, we discuss future
+directions that are worthy of exploration. In addition, we release two Python libraries: EduData for easy access
+to some relevant public datasets we have collected, and EduCDM that implements popular CDMs to facilitate
+both applications and research purposes.
+CCS Concepts: • Applied computing → Computer-assisted instruction ; E-learning; • Social and
+professional topics→ Computing education; Computing profession; User characteristics.
+Additional Key Words and Phrases: Cognitive diagnosis, item response theory, cognitive diagnosis model,
+intelligent education, deep learning, survey
+ACM Reference Format:
+Fei Wang, Weibo Gao, Qi Liu, Jiatong Li, Guanhao Zhao, Zheng Zhang, Zhenya Huang, Mengxiao Zhu, Shijin
+Wang, Wei Tong, and Enhong Chen. 2024. A Survey of Models for Cognitive Diagnosis: New Developments
+and Future Directions. 1, 1 (July 2024), 37 pages. https://doi.org/10.1145/nnnnnnn.nnnnnnn
+Authors’ addresses: F. Wang, W. Gao, J. Li, G. Zhao, Z. Zhang, Q. Liu, Z. Huang and Enhong Chen, State Key Laboratory
+of Cognitive Intelligence, University of Science and Technology of China, Hefei, China; emails: {wf314159, weibogao,
+satosasara, ghzhao0223, zhangzheng}@mail.ustc.edu.cn and {qiliuql, huangzhy, cheneh}@ustc.edu.cn; M. Zhu, Anhui
+Province Key Laboratory of Science Education and Communication, University of Science and Technology of China; email:
+mxzhu@ustc.edu.cn; S. Wang, iFLYTEK AI Research (Central China), Wuhan, China; email: sjwang3@iflytek.com; W. Tong,
+National Educational Examinations Authority; email: tongw@mail.neea.edu.cn.
+Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee
+provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the
+full citation on the first page. Copyrights for components of this work owned by others than the author(s) must be honored.
+Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires
+prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+© 2024 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM XXXX-XXXX/2024/7-ART
+https://doi.org/10.1145/nnnnnnn.nnnnnnn
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+arXiv:2407.05458v1  [cs.AI]  7 Jul 2024
+
+===== PAGE 2 =====
+
+2 Fei Wang, et al.
+Q1
+Q2
+Qm
+Q1
+Q2
+Qm
+Q1
+Q2
+Qn
+Q1
+Q2
+Qn
+Score：90
+Score：82
+Test 1
+Test 2
+?
+Measure ability by test scores
+ Measure ability by cognitive diagnosis
+s1
+Items Skills
+Responses
+    
+    
+    
+    
+    ,  
+    ,  
+Overall score 60 60
+Cognitive
+Diagnosis
+0 0.57 0.61
+    
+Overall ability
+Proficiency levels
+  
+  
+    
+    
+  
+  
+    
+    
+          
+  
+  
+Mastered or unmastered
+Different types of diagnostic reports
+Fig. 1. Comparison between ability measurement by test scores and by cognitive diagnosis.
+1 INTRODUCTION
+Measurement is an integral part of modern science as well as of engineering, commerce, and daily life
+[123]. Through measurement, we learn quantitatively about the things around us and even human
+beings. Cognitive diagnosis, as a representative, aims to measure the cognitive status of individuals,
+especially the ability levels such as knowledge structures and processing skills, so as to provide
+information about their cognitive strengths and weaknesses [74]. For example, through cognitive
+diagnosis, we can learn about whether a student has mastered specific knowledge concepts [74] or
+whether a patient is mentally healthy [32]. Therefore, cognitive diagnosis provides informative
+results for test developers and test takers, as well as helps with personalized support such as training
+course planning for employers and learning resource recommendations for students.
+Unlike conventional physical measurement objects such as length and weight, a person’s ability
+level is a psychological characteristic not directly observable. Therefore, the fundamental idea of
+measuring human ability is by conducting tests and inferring examinees’ ability through their
+performance. Francis Galton is thought as the first to apply statistical methods to the study of human
+differences and inheritance of intelligence, and proposed the first personality test [117]. Using the
+scores obtained in a test is a straightforward way to represent a person’s overall ability level, and is
+widely adopted in IQ tests, teaching, etc. However, although test scores reflect examinees’ ability
+level to some extent, they are not the ability level themselves. For instance, as demonstrated in the
+left part of Fig. 1, a person may get different scores on two tests at the same time, while neither
+of them can absolutely represent the correct ability level. By contrast, cognitive diagnosis infers
+the ability level hidden in the responses. The complete cognitive diagnosis procedure (especially
+traditional cognitive diagnosis) requires multiple steps, including preparatory work such as deciding
+the measurement goal, arranging the knowledge structures, and constructing tests. A simplified
+procedure is illustrated in the right part of Fig. 1 which includes: 1) Test construction: rigorous
+questionnaires or test items (e.g., 𝑄1∼ 𝑄5) can be constructed for response collection in fields
+such as education and psychotherapy [ 59]. The relation between items and relevant attributes
+(i.e., skills or knowledge concepts) are usually provided by experts. 2) Response data collection:
+the responses here mostly refer to binary 0/1 values indicating the results of examinees’ answers
+(e.g., incorrect/correct) or discrete scores obtained on the items (e.g., 5 points out of 8). In some
+situations, responses are not limited to question answering, for example, the outcome of adversarial
+games [56] and law cases [3]. 3) Cognitive diagnosis model (CDM) designing: well-designed CDMs
+are an important guarantee of valid diagnostic results. 4) Psychological factor estimation: based on
+the collected response data, the psychological factors (e.g., the ability parameters) within CDMs are
+estimated. 4) Diagnosis feedback: the diagnosed ability levels are then fed back to the examinees.
+The feedback can be different depending on the CDMs, such as overall ability (§3.1), whether or
+not mastered certain attributes (§3.2), and proficiency levels of certain attributes (§4.2).
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 3 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 3
+Q1
+Q2
+Qn
+Q1
+Q2
+Qn
+Q1
+Q2
+Qn
+Q1
+Q2
+Qn
+Unobservable ability
+Observable
+responses
+Test 
+items
+Cognitive 
+process
+Simulate
+Fig. 2. The essence of CDM.
+Cognitive diagnosis models are essential for
+cognitive diagnosis, aiming to infer the unob-
+servable ability levels from the observable re-
+sponses to test items. Essentially, most existing
+CDMs are/contain simulations of examinees’
+cognitive processes. Specifically, as illustrated
+in Fig. 2, when answering the test items, ex-
+aminees go through a cognitive process that
+handles the items with their knowledge status
+and then provide their responses to the items.
+The responses depend on multiple factors, in-
+cluding the characteristics of both items (e.g.,
+difficulty [111], relevant knowledge concept, guessing [28]) and examinees (e.g., ability, gaming
+behavior [158]). Therefore, the central problem of cognitive diagnosis is to model the relation
+between the examinees’ ability levels and their observable behaviors such as responses to test items
+[43]. This simulation can be formulated as:
+𝑃𝑟(𝑟𝑒𝑠𝑝𝑜𝑛𝑠𝑒) = 𝑓(𝜃,𝛽, Ω),
+where𝜃,𝛽 are the parameters indicating the examinees’ abilities and items’ features, respectively.
+Ω represents the possible parameters required by the CDM itself (empty for some models).
+Originating from psychometrics, the models for measuring human abilities have been developed
+for decades. The proposal of item response theory (IRT) can be traced back to the 1950s by Fredrick
+Lord [94]. IRT is a general framework for specifying mathematical functions that describe the
+interactions of persons and test items, where unidimensional parameters were adopted to describe
+the abilities of the persons. However, as suggested by researchers such as Glaser [52] and Mislevy
+[104], IRT and its previous test theories (e.g., classical test theory [37]) only measure the macro
+ability of individuals. Psychology was suggested to be combined with psychometrics in order to
+model the micro knowledge structure and cognitive processing of persons during the assessments
+so that the diagnostic results can be more instructional. The termcognitive diagnosis model (CDM)
+is originally adopted to denote such models1. The proposal and usage of Q-matrix was a significant
+milestone of CDM [124]. Subsequently, representative models such as AHM [75], DINA [28] and
+NIDA [68] were proposed based on different assumptions to simulate the knowledge structures or
+cognitive processes, and each examinee is classified into a mastery pattern representing his/her
+mastery of each specific skill. These models fall into the cognition level paradigm [104].
+In recent years, some researchers have been rethinking the issue of cognitive diagnosis from the
+perspective of machine learning and have proposed novel solutions [86]. Collaborative filtering
+and matrix factorization methods were adopted to model learners’ ability and to predict learners’
+test performance [129, 130, 134]. Gierl et al. [51] proposed a neural network-based ability classifier
+trained with the data generated by a pre-trained attribute hierarchical model. More recently, Wang
+et al. recognized the limitations of expert-designed interaction functions and proposed a new
+data-driven cognitive diagnosis framework called NeuralCD [145]. Deep learning-based models
+incorporated with the theories/hypotheses from psychometrics have the advantage of better fitting
+ability of the sophisticated cognitive process, as well as promising interpretability. Since then,
+such deep learning-based paradigm gradually becomes a new tendency and has been attracting
+increasing attention [97, 146, 150]. In addition to the usage of various deep learning technologies, this
+1The usage of the terminology in academia has not achieved a complete consensus. Strictly speaking, IRT-like models are
+mostly regarded as the predecessor of CDM. For convenience and without significant violation of the original definition, in
+this paper, we use cognitive diagnosis model (CDM) to denote all the models for cognitive diagnosis.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 4 =====
+
+4 Fei Wang, et al.
+Paper
+Structure
+Cognitive Diagnosis Models Overview of CDMs §2
+Psychometrics-based
+Models §3
+Ability Level Paradigm §3.1
+Cognition Level Paradigm §3.2
+Machine Learning-based
+Models §4
+Non-deep Learning-
+based Models §4.1
+Deep Learning-based Models §4.2
+Parameter Estimation §5
+Model Evaluation §6
+Application §7
+Datasets and Tools §8
+Future Research Directions §9
+Conclusion §10
+Fig. 3. Scope and structure of the survey.
+paradigm takes the naturally saved data of learners’ daily behaviors into consideration, breaking the
+limitation of intentional tests. Furthermore, more types of data were further explored as supplements
+for cognitive diagnosis, including the knowledge structures [46, 79], the text of test items [21, 146],
+and the context features of learners [175].
+In terms of application areas, although cognitive diagnosis used to mainly focus on diagnosing
+students’ knowledge mastery and patients’ psychological disorders in the past, nowadays cognitive
+diagnosis has been more widely applied in various areas. For example, traditional IRT was also
+adopted to model the ability of workers in data crowdsourcing to improve the accuracy of truth
+inference [6, 153]. Gu et al. [56] considered the effect of cooperation and competition among game
+players’ abilities to predict the outcomes of matches. An et al. [3] diagnosed the proficiency of trial
+lawyers in different legal fields by proposing a lawyer proficiency assessment network.
+1.1 Goal and Contributions
+The goal of this survey is to summarize the past studies of cognitive diagnosis models, allowing
+newcomers to have a comprehensive understanding of cognitive diagnosis. At the same time, we
+will emphasize recent developments in cognitive diagnosis, and provide our understanding about
+new trends in the research.
+The contributions are summarized as follows:
+• We review the development stages of cognitive diagnosis models in the past, including the
+recent new trends in research.
+• We provide a more complete and comprehensive review of the recent deep learning-based
+cognitive diagnosis models.
+• We demonstrate the usefulness of cognitive diagnosis, including its downstream applications
+and its usage in various areas.
+• We discuss the limitations of current cognitive diagnosis models and potential future research
+directions.
+1.2 Paper Structure
+In the rest of the paper, we review the research on cognitive diagnosis from the aspects of model
+structure, parameter estimation, evaluation, applications, datasets and future directions, as depicted
+in Fig 3. Specifically, we firstly give an overview of CDMs in Section 2, and then introduce the
+details of existing models by classifying them into two main classes, i.e., psychometrics-based
+models (Section 3) and machine learning-based models (Section 4). In Section 5, we summarized
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 5 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 5
+the most commonly used algorithms for estimating the parameters in different types of CDMs.
+In Section 6, we summarize the evaluation of CDMs from multiple aspects. Applications based
+on cognitive diagnosis are summarized in Section 7. Finally, we discuss the limitations of current
+research and potential research directions for future studies in Section 9. The paper is concluded in
+Section 10.
+2 THE OVERVIEW OF COGNITIVE DIAGNOSIS MODELS
+2.1 Preliminary
+Suppose there are examineesS ={𝑆1,...,𝑆 𝐼}, test itemsQ ={𝑄1,...,𝑄 𝐽} and𝐾 item attributes
+(i.e., skills or knowledge concepts). The responses are denoted as𝑅 ={𝑅𝑖,𝑖 = 1,...,𝐼 }, where𝑅𝑖
+denotes the responses of𝑆𝑖.𝑅𝑖 ={(𝑆𝑖,𝑄 𝑗,𝑟𝑖𝑗),𝑆𝑖∈S,𝑄 𝑗∈Q} denotes𝑆𝑖’s responses and𝑟𝑖𝑗 is the
+response result of𝑆𝑖 on𝑄𝑗. Usually there is an expert-labeled Q-matrix𝑄 ={𝑞𝑗𝑘}𝐽×𝐾, where𝑞𝑗𝑘 =1
+(or 0) indicating that item𝑄𝑗 requires (or does not require) the mastery of attribute𝑘 to answer
+it correctly. Sometimes there are extra multifaceted information available, such as item content
+and examinees’ background, which we denote as𝑋 . The problem of cognitive diagnosis can be
+generally defined as follows:
+Problem Definition. With the input𝑅,𝑄 and possible𝑋 , the goal of cognitive diagnosis is to out-
+put examinees’ ability levels𝜃𝑖(𝑖 = 1,...,𝐼 ), where𝜃𝑖 is either unidimensional or multidimensional
+indicating the overall ability levels or the mastery levels of each attribute.
+The practicability of cognitive diagnosis is based on several basic assumptions.
+Assumption 1. Constant ability. The cognitive status of concern, i.e., ability level, remains
+unchanged during the process of answering the test items.
+It is reasonable to assume that a person’s ability level does not change in a short time (e.g., during
+a standard test), during which the person’s ability level can be measured based on the responses to
+test items. Here lies the big difference between cognitive diagnosis and knowledge tracing, of which
+the latter also attracted wide attention in recent years. Knowledge tracing focuses on modeling
+the changing patterns of online learners’ knowledge states (either explainable or unexplainable),
+which highly relies on sequential modeling methods such as hidden Markov chains and Recurrent
+Neural Networks. The cognitive process is usually neglected in the knowledge tracing models, and
+predicting learners’ future performance is the most adopted task. By contrast, cognitive diagnosis
+aims to measure learners’ ability level within a certain period of time. It mines the response data
+of learners, models the cognitive process of answering items, and provides the values of learners’
+ability levels within a certain metric space.
+Assumption 2. Constant item characteristics. The characteristics of a test item remain constant
+over all of the testing situations where it is used [111].
+Some statistics of the item such as the correct rate can be influenced by the examinees. However,
+the characteristics of a test item, such as the difficulty, discrimination, and relevant knowledge
+concepts, reflect the essential features of the item and should not change. This type of stability
+contributes to the fairness of test items for all examinees, and suggests that test items can be
+represented by fixed parameter values that reflect these characteristics.
+Assumption 3. Monotonicity. The probability of a correct response to the test item increases,
+or at least does not decrease, as the locations of examinees increase on any of the coordinate
+dimensions [111].
+Most cognitive diagnosis models adopt the monotonicity assumption in their modeling of cog-
+nitive processes, especially IRT-based and MIRT-based models. This assumption suggests that a
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 6 =====
+
+6 Fei Wang, et al.
+Ability level
+Non-deep learning based
+Deep learning based
+IRT 
+(Lord 
+& Rasch)
+Time
+1PL-IRT
+(Rasch)
+2PL-IRT,
+3PL-IRT
+(Birnbaum)
+MIRT
+RSM 
+(Tatsuoka)
+DINA 
+(Junker)
+GDM 
+(Davier)
+G-DINA
+(De La Torre)
+NeuralCD 
+(Wang)
+MRMF (Thai-Nghe)SVM
+ (Zheng) FuzzyCDF (Wu)
+NN 
+(Gierl)
+ID-CDF 
+(Li)
+Psychometrics 
+based
+Machine learning 
+based
+1961 1968 1970s
+1950s - 1960s
+1983 2001 2005 2011
+2010 20152008 2020 2024
+0 0.57 0.61
+    
+          
+  
+  
+  
+  
+    
+    
+Cognition level
+Fig. 4. Representative models in the development of cognitive diagnosis model structures.
+better performance should result from a higher ability level, which is in accordance with common
+intuition or experience.
+The above assumptions are the most adopted ones in cognitive diagnosis models. There are some
+model-specific assumptions in the research, leading to different model structures. For example,
+DINA [28] and NIDA [68] models make detailed and different assumptions about how examinees’
+mastery of knowledge concepts decides their responses, and the Rule Space Method [124] assumes
+a hierarchical structure of knowledge concepts. We will provide some introduction in §3 and §4.
+In the following content of the paper, we will use 𝜃 to represent examinees’ ability; use 𝛽 to
+represent the features of test items, such as difficulty and discrimination. The features of test items
+could be used differently, and we will provide explanations when introducing specific CDMs. In
+addition, we will use Ω to represent all the parameters contained in a CDM itself besides the two
+types of parameters mentioned above. Ω only exists in the ML-based CDMs (§4).
+2.2 A Brief Review of Cognitive Diagnosis Model Development
+Without cognitive diagnosis, the most widely adopted method to evaluate a learner’s ability is
+through their scores obtained in tests. Classical Test Theory (CTT) [37] was proposed to eliminate
+the errors existing in the scores. However, the score is the observed reflection of ability with
+the influence of factors such as question attributes and other psychological characteristics. To
+extract the actual ability hidden in the observations, cognitive diagnosis models sprouted from
+Psychometrics and have undergone decades of study. The development of cognitive diagnosis can
+be summarized from the aspects of both model structures and data characteristics.
+2.2.1 The development of model structures. Basically, the development of cognitive diagnosis
+models can be divided into two stages, i.e., psychometrics-based models and machine learning-
+based models. Fig. 4 illustrates some of the representative works and the times they were proposed.
+Each stage of the development can be further divided into two sub-stages as follows:
+Psychometrics-based models. At the first stage of cognitive diagnosis development, ability mea-
+surement were based on psychometrics. Early research works were summarized as theability level
+paradigm [104], as they used unidimensional or multidimensional latent vectors to represent exam-
+inees’ overall ability levels. Representative methods include IRT and multidimensional IRT (MIRT).
+According to [111], its popularity is generally attributed to the work of Fredrick Lord and Georg
+Rasch starting in the 1950s and 1960s. Both IRT and MIRT have undergone lots of development and
+there is a large class of implementations. §3.1 will provide a more detailed review of representative
+models. With the demand of measuring fine-grained ability, i.e., mastery of knowledge concepts
+or skills, the cognition level paradigm was proposed to improve diagnostic performance. The
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 7 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 7
+• Item 1: correct (1)
+• Item 2: incorrect (0)
+• Item 3: correct (1)
+• Item 4: 2 points / 3 total
+• …
+Score: 90
+Scale-based tests
+Numerical data
+Solve the equation                     , x= ____.
+Integer Decimal
+Fraction
+Real Number
+…
+Integer Decimal
+Fraction
+Real Number
+…
+Background information:
+Item content:
+Family education
+Learning habits … 
+Teacher attitude
+Fig. 5. The changes of data types exploited by cognitive diagnosis.
+proposal of Q-matrix and its usage is a hallmark of these methods [124]. Representative works in-
+clude RSM [124], DINA [68], GDM [139], G-DINA [29], etc. Section 3.2 will provide more summary
+about such models.
+Machine learning-based models. Later in 2000s, there came increasingly more studies using
+machine learning (ML) models for cognitive diagnosis, such as clustering algorithms [ 24, 57],
+support vector machine [84, 174], matrix factorization [129, 130, 134] and fuzzy set [157]. §4.1 gives
+a review of relevant research using machine learning models for cognitive diagnosis before deep
+learning-based methods become popular. Although Gierl et al. [ 51] made early attempts to use
+artificial neural networks as classifiers for cognitive diagnosis, the popularity of deep learning
+(DL)-based CDMs is mostly attributed to the work of Wang et al. [145] which preliminarily validated
+the superiority of using data-driven deep learning methods in cognitive diagnosis and inspired
+numerous research works [45, 46, 97, 120]. More recently, Li et al. [78] put emphasis on inductive
+diagnosis and proposed an encoder-decoder-like CDM. We will provide a comprehensive summary
+and comparison in §4.
+2.2.2 The changes of exploited data. As shown in the left part of Fig. 5, in the early research
+works, the response data for diagnosing examinees’ ability is collected from scale-based tests,
+where scales (e.g., questionnaires, test papers) are constructed and tests are intentionally organized.
+Only numerical data, i.e., correct, incorrect, and scores, is utilized in early psychometrics-based
+methods, such as IRT, MIRT, and DINA. After that, some psychometrics-based models leverage
+simple hierarchical structures among a small number of knowledge concepts by either using them
+to help with the defining of Q-matrix or explicitly modeling the hierarchical structures, such as
+AHM. Overall, the data types that can be utilized in pure psychometrics-based models are limited
+due to the simplicity of model structures.
+With the usage of machine learning, researchers have been making attempts to leverage more
+types of data that contain relevant information for cognitive diagnosis. Especially after NeuralCD
+[145] validated the superiority of using deep learning methods in cognitive diagnosis, including
+better fitting ability and extensibility without losing explainability, following studies started to
+explore diverse types of data, including test item contents, examinees’ background information
+and sophisticated graph-structured data (the right part of Fig. 5). Moreover, the response data in
+consideration is not limited to scale-based tests. The popularity of online learning systems provides
+more opportunities of accessing learners’ daily behavioral data as well as diverse data types.
+Therefore, cognitive diagnosis can be conducted even without organizing tests in an interruptive
+way if we regard learners’ ability as constant during a short time period. Some researchers addressed
+the data sparsity problem within learners’ response logs [146, 164], and considered supplementary
+data such as response time and hints [130, 158, 167, 168]. More detailed behaviors such as keystrokes
+and eye tracking can be available, however, they still need further exploration.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 8 =====
+
+8 Fei Wang, et al.
+Psychometrics-based
+models
+Ability level paradigm
+IRT
+Dichotomous IRT 1PL/2PL/3PL-IRT
+Polytomous IRT
+Other IRT modelsMIRT
+Cognition
+level paradigm
+Rule Space Method
+DINA, DINO, NIDA, NIDO, etc.
+GDM
+Others
+RUM
+LCDM
+MLTM-D
+...
+Fig. 6. A taxonomy of psychometrics-based cognitive diagnosis models.
+3 PSYCHOMETRICS-BASED COGNITIVE DIAGNOSIS MODELS
+Traditional cognitive diagnosis models (CDMs) utilize statistical methods based on psychometrics
+to model examinees’ cognitive status. These models can be categorized into two paradigms, i.e., the
+ability level paradigm and the cognition level paradigm (Fig. 6).
+3.1 Ability Level Paradigm
+In the ability level paradigm, researchers focus on the estimation of the overall ability of examinees
+reflected on tests. Traditional models following the ability level paradigm usually model examinees’
+overall ability levels by low-dimensional𝜃, which can be jointly estimated with low-dimensional
+item parameters such as discrimination and difficulty. As mentioned before, we include Item
+Response Theory (IRT) [16, 67] and Multidimensional IRT (MIRT) [111] into the review even if
+they were proposed before the term cognitive diagnosis appeared.
+3.1.1 Item Response Theory (IRT). IRT [16, 67] is one of the most classical latent trait methods
+for measuring human cognitive status. The core assumption of IRT is that the relation between
+examinees’ responses and their ability levels can be modeled by a continuous mathematical function.
+i.e.,𝑃𝑟(𝑟𝑖𝑗 = 1) = 𝑓(𝜃𝑖,𝛽 𝑗), where𝜃𝑖 is a scalar parameter indicating the ability level of examinee
+𝑖, and 𝛽𝑗 denotes the latent traits of test item 𝑗. Many IRT-based models are simply called IRT,
+among which the most representative models include one-parameter logistic IRT (1PL-IRT), two-
+parameter logistic IRT (2PL-IRT) and three-parameter logistic IRT (3PL-IRT). 1PL-IRT only uses
+a scalar parameter𝑏𝑗 to capture the difficulty of item 𝑗. 2PL-IRT adds an extra scalar parameter
+𝑎𝑗 to indicate the discrimination of item𝑗. While 3PL-IRT adds a parameter𝑐𝑗 for item 𝑗, which
+is mostly interpreted as the probability of correctly guessing the answer. These models take
+dichotomous response scores into consideration, i.e., 𝑟𝑖𝑗 = 0, 1 indicating incorrect and correct
+responses respectively. Their formulas are as follows, and Fig. 7 depicts their model structures as
+generative probabilistic graphical models.
+1PL-IRT:𝑃𝑟(𝑟𝑖𝑗 = 1|𝜃𝑖,𝑏𝑗) =𝜎(𝜃𝑖−𝑏𝑗) = 1
+1+𝑒−(𝜃𝑖−𝑏 𝑗), (1)
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 9 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 9
+𝜃 𝑏
+𝜎(𝜃 − 𝑏)
+Response
+𝜃 𝑏
+𝜎[𝑎 𝜃 − 𝑏 ]
+Response
+𝑎 𝜃 𝑏
+𝑐 + (1 − 𝑐)𝜎[𝑎 𝜃 − 𝑏 ]
+Response
+𝑎 𝑐
+(a) 1PL-IRT (b) 2PL-IRT (c) 3PL-IRT
+𝜃 𝑏
+𝜎(𝑎T𝜃 + 𝑏)
+Response
+𝑎
+(d) 2PL-MIRT
+Fig. 7. The comparison of representative IRT and MIRT models.
+1PL-2RT:𝑃𝑟(𝑟𝑖𝑗 = 1|𝜃𝑖,𝑎𝑗,𝑏𝑗) = 1
+1+𝑒−𝑎 𝑗(𝜃𝑖−𝑏 𝑗), (2)
+1PL-3RT:𝑃𝑟(𝑟𝑖𝑗 = 1|𝜃𝑖,𝑎𝑗,𝑏𝑗,𝑐𝑗) =𝑐𝑗+( 1−𝑐𝑗) 1
+1+𝑒−𝑎 𝑗(𝜃𝑖−𝑏 𝑗). (3)
+Despite IRT models represent the ability levels in the simplest scalar form, their excellent
+mathematical properties (e.g., the convex property of the interaction function) allow them to
+be applied to a variety of downstream tasks such as computerized adaptive testing. Although
+IRT models for dichotomous items attract more attention, there have been extended models for
+polytomous items. For polytomous items, scores can be multiple-graded. For example, for an item
+whose full score is 10, the obtained scores might be 0, 5, 8 and 10. Researchers have developed
+various polytomous IRT models such as Partial Credit Rasch Model [101], Rating Scale Model [4]
+and Graded Response Model [118].
+3.1.2 Multidimensional Item Response Theory (MIRT). MIRT [111] extends the ability modeled
+in IRT to multidimensional cases. Similar to exploratory factor analysis (EFA), MIRT allows for
+the exploration of multidimensionality and complex relationships between observed variables and
+latent traits, particularly in the context of assessments or tests. The simplest form of MIRT is a
+direct extension from 2PL-IRT and is given as𝑃𝑟(𝑟𝑖𝑗 = 1|𝜃𝑖,𝑎𝑗,𝑏𝑗) = 1/(1+𝑒−(𝑎⊤
+𝑗𝜃𝑖+𝑏 𝑗)), where𝑎𝑗
+denotes item discrimination on multiple dimensions, and𝑏𝑗 is related to item difficulty. In practice,
+a small dimension is usually enough for MIRT, and each dimension of𝜃𝑖 represents a specific ability
+required to successfully answer the item. However, when using low-dimensional parameters, the
+ability is hard to explain explicitly. just like factor analysis. Besides relating to EFA and extending the
+dimension of IRT, MIRT also connects the cognition level paradigm. In the cognition level paradigm,
+researchers focus more on the fine-grained cognitive states of examinees, such as proficiency levels
+on pre-defined knowledge concepts. Along this line, da Silva et al. [ 26] introduce the Q-matrix
+into the interaction function of MIRT to obtain examinees’ knowledge-concept-wise latent traits.
+To ensure the identifiability of MIRT, item discrimination vector𝑎𝑗 of different items are usually
+rotated to the same value to acquire identifiable estimations of examinees’ abilities [7].
+3.2 Cognition Level Paradigm
+In the cognitive level paradigm, researchers focus on the estimation of the fine-grained cognitive
+states of students. For instance, in K-12 course learning, test designers require diagnosing students’
+proficiency level on knowledge concepts (e.g., the concept linear function in mathematics) from
+their test performances. Therefore, CDMs in the cognitive level paradigm are utilized to estimate
+student knowledge proficiencies in this scenario. Since such a diagnosis process can be viewed
+as classifying students to an “ideal” proficiency pattern that is most suitable for his/her test
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 10 =====
+
+10 Fei Wang, et al.
+(1 − 𝑠𝑘)𝜃𝑖𝑘𝑔𝑘1−𝜃𝑖𝑘
+𝑠𝑗 𝑔𝑗
+AND
+𝜃𝑖
+{0, 1}
+η𝑖𝑗
+(1 − 𝑠𝑗)η𝑖𝑗𝑔𝑗1−η𝑖𝑗
+Response
+𝑠𝑗 𝑔𝑗
+OR
+𝜃𝑖
+η𝑖𝑗
+(1 − 𝑠𝑗)η𝑖𝑗𝑔𝑗1−η𝑖𝑗
+Response
+𝜃𝑖
+(1 − 𝑠𝑘)𝜃𝑖𝑘𝑔𝑘1−𝜃𝑖𝑘
+AND
+𝑠𝑘 𝑔𝑘
+Response
+(1 − 𝑠𝑘)𝜃𝑖𝑘𝑔𝑘1−𝜃𝑖𝑘
+𝜃𝑖
+(1 − 𝑠𝑘)𝜃𝑖𝑘𝑔𝑘1−𝜃𝑖𝑘
+OR
+𝑠𝑘 𝑔𝑘
+Response
+(a) DINA (b) DINO (c) NIDA (d) NIDO
+Required Knowledge concept Unrequired Knowledge concept
+Fig. 8. The comparison among DINA, DINO, NIDA and NIDO.
+performance, traditional cognitive level paradigm-based CDMs are also named as Diagnostic
+Classification Model (DCM).
+3.2.1 Rule Space Method (RSM) And Its Variations. The RSM proposed by Tatsuoka in the 1980s [124],
+is a statistical modeling approach used for cognitive diagnosis. Compared with IRT, RSM focuses
+on representing the cognitive processes that individuals use to respond to test items, which is
+more fine-grained. It seeks to identify the specific cognitive rules or strategies that individuals
+employ when answering test items. Four steps are included in RSM, i.e., item decomposition, rule
+specification, rule space construction, and rule space matching.
+The RSM is a fundamental yet significant method in traditional CD, and is the basis of many
+DCMs [74, 75]. One shortcoming of the traditional RSM is that it views knowledge concepts
+as independent entities and ignores their hierarchical relationship in the cognitive process (e.g.,
+knowledge dependency). Therefore, Leighton et al. [75] proposed the Attribute Hierarchy Method
+(AHM) to address this issue. Compared to the original RSM, the AHM assumes that attributes (i.e.,
+knowledge concepts or skills that are required for students to solve a test item) are organized in a
+hierarchical structure, which can be represented by an adjacent matrix of attributes. Then the AHM
+limits the rule space defined in the RSM, such that the mastery of any child attribute should be no
+less than the mastery of its parent attribute. Then the AHM matches each student into the most
+similar ideal response patterns, with the corresponding rule as the diagnostic result of the student.
+3.2.2 DINA And Relevant CDMs. Deterministic Input, Noisy “And” Gate (DINA) model [28] is a
+representative and recognized CDM. DINA and its relevant CDMs diagnose students’ knowledge
+concept-wise abilities from binary response data and expert-labeled question-knowledge relation-
+ship. The core assumption of DINA is that the proficiency of different knowledge concepts is
+non-compensatory. That is, the model assumes that mastery of all required attributes is necessary
+for a correct response, but also allows for the possibility of guessing. In DINA, each student 𝑖’s
+ability status is modeled as a binary knowledge mastery pattern vector 𝜃𝑖 =(𝜃𝑖1,...,𝜃 𝑖𝐾). Here
+𝐾 denotes the number of knowledge concepts, and the binary value𝜃𝑖𝑘∈{ 1, 0} denotes whether
+or not student𝑖 has mastered the knowledge concept𝑘. Items are modelled by “slip” and “guess”
+parameters and a pre-given binary Q-matrix𝑄 =(𝑞1,...,𝑞 𝐽)⊤ =(𝑞𝑗𝑘)𝐽×𝐾. The interaction func-
+tion of DINA is defined as𝑃𝑟(𝑟𝑖𝑗 = 1|𝜃𝑖,𝑞𝑗,𝑠𝑗,𝑔𝑗) =(1−𝑠𝑗)𝜂𝑖 𝑗𝑔1−𝜂𝑖 𝑗
+𝑗 , where𝜂𝑖𝑗 = Î𝐾
+𝑘=1𝜃𝑞 𝑗𝑘
+𝑖𝑘 is the
+indicator of whether the student has mastered all required knowledge concepts of the item. The𝑠𝑗
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 11 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 11
+and𝑔𝑗 denote respectively the “slip” and “guess” parameters of item 𝑗. Then the goal of the DINA
+model is to estimate the psychological factors including student cognitive state𝜃𝑖, item parameters
+𝑠𝑗 and𝑔𝑗 given observed binary response scores.
+There are some representative CDMs similar to DINA but different in the assumption. Fig. 8
+demonstrates a comparison among DINA and the following examples. The Deterministic Input,
+Noisy “Or” Gate (DINO) model [127] assumes the proficiency of different knowledge concepts to
+be compensatory. That is to say, the examinee is supposed to correctly answer the item if at least
+one required knowledge concept is mastered and there is no slipping. Compared to DINA, DINO
+has a more relaxed assumption and is suitable for certain circumstances such as items with multiple
+solving strategies. One risk of DINO is an over-estimation of students’ ability levels. The Noisy
+Inputs, Deterministic "And" Gate (NIDA) model [100] and Noisy Inputs, Deterministic "Or" Gate
+(NIDO) model assume that examinees may slip on their mastered knowledge concepts or guess
+on unmastered knowledge concepts. These noisy mastery patterns then compose the response in
+compensatory and non-compensatory ways respectively.
+3.2.3 General Diagnostic Model (GDM). The General Diagnostic Model (GDM) [139] is a general
+framework that subsumes many classical and well-known CDMs like DINA, IRT and MIRT [14, 140].
+As a general framework, GDM is suitable for various real-world scenarios, including but not limited
+to dichotomous/polytomous response scores, binary/continuous/polytomous ordinal knowledge
+mastery levels, etc. We introduce the general form of GDM in this section.
+Formally, let𝜃 be a K-dimensional skill profile consisting of polytomous or dichotomous skill
+attributes𝜃𝑘(𝑘 = 1,...,𝐾 ). Then the probability of a polytomous response score𝑥∈{ 0,...,𝑚 𝑗} to
+item 𝑗 under the GDM with an individual with skill profiles𝜃 is defined as
+𝑃𝑟(𝑟𝑗 =𝑥|𝜃 =(𝜃1,...,𝜃 𝐾)) = exp
+
+𝛽𝑗𝑥+ Í𝐾
+𝑘=1𝛾𝑗𝑥𝑘ℎ𝑗(𝑞𝑗𝑘,𝜃𝑘)
+
+1+ Í𝑚 𝑗
+𝑦=1 exp
+
+𝛽𝑗𝑦+ Í𝐾
+𝑘=1𝛾𝑗𝑦𝑘ℎ𝑗(𝑞𝑗𝑘,𝜃𝑘)
+, (4)
+where𝛽𝑗𝑥 and𝛾𝑗𝑥𝑘(𝑗 = 1, 2,...,𝐽 ) are estimable item parameters. Each element𝑞𝑗𝑘,𝑗 = 1, 2,...𝐽,𝑘 =
+1, 2,...,𝐾 of the Q-matrix is a constant, as in other DCMs like DINA. The helper functionℎ(·,·)
+maps𝑞𝑗𝑘 and𝜃𝑘 to a real number, which considers the fact that the knowledge profile𝜃 might be
+polytomous. By elaborately designing the form of the parameter𝛾 and the helper function, GDM
+can be flexibly applied to either binary or polytomous response data. As a constraint latent class
+model, the parameter estimation of GDM is usually done with expectation-maximization (EM)
+algorithm [33, 65].
+Due to its generality and flexibility, there are also many other versions for GDM to adjust some
+special scenarios, like mixture distribution extensions of GDM which consider the ability prior of
+student groups, and hierarchical extensions of GDM which consider the multilevel distribution of
+student abilities. Indeed, many traditional CDMs, including CDMs in the ability level paradigm like
+IRT and MIRT [14], and CDMs in the cognitive level paradigm like LCDM and DINA [140], have
+been proven to be special cases of GDM.
+3.2.4 Other Traditional CDMs. Besides representative CDMs introduced above, there are also some
+other traditional CDMs that focus on different research challenges in the context of educational
+measurement. For instance, the Reparameterized Unified Model (RUM) [ 58], as a refinement of
+DINA, aims to construct a cognitive diagnosis assessment system that includes DCM models,
+estimation procedure, classification algorithm and model-and-data checking function. De La Torre
+[29] proposed the G-DINA, as a general cognitive diagnosis framework similar to GDM, which
+subsumes many existing CDMs like DINA. Henson et al. [60] proposed the Log-Linear Cognitive
+Diagnosis Model (LCDM) based on GDM, which integrates the log-linear model into the calculation
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 12 =====
+
+12 Fei Wang, et al.
+ML-based
+CDMs
+Non-DL CDMs
+DL-based CDMs
+DL-based architectures
+Mastery pattern classifier
+Cognitive interaction
+simulator DNN
+NAS
+GNN
+...
+Encoder-decoder
+DL for multifaceted information
+CD + KT
+Other topics
+Fig. 9. A taxonomy of machine-learning based cognitive diagnosis models.
+ofℎ(·,·). Therefore, LCDM is a special case of GDM and focuses more on the interaction between
+students and items [141]. Embretson and Yang [41] proposed the Multicomponent Latent Trait Model
+for Diagnosis (MLTM-D), which aims to diagnose hierarchically structured skills or knowledge
+concepts. In a word, traditional CDMs are usually the combinations of psychometric assumptions
+and statistical methods.
+4 MACHINE LEARNING-BASED COGNITIVE DIAGNOSIS MODELS
+In recent years, with the development of AI-based education, cognitive diagnosis has raised the
+attention of researchers from computer science, especially artificial intelligence. CDMs based on
+machine learning (ML), especially deep learning (DL), are consequently proposed [86]. With the
+advantages of better fitting ability and more flexible structures to make use of different types of
+educational data (e.g., response, item content, knowledge concept structure), machine learning-
+based CDMs have achieved much success, leading to a new trend of research. We roughly classify
+these works according to their proposed time and technology/target in Fig. 9.
+4.1 Non-deep-learning Models
+In the earlier works, there were several attempts using clustering algorithms to classify examinees
+into different clusters, where each of the clusters represents a type of knowledge mastery pattern.
+For example, Chiu [24] adopted K-means clustering combined with hierarchical agglomerative
+cluster analysis, Guo et al. [57] adopted spectral clustering algorithms. Support vector machine
+(SVM) was also used in several studies for cognitive diagnosis [84, 174], where examinees’ response
+logs are input as features and possible knowledge mastery statuses are predicted by SVM. Supervised
+training data including the known knowledge status is required for SVM-based methods, which
+limits the practicality of these models. Collaborative filtering methods such as matrix factorization
+were also adopted to solve the cognitive diagnosis problem in education [129, 130, 134]. However, as
+these models focus on predicting students’ performance instead of diagnosing students’ knowledge
+proficiencies, the estimated student parameters are not explicitly explainable. Wu and Liu et al.
+[89, 157] proposed FuzzyCDF which integrates the fuzzy set to handle both objective and subjective
+test items. Wu et al. [156] introduced a variational Bayesian inference algorithm for IRT, which
+provides a faster and more accurate human ability estimation compared to traditional IRT, especially
+on large-scale datasets.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 13 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 13
+4.2 Deep learning-Based Models
+Integrating deep learning methods has been a new trend in cognitive diagnosis. According to the
+model architectures and their emergence time, deep learning-based CDMs can be generally classified
+into mastery pattern classifier, cognitive interaction simulator, and encoder-decoder-based
+architectures. In §4.2.1 we will review these types of CDMs in detail, following an exploration of
+multifaceted information (§4.2.2) and other topics in cognitive diagnosis research (§4.2.4).
+4.2.1 DL-based Architectures.
+(1) Mastery Pattern Classifier .
+Artificial neural networks were initially adopted in cognitive diagnosis in a reverse manner
+compared to traditional models, as depicted by Fig. 10 (a). Typically, as introduced in the Introduction,
+CDMs simulate the cognitive mechanism of the human’s item-answering process. Therefore, the
+goal of cognitive diagnosis, i.e., humans’ ability levels, is actually at the input side of traditional
+models because it’s the cause of human responses. The ability evaluation is actually done through
+model training instead of model inference. In contrast, Gierl et al. [51] proposed a reversed model
+structure based on neural networks, which takes the examinee’s response pattern (i.e., a binary
+vector that indicates his/her responses) as input, and directly outputs the examinee’s attribute
+pattern (i.e., a vector that indicates his/her mastery on each knowledge concept). As a result, the
+CDM becomes a classification model, which can be abstracted as:
+𝜃 =𝑔𝑁𝑁(𝑅𝑒𝑠𝑝𝑜𝑛𝑠𝑒, Ω). (5)
+As empirical response data with the examinee’s true ability levels is unavailable, the model is
+trained with simulated data, which is generated using traditional CDMs such as AHM. Similarly,
+Cui et al. [25] adopted the self-organizing map to construct the classification model for ability
+evaluation. The main advantage of these methods is that the ability evaluation can be done with
+model inference after model training, even if the examinee is out of the training data. However,
+as pointed out by Briggs et al [15], the performance of these models is limited by the CDMs that
+generate the training data. When the items and/or data generation model is flawed, the trained
+CDM will naturally incorporate those flaws. Moreover, the ability estimation can be unstable after
+multiple times of model training.
+(2) Cognitive Interaction Simulator .
+Most deep learning-based CDMs still follow the traditional practice, i.e., model the cognitive
+interaction during the item answering process like a simulator, as depicted by Fig. 10 (b). The
+differences mainly lie in how the interactions are modeled. As pointed out by Wang et al. [145],
+traditional psychometric-based CDMs rely on domain experts to design interaction functions for
+predicting examinees’ responses. Although this approach offers high interpretability, it is costly, and
+the fixed function form often leads to weak fitting and generalization capabilities. Wang et al. [145]
+made an initial break through along this line. They abstracted the cognitive factors involved in
+the process of answering questions and attributed them to student factors, exercise factors, and
+interaction functions. A neural network-based framework called NeuralCD was proposed, which
+can be generally formulated as follows:
+𝑅𝑒𝑠𝑝𝑜𝑛𝑠𝑒 = 𝑓𝑁𝑁(𝜃,𝛽, Ω). (6)
+Here,𝜃 represents the examinee’s ability level and is modeled with a multi-dimensional continuous
+vector, where the value of each entry indicates the proficiency of a specific knowledge concept. The
+item parameters𝛽 here can be the knowledge difficulty, item discrimination, etc. The main difference
+between NeuralCD and psychometric-based CDMs is that NeuralCD introduced the data-driven
+strategy to learn the interaction function with neural networks from actual response data. The
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 14 =====
+
+14 Fei Wang, et al.
+Response
+𝜃 𝛽
+Response
+Response
+(a) Mastery Pattern Classifier (b) Cognitive Interaction Simulator (c) Encoder-decoder
+Response
+𝑔𝑁𝑁
+𝑓𝑁𝑁
+𝜃 𝛽
+𝑓𝑁𝑁𝑑𝑒𝑐
+𝑓𝑁𝑁𝑒𝑛𝑐
+𝜃 𝛽
+Fig. 10. The comparison of deep learning-based cognitive diagnosis models.
+monotonicity assumption was adopted together with the knowledge relevancy vector to ensure the
+explainability of diagnostic results, i.e., the estimated𝜃. Wang et al. also illustrated the generality and
+extensibility of NeuralCD. The simplicity, robust generalizability, and psychological interpretability
+based on the monotonicity assumption make NeuralCD highly attractive. Consequently, NeuralCD
+has inspired the emergence of quite a few DL-based CDMs.
+Deep neural network (DNN). The DNN is the most straightforward deep learning method
+to construct the interaction functions. Wang et al. [ 145] have provided a basic implementation
+based on NeuralCD called NeuralCDM. Formally, NeuralCDM reconstructs the response of each
+learner𝑖 to the test item 𝑗 with the formula 𝑃𝑟(𝑟𝑖𝑗 = 1) = 𝑓𝐷𝑁𝑁(𝑞𝑗◦( 𝜃𝑖−𝑏𝑗)∗ 𝑎𝑗), where
+the interaction function 𝑓𝐷𝑁𝑁 consists of multiple fully connected layers. The ability status of
+learner𝑖 is represented with a𝐾-dimensional vector,𝜃𝑖∈ R𝐾, where𝐾 denotes the total number
+of knowledge concepts corresponding to all test items. Each dimension𝜃𝑖𝑘 , ranging from 0 to 1,
+represents the proficiency level of learner𝑖 on concept𝑘. In NeuralCDM, the test item is considered
+as a difficulty parameter𝑏𝑗∈ R𝐾 and a discrimination parameter𝑎𝑗∈ R1, similar to MIRT.𝑞𝑗∈ R𝐾
+is the 𝑗th row of the Q-matrix indicating the knowledge concepts required by item𝑗. The symbol
+◦ denotes the element-wise product. Notably, NeuralCDM strictly adheres to the monotonicity
+assumption by restricting the layer weights to be nonnegative.
+Some deep learning-based CDMs are direct extensions of NeuralCDM. Wang et al. [146] proposed
+KaNCD to model the latent knowledge associations with the aim of mitigating the low knowledge
+coverage problem as well as improving the diagnostic performance. Ma et al. [97] proposed KSCD
+that introduces additional parameters for knowledge concepts to better capture the relationship
+among students, items, and knowledge concepts. Meanwhile, Li et al. [76] added the guessing and
+slipping parameters of test items and replaced the first-layer of the NeuralCDM interaction module
+with IRT to enhance the interpretability while maintaining data-driven generalization, effectiveness,
+and efficiency. Cheng et al. [22] added a knowledge point importance vector to the input layer of
+NeuralCDM. Similarly, Li et al. [80] added parameters to depict the impacts of different knowledge
+concepts, as well as the guessing and slipping factors, thereby proposing the CDMFKC model.
+Wang et al. [150] improved NeuralCDM by aggregating the knowledge concepts by converting
+them into a graph structure and only considering the leaf node of the knowledge concept tree.
+Some extensions made use of extra information, such as the text content [146]. We will introduce
+them in Section 4.2.2.
+Neural architecture search (NAS). In addition to widely used neural networks, some studies
+have opted for the more complex neural architecture search (NAS)-based approach to construct the
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 15 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 15
+interaction function𝑓𝑁𝑁 , offering an intriguing alternative. Despite this shift, these endeavors still
+operate within the NeuralCD framework and can thus be represented using Eq. (6). The primary
+distinction lies in implementing the interaction function𝑓𝑁𝑁 using NAS instead of conventional
+neural networks. For example, Yang et al. [ 162, 163] leverage evolutionary NAS to implement
+the interaction function. They define the cognitive diagnosis task as a search space within NAS
+and design various algorithms to search for the optimal solution, aiming to automatically fit the
+interaction between learners and items.
+Graph neural network (GNN). Some researchers have realized that the correlation between
+learners, items, and even knowledge concepts can form a graph structure, and therefore incorporated
+GNN into their cognitive diagnostic models. In these works, GNN was mainly used to either improve
+the embeddings of learners, items, and knowledge concepts [ 85, 103] or model the propagation
+of the influence among the mastery of different knowledge concepts [ 46, 122]. Meanwhile, the
+interaction among the learners, items, and knowledge concepts was still modeled with DNN. We
+will review more details in Section 4.2.2.
+Others. There are a few studies trying to combine some traditional psychometrics-based CDMs
+with deep learning. For example, Gao et al. [45] combines the IRT, DINA and neural networks, and
+predicts learners’ scores on both objective and subjective items. Wang et al. [151] took IRT, DINA,
+HO-DINA, and MIRT into consideration and fused them in two ways with neural networks.
+(3) Encoder-Decoder-based Architecture.
+A few recent studies have raised attention to encoder-decoder-based CDMs. If we regard the
+first type of architecture (mastery pattern classifier) as the encoder and the second type (cognitive
+interaction simulator) as the decoder, then the new architecture can be seen as the combination of
+the above (Fig. 10 (c)). Encoder-decoder-based CDMs take responses (and maybe more types of data
+in the future) as input, encode them into examinees’ explainable ability vectors and item parameters,
+and then decode them to reconstruct the input responses. It can be formalized as follows:
+𝑅𝑒𝑠𝑝𝑜𝑛𝑠𝑒 = 𝑓𝑁𝑁 𝑑𝑒𝑐(𝜃,𝛽, Ω𝑑𝑒𝑐|𝜃,𝛽 ← 𝑓𝑁𝑁 𝑒𝑛𝑐(𝑅𝑒𝑠𝑝𝑜𝑛𝑠𝑒, Ω𝑒𝑛𝑐)), (7)
+Such architecture overcomes the shortcomings of the mastery pattern classifier architecture as
+it can be trained directly using real-world datasets. Moreover, after model training, the diagnosis
+process can be conducted inductively which means that examinees who do not appear in the
+training data can be directly diagnosed based on their response data using the encoder. Along this
+line, Li et al. [78] proposed a response-proficiency-response paradigm called ID-CDF, where the
+encoder module is implemented with a simple yet effective DNN. Similarly, Liu et al. [ 91] also
+proposed an inductive encoder-decode-like CDM called ICDM, where the authors constructed
+a student-centered graph based on the response data and Q-matrix, and encoded the nodes (i.e.,
+students, questions, and knowledge concepts) into embedding vectors that can be transformed
+to explainable student’s ability levels. In addition, in [78], the authors raised concerns about the
+inherent non-identifiability and explainability overfitting issues of the traditional decoder-like
+architecture. These issues can negatively impact the quantification of learners’ cognitive states
+and the quality of web learning services. The superiority of ID-CDF in solving the above problems
+has been verified in the paper. Chen et al. proposed DCD [19], which maps cognitive parameters
+and test item traits into distributional forms, utilizing a variational autoencoder as the interaction
+function to enhance the model’s generalization capability. The ICD model proposed by Qi et al. [108]
+basically follows the encoder-decoder architecture. A data enhancement approach was proposed so
+that each learner’s responses were divided differently multiple times.
+4.2.2 Integration of Multifaceted Information. Despite significant progress in cognitive diagnosis
+interaction function technology, the bottleneck of cognitive diagnosis arises from the initialization
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 16 =====
+
+16 Fei Wang, et al.
+of diagnosis factors (learner features and test item features) solely based on their IDs. Thus,
+researchers have begun exploring ways to enhance the expressive ability of diagnosis factors with
+multifaceted information, including side-information and domain priors, aiming to further improve
+the interpretability and performance of diagnosis models.
+Let X denote the multifaceted information. We hence model the CDM that introduces multifaceted
+information as follows:
+𝑅𝑒𝑠𝑝𝑜𝑛𝑠𝑒 = 𝑓𝑁𝑁(𝜃,𝛽, Ω|𝜃← 𝑓𝑁𝑁 𝑢𝑠𝑒𝑟(X, Ω𝑢𝑠𝑒𝑟),𝛽 ← 𝑓𝑁𝑁 𝑖𝑡𝑒𝑚(X, Ω𝑖𝑡𝑒𝑚)), (8)
+where𝑓𝑁𝑁 𝑢𝑠𝑒𝑟 and𝑓𝑁𝑁 𝑖𝑡𝑒𝑚 are feature extraction functions to extract useful clues from multifaceted
+information to generate solid diagnosis factors, i.e., learner cognitive traits and test item traits.𝑓𝑁𝑁
+is the interaction function for the diagnosis prediction. The multifaceted information X commonly
+utilized in cognitive diagnosis can be categorized into three types as follows.
+Learner-side information. From the perspective of learners, extra information typically in-
+cludes learner features or profiles, such as age, gender, behaviors, and preferences, as well as
+contextual information like school details, family income, and parental occupation, all of which
+are relevant to the learner. The learner-side information can provide richer insights than mere
+IDs. Zhou et al. [ 175] leveraged learner features (e.g., gender, age, region) as the initial profile
+and contextual information related to the learners (e.g., school details and parents’ occupation)
+to uncover implicit relations between learners’ contextual information and their performance in
+practice. This study not only enhances diagnostic performance but also sets the groundwork for
+subsequent research on fairness in education [173].
+Item-side information. In addition to relevant knowledge concepts/skills, commonly employed
+item-side information encompasses the item contents, such as texts and images (Fig. 11 (a)), as well
+as exceptional factors like guessing and slipping, which offer detailed semantic cues to represent
+item traits. Song et al. [120], Cheng et al. [21], Gao et al. [47], and Wang et al. [146] extracted item
+difficulty and discrimination from text or image content, enhancing the extensibility of CDMs to
+cold-start items. Gao et al. [45] established semantic relationships between item text and knowledge
+concepts, enhancing the interpretability of cognitive diagnosis.
+Relational graph-based information. Many studies introduce relational graphs based on
+the educational priors, such as knowledge concept (KC) graphs (as depicted in Fig. 11 (b)) and
+item-concept association graphs, to enhance the representations of both learners and items. Gao et
+al. [46] and Su et al. [122] modeled the heterogeneous graph structures of learner-item-knowledge
+to fully explored higher-order interaction relationships between the nodes and the dependency
+relationships between knowledge concepts within a concept map, thus enhancing the representation
+of learner cognitive states and item features. Li et al [ 79] proposed the HierCDF framework to
+model the influence of hierarchical knowledge structures on cognitive diagnosis. Song et al. [120]
+focused on the effective fusion of knowledge concept maps with knowledge concept dependency
+relations and item features. Jiao et al. [66] revealed the relationships between knowledge concepts
+and items, as well as concept dependency relations within the knowledge concept map, enhancing
+the representation of item and learner features.
+4.2.3 Combination of cognitive diagnosis and knowledge tracing. As mentioned in §2.1, cognitive
+diagnosis assumes constant ability, which is a big difference compared to knowledge tracing. This
+assumption is reasonable in circumstances when examinees’ ability is stable in a relatively short
+time period. However, there are indeed situations that need to model the changes in examinees’
+ability levels. For example, at an online learning platform, a learner may receive exercises related
+to a certain knowledge concept multiple times to practice. This type of learning process involves
+changes in learners’ abilities, which the learners and maybe other platform users care about.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 17 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 17
+Response
+𝜃
+Context
+ Side information
+(a) (b) (c)
+𝑓𝑁𝑁
+𝛽
+Fig. 11. (a) Examples of item-side information; (b) An example of knowledge concept graph with prerequisite
+and collaboration relations; (c) DL-based CDMs integrating multifacet information.
+Due to the lack of interpretability of traditional knowledge tracing models, some researchers
+combined cognitive diagnosis models with knowledge tracing. For example, Zhang et al. [ 171]
+developed Gated-GNN to trace the student-knowledge response records and to extract students’
+latent traits, and used IRT to predict the probability of students answering exercises correctly. Gan
+et al. [44] and Li et al. [77] combined the key-value memory network with IRT. Wang et al. [144]
+proposed a Dynamic Cognitive Diagnosis (DynamicCD) approach. This work provided a relatively
+extensive discussion about what types of educational priors from cognitive diagnosis models can be
+integrated with knowledge tracing, how they are integrated, and what influences they bring. The
+proposed approach provides a more nuanced understanding of learners’ evolving knowledge states,
+as well as a more accurate prediction of learners’ performance. Ma et al. [98] proposed a continuous
+time based Neural Cognitive Modeling (CT-NCM) that combines the neural Hawkes process with
+CDMs, thereby integrating the dynamism and continuity of knowledge forgetting into the learning
+process modeling. Liu et al. [90] proposed a two-stage method to automatically discover symbolic
+laws governing skill acquisition from learners’ sequential response data. In the first stage of their
+method, a transformer-like module is used to encode learners’ sequential response data and then
+combined with 3PL-IRT to predict the scores. In the second stage, symbolic regression is used to
+extract core patterns from the trained deep-learning regressor into algebraic equations, resulting in
+symbolic rules. It is worth pointing out that, the combination of cognitive diagnosis and knowledge
+tracing might be seen as an extension of the encoder-decoder-based architecture of CDMs.
+The difference mainly lies in that the encoder is from the knowledge tracing academia which better
+models the sequential data and tracks the evolution of knowledge status.
+4.2.4 Other Issues. Considering the practical demands of real-world scenarios, recent studies
+have been focusing on developing cognitive diagnosis methods tailored for specific application
+contexts. These contexts often come with their own complexities and data constraints, necessitating
+specialized approaches to effectively address the unique challenges they present.
+Cognitive diagnosis under limited data scenarios. The practice data of learners in real
+learning scenarios often face limitations. For instance, the self-driven nature of online learning
+leads many learners to selectively engage with items they excel in or practice irregularly, resulting
+in a ’sparse issue’ that introduces biases into their diagnosis results. To address this challenge,
+Yao et al. [164] analyzed the features of both interacted and non-interacted items and designed an
+item-aware partial order constraint to guide cognitive diagnosis modeling.
+Moreover, in real learning platforms, new courses are frequently introduced where learner data
+is unavailable, presenting a cold-start problem. Traditional CDMs heavily rely on abundant learner
+practice data, which becomes scarce in such scenarios. In response, Gao et al. [ 48] proposed a
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 18 =====
+
+18 Fei Wang, et al.
+unified knowledge concept graph modeling approach to bridge cold-start scenarios with mature
+scenarios possessing rich data, transferring modeling experience from existing contexts to cold-
+start situations. Additionally, Gao et al. [47] developed a training-fine-tuning approach leveraging
+pre-training to extract universal cognitive representations from existing scenarios. By fine-tuning
+a superior cognitive diagnosis model with a small amount of learner practice data in cold-start
+scenarios, this method effectively overcomes data scarcity challenges.
+Fairness in cognitive diagnosis. Fairness has become a prominent and pressing issue in
+education, with recent years witnessing a surge in research focused on fair cognitive diagnosis
+modeling. This is especially significant as learners’ diagnostic results produced by CDMs can be
+impacted by various sensitive attributes, such as region or socio-economic background during the
+model training. Recognizing this, Zhang et al. [173] delved into the fairness in cognitive diagnosis
+and uncovered instances of unfairness in prior CDMs. An adversarial-based cognitive diagnosis
+framework was proposed to eliminate sensitive information from user vectors, thereby ensuring
+fairness in the diagnostic process. Furthermore, Zhang et al. [169] argued that sensitive attributes of
+students can also provide valuable information, and only shortcuts directly linked to the sensitive
+information should be eliminated. To accomplish this objective, they utilized causal reasoning and
+developed a path-specific causal reasoning framework for fairness-aware cognitive diagnosis.
+Group-level cognitive diagnosis. While most CDMs have primarily focused on individual-
+oriented modeling, real learning scenarios frequently entail group teaching, such as classroom
+settings. This necessitates the development of group-level cognitive diagnosis methods to enhance
+teaching efficiency. In response to this need, methods based on psychometrics-based CDMs have
+been proposed, which either extend IRT to combine with response sampling methods [12, 113] or
+average the diagnosed individual abilities [2, 93]. Recent studies have been exploring this issue
+using deep learning methods. Huang et al. [64] proposed an efficient group-level diagnosis method
+based on educational priors. By considering the collective knowledge and performance of a group,
+this approach offers insights that can inform instructional strategies and interventions tailored to
+group dynamics. Further advancing group-level diagnosis, Liu et al. [92] integrated homogeneous
+relations among learners to enhance diagnosis performance. By leveraging similarities and shared
+characteristics among learners within a group, this method offers a more nuanced understanding of
+group-level cognitive profiles. These advancements hold promise for optimizing teaching practices
+and facilitating collaborative learning experiences in educational settings.
+Data privacy in cognitive diagnosis. Data privacy is of great concern nowadays. Learners’
+behavioral data on learning platforms could be private data that is not allowed by either learners
+or platform administrators to share. In response to such data protection policies, Wu et al. [155]
+and Liu et al. [88] proposed federated learning-based user model approaches and applied them to
+cognitive diagnosis. These approaches achieved comparable diagnostic performances with local
+training approaches, with much less risk of data leakage.
+Cognitive diagnosis in adversarial scenarios. In some applications of cognitive diagnosis,
+the data is not limited to examinees’ responses to test items, but also the outcome of confrontation
+between individuals, or even between teams. For example, Gu et al. [ 56] proposed a NeuralAC
+model to measure the abilities of MOBA (multiplayer online battle arena) game players, where the
+cooperation and competition factors should be considered. An et al. [ 3] proposed a proficiency
+assessment network for trial lawyers, which the role of a lawyer in court cases, including cooperation
+with team members and debate with adversarial lawyers, is modeled.
+Efficiency in cognitive diagnosis. As Assumption 1 stated, examinees’ ability levels are
+assumed to be constant in CDMs. When used in online learning platforms, learners’ parameters
+should be updated to keep track of the changes in learner ability. However, frequent re-estimation
+of parameters can be uneconomical. Therefore, Tong et al. [132] theoretically discussed when a
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 19 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 19
+Table 1. A summary of descriptive characteristics of main machine learning-based CDMs. MPC, CIS, ED and
+KC are the abbreviations of Mastery Pattern Classifier, Cognitive Interaction Simulator, Encoder-decoder-based
+Architecture and Knowledge Concept respectively. The knowledge status provided by several CDMs depends
+on base CDMs because they are frameworks that can be applied to different existing CDMs.
+CDM Architecture ML basis Knowledge statusExtra Information Other topicsSVM[84, 174] MPC SVM Binary vector \ \MF[129, 130, 134]CIS MF Hidden state \ \FuzzyCDF[89] CIS Fuzzy Set Real-valued vector \ \
+NN[51] MPC DNN Real-valued vector \ \SOM[25] MPC Self-organized mapBinary vector \ \NeuralCDM[145]CIS DNN Real-valued vector \ \KaNCD[146] CIS DNN Real-valued vector \ \KSCD[97] CIS DNN Real-valued vector \ \NeuralNCD[76]CIS DNN Real-valued vector \ \IK-NeuralCD[22]CIS DNN Real-valued vector \ \CDMFKC[80] CIS DNN Real-valued vector \ \CDGK[150] CIS DNN Real-valued vector \ \NAS-GCD[163] CIS NAS Real-valued vector \ \EMO-NAS-CD[162]CIS NAS Real-valued vector \ \RCD[46] CIS GNN, DNN Real-valued vectorKC structure \Graph-EKLN[103]CIS GNN, DNN Real-valued vectorKC structure \GCDM[122] CIS GNN, DNN Real-valued vector \ \deepCDF[45] CIS Other Real-valued vector Text Subjective and objective exercisesLDM-ID/HMI[151]CIS Other Real-valued vector \ \CNCD-Q/CNCD-F[146]CIS DNN Real-valued vector Text \ECD[175] CIS DNN Real-valued vectorLearner context \HierCDF[79] CIS DNN, Bayesian NNDepends on base CDMKC structure \CMNCD[120] CIS DNN Real-valued vectorText, Image, KC structure \QI-NeuralCDM[66]CIS DNN Real-valued vectorKC structure \TechCD[48] CIS GNN, DNN Real-valued vectorKC structure Limited data scenarios, Cold-startZero-1-to-3[47] CIS DNN Real-valued vectorText, Learner relationsLimited data scenarios, Cold-startEIRS[164] CIS DNN Real-valued vectorItem-aware partial orderLimited data scenarios, Data sparsityFairCD[173] CIS DNN Real-valued vectorLearner context FairnessMGCD[64] CIS DNN Real-valued vector \ Group-levelHomoGCD[92] CIS DNN Real-valued vectorLearner relations Group-levelHPFL[155] CIS DNN, Federated learningReal-valued vector \ Data privacyAHPFL[88] CIS DNN, Federated learningReal-valued vector \ Data privacyNeuralAC[56] CIS DNN Hidden state \ Adversarial scenariosLawyerPAN[3] CIS DNN Real-valued vector Text Adversarial scenariosICD[132] CIS DNN Depends on base CDM\ EfficiencyID-CDF[78] ED Enc-Dec, DNNDepends on base CDM\ IdentifiabilityICDM[91] ED Enc-Dec, GNNReal-valued vector \ \ICD[108] ED Enc-Dec, DNNReal-valued vector \ \DASPM[85] ED Enc-Dec, GNNReal-valued vectorKC structure \DCD[19] ED Enc-Dec,𝛽-TCVAEGaussian distributionKC structure Limited Exercise-Knowledge Labels
+CDM should be updated and how to incrementally update it, thereby proposing an incremental
+cognitive diagnosis (ICD) method.
+Finally, we provide a summary of the descriptive characteristics of main machine learning-based
+CDMs in Table 1.
+5 PARAMETER ESTIMATION
+Parameter estimation is responsible for the psychological factor estimation within CDMs,
+especially the parameters representing examinees’ ability levels. This section provides several rep-
+resentative parameter estimation methods employed in cognitive diagnosis, including Expectation
+Maximization (EM), Markov Chain Monte Carlo (MCMC), and Gradient Descent (GD). Since most
+of the existing cognitive diagnosis models are simulations of examinees’ cognitive processes during
+item answering, estimating parameters is approximately equivalent to diagnosing examinees’ ability
+status. The main purpose of cognitive diagnosis models is to obtain the estimated parameters rep-
+resenting examinees’ abilities instead of predicting the examinees’ future performance. Regardless
+of a few exceptions [25, 51, 156], this is a big difference compared to traditional machine learning
+whose goal is to train models that can be used to predict the labels of unseen samples.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 20 =====
+
+20 Fei Wang, et al.
+5.1 Expectation Maximization
+Expectation Maximization (EM) [34] is widely adopted for non-deep-learning CDMs, where Ω =∅,
+such as IRT [154], MIRT [170], DINA [28] and G-DINA [29]. Note that in some papers, it is also called
+the marginalized maximum likelihood estimation (MMLE). The missing data in the EM algorithm
+refers to the examinees’ ability parameters in the CDM. Therefore, a standard EM algorithm for
+CDMs is as follows:
+Expectation (E-step): In this step, given the observed responses and the current parameter
+values, the Q-function is calculated:
+𝑄[(𝛽,𝜋)|(𝛽(𝑠),𝜋(𝑠))] =
+𝐼∑︁
+𝑖=1
+log[
+∫
+𝜃𝑖
+𝑃𝑟(𝑅𝑖|𝜃𝑖,𝛽)𝑃𝑟(𝜃𝑖|𝑅,𝛽(𝑠),𝜋(𝑠))d𝜃𝑖], (9)
+where𝜋 represents the prior distribution of examinees’ ability parameters and𝛽 represents all the
+item parameters;𝛽(𝑠),𝜋(𝑠) represent the current values of𝛽 and𝜋 estimated in the last iteration. The
+prior distribution𝜋 can be either fixed or estimated during the iterations. A convenient strategy is to
+discretize the prior distribution when𝜃𝑖 is a continuous parameter (e.g., in IRT), which significantly
+simplifies the calculation of the integral [154].
+Maximization (M-step): In this step, the algorithm updates the values of𝛽 and𝜋 to maximize
+the Q-function:
+(𝛽(𝑠+1),𝜋(𝑠+1)) = arg max
+𝛽,𝜋
+𝑄[(𝛽,𝜋)|(𝛽(𝑠),𝜋(𝑠))]. (10)
+The EM algorithm iteratively alternates between the E-step and M-step until convergence.
+In the standard practice of EM algorithm for CDMs, the parameter estimation is a two-stage
+process. The first stage is item calibration, which estimates item parameters while regarding the
+examinees’ abilities as latent variables following particular prior distribution (i.e.,𝜋). This stage is
+sometimes conducted using the responses provided by a particular group of examinees and is an
+especially necessary step for computer adaptive testing (CAT) to construct item banks [138]. At
+the second stage, examinees’ ability parameters are estimated taking the previously estimated item
+parameters as known and fixed.
+5.2 Markov Chain Monte Carlo
+MCMC can be thought of as a successor to the standard two-stage practice of EM-based methods,
+which treats the item and examinee parameters at the same time. Compared to EM-based methods,
+MCMC-based methods are generally easier to implement and remain straightforward as model
+complexity increases, at the cost of generally slower execution times [107].
+The Gibbs sampling approach of MCMC can be straightforwardly used for CDMs with multiple
+parameters. In case when the distribution is difficult to directly draw samples from, one can
+integrate the Metropolis-Hastings approach that introduces the acceptance rate into the sampling
+[30, 89, 107]. The parameters can be grouped into blocks to update simultaneously so as to increase
+the efficiency [49]. MCMC was extended to address problems such as missing data, multiple item
+types, rated responses, and response time [106, 119, 167].
+5.3 Gradient Descent
+Since deep learning-based CDMs have relatively complicated model structures with more parame-
+ters, EM-based and MCMC-based methods are not easily extendable and less efficient for these
+models. Instead, gradient descent (GD), which has been the mainstream estimation algorithm
+especially used in deep learning, is adopted to train these models.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 21 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 21
+Cross entropy added by some regularization terms is most adopted as the objective function
+[46, 79, 97, 145, 160, 175]. Tong et al. and Yao et al. proposed pairwise objective functions to enhance
+the monotonicity and leverage non-interactive items [133, 164]. The optimization can be conducted
+through mini-batches [61], and optimizers proposed in the deep learning research are compatible
+with CDM training, such as Adam [72], Adagrad [39], and RMSProp [131]. Except for these generally
+used methods, research about parameter estimation especially for deep learning-based CDMs is still
+underexplored. The robustness of the existing GD methods for CDMs, such as stability, uncertainty
+and explainability, might need further analysis.
+6 MODEL EV ALUATION
+Model Evaluation is an important stage of validating the effectiveness of models and helping
+with model selection in real-world applications. Basically, a CDM is expected to provide accurate,
+explainable and even robust diagnostic results to users. Due to the large differences between
+traditional psychometrics-based CDMs and machine learning-based CDMs, the evaluation methods
+tend to be different. We make the summary as follows.
+6.1 Evaluation for psychometrics-based CDMs
+The evaluation methods for psychometrics-based CDMs are relatively abundant. Some frequently
+discussed aspects include goodness-of-fit, reliability, validity, and uncertainty. Goodness-of-fit
+evaluates whether accurate (and may also be explainable) diagnostic results can be provided by
+CDMs, while the rest is about the robustness of the diagnostic results.
+Goodness-of-fit. Goodness-of-fit provides a general measure of whether a CDM is capable
+of fitting the response data well. If a CDM cannot even fit most of the data, it is not likely that
+the CDM can provide accurate diagnostic results. Various metrics for goodness-of-fit have been
+proposed, which can be generally divided into relative fit evaluation and absolute fit evaluation. The
+relative fit evaluation compares the fitnesses of different CDMs on a certain dataset. The number of
+parameters within a CDM may also be taken into consideration to obtain a balance between fitness
+and model complexity. Such metrics include AIC, BIC [142], DIC [121], etc. Absolute fit evaluation
+aims to assess the extent to which a model adequately fits the observed data. Fit indices such as
+RMSE or chi-square statistic [13] provide quantitative measures of the discrepancy between the
+model’s predicted values and the observed data. Lower values of these indices indicate a better fit
+between the model and the data. When choosing a CDM to use in applications, a common practice
+is to use relative fit metrics to select relatively better fitting CDMs, and use absolute fit metrics to
+determine the best CDM or identify the misspecification of Q-matrix and CDM [18, 63].
+In addition, quite a lot of works used synthesized datasets for model evaluation. As the groundtruths
+of synthesized datasets are known, a straightforward way to evaluate the accuracy of diagnostic
+results is to compare the differences between estimated parameters (denoting examinees’ ability
+levels or item characteristics) and the groundtruths [27, 31]. When the estimated ability levels are
+close to the groundtruths, they are intrinsically explainable. However, such a method cannot be
+applied to real-world datasets.
+Uncertainty/Confidence. It is not realistic to expect that CDMs always provide accurate and
+reliable diagnostic results, in other words, there exists uncertainty within the diagnostic results.
+For example, a CDM may not be able to make sure of the actual ability of a learner based on the
+observed data (even if it outputs an estimated ability parameter “0.7” for that learner), while it infers
+that the ability is most likely in the range of (0.6, 0.8). Therefore, understanding the uncertainty
+or confidence of diagnostic results is valuable for assessing the reliability of diagnostic outcomes,
+as it unveils potential error margins or ranges in model predictions. By gaining insights into this
+uncertainty, decision-makers can better comprehend diagnostic results, factor in potential risks
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 22 =====
+
+22 Fei Wang, et al.
+and uncertainties, and make more prudent decisions. Various methods have been proposed to
+estimate the uncertainty of psychometrics-based CDMs. For instance, Fully Bayesian sampling-
+based methods [107] and the multiple imputation method [161] analyze the uncertainty of IRT and
+MIRT by examining variations in diagnostic results. Frequentist methods [105, 114] use standard
+errors to depict uncertainty. Duck-Mayr et al. [40] introduce a Gaussian process-based approach
+for nonparametric IRT models.
+6.2 Evaluation for machine learning-based CDMs
+The development of machine learning-based CDMs has a much shorter history compared to
+Psychometrics-based CDMs, no matter the research about model evaluation. Due to the big dif-
+ference in model structures and maybe the background of researchers, the evaluation of machine
+learning-based CDMs is different.
+Accuracy-related evaluation. To evaluate whether a CDM provides accurate diagnostic results,
+most studies about machine learning-based CDMs, especially deep learning-based CDMs, adopted
+the metrics that are usually used to evaluate regression or classification ML models. Research
+works of machine learning-based CDMs pay more attention to real-world datasets. However, as
+the groundtruths of examinees’ ability levels are not available, the evaluation is usually indirect.
+Specifically, each examinee’s responses are divided into a training set and a testing set. The
+diagnosis, that is, the parameter estimation, is conducted based on examinees’ responses in the
+training set. Based on the estimated ability parameters, CDMs are required to predict the examinees’
+responses in the testing set. The motivation is that, if the diagnostic results are accurate, then
+the prediction of responses based on them should also be accurate. Metrics from both regression
+tasks and classification tasks have been adopted, such as the root mean square error (RMSE), mean
+absolute error (MAE) [62], accuracy (ACC) and area under the receiver operating characteristic
+curve (AUC) [83]. Another possible reason to divide the training-testing set instead of calculating
+the goodness-of-fit on the whole dataset is that machine learning-based CDMs, especially deep
+learning-based CDMs, are more sophisticated and have much stronger fitting ability. If we focus on
+goodness-of-fit, then the diagnostic results could be easily overfitting.
+Explainability. Explainable diagnostic results are extremely important for providing feedback
+to users as well as downstream applications. The explainability of diagnostic results is not easy to
+define, and is still underexplored. Some studies use the metric called “degree of agreement” (DOA)
+to measure the explainability of diagnostic results [19, 20, 145]. The assumption behind DOA is
+that, if an examinee𝑎 has a higher proficiency on knowledge concept𝑘 than another examinee𝑏,
+then𝑎 is supposed to perform better than𝑏 on test items requiring𝑘. Wang et al. [144] proposed
+partial DOA (PDOA) to mitigate the defect of DOA when dealing with test items requiring multiple
+knowledge concepts. Li et al. [78] used a similar but reverse metric called “degree of consistency”
+(DOC). In DOC, the assumption is that, if an examinee𝑎 performs better than another examinee
+𝑏 on test items requiring knowledge concept 𝑘, then the diagnosed 𝑎’s proficiency of 𝑘 should
+be higher than 𝑏’s proficiency of 𝑘. Without certain metrics, most works chose to analyze the
+explainability with diagnosed cases.
+Uncertainty/Confidence. Overall, the evaluation of the uncertainty or confidence for machine
+learning-based CDMs is still an underexplored topic. Here are a few studies. Bi et al. [9] incorporated
+model uncertainty quantification into a meta-learned cognitive diagnosis framework by considering
+ability parameters and meta parameters as fully factorized Gaussian distributions, leading to lower
+expected calibration error (ECE). Ma et al. [ 172] also used Gaussian distributions to represent
+ability parameters and proposed ReliCD, where the deviations were seen as the indicator of
+uncertainty/confidence. An ECE loss was added to the objective function to further decrease the
+ECE. Both of the above works seem to focus more on improving the diagnostic performance, while
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 23 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 23
+incorporating the estimated uncertainty as a useful by-product and validated by ECE. Wang et
+al. [147] focused on the uncertainty estimation for CDMs, and provided a unified method called
+UCD. UCD also adopted the Bayesian-based method and can be used for both non-deep learning
+and deep learning-based CDMs. The uncertainty of diagnostic parameters (i.e., examinees’ and
+items’ parameters) was characterized through their posterior probability distributions, and the
+deviations were factorized into the data aspect and model aspect. The estimated uncertainty was
+validated using the PICP, PIAW metrics, and some statistical analysis.
+Discussion. There exists quite a few differences between the evaluation of diagnostic results
+for Psychometrics-based CDMs and machine learning-based CDMs. Basically, the evaluation of
+accuracy for Psychometrics-based CDMs pays more attention to either accurately re-estimating the
+simulated parameters in synthesized datasets or better fitting the responses in real-world datasets.
+By contrast, the evaluation of accuracy for deep learning-based CDMs adopts a training-testing
+set division of real-world datasets to ensure the generality. Performance prediction task is mostly
+adopted to indirectly evaluate the accuracy. Moreover, the evaluation of cognitive diagnostic results
+should be comprehensive. The research about the evaluation of machine learning-based CDMs is
+still in the initial stage.
+In addition to the evaluation of CDMs, there also exist measurements of the reliability and
+validity of items within a test. The reliability focuses on whether the items receive consistent
+responses across different times and conditions through the test-retest method, Cronbach’s alpha
+coefficient [126], etc. The validity of items evaluates the extent to which the items can measure
+examinees’ cognitive status. Validity can be assessed through various methods such as correlation
+analysis [53], and factor analysis [73].
+7 APPLICATIONS
+Since the inception of cognitive diagnosis, it has garnered widespread attention and has found
+applications in diverse fields. This section aims to provide a primary summary of its applications
+in intelligent education, covering areas such as computer adaptive testing and educational rec-
+ommendation systems. Additionally, we will delve into the extended applications of cognitive
+diagnosis-related technologies in other domains.
+7.1 Applications in Education
+The most straightforward application of cognitive diagnosis in Education is to generate learning
+status diagnostic reports based on the diagnostic results, which help learners together with teachers
+to better understand the learning status of learners, and further serve as the basis of personal-
+ized applications, including the recommendation of learning resources and learning paths, and
+computerized adaptive testing.
+Cognitive Diagnostic Reports. Proverbially, both teachers (including intelligent tutoring sys-
+tems) and learners need diagnostic reports on the cognitive status of learners. As for the teachers,
+they can use the diagnostic reports to check: (1) What are the learners’ characteristics such as
+diligence, laziness, and inattention? (2) Whether or to what extent the learners have mastered a
+learning unit. As for the students, they need the diagnostic reports to check: (1) Whether or to
+what extent they have achieved the learning goal to adjust their learning styles and keep their
+learning enthusiasm [55]. To construct cognitive diagnostic reports, Roberts et al. [115] proposed a
+framework, that presents a graphical representation of the skill-level performance of individual
+students, to provide structured cognitive diagnostic reports with the Attribute Hierarchy Method.
+Zeniski et al. [166] advanced a pipeline of diagnostic report development that is defined by seven
+guiding principles for report design and validation. Maas et al. [ 99] developed a personalized
+student dashboard, which provides a visual summary of student performance and outlines how this
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 24 =====
+
+24 Fei Wang, et al.
+information can guide study behavior. Furthermore, online educational platforms (e.g., Zhixue 2,
+Eedi 3) have already developed various cognitive diagnostic reports, which include radar figures,
+learning paths, and other relevant panels or tables, to provide sufficient reports of cognitive status.
+Educational Recommendation Systems. Typically, students pursue studies to meet specific
+learning objectives, such as mastering a particular knowledge domain or passing examinations
+successfully. Aligned with these predefined objectives, students necessitate tailored learning ma-
+terials (typically exercises) to attain their desired outcomes. In conventional learning methods,
+there are two predominant strategies for resource selection, i.e., by students themselves and by
+professional teachers. Yet, the former strategy might lead to students selecting learning resources
+that are either overly basic or excessively advanced, consequently impeding optimal learning
+efficiency. Conversely, the latter method could potentially create higher barriers to access [36, 96].
+To overcome such problems, recent intelligent tutoring systems (e.g., ouc-online 4) have utilized
+cognitive diagnosis methods, which estimate the cognitive state of each student, to choose the best
+appropriate learning resources based on their recommendation strategies and finally provide auto-
+matic educational recommendations for individual students. In addition, Ma et al. [96] introduced
+the neutrosophic set method to compute the similarity between the cognitive states of students
+and recommends exercises. Chen et al. [23] relied on the knowledge space theory to recommend
+tailored exercises based on estimated students’ cognitive states and knowledge structures. Liu et
+al. [87] utilized the cognitive diagnosis model to offer rewards to their reinforcement learning-based
+learning path recommending strategy.
+Computerized Adaptive Testing. Traditionally, teachers hold a pencil-and-paper test to ac-
+complish the student assessment by carefully selecting a fixed set of questions for all examinees at
+once. While this method effectively evaluates their performance and presents a uniform testing
+environment for all, it is challenging to ensure that the test items are properly selected for each
+examinee [8]. Consequently, recent efforts [50, 178] have shifted focus toward Computerized Adap-
+tive Testing (CAT). CAT aims to provide tests that adapt dynamically to each examinee by tailoring
+test items based on the examinee’s performance. It has several advantages, including heightened
+accuracy, shorter test length, enhanced security, and increased examinee engagement. CAT has
+already been successfully implemented by some standard test organizations [152] like the Graduate
+Management Admission Test (GMAT)5 and the Graduate Record Examinations (GRE).
+CDMs are the essential component of CAT, as the estimated ability levels (𝜃) constitute the basis
+of item selection. For instance, [17] employed Kullback-Leibler information, computed based on
+the unidimensional 𝜃 estimated by IRT, to assess item informativeness for each examinee and
+select the most informative one as the next to be assigned. Similarly, [ 95] used the estimated 𝜃
+to compute the Fisher information measure for candidate items. Recently, some novel methods
+based on advanced machine learning have been proposed. For example, Bi et al. [10] integrated
+the concept from active learning, utilizing the model-agnostic expected model change derived
+from CDMs as the informative measure to select items. Additionally, [50, 148] formulated the CAT
+process as a Markov Decision Process (MDP) and utilized a reinforcement learning paradigm to
+address it. These approaches leverage CDMs to handle the state within their MDP formulation.
+The study by [178] innovatively transforms the CAT task into a coreset selection problem. This
+transformation involves aligning the gradients of the CDMs between a scenario with limited items
+and one with a complete set of items.
+2https://www.zhixue.com/login.html
+3https://family.eedi.com/
+4http://one.ouchn.cn/
+5The Graduate Management Admission Test (GMAT) stands as the most widely utilized test for admission into graduate
+business and management programs worldwide.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 25 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 25
+7.2 Applications in Other Domains
+In recent years, some scholars have expanded the application of cognitive diagnosis-related tech-
+nologies into other contexts, achieving notable success in the process.
+Truth Inference. Deep learning generally relies on large-scale annotated data, often labeled
+through crowdsourcing (e.g., Amazon Mechanical Turk). Truth inference [153], in this context,
+refers to the technique of identifying the true data labels from potentially conflicting annotations
+made by annotators with varying abilities and backgrounds. In [70, 153] the authors utilized IRT-
+based probabilistic approaches to iteratively estimate the abilities of annotators and infer the true
+labels of images based on the annotations and abilities. Li et al. [81] extended the previous IRT-based
+methods with compressive sensing theory and then mitigated human labeling errors.
+Corporate Recruitment. Assessing the skill qualifications of job seekers facilitates better match-
+ing between seekers and job requirements in online recruitment services [ 109, 176]. The study
+in [109] utilizes a word-level semantic representation module to represent job requirements and
+seekers’ abilities, and then predict the compatibility with the hierarchical ability-aware atten-
+tion strategies. Zhu et al. [176] proposed an end-to-end convolutional neural network (CNN) to
+learn the joint representation of Person-Job fitness between requirements and abilities. Recent
+works like [11, 110] proposed advanced neural networks, seeking more patterns to better mine job
+requirements and seekers’ abilities, then compute the compatibility between them.
+Sport. The assessment of specific skills is vital for athlete development [5]. Matsuoka et al. [102]
+introduced an IRT-based system comprising item construction, decision tree analysis, and test
+characteristic analysis. This system effectively evaluates defensive transitions in soccer games.
+Additionally, the research in [165] explored multi-directional training and technical analysis of
+basketball players using neural networks. By analyzing basketball players’ abilities, this approach
+enables optimization of their training and team strategy. These assessment tools provide a tailored
+means for players, coaches, and managers to monitor the progression of individual skills throughout
+the training process.
+Game. Precisely estimating players’ abilities and properly arranging multiple players of compa-
+rable ability into competitive games, namely matchmaking, is an important component of online
+games [35]. Its quality directly determines player satisfaction and further affects the life cycle
+of game products. The study in [54] proposed a two-stage data-driven matchmaking framework,
+which firstly learns the low-dimensional abilities representations of individuals by capturing the
+high-order inter-personal interactions and then incorporates the team-up effect and predicts the
+match outcomes. The study in [149] modeled the players and their win-loss relationships as an
+undirected weighted skill gap graph. By matching players properly after estimating their abilities,
+these works provide players with a considerable gain in their game experience.
+Psychological and Physical Health Diagnosis. As the technique arose from psychometrics, it
+is natural to use CDMs to diagnose patients’ mental health. For instance, Fraley et al. [42] employed
+item response theory to diagnose the existence of adult attachment from self-report measures.
+Templin et al. [128] utilized the DINO model to assess and diagnose pathological gamblers. Tu et
+al. [135] designed questions related to internet addiction and further utilized G-DINA to diagnose
+whether a subject has internet addiction. In addition, CDMs are also used in diagnosing physical
+health. Liang et al. [82] employed G-DINA, in conjunction with constructed data and a Q-matrix, to
+predict six-month Quality of Life (QoL) in breast cancer. The results from CDMs provide valuable
+references for doctors to assess examinees’ health conditions and support planning the treatments.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 26 =====
+
+26 Fei Wang, et al.
+Table 2. Basic descriptions of the datasets.
+Source Dataset #Examinee #Item #Response #KC/Skill Extra info
+Standard
+tests
+FrcSub 536 20 10,720 8 ✗
+Math1 4,209 20 84,180 11 ✗
+Math2 3,911 20 78,220 16 ✗
+ECPE 2,922 28 81,816 3 ✗
+PISA2015 519,334 183 12,612,424 - ✓
+E-
+learning
+systems
+ASSISTments2009 4,163 17,751 346,860 123 ✓
+ASSISTments2012 46,674 179,999 6,123,270 265 ✓
+Junyi 247,606 722 25,925,922 41 ✓
+Eedi 118,971 27,613 15,867,850 288 ✓
+8 DATASETS AND CDM TOOLS
+8.1 Datasets
+To further help researchers who have an interest in developing CDMs, we summarize some fre-
+quently used datasets in the related works. As the datasets used in early research papers, i.e.,
+psychometrics-based CDMs, are mostly synthesized or unavailable, here we only summarize pub-
+licly available datasets from recent research papers. Moreover, we have open-sourced a Python
+library called EduData6 which provides easy access to numerous datasets.
+Basically, the datasets used in CDM research can be classified into two types, i.e., from standard
+tests and from e-learning platforms. Table 2 presents some basic descriptions including statistics of
+the datasets.
+Datasets from standard tests. This type of data is collected from standard tests. Therefore, In
+each dataset, all examinees have provided their responses to all test items. The data size is mostly
+small, with fewer examinees, test items, and knowledge concepts.
+• FrcSub. The FrcSub [89, 125] is composed of the scores of middle school students on fraction
+subtraction objective problems.
+• Math1 & Math2. The Math1 and Math27 datasets are collected from two final mathematical
+exams from high school students, including both objective and subjective problems.
+• ECPE. The full name of this dataset isExamination for the Certificate of Proficiency in English 8.
+It is collected from a standard English test by the English Language Institute of the University
+of Michigan and is well-adopted in educational psychology.
+• PISA2015. The PISA20159 dataset is released by OECD’s Programme for International Stu-
+dent Assessment. PISA is a worldwide testing program that measures 15-year-olds’ abilities to
+address real-life challenges. Four core domains of PISA2015 include science, reading, mathe-
+matics and collaborative problem-solving. In addition, PISA also collects students’ background
+information such as region, home economic and cultural status through questionnaires. The
+test is put out every three years, and PISA2015 is the result released in 2015. Not every student
+answers every question as many versions of the computer exam exist. The assessed abilities
+are not barely the mastery of knowledge concepts and vary in different core domains. For
+6https://github.com/bigdata-ustc/EduData/
+7http://staff.ustc.edu.cn/~qiliuql/data/math2015.rar
+8https://rdrr.io/cran/GDINA/man/ecpe.html
+9http://www.oecd.org/pisa/data/2015database/
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 27 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 27
+example, in the science domain, the assessment tasks focused on Competencies, Knowledge,
+and Context. The Knowledge further includes Content Knowledge, Procedural Knowledge and
+Epistemic Knowledge. The usage of these types of abilities is better decided by researchers
+and we choose not to simply put their count in the table.
+Datasets from e-learning systems. This type of data is collected from e-learning systems,
+especially online learning platforms. The responses of a learner may be distributed over either a
+short or a long period of time, which might be considered as a violation of the assumption mentioned
+in the Overview, i.e., constant ability. The requirements for the dataset are sometimes not very
+strict, or the researchers have already assumed that students’ abilities are relatively stable within
+the datasets. Some researchers have mentioned this problem and made analyses and preprocesses.
+For instance, analyzing the stability of learners’ abilities [145], constructing a subset of the original
+dataset where the responses are collected in a shorter period of time [79, 147], and only maintain
+the first response to an item when a learner has multiple attempts on it.
+• ASSISTments2009 & ASSISTments2012.10 Both of these two datasets are collected from AS-
+SISTments, an online tutoring system in the United States. The full name of ASSISTments2009
+is the ASSISTments 2009-2010 skill builder data set. ASSISTments2009 is collected during the
+school year from 2009 to 2010, and students were asked to practice the questions related to
+similar knowledge concepts until they answered three or more times in a row. It is worth
+noting that there are multiple versions of ASSISTments2009. Early versions have several
+problems that may have caused some unreliable experiments in early research papers [159].
+The final version has solved the problems. ASSISTments2012 is collected during the school
+year from 2012 to 2013. ASSISTments2012 contains more students and responses. However,
+the majority of the test items are not labeled to any knowledge concepts, and each test item
+is labeled to no more than one related knowledge concept. Researchers can request access
+to the item contents by sending emails to the providers (see the website for details). Both
+ASSISTments2009 and ASSISTments2012 provide some side information, such as the attempt
+counts, start time, end time, and problem type.
+• Junyi.11 The Junyi dataset contains student online learning logs on mathematical exercises
+which are collected from a Chinese online learning platform called Junyi Academy. The
+dataset contains practicing logs from Oct. 2012 to Jan. 2015, exercise-related information on
+the platform, and annotations of exercise relationships.
+• Eedi. Eedi is the dataset released by the NeurIPS 2020 education challenge 12, containing
+students’ answers to mathematics questions from Eedi, an online educational platform. All
+items are 4-choice questions with only one correct choice. In addition, Eedi also provides
+side information such as gender, date of birth, group ID, and quiz ID.
+8.2 CDM Tools
+The implementations of CDMs are not standard and are mostly developed independently by
+researchers. In earlier research, psychometrics-based CDMs were usually implemented with R
+language (a programming language suitable for statistical analysis). Most of their codes were not
+properly shared and are difficult to access now. Additionally, thanks to the relatively longer and
+more mature research on psychometrics-based CDMs, there are already some related software and
+platforms. For example, the Vector Psychometric Group13 has launched several useful software for
+10https://sites.google.com/site/assistmentsdata
+11http://www.junyiacademy.org/
+12https://competitions.codalab.org/competitions/25449
+13https://vpgcentral.com/software/
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 28 =====
+
+28 Fei Wang, et al.
+cognitive diagnosis, such as Adaptest, flexMIRT, and IRTPRO. Tu et al. [136] launched a web-based
+cognitive diagnosis platform called flexCDMs14, which provides easy usage of traditional DCMs
+such as DINA, DINA, rRUM, and GDM.
+The research for deep learning-based CDMs prefers Python to implement their models. Although
+the code availability is better, it is still laborious to search for the CDMs and learn about the codes
+with different programming styles. Therefore, we have developed an open-sourced Python library
+called EduCDM15, which provides easy use of numerous CDMs. The code structure of EduCDM is
+more unified and thus easier to understand, modify and extend. We will keep updating this library.
+9 DISCUSSION OF FUTURE RESEARCH DIRECTIONS
+Despite the promising performances achieved by the existing state-of-the-art CDMs, limits as well
+as opportunities exist that encourage future research.
+Cognitive diagnosis in more application areas. Cognitive diagnosis has obtained many
+achievements in traditional application areas, especially in intelligent education and psychological
+measurement. However, the demand for individual ability evaluation is not limited to the traditional
+areas. For instance, evaluating the proficiency of trial lawyers in different legal fields enables
+matching qualified lawyers to strive for the clients’ best rights while ensuring fairness and litigation
+[3]. In companies, effective assessment of employees’ abilities helps with enhancing employee
+training and development [116, 143]. Moreover, the objects of diagnosis can be AI agents to assess
+their anthropomorphic intelligence. Zhuang et al. [177] made an attempt to measure the cognitive
+ability of large language models (LLM) through cognitive diagnosis and adaptive testing. How to
+measure the cognitive ability of large models such as LLM and how to leverage large models for
+better diagnosing human ability are worthy study. It is expected that cognitive diagnosis can be
+developed for wider areas and applications.
+More question types and multimodal data. Most cognitive diagnosis models handle binary
+responses, which belong to questions having only “correct” or “incorrect” answers. However, some
+types of questions can have partially correct answers. For instance, cognitive diagnosis using
+polytomous responses has caught some attention in traditional studies [ 4, 101], while it is still
+underexplored with deep-learning-based modeling. Another example is the questions requiring
+more extensive text responses, such as writing and programming, which have a more complex
+scoring structure and are also not sufficiently studied. In terms of data types, existing models mainly
+consider information such as question text [146], knowledge concept relations [46], participant
+background features [175], etc. The behavior of participants is considered by some works in a
+coarse manner, such as the number of attempts, hints, and response time [130, 158, 167, 168]. For
+questions such as writing and programming, fine-grained answering progress (e.g., type in, delete,
+copy and paste) is underexplored. The primary obstacle on this path is likely to be the collection
+and disclosure of data.
+More than the model structure. While the concentration of this survey is the cognitive diag-
+nosis models, especially the recent development of deep learning-based models and their various
+applications, we would like to point out some issues besides the model structure designing that are
+ignored by recent research. 1) The definitions of knowledge concepts (or skills) and their structures.
+In the field of education, such definitions typically come from experts’ professional knowledge
+and rigorous discussion. However, the definition of knowledge concepts in other application ar-
+eas can be less rigorous and systematic. 2) Calibration of item parameters. In a more standard
+cognitive diagnosis process, there is a calibration stage during which responses to the candidate
+14http://www.psychometrics-studio.cn/
+15https://github.com/bigdata-ustc/EduCDM
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 29 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 29
+items are provided by a certain group of examinees. The examinees are supposed to have ability
+levels following a certain distribution (e.g., normal distribution [1, 71]). After that, item parameters
+are estimated based on these responses. Suitable items are then selected into the item bank and
+construct the test papers [112]. For the true test takers who are assigned to these items, their ability
+parameters are estimated. In the recent deep learning-based methods, calibration of item parameters
+is usually omitted or simplified to facilitate the usage, where the parameters of items and test
+takers are estimated simultaneously, with less consideration of the influence of test takers’ ability
+distribution upon the parameter estimation. 3) Comparability of diagnostic results. For continuous
+CDMs, the diagnostic results, i.e., the estimated parameters of test takers, are most meaningful
+within the trained model using the corresponding response data. However, the diagnostic results
+among different trained CDMs, even having the same model structure trained with different data,
+are not directly comparable. As a measurement tool, the comparability of diagnostic results across
+different models is of great use in circumstances such as ability comparison among test takers across
+time/institutions, and adding new items into a CAT item bank. Related works called “parameter
+linking” have been proposed for CDMs with simple structures including IRT and MIRT [69, 111, 137].
+However, for state-of-the-art CDMs, which are more complicated, the comparability problem is
+still underexplored. 4) Cognitive diagnosis, if cooperated with some interpretative methods, can be
+used for discovering examinees’ cognitive patterns from empirical data in a data-driven way. Liu et
+al. [90] have pioneered in this direction and proved its feasibility.
+Model evaluation. Model evaluation is an important yet easily neglected problem of cognitive di-
+agnosis. Different from most machine learning models focusing on accurately predicting something
+either by classification or regression, cognitive diagnosis pays more attention on the diagnostic
+results. Although the student performance prediction task is adopted to indirectly validate the
+accuracy of diagnostic results due to the lack of ground truth of examinees’ abilities, excessive
+focus on the task of student performance prediction will gradually turn the cognitive diagnostic
+model into a predictive model rather than a diagnostic model. The evaluation of cognitive diag-
+nosis models should be multi-faceted. Especially, the research on evaluation metrics for SOTA
+deep learning-based CDMs is still in its infancy and relatively lacking. We hope there will be
+insightful research on CDM evaluation from different aspects, including but not limited to accuracy,
+explainability, uncertainty, identifiability [78], and stability of parameter estimation.
+10 CONCLUSION
+In this survey, we have reviewed the development of models for cognitive diagnosis. Basically,
+the research history is divided into two stages: psychometrics-based CDMs and machine learning-
+based CDMs, between which the latter is the key emphasis of this survey. Through reviewing and
+comparing existing research outcomes, we have found that the transition from psychometrics-based
+CDMs to machine learning-based CDMs has undergone changes in not only model structures but
+also data types. Moreover, the research topics become more diverse. The trend in model structure
+is the shift from psychometrics methods where the interaction functions are designed by experts to
+data-driven deep learning methods. In terms of data types, behavioral data from online learning
+is gradually being taken into consideration, and the role of text, images, graphs, and other types
+of data in cognitive diagnosis is being explored. Furthermore, researchers are also beginning to
+consider issues such as cold start and fairness in cognitive diagnosis. Besides these, we have also
+summarized some main changes in the parameter estimation and model evaluation approaches and
+provided some examples of where cognitive diagnosis has been applied.
+We hope this survey can invoke more attention on cognitive diagnosis, and inspire more inter-
+esting and insightful research in this area. We have summarized some commonly used datasets
+and useful tools for the application and research of cognitive diagnosis. In addition, we have also
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 30 =====
+
+30 Fei Wang, et al.
+discussed several promising future research directions. In summary, we advocate for the further
+development of cognitive diagnostic methods in more fields and from more diversified perspectives.
+However, we also remind that attention needs to be paid to the fact that cognitive diagnosis models
+are measurement tools for human ability, and avoid placing too much emphasis on predicting
+learners’ question-answering performance.
+We also recognize some limitations of this survey. First, since this survey focuses more on
+the recent progress of cognitive diagnosis, i.e., deep learning-based CDMs, the summary of the
+traditional psychometrics-based works may not be comprehensive enough. The related work of
+traditional methods is rich and relatively mature thanks to decades of research [38, 74, 112]. Readers
+can refer to relevant literature to gain a deeper understanding. Second, as new research work on
+cognitive diagnosis continues to emerge and is scattered across different publications in the fields
+of education and computer science, we may have missed a few noteworthy works. If necessary, we
+will continue to track the progress in this direction in future discussions.
+REFERENCES
+[1] Terry A Ackerman. 1989. Unidimensional IRT calibration of compensatory and noncompensatory multidimensional
+items. Applied Psychological Measurement 13, 2 (1989), 113–127.
+[2] Rakesh Agrawal, Behzad Golshan, and Evimaria Terzi. 2014. Grouping students in educational settings. InProceedings
+of the 20th ACM SIGKDD international conference on Knowledge discovery and data mining . 1017–1026.
+[3] Yanqing An, Qi Liu, Han Wu, Kai Zhang, Linan Yue, Mingyue Cheng, Hongke Zhao, and Enhong Chen. 2021.
+LawyerPAN: a proficiency assessment network for trial lawyers. In Proceedings of the 27th ACM SIGKDD Conference
+on Knowledge Discovery & Data Mining . 5–13.
+[4] Erling B. Andersen. 1997. The Rating Scale Model . Springer New York, New York, NY, 67–84. https://doi.org/10.1007/
+978-1-4757-2691-6_4
+[5] Kozue Ando, Shota Mishio, and Takahiko Nishijima. 2018. Validity and reliability of computerized adaptive test of
+soccer tactical skill. Football Science 15 (2018), 38–51.
+[6] Yoram Bachrach, Thore Graepel, Tom Minka, and John Guiver. 2012. How to grade a test without knowing the
+answers—a Bayesian graphical model for adaptive crowdsourcing and aptitude testing. arXiv preprint arXiv:1206.6386
+(2012).
+[7] A. A. Béguin and C. A. W. Glas. 2001. MCMC estimation and some model-fit analysis of multidimensional IRT models.
+Psychometrika 66, 4 (01 Dec 2001), 541–561. https://doi.org/10.1007/BF02296195
+[8] Betty A Bergstrom. 1992. Ability Measure Equivalence of Computer Adaptive and Pencil and Paper Tests: A Research
+Synthesis. (1992).
+[9] Haoyang Bi, Enhong Chen, Weidong He, Han Wu, Weihao Zhao, Shijin Wang, and Jinze Wu. 2023. BETA-CD: a
+Bayesian meta-learned cognitive diagnosis framework for personalized learning. InProceedings of the AAAI Conference
+on Artificial Intelligence, Vol. 37. 5018–5026.
+[10] Haoyang Bi, Haiping Ma, Zhenya Huang, Yu Yin, Qi Liu, Enhong Chen, Yu Su, and Shijin Wang. 2020. Quality meets
+diversity: A model-agnostic framework for computerized adaptive testing. In 2020 IEEE International Conference on
+Data Mining (ICDM). IEEE, 42–51.
+[11] Shuqing Bian, Xu Chen, Wayne Xin Zhao, Kun Zhou, Yupeng Hou, Yang Song, Tao Zhang, and Ji-Rong Wen.
+2020. Learning to match jobs with resumes from sparse interaction data using multi-view co-teaching network. In
+Proceedings of the 29th ACM International Conference on Information & Knowledge Management . 65–74.
+[12] Menucha Birenbaum, Curtis Tatsuoka, and Tomoko Yamada. 2004. Diagnostic assessment in TIMSS-R: Between-
+countries and within-country comparisons of eighth graders’ mathematics performance. Studies in Educational
+Evaluation 30, 2 (2004), 151–173.
+[13] Sorana D Bolboacă, Lorentz Jäntschi, Adriana F Sestraş, Radu E Sestraş, and Doru C Pamfil. 2011. Pearson-Fisher
+chi-square statistic revisited. Information 2, 3 (2011), 528–545.
+[14] Laine Bradshaw and Jonathan Templin. 2014. Combining Item Response Theory and Diagnostic Classification Models:
+A Psychometric Model for Scaling Ability and Diagnosing Misconceptions. Psychometrika 79, 3 (01 Jul 2014), 403–425.
+https://doi.org/10.1007/s11336-013-9350-4
+[15] Derek C Briggs and Ruhan Circi. 2017. Challenges to the use of artificial neural networks for diagnostic classifications
+with student test data. International Journal of Testing 17, 4 (2017), 302–321.
+[16] Justyna Brzezinska. 2020. Item response theory models in the measurement theory. Commun. Stat. Simul. Comput. 49,
+12 (2020), 3299–3313.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 31 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 31
+[17] Hua-Hua Chang and Zhiliang Ying. 1996. A global information approach to computerized adaptive testing. Applied
+Psychological Measurement 20, 3 (1996), 213–229.
+[18] Jinsong Chen, Jimmy de la Torre, and Zao Zhang. 2013. Relative and absolute fit evaluation in cognitive diagnosis
+modeling. Journal of Educational Measurement 50, 2 (2013), 123–140.
+[19] Xiangzhi Chen, Le Wu, Fei Liu, Lei Chen, Kun Zhang, Richang Hong, and Meng Wang. 2024. Disentangling Cognitive
+Diagnosis with Limited Exercise Labels. Advances in Neural Information Processing Systems 36 (2024).
+[20] Yuying Chen, Qi Liu, Zhenya Huang, Le Wu, Enhong Chen, Runze Wu, Yu Su, and Guoping Hu. 2017. Tracking
+knowledge proficiency of students with educational priors. InProceedings of the 2017 ACM on Conference on Information
+and Knowledge Management. 989–998.
+[21] Song Cheng, Qi Liu, Enhong Chen, Zai Huang, Zhenya Huang, Yiying Chen, Haiping Ma, and Guoping Hu. 2019. DIRT:
+Deep learning enhanced item response theory for cognitive diagnosis. In Proceedings of the 28th ACM international
+conference on information and knowledge management . 2397–2400.
+[22] Yan Cheng, Meng Li, Haomai Chen, Yingying Cai, Huan Sun, Gang Wu, Zhuang Cai, and Guanghe Zhang. 2021.
+Neural cognitive modeling based on the importance of knowledge point for student performance prediction. In 2021
+16th International Conference on Computer Science & Education (ICCSE) . IEEE, 495–499.
+[23] Yan Cheng, Meng Li, Haomai Chen, Yingying Cai, Huan Sun, Haifeng Zou, and Guanghe Zhang. 2021. Exercise
+recommendation method combining neuralcd and neumf models. In 2021 7th Annual International Conference on
+Network and Information Systems for Computers (ICNISC) . IEEE, 646–651.
+[24] Chia-Yi Chiu, Jeffrey A Douglas, and Xiaodong Li. 2009. Cluster analysis for cognitive diagnosis: Theory and
+applications. Psychometrika 74 (2009), 633–665.
+[25] Ying Cui, Mark Gierl, and Qi Guo. 2016. Statistical classification for cognitive diagnostic assessment: An artificial
+neural network approach. Educational Psychology 36, 6 (2016), 1065–1082.
+[26] Marcelo A. da Silva, Ren Liu, Anne C. Huggins-Manley, and Jorge L. Bazán. 2019. Incorporating the Q-Matrix Into
+Multidimensional Item Response Theory Models. Educational and Psychological Measurement 79, 4 (2019), 665–687.
+[27] RJ De Ayala, Barbara S Plake, and James C Impara. 2001. The impact of omitted responses on the accuracy of ability
+estimation in item response theory. Journal of educational measurement 38, 3 (2001), 213–234.
+[28] Jimmy De La Torre. 2009. DINA model and parameter estimation: A didactic. Journal of educational and behavioral
+statistics 34, 1 (2009), 115–130.
+[29] Jimmy De La Torre. 2011. The generalized DINA model framework. Psychometrika 76 (2011), 179–199.
+[30] Jimmy De La Torre and Jeffrey A Douglas. 2004. Higher-order latent trait models for cognitive diagnosis.Psychometrika
+69, 3 (2004), 333–353.
+[31] Jimmy De La Torre, Yuan Hong, and Weiling Deng. 2010. Factors affecting the item parameter estimation and
+classification accuracy of the DINA model. Journal of Educational Measurement 47, 2 (2010), 227–249.
+[32] Jimmy De La Torre, L Andries van der Ark, and Gina Rossi. 2018. Analysis of clinical data from a cognitive diagnosis
+modeling framework. Measurement and Evaluation in Counseling and Development 51, 4 (2018), 281–296.
+[33] A. P. Dempster, N. M. Laird, and D. B. Rubin. 1977. Maximum Likelihood from Incomplete Data Via the EM Algorithm.
+Journal of the Royal Statistical Society: Series B (Methodological) 39, 1 (1977), 1–22. https://doi.org/10.1111/j.2517-
+6161.1977.tb01600.x arXiv:https://rss.onlinelibrary.wiley.com/doi/pdf/10.1111/j.2517-6161.1977.tb01600.x
+[34] Arthur P Dempster, Nan M Laird, and Donald B Rubin. 1977. Maximum likelihood from incomplete data via the EM
+algorithm. Journal of the royal statistical society: series B (methodological) 39, 1 (1977), 1–22.
+[35] Qilin Deng, Hao Li, Kai Wang, Zhipeng Hu, Runze Wu, Linxia Gong, Jianrong Tao, Changjie Fan, and Peng Cui. 2021.
+Globally optimized matchmaking in online games. In Proceedings of the 27th ACM SIGKDD Conference on Knowledge
+Discovery & Data Mining . 2753–2763.
+[36] Michel C Desmarais and Ryan SJ d Baker. 2012. A review of recent advances in learner and skill modeling in intelligent
+learning environments. User Modeling and User-Adapted Interaction 22 (2012), 9–38.
+[37] Robert F DeVellis. 2006. Classical test theory. Medical care (2006), S50–S59.
+[38] Louis V DiBello, Louis A Roussos, and William Stout. 2006. 31a review of cognitively diagnostic assessment and a
+summary of psychometric models. Handbook of statistics 26 (2006), 979–1030.
+[39] John Duchi, Elad Hazan, and Yoram Singer. 2011. Adaptive subgradient methods for online learning and stochastic
+optimization. Journal of machine learning research 12, 7 (2011).
+[40] JBrandon Duck-Mayr, Roman Garnett, and Jacob Montgomery. 2020. Gpirt: A Gaussian process model for item
+response theory. In Conference on uncertainty in artificial intelligence . PMLR, 520–529.
+[41] Susan E. Embretson and Xiangdong Yang. 2013. A Multicomponent Latent Trait Model for Diagnosis. Psychometrika
+78, 1 (01 Jan 2013), 14–36. https://doi.org/10.1007/s11336-012-9296-y
+[42] R Chris Fraley, Niels G Waller, and Kelly A Brennan. 2000. An item response theory analysis of self-report measures
+of adult attachment. Journal of personality and social psychology 78, 2 (2000), 350.
+[43] Norman Frederiksen, Robert J Mislevy, and Isaac I Bejar. 2012. Test theory for a new generation of tests . Routledge.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 32 =====
+
+32 Fei Wang, et al.
+[44] Wenbin Gan, Yuan Sun, and Yi Sun. 2022. Knowledge interaction enhanced sequential modeling for interpretable
+learner knowledge diagnosis in intelligent tutoring systems. Neurocomputing 488 (2022), 36–53.
+[45] Lina Gao, Zhongying Zhao, Chao Li, Jianli Zhao, and Qingtian Zeng. 2022. Deep cognitive diagnosis model for
+predicting students’ performance. Future Generation Computer Systems 126 (2022), 252–262.
+[46] Weibo Gao, Qi Liu, Zhenya Huang, Yu Yin, Haoyang Bi, Mu-Chun Wang, Jianhui Ma, Shijin Wang, and Yu Su. 2021.
+RCD: Relation map driven cognitive diagnosis for intelligent education systems. InProceedings of the 44th international
+ACM SIGIR conference on research and development in information retrieval . 501–510.
+[47] Weibo Gao, Qi Liu, Hao Wang, Linan Yue, Haoyang Bi, Yin Gu, Fangzhou Yao, Zheng Zhang, Xin Li, and Yuanjing He.
+2024. Zero-1-to-3: Domain-Level Zero-Shot Cognitive Diagnosis via One Batch of Early-Bird Students towards Three
+Diagnostic Objectives. In Proceedings of the AAAI Conference on Artificial Intelligence , Vol. 38. 8417–8426.
+[48] Weibo Gao, Hao Wang, Qi Liu, Fei Wang, Xin Lin, Linan Yue, Zheng Zhang, Rui Lv, and Shijin Wang. 2023. Leveraging
+transferable knowledge concept graph embedding for cold-start cognitive diagnosis. In Proceedings of the 46th
+International ACM SIGIR Conference on Research and Development in Information Retrieval . 983–992.
+[49] Andrew Gelman, John B Carlin, Hal S Stern, and Donald B Rubin. 1995. Bayesian data analysis . Chapman and
+Hall/CRC.
+[50] Aritra Ghosh and Andrew Lan. 2021. Bobcat: Bilevel optimization-based computerized adaptive testing.arXiv preprint
+arXiv:2108.07386 (2021).
+[51] Mark J Gierl, Ying Cui, and Steve Hunka. 2008. Using connectionist models to evaluate examinees’ response patterns
+to achievement tests. Journal of Modern Applied Statistical Methods 7, 1 (2008), 19.
+[52] Robert Glaser. 1981. The future of testing: A research agenda for cognitive psychology and psychometrics. American
+Psychologist 36, 9 (1981), 923.
+[53] Nithya J Gogtay and Urmila M Thatte. 2017. Principles of correlation analysis. Journal of the Association of Physicians
+of India 65, 3 (2017), 78–81.
+[54] Linxia Gong, Xiaochuan Feng, Dezhi Ye, Hao Li, Runze Wu, Jianrong Tao, Changjie Fan, and Peng Cui. 2020. Optmatch:
+Optimized matchmaking via modeling the high-order interactions on the arena. In Proceedings of the 26th ACM
+SIGKDD International Conference on Knowledge Discovery & Data Mining . 2300–2310.
+[55] Dean Goodman and Ronald K. Hambleton. 2004. Student Test Score Reports and Interpretive Guides: Review of
+Current Practices and Suggestions for Future Research. Applied Measurement in Education 17 (2004), 145 – 220.
+https://api.semanticscholar.org/CorpusID:143082517
+[56] Yin Gu, Qi Liu, Kai Zhang, Zhenya Huang, Runze Wu, and Jianrong Tao. 2021. Neuralac: Learning cooperation and
+competition effects for match outcome prediction. In Proceedings of the AAAI Conference on Artificial Intelligence ,
+Vol. 35. 4072–4080.
+[57] Lei Guo, Jing Yang, and Naiqing Song. 2020. Spectral clustering algorithm for cognitive diagnostic assessment.
+Frontiers in Psychology 11 (2020), 524197.
+[58] S. M. Hartz. 2002. A Bayesian framework for the unified model for assessing cognitive abilities: Blending theory with
+practicality. Dissertation Abstracts International: Section B: The Sciences and Engineering, 63, 2-B (2002), 864.
+[59] Robert Henson and Jeff Douglas. 2005. Test construction for cognitive diagnosis. Applied Psychological Measurement
+29, 4 (2005), 262–277.
+[60] Robert A. Henson, Jonathan L. Templin, and John T. Willse. 2009. Defining a Family of Cognitive Diagnosis Models
+Using Log-Linear Models with Latent Variables. Psychometrika 74, 2 (01 Jun 2009), 191–210. https://doi.org/10.1007/
+s11336-008-9089-5
+[61] Geoffrey Hinton, Nitish Srivastava, and Kevin Swersky. 2012. Neural networks for machine learning lecture 6a
+overview of mini-batch gradient descent. Cited on 14, 8 (2012), 2.
+[62] Timothy O Hodson. 2022. Root mean square error (RMSE) or mean absolute error (MAE): When to use them or not.
+Geoscientific Model Development Discussions 2022 (2022), 1–10.
+[63] Jinxiang Hu, M David Miller, Anne Corinne Huggins-Manley, and Yi-Hsin Chen. 2016. Evaluation of model fit in
+cognitive diagnosis models. International Journal of Testing 16, 2 (2016), 119–141.
+[64] Jie Huang, Qi Liu, Fei Wang, Zhenya Huang, Songtao Fang, Runze Wu, Enhong Chen, Yu Su, and Shijin Wang. 2021.
+Group-level cognitive diagnosis: A multi-task learning perspective. In 2021 IEEE International Conference on Data
+Mining (ICDM). IEEE, 210–219.
+[65] Yan Huo and Jimmy de la Torre. 2014. Estimating a Cognitive Diagnostic Model for Multiple Strategies via the EM
+Algorithm. Applied Psychological Measurement 38, 6 (2014), 464–485. https://doi.org/10.1177/0146621614533986
+arXiv:https://doi.org/10.1177/0146621614533986
+[66] JiuNing Jiao, Yi Tian, LiKun Huang, Quan Wang, and Jiao Chen. 2023. Neural Cognitive Diagnosis Based on the
+Relationship Between Mining Exercise and Concept. In 2023 2nd International Conference on Artificial Intelligence and
+Computer Information Technology (AICIT). IEEE, 1–4.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 33 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 33
+[67] Jeffrey Johns, Sridhar Mahadevan, and Beverly Park Woolf. 2006. Estimating Student Proficiency Using an Item
+Response Theory Model. In Intelligent Tutoring Systems (Lecture Notes in Computer Science, Vol. 4053) . Springer,
+473–480.
+[68] Brian W Junker and Klaas Sijtsma. 2001. Cognitive assessment models with few assumptions, and connections with
+nonparametric item response theory. Applied Psychological Measurement 25, 3 (2001), 258–272.
+[69] Taehoon Kang and Nancy S Petersen. 2012. Linking item parameters to a base scale. Asia Pacific Education Review 13
+(2012), 311–321.
+[70] FAIZA KHAN KHATTAK and ANSAF SALLEB-AOUISSI. [n. d.]. Accurate Crowd-labeling using Item Response
+Theory. ([n. d.]).
+[71] Seonghoon Kim. 2006. A comparative study of IRT fixed parameter calibration methods. Journal of educational
+measurement 43, 4 (2006), 355–381.
+[72] Diederik P Kingma and Jimmy Ba. 2014. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980
+(2014).
+[73] Paul Kline. 2014. An easy guide to factor analysis . Routledge.
+[74] Jacqueline Leighton and Mark Gierl. 2007. Cognitive diagnostic assessment for education: Theory and applications .
+Cambridge University Press.
+[75] Jacqueline P Leighton, Mark J Gierl, and Stephen M Hunka. 2004. The attribute hierarchy method for cognitive
+assessment: A variation on Tatsuoka’s rule-space approach. Journal of educational measurement 41, 3 (2004), 205–237.
+[76] Guangquan Li, Yuqing Hu, Junkai Shuai, Tonghua Yang, Yonghong Zhang, Shiming Dai, and Naixue Xiong. 2022.
+NeuralNCD: A neural network cognitive diagnosis model based on multi-dimensional features. Applied Sciences 12,
+19 (2022), 9806.
+[77] Guangquan Li, Junkai Shuai, Yuqing Hu, Yonghong Zhang, Yinglong Wang, Tonghua Yang, and Naixue Xiong.
+2022. DKT-LCIRT: A Deep Knowledge Tracking Model Integrating Learning Capability and Item Response Theory.
+Electronics 11, 20 (2022), 3364.
+[78] Jiatong Li, Qi Liu, Fei Wang, Jiayu Liu, Zhenya Huang, Fangzhou Yao, Linbo Zhu, and Yu Su. 2024. Towards the
+Identifiability and Explainability for Personalized Learner Modeling: An Inductive Paradigm. In Proceedings of the
+ACM on Web Conference 2024. 3420–3431.
+[79] Jiatong Li, Fei Wang, Qi Liu, Mengxiao Zhu, Wei Huang, Zhenya Huang, Enhong Chen, Yu Su, and Shijin Wang. 2022.
+HierCDF: A Bayesian Network-based Hierarchical Cognitive Diagnosis Framework. In Proceedings of the 28th ACM
+SIGKDD Conference on Knowledge Discovery and Data Mining . 904–913.
+[80] Sheng Li, Quanlong Guan, Liangda Fang, Fang Xiao, Zhenyu He, Yizhou He, and Weiqi Luo. 2022. Cognitive diagnosis
+focusing on knowledge concepts. In Proceedings of the 31st ACM International Conference on Information & Knowledge
+Management. 3272–3281.
+[81] Xiaohua Li and Jian Zheng. 2016. Active learning for regression with correlation matching and labeling error
+suppression. IEEE Signal Processing Letters 23, 8 (2016), 1081–1085.
+[82] Mu Zi Liang, Peng Chen, M Tish Knobf, Alex Molassiotis, Ying Tang, Guang Yun Hu, Zhe Sun, Yuan Liang Yu, and
+Zeng Jie Ye. 2023. Measuring resilience by cognitive diagnosis models and its prediction of 6-month quality of life in
+Be Resilient to Breast Cancer (BRBC). Frontiers in Psychiatry 14 (2023), 1102258.
+[83] Charles X Ling, Jin Huang, and Harry Zhang. 2003. AUC: a better measure than accuracy in comparing learning
+algorithms. In Advances in Artificial Intelligence: 16th Conference of the Canadian Society for Computational Studies of
+Intelligence, AI 2003, Halifax, Canada, June 11–13, 2003, Proceedings 16 . Springer, 329–341.
+[84] Cheng Liu and Ying Cheng. 2018. An application of the support vector machine for attribute-by-attribute classification
+in cognitive diagnosis. Applied psychological measurement 42, 1 (2018), 58–72.
+[85] Mengfan Liu, Pengyang Shao, and Kun Zhang. 2021. Graph-based exercise-and knowledge-aware learning network for
+student performance prediction. In Artificial Intelligence: First CAAI International Conference, CICAI 2021, Hangzhou,
+China, June 5–6, 2021, Proceedings, Part I 1 . Springer, 27–38.
+[86] Qi Liu. 2021. Towards a New Generation of Cognitive Diagnosis.. In IJCAI. 4961–4964.
+[87] Qi Liu, Shiwei Tong, Chuanren Liu, Hongke Zhao, Enhong Chen, Haiping Ma, and Shijin Wang. 2019. Exploiting
+cognitive structure for adaptive learning. InProceedings of the 25th ACM SIGKDD International Conference on Knowledge
+Discovery & Data Mining . 627–635.
+[88] Qi Liu, Jinze Wu, Zhenya Huang, Hao Wang, Yuting Ning, Ming Chen, Enhong Chen, Jinfeng Yi, and Bowen Zhou.
+2023. Federated User Modeling from Hierarchical Information. ACM Transactions on Information Systems 41, 2 (2023),
+1–33.
+[89] Qi Liu, Runze Wu, Enhong Chen, Guandong Xu, Yu Su, Zhigang Chen, and Guoping Hu. 2018. Fuzzy cognitive
+diagnosis for modelling examinee performance. ACM Transactions on Intelligent Systems and Technology (TIST) 9, 4
+(2018), 1–26.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 34 =====
+
+34 Fei Wang, et al.
+[90] Sannyuya Liu, Qing Li, Xiaoxuan Shen, Jianwen Sun, and Zongkai Yang. 2024. Automated discovery of symbolic laws
+governing skill acquisition from naturally occurring data. Nature Computational Science (2024), 1–12.
+[91] Shuo Liu, Junhao Shen, Hong Qian, and Aimin Zhou. 2024. Inductive Cognitive Diagnosis for Fast Student Learning
+in Web-Based Intelligent Education Systems. In Proceedings of the ACM on Web Conference 2024 . 4260–4271.
+[92] Shuhuan Liu, Xiaoshan Yu, Haiping Ma, Ziwen Wang, Chuan Qin, and Xingyi Zhang. 2023. Homogeneous Cohort-
+Aware Group Cognitive Diagnosis: A Multi-grained Modeling Perspective. InProceedings of the 32nd ACM International
+Conference on Information and Knowledge Management . 4094–4098.
+[93] Yuping Liu, Qi Liu, Runze Wu, Enhong Chen, Yu Su, Zhigang Chen, and Guoping Hu. 2016. Collaborative learning
+team formation: a cognitive modeling perspective. In Database Systems for Advanced Applications: 21st International
+Conference, DASFAA 2016, Dallas, TX, USA, April 16-19, 2016, Proceedings, Part II 21 . Springer, 383–400.
+[94] Frederic Lord. 1952. A theory of test scores. Psychometric monographs (1952).
+[95] Frederic M Lord. 2012. Applications of item response theory to practical testing problems . Routledge.
+[96] Hua Ma, Zhuoxuan Huang, Wensheng Tang, and Xuxiang Zhang. 2022. Exercise recommendation based on cognitive
+diagnosis and neutrosophic set. In 2022 IEEE 25th International Conference on Computer Supported Cooperative Work
+in Design (CSCWD). IEEE, 1467–1472.
+[97] Haiping Ma, Manwei Li, Le Wu, Haifeng Zhang, Yunbo Cao, Xingyi Zhang, and Xuemin Zhao. 2022. Knowledge-
+Sensed Cognitive Diagnosis for Intelligent Education Platforms. InProceedings of the 31st ACM International Conference
+on Information & Knowledge Management . 1451–1460.
+[98] Haiping Ma, Jingyuan Wang, Hengshu Zhu, Xin Xia, Haifeng Zhang, Xingyi Zhang, and Lei Zhang. 2022. Reconciling
+Cognitive Modeling with Knowledge Forgetting: A Continuous Time-aware Neural Network Approach.. In IJCAI.
+2174–2181.
+[99] Lientje Maas, Matthieu JS Brinkhuis, Liesbeth Kester, and Leoniek Wijngaards-de Meij. 2022. Cognitive diagnostic
+assessment in university statistics education: Valid and reliable skill measurement for actionable feedback using
+learning dashboards. Applied Sciences 12, 10 (2022), 4809.
+[100] E. Maris. 1999. Estimating multiple classification latent class models. Psychometrika 64, 2 (01 Jun 1999), 187–212.
+https://doi.org/10.1007/BF02294535
+[101] Geoff N. Masters. 1982. A rasch model for partial credit scoring. Psychometrika 47, 2 (01 Jun 1982), 149–174.
+https://doi.org/10.1007/BF02296272
+[102] Hiroki Matsuoka, Yasuhiro Tahara, Kozue Ando, and Takahiko Nishijima. 2021. Development of criterion-referenced
+measurement items of defensive transition in soccer games from tracking data. International Journal of Sport and
+Health Science 19 (2021), 87–97.
+[103] Haodong Meng, Changzhi Chen, Hongyu Yi, and Xiaofeng He. 2022. Dual autoencoder enhanced subgraph pattern
+mining for cognitive diagnosis. In 2022 IEEE 34th International Conference on Tools with Artificial Intelligence (ICTAI) .
+IEEE, 539–546.
+[104] Robert J Mislevy. 2012. Foundations of a New Test Theory. Test Theory for A New Generation of Tests (2012), 19.
+[105] Jeffrey M Patton, Ying Cheng, Ke-Hai Yuan, and Qi Diao. 2014. Bootstrap standard errors for maximum likelihood
+ability estimates when item parameters are unknown. Educational and Psychological Measurement 74, 4 (2014),
+697–712.
+[106] Richard J Patz and Brian W Junker. 1999. Applications and extensions of MCMC in IRT: Multiple item types, missing
+data, and rated responses. Journal of educational and behavioral statistics 24, 4 (1999), 342–366.
+[107] Richard J Patz and Brian W Junker. 1999. A straightforward approach to Markov chain Monte Carlo methods for
+item response models. Journal of educational and behavioral Statistics 24, 2 (1999), 146–178.
+[108] Tianlong Qi, Meirui Ren, Longjiang Guo, Xiaokun Li, Jin Li, and Lichen Zhang. 2023. ICD: A new interpretable
+cognitive diagnosis model for intelligent tutor systems. Expert Systems with Applications 215 (2023), 119309.
+[109] Chuan Qin, Hengshu Zhu, Tong Xu, Chen Zhu, Liang Jiang, Enhong Chen, and Hui Xiong. 2018. Enhancing person-job
+fit for talent recruitment: An ability-aware neural network approach. In The 41st international ACM SIGIR conference
+on research & development in information retrieval . 25–34.
+[110] Chuan Qin, Hengshu Zhu, Tong Xu, Chen Zhu, Chao Ma, Enhong Chen, and Hui Xiong. 2020. An enhanced neural
+network approach to person-job fit in talent recruitment. ACM Transactions on Information Systems (TOIS) 38, 2
+(2020), 1–33.
+[111] Mark D. Reckase. 2009. Multidimensional Item Response Theory Models . Springer New York, New York, NY, 79–112.
+[112] Mark D Reckase. 2010. Designing item pools to optimize the functioning of a computerized adaptive test.Psychological
+Test and Assessment Modeling 52, 2 (2010), 127.
+[113] Steven P Reise, Rob R Meijer, Andrew T Ainsworth, Leo S Morales, and Ron D Hays. 2006. Application of group-level
+item response models in the evaluation of consumer reports about health plan quality.Multivariate behavioral research
+41, 1 (2006), 85–102.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 35 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 35
+[114] Jason D Rights, Sonya K Sterba, Sun-Joo Cho, and Kristopher J Preacher. 2018. Addressing model uncertainty in item
+response theory person scores through model averaging. Behaviormetrika 45 (2018), 495–503.
+[115] Mary Roduta Roberts and Mark J Gierl. 2010. Developing score reports for cognitive diagnostic assessments.
+Educational Measurement: Issues and Practice 29, 3 (2010), 25–38.
+[116] Joel Rodriguez and Kelley Walters. 2017. The importance of training and development in employee performance and
+evaluation. World Wide Journal of Multidisciplinary Research and Development 3, 10 (2017), 206–212.
+[117] John Rust and Susan Golombok. 2014. Modern psychometrics: The science of psychological assessment . Routledge.
+[118] Fumiko Samejima. 1969. Estimation of latent ability using a response pattern of graded scores. Psychometrika 34, 1
+(01 Mar 1969), 1–97. https://doi.org/10.1007/BF03372160
+[119] Na Shan and Xiaofei Wang. 2020. Cognitive diagnosis modeling incorporating item-level missing data mechanism.
+Frontiers in Psychology 11 (2020), 564707.
+[120] Lingyun Song, Mengting He, Xuequn Shang, Chen Yang, Jun Liu, Mengzhen Yu, and Yu Lu. 2023. A deep cross-modal
+neural cognitive diagnosis framework for modeling student performance. Expert Systems with Applications 230 (2023),
+120675.
+[121] David J Spiegelhalter, Nicola G Best, Bradley P Carlin, and Angelika Van Der Linde. 2002. Bayesian measures of
+model complexity and fit. Journal of the royal statistical society: Series b (statistical methodology) 64, 4 (2002), 583–639.
+[122] Yu Su, Zeyu Cheng, Jinze Wu, Yanmin Dong, Zhenya Huang, Le Wu, Enhong Chen, Shijin Wang, and Fei Xie. 2022.
+Graph-based cognitive diagnosis for intelligent tutoring systems. Knowledge-Based Systems 253 (2022), 109547.
+[123] Eran Tal. 2015. Measurement in science. (2015).
+[124] Kikumi K Tatsuoka. 1983. Rule space: An approach for dealing with misconceptions based on item response theory.
+Journal of educational measurement (1983), 345–354.
+[125] Kikumi K Tatsuoka. 1984. Analysis of Errors in Fraction Addition and Subtraction Problems. Final Report. (1984).
+[126] Mohsen Tavakol and Reg Dennick. 2011. Making sense of Cronbach’s alpha. International journal of medical education
+2 (2011), 53.
+[127] Jonathan Templin and Robert Henson. 2006. Measurement of psychological disorders using cognitive diagnosis models.
+Psychological Methods, 11(3), 287-305. Psychological methods 11 (09 2006), 287–305. https://doi.org/10.1037/1082-
+989X.11.3.287
+[128] Jonathan L Templin and Robert A Henson. 2006. Measurement of psychological disorders using cognitive diagnosis
+models. Psychological methods 11, 3 (2006), 287.
+[129] Nguyen Thai-Nghe, Lucas Drumond, Artus Krohn-Grimberghe, and Lars Schmidt-Thieme. 2010. Recommender
+system for predicting student performance. Procedia Computer Science 1, 2 (2010), 2811–2819.
+[130] Nguyen Thai-Nghe and Lars Schmidt-Thieme. 2015. Multi-relational factorization models for student modeling in
+intelligent tutoring systems. In 2015 Seventh international conference on knowledge and systems engineering (KSE) .
+IEEE, 61–66.
+[131] Tijmen Tieleman and Geoffrey Hinton. 2012. Rmsprop: Divide the gradient by a running average of its recent
+magnitude. coursera: Neural networks for machine learning. COURSERA Neural Networks Mach. Learn 17 (2012).
+[132] Shiwei Tong, Jiayu Liu, Yuting Hong, Zhenya Huang, Le Wu, Qi Liu, Wei Huang, Enhong Chen, and Dan Zhang.
+2022. Incremental Cognitive Diagnosis for Intelligent Education. In Proceedings of the 28th ACM SIGKDD Conference
+on Knowledge Discovery and Data Mining . 1760–1770.
+[133] Shiwei Tong, Qi Liu, Runlong Yu, Wei Huang, Zhenya Huang, Zachary A Pardos, and Weijie Jiang. 2021. Item
+Response Ranking for Cognitive Diagnosis.. In IJCAI. 1750–1756.
+[134] Andreas Toscher and Michael Jahrer. 2010. Collaborative filtering applied to educational data mining. KDD cup
+(2010).
+[135] Dongbo Tu, Xuliang Gao, Daxun Wang, and Yan Cai. 2017. A new measurement of internet addiction using diagnostic
+classification models. Frontiers in psychology 8 (2017), 302329.
+[136] Dongbo Tu, Yong Liu, Xuliang Gao, and Yan Cai. 2023. flexCDMs: A Web-based Platform for Cognitive Diagnostic
+Data Analysis. Chinese/English Journal of Educational Measurement and Evaluation 4, 1 (2023), 1.
+[137] Wim J van der Linden and Michelle D Barrett. 2016. Linking item response model parameters. Psychometrika 81, 3
+(2016), 650–673.
+[138] Wim J Van der Linden and Cees AW Glas. 2000. Computerized adaptive testing: Theory and practice . Springer.
+[139] Matthias von Davier. 2005. A GENERAL DIAGNOSTIC MODEL APPLIED TO LANGUAGE TESTING
+DATA. ETS Research Report Series 2005, 2 (2005), i–35. https://doi.org/10.1002/j.2333-8504.2005.tb01993.x
+arXiv:https://onlinelibrary.wiley.com/doi/pdf/10.1002/j.2333-8504.2005.tb01993.x
+[140] Matthias von Davier. 2014. The DINA model as a constrained general diagnostic model: Two variants of
+a model equivalency. Brit. J. Math. Statist. Psych. 67, 1 (2014), 49–71. https://doi.org/10.1111/bmsp.12003
+arXiv:https://bpspsychub.onlinelibrary.wiley.com/doi/pdf/10.1111/bmsp.12003
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 36 =====
+
+36 Fei Wang, et al.
+[141] Matthias von Davier. 2014. The Log-Linear Cognitive Diagnostic Model (LCDM) as a Special Case of the General
+Diagnostic Model (GDM). ETS Research Report Series 2014, 2 (2014), 1–13. https://doi.org/10.1002/ets2.12043
+arXiv:https://onlinelibrary.wiley.com/doi/pdf/10.1002/ets2.12043
+[142] Scott I Vrieze. 2012. Model selection and psychological theory: a discussion of the differences between the Akaike
+information criterion (AIC) and the Bayesian information criterion (BIC). Psychological methods 17, 2 (2012), 228.
+[143] Chao Wang, Hengshu Zhu, Chen Zhu, Xi Zhang, Enhong Chen, and Hui Xiong. 2020. Personalized employee training
+course recommendation with career development awareness. In Proceedings of the Web Conference 2020 . 1648–1659.
+[144] Fei Wang, Zhenya Huang, Qi Liu, Enhong Chen, Yu Yin, Jianhui Ma, and Shijin Wang. 2023. Dynamic cognitive
+diagnosis: An educational priors-enhanced deep knowledge tracing perspective. IEEE Transactions on Learning
+Technologies (2023).
+[145] Fei Wang, Qi Liu, Enhong Chen, Zhenya Huang, Yuying Chen, Yu Yin, Zai Huang, and Shijin Wang. 2020. Neural
+cognitive diagnosis for intelligent education systems. In Proceedings of the AAAI conference on artificial intelligence ,
+Vol. 34. 6153–6161.
+[146] Fei Wang, Qi Liu, Enhong Chen, Zhenya Huang, Yu Yin, Shijin Wang, and Yu Su. 2022. NeuralCD: a general framework
+for cognitive diagnosis. IEEE Transactions on Knowledge and Data Engineering (2022).
+[147] Fei Wang, Qi Liu, Enhong Chen, Chuanren Liu, Zhenya Huang, Jinze Wu, and Shijin Wang. 2024. Unified Uncertainty
+Estimation for Cognitive Diagnosis Models. arXiv preprint arXiv:2403.14676 (2024).
+[148] Hangyu Wang, Ting Long, Liang Yin, Weinan Zhang, Wei Xia, Qichen Hong, Dingyin Xia, Ruiming Tang, and Yong
+Yu. 2023. GMOCAT: A Graph-Enhanced Multi-Objective Method for Computerized Adaptive Testing. In Proceedings
+of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining . 2279–2289.
+[149] Jiasheng Wang. 2022. Graph Embedding Augmented Skill Rating System. IEEE Transactions on Games (2022).
+[150] Xinping Wang, Caidie Huang, Jinfang Cai, and Liangyu Chen. 2021. Using knowledge concept aggregation towards
+accurate cognitive diagnosis. In Proceedings of the 30th ACM International Conference on Information & Knowledge
+Management. 2010–2019.
+[151] Zhifeng Wang, Wenxing Yan, Chunyan Zeng, Yuan Tian, Shi Dong, et al. 2023. A unified interpretable intelligent
+learning diagnosis framework for learning performance prediction in intelligent tutoring systems. International
+Journal of Intelligent Systems 2023 (2023).
+[152] C Wendler and B Bridgeman. 2014. The Research Foundation for the GRE revised General Test: A compendium of
+studies. Educational Testing Service: Princeton, NJ, USA (2014).
+[153] Jacob Whitehill, Ting-fan Wu, Jacob Bergsma, Javier Movellan, and Paul Ruvolo. 2009. Whose vote should count
+more: Optimal integration of labels from labelers of unknown expertise. Advances in neural information processing
+systems 22 (2009).
+[154] David J Woodruff and Bradley A Hanson. 1996. Estimation of Item Response Models Using the EM Algorithm for
+Finite Mixtures. (1996).
+[155] Jinze Wu, Qi Liu, Zhenya Huang, Yuting Ning, Hao Wang, Enhong Chen, Jinfeng Yi, and Bowen Zhou. 2021.
+Hierarchical personalized federated learning for user modeling. In Proceedings of the Web Conference 2021 . 957–968.
+[156] Mike Wu, Richard L Davis, Benjamin W Domingue, Chris Piech, and Noah Goodman. 2020. Variational item response
+theory: Fast, accurate, and expressive. In Proceedings of The 13th International Conference on Educational Data Mining .
+257–268.
+[157] Runze Wu, Qi Liu, Yuping Liu, Enhong Chen, Yu Su, Zhigang Chen, and Guoping Hu. 2015. Cognitive modelling for
+predicting examinee performance. In Twenty-Fourth International Joint Conference on Artificial Intelligence .
+[158] Runze Wu, Guandong Xu, Enhong Chen, Qi Liu, and Wan Ng. 2017. Knowledge or gaming? Cognitive modelling
+based on multiple-attempt response. InProceedings of the 26th International Conference on World Wide Web Companion.
+321–329.
+[159] Xiaolu Xiong, Siyuan Zhao, Eric G Van Inwegen, and Joseph E Beck. 2016. Going deeper with deep knowledge tracing.
+International Educational Data Mining Society (2016).
+[160] Haowen Yang, Tianlong Qi, Jin Li, Longjiang Guo, Meirui Ren, Lichen Zhang, and Xiaoming Wang. 2022. A novel
+quantitative relationship neural network for explainable cognitive diagnosis model. Knowledge-Based Systems 250
+(2022), 109156.
+[161] Ji Seung Yang, Mark Hansen, and Li Cai. 2012. Characterizing sources of uncertainty in item response theory scale
+scores. Educational and psychological measurement 72, 2 (2012), 264–290.
+[162] Shangshang Yang, Haiping Ma, Cheng Zhen, Ye Tian, Limiao Zhang, Yaochu Jin, and Xingyi Zhang. 2023. Design-
+ing novel cognitive diagnosis models via evolutionary multi-objective neural architecture search. arXiv preprint
+arXiv:2307.04429 (2023).
+[163] Shangshang Yang, Cheng Zhen, Ye Tian, Haiping Ma, Yuanchao Liu, Panpan Zhang, and Xingyi Zhang. 2023.
+Evolutionary Multi-Objective Neural Architecture Search for Generalized Cognitive Diagnosis Models. In 2023 5th
+International Conference on Data-driven Optimization of Complex Systems (DOCS) . IEEE, 1–10.
+, Vol. 1, No. 1, Article . Publication date: July 2024.
+
+===== PAGE 37 =====
+
+A Survey of Models for Cognitive Diagnosis: New Developments and Future Directions 37
+[164] Fangzhou Yao, Qi Liu, Min Hou, Shiwei Tong, Zhenya Huang, Enhong Chen, Jing Sha, and Shijin Wang. 2023.
+Exploiting non-interactive exercises in cognitive diagnosis. Interaction 100, 200 (2023), 300.
+[165] G Yuzhou and H Qi. 2018. Research on multi direction training and technical analysis of basketball based on BP
+neural network model. International Journal for Engineering Modelling 31, 1 (2018), 54–60.
+[166] April L Zenisky and Ronald K Hambleton. 2012. Developing test score reports that work: The process and best
+practices for effective communication. Educational Measurement: Issues and Practice 31, 2 (2012), 21–26.
+[167] Peida Zhan, Hong Jiao, and Dandan Liao. 2018. Cognitive diagnosis modelling incorporating item response times.
+Brit. J. Math. Statist. Psych. 71, 2 (2018), 262–286.
+[168] Peida Zhan*, Kaiwen Man*, Stefanie A Wind, and Jonathan Malone. 2022. Cognitive diagnosis modeling incorporating
+response times and fixation counts: Providing comprehensive feedback and accurate diagnosis. Journal of Educational
+and Behavioral Statistics 47, 6 (2022), 736–776.
+[169] Dacao Zhang, Kun Zhang, Le Wu, Mi Tian, Richang Hong, and Meng Wang. 2024. Path-Specific Causal Reasoning
+for Fairness-aware Cognitive Diagnosis. arXiv preprint arXiv:2406.03064 (2024).
+[170] Jinming Zhang. 2004. Comparison of unidimensional and multidimensional approaches to IRT parameter estimation.
+ETS Research Report Series 2004, 2 (2004), i–40.
+[171] Junrui Zhang, Yun Mo, Changzhi Chen, and Xiaofeng He. 2021. GKT-CD: Make cognitive diagnosis model enhanced
+by graph-based knowledge tracing. In 2021 International joint conference on neural networks (IJCNN) . IEEE, 1–8.
+[172] Yunfei Zhang, Chuan Qin, Dazhong Shen, Haiping Ma, Le Zhang, Xingyi Zhang, and Hengshu Zhu. 2023. ReliCD: A
+Reliable Cognitive Diagnosis Framework with Confidence Awareness. In 2023 IEEE International Conference on Data
+Mining (ICDM). IEEE, 858–867.
+[173] Zheng Zhang, Le Wu, Qi Liu, Jiayu Liu, Zhenya Huang, Yu Yin, Yan Zhuang, Weibo Gao, and Enhong Chen. 2024.
+Understanding and improving fairness in cognitive diagnosis. Science China Information Sciences 67, 5 (2024), 152106.
+[174] Kuang Zheng, Ding Shuliang, and Xu Zhiyong. 2010. Application of support vector machine to cognitive diagnosis.
+In 2010 Asia-Pacific Conference on Wearable Computing Systems . IEEE, 3–6.
+[175] Yuqiang Zhou, Qi Liu, Jinze Wu, Fei Wang, Zhenya Huang, Wei Tong, Hui Xiong, Enhong Chen, and Jianhui Ma.
+2021. Modeling context-aware features for cognitive diagnosis in student learning. In Proceedings of the 27th ACM
+SIGKDD Conference on Knowledge Discovery & Data Mining . 2420–2428.
+[176] Chen Zhu, Hengshu Zhu, Hui Xiong, Chao Ma, Fang Xie, Pengliang Ding, and Pan Li. 2018. Person-job fit: Adapting
+the right talent for the right job with joint representation learning. ACM Transactions on Management Information
+Systems (TMIS) 9, 3 (2018), 1–17.
+[177] Yan Zhuang, Qi Liu, Yuting Ning, Weizhe Huang, Rui Lv, Zhenya Huang, Guanhao Zhao, Zheng Zhang, Qingyang
+Mao, Shijin Wang, et al. 2023. Efficiently Measuring the Cognitive Ability of LLMs: An Adaptive Testing Perspective.
+arXiv preprint arXiv:2306.10512 (2023).
+[178] Yan Zhuang, Qi Liu, GuanHao Zhao, Zhenya Huang, Weizhe Huang, Zachary Pardos, Enhong Chen, Jinze Wu, and
+Xin Li. 2023. A Bounded Ability Estimation for Computerized Adaptive Testing. In Thirty-seventh Conference on
+Neural Information Processing Systems .
+, Vol. 1, No. 1, Article . Publication date: July 2024.

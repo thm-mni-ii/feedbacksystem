@@ -1,0 +1,1311 @@
+
+
+===== PAGE 1 =====
+
+Journal of Classiﬁcation 3 (2018)
+DOI: 10.1007/s00357-018-9255-0
+H o wt oB u i l daC o m p l e t eQ - M a t r i xf o ra
+Cognitively Diagnostic T est
+Hans-Friedrich K¨ohn
+University of Illinois, Urbana-Champaign
+Chia-Yi Chiu
+Rutgers, The State University of New Jersey, New Brunswick
+Abstract: The Q-matrix of a cognitively diagnostic test is said to be complete if
+it guarantees the identiﬁability of all possible proﬁciency classes among examinees.
+An incomplete Q-matrix causes examinees to be assigned to proﬁciency classes to
+which they do not belong. Completeness of the Q-matrix is therefore a key require-
+ment of any cognitively diagnostic test. The importance of the completeness property
+of the Q-matrix of a test as a fundamental c ondition to guarantee a reliable estimate
+of an examinee’s attribute proﬁle has only recently been realized by researchers. In
+fact, inspection of extant assessments based on the cognitive diagnosis framework
+often revealed that, in hindsight, the Q-matrices used with these tests were not com-
+plete. Thus, the availability of rules for building a complete Q-matrix at the early
+stages of test development is perhaps at least as desirable as rules for identifying the
+completeness of a given Q-matrix. This article presents procedures for constructing
+Q-matrices that are complete. The famous Fr action-Subtraction test problems by K.
+K. Tatsuoka (1984) are used t hroughout for illustration.
+Keywords: Q-matrix; Completeness; Cognitive Diagnosis; Diagnostic Classiﬁcation
+Models (DCMs); General DCMs.
+1. Introduction
+In the past decade, cognitive diagnosis has emerged as a new paradigm
+of educational measurement that seeks to combine rigorous psychometric
+standards with the goals of formative assessment. (DiBello, Roussos, and
+This material is based upon work supported by the National Science Foundation
+under Grant No. 1552563.
+Corresponding Author’s Address: H-F. K¨ ohn, University of Illinois at Urbana-
+Champaign, 425 Psychology Bldg., 603 E. Daniel Street M/C 716, Champaign, IL 61820,
+email: hkoehn@illinois.edu.
+Published online:              25                   July           2018
+5:273-299      
+
+===== PAGE 2 =====
+
+H-F. K¨ohn
+Stout, 2007; Haberman and von Davier, 2007; Leighton and Gierl, 2007;
+Rupp, Templin, and Henson, 2010). The focus is on speciﬁc examinee skills,
+knowledge, and other cognitive characteristics needed to perform tasks that
+are typically chosen to assess student ability. The close ties of assessments
+based on the cognitive diagnosis framework to curriculum are intentional
+and deemed to inform instruction and enhance student learning. Cognitively
+diagnostic tests are tailored to evaluate students’ mastery of the instructional
+content and to provide immediate feedback on their strengths and weak-
+nesses in terms of skills learned and skills needing study. Consequently,
+models of cognitive diagnosis—commonly referred to as “Diagnostic Clas-
+siﬁcation Models” (DCMs)—describe ability in a domain as a composite of
+speciﬁc discrete skills—often called “cognitive attributes”—each of which
+an examinee may or may not have mastered based on the evidence of tasks
+that he or she performs. Different attribute proﬁles deﬁne distinct classes
+of proﬁciency. Modeling assessment data within the cognitive diagnosis
+framework involves estimating the item parameters (required for a detailed
+evaluation of the properties of a test) and assigning examinees to proﬁciency
+classes—that is, estimating their individual attribute proﬁles.
+Cognitively diagnostic tests use items that themselves are character-
+ized by individual proﬁles specifying which attributes are required to re-
+spond correctly to an item. The entire set of these item-attribute associa-
+tions forms the Q-matrix of a test (Tatsuoka, 1985). The Q-matrix must be
+complete, which means it must guarantee the identiﬁability of all possible
+proﬁciency classes among examinees (Chiu, Douglas, and Li, 2009). An
+incomplete Q-matrix causes examinees to be assigned to proﬁciency classes
+to which they do not belong. Completeness of the Q-matrix is therefore
+a key requirement of any cognitively diagnostic test. The importance of
+Q-completeness as a fundamental condition for the cognitive diagnosis of
+assessment data has only been recently acknowledged (e.g., Chiu, 2013;
+DeCarlo, 2012; Liu, Xu and Ying, 2012, 2013).
+But completeness of the Q-matrix is often difﬁcult to establish, espe-
+cially, for tests with a large number of items involving many attributes. As
+an additional complication, completeness is not an intrinsic property of the
+Q-matrix, but can only be assessed in relation to a speciﬁc DCM supposed
+to underlie the data—that is, the Q-matrix of a given test can be complete
+for one model, but incomplete for another. An even more intricate situation
+arises if the test items do not conform to a single DCM, but to a mix of
+several DCMs.
+Recently, K¨ ohn and Chiu (2017) investigated the technical require-
+ments and conditions of Q-completeness, and how to use them to determine
+whether a given Q-matrix is complete. Of equal importance, however, seems
+the question of how to use these results in practice for constructing a com-
+274
+
+===== PAGE 3 =====
+
+Q-Completeness
+plete Q-matrix for an assessment—especially, when the test in question is
+based on a complex DCM and uses a realistic number of items involving
+multiple attributes.
+In this article, a sequential procedure is presented for constructing Q-
+matrices that are guaranteed to be complete regardless of which DCM is
+chosen. Part I of this article brieﬂy reviews deﬁnitions and key technical
+concepts of cognitive diagnosis and Q-completeness. Part II presents the
+method for constructing a complete Q-matrix in terms of a case study based
+on Tatsuoka’s (1984) famous set of fraction-subtraction problems. The dis-
+cussion concludes with some practical recommendations.
+2. Part I: Deﬁnitions and Key Technical Concepts
+2.1 Diagnostic Classiﬁcation Models
+Let Yij denote the observed response of examinee i, i =1 , 2,...,N ,
+to binary item j, j =1 , 2,...,J . For the general latent class model, the
+conditional probability of examinee i in proﬁciency class Cm answering
+item j correctly is deﬁned by the item response function (IRF), P (Yij =
+1|i ∈C m)= πjm ,w h e r eπjm is constant for item j across all members i
+in proﬁciency class Cm, m =1 , 2,...,M .T h e Yij are assumed indepen-
+dent conditional on proﬁciency-class membership (local independence); no
+further restrictions are imposed on the relation between the latent variable—
+proﬁciency-class membership—and the observed item response.
+DCMs, in contrast, are constrained latent class models such that
+proﬁciency-class membership—associated with mastery of a particular at-
+tribute set—determines the probability of a correct item response. Suppose
+that K latent binary attributes constitute a certain ability domain; there are
+then 2K distinct attribute proﬁles composed of these K attributes represent-
+ing M =2 K distinct proﬁciency classes. (Note that an attribute proﬁle for
+a proﬁciency class can consist of all zeroes, because it is possible for an ex-
+aminee not to have mastered any attributes at all.) Let the K-dimensional
+vector,αm =( αm1,αm2,...,α mK )′, be the binary attribute proﬁle of pro-
+ﬁciency class Cm,w h e r et h ekth entry, k =1 , 2,...,K , indicates whether
+the corresponding attribute has been mastered. The attribute proﬁle of ex-
+aminee i ∈C m, αi∈Cm , is usually simply written as αi. (For brevity, the
+examinee index, i, is omitted if the context permits.)
+Consider a test of J items for assessing ability in the domain. Each
+individual itemj is associated with a K-dimensional binary vector qj called
+the item-attribute proﬁle, where qjk =1 if a correct answer requires mastery
+of the kth attribute, and 0 otherwise. Note that item-attribute proﬁles con-
+sisting entirely of zeroes are inadmissible, because they correspond to items
+275
+
+===== PAGE 4 =====
+
+H-F. K¨ohn
+that require no attributes at all. Hence, given K attributes, there are at most
+2K − 1 distinct item-attribute proﬁles. The item-attribute proﬁles of a test
+are collected into the J ×K Q-matrix Q = {qjk}.
+A plethora of DCMs has been proposed in the literature (e.g., Fu
+and Li, 2007; Rupp and Templin, 2008). They differ in how the func-
+tional relation between mastery of attributes and the probability of a cor-
+rect item response is modeled. DCMs have been distinguished based on
+criteria like compensatory versus non-compensatory (can lacking certain at-
+tributes be compensated for by possessing other attributes or not), or con-
+junctive (all attributes speciﬁed for an item in q are required; mastering
+only a subset of them results in a success probability equal to that of an
+examinee mastering none of the attributes) versus disjunctive (mastery of
+a subset of the required attributes is a sufﬁcient condition for maximizing
+the probability of a correct item response) (de la Torre and Douglas, 2004;
+Henson, Templin, and Willse, 2009; Maris, 1999). The Deterministic In-
+put Noisy “AND” Gate (DINA) Model (Haertel, 1989; Junker and Sijtsma,
+2001; Macready and Dayton, 1977) is the standard example of a conjunc-
+tive DCM. Its IRF is P (Yij =1 | αi)=( 1 − sj )ηij g(1−ηij )
+j , subject to
+0 <g j < 1 − sj < 1 for each item j. The conjunction parameter ηij is
+deﬁned as ηij = ∏K
+k=1 αqjk
+ik indicating whether examinee i has mastered
+all the attributes needed to answer item j correctly. The item-related pa-
+rameters sj = P (Yij =0 | ηij =1 ) and gj = P (Yij =1 | ηij =0 )
+refer to the probabilities of slipping (failing to answer item j correctly de-
+spite having the attributes required to do so) and guessing (answering item j
+correctly despite lacking the attributes required to do so), respectively. The
+Deterministic Input Noisy “OR” Gate (DINO) Model (Templin and Hen-
+son, 2006) is the prototypical disjunctive DCM. The disjunction parameter,
+ωij =1 − ∏K
+k=1(1−αik)qjk , indicates whether at least one of the attributes
+associated with item j has been mastered. (Like ηij in the DINA model, ωij
+represents the ideal item response when neither slipping nor guessing oc-
+cur.) The IRF of the DINO model is P (Yij =1 | αi)=( 1 −sj )ωij g(1−ωij )
+j ,
+subject to 0 <g j < 1−sj < 1 for each item j.
+General DCMs have been proposed as a theoretical framework for
+expressing the IRFs of speciﬁc DCMs in uniﬁed mathematical form and pa-
+rameterization (de la Torre, 2011; Henson et al., 2009; Rupp et al., 2010; von
+Davier, 2005, 2008, 2014). V on Davier’s General Diagnostic Model (GDM;
+2005, 2008) is the archetypal general DCM. The IRF of (presumably) the
+most popular version of the GDM is formed by the logistic function of the
+linear combination of all K attribute main effects. Henson et al. (2009) pro-
+posed to use the linear combination of the K attribute main effects and all
+their two-way, three-way,... ,K-way interactions
+276
+
+===== PAGE 5 =====
+
+Q-Completeness
+vij = βj0 +
+K∑
+k=1
+βjkqjkαik +
+K∑
+k′=k+1
+K−1∑
+k=1
+βj(kk′)qjkqjk ′αikαik′ +
+··· +βj12...K
+K∏
+k=1
+qjkαik (1)
+(qjk indicates whether mastery of αk is required for item j) for constructing
+the IRF of a general DCM called the Loglinear Cognitive Diagnosis Model
+(LCDM)
+P (Yij =1 | αi)= exp(vij )
+1+e x p (vij ) (2)
+(see Equation 11 in Henson et al., 2009). De la Torre (2011) presented the
+Generalized DINA (G-DINA) model that, in addition to the logit link, allows
+for constructing the IRF based on the identity link, P (Yij =1 | αi)= vij ,
+and the log link, P (Yij =1 | αi)=e x p
+(
+vij ) (see Equations 1–3 in de la
+Torre, 2011). By imposing appropriate constraints on the β-coefﬁcients in
+vij , the IRFs of speciﬁc DCMs can be reparameterized as general DCMs.
+For example, the IRF of the DINA model becomes
+P (Yij =1 | αi)=
+exp
+(
+βj0 +βj(∀k∈Lj )
+∏
+k∈Lj
+αik
+)
+1+e x p
+(
+βj0 +βj(∀k∈Lj )
+∏
+k∈Lj
+αik
+) (3)
+subject to βj(∀k∈Lj ) > 0.T h es e tLj = {k | qjk =1 } contains the non-zero
+elements in qj . (If k ∈L j ,t h e nqjk =1 is always true; hence, qjk has been
+dropped from the IRF.) Henceforth, all DCMs are written as general DCMs.
+2.2 Completeness of the Q-Matrix
+2.2.1 Deﬁnition
+Chiu et al. (2009) proposed a formal deﬁnition of Q-completeness in
+terms of the vectors of ideal item responses, η(α)= η(α∗) ⇒ α = α∗,
+with entriesηj as deﬁned earlier. V erbally stated, aJ×K matrix Q = {qjk}
+is said to be complete if it allows for the identiﬁcation of all the possible at-
+tribute proﬁles of the 2K = M different proﬁciency classes. This deﬁnition
+was tailored to the DINA model, but it is not applicable to DCMs without
+conjunction parameter. Thus, Chiu and K¨ ohn (2015) proposed an equiv-
+alent, yet more general deﬁnition of completeness of the Q-matrix based
+on the conditional expectation of an examinee’s J-dimensional item re-
+sponse proﬁle Y , given attribute proﬁle α, denoted by S(α)= E(Y | α).
+(For the DINA model, the jth entry of S(α) is deﬁned as E(Yj | α)=
+(1−sj )ηj g(1−ηj )
+j .)—Here is a small-scale example.
+277
+
+===== PAGE 6 =====
+
+H-F. K¨ohn
+The Q-matrix Q(1:3) has three rows that are the attribute proﬁles q1,
+q2,a n d q3 for J =3 items; the K =3 columns correspond to the at-
+tributes α1, α2,a n d α3. (The matrix superscript refers to the item indices
+j =1 , 2, 3.)
+Q(1:3) =
+⎛
+⎝
+100
+010
+001
+⎞
+⎠
+Note that each item requires only a single attribute. Completeness of Q(1:3)
+is established by checking the deﬁnition S(α)= S(α∗) ⇒ α = α∗ for
+each pair, α and α∗,o ft h e M =8 proﬁciency classes. The elements of
+the vector of expected item responses, S(α)=
+(
+S1(α),S 2(α),S 3(α)
+)′,
+are deﬁned as Sj (α)= E(Yj | α)= P (Yj | α). (Recall that the random
+variableYj is distributed as a Bernoulli(πj ), where πj = P (Yj =1 | α),a s
+deﬁned by the IRF of the DCM in question; hence, E(Yj | α)= P (Yj =
+1 | α).) As a simple illustration, consider a main-effects-only model like
+the GDM:
+Sj (α)= exp
+(
+βj0 + ∑K
+k=1 βjkqjkαk
+)
+1+e x p
+(
+βj0 + ∑K
+k=1 βjkqjkαk
+).
+If q1 = (100), then for
+α = (000)′, S1
+(
+(000)′)
+= exp(β10 )
+1+exp(β10)
+α = (100)′, S1
+(
+(100)′)
+= exp(β10 +β11α1 )
+1+exp(β10+β11α1 ).
+Q(1:3) allows to distinguish all vectors S(α) of expected item responses
+associated with different attribute proﬁles α; thus, all proﬁciency classes are
+identiﬁable. Note that only the coefﬁcients retained in Sj (α) are reported in
+the table below, but not the expression of the entire logistic function:
+α =( α1 α2 α3)′
+ Q(1:3)
+q1 = (100) q2 = (010) q3 = (001)
+S1(α) S2(α) S3(α)
+α1 = (000)′ β10 β20 β30
+α2 = (001)′ β10 β20 β30 +β33
+α3 = (010)′ β10 β20 +β22 β30
+α4 = (011)′ β10 β20 +β22 β30 +β33
+α5 = (100)′ β10 +β11 β20 β30
+α6 = (101)′ β10 +β11 β20 β30 +β33
+α7 = (110)′ β10 +β11 β20 +β22 β30
+α8 = (111)′ β10 +β11 β20 +β22 β30 +β33
+278
+
+===== PAGE 7 =====
+
+Q-Completeness
+Compare these results with those obtained for the Q-matrix Q(1:2)
+Q(1:2) =
+( 100
+010
+)
+α =( α1 α2 α3)′
+ Q(1:2)
+q1 = (100) q2 = (010)
+S1(α) S2(α)
+α1 = (000)′ β10 β20
+α2 = (001)′ β10 β20
+α3 = (010)′ β10 β20 +β21
+α4 = (011)′ β10 β20 +β21
+α5 = (100)′ β10 +β11 β20
+α6 = (101)′ β10 +β11 β20
+α7 = (110)′ β10 +β11 β20 +β21
+α8 = (111)′ β10 +β11 β20 +β21
+Clearly, Q(1:2) is not complete because only four proﬁciency classes can
+be identiﬁed. For example, S(α1)= S(α2), whereas α1 = (000) ′⁄=
+α2 = (001) ′. Likewise, S(α3)= S(α4),b u t α3 = (010) ′⁄= α4 =
+(011)′; S(α5)= S(α6),b u tα5 = (100)′⁄= α6 = (101)′;a n dS(α7)=
+S(α8),b u t α7 = (110)′⁄= α8 = (111)′. Hence, Q(1:2) does not allow
+to distinguish all M =8 proﬁciency classes—which is also suggested by
+intuition because two items can only result in four distinct manifest response
+patterns, (00), (01), (10),a n d (11), where the ﬁrst number corresponds to
+the response to item Y1 =0 , 1; the second to Y2 =0 , 1. Thus, for the proper
+discrimination of all proﬁciency classes, a third item is required.
+2.3 Rules of Q-Completeness
+From the theorems and propositions presented in K ¨ohn and Chiu (2017),
+three rules can be derived to describe the technical conditions of Q-complete-
+ness.
+2.3.1 Rule 1
+A J ×K Q-matrix is guaranteed to be complete for any DCM if it contains
+among its J rows theK single-attribute items e1,..., eK .
+(ek denotes a 1×K vector, with thekth element,ek, equal to 1, and all other
+entries equal to 0.) Consider, for example, DCMs as different as the DINA
+model and the LCDM. For the DINA model,
+279
+
+===== PAGE 8 =====
+
+H-F. K¨ohn
+Sj (α)=
+exp
+(
+βj0 +βj(∀k∈Lj )
+∏
+k∈Lj αk
+)
+1+e x p
+(
+βj0 +βj(∀k∈Lj )
+∏
+k∈Lj αk
+)
+(see Equation 3). Recall that the LCDM contains all attribute main and in-
+teraction effects (see Equations 1 and 2); hence,
+Sj (α)=
+[
+exp
+(
+βj0 +
+K∑
+k=1
+βjkqjkαk +
+K∑
+k′=k+1
+K−1∑
+k=1
+βj(kk′)qjkqjk ′αkαk′ +
+··· +βj(12...K)
+K∏
+k=1
+qjkαk
+)]/
+[
+1+e x p
+(
+βj0 +
+K∑
+k=1
+βjkqjkαk +
+K∑
+k′=k+1
+K−1∑
+k=1
+βj(kk′)qjkqjk ′αkαk′ +
+··· +βj(12...K)
+K∏
+k=1
+qjkαk
+)]
+.
+Q(1:3) is complete for both models, as can be conﬁrmed by computing the
+expected item response proﬁles, S(α). Note that in case of single-attribute
+items, all interaction terms disappear from the Sj (α) of the LCDM, whereas
+for the DINA model the term ∏
+k∈Lj αk is reduced to a simple main effect.
+Hence, for the DINA model and the LCDM, the expected item responses
+turn out to be identical to those calculated earlier for the GDM:
+α =( α1 α2 α3)′
+ Q(1:3)
+q1 = (100) q2 = (010) q3 = (001)
+S1(α) S2(α) S3(α)
+α1 = (000)′ β10 β20 β30
+α2 = (001)′ β10 β20 β30 +β33
+α3 = (010)′ β10 β20 +β22 β30
+α4 = (011)′ β10 β20 +β22 β30 +β33
+α5 = (100)′ β10 +β11 β20 β30
+α6 = (101)′ β10 +β11 β20 β30 +β33
+α7 = (110)′ β10 +β11 β20 +β22 β30
+α8 = (111)′ β10 +β11 β20 +β22 β30 +β33
+For the DINA model and the DINO model, a J×K Q-matrix is com-
+plete if and only if each attribute is represented by at least one single-attribute
+280
+
+===== PAGE 9 =====
+
+Q-Completeness
+item—this is a necessary condition of Q-completeness that only applies to
+those two DCMs, and that sets them apart from all other DCMs as special
+cases (see also, Chiu et al., 2009; Chiu and K ¨ ohn, 2015). As an illustration,
+consider Q(4:6) that does not contain single-attribute items:
+Q(4:6) =
+⎛
+⎝
+011
+101
+110
+⎞
+⎠
+Computing the expected item responses shows that Q(4:6) is not complete
+for the DINA model:
+α =( α1 α2 α3)′
+ Q(4:6)
+q4 = (011) q5 = (101) q6 = (110)
+S4(α) S5(α) S6(α)
+α1 = (000)′ β40 β50 β60
+α2 = (001)′ β40 β50 β60
+α3 = (010)′ β40 β50 β60
+α4 = (011)′ β40 +β4(23) β50 β60
+α5 = (100)′ β40 β50 β60
+α6 = (101)′ β40 β50 +β5(13) β60
+α7 = (110)′ β40 β50 β60 +β6(12)
+α8 = (111)′ β40 +β4(23) β50 +β5(13) β60 +β6(12)
+However, for other DCMs, the inclusion of all K single-attribute items in
+the Q-matrix is a sufﬁcient, but not a necessary condition of completeness,
+which means that compositions of the Q-matrix that do not include all single-
+attribute items can also be complete. Thus, Q(4:6), for example, is complete
+for the LCDM despite the absence of single-attribute items:
+α =( α1α2α3)′
+ Q(4:6)
+q4 = (011) q5 = (101) q6 = (110)
+S4(α) S5(α) S6(α)
+α1 = (000) ′ β40 β50 β60
+α2 = (001) ′ β40 + β43 β50 + β53 β60
+α3 = (010) ′ β40 + β42 β50 β60 + β62
+α4 = (011) ′ β40 + β42 + β43 + β4(23) β50 + β53 β60 + β62
+α5 = (100) ′ β40 β50 + β51 β60 + β61
+α6 = (101) ′ β40 + β43 β50 + β51 + β53 + β5(13) β60 + β61
+α7 = (110) ′ β40 + β42 β50 + β51 β60 + β61 + β62 + β6(12)
+α8 = (111) ′ β40 + β42 + β43 + β4(23) β50 + β51 + β53 + β5(13) β60 + β61 + β62 + β6(12)
+281
+
+===== PAGE 10 =====
+
+H-F. K¨ohn
+Note that this result also holds for a main-effects-only model like the
+GDM—then, the β-coefﬁcients of the interaction terms, βj(kk′), would dis-
+appear from the previous table, but α ⁄= α∗ ⇒ S(α) ⁄= S(α∗) would still
+hold for all pairs of the M proﬁciency classes.
+These observations can be formalized as Rule 2, which expresses the
+sufﬁciency condition of Q-completeness in more general terms based on
+the concept of the rank of Q. Recall from linear algebra that for an arbitrary
+matrix A, withU rows andV columns, the maximum number of linearly in-
+dependent rows and the maximum number of linearly independent columns
+is the same; this common number is deﬁned to be the rank of A. A matrix is
+said to be of full rank if the rank is equal to the minimum of U andV . 2.3.2
+Rule 2
+If the J × K matrix Q of a test is not of full rank K—that is, Q does not
+contain K linearly independent q-vectors—then, Q is not complete.
+This rule applies independent of whether the DCM underlying the test is
+a main-effects-only model or a model with main and interaction effects.
+Within this context recall the examples of Q(1:3) and Q(1:2): the latter was
+not of full rank and thus, incomplete, whereas the full rank matrix Q(1:3)
+was complete. However, having full rank K is a necessary, but not a sufﬁ-
+cient condition of completeness—that is, a Q-matrix can be of full rank K,
+but still incomplete. Here is an example.
+Q(7:9) =
+⎛
+⎝
+110
+101
+111
+⎞
+⎠
+Note that Q(7:9) has full rank. Computing the expected responses S(α)
+and S(α∗) for the proﬁciency classes α = (100)′and α∗ = (011)′shows
+S(α) and S(α∗) cannot be guaranteed to be distinct unless the additional
+constraints β71 ⁄= β72, β81 ⁄= β83 or β91 ⁄= β92 + β93 are imposed on the
+coefﬁcients. Hence, Q(7:9) may or may not be complete depending on the
+speciﬁc values of the β-coefﬁcients:
+α =( α1 α2 α3)′
+ Q(7:9)
+q7 = (110) q8 = (101) q9 = (111)
+S7(α) S8(α) S9(α)
+α = (100)′ β70 +β71 β80 +β81 β90 +β91
+α∗ = (011)′ β70 +β72 β80 +β83 β90 +β92 +β93
+This example suggests that any candidate Q-matrix that is of full rank must
+be further inspected for completeness by checking all pairs of attribute pro-
+282
+
+===== PAGE 11 =====
+
+Q-Completeness
+ﬁles, α and α∗, for possibly indeterminate β-coefﬁcient patterns like β71
+and β72, β81 and β83,o r β91 and β92 + β93 in the previous illustration.
+However, the amount of computational effort of checking for these indeter-
+minacies explodes with the number K of attributes: for K =3 attributes,(8
+2
+)
+=5 6 pairs must be checked, whereas if K =5 ,
+(32
+2
+)
+= 496 pairs
+must be checked. So, what to do?—The following result allows for a signif-
+icant reduction in the computational effort: if α and α∗ are nested within
+each other, then S(α) ⁄= S(α∗) is always true. (A K-dimensional vec-
+tor α∗ ⁄= α is said to be nested within the vector α if α∗
+k ≤ αk,f o ra l l
+elements k,a n d α∗
+k <α k for at least one k.) Said differently, if α and
+α∗ are not nested within each other, then indeterminate constellations of
+the β-coefﬁcients in S(α) and S(α∗) can occur like, for example, with
+α = (100)′andα∗ = (011)′, which might render the Q-matrix incomplete.
+2.4 Summary: Checking Q-Completeness
+Rules 1–2 together with the previous result suggest a sequential pro-
+cedure for assessing the completeness of any given Q-matrix:
+(1) Check wether Q contains all K single-attribute items. If so, then Q is
+complete.
+( 2 )I fa n yo ft h eK single-attribute items is missing from Q,a n dt h ed a t aa r e
+ﬁtted by the DINA model or the DINO model, then Q is not complete. If the
+ﬁtted model is neither the DINA model nor the DINO model, then continue
+with (3).
+(3) If the rank of Q is less than K,t h e nQ is incomplete. If Q has full rank
+K, then continue with (4).
+(4) Consider only all non-nested pairs α and α∗ and check for possibly
+non-distinct S(α) and S(α∗)—concretely, if for each pair α and α∗,t h e r e
+exists at least one item j such that the coefﬁcients in Sj (α∗) a r eap r o p e r
+subset of those in Sj (α),o rv i c ev e r s a ,t h e nQ is complete; otherwise, Q is
+incomplete.
+3. Part II: How to Build a Complete Q-Matrix—A Case Study
+Recall that the importance of the completeness property of the Q-
+matrix of a test as a fundamental condition to guarantee a reliable esti-
+mate of an examinee’s attribute proﬁle has only recently been realized by
+researchers. In fact, inspection of extant assessments based on the cognitive
+diagnosis framework often revealed that, in hindsight, the Q-matrices used
+with these tests were not complete—a prominent example is discussed in
+283
+
+===== PAGE 12 =====
+
+H-F. K¨ohn
+detail below. More to the point, what is the value of rules for establishing
+Q-completeness if the damage has already been done?—that is, the test with
+an incomplete Q-matrix has been in use for quite a while, and examinees
+have possibly been misdiagnosed? Said differently, the availability of rules
+for building a complete Q-matrix at the early stages of test development is
+perhaps at least as desirable as rules for identifying the completeness of a
+given Q-matrix. Thus, Part II of this article concerns procedures for con-
+structing Q-matrices that are complete. The famous Fraction-Subtraction
+test problems by K.K. Tatsuoka (1984) are used throughout for illustration.
+3.1 The Fraction-Subs traction Problems (K.K. Tatsuoka, 1984)
+Tatsuoka’s Fraction-Subtraction data have been studied extensively
+in cognitive diagnosis research (e.g., Chen, de la Torre, and Zhang, 2013;
+Chiu, 2013; Chiu and Douglas, 2013; Chiu and K¨ ohn, 2015; de la Torre,
+2008, 2009, 2011; de la Torre and Douglas, 2004, 2008; DeCarlo, 2011,
+2012; Henson et al., 2009; K¨ ohn, Chiu, and Brusco, 2015; Mislevy, 1996;
+C. Tatsuoka, 2002; K.K. Tatsuoka, 1990, 2009). The data set was collected
+from 536 middle-school students. (As noted by DeCarlo, 2011, p. 24, a
+number of articles have reported a sample size of 2,144 observations; this is
+a mistake that arose when the original data were stacked four times.) V ari-
+ous Q-matrices have been devised—post hoc—for the Fraction-Subtraction
+data. They differ with regard to the speciﬁc subsets of items selected for
+the analysis and which particular attributes were assumed to be required
+for a correct item response. As DeCarlo (2011, p. 21) observed, “the frac-
+tion subtraction data present a case in point about difﬁculties with respect to
+specifying a Q-matrix, in that even for these simple items, it is still debatable
+(after 20 years) as to the correct speciﬁcation of the Q-matrix; in fact, vir-
+tually every researcher who has considered the fraction subtraction data has
+suggested different modiﬁcations of the Q-matrix.” For example, Henson et
+al. (2009) chose a subset of 12 items, for which they devised a Q-matrix
+involving only three attributes. De la Torre (de la Torre, 2011; de la Torre
+and Lee, 2013) also studied a subset consisting of 12 items, but involving
+four attributes. Another Q-matrix variant for the Fraction-Subtraction data
+used by de la Torre (2008; see also de la Torre and Douglas, 2008; De-
+Carlo, 2012; Mislevy, 1996) contained 15 items involving ﬁve attributes;
+this Q matrix is shown in Table 1. Based on this Q-matrix, de la Torre
+(2008) ﬁtted the Fraction-Subtraction data with the DINA model. The re-
+sulting item parameter estimates suggested, according to de la Torre, a good
+ﬁt to the data. But a quick inspection of this Q-matrix shows that it does
+not contain all K single-attribute items; hence, it cannot be complete for
+the DINA model. Speciﬁcally, given ﬁve attributes, there are 25 =3 2 pos-
+284
+
+===== PAGE 13 =====
+
+Q-Completeness
+Table 1. Q-Matrix for the Fraction-Subtraction Test Items (de la Torre, 2008; DeCarlo, 2012)
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5
+1 3 / 4 - 3 / 8 10000
+2 3 1 / 2 - 2 3 / 2 11110
+3 6 / 7 - 4 / 7 10000
+4 3 - 2 1 / 5 11111
+5 3 7 / 8 - 2 10100
+6 4 4/12 - 2 7/12 1 1 1 1 0
+7 4 1 / 3 - 2 4 / 3 11110
+8 11/8 - 1/8 1 1 0 0 0
+9 3 4 / 5 - 3 2 / 5 10100
+1 0 2 - 1 / 3 10111
+1 1 4 5 / 7 - 1 4 / 7 10100
+1 2 7 3 / 5 - 4 / 5 10110
+1 3 4 1 / 1 0 - 2 8 / 1 011110
+1 4 4 - 1 4 / 3 11111
+1 5 4 1 / 3 - 1 5 / 3 11110
+Note. α1 = performing the basic fraction-subtraction operation, α2 = simplifying/reducing,
+α3 = separating a whole number from a fraction, α4 = borrowing 1 from a whole number, α5
+= converting a whole number to a fraction.
+sible proﬁciency classes in total. Computing the expected item response
+vectors, S(α), for the DINA model, however, conﬁrms that this Q-matrix
+allows merely to identify nine out of the 32 proﬁciency classes (see Table 2).
+Hence, Q is incomplete. Note that the Sj (α) were only computed for the
+seven items with unique—that is, non-redundant—attribute proﬁles because
+the remaining eight items did not provide any additional information. (Pre-
+vious studies of the Fraction-Subtraction data were usually focussed on item
+parameter estimation and model ﬁt, but not on the assignment of examinees
+to proﬁciency classes, which might explain why this problematic aspect of
+the fraction-subtraction data has barely been discussed in the literature; see,
+for example, DeCarlo, 2011.)
+In summary, none of the various Q-matrices that have been devised
+for the Fraction-Subtraction data is complete for the DINA model (and nei-
+ther for the DINO model) because they all lack inclusion of the K single-
+attribute items. As an aside, these Q-matrices, however, all conform to Rule
+2—they all have full rank K. In addition, checking all pairs of non-nested α
+and α∗ for indeterminate constellations among the coefﬁcients of the asso-
+ciatedS(α) andS(α∗) establishes completeness of these Q-matrices for all
+other DCMs. Hence, the Fraction-Subtraction data might be more suitable
+for a main effects model or a model containing main effects and interaction
+terms to guarantee the identiﬁability of all proﬁciency classes. In fact, Hen-
+son et al. (2009) ﬁtted the subset of the Fraction-Subtraction data with the
+285
+
+===== PAGE 14 =====
+
+H-F. K¨ohn
+Table 2. Identiﬁable Proﬁciency Classes for the DINA Model Based on the Q-matrix of K. K. Tatsuoka’s (1984)
+Fraction-Subtraction Test Items Shown in Table 1 (de la Torre, 2008; DeCarlo, 2012)
+α =( α1 α2 ...α 5 )′
+ qj
+(10000) (10100) (10110) (10111) (11000) (11110) (11111)
+Sj (α)
+α1 = (00000) ′ β0 β0 β0 β0 β0 β0 β0
+α2 = (00001) ′ β0 β0 β0 β0 β0 β0 β0
+α3 = (00010) ′ β0 β0 β0 β0 β0 β0 β0
+α4 = (00011) ′ β0 β0 β0 β0 β0 β0 β0
+α5 = (00100) ′ β0 β0 β0 β0 β0 β0 β0
+α6 = (00101) ′ β0 β0 β0 β0 β0 β0 β0
+α7 = (00110) ′ β0 β0 β0 β0 β0 β0 β0
+α8 = (00111) ′ β0 β0 β0 β0 β0 β0 β0
+α9 = (01000) ′ β0 β0 β0 β0 β0 β0 β0
+α10 = (01001) ′ β0 β0 β0 β0 β0 β0 β0
+α11 = (01010) ′ β0 β0 β0 β0 β0 β0 β0
+α12 = (01011) ′ β0 β0 β0 β0 β0 β0 β0
+α13 = (01100) ′ β0 β0 β0 β0 β0 β0 β0
+α14 = (01101) ′ β0 β0 β0 β0 β0 β0 β0
+α15 = (01110) ′ β0 β0 β0 β0 β0 β0 β0
+α16 = (01111) ′ β0 β0 β0 β0 β0 β0 β0
+α17 = (10000) ′ β0 + β1 β0 β0 β0 β0 β0 β0
+α18 = (10001) ′ β0 + β1 β0 β0 β0 β0 β0 β0
+α19 = (10010) ′ β0 + β1 β0 β0 β0 β0 β0 β0
+α20 = (10011) ′ β0 + β1 β0 β0 β0 β0 β0 β0
+α21 = (10100) ′ β0 + β1 β0 + β13 β0 β0 β0 β0 β0
+α22 = (10101) ′ β0 + β1 β0 + β13 β0 β0 β0 β0 β0
+α23 = (10110) ′ β0 + β1 β0 + β13 β0 + β134 β0 β0 β0 β0
+α24 = (10111) ′ β0 + β1 β0 + β13 β0 + β134 β0 + β1345 β0 β0 β0
+α25 = (11000) ′ β0 + β1 β0 β0 β0 β0 + β12 β0 β0
+α26 = (11001) ′ β0 + β1 β0 β0 β0 β0 + β12 β0 β0
+α27 = (11010) ′ β0 + β1 β0 β0 β0 β0 + β12 β0 β0
+α28 = (11011) ′ β0 + β1 β0 β0 β0 β0 + β12 β0 β0
+α29 = (11100) ′ β0 + β1 β0 + β13 β0 β0 β0 + β12 β0 β0
+α30 = (11101) ′ β0 + β1 β0 + β13 β0 β0 β0 + β12 β0 β0
+α31 = (11110) ′ β0 + β1 β0 + β13 β0 + β134 β0 β0 + β12 β0 + β1234 β0
+α32 = (11111) ′ β0 + β1 β0 + β13 β0 + β134 β0 + β1345 β0 + β12 β0 + β1234 β0 + β12345
+Note. Identiﬁable proﬁciency classes—that is, α ⁄= α∗ ⇒ S(α) ⁄= S(α)∗ —are separated by horizontal lines.
+LCDM. Recently, de la Torre (2014) suggested that the Reduced Reparam-
+eterized Uniﬁed Model (Reduced RUM; Hartz, 2002; Hartz and Roussos,
+2008) might provide a good ﬁt to the Fraction-Substraction data.
+3.2 Building a Complete Q-Matrix
+As completeness of a Q-matrix can only be determined in reference
+to a particular DCM, two basic scenarios must be distinguished. First, if
+the DINA model or the DINO model is postulated to underlie the test, then
+the construction of a complete Q-matrix is straightforward: a test developer
+286
+
+===== PAGE 15 =====
+
+Q-Completeness
+just needs to include all K different single-attribute items (Rule 1). Second,
+if DCMs other than the DINA model or the DINO model are assumed to
+underlie the test, then constructing a complete Q-matrix is more involved;
+any effort should ﬁrst aim at compiling a K × K candidate Q-matrix that
+is of full rank (as a necessary condition for completeness). Hence, the row
+vectors (i.e., the item q-vectors) of this candidate Q-matrix must be linearly
+independent. However, compiling a set of linearly independent q-vectors is
+not trivial; especially, when K is large. But tools from linear algebra can
+help; the following stages are recommended:
+(1) Put together a K ×K candidate Q-matrix Qc consisting of just J = K
+items. Check whether Qc contains identical q-vectors. (Recall that each
+duplicate q-vector reduces the rank of Qc by 1.) Replace the duplicate q-
+vectors by alternative items until all q-vectors are distinct. (Note that the
+R function unique() can be used to check whether all the q-vectors are
+distinct.)
+(2) Check whether every attribute is measured. If there are k attributes that
+have not yet been considered, then add k items so that each of the attributes
+is measured by at least one item.
+(3) Check the rank of the resulting candidate Q-matrix (Rule 2). (The R
+function rankMatrix() in the package Matrix can be used to ﬁnd the
+rank of a matrix.)
+(4) If Qc is not of full rank K, then its item attribute proﬁles are linearly
+dependent—that is, one or more item attribute proﬁles can be expressed as
+a linear combination of the remaining item attribute proﬁles. Usually, the
+difﬁcult part is to determine which speciﬁc item attribute proﬁles are linearly
+dependent.
+Transforming a matrix to reduced row echelon form is a commonly
+used device in linear algebra for detecting patterns of linear dependence
+among the columns or rows of a matrix. Thus, the reduced row echelon form
+of a rank-deﬁcient Q-matrix can be used to obtain diagnostic information on
+how to remedy the linear-dependence issue of the candidate Q-matrix in
+question.
+In general, a matrix is said to be in row echelon form (a) if the ﬁrst
+nonzero entry in each row is 1; (b) if row r does not consist entirely of
+zeros, then the number of leading zero entries in row r +1 is greater than
+the number of leading zero entries in row r; (c) if there are rows with all
+entries equal to zero, then these rows are below those rows having nonzero
+entries. A matrix is said to be in reduced row echelon form ( a )i ft h em a t r i x
+is in row echelon form; (b) if the ﬁrst nonzero entry in each row is the only
+287
+
+===== PAGE 16 =====
+
+H-F. K¨ohn
+nonzero entry in its column. (For further details, consult Leon, 1998.—Note
+that the R function echelon() in the package editrules can be used
+to ﬁnd the reduced row echelon form of a matrix.)
+Recall that the candidate Q-matrix Qc is of K × K; hence, if Qc
+is of full rank, then its reduced row echelon form displays a “staircase”
+pattern of ones along the main diagonal. If Qc is rank deﬁcient, then the
+staircase pattern is disrupted such that in certain rows the entry of one has
+been shifted to the right. The columns that have been “shifted over” point
+at attributes that are confounded—their individual contributions cannot be
+separated from other attributes due to the particular composition of the item
+attribute vectors in Qc. Hence, items must be added to Qc that speciﬁcally
+target the confounded attributes. (Because longer tests are more reliable,
+adding items should typically be preferred over removing/replacing items.
+How to use the reduced row echelon form for identifying confounded at-
+tributes in Qc is described in detail in the example below.)
+(5) Repeat (2), (3), and (4) until the rank of the candidate Q-matrix is K.
+Note that adding further items to Qc—as might be required by the domain
+of the test in question—is not going to compromise the completeness of the
+Q-matrix as long as the rank K candidate Qc obtained in (4) is retained.
+As an illustration of these stages, consider constructing a complete
+Q-matrix based on a pool of 20 fraction-subtraction items that involve eight
+attributes. They are presented in Table 3 (these items have been used before
+by Chen et al., 2013; Chiu, 2013; Chiu and Douglas, 2013; de la Torre and
+Douglas, 2004; DeCarlo, 2011).Two scenarios are described in detail where
+the speciﬁc properties of the K × K Q-matrices initially chosen from the
+total set of items in Table 3 called for different strategies of working through
+the four building stages.
+3.3 Scenario 1: The Initial Candidate Q-matrix Is Not of Full Rank
+The initial candidate Q-matrix Qc was formed by the ﬁrst eight items
+in Table 3:
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+1 5/3 - 3/4 00010110
+2 3/4 - 3/8 00010010
+3 5/6 - 1/9 00010010
+4 31 / 2-23 / 2 01101010
+5 4 3/5 - 3 4/10 01010011
+6 6/7 - 4/7 00000010
+7 3-4 / 7 11000010
+8 2/3 - 2/3 00000010
+288
+
+===== PAGE 17 =====
+
+Q-Completeness
+Table 3. 20 Fraction-Subtraction Test Items and Their Attribute Proﬁles (de la Torre and
+Douglas, 2004; DeCarlo, 2011)
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+1 5/3 - 3/4 0 0 0 1 0 1 1 0
+2 3/4 - 3/8 0 0 0 1 0 0 1 0
+3 5/6 - 1/9 0 0 0 1 0 0 1 0
+4 31 / 2-23 / 2 0 1 1 0 1 0 1 0
+5 4 3 / 5 - 3 4 / 1 0 01010011
+6 6/7 - 4/7 0 0 0 0 0 0 1 0
+7 3 - 4 / 7 11000010
+8 2/3 - 2/3 0 0 0 0 0 0 1 0
+9 3 7 / 8 - 2 01000000
+1 0 44 / 1 2-27 / 1 2 0 1 0 0 1 0 1 1
+1 1 4 1 / 3 - 2 4 / 3 01001010
+12 1 1/8 - 1/8 0 0 0 0 0 0 1 1
+1 3 3 3 / 8 - 2 5 / 6 01011010
+1 4 3 4 / 5 - 3 2 / 5 01000010
+1 5 2 - 1 / 3 10000010
+1 6 4 5 / 7 - 1 4 / 7 01000010
+17 7 3/5 - 4/5 0 1 0 0 1 0 1 0
+1 8 41 / 1 0-28 / 1 0 0 1 0 0 1 1 1 0
+1 9 4-14 / 3 1 1 1 0 1 0 1 0
+2 0 4 1 / 3 - 1 5 / 3 01101010
+Note. α1 = convert a whole number to a fraction, α2 = separate a whole number from a
+fraction, α3 = simplify before subtracting, α4 = ﬁnd a common denominator, α5 = borrow
+from whole number part, α6 = column borrow to subtract the second numerator from the
+ﬁrst, α7 = subtract numerators, α8 = reduce answers to simplest form.
+There were only six unique q-vectors, as could be easily veriﬁed by the R
+function unique(); Items 2 and 3 were replications. Qc was rank deﬁ-
+cient: its rank was six. At least two items had to be added to make Qc of
+full rank K =8 . The crucial question was which items to pick? Hence, Qc
+was transformed to reduced row echelon form:
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+1 5/3 - 3/4 1000000 −1
+2 3/4 - 3/8 0100000 1
+3 5/6 - 1/9 0010100 −1
+4 31 / 2-23 / 2 0001000 0
+5 4 3/5 - 3 4/10 0000010 0
+6 6/7 - 4/7 0000001 0
+7 3-4 / 7 0000000 0
+8 2/3 - 2/3 0000000 0
+289
+
+===== PAGE 18 =====
+
+H-F. K¨ohn
+Two disruptions of the staircase pattern occured: in row q5 at column α5,
+and in row q7 at column α8. The disruptions point at attributes that are
+confounded: α5 and α8. Their individual contributions cannot be separated
+from other attributes due to the particular composition of the item attribute
+vectors in Qc. Hence, items must be added to Qc that speciﬁcally target the
+confounded attributes. So, how to “repair” the staircase pattern?—which is
+equivalent to increasing the rank ofQc from six toK =8 . A straightforward
+ﬁx would have been to add those items to Qc that would restore entries of
+ones to the “gaps” at the row/column locations where the disruption of the
+staircase pattern occurred. Obvious choices, therefore, would have been
+the two single-attribute items having q-vectors e5 = (00001000) and e8 =
+(00000001). Then, Qc would have been of full rank, with the reduced row
+echelon form equal to:
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+1 5/3 - 3/4 10000000
+2 3/4 - 3/8 01000000
+3 5/6 - 1/9 00100000
+4 31 / 2-23 / 2 00010000
+5 4 3/5 - 3 4/10 00001000
+6 6/7 - 4/7 00000100
+7 3-4 / 7 00000010
+8 2/3 - 2/3 00000001
+9 00000000
+1 0 00000000
+Unfortunately, the two single-attribute items, e5 and e8, were not available
+in the collection of items in Table 3. So, what to do?
+The second row of the reduced row echelon form of Qc—which is
+repeated here for convenience—showed that if the “1” in column α2 could
+be eliminated, then this row would have the ﬁrst nonzero entry in column
+α8—exactly what was needed:
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+2 3/4 - 3/8 01000001
+As it happened, Item 9 in Table 3 is a single-attribute item—it was a perfect
+match: q9 = (01000000). Thus, adding Item 9 to Qc ensured that the ﬁrst
+290
+
+===== PAGE 19 =====
+
+Q-Completeness
+“1” in the seventh row of the reduced row echelon form occurred in column
+α8. (Recall that the disruption in row q5 at column α5 of the reduced row
+echelon form has not yet been ﬁxed.)
+Next, look at the third row of the reduced row echelon form of Qc—
+what about α5?
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+3 5/6 - 1/9 0010100 −1
+An item measuring α5 was needed to eliminate the “1” in column α5 of the
+third row. Among the remaining 12 items in Table 3 that had not yet been
+used in Qc, seven items required α5. In choosing simply the ﬁrst of those
+seven, Item 10, the candidate Q-matrix Qc became:
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+1 5/3 - 3/4 00010110
+2 3/4 - 3/8 00010010
+3 5/6 - 1/9 00010010
+4 31 / 2-23 / 2 01101010
+5 4 3/5 - 3 4/10 01010011
+6 6/7 - 4/7 00000010
+7 3-4 / 7 11000010
+8 2/3 - 2/3 00000010
+9 37 / 8-2 01000000
+10 44 / 1 2-27 / 1 2 01001011
+The reduced row echelon form of this candidate Q-matrix had a perfect stair-
+case pattern of ones along the main diagonal of the K×K submatrix formed
+by the ﬁrst K rows, which conﬁrmed that Qc after the addition of Items 9
+and 10 was of full rank K =8 .
+As a ﬁnal step, for all pairs of non-nested α and α∗, the associated
+expected item response vectors, S(α) andS(α∗), had to be checked for in-
+determinate constellations of the β-coefﬁcients that might have rendered Qc
+incomplete despite having full rank. For K =8 attributes, there are 26,335
+pairs of non-nested α and α∗ that needed to be inspected. A routine writ-
+ten in R called Q.check performs a comprehensive completeness check of
+any candidate Q-matrix, including also the inspection of all pairs of non-
+nested α and α∗. (A beta-version of Q.check is available upon request.)
+Q.check conﬁrmed that Qc was complete. Additional items could then be
+added to Qc according to a test developer’s speciﬁc objectives.
+291
+
+===== PAGE 20 =====
+
+H-F. K¨ohn
+3.4 Scenario 2: The Initial Candidate Q-Matrix Is of Full Rank, But
+Fails the Nestedness Check
+In this scenario, the initial candidate Q-matrix was formed by Items
+13 to 20 in Table 3:
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+13 33 /8− 25/6 01011010
+14 34 /5− 32/5 01000010
+15 2 − 1/3 10000010
+16 45 /7− 14/7 01000010
+17 73 /5− 4/5 01001010
+18 41 /10− 28/1 001001110
+19 4 − 14/3 11101010
+20 41 /3− 15/3 01101010
+The R function unique() showed that only seven of the eight q-vectors
+were distinct; q14 and q16 were identical. Also, attribute α8 was not mea-
+sured by any item. Hence, Item 12, which required mastery of α8,w a s
+added to Qc: q12 = (00000011). The candidate Q-matrix containing Items
+12 to 20 was now of full rank K =8 . Hence, again, as a ﬁnal step, the
+expected item response vectors, S(α) and S(α∗), had to be checked for
+indeterminate constellations of the β-coefﬁcients for all associated pairs of
+non-nested proﬁciency class attribute vectors. As a technical detail, note that
+Q.check does not perform an exhaustive assessment of all pairs of non-
+nested attribute proﬁles. Rather, Q.check terminates when the ﬁrst pair is
+encountered with indeterminate β-coefﬁcients in the associated S(α) and
+S(α∗). Among the 26,335 pairs of non-nested α and α∗, α8 and α43 was
+the ﬁrst pair that was ﬂagged for indeterminate β-coefﬁcients. Computing
+S(α) andS(α∗) using the GDM conﬁrmed the diagnosis by Q.check:
+α =( α1 α2 ...α 8)′
+ q12 q13
+(00000011) (01011010)
+S12(α) S13(α)
+α8 = (00000010) ′ β12(0) +β12(7) β13(0) + β13(7)
+α43 = (11000001) ′ β12(0) + β12(8) β13(0) +β13(2)
+q17 q18
+(01001010) (01001110)
+S17(α) S18(α)
+α8 = (00000010) ′ β17(0) + β17(7) β18(0) + β18(7)
+α43 = (11000001) ′ β17(0) +β17(2) β18(0) +β18(2)
+292
+
+===== PAGE 21 =====
+
+Q-Completeness
+α =( α1 α2 ...α 8)′
+ q14 q15
+(01000010) (10000010)
+S14(α) S15(α)
+α8 = (00000010)′ β14(0) + β14(7) β15(0) + β15(7)
+α43 = (11000001)′ β14(0) +β14(2) β15(0) +β15(1)
+q19 q20
+(11101010) (01101010)
+S19(α) S20(α)
+α8 = (00000010)′ β19(0) + β19(7) β20(0) + β20(7)
+α43 = (11000001)′ β19(0) +β19(1) +β19(2) β20(0) +β20(2)
+Unless additional constraints on the β-coefﬁcients would be imposed (e.g.,
+β12(7) ⁄= β12(8),o r β19(1) +β19(2) ⁄= β19(7)) completeness of Qc would not
+be guaranteed—in other words, the candidate Q-matrix failed the “nested-
+ness” check.
+Thus, more items needed to be added to Qc to eliminate the indeter-
+minacy among the β-coefﬁcients of S(α8) and S(α43). The most efﬁcient
+strategy—although not the only one—was to add an item that had a q-vector
+equal either to α8 or α43—provided such items were available. In fact,
+among the items not yet selected for Qc, Item 8 had an attribute proﬁle that
+was identical to that of proﬁciency class α8: q8 = (00000010). Computing
+the expected response proﬁle S8 forα8 andα43 conﬁrmed that now the two
+proﬁciency classes were well distinguishable:
+α =( α1 α2 ...α 8)′ q8
+(00000010)
+S8(α)
+α8 = (00000010) ′ β8(0) +β8(7)
+α43 = (11000001) ′ β8(0)
+After Item 8 had been added to Qc, the candidate Q-matrix was run again
+through Q.check; now, it was complete:
+Number
+ Item
+ Attributes
+α1 α2 α3 α4 α5 α6 α7 α8
+82 /3 − 2/3 00000010
+12 11 /8 − 1/8 00000011
+13 33 /8 − 25/6 01011010
+14 34 /5 − 32/5 01000010
+15 2 − 1/3 10000010
+16 45 /7 − 14/7 01000010
+17 73 /5 − 4/5 01001010
+18 41 /10 − 28/1 001001110
+19 4 − 14/3 11101010
+20 41 /3 − 15/3 01101010
+293
+
+===== PAGE 22 =====
+
+H-F. K¨ohn
+But if Item 8 had not been among the candidate items? An alterna-
+tive solution would have been to construct an item with an attribute proﬁle
+that was nested within the attribute proﬁle of α43—say, q∗ = (11000000).
+Then, as the expected response proﬁles showed, the two proﬁciency classes
+would have been well distinguishable:
+α =( α1 α2 ...α 8)′ q∗
+(11000000)
+S∗(α)
+α8 = (00000010)′ β∗
+0
+α43 = (11000001)′ β∗
+0 +β∗
+1
+Recall that, as long as there is a single Sj such that Sj (α) <S j (α∗) or
+Sj (α) >S j (α∗), S(α) ⁄= S(α∗).
+4. Discussion
+A test with an incomplete Q-matrix does not allow for the identi-
+ﬁcation of all proﬁciency classes, which, in turn, causes examinees to be
+misclassiﬁed. In practice, such false ability assessment can have grave con-
+sequences for the test taker as well as the test administrator. Related work
+by Maddison and Bradshaw (2015) and by Xu and Zhang (2016) showed
+that completeness of the Q-matrix is also an indispensable requirement for
+the identiﬁability (and estimability) of the item parameters. (Madison, Brad-
+shaw, and Hollingsworth [2014] developed a web-based device—located at
+http://www.lainebradshaw.com/qpower/ —that allows researchers to assess
+beforehand to what extent their candidate Q-matrix might be at risk of failing
+to ensure estimable item parameters.) In this article, a four-stage sequential
+procedure was presented for constructing Q-matrices that are guaranteed
+to be complete. First, check wether the cadidate Q-matrix Qc contains all
+single-attribute q-vectors; if so, then Qc is complete. Second, if any of the
+single-attribute item proﬁles is missing from Qc, and the data are ﬁtted by
+the DINA model or the DINO model, then Qc is not complete. Third, if the
+ﬁtted model is neither the DINA nor the DINO, then check the rank of Qc;i f
+it is less than K,t h e nQc is incomplete. Fourth, if Qc has full rank K,t h e n
+check the expected item response proﬁles of all non-nested pairs α and α∗
+for indeterminate β-coefﬁcients. Note that the steps of the four-stage proce-
+dure provide a “built-in” safe-guard against unintentionally constructing an
+incomplete Q-matrix even if the true DCM underlying a test is not known
+with certainty—which, in practice, is likely the rule than the exception. In
+conclusion, two closely related questions should be brieﬂy addressed.
+294
+
+===== PAGE 23 =====
+
+Q-Completeness
+The ﬁrst concerns the effect on Q-completeness of sequential model
+comparison strategies, as they might be used for identifying the best ﬁtting
+model among candidate DCMs when information on the true DCM under-
+lying the data is not available (e.g., Chen et al., 2013; de la Torre and Lee,
+2013; Rupp et al., 2010; Templin and Bradshaw, 2014). Recall that com-
+pleteness of the Q-matrix depends on the chosen model. Model comparison
+strategies, however, focus on identifying the best ﬁtting model and usually
+ignore whether completeness of the Q-matrix is secured for the various can-
+didate models. But completeness of the Q-matrix may not necessarily be
+preserved when the model supposedly underlying the data is modiﬁed. Thus,
+the recommendation is to monitor Q-completeness during the model-ﬁnding
+process.
+The second question refers to situations when a test contains items
+that do not just conform to a single DCM, but presumably to a mix of mul-
+tiple DCMs. How can the four-stage procedure be used to secure that the
+Q-matrix is still complete, given such uncertainties?
+As a simple example, assume that the items of a test conform to two
+DCMs, the DINA model and the GDM, involving K attributes. If the Q-
+matrix contains all K single-attribute items, then its completeness is guar-
+anteed regardless of the speciﬁc mix of DCMs in the test. In all other
+instances, completeness of the Q-matrix is no longer given for the DINA
+model. However, if Qc contains a K ×K submatrix that has full rank, then
+the Q-matrix can still be complete for the GDM provided indeterminacies
+of the β-coefﬁcients in the expected item responses can be ruled out. To il-
+lustrate the crucial role of the particular choice of q-vectors in Qc, consider
+a test with only three items, q1 = (100), q2 = (011),a n d q3 = (001),I t e m
+1 conforms to the DINA model, whereas the other two items conform to the
+GDM. The Q-matrix is of full rank and complete, as the inspection of the
+expected item responses conﬁrms:
+α =( α1 α2 α3)′
+ Qc
+DINA GDM
+q1 = (100) q2 = (011) q3 = (001)
+S1(α) S2(α) S3(α)
+α1 = (000)′ β10 β20 β30
+α2 = (001)′ β10 β20 + β23 β30 +β33
+α3 = (010)′ β10 β20 +β22 β30
+α4 = (011)′ β10 β20 +β22 +β23 β30 +β33
+α5 = (100)′ β10 +β11 β20 β30
+α6 = (101)′ β10 +β11 β20 + β23 β30 +β33
+α7 = (110)′ β10 +β11 β20 +β22 β30
+α8 = (111)′ β10 +β11 β20 +β22 +β23 β30 +β33
+295
+
+===== PAGE 24 =====
+
+H-F. K¨ohn
+Now, assume that Items 1 and 2 conform to the DINA model, but Item 3 to
+the GDM. The Q-matrix is still of full rank, but no longer complete, as can
+be demonstrated by calculating the expected item responses (note that the
+proﬁciency classes α1 = (000)′and α3 = (010)′as well as α5 = (100)′
+and α7 = (110)′cannot be distinguished):
+α =( α1 α2 α3)′
+ Qc
+DINA GDM
+q1 = (100) q2 = (011) q3 = (001)
+S1(α) S2(α) S3(α)
+α1 = (000)′ β10 β20 β30
+α2 = (001)′ β10 β20 β30 +β33
+α3 = (010)′ β10 β20 β30
+α4 = (011)′ β10 β20 +β2(23) β30 +β33
+α5 = (100)′ β10 +β11 β20 β30
+α6 = (101)′ β10 +β11 β20 β30 +β33
+α7 = (110)′ β10 +β11 β20 β30
+α8 = (111)′ β10 +β11 β20 +β2(23) β30 +β33
+In conclusion, as this small-scale example suggests, matters become
+quickly pretty complicated even if just two different DCMs are underlying
+a test. The general recommendation for tests involving multiple DCMs is to
+play it safe and include all K single-attribute items in the Q-matrix, which
+guarantees completeness for any mix of DCMs. If this is not possible—
+in certain knowledge domains, it is often difﬁcult to devise single-attribute
+items, not to mention all K of them—then the only option is to monitor the
+Q-matrix construction closely in applying the four-stage procedure devel-
+oped here.
+References
+CHEN, J., DE LA TORRE, J., and ZHANG, Z. (2013), “Relative and Absolute Fit Evaluation
+in Cognitive Diagnosis Modeling”, Journal of Educational Measurement, 50 , 123–
+140.
+CHIU, C.-Y . (2013), “Statistical Reﬁnement of the Q-matrix in Cognitive Diagnosis”,Applied
+Psychological Measurement, 37, 598–618.
+CHIU, C.-Y ., and DOUGLAS, J.A. (2013), “A Nonparametric Approach to Cognitive Diag-
+nosis by Proximity to Ideal Response Proﬁles”, Journal of Classiﬁcation, 30 , 225–
+250.
+CHIU, C.-Y ., and K ¨OHN, H.-F. (2015), “Consistency of Cluster Analysis for Cognitive Di-
+agnosis: The DINO Model and the DINA Model Revisited”, Applied Psychological
+Measurement, 39, 465-479.
+CHIU, C.-Y ., DOUGLAS, J.A., and LI, X. (2009), “Cluster Analysis for Cognitive Diagnosis:
+Theory and Applications”, Psychometrika, 74, 633–665.
+296
+
+===== PAGE 25 =====
+
+Q-Completeness
+DE LA TORRE, J. (2008), “An Empirically Based Method of Q-matrix V alidation for the
+DINA Model: Development and Applications”, Journal of Educational Measure-
+ment, 45, 343–362.
+DE LA TORRE, J. (2009), “DINA Model and Parameter Estimation: A Didactic”, Journal of
+Educational and Behavioral Statistics, 34, 115–130.
+DE LA TORRE, J. (2011), “The Generalized DINA Model Framework”, Psychometrika, 76,
+179–199.
+DE LA TORRE, J. (2014), Personal Communication.
+DE LA TORRE, J., and DOUGLAS, J.A. (2004), “Higher-Order Latent Trait Models for
+Cognitive Diagnosis”, Psychometrika, 69, 333–353.
+DE LA TORRE, J., and DOUGLAS, J.A. (2008), “Model Evaluation and Multiple Strategies
+in Cognitive Diagnosis: An Analysis of Fraction Subtraction Data”, Psychometrika,
+73, 595–624.
+DE LA TORRE, J., and LEE, Y .-S . (2013), “Evaluating the Wald Test for Item-Level Com-
+parison of Saturated and Reduced Models in Cognitive Diagnosis”, Journal of Edu-
+cational Measurement, 50, 355–373.
+DECARLO, L.T. (2011), “On the Analysis of Fraction Subtraction Data: The DINA Model,
+Classiﬁcation, Latent Class Sizes, and the Q-matrix”, Applied Psychological Mea-
+surement, 35, 8–26.
+DECARLO, L.T. (2012), “Recognizing Uncertainty in the Q-Matrix via a Bayesian Extension
+of the DINA Model”, Applied Psychological Measurement, 36, 447–468.
+DIBELLO, L.V ., ROUSSOS, L.A., and STOUT, W.F. (2007), “Review of Cognitively Diag-
+nostic Assessment and a Summary of Psychometric Models”, in Handbook of Statis-
+tics: Vol. 26. Psychometrics , eds. C.R. Rao and S. Sinharay, Amsterdam: Elsevier,
+pp. 979–1030.
+FU, J., and LI, Y . (2007), “An Integrative Review of Cognitively Diagnostic Psychometric
+Models”, paper presented at the Annual Meeting of the National Council on Mea-
+surement in Education, Chicago, IL.
+HABERMAN, S.J., and VON DA VIER, M. (2007), “Some Notes on Models for Cognitively
+Based Skill Diagnosis”, in Handbook of Statistics: Vol. 26. Psychometrics,e d s .C . R .
+Rao and S. Sinharay, Amsterdam: Elsevier, pp. 1031–1038.
+HAERTEL, E.H. ( 1989), “Using Restricted Latent Class Models to Map the Skill Structure
+of Achievement Items”, Journal of Educational Measurement, 26, 333–352.
+HARTZ, S.M. (2002), “A Bayesian Framework for the Uniﬁed Model for Assessing Cognitive
+Abilities: Blending Theory with Practicality”, Doctoral Dissertation, available from
+ProQuest Dissertations and Theses database, UMI No. 3044108.
+HARTZ, S.M., and ROUSSOS, L.A. (2008), “The Fusion Model for Skill Diagnosis: Blend-
+ing Theory with Practicality”, Research Report No. RR-08-71, Princeton, NJ: Edu-
+cational Testing Service.
+HENSON, R.A., TEMPLIN, J.L., and WILLSE, J.T. (2009), “Deﬁning a Family of Cognitive
+Diagnosis Models Using Log-Linear Models with Latent V ariables”, Psychometrika,
+74, 191–210.
+JUNKER, B.W., and SIJTSMA, K. (2001), “Cognitive Assessment Models with Few As-
+sumptions, and Connections with Nonparametric Item Response Theory”, Applied
+Psychological Measurement, 25, 258–272.
+K ¨OHN, H.-F., and CHIU, C.-Y . (2017), “A Procedure for Assessing the Completeness of the
+Q-Matrices of Cognitively Diagnostic Tests”, Psychometrika, 82, 112–132.
+297
+
+===== PAGE 26 =====
+
+H-F. K¨ohn
+K ¨OHN, H.-F., CHIU, C.-Y ., and BRUSCO, M.J. (2015), “Heuristic Cognitive Diagnosis when
+the Q-Matrix is Unknown”, British Journal of Mathematical and Statistical Psychol-
+ogy, 68, 268–291.
+LEIGHTON, J., and GIERL, M. (2007), Cognitive Diagnostic Assessment for Education:
+Theory and Applications, Cambridge, UK: Cambridge University Press.
+LEON, S.J. (1998), Linear Algebra with Applications (5th ed.), Upper Saddle River, NJ:
+Prentice Hall.
+LIU, J., XU, G., and YING, Z. (2012), “Data-Driven Learning of Q-Matrix”, Applied Psy-
+chological Measurement, 36, 548–564.
+LIU, J., XU, G., and YING, Z. (2013), “Theory of the Self-Learning Q-Matrix”, Bernoulli,
+19, 1790–1817.
+MACREADY , G.B., and DA YTON, C.M. (1977), “The Use of Probabilistic Models in the
+Assessment of Mastery”, Journal of Educational Statistics, 33, 379–416.
+MADISON, M.J., and BRADSHAW, L.P . (2015), “The Effects of Q-Matrix Design on Clas-
+siﬁcation Accuracy in the Log-Linear Cognitive Diagnosis Model”, Educational and
+Psychological Measurement, 75, 491–511.
+MADISON, M.J., BRADSHAW, L.P ., and HOLLINGSWORTH, B. (2014),Q*Power–User
+Manual (Beta Version, 2014), retrieved from http://www.lainebradshaw.com/qpower/.
+MARIS, E. (1999), “Es timating Multip le Classiﬁcation Latent Class Models”, Psychome-
+trika, 64, 187–212.
+MISLEVY , R.J. (1996), “Test Theory Reconceived”, Journal of Educational Measurement,
+33, 379-416.
+RUPP , A.A., and TEMPLIN, J.L. (2008), “Unique Characteristics of Diagnostic Classiﬁcation
+Models: A Comprehensive Review of the Current State-of-the-Art”, Measurement, 6,
+219-262.
+RUPP , A.A., TEMPLIN, J.L., and HENSON, R.A. (2010),Diagnostic Measurement. Theory,
+Methods, and Applications, New Y ork: Guilford.
+TA TSUOKA, K.K. (1984), “Analysis of Errors in Fraction Add ition and Subtraction Prob-
+lems”, Report NIE-G-81-0002, Computer-based Education Research Library, Ur-
+bana, IL: University of Illinois, retrieved from Education Research Information Cen-
+ter [ERIC] website http://www.eric.ed.gov (ED257665). (Th e fraction addition and
+subtraction data are also available in the R package CDM by Robitzsch, A., Kiefer,
+T., George, A. C., and Uenlue, A.(2017), CDM: Cognitive Diagnosis Modeling. R
+Package Version 5.9-27, downloadable from the Comprehensive R Archive Network
+[CRAN] website https://cran.r-project.org/web/packages/CDM/.)
+TA TSUOKA, K.K. (1985), “A Probabilistic Model for Diagnosing Misconception in the Pat-
+tern Classiﬁcation Approach”, Journal of Educational and Behavioral Statistics, 12,
+55–73.
+TA TSUOKA, K.K. (1990), “Toward an Integration of Item-Response Theory and Cognitive
+Error Diagnosis”, in Diagnostic Monitoring of Skill and Knowledge Acquisition,e d s .
+N. Frederiksen, R. Glaser, A. Lesgold, and M. Shafto, Hillsdale, NJ: Erlbaum, pp.
+453-488.
+TA TSUOKA, K.K. (2009), Cognitive Assessment. An Introduction to the Rule Space Method”,
+New Y ork: Routledge/Taylor and Francis.
+TEMPLIN, J., and BRADSHAW, L. (2014), “Hierarchical Diagnostic Classiﬁcation Models:
+A Family of Models for Estimating and Testing Attribute Hierarchies”, Psychome-
+trika, 79, 317-339.
+298
+
+===== PAGE 27 =====
+
+Q-Completeness
+TEMPLIN, J.L., and HENSON, RA. (2006), “Measurement of Psychological Disorders Us-
+ing Cognitive Diagnosis Models”, Psychological Methods, 11, 287–305.
+VON DA VIER, M. (2005), “A General Diagnostic Model Applied to Language Testing Data”,
+Research Report No. RR-05-16, Princeton, NJ: Educational Testing Service.
+VON DA VIER, M. (2008), “A General Diagnostic Model Applied to Language Testing Data”,
+British Journal of Mathematical and Statistical Psychology, 61, 287–301.
+VON DA VIER, M. (2014), “The DINA Model as a Constrained General Diagnostic Model:
+Two V ariants of a Model Equivalency”,British Journal of Mathematical and Statisti-
+cal Psychology, 67, 49–71.
+XU, G., and ZHANG, S. (2016), “ Identiﬁability of Diagnostic Classiﬁcation Models”, Psy-
+chometrika, 81(3), 625–649.
+299

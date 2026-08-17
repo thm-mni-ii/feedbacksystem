@@ -111,13 +111,16 @@ export function useAlgorithmLabView() {
     return `${Math.round(score * 100)}%`
   }
 
-  const submitAnswer = (score: number) => {
+  const submitAnswer = async (score: number) => {
     if (!store.currentQuestion) {
       console.warn('Keine aktuelle Frage vorhanden')
       return
     }
 
-    store.submitAnswer(score)
+    await store.submitAnswer({
+      score,
+      source: 'manual-self-assessment'
+    })
     showFeedback.value = true
     setTimeout(() => {
       showFeedback.value = false

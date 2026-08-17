@@ -8,8 +8,17 @@ import { computed, ref } from 'vue'
 
 import { AdaptiveQuizAlgorithm, createSession } from '@/composables/algorithm'
 import { competencies, questions } from '@/composables/skillgraph.mock'
+import { learningProgressRepository } from '@/services/learningProgress.repository'
 
-import type { Competency, Question, SessionState, NextQuestion, AnswerResult } from '@/model/types'
+import type {
+  AnswerEvaluation,
+  AnswerResult,
+  Competency,
+  LearningAttempt,
+  NextQuestion,
+  Question,
+  SessionState
+} from '@/model/types'
 
 export const useQuizSessionStore = defineStore('quizSession', () => {
   const algo = new AdaptiveQuizAlgorithm()
@@ -25,6 +34,8 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
   const lastResult = ref<AnswerResult | null>(null)
 
   const isComplete = ref(false)
+  const attempts = ref<LearningAttempt[]>([])
+  const questionPresentedAt = ref<number | null>(null)
 
   const progress = computed(() => {
     if (!session.value) return []
@@ -50,18 +61,21 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     questions_ref.value = values
   }
 
-  function startSession(studentId = 'student') {
+  async function startSession(studentId = 'student') {
     if (competencies_ref.value.length === 0) {
       console.warn('Keine Competencies geladen')
       return
     }
 
-    session.value = createSession(studentId, competencies_ref.value)
+    const newSession = createSession(studentId, competencies_ref.value)
+    session.value = newSession
+    attempts.value = []
 
     currentQuestion.value = null
     lastResult.value = null
     isComplete.value = false
 
+    await learningProgressRepository.createSession(newSession)
     advance()
   }
 
@@ -73,15 +87,23 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
       questions_ref.value,
       session.value
     )
+    questionPresentedAt.value = currentQuestion.value ? Date.now() : null
   }
 
-  function submitAnswer(score: number) {
+  async function submitAnswer(
+    evaluation: AnswerEvaluation,
+    responsePayload?: unknown
+  ): Promise<void> {
     if (!session.value || !currentQuestion.value) {
       return
     }
 
+    const normalizedScore = Math.min(1, Math.max(0, evaluation.score))
+    const current = currentQuestion.value
+    const submittedAt = Date.now()
+
     // Stickiness-Logik: Aktualisiere currentCompetencyId und questionsInCurrentCompetency
-    const targetCompetencyId = currentQuestion.value.targetCompetency.id
+    const targetCompetencyId = current.targetCompetency.id
     if (session.value.currentCompetencyId === targetCompetencyId) {
       // Gleiche Kompetenz: Counter incrementieren
       session.value.questionsInCurrentCompetency += 1
@@ -92,19 +114,51 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     }
 
     const { updatedState, result } = algo.submitAnswer(
-      currentQuestion.value.question,
-      score,
+      current.question,
+      normalizedScore,
       session.value
     )
 
     session.value = updatedState
+    const attempt: LearningAttempt = {
+      id: crypto.randomUUID(),
+      sessionId: updatedState.id,
+      studentId: updatedState.studentId,
+      questionId: current.question.id,
+      targetCompetencyId,
+      competencyIds: result.updatedCompetencies,
+      evaluation: { ...evaluation, score: normalizedScore },
+      responsePayload,
+      submittedAt,
+      responseTimeMs: Math.max(0, submittedAt - (questionPresentedAt.value ?? submittedAt))
+    }
+
+    attempts.value = [...attempts.value, attempt]
+    await learningProgressRepository.saveAttempt(attempt)
+    await learningProgressRepository.saveSessionState(updatedState)
 
     lastResult.value = result
 
     advance()
   }
 
-  function excludeQuestion(questionId: string) {
+  /** Lädt einen zuvor gespeicherten Lernstand und setzt die Sitzung fort. */
+  async function resumeSession(sessionId: string): Promise<boolean> {
+    const savedSession = await learningProgressRepository.getSession(sessionId)
+    if (!savedSession) {
+      return false
+    }
+
+    session.value = savedSession
+    attempts.value = await learningProgressRepository.getAttempts(sessionId)
+    currentQuestion.value = null
+    lastResult.value = null
+    isComplete.value = false
+    advance()
+    return true
+  }
+
+  async function excludeQuestion(questionId: string) {
     if (!session.value) {
       return
     }
@@ -115,15 +169,18 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
 
     session.value = {
       ...session.value,
-      excludedQuestionIds: [...session.value.excludedQuestionIds, questionId]
+      excludedQuestionIds: [...session.value.excludedQuestionIds, questionId],
+      updatedAt: Date.now()
     }
+
+    await learningProgressRepository.saveSessionState(session.value)
 
     if (currentQuestion.value?.question.id === questionId) {
       advance()
     }
   }
 
-  function includeQuestion(questionId: string) {
+  async function includeQuestion(questionId: string) {
     if (!session.value) {
       return
     }
@@ -134,11 +191,14 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
 
     session.value = {
       ...session.value,
-      excludedQuestionIds: session.value.excludedQuestionIds.filter((id) => id !== questionId)
+      excludedQuestionIds: session.value.excludedQuestionIds.filter((id) => id !== questionId),
+      updatedAt: Date.now()
     }
+
+    await learningProgressRepository.saveSessionState(session.value)
   }
 
-  function setExcludedQuestions(questionIds: string[]) {
+  async function setExcludedQuestions(questionIds: string[]) {
     if (!session.value) {
       return
     }
@@ -147,8 +207,11 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
 
     session.value = {
       ...session.value,
-      excludedQuestionIds: uniqueQuestionIds
+      excludedQuestionIds: uniqueQuestionIds,
+      updatedAt: Date.now()
     }
+
+    await learningProgressRepository.saveSessionState(session.value)
 
     if (currentQuestion.value && uniqueQuestionIds.includes(currentQuestion.value.question.id)) {
       advance()
@@ -161,6 +224,8 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     currentQuestion.value = null
     lastResult.value = null
     isComplete.value = false
+    attempts.value = []
+    questionPresentedAt.value = null
   }
 
   return {
@@ -172,6 +237,7 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     currentQuestion,
     lastResult,
     isComplete,
+    attempts,
 
     // computed
     progress,
@@ -187,6 +253,7 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     includeQuestion,
 
     startSession,
+    resumeSession,
     submitAnswer,
     resetSession
   }

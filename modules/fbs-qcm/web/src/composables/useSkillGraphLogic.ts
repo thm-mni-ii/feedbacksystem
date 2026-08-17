@@ -4,6 +4,7 @@ import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/layouts/force'
 import type { Competency, Question } from '@/model/types'
 import { skillGraphPalette } from '@/plugins/vuetify'
+import { getQuestionCompetencyIds } from '@/composables/qMatrix'
 
 interface Course {
   id: string
@@ -74,7 +75,7 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
     competencies.value.filter((c) => c.parentId === parentId)
 
   const questionsWithCompetency = (compId: string): Question[] =>
-    questions.value.filter((q) => q.competencyIds.includes(compId))
+    questions.value.filter((q) => getQuestionCompetencyIds(q).includes(compId))
 
   const nodeIcon = (type?: string) => {
     if (type === 'course') return 'mdi-school'
@@ -149,7 +150,12 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
       })
 
     questions.value.forEach((q) => {
-      const primaryCompId = getMostSpecificCompetency(q.competencyIds)
+      const qCompIds = getQuestionCompetencyIds(q)
+      if (qCompIds.length === 0) {
+        return
+      }
+
+      const primaryCompId = getMostSpecificCompetency(qCompIds)
       edges[`e-${primaryCompId}-${q.id}`] = {
         source: primaryCompId,
         target: q.id,
@@ -216,7 +222,12 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
 
     const compQMap = new Map<string, Question[]>()
     questions.value.forEach((q) => {
-      const pCompId = getMostSpecificCompetency(q.competencyIds)
+      const qCompIds = getQuestionCompetencyIds(q)
+      if (qCompIds.length === 0) {
+        return
+      }
+
+      const pCompId = getMostSpecificCompetency(qCompIds)
       if (!compQMap.has(pCompId)) compQMap.set(pCompId, [])
       compQMap.get(pCompId)!.push(q)
     })
@@ -324,7 +335,25 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
 
   const removeCompetencyFromQuestion = (questionId: string, compId: string) => {
     const q = questions.value.find((q) => q.id === questionId)
-    if (q) q.competencyIds = q.competencyIds.filter((c) => c !== compId)
+    if (!q) {
+      return
+    }
+
+    q.competencyIds = q.competencyIds.filter((c) => c !== compId)
+
+    if (q.competencyLinks && q.competencyLinks.length > 0) {
+      q.competencyLinks = q.competencyLinks.filter((link) => link.competencyId !== compId)
+    }
+
+    const normalizedIds = getQuestionCompetencyIds(q)
+    q.competencyIds = normalizedIds
+
+    if (q.competencyLinks && q.competencyLinks.length > 0) {
+      const normalizedLinkIds = new Set(q.competencyLinks.map((link) => link.competencyId))
+      q.competencyLinks = q.competencyLinks.filter((link) =>
+        normalizedLinkIds.has(link.competencyId)
+      )
+    }
   }
 
   const selectCourse = () => {

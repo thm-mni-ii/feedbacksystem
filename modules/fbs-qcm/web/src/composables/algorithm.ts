@@ -8,12 +8,14 @@ import type {
   Competency,
   CompetencyState,
   Question,
+  QuestionCompetencyLink,
   SessionState,
   AnswerRecord,
   NextQuestion,
   AnswerResult,
   ProgressItem
 } from '@/model/types'
+import { getQuestionCompetencyIds, getQuestionCompetencyLinks } from '@/composables/qMatrix'
 
 /**
  * Session für einen Studierenden erstellen
@@ -22,6 +24,7 @@ import type {
  */
 export function createSession(studentId: string, competencies: Competency[]): SessionState {
   const competencyStates: Record<string, CompetencyState> = {}
+  const now = Date.now()
 
   for (const competency of competencies) {
     competencyStates[competency.id] = {
@@ -33,7 +36,10 @@ export function createSession(studentId: string, competencies: Competency[]): Se
   }
 
   return {
+    id: crypto.randomUUID(),
     studentId,
+    startedAt: now,
+    updatedAt: now,
     competencies: competencyStates,
     history: [],
     recentQuestionIds: [],
@@ -74,6 +80,10 @@ function competencyWeight(state: CompetencyState): number {
   return 1 / (state.timesAssessed + 1)
 }
 
+function relationFactor(link: QuestionCompetencyLink): number {
+  return link.relation === 'supporting' ? 0.7 : 1
+}
+
 /**
  * Adaptive Quiz Algorithm
  *
@@ -83,14 +93,55 @@ function competencyWeight(state: CompetencyState): number {
  * - Recent History (um Wiederholungen zu vermeiden)
  */
 export class AdaptiveQuizAlgorithm {
+  private questionTargetsCompetency(question: Question, competencyId: string): boolean {
+    return getQuestionCompetencyIds(question).includes(competencyId)
+  }
+
+  private scoreQuestionUtility(
+    question: Question,
+    session: SessionState,
+    targetCompetencyId: string
+  ): number {
+    const links = getQuestionCompetencyLinks(question)
+
+    if (links.length === 0) {
+      return 0
+    }
+
+    let total = 0
+    let weights = 0
+
+    for (const link of links) {
+      const state = session.competencies[link.competencyId]
+      if (!state) continue
+
+      const linkWeight = Math.max(0, link.weight ?? 1) * relationFactor(link)
+      const information = Math.max(0, 1 - Math.abs(question.difficulty - state.score))
+      const need = 1 - state.score
+      const novelty = 1 / (state.timesAssessed + 1)
+      const utility = information * 0.5 + need * 0.35 + novelty * 0.15
+
+      total += linkWeight * utility
+      weights += linkWeight
+    }
+
+    if (weights === 0) {
+      return 0
+    }
+
+    const base = total / weights
+    const targetBonus = this.questionTargetsCompetency(question, targetCompetencyId) ? 0.1 : 0
+    return base + targetBonus
+  }
+
   /**
-   * Nächste Frage auswählen mit IRT-basierter Schwierigkeitsadaption, Competency Stickiness und hierarchischer Freischaltung
+ * Nächste Frage auswählen mit Schwierigkeitsadaption, Competency Stickiness
+ * und expliziten fachlichen Voraussetzungen.
    *
    * Strategie:
-   * 1. HIERARCHIE: Nur Kompetenzen mit erfüllten Prerequisites werden angeboten
-   *    - Eltern-Kompetenzen sind immer verfügbar
-   *    - Kind-Kompetenzen brauchen Parent-Score > 0.6 (UNLOCK_THRESHOLD)
-   *    → Damit wird ein "Zweig" von Kompetenzen komplett abgearbeitet
+   * 1. VORAUSSETZUNGEN: Nur Kompetenzen mit erfüllten expliziten
+   *    Voraussetzungen werden angeboten. `parentId` wird hierfür bewusst nicht
+   *    verwendet, da Taxonomie und Lernreihenfolge unterschiedliche Relationen sind.
    * 2. STICKINESS: Falls gerade eine Kompetenz bearbeitet wird und < 5 Fragen gestellt,
    *    bleib bei dieser Kompetenz (reduziert Kontextwechsel)
    * 3. Wähle Zielkompetenz (gewichtet nach Anzahl Tests, Score und Hierarchie)
@@ -116,7 +167,7 @@ export class AdaptiveQuizAlgorithm {
 
     // Schritt 0: Filtere nur Kompetenzen, die Fragen haben
     const competenciesWithQuestions = competencies.filter((c) =>
-      availableQuestions.some((q) => q.competencyIds.includes(c.id))
+      availableQuestions.some((q) => this.questionTargetsCompetency(q, c.id))
     )
 
     if (competenciesWithQuestions.length === 0) {
@@ -135,7 +186,7 @@ export class AdaptiveQuizAlgorithm {
       const currentCompetency = competencies.find((c) => c.id === session.currentCompetencyId)
       const hasAnyQuestionForCurrentCompetency =
         !!currentCompetency &&
-        availableQuestions.some((q) => q.competencyIds.includes(currentCompetency.id))
+        availableQuestions.some((q) => this.questionTargetsCompetency(q, currentCompetency.id))
 
       if (currentCompetency && hasAnyQuestionForCurrentCompetency) {
         targetCompetency = currentCompetency
@@ -144,18 +195,17 @@ export class AdaptiveQuizAlgorithm {
         // Falls wirklich keine Frage mehr für diese Kompetenz verfügbar ist, darf gewechselt werden.
         targetCompetency = this.selectNextCompetency(
           competenciesWithQuestions,
-          session,
-          competencies
+          session
         )
       }
     } else {
       // SCHRITT 2: Wähle neue Zielkompetenz (gewichtet nach Häufigkeit Tests)
-      targetCompetency = this.selectNextCompetency(competenciesWithQuestions, session, competencies)
+      targetCompetency = this.selectNextCompetency(competenciesWithQuestions, session)
     }
 
     // SCHRITT 3: Finde Fragen für die Zielkompetenz
     const questionsForCompetency = availableQuestions.filter((q) =>
-      q.competencyIds.includes(targetCompetency.id)
+      this.questionTargetsCompetency(q, targetCompetency.id)
     )
 
     if (questionsForCompetency.length === 0) {
@@ -215,7 +265,7 @@ export class AdaptiveQuizAlgorithm {
         const fallbackQuestion =
           globalWithoutLast[Math.floor(Math.random() * globalWithoutLast.length)]
         const fallbackTargetCompetency =
-          competencies.find((c) => fallbackQuestion.competencyIds.includes(c.id)) ??
+          competencies.find((c) => this.questionTargetsCompetency(fallbackQuestion, c.id)) ??
           targetCompetency
 
         return {
@@ -225,8 +275,12 @@ export class AdaptiveQuizAlgorithm {
       }
     }
 
-    // SCHRITT 6: Zufällige Auswahl aus dem adaptierten Pool
-    const question = selectionPool[Math.floor(Math.random() * selectionPool.length)]
+    // SCHRITT 6: Q-Matrix-Utility über alle verknüpften Kompetenzen nutzen
+    const weightedPool = selectionPool.map((q) => ({
+      item: q,
+      weight: Math.max(0.001, this.scoreQuestionUtility(q, session, targetCompetency.id))
+    }))
+    const question = weightedSample(weightedPool)
 
     return {
       question,
@@ -235,48 +289,32 @@ export class AdaptiveQuizAlgorithm {
   }
 
   /**
-   * Hilfsfunktion: Wähle nächste Zielkompetenz mit hierarchischer Freischaltung
+   * Hilfsfunktion: Wähle nächste Zielkompetenz mit expliziten Voraussetzungen.
    *
    * Prerequisite-Based Learning:
-   * - Nur Eltern-Kompetenzen (parentId = null) sind immer verfügbar
-   * - Kind-Kompetenzen werden erst freigegeben, wenn Parent-Kompetenz Score > UNLOCK_THRESHOLD
+   * - Kompetenzen ohne Voraussetzungen sind verfügbar.
+   * - Jede explizite Voraussetzung muss den angegebenen Beherrschungsgrad erreichen.
    * - Gewichtung: weniger getestet + niedriger Score
    * - Dadurch wird ein "Zweig" komplett abgearbeitet, bevor man zum nächsten wechselt
    */
   private selectNextCompetency(
     candidates: Competency[],
-    session: SessionState,
-    allCompetencies: Competency[]
+    session: SessionState
   ): Competency {
-    const UNLOCK_THRESHOLD = 0.6 // 60% Parent-Score erforderlich für Kinder
-    const competenciesByParent = new Map<string | null, Competency[]>()
-
-    // Gruppiere Kompetenzen nach parentId
-    for (const competency of allCompetencies) {
-      const parentId = competency.parentId ?? null
-      if (!competenciesByParent.has(parentId)) {
-        competenciesByParent.set(parentId, [])
-      }
-      competenciesByParent.get(parentId)!.push(competency)
-    }
-
-    // Filtere: Nur Kompetenzen, deren Prerequisite erfüllt ist
+    // Filtere: Nur Kompetenzen, deren explizite Voraussetzungen erfüllt sind.
     const fullyUnlockedCandidates = candidates.filter((c) => {
-      // Eltern-Kompetenzen (parentId = null) sind immer verfügbar
-      if (!c.parentId) {
-        return true
-      }
-
-      // Kind-Kompetenzen: Parent muss Score > UNLOCK_THRESHOLD haben
-      const parentScore = session.competencies[c.parentId]?.score ?? 0
-      return parentScore > UNLOCK_THRESHOLD
+      return (c.prerequisites ?? []).every((prerequisite) => {
+        const mastery = session.competencies[prerequisite.competencyId]?.score ?? 0
+        return mastery >= prerequisite.minimumMastery
+      })
     })
 
-    // Fallback: Falls keine Kompetenzen freigegeben sind (z.B. am Anfang), nimm Eltern-Kompetenzen
+    // Ein ungültiger oder zyklischer Voraussetzungsgraf darf die Session nicht blockieren.
+    // Die Struktur wird zusätzlich beim Speichern/Import der Kompetenzen validiert.
     const activePool =
       fullyUnlockedCandidates.length > 0
         ? fullyUnlockedCandidates
-        : candidates.filter((c) => !c.parentId)
+        : candidates
 
     return weightedSample(
       activePool.map((c) => {
@@ -314,17 +352,20 @@ export class AdaptiveQuizAlgorithm {
       ...state.competencies
     }
 
-    // Alle Kompetenzen dieser Frage aktualisieren
-    for (const competencyId of question.competencyIds) {
-      const current = competencies[competencyId]
+    const links = getQuestionCompetencyLinks(question)
+
+    // Alle Kompetenzen dieser Frage aktualisieren (gewichtet nach Q-Matrix-Link)
+    for (const link of links) {
+      const current = competencies[link.competencyId]
 
       if (!current) continue
 
       // Exponential Moving Average: newScore = oldScore + alpha * (newValue - oldScore)
-      const alpha = 0.3
+      const influence = Math.max(0.2, Math.min(1.2, (link.weight ?? 1) * relationFactor(link)))
+      const alpha = 0.3 * influence
       const updatedScore = current.score + alpha * (score - current.score)
 
-      competencies[competencyId] = {
+      competencies[link.competencyId] = {
         ...current,
         score: updatedScore,
         timesAssessed: current.timesAssessed + 1,
@@ -332,10 +373,12 @@ export class AdaptiveQuizAlgorithm {
       }
     }
 
+    const answeredCompetencyIds = getQuestionCompetencyIds(question)
+
     // Datensatz erstellen
     const record: AnswerRecord = {
       questionId: question.id,
-      competencyIds: question.competencyIds,
+      competencyIds: answeredCompetencyIds,
       score,
       answeredAt: Date.now()
     }
@@ -345,12 +388,13 @@ export class AdaptiveQuizAlgorithm {
       ...state,
       competencies,
       history: [...state.history, record],
+      updatedAt: record.answeredAt,
       // Behalte die letzten 5 Fragen zur Vermeidung von Wiederholungen
       recentQuestionIds: [question.id, ...state.recentQuestionIds].slice(0, 5)
     }
 
     const result: AnswerResult = {
-      updatedCompetencies: question.competencyIds,
+      updatedCompetencies: answeredCompetencyIds,
       sessionComplete: false
     }
 

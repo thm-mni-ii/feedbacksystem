@@ -1,0 +1,2187 @@
+
+
+===== PAGE 1 =====
+
+Br J Math Stat Psychol . 2026;00:1–35.     | 1
+wileyonlinelibrary.com/journal/bmsp
+Received: 11 December 2025 | Accepted: 26 June 2026
+DOI: 10.1111/bmsp.70066  
+ARTICLE
+Review of cognitive diagnostic models (CDMs): 
+Recent methodological advancements for addressing 
+practical challenges
+Chun Wang1  |   Yale Quan2 |   David Arthur3
+This is an open access article under the terms of the Creative Commons Attribution  License, which permits use, distribution and reproduction 
+in any medium, provided the original work is properly cited.
+© 2026 The Author(s). British Journal of Mathematical and Statistical Psycholog y published by John Wiley & Sons Ltd on behalf of British 
+Psychological Society.
+1College of Education, University of Washington, 
+Seattle, Washington, USA
+2College of Education and Human Sciences, 
+University of Southern Mississippi, 
+Mississippi, USA
+3Department of Statistics, University of 
+Washington, Tacoma, Washington, USA
+Correspondence
+Chun Wang, College of Education, University of 
+Washington, 312E Miller Hall, 2012 Skagit Ln, 
+Seattle, WA 98105, USA.
+Email: wang4066@uw.edu
+Funding information
+National Science Foundation, Grant/Award 
+Number: #2300382; Institute of Education 
+Sciences, Grant/Award Number: R305D200015 
+and R305D240021
+Abstract
+Cognitive diagnostic models (CDMs) have become 
+essential tools for providing fine-  grained information 
+about individuals' mastery of cognitive skills. While prior 
+reviews have emphasized statistical foundations and deep 
+learning-  based developments, this article focuses on recent 
+methodological innovations designed to address persistent 
+challenges in applying CDMs across various contexts. 
+We highlight six areas of advancement: (1) extending 
+models to accommodate polytomous attributes, thereby 
+capturing multiple levels of proficiency; (2) discovering 
+attribute relationships to reveal learning trajectories and 
+support instructional design; (3) accelerating estimation 
+through computational strategies that enable scalability to 
+high- dimensional attributes; (4) improving estimation in 
+small- sample contexts, particularly relevant for classroom 
+applications; (5) refining and estimating Q-  matrices 
+through both statistical and machine learning approaches; 
+and (6) evaluating model and item fit. Together, these 
+methodological developments enhance the interpretability, 
+efficiency, and applicability of CDMs, broadening their 
+utility in various types of assessment, larger or smaller scales. 
+The review complements existing surveys by emphasizing 
+innovations that directly address application barriers, and it 
+points to promising future directions including integration 
+with deep learning and large language models.
+KEYWORDS
+cognitive diagnosis model/diagnostic classification model, item response 
+theory
+
+
+===== PAGE 2 =====
+
+2 |   
+WA NG et al .
+1 | INTRODUCTION
+In education, assessments constructed under a formative paradigm and grounded in research on 
+learner cognition would much better serve the needs of various stakeholders (e.g. teachers, students 
+and parents). To support these next-  generation assessments that provide fine-  grained feedback for 
+students and teachers (Bradshaw & Templin, 2014; Leighton & Gierl, 2007; Templin & Bradshaw, 2013), 
+cognitive diagnostic models (CDMs) have arisen as advanced psychometric models in the past few 
+decades. They are a family of psychometric models developed to provide detailed information about 
+individuals' mastery of specific cognitive skills or attributes. These models were conceived in response 
+to limitations of traditional psychometric approaches, such as Classical Test Theory (CTT) and Item 
+Response Theory (IRT), which primarily estimate a unidimensional or low-  dimensional general 
+ability but offer limited insight into the specific subskills or knowledge components underlying test 
+performance (Embretson,  1985; Rupp et al., 2010). Although the fast emergence of CDMs occurred 
+around the 1990s, the theoretical motivation for these models originates from the convergence of 
+cognitive psychology, psychometrics and educational measurement. Beginning in the 1970s, researchers 
+in cognitive psychology emphasized the importance of assessments that could reflect the structure and 
+processes of human cognition (Glaser, 1994 ; Mislevy, 1994 ). Parallel efforts in educational assessment 
+called for diagnostic tools that could support formative feedback and individualized instruction by 
+pinpointing which specific skills students had or had not mastered (Leighton & Gierl, 2007 ).
+This led to the development of Restricted Latent Class Models (RLCMs) that form the statistical foun -
+dation of CDMs. Unlike general latent class models, which treat the latent structure as unconstrained, 
+RLCMs impose restrictions (often based on a Q-  matrix) that encode, a priori, assumptions about the 
+relationships between latent attributes and item responses (DiBello et al., 1995 ; Haertel, 1989 ). These 
+constraints allow for interpretable inferences about an individual's mastery profile across a predefined 
+set of binary or categorical skills. During the 1990s and early 2000s, specific CDMs were introduced, 
+most notably the Deterministic Inputs, Noisy ‘And’ gate (DINA) model and its disjunctive coun -
+terpart, the Deterministic Inputs, Noisy ‘Or’ gate (DINO) model (Junker & Sijtsma, 2001; Templin 
+& Henson, 2006 ). These models were further generalized into frameworks such as the Log-  Linear 
+Cognitive Diagnosis Model (LCDM; Von Davier, 2014) and the Generalized DINA (G-  DINA) model, 
+allowing more flexible representations of item-  attribute relationships (De La Torre, 2009). The broader 
+term Diagnostic Classification Models (DCMs)  was later adopted to encompass the full range of models—
+including RLCMs—that aim to classify individuals based on discrete latent traits (Rupp et al., 2010). 
+While CDMs are often used interchangeably with DCMs, some distinguish between them by reserving 
+‘CDM’ for models with a stronger foundation in cognitive theory and ‘DCM’ for the broader class that 
+includes empirically driven or atheoretical models. In this review, we do not distinguish between them.
+Methodological research on CDMs has flourished in the past several decades. In parallel, applica -
+tion research that connects the theory of CDMs with practice has emerged in different substantive 
+areas. For instance, they are applied in education over a wide range of developmental phases, including 
+proportional reasoning (Tjoe & Torre, 2012 ), rational numbers (Bradshaw et al., 2014 ) and undergrad -
+uate Physics (Morphew et al., 2018 ). Beyond education, CDMs have also been applied to many other 
+domains, such as assessing pathological gamblers (Templin & Henson, 2006), internet addiction (Tu 
+et al., 2017), quality of life in breast cancer patients (Liang et al., 2023) or assessing detailed skill qualifi -
+cations of job candidates to facilitate a better match between job seekers and job requirements in online 
+recruitment (Qin et al., 2020 ; Zhu et al., 2018).
+One of the earliest reviews of CDM is by Rupp and Templin (2008), and since then, Sessoms and 
+Henson (2018) as well as Ravand and Baghaei (2020) have provided more recent reviews. There are two 
+latest comprehensive reviews of CDMs, one by Zhang et  al. (2023) and the other by Wang et al. (2024). 
+Zhang et al. (2023) can be viewed as an extension of Ravand and Baghaei (2020) to focus on the latest 
+(up to 2023) statistical applications of cognitive diagnostic testing, and they review different frame -
+works for cognitive diagnosis, different probabilistic CDMs and nonparametric methods. Because their 
+publication is in the journal of Annual Review of Statistics and Its Application , they devote an entire section 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 3 =====
+
+    | 3
+REVIEW OF CDMS
+to statistical inference, including parameter estimation and model identifiability. In contrast, although 
+Wang et al. (2024) also present a brief review of CDM history by listing a whole host of representative 
+CDMs from the 1960s to the present (i.e. see their figure  4), a large portion of their review is devoted 
+to machine learning-  based CDM. It is a broad family of models that were proposed in the recent de -
+cade, including both non-  deep learning and deep learning-  based models. To avoid too much overlap 
+with these two reviews, our paper will omit what are detailed in their papers but instead elaborate and 
+highlight the recent methodological advancements of CDMs, which intend to address the challenges 
+emerged from CDM applications. Note that Sessoms and Henson (2018) also provided a rather recent 
+review and critical commentary on the applications of CDMs, but their focus is on practical challenges 
+in applications such as reliability and validity evidence of CDMs for informing practical decision-  
+making, whereas we focus on three aspects of application needs that are germane to CDM method -
+ology: modelling, estimation and validation . For modelling, we discuss two topics: (1) allowing gradation 
+of attributes and (2) discovering attribute relationships. Regarding estimation, we introduce methods 
+that will (3) speed up computation with high-  dimensional attributes and (4) provide accurate model 
+estimation with small sample sizes. Lastly, we introduce validation methods that include (5) Q-  matrix 
+discovery and refinement and (6) model fit evaluation.
+This article provides a conceptual review of the above six topics. The purpose of the review is not to 
+provide an exhaustive survey of the literature, but rather to synthesize and organize representative mod -
+elling and methodological approaches that have shaped the development of the field. Accordingly, the 
+studies discussed were selected based on their relevance to the methodological themes addressed in this 
+paper.1 Given the rapid growth of CDM literature, it is possible that many additional studies exist that 
+are not explicitly discussed here.
+2 | REVIEW OF METHODOLOGICAL ADVANCEMENTS
+This section reviews the six topics listed above. Below is a list of basic notations that will be used 
+throughout the review:
+l : profile;
+L: total number of profiles;
+k: attribute;
+K: total number of attributes;
+M: number of categories (or levels) per attribute [For notational simplicity, throughout the paper, we 
+do not assume varying levels per attribute, although all polytomous CDMs reviewed herein can allow 
+each attribute to have distinctive levels, i.e. M k];
+S: number of response options per item;
+j: item;
+J: total number of items.
+2.1 | Modelling polytomous attributes
+Traditional CDMs assume that an individual's latent profile is a discrete constellation of binary at -
+tributes that denote the mastery or non-  mastery of the fine-  grained skills, such as mastering the chain 
+ 1The goal of the present paper is to provide a conceptual overview of CDMs rather than a systematic or scoping review of the literature. 
+Consequently, we need to acknowledge that the literature included in the review was not identified through a formal database search with 
+predefined inclusion and exclusion criteria. Instead, we used key words such as ‘cognitive diagnostic models’, ‘diagnostic classification models’, 
+‘estimation’, ‘Q-  matrix validation’ and ‘item fit’ to identify relevant papers published since 2020 onwards from the major psychometric journals 
+such as Psychometrika, Journal of Educational and Behavioral Statistics, British Journal of Mathematical and Statistical Psycholog y, Multivariate Behavioral 
+Research, Journal of Educational Measurement , as well as a few other journal outlets. As mentioned, we only include methods that are relevant to the 
+themes and that are not extensively discussed in other recent CDM review papers.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 4 =====
+
+4 |   
+WA NG et al .
+rule in calculus, although recently, several studies have also extended the concept of attribute to include 
+‘misconceptions’ and thereby, having a misconception means an individual possesses this intermediate 
+understanding (Bradshaw et al., 2014; DiBello et al., 2015; Kuo et  al., 2018; Wang, 2024). Still, these 
+models assume attributes to be binary. In contrast, polytomous attributes capture multiple levels of 
+proficiency within an attribute rather than a simple binary classification. This finer granularity enables 
+more precise diagnostic feedback, which can be particularly useful in educational assessment where 
+learning progresses in stages. One concrete example of a polytomous attribute is a three-  level attribute 
+related to fractions, with level 0 indicating ‘not able to compare and order fractions’, level 1 indicating 
+‘able to compare two fractions’ and level 2 indicating ‘able to order three or more fractions’ (Chen & De 
+La Torre, 2013; Ma, 2022).
+A number of CDMs for polytomous attributes have been proposed in the literature, including the 
+generalized diagnostic models (GDM, Von Davier, 2008 ), polytomous attribute RUM (Templin, 2004 ), 
+polytomous generalized DINA (pG-  DINA, Chen & De La Torre, 2013), polytomous diagnostic classi -
+fication model framework (PDCM, Bao, 2019 ), higher- order CDM with ordinal attributes (Ma, 2022 ), 
+saturated polytomous CDM (sp-  CDM, De La Torre et al., 2025 ) and restricted latent class model with 
+polytomous attributes (Wayman et al., 2025 ), in a chronological order. Rather than reviewing all as -
+pects of these different models, this section highlights how polytomous attributes are handled by different 
+models. Other model features, such as condensation rules (e.g. conjunctive, additive and disjunctive) or 
+multivariate relationships among attributes (e.g. higher-  order structure), which are not unique to only 
+polytomous models, are omitted here.
+Table 1 provides a summary of different ways of handling polytomous attributes, and we provide 
+a more in-  depth discussion following Table  1. Unlike CDMs for binary attributes, where qjk ∈ {0, 1}, 
+all these models assume that qjk ∈ {0, 1, … M }, although different models may treat the meaning of 
+"qjk
+" differently. For instance, in Ma ( 2022), he provided a mapping matrix (table 1, p. 411) that maps 
+an original q-  vector into a reduced one. For example, for an attribute /u1D6FC with four levels (0, 1, 2, 3), the 
+original q-  vector for item 1 is (0, 0, 1, 2), meaning that this item cannot distinguish level 0 and level 1 
+of /u1D6FC but can distinguish the rest. The reduced q-  vector for this item becomes q1 = (0, 1, 2), referring to 
+/u1D6FC= [0 or 1],2 ,3 as reduced three levels. The original q-  vector for item 2 is (0, 1, 1, 2), implying that level 
+1 and 2 of /u1D6FC are not distinguishable by item 2. The reduced q-  vector for item 2 becomes q1 = (0, 1, 2) as 
+well, but it refers to three different levels of /u1D6FC compared to item 1, that is, /u1D6FC= 0,[1 or 2],3. The flexible 
+models in the last row of Table 1 assume when qjk = 2, this item j can distinguish level 0, level 1 and 
+TABLE 1  Summary of treatment of polytomous attributes in different models.
+Models Polytomous attributes Remarks
+Ordered category attribute coding 
+(OCAC, Karelitz, 2004 ); pG- DINA 
+(Chen & De La Torre, 2013)
+𝛼∗
+lk =
+/braceleft.s4
+0,𝛼lk < qjk
+1,𝛼lk ≥ qjk
+When 𝛼lk < qjk, it does not 
+differentiate non-  mastery from 
+partial mastery
+GDM (Von Davier, 2008 ) /u1D6FC∗
+lk = min
+/parenleft.s2
+qjk ,/u1D6FClk
+/parenright.s2 A higher level than qjk will not 
+increase the success probability
+Higher-  order CDM with ordinal 
+attributes (Ma,  2022); sp- G- DINA (De 
+La Torre et al., 2025 )
+/u1D736∗
+lk is a dummy coded /u1D6FClk, such as,
+/u1D736∗
+lk =
+⎧
+⎪
+⎨
+⎪⎩
+(0, 0),/u1D6FClk = 0
+(1, 0),/u1D6FClk = 1
+(1, 1),/u1D6FClk = 2
+This allows for maximum 
+flexibility: (1) mastering 
+different levels of an attribute 
+results in different success 
+probability; and (2) it can 
+model the interactions of 
+different levels of attributes.Restricted latent class model with order 
+attributes (Wayman et al., 2025 )
+/u1D736∗
+lk is a cumulative  coded /u1D6FClk with the first 
+column indicating intercept, such as,
+/u1D736∗
+lk =
+⎧
+⎪
+⎨
+⎪⎩
+(1, 0, 0),/u1D6FClk ≥ 0
+(1, 1, 0),/u1D6FClk ≥ 1
+(1, 1, 1),/u1D6FClk ≥ 2
+Note: /u1D6FClk denotes the original polytomous attribute for profile l  and attribute k, whereas /u1D6FC∗
+lk denotes the transformed attributes. /u1D6FC∗
+lk can take both 
+binary and polytomous form.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 5 =====
+
+    | 5
+REVIEW OF CDMS
+level 2 of attribute k , although in Ma (2022), the three levels of attribute k may be associated with dif -
+ferent interpretations for different items.
+Karelitz  (2004 ) proposed an ordered category attribute coding (OCAC) framework to represent 
+qualitatively ordered mastery levels for each attribute. In this framework, each attribute is coded as 
+an integer starting from 0 and 1 to the highest level, according to its cognitive complexity. Expanding 
+from this framework, Chen and De La Torre  (2013) proposed a polytomous generalized DINA (pG-  
+DINA). The primary idea is, for attribute k and a profile l , if 𝛼lk < qjk for item j, then /u1D6FC∗
+lk = 0. Here, 
+/u1D6FC∗
+lk is a collapsed binary attribute and /u1D6FC∗
+lk = 1 only when /u1D6FClk ≥ qjk. This treatment simplifies the model 
+such that the classic generalized DINA model with binary attributes can be readily applied on the 
+collapsed attributes. However, this approach assumes that if qjk = 2, someone with /u1D6FClk = 0 versus 
+/u1D6FClk = 1 will have the same chance of answering item j correctly, without differentiating non-  mastery 
+from partial mastery. In contrast, in Von Davier's ( 2008 ) general diagnostic model (GDM), a critical 
+component in the model is hk
+/parenleft.s2
+qjk,/u1D6FClk
+/parenright.s2
+= min
+/parenleft.s2
+qjk,/u1D6FClk
+/parenright.s2
+. The rationale is that, since qjk represents a 
+sufficient level for attribute k on item j, a higher level than qjk will not increase the probability of 
+solving item j. When holding other attributes as the same, a skill level lower than qjk results in a 
+lower probability of solving item j. Different from the pG-  DINA model, this parameterization 
+distinguishes non-  mastery and partial mastery because /u1D6FClk = 0 vs. /u1D6FClk = 1 will lead to different 
+hk
+/parenleft.s2
+qjk, /u1D6FClk
+/parenright.s2
+ when qjk = 2. In this regard, the pG-  DINA model can be viewed as a special case of 
+GDM. One modelling constraint of GDM is that it treats /u1D6FClk as if it is on the interval scale. That is, 
+when 𝛼lk < qjk, say when qjk = 3, due to the linear term /u1D706jkhk
+/parenleft.s2
+qjk, /u1D6FClk
+/parenright.s2
+ in the model, the difference in 
+terms of logit of success probability between /u1D6FClk = 0 and /u1D6FClk = 1 is the same as the difference of logit 
+success rate between /u1D6FClk = 1 and /u1D6FClk = 2.
+Recently, De La Torre et al. (2025) proposed a generalized CDM for polytomous attributes, and their 
+framework subsumes all extant polytomous CDMs as special cases. In their model, polytomous attri -
+butes are dummy coded, so are other recent models (Bao, 2019; Ma, 2022). With such a coding scheme, 
+a saturated model will consider all possible interactions among varying levels. Take item j as an exam -
+ple. Let K j = ∑K
+k =1 I
+�
+qjk > 0
+�
+ denote the number of required attributes. The item response function 
+using an identity  link function is as follows (De La Torre et al., 2025 ):
+Here in Equation 1, /u1D736l is a reduced vector that only contains relevant attribute for item j, but we omit the 
+subscript j to avoid notational clutter. /u1D6FFj 0 is the intercept and /u1D6FFjkm is the main effect of the m th level of 
+the k th attribute. In Equation 1, the terms I/bracketleft.s1/u1D6FClk = m /bracketright.s1
+,…, ∏K j
+k =1 I�/u1D6FClk = m k
+�
+ can be viewed as forming a 
+‘design vector’ for /u1D6FF's, and this design matrix is constructed by the Kronecker product of all d ∗
+lk's, that is, 
+d ∗
+l1
+⨂ d ∗
+l2 ⋯ ⨂ d ∗
+lK j, where d ∗
+lk = /parenleft.s11, /u1D736∗
+lk
+/parenright.s1
+ and /u1D736∗
+lk is a binary coding of the original polytomous /u1D6FClk. 
+Take K j = 2 as an example and assume both q j1 = q j2 = 2, implying that item j measures /u1D6FC1 and /u1D6FC2. Table 2 
+lists the design vector for different profiles. Note that the last column in Table 2 refers to models based 
+(1)
+Pj
+/parenleft.s1/u1D736l
+/parenright.s1= 𝛿j0 +
+/uni2211.s1K j
+k=1
+/uni2211.s1M −1
+m =1 𝛿jkmI/bracketleft.s1𝛼lk= m /bracketright.s1+
+/uni2211.s1K j
+k�>k
+/uni2211.s1K j−1
+k=1
+/uni2211.s1M −1
+m =1
+/uni2211.s1M −1
+m �=1 𝛿jkmk�m � I/bracketleft.s1𝛼lk= m /bracketright.s1I/bracketleft.s1𝛼lk� = m �/bracketright.s1+…
++
+/uni2211.s1M −1
+m 1=1
+/uni2211.s1M −1
+m 2=1 ⋯
+/uni2211.s1M −1
+m K j=1 𝛿1m 12m 2…K jm K j
+/uni220F.s1K j
+k=1 I/bracketleft.s1𝛼lk= m k
+/bracketright.s1
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 6 =====
+
+6 |   
+WA NG et al .
+on cumulative coding as in and Wayman et al. (2025). Although the design matrix for dummy coding and 
+cumulative coding is the same, the interpretation is different.
+In Equation 1, another point that is worth highlighting is that q-  vector is not specifically included 
+therein; instead, the q-  vector information is encoded in /u1D736l , which represents a reduced vector that only 
+contains attributes measured by the item, regardless of the levels. That is, if this item measures only level 
+2 of attribute k, and someone with /u1D6FClk = 3 will still have a higher chance of answering the item correctly 
+than others with /u1D6FClk = 2. This monotonicity can be achieved by constraining all /u1D6FF's be non- negative. De 
+also considered a few constrained versions of the model, such as constraining the maximum success 
+probability to be unchanged when /u1D6FClk ≥ qjk.
+To illustrate the connection between CDMs with binary and polytomous attributes clearly, let us 
+focus on the additive model. De La Torre et al. ( 2025) also showed that the fully additive model for 
+polytomous attributes ( fA- M; Yakar et al., 2021) is a special form of Equation  1 that only retains the 
+intercept and main effects, that is,
+Because any M- level polytomous attribute can be equivalently represented by (M − 1) binary attributes that 
+follow a linear hierarchy, it is easy to demonstrate that Equation 2 is equivalent to the classic additive CDM 
+(a constrained form of G- DINA, De La Torre, 2011) when replacing an M- level polytomous attribute with 
+(M − 1) binary attributes. That is,
+where /u1D736∗
+l  is a dummy coded /u1D736l, as shown in Table 1. For instance, for an item with a q- vector of (1, 2, 0, 0) 
+and let /u1D736l =(2, 1), then /u1D736∗
+l = (1, 1, 1, 0).
+This equivalency between Equations  2 and 3 continues to hold when interaction terms are included, 
+with a caveat that there will be no interactions among dummy-  coded attributes within a polytomous 
+attribute. For instance, considering only adding a two-  way interaction term to Equation  2, we have the 
+following:
+(2)Pj
+/parenleft.s1/u1D736l
+/parenright.s1= /u1D6FFj0 +
+/uni2211.s1K j
+k=1
+/uni2211.s1M −1
+m =1 /u1D6FFjkmI/bracketleft.s1/u1D6FClk = m /bracketright.s1.
+(3)P j
+/parenleft.s1/u1D736l
+/parenright.s1= /u1D6FFj0 +
+/uni2211.s1K j
+k =1 /u1D739jk/u1D736∗
+l
+(4)
+Pj
+/parenleft.s1/u1D736l
+/parenright.s1= 𝛿j0 +
+/uni2211.s1K j
+k=1
+/uni2211.s1M −1
+m =1 𝛿jkmI/bracketleft.s1𝛼lk= m /bracketright.s1+
+/uni2211.s1K j
+k�>k
+/uni2211.s1K j−1
+k=1
+/uni2211.s1M −1
+m =1
+/uni2211.s1M −1
+m �=1 𝛿jkmk�m � I/bracketleft.s1𝛼lk= m /bracketright.s1I/bracketleft.s1𝛼lk� = m �/bracketright.s1
+TABLE 2  Illustration of design matrix in generalized CDM.
+d ∗
+l1 d ∗
+l2 d ∗
+l1
+⨂ d ∗
+l2
+Implications
+Dummy coding Cumulative coding
+(1, 0, 0) (1, 0, 0) (1,0,0,0,0,0,0,0,0) /u1D6FCl 1 = 0,/u1D6FCl 2 = 0 /u1D6FCl 1 ≥ 0,/u1D6FCl 2 ≥ 0
+(1, 0, 0) (1, 1, 0) (1,1,0,0,0,0,0,0,0) /u1D6FCl 1 = 0,/u1D6FCl 2 = 1 /u1D6FCl 1 ≥ 0,/u1D6FCl 2 ≥ 1
+(1, 0, 0) (1, 1, 1) (1,1,1,0,0,0,0,0,0) /u1D6FCl 1 = 0,/u1D6FCl 2 = 2 /u1D6FCl 1 ≥ 0,/u1D6FCl 2 ≥ 2
+(1, 1, 0) (1, 0, 0) (1,0,0,1,0,0,0,0,0) /u1D6FCl 1 = 1,/u1D6FCl 2 = 0 /u1D6FCl 1 ≥ 1,/u1D6FCl 2 ≥ 0
+(1, 1, 0) (1, 1, 0) (1,1,0,1,1,0,0,0,0) /u1D6FCl 1 = 1,/u1D6FCl 2 = 1 /u1D6FCl 1 ≥ 1,/u1D6FCl 2 ≥ 1
+(1, 1, 0) (1, 1, 1) (1,1,1,1,1,1,0,0,0) /u1D6FCl 1 = 1,/u1D6FCl 2 = 2 /u1D6FCl 1 ≥ 1,/u1D6FCl 2 ≥ 2
+(1, 1, 1) (1, 0, 0) (1,0,0,1,0,0,1,0,0) /u1D6FCl 1 = 2,/u1D6FCl 2 = 0 /u1D6FCl 1 ≥ 2,/u1D6FCl 2 ≥ 0
+(1, 1, 1) (1, 1, 0) (1,1,0,1,1,0,1,1,0) /u1D6FCl 1 = 2,/u1D6FCl 2 = 1 /u1D6FCl 1 ≥ 2,/u1D6FCl 2 ≥ 1
+(1, 1, 1) (1, 1, 1) (1,1,1,1,1,1,1,1,1) /u1D6FCl 1 = 2,/u1D6FCl 2 = 2 /u1D6FCl 1 ≥ 2,/u1D6FCl 2 ≥ 2
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 7 =====
+
+    | 7
+REVIEW OF CDMS
+Take an example of K j = 2 (assuming item j requires the first two attributes for simplicity) and both /u1D6FCl 1 and 
+/u1D6FCl 2 are 3- level polytomous attributes (i.e. M = 3). Then from Equation 4, we have
+where the last four terms refer to the two- way interaction effects: /u1D6FFj 1121 refers to the interaction between 
+(/u1D6FCl 1 = 1) and (/u1D6FCl 2 = 1) whereas /u1D6FFj 1222 denotes the interaction between (/u1D6FCl 1 = 2) and (/u1D6FCl 2 = 2). This exercise 
+aims to reinforce that one can strategically treat each polytomous attribute as a vector of binary attributes 
+with linear constraints, and this is practically useful because one can readily use the estimation algorithms 
+that were originally developed for CDMs with binary attributes directly for polytomous CDMs with mini-
+mum modifications. That said, while dummy (or cumulative) coding allows for maximum flexibility, the 
+resulting model is highly parameterized, and Ma ( 2022) found that adding L1 penalty on /u1D6FF's would help 
+stabilize model estimation and performance.
+2.2 | Discovering attribute relationships
+Attribute hierarchy is a core concept in CDM, referring to a directional link among attributes 
+such that some attributes must be mastered before the subsequent attributes can be learned. In 
+educational context, it often reflects theories about students' learning (Dahlgren et  al., 2006 ; 
+Simon & Tzur, 2004 ), where a piece of knowledge learned earlier serves as a prerequisite for the 
+more advanced knowledge, forming a so-  called learning trajectory (Corcoran et  al., 2009 ; Daro 
+et al., 2011). A LT will allow for optimizing instructional design by offering theory-  driven sequences 
+of cognitive progression. The rule space model (RSM; Birenbaum et  al., 1993 ; Tatsuoka, 2009 ) 
+and attribute hierarchy model (AHM; Leighton et  al., 2004 ) are two earliest CDMs that formally 
+incorporate such a hierarchical structure. Both are pattern recognition approaches rather than a 
+probabilistic measurement model, hence making inferences at item level or attribute level is often 
+difficult. Since then, various methodological studies have incorporated hierarchical relationships 
+into model development (e.g. Bradshaw & Templin, 2014 ; Gierl et  al., 2007 ; Ma, De La Torre, & 
+Xu, 2023a ; Ma, Ouyang, & Xu, 2023b ; Tu et  al., 2018 ; Wang, 2024 ). In addition, many empirical 
+studies have also designed items and assessments to respect certain attribute structures (e.g. Gierl 
+et al., 2007 ; Wang & Gierl, 2011 ).
+The field of CDMs keeps emphasizing the importance of attribute hierarchy because: (1) cognitive 
+skills, by their nature, do not operate in isolation but belong to a network of interrelated competencies 
+(Kuhn, 2001; Simon & Tzur, 2004; Vosniadou & Brewer, 1992); (2) incorporating information from at -
+tribute hierarchy could reduce the number of parameters and improve model fit, which will in turn yield 
+higher classification accuracy of students' attribute profiles (Liu, 2018 ); and (3) understanding attribute 
+relationships provide explanatory and foundational knowledge related to sequences of cognitive pro -
+gression (e.g. can several goal facets develop in parallel, or do they develop sequentially?) (Wang, 2024; 
+Wang & Lu, 2021). In this section, we will review both confirmatory and exploratory approaches that ei-
+ther validate extant attribute hierarchies or discover unknown hierarchies from response data. Figure 1 
+presents a few different types of attribute hierarchy. The arrow indicates prerequisites: for instance, in 
+the convergent relationship, /u1D6FC1 is the prerequisite of /u1D6FC2 and /u1D6FC3, both of which are prerequisites of /u1D6FC4 .
+2.2.1 | Confirmatory approach
+Despite the instructional benefits of a detailed attribute hierarchy map, identifying the multitude of 
+links among attribute pairs poses a methodological challenge. For example, just 9 facets could generate 
+as many as 72 potential directional links. There are two approaches to discover attribute relationships: 
+(5)P j
+/parenleft.s1/u1D736l = [2, 2]
+/parenright.s1= /u1D6FFj0 + /u1D6FFj11 + /u1D6FFj12 + /u1D6FFj21 + /u1D6FFj22 + /u1D6FFj1121 + /u1D6FFj1221 + /u1D6FFj1122 + /u1D6FFj1222
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 8 =====
+
+8 |   
+WA NG et al .
+confirmatory and exploratory approaches. In the confirmatory framework, the attribute hierarchy 
+is specified by experts and then validated by students' response data. For instance, Templin and 
+Bradshaw (2014) proposed a likelihood ratio (LR) test formatted within a hierarchical DCM (HDCM) 
+to statistically test one hypothesized link at a time. That is, they compared two models: one full model 
+assuming independence of two attributes and one reduced model assuming a pre-  specified hierarchical 
+relationship between the two attributes. Specifically, if one specifies a saturated CDM for binary 
+responses and two binary attributes (i.e. /u1D6FC1 and /u1D6FC2) as follows:
+Assuming /u1D6FC1 is a prerequisite of /u1D6FC2, according to Templin and Bradshaw  (2014), if fitting the model in 
+Equation 6 directly, one would observe a large standard error of /u1D6FFj 2. This is because /u1D6FFj 2 is a simple main 
+effect, which represents the increase in the probability (or log- odds depending on the link function) of a 
+correct response for mastering /u1D6FC2 in the absence of mastering /u1D6FC1. However, in the sample, there will be no 
+one who solely masters /u1D6FC2, hence, there will be no sample for whom this main effect would apply, making 
+/u1D6FFj 2 empirically under- identified. If one fits an additive model instead of the saturated model in Equation 6, 
+then /u1D6FFj 2 will not be empirically under-  identified. Instead, /u1D6FFj 2 becomes /u1D6FFj 12 and it implies the increased 
+probability of answering the item correctly when one masters /u1D6FC2 in addition to mastering /u1D6FC1. In addition, 
+instead of estimating the full mixing proportion vector /u1D745, the mixing proportion for profile (0, 1) is 0 due 
+to the hierarchy. Then a LR test is performed to compare the fit of the full model versus the reduced model, 
+thereby evaluating if such a hierarchical link is supported by the empirical data. Although this is theoreti-
+cally sound, it is cumbersome to perform their LR testing at scale because the reference distribution needs 
+to be simulated each time to derive the empirical p- value. Instead, exploratory approaches that can directly 
+identify massive potential attribute hierarchies from data will not only be computationally preferrable, but 
+also the findings therefrom will complement existing theory- driven LTs and reveal new insights to refine 
+or expand theoretical trajectories.
+2.2.2 | Exploratory approach
+Several exploratory methods were proposed to identify hierarchical structures directly from data. The 
+first set of methods focuses on recovering the sparse structure of the mixing proportion, /u1D745. With attribute 
+hierarchy, many of 2K profiles are impermissible, hence, zero elements in /u1D745 suggest the presence of imper-
+missible patterns, whereas non- zero elements correspond to permissible patterns. Wang and Lu (2021) ap-
+plied latent variable selection (Xu & Shang, 2018) and regularized latent class analysis (Chen et al., 2017) to 
+identify non- zero components in /u1D745. Gu and Xu (2019), as well as Wang (2021, 2024) used a log penalty on 
+/u1D745 in a frequentist expectation–maximization (EM) algorithm to directly shrink insignificant elements in /u1D745 
+to 0. Once the sparsity structure of /u1D745 is recovered, a heuristic algorithm is used to infer attribute hierarchy 
+(6)P j
+/parenleft.s1/u1D736l
+/parenright.s1= /u1D6FFj0 + /u1D6FFj1/u1D6FC1 + /u1D6FFj2/u1D6FC2 + /u1D6FFj12/u1D6FC1/u1D6FC2
+FIGURE 1  Different types of attribute hierarchies.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 9 =====
+
+    | 9
+REVIEW OF CDMS
+(Wang, 2024). Take K = 5 as an example. Assume out of the 25 = 32 potential patterns, only six (i.e. 00000, 
+10000, 11000, 11100, 1110 and 11111) permissible profiles are identified. Then one can compare pairs of at-
+tributes to form adjacency matrix to determine the final hierarchy. For instance, because the first attribute 
+is always mastered whenever any other attribute is mastered, it is deemed the prerequisite for all others. The 
+same pairwise reasoning is applied iteratively to establish the complete hierarchy.
+Another way to find sparsity structure of /u1D745 is through hypothesis testing. Liu et al. (2022) proposed 
+a z-  statistic to test whether certain mixing proportions (which they term as ‘structural parameters’) 
+are significantly different from zero. Their z-  statistic relies on the estimated standard error, derived 
+from the inverse of the information matrix. However, when some mixing proportions are near-  zero, 
+the information matrix can be unstable or even singular. To overcome this numeric instability, Zhang 
+et al. (2024) proposed an iterative extension to iteratively remove structural parameters that are smaller 
+than the pre-  specified criterion values.
+We need to highlight that the methods reviewed thus far are based on cross-  sectional measure -
+ment, hence we cannot make direct developmental or causal claims about learning trajectories but 
+only inferring potential attribute hierarchies from snapshots of students' mastery profiles by looking 
+for co-  occurrences of masteries (or lack thereof). On the other hand, a suite of latent transition 
+CDMs (TCDM) were proposed in the literature, which is a longitudinal extension of CDMs that 
+model attribute mastery changes over time (Chen et  al., 2018 ; Kaya & Leite, 2017 ; Li et  al., 2016 ; 
+Madison & Bradshaw, 2018 ). A shared idea among them is to model the transition probabilities from 
+non- mastery to mastery for each attribute at the group level, also known as the latent transition 
+analysis (LTA: Collins & Lanza, 2010 ; Collins & Wugalter, 1992 ; Nylund-  Gibson & Hart, 2014 ). first 
+incorporated attribute hierarchies into the transition probabilities, such as follows: if assuming an 
+attribute-  level learning rate of /u1D714k and forget rate of /u1D706k for /u1D6FCk, then denote the prerequisites of attri -
+bute k as 
+/braceleft.s1k/braceright.s1
+, and denote /u1D6FC(t)
+ik  as person i's mastery status of attribute k at time t, then the latent 
+transition component of a longitudinal CDM becomes,
+Apparently, Equation 8 assumes that students learn each attribute independently and it takes a confirmatory 
+approach. In contrast, Wang (2021) proposed an exploratory approach to discover attribute hierarchies from 
+profile- level transitions (Chen et al., 2018; Madison & Bradshaw, 2018). Say if there are L t and L t+1 total 
+number of latent classes at two adjacent time points, then there will be L t × /parenleft.s1L t+1 − 1/parenright.s1
+ estimable transition 
+probabilities, that is, /u1D749= P /parenleft.s1/u1D736(t+1)/uni007C.var/u1D736(t)/parenright.s1
+. This flexible approach will help inform a longitudinal learning 
+progression across different attributes. For instance, the attribute-  level transition probabilities, such as 
+P
+/parenleft.s2
+/u1D6FC(t+1)
+3 = 1/uni007C.var/u1D6FC(t)
+2 = 1
+/parenright.s2, the transition of mastery of /u1D6FC2 at time t to mastery of /u1D6FC3 at time (t + 1), could be 
+summarized from the estimated profile-  wise transition probabilities (Madison & Bradshaw, 2018 ). If 
+P
+/parenleft.s2
+/u1D6FC(t+1)
+3 = 1/uni007C.var/u1D6FC(t)
+2 = 0
+/parenright.s2 is close to 0, then /u1D6FC2 is likely a prerequisite of /u1D6FC3. Therefore, when modelling many 
+profile- level transitions, it is likely that some transition probabilities will be close to 0, implying a non-  
+existent pathway. Wang (2021) proposed two novel regularization methods to encourage sparsity of profile- 
+level transitions by shrinking either elements or columns in the transition matrix /u1D749 to 0. The sparsity pattern 
+is then used to infer longitudinal attribute hierarchies, which takes a step further from using cross- sectional 
+data, to understand developmental learning trajectories.
+Essentially, these methods reviewed above are ‘deterministic’ in nature because the sparsity structure 
+of /u1D745 or /u1D749 fully determines the final inferred structure. These methods have two limitations: (1) they 
+only exploit the information of whether a profile is permissible or not but overlook the distributions 
+(7)P
+�
+/u1D6FC(t+1 )
+ik = 1 �/u1D6FC(t)
+ik ,/u1D714k ,/u1D706k
+�
+=
+⎧
+⎪
+⎨
+⎪⎩
+1 − /u1D706k , if/u1D6FC(t)
+ik = 1
+/u1D714k
+�
+k �∈{k }
+/u1D6FC(t+1 )
+ik� if /u1D6FC(t)
+ik = 0 .
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 10 =====
+
+10 |   
+WA NG et al .
+of attribute profiles. As a result, any error in recovering the sparsity structure of /u1D745 or /u1D749 would severely 
+affect the recovery of attribute hierarchies and (2) they disregard the estimation error in /u1D745 or /u1D749. That 
+is, existing methods demand both low type I error and high power in recovering permissible profiles, 
+conditions that are often difficult to achieve (Liu et al., 2022; Wang & Lu, 2021; Zhang et al., 2024). 
+Instead, two probabilistic approaches recently emerged in literature.
+Chen and Wang ( 2023 ) proposed a Bayesian Markov chain Monte Carlo (MCMC) algorithm to 
+directly estimate attribute hierarchy. Inspired by structure learning methods in machine learning, 
+the attribute hierarchy can be seen as a directed acyclic graph (DAG, denoted as ‘G’ in their paper), 
+and their algorithm explored the sample space of DAGs through random walks by adding or remov -
+ing one directional link at a time until convergence. Their algorithm treats attribute hierarchy as a 
+part of the model parameters and estimates it simultaneously with other CDM parameters. However, 
+their algorithm is model specific, hence, generalizing their algorithm to different types of CDMs 
+needs large efforts. Yan et al. ( 2024 ) proposed a heuristic algorithm to infer the hierarchy based on 
+ordering theory (OT). Their method contains two steps. First, a CDM is fitted to the data to esti -
+mate individuals' attribute profiles. Then the order among the attributes can be determined based 
+on the sample distribution of the attribute profiles. That is, they compute a K- by- K attribute correla -
+tion matrix C, in which C ij= P
+/parenleft.s2
+/u1D6FCi = 0,/u1D6FCj = 1
+/parenright.s2
+ is the proportion of individuals who have mastered 
+attribute /u1D6FCj but not /u1D6FCi. Then a hierarchical index H i for attribute /u1D6FCi is a row sum of the matrix C, that 
+is, H i = ∑K
+j=1 C ij. Smaller value of H i indicates that /u1D6FCi is at the more basic level of the attribute hierarchy, 
+implying that /u1D6FCi is more likely the prerequisite of the other attributes. One drawback of their method 
+is that H i is compared to a somewhat arbitrary cutoff to classify attributes into different levels of the 
+hierarchy. Furthermore, Ren and Wang (2024 ) showed that their method may not work well when 
+attribute display certain types of structures, such as parallel convergent or independent structures, 
+as shown in Figure  1.
+Most recently, Ren and Wang ( 2025) proposed to use a causal discovery (CD) algorithm to infer at -
+tribute relationships. CD algorithms aim to identify the causal relationships among different variables 
+based on a set of observational data (Rodríguez-  Nogueira et al., 2022 ). If viewing the attribute hierar -
+chy as DAGs, the off-  the- shelf CD algorithms can be readily applied to either the estimated attribute 
+profiles or the estimated mastery probability matrix from the sample. The sample mastery probability 
+matrix can be obtained from the marginal mastery probability of each attribute for every individual, 
+known as the expected a posteriori (EAP, Huebner et al., 2016 ). Ren and Wang ( 2024) demonstrated 
+that a certain attribute hierarchy (e.g. linear hierarchy) is a special case of a strong attribute causal re -
+lationship, and while the extant methods reviewed above can recover the strong causal relationship, 
+they do not fare well when there are weak causal relationships among attributes. Furthermore, while 
+the extant CD algorithms can discover the skeleton relationship (i.e. non-  directional) among attributes 
+well, they also proposed augmenting the CD algorithm with the OT-  based procedure to further assist 
+in discovering directional relationships among attributes. Different from Chen and Wang (2023) and like 
+Yan et al. (2024), their method is also a two-  stage plug-  and- play framework that is compatible with 
+any CDMs. Specifically, in the latent modelling stage, students' profiles are estimated from a specified 
+CDM. Then, in the attribute relationship discovery stage, the hybrid CD-  OT algorithm is applied to 
+uncover the attribute relationships.
+The hybrid CD-  OT algorithm is not without limitations either. First, even though the CD algo -
+rithm is used, causal claims cannot be directly made between attributes unless longitudinal data or 
+intervention data is collected. Second, the simple DAG edge structure used in the basic CD algo -
+rithm cannot encode ‘AND/OR’ logic by itself such as /u1D6FC3 requires both /u1D6FC1 AND /u1D6FC2, or /u1D6FC3 requires 
+either /u1D6FC1 OR /u1D6FC2 , such as in the convergent structure in Figure  1, which is common in attribute hier -
+archy. Third, the resulting DAG does not establish strict prerequisites such that hierarchy becomes 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 11 =====
+
+    | 11
+REVIEW OF CDMS
+stochastic. That is, one can only claim mastery of /u1D6FC1 increases the probability of mastering /u1D6FC2 rather 
+than being required. Lastly, the structure in DAGs implies conditional independence due to d-  
+separation, whereas in attribute hierarchies, two attributes may be hierarchically ordered yet still 
+strongly dependent even after conditioning. Hence, cautions need to be exercised when interpreting 
+the findings from the hybrid CD-  OT algorithm, and extending the algorithm to longitudinal con -
+text would be useful.
+2.3 | Fast estimation
+The estimation of CDMs can be computationally challenging, especially when the number of attributes 
+is high, due to the 2K (assuming there are K total number of attributes) possible profiles. This could 
+severely undermine the practical application of CDMs especially if estimation needs to be done on the 
+f ly,2 such as in real time adaptive learning system. Below, we present a few different approaches that can 
+help alleviate the computational challenge.
+2.3.1 | Matrix manipulation
+We want to start out by highlighting that matrix manipulation is essential to speed up estimation. 
+Although this sounds cliché and may not be psychometrically relevant, we want to share just one 
+concrete example that helps greatly with our own research. The example is quite common in CDM 
+estimations, and the matrix manipulation trick is not often familiar to readers in our field, but the trick 
+is versatile that it can be applied in wide applications, hence worth pointing out here.
+Suppose we have a complete-  data log-  likelihood log L j for item j as follows where P il denote the 
+posterior probability of person i in latent class l ,
+In Equation  9, the inner summation over L profiles can be easily done with vector product, and 
+hence a natural programming choice is to create just one loop over N, as shown in Figure  2a and 
+Figure  3 for illustrative MATLAB code. The indicator 1
+/parenleft.s2
+Y ij = s
+/parenright.s2
+ obscures direct matrix product 
+between P and /u1D703, but the matrix version overcomes this caveat. Specifically, a matrix version aims 
+to first to conduct a matrix product. Let P  denote the N × L matrix of posterior probability, where 
+N is the number of individuals answering item j and L denotes the total number of latent classes. 
+Let θ be a L × S matrix of endorsement probability where S denotes the response categories of item 
+j. Instead of looping through N, we first create a product matrix 
+/parenleft.s1P × log /u1D6C9/parenright.s1
+, a N × S matrix. Then 
+ 2We want to point readers to Nájera, Kreitchmann, et al. ( 2025 ) and Nájera, Sorrel, et al. ( 2025 ), which provides an innovative approach to 
+variable length computerized adaptive tests that is calibration free. With their method, the on-  the- fly calibration challenge can be alleviated.
+(8)log L j =
+�N
+i
+⎡
+⎢
+⎢⎣
+�
+l∈{0,1}K
+P illog
+�Sj
+s=1 /u1D703
+1
+�
+Y ij=s
+�
+ls
+⎤
+⎥
+⎥⎦
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 12 =====
+
+12 |   
+WA NG et al .
+the indicator function, 1
+/parenleft.s2
+Y ij = s
+/parenright.s2
+, translates to select the corresponding column (i.e. determined by 
+the response of person i) for the i th row of the product matrix.
+2.3.2 | Reduction of profile space
+To further improve computation efficiency, two approaches can be used. The first one is to reduce 
+the number of latent classes from 2K to only significant latent classes, by penalizing /u1D70Bl , as in Gu and 
+Xu ( 2019), or Wang ( 2021, 2024). Specifically, a log-  penalty can be imposed on /u1D70Bl  to encourage its 
+sparsity. That is, with penalty, the objective function that will be maximized takes the following form:
+arg max/u1D6C9,/u1D6D1
+�
+logLN (/u1D6C5,/u1D6D1�X ) + /u1D6FE∑2 K
+l log/u1D70CN
+�/u1D70Bl
+��
+ subject to the constraint of ∑2K
+l /u1D70Bl = 1, where /u1D6C5 is the 
+model parameters. Here,
+where /u1D70CN ≈ 1
+N is a small threshold parameter to suppress singularity issue of the log function (Gu & 
+Xu, 2019; Wang, 2021). The tuning parameter is /u1D6FE/u1D716(−∞ ,0 ) and smaller /u1D6FE yields more sparsity in /u1D745. At the 
+convergence of the EM algorithm, /uni0302.s1/u1D70Bl will be compared to /u1D70CN and only classes with �𝜋l >𝜌 N  are retained as 
+permissible classes. Adding this penalty term and carefully selecting the tuning parameter will greatly re -
+duce the latent profile space if the attributes follow certain hierarchical structures. The selection of the 
+tuning parameter can be based on either the BIC or the generalized information criterion (GIC, Gu & 
+Xu, 2019, Wang, 2021, 2024).
+The second one stems from Bayesian estimation, namely, the MCMC to be specific. The traditional 
+MCMC method for CDM often uses the Dirichlet distribution as conjugate priors for π , that is, 
+/u1D6D1∼ Dirichlet(/u1D6CC) where /u1D6CC= /parenleft.s1/u1D7061 , … ,/u1D706L
+/parenright.s1� denotes a L = 2K- dimensional hyperparameter vector for π 
+(Culpepper, 2015; Culpepper & Hudson, 2018 ). For large K, this approach often suffers from the in -
+creasing computational cost of sampling each latent profile /u1D736i from its full conditional distribution with 
+2K categories. This simultaneous Gibbs sampling of the entire /u1D736 is not only time consuming but also 
+affect the convergence of the MCMC algorithm. Instead, Wang et al. ( 2022) proposed a sequential 
+Gibbs sampler that aims to sample each attribute one at a time, reducing the computational overhead 
+from O/parenleft.s12K /parenright.s1
+ to O(K). The primary idea is to break down the full vector of /u1D736 into {/u1D6FCk, /u1D736/uni2216.vark} where /u1D736/uni2216.vark 
+denote a sub-  vector that excludes the k th attribute. Then the full conditional distribution of /u1D6FCk 
+becomes
+where /u1D6C5 again denotes item parameters. Here, 
+/parenleft.s1/u1D6FCk/uni007C.var/u1D736/uni2216.vark, /u1D6D1/parenright.s1
+ follows a Bernoulli distribution, which implies 
+that the k th attribute will be updated assuming the other attributes are fixed. Hence, the parameter in this 
+Bernoulli distribution can be easily computed as follows:
+(9)log𝜌N
+/parenleft.s1𝜋l
+/parenright.s1= log/parenleft.s1𝜋l
+/parenright.s1× I/parenleft.s1𝜋l >𝜌 N
+/parenright.s1+ log/parenleft.s1𝜌N
+/parenright.s1× I/parenleft.s1𝜋l ≤ 𝜌N
+/parenright.s1
+P/parenleft.s1/u1D6FCk/uni007C.var/u1D736�k, /u1D6D1, /u1D6C5/parenright.s1∝ P/parenleft.s1/u1D6FCk/uni007C.var/u1D736�k, /u1D6D1/parenright.s1P(Y /uni007C.var/u1D736, /u1D6C5) ,
+∑2K
+l=1 /u1D70BlI�/u1D6FClk = 1 ∩ /u1D736l�k = /u1D736�k
+�
+∑2K
+l=1 /u1D70BlI�/u1D736l�k = /u1D736�k
+� .
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 13 =====
+
+    | 13
+REVIEW OF CDMS
+As shown, each element of the attribute profile is sampled separately from the conditional Bernoulli dis-
+tribution, thereby reducing the computational cost significantly. This approach is suitable for literally any 
+CDMs.
+2.3.3 |  Two-  stage estimation
+While having a large number of potential profiles is one cause of slow computation, another possible 
+cause is non-  closed- form solution. Taking the DFSM (Wang, 2024 ) as an example again. In every 
+M- step of the EM algorithm, the item parameters can only be obtained via numeric searches, such 
+as the commonly used L-  BFGS- B (Limited Memory Broyden-  Fletcher-  Goldfarb-  Shanno) method. 
+FIGURE 2  Illustration of matrix multiplication. (a) Loop version with vector multiplication (b) Matrix version.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 14 =====
+
+14 |   
+WA NG et al .
+Instead, the G-  DINA model or the DINA model enjoy the closed-  form solutions for their item 
+parameters. Coupling numeric searches for each item in each M-  step with the large number of latent 
+profiles can severely slow down the computation. Instead, a two-  step estimation may greatly speed 
+it up.
+In Step I, one aims to first estimate /u1D703jls (from Equation 7) for each option s of item j and l  th latent 
+profile, using the following closed form,
+(10)
+/uni0302.s1/u1D703jls=
+∑
+iP ilI
+�
+Y ij= s
+�
+∑
+iP il
+,
+FIGURE 3  MATLAB code illustration of Equation  9.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 15 =====
+
+    | 15
+REVIEW OF CDMS
+where P il is the posterior probability of person i belong to profile l . Equation 11 is simply the proportion of 
+individuals who belong to profile l  and choose option s of item j.
+Although /u1D703jls is very easy to update, its estimation may not be accurate because there are just too many 
+of them. Several strategies can be used to stabilize the estimation: (1) Instead of estimating /u1D703jls for all 
+l ∈ 2K , one can focus only on those l ∈ 2K j, where K j is the number of attributes measured by item j. 
+This set can be further reduced during the regularized EM algorithm when some latent classes are 
+deemed impermissible. (2) The initial values matter greatly. It is a known tendency of EM algorithm to 
+converge to local optima when the intital values are poorly chosen (Balakrishnan et al., 2017). Starting 
+all /u1D703jls at a constant, say one divided by the total number of response options, would lead to the algo -
+rithm converges in one cycle, meaning that the estimation gets stuck at a single point. This is because in 
+such a case, the likelihood of every person will be the same simply because the chance of selecting any 
+response option is the same.3 Although starting /u1D703jls at a random value will eliminate this issue, but it does 
+not work very well because there are too many parameters and starting randomly will easily move the 
+algorithm towards a local optimum. Instead, informative starting values are necessary. One option 
+could be to use nonparametric methods (see Section 2.4 ) to first roughly classify everyone into one of 
+the latent classes. Then compute the proportion of individuals in each latent class who select option s of 
+item j. This treatment resembles closely to Equation  11 closely, except that it does not use the posterior 
+probability P il.
+In Step II, given /uni0302.s1/u1D703jls and /uni0302.s1/u1D70Bl  from step I, we can obtain item parameters for each item separately by 
+minimizing the following loss function
+In Equation 12, /uni0303.s1/u1D703jls is the predicted probability from any CDM that includes relevant item parameters one 
+aim to estimate. The absolute value in Equation 12 can be changed to other forms such as squared differ-
+ence, and the estimation precision will not change too much. We assume Q- matrix is known in this case.
+This two-  step approach separates the computationally intensive search of optimal model parameters 
+(step II, Equation  12) from the easy update of /uni0302.s1/u1D703jls from step I. As described above, /uni0302.s1/u1D703jls's are obtained 
+through the EM algorithm, and the model parameters are updated outside of the EM algorithm as a 
+separate step. This is different from the EM algorithm of G-  DINA (De La Torre, 2011 ), which also 
+includes an implicit two-  step update in the M-  step. In the G-  DINA EM algorithm, the two-  step refers 
+to updating /uni0302.s1/u1D703jls first and updating model parameters as linear combinations of /uni0302.s1/u1D703jls in every M- step within 
+the EM cycle. Hence, the two-  step updates are inside the EM cycle. Although separating the two-  step 
+updates outside of the EM cycle greatly speeds up computation, their stability and performance need to 
+be further evaluated. This is because the successful updates in Step II hinge on precise estimates of /uni0302.s1/u1D703jls 
+from step I, which can be challenging due to the sheer number of parameters that need to be updated 
+simultaneously. Our limited pilot exploration reveals that although step I can converge quickly, it may 
+sometimes converge to local optima and adversely affect step II estimation accuracy. Hence, more thor -
+ough studies and maybe some adjustments to the two-  step approach will be needed to ensure its overall 
+accuracy is on par with the classic one-  step approach. Inspired by Sorrel et al. (2017), who proposed a 
+two- step likelihood ratio test which shares a similar spirit to the two-  step approach, we can make some 
+adjustments to the general-  purpose two-  step approach. Specifically, in Sorrel et al. ( 2017), they pro -
+posed to estimate the G-  DINA model first, and then in the second step, the item parameters from the 
+reduced models can be obtained using /uni0302.s1P j (like /uni0302.s1/u1D703jls from Equation 11) from the G-  DINA model. As a 
+result, the item parameters from the reduced models are therefore obtained from a two-  step approach. 
+The key is how /uni0302.s1P j is computed: in the general stated two-  step approach above, this statistic is obtained 
+from EM algorithm independent of any CDMs, whereas in Sorrel et al. (2017), /uni0302.s1P j is obtained as a by -
+product from the EM algorithm for G-  DINA. In this regard, their /uni0302.s1P j's will be more accurate compared 
+ 3Regarding the initial values of /u1D70Bl , we recommend random start instead of a constant of 1
+2K  for the same reason.
+(11)Loss j =
+/uni2211.s1
+l
+/uni0302.s1/u1D70Bl
+/parenleft.s4
+/uni2211.s1
+s
+/uni007C.x/uni007C.x/uni007C.x/uni0302.s1/u1D703jls−/uni0303.s1/u1D703jls
+/uni007C.x/uni007C.x/uni007C.x
+/parenright.s4
+.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 16 =====
+
+16 |   
+WA NG et al .
+to /uni0302.s1/u1D703jls. Hence an adjustment can be made as follows: In stage I, one can first construct a general model 
+(e.g. sp- G- DINA, De La Torre et al., 2025; or Ma, 2022) that has closed- form updates of item parame -
+ters from /uni0302.s1/u1D703jls (or /uni0302.s1P j), and the goal is to calculate /uni0302.s1/u1D703jls (or /uni0302.s1P j) as a byproduct from model estimation. This 
+way, /uni0302.s1/u1D703jls (or /uni0302.s1P j) will be more accurately obtained than estimating them standalone because in the latter 
+case, the number of parameters is much higher. Then, in stage II, use /uni0302.s1/u1D703jls (or /uni0302.s1P j) to estimate other re -
+duced model parameters that do not have closed-  form solutions.
+In sum, the methods reviewed above are general-  purpose approaches that can be applied to 
+different types of CDMs. This section review is by no means exhaustive, and there are other theo -
+retical and algorithmic advancements that make CDM estimation computationally more affordable 
+for specific types of CDMs. For instance, Culpepper ( 2015) proposed a Gibbs sampling algorithm 
+for the DINA model, and Culpepper and Hudson ( 2018) proposed a Gibbs sampling algorithm for 
+the reduced reparametrized unified model (rRUM). Both studies show that the improved strategy 
+for Bayesian estimation converges faster than the commonly used Metropolis-  Hastings algorithm, 
+thereby reducing the computation time. Zeng et  al. ( 2023) proposed a tensor-  EM algorithm to 
+handle CDM estimation with binary responses in the double asymptotic regime, that is, when both 
+sample size and test length go to infinity. Their method contains two steps: using a moment-  based 
+tensor power method in the first step and then using the obtained estimates as initialization for the 
+EM algorithm in the second step. Not only does the two-  step method achieve good accuracy and 
+computational efficiency, but it also provides theoretical guarantees of the clustering consistency in 
+this double asymptotic regime.
+2.4 | Challenges with small sample sizes
+Most classrooms yield relatively small datasets, raising concerns about whether CDMs can be reli -
+ably implemented in such settings. Sessoms and Henson ( 2018) reviewed a range of CDM applica -
+tions and found that 61% involved sample sizes greater than 1000, with another 31% falling between 
+1000 and 2000. Only two studies—Im and Yin ( 2009 ) and Jang et  al. ( 2015)—used sample sizes 
+comparable to those typically found in classroom contexts, which, for the purposes of this review, 
+we define as ranging from approximately 20–100 students. Such sample sizes are common in indi -
+vidual courses, small instructional programmes, or pilot evaluations, all of which could benefit from 
+the use of CDMs.
+In this section, we first provide an overview of challenges that small sample sizes pose for CDMs, 
+including (1) model estimation, (2) model assessment and selection and (3) Q-  matrix validation/estima -
+tion. We then discuss how some of these challenges are overcome by nonparametric cognitive diagnos -
+tic methods. Finally, we discuss connections between parametric and nonparametric methods, with a 
+particular focus on how Bayesian methods have the potential to overcome many of the challenges that 
+arise in small-  sample cognitive diagnostic modelling.
+2.4.1 | Small sample estimation of CDMs
+A consistent finding in the literature is that larger sample sizes lead to better estimation properties. 
+For instance, De La Torre et al. ( 2010) showed that increasing sample size from 1000 to 4000 in the 
+DINA model reduced bias and RMSE. Similar patterns hold for DINO, A-  CDM and G- DINA models 
+(Rojas et al., 2012), with larger samples improving attribute classification accuracy. Kunina-  Habenicht 
+et al. (2012) found that sample sizes of 1000 were sufficient for estimating main effects in the LCDM, 
+but that sample sizes of up to 10,000 were needed to estimate higher-  order interaction effects. Studies 
+confirm these patterns across CDMs such as C-  RUM (Galeshi & Skaggs, 2016), DINA (Sünbül & 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 17 =====
+
+    | 17
+REVIEW OF CDMS
+Kan, 2016) and G-  DINA (Başokçu, 2014). Sen and Cohen (2021) concluded that samples of at least 
+500 are needed for reliable estimation in simpler models, with more complex models requiring larger 
+samples.
+Estimation challenges in small samples are not limited to degraded accuracy—they can include com -
+plete estimation failure. When estimating the DINA model via the EM algorithm, DeCarlo (2011) 
+observed boundary estimates and proposed a Bayesian solution. Templin and Bradshaw (2014) reported 
+frequent non- convergence for hierarchical models with small samples; Ma and Guo ( 2019) and Oka and 
+Okada (2021) documented similar issues. Bayesian methods can also be unstable with uninformative 
+priors in small samples (Oka & Okada, 2021 ).
+As a simple example, consider the estimator for slipping parameters in the DINA model:
+where /u1D702ij = 1 if individual i has all attributes required by item j. Boundary estimates occur if all mastery-  
+group respondents answer correctly or incorrectly. If no one is in the mastery group, ∑N
+i=1 /u1D702ij= 0, and 
+the estimate is undefined. Even without these extremes, small N causes high variance due to the small 
+denominator.
+Sample size also influences model fit indices and selection. Choi et al. (2010) showed that log- linear 
+fit indices require at least 200 samples for stability, with reliability improving further at larger samples 
+(Hu et al., 2016; Lei & Li, 2016). Model selection tests, such as Wald or likelihood ratio tests comparing 
+G- DINA to reduced models, need large samples (often >2000) to maintain Type I error control and 
+selection accuracy (De La Torre & Lee, 2013 ; Sorrel et al., 2021).
+In many applications, the Q-  matrix may be misspecified or entirely unknown and must therefore 
+be validated or estimated. This process is also sensitive to sample size. Liu et  al. (2012) demonstrated 
+that Q-  matrix recovery probability increased markedly as sample size rose from 500 to 4000. Similar 
+trends appear across R-  RUM, DINO and G-  DINA models and hold under both frequentist (Chen 
+et al., 2015 ; Chung, 2019 ; Xu & Shang, 2018 ) and Bayesian estimation (Chen et  al., 2015 , 2018; 
+Culpepper,  2019).
+These findings reveal how sample size impacts every CDM component—parameter estimation, fit 
+assessment, classification, model selection and Q-  matrix validation. Nevertheless, the classroom re -
+mains a central context for formative assessment and understanding how to adapt CDMs to small- 
+sample settings is essential for extending their practical utility. This need has motivated research into 
+methods that can work more effectively in these settings.
+2.4.2 | Clustering and nonparametric cognitive diagnosis
+In response to the limitations of traditional CDMs in small sample settings, early researchers developed 
+nonparametric methods that offer more robust classification performance—particularly with respect to 
+accuracy. These methods often avoid the need for full parametric estimation of item parameters, which 
+is unstable or infeasible when sample sizes are small.
+Early work applied clustering heuristics assuming respondents with similar mastery patterns yield 
+similar response profiles. Willse et al. (2007 ) used k-  means clustering with the R-  RUM model; Ayers 
+et al. (2008) and Chiu et al. (2009) showed that k- means and hierarchical clustering consistently recover 
+attribute profiles as item count grows. Neural network classifiers were tested (Shu et al., 2013) but 
+proved more sensitive to item quality and noise.
+These successes set the stage for formal nonparametric CDMs, the most studied small-  sample 
+alternatives to parametric models. Chiu and Köhn ( 2019) introduced a DINA-  based method for 
+(12)/uni0302.s1sj =
+N∑
+i=1
+�
+1 − yij
+�
+/u1D702ij
+N∑
+i=1
+/u1D702ij
+,
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 18 =====
+
+18 |   
+WA NG et al .
+assigning attribute profiles by minimizing a weighted discrepancy between observed and ideal re -
+sponse patterns:
+where /uni0302.s1p j is the proportion correct for item j and /u1D702jc is the ideal response under attribute profile c, assuming 
+a conjunctive response function. This method achieves consistent classification as the number of items 
+increases (Chiu & Köhn, 2015), with extensions to DINO, NIDA and R- RUM. Furthermore, several sim-
+ulations have shown that nonparametric approaches outperform maximum likelihood estimation in small 
+samples (Akbay, 2016; Paulsen & Valdivia, 2022; Tzou & Yang, 2019).
+While early nonparametric methods focused on DINA's strict conjunctive structure, Chiu et al. (2018) 
+generalized them to the G-  DINA model. In this approach, rather than letting ideal responses conform 
+to a single model, the ideal response is a weighted average of conjunctive and disjunctive components:
+where /u1D702c
+jc and /u1D702d
+jc represent the ideal responses under the conjunctive and disjunctive models, respectively, 
+and w jc is a data-  driven weight estimated from item responses. This method also has proven consistency 
+(Chiu & Köhn 2019) and outperforms parametric models in many settings. Nonparametric cognitive diag-
+nosis has since been extended to other tasks, including Q- matrix refinement (Chiu, 2013) and computerized 
+adaptive testing (Chang et al., 2019; Chiu & Chang, 2021), making it a versatile and practical approach for 
+diagnostic assessment in low-  data settings. Together, these developments highlight how nonparametric 
+approaches provide both statistically principled and computationally efficient solutions for cognitive diag-
+nosis when sample sizes are severely limited.
+2.4.3 | Parametric vs. nonparametric methods
+While nonparametric methods have proven highly effective for cognitive diagnosis in small sample 
+settings—especially in terms of attribute classification accuracy—they are not without limitations. We 
+highlight four main challenges.
+First, nonparametric methods typically lack built-  in mechanisms for quantifying uncertainty in clas -
+sifications. Second, although estimating item parameters in small samples is difficult, such parameters 
+are still valuable for practitioners aiming to evaluate item and test quality. Third, nonparametric meth -
+ods do not provide a natural framework for model comparison, making it difficult to evaluate compet -
+ing CDMs. Fourth, unlike parametric models, increasing the sample size in nonparametric methods 
+does not guarantee improved performance, raising practical questions about when to use one approach 
+over the other.
+Recent research reveals connections bridging parametric and nonparametric CDMs. Ma et al. (2023) 
+proposed a unified framework where parametric models (DINA, G-  DINA) and nonparametric classi -
+fiers (NPC, GNPC) arise by varying a general loss function over item response–centroid discrepancies. 
+This framework bridges the conceptual gap between the two modelling paradigms and suggests that 
+hybrid approaches are feasible (see Yamaguchi et al., 2025  for a Bayesian extension).
+(13)/uni0302.s1/u1D6FCi = argmin
+c
+J/uni2211.s1
+j=1
+1
+/uni0302.s1p j
+/parenleft.s2
+1 −/uni0302.s1p j
+/parenright.s2/uni007C.x/uni007C.x/uni007C.xyij− /u1D702jc
+/uni007C.x/uni007C.x/uni007C.x,
+(14)/u1D702jc= w jc/u1D702c
+jc+
+/parenleft.s2
+1 − w jc
+/parenright.s2
+/u1D702d
+jc,
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 19 =====
+
+    | 19
+REVIEW OF CDMS
+Nájera et al. (2023) introduced the restricted DINA (R-  DINA) model, which is a simplified version 
+of the DINA model that assumes sj = gj = /u1D719. That is, all item parameters are replaced by a single pa -
+rameter for all items. They showed that MAP estimates from this model match NPC estimates while 
+also allowing for uncertainty quantification and model comparison (see Sorrel et al., 2023 for practical 
+recommendations regarding implementation in classroom assessment). The parameter /u1D719 in the R- DINA 
+model is as follows:
+In comparison to the earlier estimator for sj, we can see that this is much less likely to exhibit problems with 
+boundary or undefined estimates, even when N is small. It will also exhibit lower variance, at the cost of 
+introducing more bias as an estimator of sj.
+These results highlight a bias-  variance tradeoff with CDMs: rich parametric models (e.g. G-  
+DINA) have low bias but high variance in small samples; highly constrained models (e.g. R-  DINA) 
+have low variance but higher bias. Nonparametric methods fall on the low-  variance end but lack 
+the flexibility of full parametric estimation. Ideally, one would aim for a balance between these 
+extremes.
+Bayesian estimation offers a promising resolution. Ma and Jiang ( 2021) showed that shrinkage priors 
+improve classification and parameter stability in G-  DINA. Using slightly informative Beta priors—
+Beta (1.5, 2.5) for slipping/guessing and Beta (2, 2) for others—they obtained posterior mode estimates 
+via Bayes modal estimation. These priors shrank item parameters towards interpretable values (e.g. .25 
+or .5), reducing variance with minimal bias. Bayesian modal estimation modifies the DINA slipping 
+estimator as follows:
+Using a prior distribution, the risk of boundary or undefined estimates is eliminated. Like the R-  DINA 
+model, this is done by introducing bias and reducing variance. However, in contrast to the R- DINA model, 
+the reduction in variance is slight and the bias minimal.
+Each of these methods involves fixed priors or fitting more restrictive models. A more flexible 
+approach would involve using a Bayesian hierarchical model. For example, the following illustrates a 
+hierarchical prior for the DINA model slipping parameters:
+These priors act as shrinkage priors, with the amount of shrinkage being controlled by /u1D70F. If /u1D70F= 4 and 
+s = .375, this reduces to Bayes modal estimation. As /u1D70F→ ∞, the model behaves more like the R-  DINA 
+model. The hierarchical model represents a compromise between these two extremes. The benefits of such 
+an approach were illustrated by Arthur ( 2024). They used an Empirical Bayes approach to hierarchical 
+modelling for the DINA model via catalytic priors (Huang et  al., 2020, 2025). Not only did this method 
+(15)/uni0302.s1/u1D719=
+N∑
+i=1
+J∑
+j=1
+yij/u1D702ij
+N∑
+i=1
+J∑
+j=1
+/u1D702ij
+.
+(16)/uni0302.s1sj =
+N∑
+i=1
+�
+1 − yij
+�
+/u1D702ij+.5
+N∑
+i=1
+/u1D702ij+ 2
+.
+sj ∼ Beta(/u1D70Fs,/u1D70F(1 − s)),s ∼ Beta(1, 1),/u1D70F∼ Gamma (a ,b ).
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 20 =====
+
+20 |   
+WA NG et al .
+outperform both NPC and Bayes modal estimation in small- sample simulations, but performance contin-
+ued to improve as N and J increased.
+These recent developments suggest that the best approaches for estimation and classification 
+involve restricting complex CDMs or using Bayesian methods to shrink complex models toward 
+simpler models with desirable properties. These findings might provide insights into other areas 
+of small-  sample cognitive diagnostic modelling that have received less attention. For example, 
+Bayesian model selection methods have shown some promise in small-  sample model selection tasks 
+(Arthur,  2024). Several approaches also exist for Q-  matrix estimation, with many of these being 
+Bayesian methods. However, little research has been done regarding how these methods might be 
+adapted to work better in smaller sample settings. The principles of parsimony and shrinkage could 
+prove useful in both of these areas of research and could help make CDMs more accessible in more 
+educational assessment settings.
+2.5 | Q- matrix estimation and refinement
+Q- matrix is a critical component of CDMs because not only its design determine whether a specific 
+CDM is statistically identifiable (known as completeness, Köhn & Chiu, 2018 ), but also it reveals the 
+coverage of attributes among items and hence affects whether individuals' latent profiles can be pre -
+cisely recovered (Madison & Bradshaw, 2015). Ideally, Q- matrix should be created prospectively when 
+items are generated by context experts. These initial Q-  matrix can be validated and refined using both 
+quantitative and qualitative data, such as students' responses or their cognitive interview narratives. 
+Oftentimes, however, we do not have access to such data from beginning to end. Instead, we have 
+partial data, such as only students' responses without an expert-  defined Q- matrix, or experts may have 
+divergent perspectives on candidate Q-  matrices. These practical scenarios motivate the development of 
+data- driven methods, which can be divided into two sets: methods for refining  and validating  Q- matrix 
+when expert- defined Q- matrix are available, but it may exhibit different versions, and methods for esti -
+mating Q- matrix when no initial Q-  matrix is available. We need to emphasize that obtaining the optimal 
+Q- matrix is an iterative process, and despite the statistical methods, experts still need to be in the loop 
+during the process to ensure Q-  matrix validity.
+2.5.1 | Q-  matrix refinement
+Refinement is also considered as Q-  matrix validation. It is used when one already has partial knowl -
+edge of the Q-  matrix and seek to refine and validate every entry or a certain proportion of the en -
+tries of a given Q-  matrix. The main idea of most refinement methods is to separate the unknown 
+true q- vector for item j from all 2K − 1 possible candidate q- vectors for each item. Such a separation 
+can be quantified by different statistical indices. For instance, Chiu ( 2013) proposed a refinement 
+method for conjunctive CDMs like the DINA model. For the DINA model, an ideal item response 
+for individual i to item j is /u1D702ij= ∏K
+k =1 /u1D6FC
+qjk
+ik  for a given qj . Then, among all possible qj's, the true qj 
+should be the one that makes the ideal responses closest to the observed responses. Hence, 
+Chiu  (2013) defined a residual sum of squares (RSS) as RSS j = ∑N
+i=1
+�
+yij− /u1D702ij
+�2
+ and proved that the 
+expectation of RSS j is minimized for the true qj. While Chiu ( 2013)'s method only applies to con -
+junctive CDMs, De La Torre and Chiu ( 2016) proposed a G-  DINA model discrimination index 
+(GDI) that applies to general CDMs. The GDI is a generalization of De La Torre's ( 2008 ) /u1D6FF− 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 21 =====
+
+    | 21
+REVIEW OF CDMS
+method, and it purports to select qj that maximizes the weighted variance of the correct response 
+probabilities:
+where P /parenleft.s1/u1D736l
+/parenright.s1
+ is the posterior probability for attribute profile l , and P j = ∑2K
+l=1 P �/u1D736l
+�P
+�
+Y j = 1� /u1D736l
+�
+ is the 
+weighted average. They showed that the correct qj should maximally differentiate success probabilities 
+across all relevant latent classes. Most recently, Li and Chen (2025) introduced a β index that approaches Q- 
+matrix validation as a signal detection task: separating the true signal (i.e. the unknown true qj) from noise 
+(i.e. all 2K − 1 possible candidate q- vectors). The rationale is that among all candidate q- vectors, the true 
+qj provides highest overall discrimination, resulting in the optimal decision outcome—highest difference 
+between hit rate (denoted as H) and false detection (denoted as F). Taking the DINA model as an example 
+again. By treating the observed responses to item j as signal, the hit rate is the proportion of individuals 
+belong to latent class l  who answer item j correctly, that is, H =
+rlj
+nl
+, where n l is the number of individuals 
+in class l , and rlj is the number of individuals in class l  who answers item j correctly. Treating the model 
+expected responses using a given qj as noise, the false detection is F = 1 − P
+/parenleft.s2
+Y j = 1/uni007C.var/u1D736l
+/parenright.s2
+≡ 1 − Pjl. The 
+β index is therefore defined as
+Equation 22 also makes intuitive sense because 
+rlj
+nl
+P jl can be interpreted as the proportion of individuals with 
+both observed and expected responses of 1, and the second product is the proportion of individuals with 
+both observed and expected responses of 0. It is easy to note that the larger the first product is, the smaller 
+the second product is. If the observed and expected responses closely align, one would expect the two prod-
+uct terms to be quite different, resulting in a large /u1D6FD. Hence, the optimal qj should maximize /u1D6FD.
+Note that Equations 19 and 22  are different ways of quantifying what one would observe had we 
+known true qj. They are considered refinement and validation methods because they need a provisional 
+Q- matrix to obtain estimates of item parameters and posterior distribution of the attribute profiles. 
+Hence, it is essentially a two-  step procedure. In contrast, Culpepper (2019) proposed a Bayesian estima-
+tion of Q- matrix using a prior based on expert knowledge and considered a fully Bayesian formulation 
+for a general diagnostic model. His method uses a novel prior that incorporates expert knowledge as 
+predictors within a latent, multivariate regression model. Specifically, suppose X  is a J× (V + 1) design 
+matrix with the first column of 1's to denote intercept. /u1D6AA is a (V + 1) × K regression coefficient that 
+directly relate expert knowledge to the Q- matrix, such that qjk ∼ Bernoulli 
+/bracketleft.s2
+Φ
+/parenleft.s2
+x ,
+j/u1D738k
+/parenright.s2/bracketright.s2
+. Culpepper (2019) 
+(17)/u1D70D2
+j =
+/uni2211.s12K
+l=1 P /parenleft.s1/u1D736l
+/parenright.s1/bracketleft.s2
+P
+/parenleft.s2
+Y j = 1/uni007C.var/u1D736l
+/parenright.s2
+− P j
+/bracketright.s22
+(18)/u1D6FD=
+/uni2211.s12K
+l=1
+/uni007C.x/uni007C.x/uni007C.x/uni007C.x
+rlj
+nl
+−
+/parenleft.s2
+1 − P jl
+/parenright.s2/uni007C.x/uni007C.x/uni007C.x/uni007C.x
+=
+/uni2211.s12K
+l=1
+/uni007C.x/uni007C.x/uni007C.x/uni007C.x/uni007C.x
+rlj
+nl
+P jl−
+/parenleft.s3
+1 −
+rlj
+nl
+/parenright.s3/parenleft.s2
+1 − P jl
+/parenright.s2/uni007C.x/uni007C.x/uni007C.x/uni007C.x/uni007C.x
+.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 22 =====
+
+22 |   
+WA NG et al .
+claimed that /u1D6AA should be sparse because a predictor should relate to at most one attribute; hence, he 
+proposed a spike-  and- slab prior on /u1D6AA. The advantage is one may uncover new, unanticipated attributes 
+that can help advance cognitive theory.
+Another approach to Q- matrix refinement is through item fit because a misspecified q-  vector for an 
+item may lead to item misfit. Popular methods include the General Discrimination Index (GDI; De La 
+Torre & Chiu, 2016), which examines how well items discriminate between different latent classes, and 
+residual- based analysis approaches (Chen, 2017) that focus on systematic patterns in model residuals 
+to identify Q-  matrix misspecifications. The convex hull approach (Ceulemans & Kiers, 2006 ; Nájera 
+et al., 2021) offers another perspective by examining whether the empirical item response patterns fall 
+within the theoretical boundaries defined by the Q-  matrix structure. This geometric approach can be 
+particularly useful for identifying items that may require additional attributes not currently specified in 
+the Q- matrix.
+Beyond these classic methods, current cutting-  edge item- fit methods developed for Q- matrix refine -
+ment have increasingly focused on applying machine learning (ML) and artificial intelligence (e.g. Qin 
+& Guo, 2023). For example, Qin and Guo address the limitations of the GDI and the Hull methods by 
+proposing four new Q-  matrix item-  fit methods that utilize feed-  forward neural networks and random 
+forests. They note that the GDI method relies on a predetermined cutoff point (e.g. .95), which can be 
+difficult to determine and may not be robust across different data conditions, and the Hull method 
+tends to under- specify the Q- matrix by rarely selecting the q-  vector where all attributes are measured by 
+an item. Rather than approaching the item-  fit problem from a statistical test viewpoint, Qin and Guo 
+propose that finding the most appropriate q-  vector from all possible q-  vectors is analogous to a classi -
+fication task in machine learning.
+Specifically, the random forests and feed-  forward neural networks are trained using the proportion 
+of variance accounted for (PVAF) and the McFadden pseudo- R2 calculated from labelled simulated 
+datasets as features (i.e. input). For a given item j and a candidate q- vector c, we can calculate the PVAF 
+as
+where /u1D7092
+jc is the weighted variance of the probabilities of correctly responding to item j under candidate 
+q- vector c across all attribute profiles relevant to item j (i.e. GDI, De La Torre & Chiu, 2016), and /u1D7092
+1:K is 
+the maximum possible value which occurs when we have a true q- vector. Therefore, there will be 2K − 1 
+different values of PVAFjc for item j as its inputs to train its q- vector. Similarly, the McFadden pseudo- R2 
+can be calculated as
+where log
+/parenleft.s2
+L jm
+/parenright.s2
+ is the log- likelihood of a specified CDM model, and log
+/parenleft.s2
+L j0
+/parenright.s2
+ is the log- likelihood of the 
+null model. Here, the null model computes the ‘correct response probability’ as the average probability of 
+correctly responding to an item across all N individuals.
+(19)PVAF jc=
+/u1D7092
+jc
+/u1D7092
+1:K
+(20)R 2
+jc= 1 −
+log
+/parenleft.s2
+L jm
+/parenright.s2
+log
+/parenleft.s2
+L j0
+/parenright.s2
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 23 =====
+
+    | 23
+REVIEW OF CDMS
+Once the models were trained, their performance was evaluated on simulated labelled testing 
+data. The study conducts two simulation studies and a real-  data analysis to evaluate the new ML-  
+based methods against the GDI and Hull methods. The evaluation criteria include the Q-  matrix 
+recovery rate (QRR), vector recovery ratio (VRR), under-  specification rate (USR) and overspecifi -
+cation rate (OSR). QRR is the proportion of correctly specified q-  entries, and VRR is the ratio of 
+correctly recovered q-  vectors to the total number of items. USR and OSR measure the tendency to 
+under-  specify or over-  specify the Q-  matrix, respectively, where USR + OSR + QRR = 1. High values 
+of QRR suggest that the method was able to correctly recover the data-  generating Q-  matrix. The 
+results of the simulation studies show that the ML-  based methods generally outperform the GDI 
+and Hull methods. The GDI method had the lowest QRR and VRR values and elevated OSR values, 
+which suggest a tendency to over-  specify the Q-  matrix. The Hull method produced the largest USR 
+values across all methods and tended to under-  specify the Q-  matrix. In contrast, the ML-  based 
+methods balanced under-   and overspecification and showed significantly higher QRR and VRR 
+values than the GDI and Hull.
+2.5.2 | Q-  matrix estimation
+Q- matrix estimation refers to directly estimating the entire Q-  matrix from data. Due to space limit, 
+this review omits the extensive work around the identifiability of Q-  matrix, which is critical in 
+deriving data-  driven Q-  matrix. Interested readers should refer to Zhang et  al. (2024) and references 
+cited therein.
+The estimation methods generally fall into three categories: exploratory factor analysis (EFA), regu -
+larization within frequentist approach, and Bayesian methods. The EFA method starts with a tetracho -
+ric inter- item correlation matrix. Then, given K factors, the rows of the J × K  item loading matrix form 
+the basis of the Q- matrix. For a given item j, first ordering the factor loadings in ascending order, then 
+the proportion of the communality of item j accounted for by the consecutive sum of the first several 
+factors is compared to a pre- specified cutoff to decide on the q- vector (Köhn et al., 2025). The cutoff is 
+chosen to yield the best model-  data fit. For the regularization method, Xu and Shang (2018) developed 
+an EM algorithm for likelihood-  based estimation of the Q-  matrix with truncated L1 penalty. Their 
+method can be used with any CDMs, in that the L1 penalty is imposed on the regression coefficients 
+(i.e. /u1D739j) hence it selects significant /u1D739j's that implies the relevant attributes measured by item j. Lastly, 
+within the Bayesian framework, Chen et al. (2018) and Liu et al. (2020) developed MCMC algorithms 
+for Q- matrix estimation for the DINA model, with Chen et al.'s (2015) identifiability constraints imple -
+mented as constraints. Culpepper and Chen ( 2019) used a spike- slab prior for item parameters to select 
+the required attributes for each item, thereby estimating the Q-  matrix for the reduced reparametrized 
+unified model (rRUM).
+2.6 | Model fit evaluation
+CDM model fit evaluation is essential for ensuring the validity of the estimated latent attribute 
+profiles. For this section, we review both global model fit evaluation methods and methods for 
+evaluating item fit. Table 3 presents a summary of extant global model fit evaluation methods and 
+item fit tests.
+In the CDM literature, misfit in CDMs stems from two major sources: model misspecification and 
+Q- matrix misspecification. CDM model misspecification occurs when an incorrect model is used to 
+represent the relationship between latent attributes and item responses. For instance, a researcher may 
+apply a conjunctive model, such as the DINA, when the true data-  generating process is disjunctive, 
+which is better captured by a model like the DINO. CDM misspecification can result in inaccurate clas -
+sification of individuals' latent attribute mastery profiles, even when the Q-  matrix is correctly specified. 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 24 =====
+
+24 |   
+WA NG et al .
+Because different CDMs apply different assumptions about how attributes combine to produce item 
+responses, the selection of an incorrect model can compromise both the diagnostic validity and the 
+substantive interpretability of the results.
+Q- Matrix misspecification generally follows one of four patterns: overspecification, under specifi -
+cation, balanced misspecification or attribute creation/reduction (e.g. Chen, 2017 ; Lei & Li, 2016 ; Liu 
+et al., 2019; Rupp & Templin, 2008). An overspecified Q-  matrix occurs when an attribute that is not 
+required for mastery is misspecified as being required (i.e. specifying a 1 where a 0 should be present). 
+Conversely, an underspecified Q-  matrix occurs when an attribute that is required for mastery is mis -
+specified as not required (i.e. specifying a 0 where a 1 should be present). Balanced misspecification 
+involves both types of errors within the same Q-  matrix where some required attributes incorrectly 
+specified as 0 and some non-  required attributes incorrectly specified as 1. Finally, attribute creation/
+reduction involves either adding an unnecessary latent attribute or omitting a required latent attribute 
+from the model entirely. Since we have reviewed the latest Q- matrix refinement and validation methods 
+in Section 2.5 , in this section, we focus on general item fit evaluation methods.
+2.6.1 | Global model fit evaluation
+The goal of global CDM model fit evaluation is to identify the model that best accounts for the observed 
+response patterns. This process involves comparing both relative and absolute model fit indices among 
+a pool of candidate CDMs (Chen et al., 2013). Since the true data-  generating mechanism remains 
+unknown, researchers must rely on empirical fit indices to guide model selection.
+Relative model fit  focuses on selecting the best-  fitting CDM among candidate models, while absolute 
+model fit investigates whether a given model fits the data adequately in an absolute sense. Examples of 
+relative fit indices include the Bayesian Information Criterion (BIC) and Akaike Information Criterion 
+(AIC), where smaller values indicate better fit. Absolute model fit  investigates whether a given model 
+fits the data adequately without comparison to other models. Absolute fit indices include the Root 
+Mean Square Error of Approximation (RMSEA), the Mean Absolute Deviation of item correlations 
+(MADcor; DiBello et al., 2006) and traditional chi-  square tests such as Pearson's χ2 and the likelihood 
+ratio G2 test (Han & Johnson, 2019).
+Chen et al. (2013) proposed that examining relative and absolute fit statistics sequentially provides the 
+most comprehensive picture of global model fit. They recommended that researchers first use relative fit 
+indices to identify the best- fitting models, then examine absolute fit indices to detect potential Q-  matrix 
+misspecifications between the models. Their research demonstrated that relative fit indices are particularly 
+sensitive to CDM model misspecification, while absolute fit indices are more effective at detecting Q- matrix 
+misspecification. This work was extended by Hu et al. (2016) and Hansen et al. (2016), who examined the 
+performance of additional absolute fit indices for detecting Q-  matrix misspecification. These indices in -
+clude the limited information RMSEA2 (Houts & Cai, 2013 ; Maydeu- Olivares & Joe, 2014), the absolute 
+value of the deviations of Fisher-  transformed correlations (ABS(fcor); Chen et  al., 2013; Robitzsch 
+et al., 2014), and the maximum of all item pair chi- square statistics (MAX(/u1D7122
+jj /uni2032.var), Robitzsch et al., 2014).
+Under ideal conditions, relative and absolute fit indices should converge on the same conclusions 
+about model adequacy. However, in practice, researchers may encounter situations where relative and 
+absolute fit indices provide somewhat inconsistent information, particularly when Q-  matrix misspecifi -
+cation affects different items to varying degrees. For example, Li et al. (2016) examined five candidate 
+CDMs for modelling the Michigan English Language Assessment Battery. The relative fit indices sug -
+gested that the G-  DINA fit the data best, followed by ACDM, or R-  RUM, while absolute fit indices 
+indicated that ACDM and G-  DINA provided equally good fit, whereas R-  RUM displayed a slightly 
+worse fit. This finding illustrates a common challenge in model selection: while the relative indices 
+suggested G- DINA best fit the data, the absolute indices indicated that both G- DINA and ACDM were 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 25 =====
+
+    | 25
+REVIEW OF CDMS
+TABLE 3  CDM model and item fit tests.
+Fit category Method/Index Description & purpose
+Relative 
+model fit
+−2 Log- Likelihood (−2LL) The model with the lowest-  2LL is preferred. Tends to prefer a fully 
+saturated model.
+Akaike information criterion 
+(AIC)
+An information-  theoretic statistic used to compare non-  nested 
+models. The model with the lower AIC value is preferred.
+Bayesian information criterion 
+(BIC)
+Compares models by balancing likelihood and complexity. Higher 
+penalty for model complexity than AIC. Lower BIC values indicate 
+a better fit.
+Likelihood ratio test (LRT) Comparing the fit of two nested models. Assesses whether the 
+more complex model provides a significantly better fit to the data.
+Absolute 
+model fit
+Limited information M2 statistic A chi- square goodness-  of- fit statistic focused on the match 
+between the model-  implied and observed frequencies of item 
+responses.
+Root mean square error of 
+approximation (RMSEA)
+Measures the discrepancy between the model and the data per 
+degree of freedom. Less sensitive to sample size than the M 2 
+statistic.
+Standardized root mean square 
+residual (SRMSR)
+Measures the average difference between the observed and model- 
+predicted correlations of item pairs. Smaller values indicate a better 
+fit of the model to the data.
+Posterior predictive model 
+checking (PPMC)
+Bayesian framework where data is simulated from the fitted model 
+and compared to the observed data using various discrepancy 
+measures.
+Transformed correlation Examining the residual between the observed and model-  predicted 
+Fisher- transformed correlation of item pairs
+Item- level fit 
+analysis
+General /u1D7122 goodness-  of- fit test 
+for dichotomous data
+Generalized goodness-  of- fit test for dichotomous data.
+Orlando and Thissen's S − X 2 
+statistic
+A chi- square test statistic that compares the observed frequency 
+of correct responses for different score groups with the frequency 
+predicted by the model for a specific item.
+Item- level likelihood ratio G2 test Compare the fit of the overall model with a model where the 
+parameters for a specific item are allowed to differ.
+Wald test Test whether adding certain parameters to an item significantly 
+improves the item's fit.
+General discrimination index Validates the proposed Q-  matrix by identifying how well the items 
+q- vector discriminates between latent groups. Correctly specified 
+q- vectors will clearly discriminate between latent groups.
+Signal detection theory informed 
+/u1D6FD method
+Using an AIC informed search algorithm, the /u1D6FD method determines 
+how well a candidate q-  vector matches the observed item responses 
+by calculating how well the candidate q-  vector discriminates 
+between latent classes.
+Convex hull Focus on systematic patterns in model residuals to identify Q- 
+matrix misspecifications
+Root mean square of 
+approximation (RMSEA)
+A chi- squared based measure of item fit, computed as the square 
+root of the weighted average, across all skill classes and item 
+categories, of the squared differences between the estimated 
+response probability and the observed proportion of responses, 
+where the weights are given by the class probabilities.
+Root mean square deviation 
+(RMSD)
+Measures item fit using the square root of the average squared 
+differences between the model-  predicted response probabilities 
+and the observed response proportions across skill classes and 
+categories, optionally weighted across groups. Detects misfit with 
+respect to the Item Response Function
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 26 =====
+
+26 |   
+WA NG et al .
+acceptable options. In such cases, researchers must weigh multiple factors including model parsimony, 
+theoretical considerations and practical interpretability.
+This example highlights the need for more granular analysis beyond global and absolute fit statistics. 
+When global fit indices suggest potential Q-  matrix problems, researchers require diagnostic tools that 
+can pinpoint specific items or attribute specifications that may be contributing to model misfit. This 
+need naturally leads to item-  level fit analysis, where individual items are examined for their consistency 
+with the proposed Q-  matrix structure.
+2.6.2 | Item fit analysis
+Item fit analysis focuses on how well each individual item is explained by the proposed CDM and Q- 
+matrix. In general, the idea of item fit analysis is to use the results of a CDM to classify students into sev-
+eral groups based on their estimated latent profile and then calculate the average discrepancy between 
+the observed and the expected responses per item. Large discrepancies suggest a misfitting item. Several 
+statistical methods have been developed to quantify these discrepancies and identify problematic items. 
+One foundational approach is the goodness-  of- fit test proposed by Sinharay and Almond ( 2007), who 
+define a general test statistic for dichotomous CDM item fit as:
+Here, G is the number of permissible latent classes, O gj is the observed proportion correct and E gj is 
+the expected proportion correct. Under the assumption that the Q-  matrix is correct, too many misfit -
+ting items indicate that the proposed CDM does not fit the data well. If we assume the proposed CDM 
+is correct, the /u1D7122 test can be used to identify potential Q-  matrix misspecification.
+The chi-  squared statistics in Equation  22 focus on CDMs with binary responses. Recently, Wang 
+et al. (2024) and Quan and Wang (2024) proposed three versions of /u1D7122 for nominal responses. The first 
+method, referred to a version I in Wang et al. (2024), groups students who possess the same profile g 
+among all permissible profiles G /parenleft.s1G < 2M /parenright.s1
+, as shown in Equation  19. It is merely a polytomous exten -
+sion of Equation 18. The chi- squared test statistic is computed as
+where O jgs and E jgs are the observed and expected count of students classified into latent group g and select 
+option k for item j. ng is the number of students classified into latent group g. Under the assumption that 
+the CDM is correct, significant p-  values suggest the proposed Q- vector for item j may be misspecified. 
+Wang et al. ( 2024) suggested two different degrees of freedom for the reference chi-  square distribution: 
+G ×
+/parenleft.s2
+K j − 1
+/parenright.s2
+− dj and G − dj where K j and dj denote the number of response categories and the number 
+of parameters for item j. Wang et al. (2024) recommended the second df as the first one can be more con-
+servative. The second method, referred to as version II, groups students based on both the q-  vector for 
+(21)/u1D7122
+j =
+/uni2211.s1G
+g=1
+/parenleft.s2
+O gj− E gj
+/parenright.s22
+E gj
+∼ /u1D7122
+df=G−2,
+(22)/u1D7122
+j =
+G/uni2211.s1
+g=1
+Sj/uni2211.s1
+s=1
+ng
+/parenleft.s2
+O jgs− E jgs
+/parenright.s22
+E jgk
+/parenleft.s2
+ng − E jgs
+/parenright.s2
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 27 =====
+
+    | 27
+REVIEW OF CDMS
+item j and students' estimated profiles. For instance, if q j = (1, 1, 0, 0), the students with the latent classes 
+(1, 1, 0, 0),(1, 1, 1, 0),(1, 1, 0, 1) and (1, 1, 1, 1) are grouped together because this item cannot differentiate 
+them. Both versions have a limitation: for some latent groups, ng can be very small (e.g. <5) which violates 
+an assumption of the goodness- of- fit test.
+To address this violation, Quan and Wang ( 2024) proposed a marginal item fit test for polytomous 
+response, which is an extension of the Z-  test in Chen et al. ( 2013) and De La Torre (2008). It is a mar-
+ginal fit index because it no longer classifies individuals into latent groups; instead, the chi-  squared test 
+statistic is calculated as
+where O js and E js are the observed and expected counts for response category s within item j. Simulation 
+studies have shown that both the version II chi-  squared test in Wang et  al. ( 2024) and the general chi-  
+squared test in Quan and Wang (2024) are both sensitive to overfit and underfit Q- matrices when an assess-
+ment has at least 27 items. However, the general chi-  squared test has a higher power to detect misfit at 
+smaller sample sizes.
+While these /u1D7122- based statistics provide a rigorous framework for hypothesis testing, they are sensi -
+tive to sample sizes. To address this, absolute measures of item fit, often conceptualized as effect sizes, 
+have been used to complement hypothesis testing-  based approaches. Two such indices used in CDMs 
+are the item- level Root Mean Square Error of Approximation (RMSEA; Kunina-  Habenicht et al., 2009) 
+and the Root Mean Square Deviation (RMSD; Oliveri & von Davier, 2011 ). The item-  level RMSEA 
+quantifies overall discrepancy as the square root of the weighted average of squared differences between 
+the estimated response probabilities and the observed response proportions, computed across all per -
+missible latent skill classes and item response categories, with weights determined by the class probabil -
+ities. The RMSD, by contrast, targets misfit with respect to the item response function itself. This 
+measures the square root of the average squared differences between model-  predicted and observed 
+response proportions across skill classes and categories. Unlike RMSEA, the RMSD can be optionally 
+weighted across subgroups, making it particularly useful for detecting differential item functioning. 
+Together, by capturing the absolute magnitude of discrepancy rather than relying solely on statistical 
+significance, both indices offer researchers practical tools for evaluating item quality and guiding Q- 
+matrix refinement (e.g. Kang et al., 2019 ).
+In summary, CDM model misfit arises primarily from two sources: CDM model misspecifica -
+tion and misspecification of the Q-  matrix structure. The sequential framework introduced by Chen 
+et al. ( 2013) provided a systematic foundation for evaluating both CDM and Q-  matrix misspecifica -
+tion. CDM model fit is first assessed using relative indices to determine the best-  fitting CDM among 
+candidate models. Q-  matrix fit is then assessed utilizing absolute fit indices to diagnose potential 
+misfit. This framework has since been extended through methodological innovations that enable 
+more precise item-  level diagnosis, as reviewed above. Together, these advances move beyond global 
+evaluation toward fine-  grained item diagnostics. Most recently, research has expanded into utilizing 
+machine learning methods such as neural networks (Qin & Guo, 2023 ) and signal detection theory 
+(Li & Chen, 2025 ). Collectively, this progression highlights a clear research trajectory from basic 
+goodness-  of- fit tests to increasingly sophisticated, data-  driven approaches that provide fine-  grain 
+information on sources of misspecification.
+Looking ahead, several research directions offer promising avenues for advancing CDM model fit 
+evaluation. A critical limitation of current research is the assumption that an assessment's attribute 
+structure (i.e. the Q-  matrix) is invariant across population subgroups. Borrowing terminology from 
+(23)/u1D7122
+j =
+S/uni2211.s1
+s=1
+/parenleft.s2
+O js− E js
+/parenright.s22
+E js
+,
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 28 =====
+
+28 |   
+WA NG et al .
+differential item functioning research, this homogeneity assumption means that when researchers 
+propose a Q-  matrix, they presume this matrix applies universally across a reference and focal group. 
+However, without validating the proposed Q-  matrix independently across these groups, it becomes 
+impossible to distinguish between genuine Q-  matrix misspecification and misfit that stems from viola -
+tions of this homogeneity assumption. The challenge lies in developing validation methods that can per -
+form effectively with the small sample sizes inherent in sub-  group analyses. To address this challenge, 
+we recommend that future research focuses on leveraging machine learning and artificial intelligence 
+approaches, which have demonstrated promise for detecting complex patterns and relationships even 
+when working with limited data.
+A second promising avenue focuses on the response formats collected in diagnostic assessments. 
+Current CDMs are primarily designed for binary and polytomous responses, which map relatively easily 
+to proposed attribute structures. However, researchers are increasingly recognizing the need to extend 
+CDMs to alternative response formats. One such example is the forced-  choice (FC) format, in which 
+respondents must select one option from two or more options rather than endorsing each item inde -
+pendently. By eliminating neutral response options, FC formats compel respondents to make a defini -
+tive judgement, which can reduce acquiescence bias and improve measurement precision. Recent work 
+has established foundational frameworks for integrating FC assessments with CDMs, including the de -
+velopment of CDMs specifically designed for FC items (Huang, 2023) and the formalization of broader, 
+generalized diagnostic modelling frameworks for modelling FC assessment (Nájera, Kreitchmann, 
+et al., 2025; Nájera, Sorrel, et al., 2025 ).
+Beyond selected-  response formats, traditional CDM frameworks may also be insufficient for 
+capturing complex cognitive processes such as logical reasoning, multi-  step mathematical prob -
+lem solving or written argumentation. Constructed responses of this kind are typically handled 
+by transforming them into binary data. Recent research has begun to address this bottleneck by 
+demonstrating the viability of ML approaches for evaluating open-  ended responses; for example, 
+Zhai et  al. ( 2023) showed that ML algorithms can automatically extract and map natural language 
+argumentation features onto Q-  matrices.
+Looking ahead, future work should continue to explore the integration of natural language 
+processing and large language models for mapping richer constructed-  response formats onto Q-  
+matrices. Such approaches could substantially expand the diagnostic scope of CDMs, enabling more 
+authentic assessments of complex skills while preserving the interpretability of attribute-  based di -
+agnostic inferences.
+3 | DISCUSSION
+In this review, we focus on six aspects of methodological advancements in CDMs that are critical to 
+their broad applications. They are (1) accommodating polytomous attributes to allow finer gradation of 
+attribute mastery; (2) discovering data-  driven attribute relationships, which are important to discover 
+learning sequences and facilitate personalized learning; (3) methods for faster computing, especially for 
+a larger number of attributes; (4) methods for estimation with small sample sizes, which often occur 
+when CDMs are applied in classroom settings; (5) Q-  matrix estimation and refinement as well as (6) 
+model fit and item fit evaluation. This review is complementary to two other latest reviews on CDM by 
+Zhang et al. (2023) and Wang et al. (2024) as it touches upon the recent methods that aim to address the 
+key pain points of CDM applications.
+The field of CDM is evolving with more advanced models being proposed, such as the deep learning- 
+based CDM reviewed in Wang et al. (2024). While those models still maintain the same input structure, 
+such as students' responses, their cognitive profiles, item content and Q-  matrix, it relaxes the need to 
+pre- specify the parametric functions between item/attributes and students' responses. Instead, it uses 
+a data- driven strategy to learn the interaction function with neural networks, thereby enjoying greater 
+flexibility with higher predictive power to predict students' item performance. These models tend to be 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 29 =====
+
+    | 29
+REVIEW OF CDMS
+useful in online learning systems when on-  the- fly prediction of student behaviour is essential, yet they 
+are less useful for maintaining and replenishing the item bank because the item parameters are less inter-
+pretable. Along with the trend of infusing deep learning into psychometrics, one fruitful direction is to 
+augment the empirical response data with item and attribute content information. For example, one can 
+embed both contents into a common space and derive an initial content-  based Q- matrix, Q0, and then 
+use the response data to refine the Q-  matrix. In addition to the Bayesian method by Culpepper ( 2019) 
+that is reviewed earlier, an alternative Bayesian refinement that exploits information in Q0 can proceed 
+by treating each qjk ∈ {0, 1} as a parameter with a prior informed by Q0 as follows:
+qjk ∼ Bernoulli /parenleft.s1/u1D70Bik
+/parenright.s1, with logit
+/parenleft.s1
+/u1D70Bik
+/parenright.s1= /u1D6FD0 + /u1D6FD1 × 1
+/braceleft.s2
+Q 0,jk = 1
+/braceright.s2
+.
+By setting 𝛽1 > 0, this prior preserves the content information, and one can allow item or attribute- 
+level random effects for more flexibility, such as letting /u1D6FD1 ∼ N+
+/parenleft.s2
+0,/u1D70E2
+/u1D6FD1
+/parenright.s2
+.
+Another set of models that are very recently proposed and not reviewed here is deep-  CDM by 
+Gu (2024) as a form of deep generative model. Different from the deep learning-  based CDM, the deep- 
+CDM exhibits a layered architecture that implies a hierarchical generative process, with deeper layers 
+representing more advanced and higher-  order skills and shallower layers representing more basic and 
+foundational skills. This model has the potential to model the underlying hierarchical and heteroge -
+neous cognitive processes that generate the observed responses. The layered structure may serve as an 
+alternative to the attribute hierarchies reviewed herein.
+Also, the methodological boundary of CDMs is actively expanding to accommodate new response 
+formats and longitudinal tracking. As discussed earlier, the adaptation of diagnostic frameworks for 
+forced- choice and constructed-  response assessments opens new areas for CDM research and applica -
+tion. Additionally, advancements in longitudinal CDMs, such as utilizing penalized expectation–maxi -
+mization (EM) algorithms to infer learning trajectories in latent transition models (Wang, 2021), allow 
+researchers to track attribute mastery over time dynamically.
+In sum, this review underscores how recent methodological advances are expanding the scope and 
+practicality of CDMs. By enhancing modelling flexibility, computational efficiency, small-  sample appli-
+cability, fit evaluation and Q-  matrix refinement, CDMs are becoming more robust tools for both large- 
+scale testing and classroom assessment in education and in other domains. Our focus complements 
+recent reviews by emphasizing innovations that address key barriers to application. Looking ahead, 
+integrating CDMs with deep learning, content-  informed priors and generative frameworks offers prom-
+ising pathways for aligning diagnostic precision with the evolving demands of personalization such as 
+personalized learning.
+AUTHOR CONTRIBUTIONS
+Chun Wang: Conceptualization; funding acquisition; writing – original draft; methodology; validation; 
+writing – review and editing; formal analysis; project administration; supervision. Yale Quan:  Writing 
+– review and editing; writing – original draft; methodology. David Arthur:  Writing – original draft; 
+writing – review and editing; methodology.
+ACKNOWLEDGEMENTS
+The research reported here was supported by the Institute of Education Sciences, U.S. Department of 
+Education, through Grant R305D200015 and R305D240021 to the University of Washington and the 
+National Science Foundation, through grant EDU-  CORE #2300382 to the University of Washington. 
+The opinions expressed are those of the authors and do not represent the views of the Institute or the 
+U.S. Department of Education or National Science Foundation.
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 30 =====
+
+30 |   
+WA NG et al .
+CONFLICT OF INTEREST STATEMENT
+The authors declare no competing interests.
+DATA AVAILABILITY STATEMENT
+Data sharing not applicable to this article as no datasets were generated or analysed during the current 
+study.
+DISCLOSURE OF ARTIFICIAL INTELLIGENCE-  GENERATED 
+CONTENT (AIGC) TOOLS
+Artificial intelligence tools (ChatGPT) were used to improve readability and grammar. No content, 
+ideas or conclusions were generated by AI.
+ORCID
+Chun Wang  https:/ / orcid.org/0000-0003-2695-9781 
+REFERENCES
+Akbay, L. (2016). Relative efficiency of the nonparametric approach on attribute classification for small sample cases. Journal of 
+European Education , 6(1), 934. https:// doi. org/ 10. 18656/  jee. 58934 
+Arthur, D. (2024). Statistical methods for small sample cognitive diagnosis. Doctoral Dissertation. Purdue University. h t t p s :// 
+hammer.  purdue. edu/ artic les/ thesis/ Stati stical_ Metho ds_ for_ Small_ Sample_ Cogni tive_ Diagn osis/ 25639 338? file= 
+45761880
+Ayers, E., Nugent, R., & Dean, N. (2008). Skill set profile clustering based on student capability vectors computed from online tutoring data . 1st 
+International Conference on Educational Data Mining.
+Balakrishnan, S., Wainwright, M. J., & Yu, B. (2017). Statistical guarantees for the EM algorithm: From population to sample- 
+based analysis. The Annals of Statistics, 45 (1), 1435. https:// doi. org/ 10. 1214/ 16-  AOS1435
+Bao, Y. (2019). A diagnostic classification model for polytomous attributes . Dissertation, University of Georgia.
+Başokçu, T. O. (2014). Classification accuracy effects of Q-  matrix validation and sample size in DINA and G-  DINA models. 
+Journal of Education and Practice , 5(6), 220–230.
+Birenbaum, M., Kelly, A. E., & Tatsuoka, K. K. (1993). Diagnosing knowledge states in algebra using the rule-  space model. 
+Journal for Research in Mathematics Education , 24(5), 442. https:/ / doi. org/ 10. 2307/ 749153
+Bradshaw, L., Izsák, A., Templin, J., & Jacobson, E. (2014). Diagnosing teachers' understandings of rational numbers: Building a 
+multidimensional test within the diagnostic classification framework. Educational Measurement: Issues and Practice , 33(1), 2–14. 
+https:// doi. org/ 10. 1111/ emip. 12020 
+Bradshaw, L., & Templin, J. (2014). Combining item response theory and diagnostic classification models: A psychometric 
+model for scaling ability and diagnosing misconceptions. Psychometrika , 79(3), 403–425. https://  doi. org/ 10. 1007/ s1133 
+6-  013-  9350-  4
+Ceulemans, E., & Kiers, H. A. L. (2006). Selecting among three-  mode principal component models of different types and 
+complexities: A numerical convex hull based method. British Journal of Mathematical and Statistical Psycholog y , 59(1), 133–150. 
+https:// doi. org/ 10. 1348/ 00071 1005X 64817 
+Chang, Y.- P., Chiu, C.- Y., & Tsai, R.- C. (2019). Nonparametric CAT for CD in educational settings with small samples. Applied 
+Psychological Measurement , 43(7), 543–561. https:// doi. org/ 10. 1177/ 01466 21618 813113
+Chen, J. (2017). A residual-  based approach to validate Q-  matrix specifications. Applied Psychological Measurement , 41(4), 277–293. 
+https:/ / doi. org/ 10. 1177/ 01466 21616 686021
+Chen, J., & De La Torre, J. (2013). A general cognitive diagnosis model for expert-  defined Polytomous attributes. Applied 
+Psychological Measurement , 37(6), 419–437. https:/ / doi. org/ 10. 1177/ 01466 21613 479818
+Chen, J., De La Torre, J., & Zhang, Z. (2013). Relative and absolute fit evaluation in cognitive diagnosis modeling. Journal of 
+Educational Measurement , 50(2), 123–140. https:// doi. org/ 10. 1111/j. 1745-  3984. 2012. 00185. x
+Chen, Y., Culpepper, S. A., Chen, Y., & Douglas, J. (2018). Bayesian estimation of the DINA Q matrix. Psychometrika , 83(1), 
+89–108. https:// doi. org/ 10. 1007/ s1133 6-  017-  9579-  4
+Chen, Y., Li, X., Liu, J., & Ying, Z. (2017). Regularized latent class analysis with application in cognitive diagnosis. Psychometrika , 
+82(3), 660–692. https:// doi. org/ 10. 1007/ s1133 6-  016-  9545-  6
+Chen, Y., Liu, J., Xu, G., & Ying, Z. (2015). Statistical analysis of Q - matrix based diagnostic classification models. Journal of the 
+American Statistical Association , 110(510), 850–866. https:/ / doi. org/ 10. 1080/ 01621 459. 2014. 934827
+Chen, Y., & Wang, S. (2023). Bayesian estimation of attribute hierarchy for cognitive diagnosis models. Journal of Educational and 
+Behavioral Statistics , 48(6), 810–841. https:// doi. org/ 10. 3102/ 10769 98623 1174918
+Chiu, C.- Y. (2013). Statistical refinement of the Q-  matrix in cognitive diagnosis. Applied Psychological Measurement , 37(8), 598–618. 
+https:// doi. org/ 10. 1177/ 01466 21613 488436
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 31 =====
+
+    | 31
+REVIEW OF CDMS
+Chiu, C.-  Y., & Chang, Y.-  P. (2021). Advances in CD-  CAT: The general nonparametric item selection method. Psychometrika , 
+86(4), 1039–1057. https:// doi. org/ 10. 1007/ s1133 6-  021-  09792 -  z
+Chiu, C.- Y., Douglas, J. A., & Li, X. (2009). Cluster analysis for cognitive diagnosis: Theory and applications. Psychometrika , 74(4), 
+633–665. https:// doi. org/ 10. 1007/ s1133 6-  009-  9125-  0
+Chiu, C.-  Y., & Köhn, H.-  F. (2015). Consistency of cluster analysis for cognitive diagnosis: The DINO model and the DINA 
+model revisited. Applied Psychological Measurement , 39(6), 465–479. https:// doi. org/ 10. 1177/ 01466 21615 577087
+Chiu, C.- Y., & Köhn, H.- F. (2019). Consistency theory for the general nonparametric classification method. Psychometrika , 84(3), 
+830–845. https:// doi. org/ 10. 1007/ s1133 6-  019-  09660 -  x
+Chiu, C.- Y., Sun, Y., & Bian, Y. (2018). Cognitive diagnosis for small educational programs: The general nonparametric classifi -
+cation method. Psychometrika , 83(2), 355–375. https:// doi. org/ 10. 1007/ s1133 6-  017-  9595-  4
+Choi, H. J., Templin, J. L., Cohen, A. S., & Atwood, C. H. (2010). The impact of model misspecification on estimation accuracy in diagnostic 
+classification models . National Council on Measurement in Education.
+Chung, M. (2019). A Gibbs sampling algorithm that estimates the Q-  matrix for the DINA model. Journal of Mathematical 
+Psycholog y, 93, 102275. https:/ / doi. org/ 10. 1016/j. jmp. 2019. 07. 002
+Collins, L. M., & Lanza, S. T. (2010). Latent class and latent transition analysis: With applications in the social, behavioral, and health sciences . 
+John Wiley and Sons Inc. https:// doi. org/ 10. 1002/ 97804 70567333
+Collins, L. M., & Wugalter, S. E. (1992). Latent class models for stage-  sequential dynamic latent variables. Multivariate Behavioral 
+Research, 27(1), 131–157.
+Corcoran, T., Mosher, F. A., & Rogat, A. (2009). Learning progressions in science: An evidence-  based approach to reform. Teachers College–
+Columbia University.
+Culpepper, S. A. (2015). Bayesian estimation of the DINA model with Gibbs sampling. Journal of Educational and Behavioral 
+Statistics, 40(5), 454–476. https:// doi. org/ 10. 3102/ 10769 98615 595403
+Culpepper, S. A. (2019). Estimating the cognitive diagnosis Q matrix with expert knowledge: Application to the fraction- 
+subtraction dataset. Psychometrika , 84(2), 333–357. https:// doi. org/ 10. 1007/ s1133 6-  018-  9643-  8
+Culpepper, S. A., & Chen, Y. (2019). Development and application of an exploratory reduced Reparameterized unified model. 
+Journal of Educational and Behavioral Statistics , 44(1), 3–24. https:// doi. org/ 10. 3102/ 10769 98618 791306
+Culpepper, S. A., & Hudson, A. (2018). An improved strategy for Bayesian estimation of the reduced Reparameterized unified 
+model. Applied Psychological Measurement , 42(2), 99–115. https:// doi. org/ 10. 1177/ 01466 21617 707511
+Dahlgren, M. A., Hult, H., Dahlgren, L. O., Af Segerstad, H. H., & Johansson, K. (2006). From senior student to novice 
+worker: Learning trajectories in political science, psychology and mechanical engineering. Studies in Higher Education , 31(5), 
+569–586. https:// doi. org/ 10. 1080/ 03075 07060 0923400
+Daro, P., Mosher, F. A., & Corcoran, T. (2011). Learning Trajoctories in mathematics: A Foundation for Standards, curriculum, assessment 
+and instruction . (No. CPRE Research Report # RR-68). Columbia University.
+De La Torre, J. (2008). An empirically based method of Q-  matrix validation for the DINA model: Development and applica -
+tions. Journal of Educational Measurement , 45(4), 343–362. https:// doi. org/ 10. 1111/j. 1745-  3984. 2008. 00069. x
+De La Torre, J. (2009). A cognitive diagnosis model for cognitively based multiple- choice options. Applied Psychological Measurement , 
+33(3), 163–183. https:// doi. org/ 10. 1177/ 01466 21608 320523
+De La Torre, J. (2011). The generalized DINA model framework. Psychometrika , 76(2), 179–199. https:// doi. org/ 10. 1007/ s1133 
+6-  011-  9207-  7
+De La Torre, J., & Chiu, C.- Y. (2016). A general method of empirical Q-  matrix validation. Psychometrika , 81(2), 253–273. h t t p s :// 
+doi. org/ 10. 1007/ s1133 6-  015-  9467-  8
+De La Torre, J., Hong, Y., & Deng, W. (2010). Factors affecting the item parameter estimation and classification accuracy of the 
+DINA model. Journal of Educational Measurement , 47(2), 227–249. https:// doi. org/ 10. 1111/j. 1745-  3984. 2010. 00110. x
+De La Torre, J., & Lee, Y. (2013). Evaluating the Wald test for item-  level comparison of saturated and reduced models in cogni -
+tive diagnosis. Journal of Educational Measurement , 50(4), 355–373. https:// doi. org/ 10. 1111/ jedm. 12022 
+De La Torre, J., Qiu, X., & Santos, K. C. (2025). The generalized cognitive diagnosis model framework for Polytomous attri -
+butes. Psychometrika , 90(2), 687–716. https:// doi. org/ 10. 1017/ psy. 2024. 16
+DeCarlo, L. T. (2011). On the analysis of fraction subtraction data: The DINA model, classification, latent class sizes, and the 
+Q- matrix. Applied Psychological Measurement , 35(1), 8–26. https:// doi. org/ 10. 1177/ 01466 21610 377081
+DiBello, L. V., Henson, R. A., & Stout, W. F. (2015). A family of generalized diagnostic classification models for multiple choice 
+option- based scoring. Applied Psychological Measurement , 39(1), 62–79. https:// doi. org/ 10. 1177/ 01466 21614 561315
+DiBello, L. V., Roussos, L. A., & Stout, W. (2006). A review of cognitively diagnostic assessment and a summary of psycho -
+metric models. In Handbook of statistics  ( Vol. 26, pp. 979–1030). Elsevier. https:// doi. org/ 10. 1016/ S0169 -  7161(06) 26031 -  0
+DiBello, L. V., Stout, W. F., & Roussos, L. A. (1995). Unified cognitive/psychometric diagnostic assessment likelihood-  based 
+classification techniques. In Cognitively diagnostic assessment . Routledge.
+Embretson, S. E. (1985). A new design for cognitive ability testing: Multi-  process computer simulation. The Journal of Educational 
+Measurement, 22(3), 271–286.
+Galeshi, R., & Skaggs, G. (2016). Parameter recovery of a cognitive diagnostic model: Evidence from a simulation study. 
+International Journal of Quantitative Research in Education , 3(4), 223. https:// doi. org/ 10. 1504/ IJQRE. 2016. 082386
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 32 =====
+
+32 |   
+WA NG et al .
+Gierl, M. J., Leighton, J. P., & Hunka, S. M. (2007). Using the attribute hierarchy method to make diagnostic inferences about 
+examinees' cognitive skills. In J. Leighton & M. Gierl (Eds.), Cognitive diagnostic assessment for education  (1st ed., pp. 242–274). 
+Cambridge University Press. https://  doi. org/ 10. 1017/ CBO97 80511 611186. 009
+Glaser, R. (1994). Instructional technology and the Measwement of learning outcomes: Some Questions 1. Educational Measurement: 
+Issues and Practice , 13(4), 6–8. https:// doi. org/ 10. 1111/j. 1745-  3992. 1994. tb005 61. x
+Gu, Y. (2024). Going deep in diagnostic modeling: Deep cognitive diagnostic models (DeepCDMs). Psychometrika , 89(1), 118 –
+150. https:// doi. org/ 10. 1007/ s1133 6-  023-  09941 -  6
+Gu, Y., & Xu, G. (2019). Learning attribute patterns in high-  dimensional structured latent attribute models. Journal of Machine 
+Learning Research , 20(115), 1–58.
+Haertel, E. H. (1989). Using restricted latent class models to map the skill structure of achievement items. Journal of Educational 
+Measurement, 26(4), 301–321. https:// doi. org/ 10. 1111/j. 1745-  3984. 1989. tb003 36. x
+Han, Z., & Johnson, M. S. (2019). Global-  and item- level model fit indices. In M. Von Davier & Y.- S. Lee (Eds.), Handbook of diag-
+nostic classification models  (pp. 265–285). Springer International Publishing. https://  doi. org/ 10. 1007/ 978-  3-  030-  05584 -  4_ 13
+Hansen, M., Cai, L., Monroe, S., & Li, Z. (2016). Limited-  information goodness-  of- fit testing of diagnostic classification item 
+response models. British Journal of Mathematical and Statistical Psycholog y , 69(3), 225–252. https:// doi. org/ 10. 1111/ bmsp. 12074 
+Houts, C. R., & Cai, L. (2013). FlexMIRT users manual version 2.0: Flexible multilevel item factor analysis and test scoring . Vector 
+Psychometric Group.
+Hu, J., Miller, M. D., Huggins-  Manley, A. C., & Chen, Y.-  H. (2016). Evaluation of model fit in cognitive diagnosis models. 
+International Journal of Testing , 16(2), 119–141. https:// doi. org/ 10. 1080/ 15305 058. 2015. 1133627
+Huang, D., Stein, N., Rubin, D. B., & Kou, S. C. (2020). Catalytic prior distributions with application to generalized linear mod -
+els. Proceedings of the National Academy of Sciences, 117 (22), 12004–12010. https:// doi. org/ 10. 1073/ pnas. 19209 13117 
+Huang, D., Wang, F., Rubin, D. B., & Kou, S. C. (2025). Catalytic priors: Using synthetic data to specify prior distributions in 
+Bayesian analysis. Statistical Science , 40(2), 930. https:// doi. org/ 10. 1214/ 24-  STS930
+Huang, H. (2023). Diagnostic classification model for forced-  choice items and non cognitive tests. Educational and Psychological 
+Measurement, 83(1), 146–180. https:// doi. org/ 10. 1177/ 00131 64421 1069906
+Huebner, A. R., Wang, C., Quinlan, K., & Seubert, L. (2016). Item exposure control for multidimensional computer adap -
+tive testing under maximum likelihood and expected a posteriori estimation. Behavior Research Methods , 48(4), 1443–1453. 
+https:// doi. org/ 10. 3758/ s1342 8-  015-  0659-  z
+Im, S., & Yin, Y. (2009). Diagnosing skills of statistical hypothesis testing using the rule space method. Studies in Educational 
+Evaluation , 35(4), 193–199. https:/ / doi. org/ 10. 1016/j. stued uc. 2009. 12. 004
+Jang, E. E., Dunlop, M., Park, G., & Van Der Boom, E. H. (2015). How do young students with different profiles of reading skill 
+mastery, perceived ability, and goal orientation respond to holistic diagnostic feedback? Language Testing , 32(3), 359–383. 
+https:// doi. org/ 10. 1177/ 02655 32215 570924
+Junker, B. W., & Sijtsma, K. (2001). Cognitive assessment models with few assumptions, and connections with nonparametric 
+item response theory. Applied Psychological Measurement , 25(3), 258–272. https:// doi. org/ 10. 1177/ 01466 21012 2032064
+Kang, C., Yang, Y., & Zeng, P. (2019). Q-  matrix refinement based on item fit statistic RMSEA. Applied Psychological Measurement , 
+43(7), 527–542. https:// doi. org/ 10. 1177/ 01466 21618 813104
+Karelitz, T. M. (2004). Ordered category attribute coding framework for cognitive assessments . Dissertation.
+Kaya, Y., & Leite, W. L. (2017). Assessing change in latent skills across time with longitudinal cognitive diagnosis modeling: An 
+evaluation of model performance. Educational and Psychological Measurement , 77(3), 369–388.
+Köhn, H. F., & Chiu, C. Y. (2018). How to build a complete Q-  matrix for a cognitively diagnostic test. Journal of Classification , 35, 
+273–299. https:// doi. org/ 10. 1007/ s0035 7-  018-  9255-  0
+Köhn, H. F., Chiu, C. Y., Oluwalana, O., Kim, H., & Wang, J. (2025). A two-  step Q-  matrix estimation method. Applied 
+Psychological Measurement , 49(1- 2), 3–28.
+Kuhn, D. (2001). How do people know? Psychological Science , 12(1), 1–8. https:// doi. org/ 10. 1111/ 1467-  9280. 00302 
+Kunina-  Habenicht, O., Rupp, A. A., & Wilhelm, O. (2009). A practical illustration of multidimensional diagnostic skills pro -
+filing: Comparing results from confirmatory factor analysis and diagnostic classification models. Studies in Educational 
+Evaluation , 35(2–3), 64–70. https:// doi. org/ 10. 1016/j. stued uc. 2009. 10. 003
+Kunina-  Habenicht, O., Rupp, A. A., & Wilhelm, O. (2012). The impact of model misspecification on parameter estimation and 
+item- fit assessment in log-  linear diagnostic classification models. Journal of Educational Measurement , 49(1), 59–81. h t t p s :// 
+doi. org/ 10. 1111/j. 1745-  3984. 2011. 00160. x
+Kuo, B.- C., Chen, C.-  H., & De La Torre, J. (2018). A cognitive diagnosis model for identifying coexisting skills and misconcep -
+tions. Applied Psychological Measurement , 42(3), 179–191. https:/ / doi. org/ 10. 1177/ 01466 21617 722791
+Lei, P.- W., & Li, H. (2016). Performance of fit indices in choosing correct cognitive diagnostic models and Q-  matrices. Applied 
+Psychological Measurement , 40(6), 405–417. https:/ / doi. org/ 10. 1177/ 01466 21616 647954
+Leighton, J., & Gierl, M. (Eds.). (2007). Cognitive diagnostic assessment for education: Theory and applications  (1st ed.). Cambridge 
+University Press. https:// doi. org/ 10. 1017/ CBO97 80511 611186
+Leighton, J. P., Gierl, M. J., & Hunka, S. M. (2004). The attribute hierarchy method for cognitive assessment: A variation 
+on Tatsuoka's rule-  space approach. Journal of Educational Measurement , 41(3), 205–237. https:// doi. org/ 10. 1111/j. 1745-  3984. 
+2004. tb011 63. x
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 33 =====
+
+    | 33
+REVIEW OF CDMS
+Li, H., Hunter, C. V., & Lei, P.-  W. (2016). The selection of cognitive diagnostic models for a reading comprehension test. 
+Language Testing , 33(3), 391–409. https:/ / doi. org/ 10. 1177/ 02655 32215 590848
+Li, J., & Chen, P. (2025). A new Q-  matrix validation method based on signal detection theory. British Journal of Mathematical and 
+Statistical Psycholog y, 78(2), 522–554. https:// doi. org/ 10. 1111/ bmsp. 12371 
+Liang, M. Z., Chen, P., Knobf, M. T., Molassiotis, A., Tang, Y., Hu, G. Y., Sun, Z., Yu, Y. L., & Ye, Z. J. (2023). Measuring resil -
+ience by cognitive diagnosis models and its prediction of 6-  month quality of life in Be resilient to breast cancer (BRBC). 
+Frontiers in Psychiatry, 14 , 1102258. https:// doi. org/ 10. 3389/ fpsyt. 2023. 1102258
+Liu, C.- W., Andersson, B., & Skrondal, A. (2020). A constrained Metropolis–Hastings Robbins–Monro algorithm for Q matrix 
+estimation in DINA models. Psychometrika , 85(2), 322–357. https:// doi. org/ 10. 1007/ s1133 6-  020-  09707 -  4
+Liu, J., Xu, G., & Ying, Z. (2012). Data-  driven learning of Q-  matrix. Applied Psychological Measurement , 36(7), 548–564. h t t p s :// 
+doi. org/ 10. 1177/ 01466 21612 456591
+Liu, R. (2018). Misspecification of attribute structure in diagnostic measurement. Educational and Psychological Measurement , 78(4), 
+605–634. https:/ / doi. org/ 10. 1177/ 00131 64417 702458
+Liu, Y., Xin, T., Andersson, B., & Tian, W. (2019). Information matrix estimation procedures for cognitive diagnostic models. 
+British Journal of Mathematical and Statistical Psycholog y , 72(1), 18–37. https:// doi. org/ 10. 1111/ bmsp. 12134 
+Liu, Y., Xin, T., & Jiang, Y. (2022). Structural parameter standard error estimation method in diagnostic classification mod -
+els: Estimation and application. Multivariate Behavioral Research , 57(5), 784–803. https://  doi. org/ 10. 1080/ 00273 171. 2021. 
+1919048
+Ma, C., De La Torre, J., & Xu, G. (2023a). Bridging parametric and nonparametric methods in cognitive diagnosis. Psychometrika , 
+88(1), 51–75. https:// doi. org/ 10. 1007/ s1133 6-  022-  09878 -  2
+Ma, C., Ouyang, J., & Xu, G. (2023b). Learning latent and hierarchical structures in cognitive diagnosis models. Psychometrika , 
+88(1), 175–207. https:// doi. org/ 10. 1007/ s1133 6-  022-  09867 -  5
+Ma, W. (2022). A higher-  order cognitive diagnosis model with ordinal attributes for dichotomous response data. Multivariate 
+Behavioral Research , 57(2–3), 408–421. https://  doi. org/ 10. 1080/ 00273 171. 2020. 1860731
+Ma, W., & Guo, W. (2019). Cognitive diagnosis models for multiple strategies. British Journal of Mathematical and Statistical Psycholog y, 
+72(2), 370–392. https:// doi. org/ 10. 1111/ bmsp. 12155 
+Ma, W., & Jiang, Z. (2021). Estimating cognitive diagnosis models in small samples: Bayes modal estimation and monotonic 
+constraints. Applied Psychological Measurement , 45(2), 95 –111. https:// doi. org/ 10. 1177/ 01466 21620 977681
+Madison, M. J., & Bradshaw, L. (2018). Evaluating intervention effects in a diagnostic classification model framework. Journal of 
+Educational Measurement , 55, 32–51. https:// doi. org/ 10. 1111/ jedm. 12162 
+Madison, M. J., & Bradshaw, L. P. (2015). The effects of Q-  matrix design on classification accuracy in the log-  linear cognitive 
+diagnosis model. Educational and Psychological Measurement , 75(3), 491–511. https:// doi. org/ 10. 1177/ 00131 64414 539162
+Maydeu- Olivares, A., & Joe, H. (2014). Assessing approximate fit in categorical data analysis. Multivariate Behavioral Research , 
+49(4), 305–328. https:// doi. org/ 10. 1080/ 00273 171. 2014. 911075
+Mislevy, R. J. (1994). Evidence and inference in educational assessment. Psychometrika , 59(4), 439–483. https:// doi. org/ 10. 1007/ 
+BF022 94388 
+Morphew, J. W., Mestre, J. P., Kang, H.- A., Chang, H.-  H., & Fabry, G. (2018). Using computer adaptive testing to assess physics 
+proficiency and improve exam performance in an introductory physics course. Physical Review Physics Education Research , 
+14(2), 020110. https:/ / doi. org/ 10. 1103/ PhysR evPhy sEduc Res. 14. 020110
+Nájera, P., Abad, F. J., Chiu, C.-  Y., & Sorrel, M. A. (2023). The restricted DINA model: A comprehensive cognitive diagnostic 
+model for classroom-  level assessments. Journal of Educational and Behavioral Statistics , 48(6), 719–749. https:// doi. org/ 10. 
+3102/ 10769 98623 1158829
+Nájera, P., Kreitchmann, R. S., Escudero, S., Abad, F. J., de la Torre, J., & Sorrel, M. A. (2025). A general diagnostic modelling 
+framework for forced-  choice assessments. British Journal of Mathematical and Statistical Psycholog y , 78, 1025–1047. h t t p s :// d o i . 
+org/ 10. 1111/ bmsp. 12393 
+Nájera, P., Sorrel, M. A., Chiu, C. Y., & Abad, F. J. (2025). Variable-  length cognitive diagnostic computerized adaptive testing 
+in small-  scale assessments. Journal of Educational and Behavioral Statistics , 10769986251366581. https:// doi. org/ 10. 3102/ 10769 
+98625 13665 
+Nájera, P., Sorrel, M. A., De La Torre, J., & Abad, F. J. (2021). Balancing fit and parsimony to improve Q-  matrix validation. 
+British Journal of Mathematical and Statistical Psycholog y , 74(S1), 110–130. https:// doi. org/ 10. 1111/ bmsp. 12228 
+Nylund- Gibson, K., & Hart, S. R. (2014). Latent class analysis in prevention science. In Defining prevention science  (pp. 493–511). 
+Springer US.
+Oka, M., & Okada, K. (2021). Assessing the performance of diagnostic classification models in small sample contexts with different estimation 
+methods (version 3). arXiv. https:// doi. org/ 10. 48550/  ARXIV. 2104. 10975 
+Oliveri, M. E., & von Davier, M. (2011). Investigation of model fit and score scale comparability in international assessments. 
+Psychological Test and Assessment Modeling , 53(3), 315–333.
+Paulsen, J., & Valdivia, D. S. (2022). Examining cognitive diagnostic modeling in classroom assessment conditions. The Journal 
+of Experimental Education , 90(4), 916–933. https:// doi. org/ 10. 1080/ 00220 973. 2021. 1891008
+Qin, C., Zhu, H., Xu, T., Zhu, C., Ma, C., Chen, E., & Xiong, H. (2020). An enhanced neural network approach to person-  job 
+fit in talent recruitment. ACM Transactions on Information Systems , 38(2), 1–33. https:// doi. org/ 10. 1145/ 3376927
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 34 =====
+
+34 |   
+WA NG et al .
+Qin, H., & Guo, L. (2023). Using machine learning to improve Q-  matrix validation. Behavior Research Methods , 56(3), 1916–1935. 
+https:/ / doi. org/ 10. 3758/ s1342 8-  023-  02126 -  0
+Quan, Y., & Wang, C. (2024). A new item fit test for the diagnostic facet test model (DFSM). Annual Pacific Northwest 
+Research on Psychometrics and Applied Statistics Conference, Pullman, WA, United States.
+Ravand, H., & Baghaei, P. (2020). Diagnostic classification models: Recent developments, practical issues, and prospects. 
+International Journal of Testing , 20(1), 24–56. https:// doi. org/ 10. 1080/ 15305 058. 2019. 1588278
+Ren, H., & Wang, C. (2024). A plug-  and- play approach to discover learning map from cognitive diagnostic assessment: Beyond attribute hierarchy . 
+Research on Psychometrics & Applied Statistics (RPAS) 3rd Annual Conference, Pullman.
+Ren, H., & Wang, C. (2025). A longitudinal diagnostic facet status model: Tracking the learning trajectory . Paper presented at the Annual 
+Meeting of the National Council on Measurement in Education (NCME), Denver, CO.
+Robitzsch, A., Kiefer, T., George, A. C., & Ünlü, A. (2014). CDM: Cognitive diagnosis modeling . (Version 3.4) [R Package].
+Rodríguez-  Nogueira, Ó., Leirós-  Rodríguez, R., Pinto-  Carral, A., Álvarez- Álvarez, M. J., Fernández-  Martínez, E., & Moreno- 
+Poyato, A. R. (2022). The relationship between burnout and empathy in physiotherapists: A cross-  sectional study. Annals 
+of Medicine, 54(1), 933–940. https:// doi. org/ 10. 1080/ 07853 890. 2022. 2059102
+Rojas, G., De La Torre, J., & Olea, J. (2012). Choosing between general and specific cognitive diagnosis models when the sample size is small . 
+National Council on Measurement in Education.
+Rupp, A. A., & Templin, J. (2008). The effects of Q-  matrix misspecification on parameter estimates and classification accuracy 
+in the DINA model. Educational and Psychological Measurement , 68(1), 78–96. https:// doi. org/ 10. 1177/ 00131 64407 301545
+Rupp, A. A., Templin, J., & Henson, R. A. (2010). Diagnostic measurement: Theory, methods, and applications . The Guilford Press.
+Sen, S., & Cohen, A. S. (2021). Sample size requirements for applying diagnostic classification models. Frontiers in Psycholog y, 11, 
+621251. https:// doi. org/ 10. 3389/ fpsyg. 2020. 621251
+Sessoms, J., & Henson, R. A. (2018). Applications of diagnostic classification models: A literature review and critical commen -
+tary. Measurement: Interdisciplinary Research and Perspectives, 16 (1), 1–17. https:// doi. org/ 10. 1080/ 15366 367. 2018. 1435104
+Shu, Z., Henson, R., & Willse, J. (2013). Using neural network analysis to define methods of DINA model estimation for small 
+sample sizes. Journal of Classification , 30(2), 173–194. https:// doi. org/ 10. 1007/ s0035 7-  013-  9134-  7
+Simon, M. A., & Tzur, R. (2004). Explicating the role of mathematical tasks in conceptual learning: An elaboration of the hypo -
+thetical learning trajectory. Mathematical Thinking and Learning , 6(2), 91–104. https:// doi. org/ 10. 1207/ s1532 7833m tl0602_ 2
+Sinharay, S., & Almond, R. G. (2007). Assessing fit of cognitive diagnostic models a case study. Educational and Psychological 
+Measurement, 67(2), 239–257. https:// doi. org/ 10. 1177/ 00131 64406 292025
+Sorrel, M. A., Abad, F. J., & Nájera, P. (2021). Improving accuracy and usage by correctly selecting: The effects of model selec -
+tion in cognitive diagnosis computerized adaptive testing. Applied Psychological Measurement , 45(2), 112–129. https:/ / doi. org/ 
+10. 1177/ 01466 21620 977682
+Sorrel, M. A., De La Torre, J., Abad, F. J., & Olea, J. (2017). Two-  step likelihood ratio test for item-  level model comparison in 
+cognitive diagnosis models. Methodolog y , 13(1), 39–47.
+Sorrel, M. A., Escudero, S., Nájera, P., Kreitchmann, R. S., & Vázquez-  Lira, R. (2023). Exploring approaches for estimating 
+parameters in cognitive diagnosis models with small sample sizes. The Psychiatrist , 5(2), 336–349.
+Sünbül, S. Ö., & Kan, A. (2016). Factors affecting the item parameter estimation and classification accuracy of the cognitive 
+diagnostic models. Hacettepe Universitesi Egitim Fakultesi Dergisi-  Hacettepe University Journal of Education , 31(4), 778–795.
+Tatsuoka, K. K. (2009). Cognitive assessment: An introduction to the rule space method . Routledge. https://  doi. org/ 10. 4324/ 97802 
+03883372
+Templin, J. (2004). Generalized linear mixed proficiency models for cognitive diagnosis . Doctoral Dissertation, University of Illinois at 
+Urbana-Champaign. https:/ / hdl. handle. net/ 2142/ 82077 
+Templin, J., & Bradshaw, L. (2013). Measuring the reliability of diagnostic classification model examinee estimates. Journal of 
+Classification , 30(2), 251–275. https:// doi. org/ 10. 1007/ s0035 7-  013-  9129-  4
+Templin, J., & Bradshaw, L. (2014). Hierarchical diagnostic classification models: A family of models for estimating and testing 
+attribute hierarchies. Psychometrika , 79(2), 317–339. https:// doi. org/ 10. 1007/ s1133 6-  013-  9362-  0
+Templin, J. L., & Henson, R. A. (2006). Measurement of psychological disorders using cognitive diagnosis models. Psychological 
+Methods, 11(3), 287–305. https:// doi. org/ 10. 1037/ 1082-  989X. 11.3. 287
+Tjoe, H., & Torre, J. d. l. (2012). Proportional reasoning problems: Current state and a possible future direction . 12th International Congress 
+on Mathematical Education, COEX, Seoul, Korea.
+Tu, D., Gao, X., Wang, D., & Cai, Y. (2017). A new measurement of internet addiction using diagnostic classification models. 
+Frontiers in Psycholog y, 8, 1768. https:// doi. org/ 10. 3389/ fpsyg. 2017. 01768 
+Tu, D., Wang, S., Cai, Y., Douglas, J., & Chang, H.-  H. (2018). Cognitive diagnostic models with attribute hierarchies: Model 
+estimation with a restricted Q-  matrix design. Applied Psychological Measurement , 43(4), 255–271. https://  doi. org/ 10. 1177/ 
+01466 21618 765721
+Tzou, H., & Yang, Y. (2019). Improved performance of model fit indices with small sample sizes in cognitive diagnostic models. 
+International Journal of Assessment Tools in Education , 6(1), 154–169. https:/ / doi. org/ 10. 21449/  ijate. 482005
+Von Davier, M. (2008). A general diagnostic model applied to language testing data. British Journal of Mathematical and Statistical 
+Psycholog y, 61(2), 287–307. https:// doi. org/ 10. 1348/ 00071 1007X 193957
+Von Davier, M. (2014). The log-  linear cognitive diagnostic model ( LCDM) as a special case of the general diagnostic model 
+(GDM). ETS Research Report Series, 2014 (2), 1–13. https:// doi. org/ 10. 1002/ ets2. 12043 
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+===== PAGE 35 =====
+
+    | 35
+REVIEW OF CDMS
+Vosniadou, S., & Brewer, W. F. (1992). Mental models of the earth: A study of conceptual change in childhood. Cognitive 
+Psycholog y, 24(4), 535–585. https:// doi. org/ 10. 1016/ 0010-  0285(92) 90018 -  W
+Wang, C. (2021). Using penalized EM algorithm to infer learning trajectories in latent transition CDM. Psychometrika , 86(1), 
+167–189. https:// doi. org/ 10. 1007/ s1133 6-  020-  09742 -  1
+Wang, C. (2024). A diagnostic facet status model (DFSM) for extracting instructionally useful information from diagnostic 
+assessment. Psychometrika , 89(3), 747–773. https:// doi. org/ 10. 1007/ s1133 6-  024-  09971 -  8
+Wang, C., & Gierl, M. J. (2011). Using the attribute hierarchy method to make diagnostic inferences about examinees' cognitive 
+skills in critical Reading: Using the AHM in Reading. Journal of Educational Measurement , 48(2), 165–187. https:// doi. org/ 10. 
+1111/j. 1745-  3984. 2011. 00142. x
+Wang, C., & Lu, J. (2021). Learning attribute hierarchies from data: Two exploratory approaches. Journal of Educational and 
+Behavioral Statistics , 46(1), 58–84. https:// doi. org/ 10. 3102/ 10769 98620 931094
+Wang, F., Gao, W., Liu, Q., Li, J., Zhao, G., Zhang, Z., Huang, Z., Zhu, M., Wang, S., Tong, W., & Chen, E. (2024). A survey 
+of models for cognitive diagnosis: New developments and future directions . (No. arXiv:2407.05458) arXiv. https://  doi. org/ 10. 48550/  
+arXiv. 2407. 05458 
+Wang, J., Shi, N., Zhang, X., & Xu, G. (2022). Sequential Gibbs sampling algorithm for cognitive diagnosis models with many 
+attributes. Multivariate Behavioral Research , 57(5), 840–858. https://  doi. org/ 10. 1080/ 00273 171. 2021. 1896352
+Wayman, E. A., Culpepper, S. A., Douglas, J., & Bowers, J. (2025). A restricted latent class model with polytomous attributes and 
+respondent- level covariates. Behaviormetrika , 1–29. https:// doi. org/ 10. 1007/ s4123 7-  025-  00271 -  8
+Willse, J. T., Henson, R. A., & Templin, J. L. (2007). Using sumscores or IRT in place of cognitive diagnostic models: Can more familiar models 
+do the job? National Council on Measurement in Education.
+Xu, G., & Shang, Z. (2018). Identifying latent structures in restricted latent class models. Journal of the American Statistical 
+Association , 113(523), 1284–1295. https:// doi. org/ 10. 1080/ 01621 459. 2017. 1340889
+Yakar, L., Doğan, N., & De La Torre, J. (2021). Retrofitting of Polytomous cognitive diagnosis and multidimensional item 
+response theory models. Eğitimde Ve Psikolojide Ölçme Ve Değerlendirme Dergisi , 12(2), 97–111. https:// doi. org/ 10. 21031/  epod. 
+778861
+Yamaguchi, K., Liu, Y., & Xu, G. (2025). Generalized Bayesian method for diagnostic classification models. Psychometrika , 90(1), 
+108–145. https:// doi. org/ 10. 1017/ psy. 2024. 20
+Yan, Y., Dong, S., & Yu, X. (2024). Using ordering theory to learn attribute hierarchies from examinees' attribute profiles. Journal 
+of Educational and Behavioral Statistics , 50, 10769986241280389. https:// doi. org/ 10. 3102/ 10769 98624 1280389
+Zeng, Z., Gu, Y., & Xu, G. (2023). A tensor- EM method for large-  scale latent class analysis with binary responses. Psychometrika , 
+88(2), 580–612. https:// doi. org/ 10. 1007/ s1133 6-  022-  09887 -  1
+Zhai, X., Haudek, K. C., & Ma, W. (2023). Assessing argumentation using machine learning and cognitive diagnostic modeling. 
+Research in Science Education , 53, 405–424. https:// doi. org/ 10. 1007/ s1116 5-  022-  10062 -  w
+Zhang, S., Liu, J., & Ying, Z. (2023). Statistical applications to cognitive diagnostic testing. Annual Review of Statistics and Its 
+Application , 10(1), 651–675. https:/ / doi. org/ 10. 1146/ annur ev-  stati stics -  03302 1-  111803
+Zhang, X., Jiang, Y., Xin, T., & Liu, Y. (2024). Iterative attribute hierarchy exploration methods for cognitive diagnosis models. 
+Journal of Educational and Behavioral Statistics , 50, 10769986241268906. https:// doi. org/ 10. 3102/ 10769 98624 1268906
+Zhu, C., Zhu, H., Xiong, H., Ma, C., Xie, F., Ding, P., & Li, P. (2018). Person-  job fit: Adapting the right talent for the right job 
+with joint representation learning. ACM Transactions on Management Information Systems , 9(3), 1–17. https:// doi. org/ 10. 1145/ 
+3234465
+How to cite this article: Wang, C., Quan, Y., & Arthur, D. (2026). Review of cognitive 
+diagnostic models (CDMs): Recent methodological advancements for addressing practical 
+challenges. British Journal of Mathematical and Statistical Psycholog y, 00, 1–35. https://doi.org/10.1111/
+bmsp.70066
+ 20448317, 0, Downloaded from https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/bmsp.70066, Wiley Online Library on [07/08/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License

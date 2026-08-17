@@ -14,37 +14,43 @@ export const competencies: Competency[] = [
     id: 'c-sql-select',
     name: 'SELECT Statements',
     description: 'SELECT, WHERE, ORDER BY, LIMIT, DISTINCT',
-    parentId: 'c-sql'
+    parentId: 'c-sql',
+    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
   },
   {
     id: 'c-sql-joins',
     name: 'JOINs',
     description: 'INNER JOIN, OUTER JOIN, CROSS JOIN',
-    parentId: 'c-sql'
+    parentId: 'c-sql',
+    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
   },
   {
     id: 'c-sql-dml',
     name: 'DML Operationen',
     description: 'INSERT, UPDATE, DELETE',
-    parentId: 'c-sql'
+    parentId: 'c-sql',
+    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
   },
   {
     id: 'c-sql-aggregation',
     name: 'Aggregation & Gruppierung',
     description: 'COUNT, SUM, AVG, GROUP BY, HAVING',
-    parentId: 'c-sql'
+    parentId: 'c-sql',
+    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
   },
   {
     id: 'c-sql-subqueries',
     name: 'Subqueries',
     description: 'Verschachtelte Abfragen',
-    parentId: 'c-sql'
+    parentId: 'c-sql',
+    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
   },
   {
     id: 'c-sql-advanced',
     name: 'SQL Fortgeschritten',
     description: 'Views, Stored Procedures',
-    parentId: 'c-sql'
+    parentId: 'c-sql',
+    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
   },
 
   // ============================================================
@@ -60,31 +66,36 @@ export const competencies: Competency[] = [
     id: 'c-er-model',
     name: 'ER-Modellierung',
     description: 'Entity-Relationship Modellierung',
-    parentId: 'c-db-design'
+    parentId: 'c-db-design',
+    prerequisites: [{ competencyId: 'c-db-design', minimumMastery: 0.6 }]
   },
   {
     id: 'c-ser-model',
     name: 'SER-Modellierung',
     description: 'System Entity Relationship Modellierung',
-    parentId: 'c-db-design'
+    parentId: 'c-db-design',
+    prerequisites: [{ competencyId: 'c-db-design', minimumMastery: 0.6 }]
   },
   {
     id: 'c-er-typ',
     name: 'ER-Typen',
     description: 'Entity-Relationship Typen und Attribute',
-    parentId: 'c-ser-model'
+    parentId: 'c-ser-model',
+    prerequisites: [{ competencyId: 'c-ser-model', minimumMastery: 0.6 }]
   },
   {
     id: 'c-er-entities',
     name: 'Entitäten & Beziehungen',
     description: 'Entitäten, Beziehungen, Kardinalitäten',
-    parentId: 'c-er-model'
+    parentId: 'c-er-model',
+    prerequisites: [{ competencyId: 'c-er-model', minimumMastery: 0.6 }]
   },
   {
     id: 'c-er-cardinality',
     name: 'Kardinalitäten',
     description: '1:1, 1:n, n:m Beziehungen',
-    parentId: 'c-er-model'
+    parentId: 'c-er-model',
+    prerequisites: [{ competencyId: 'c-er-model', minimumMastery: 0.6 }]
   },
 
   // ============================================================
@@ -100,37 +111,43 @@ export const competencies: Competency[] = [
     id: 'c-norm-1nf',
     name: '1. Normalform (1NF)',
     description: 'Atomare Werte, keine Wiederholungsgruppen',
-    parentId: 'c-normalization'
+    parentId: 'c-normalization',
+    prerequisites: [{ competencyId: 'c-normalization', minimumMastery: 0.6 }]
   },
   {
     id: 'c-norm-2nf',
     name: '2. Normalform (2NF)',
     description: 'Keine partiellen Abhängigkeiten',
-    parentId: 'c-normalization'
+    parentId: 'c-normalization',
+    prerequisites: [{ competencyId: 'c-norm-1nf', minimumMastery: 0.6 }]
   },
   {
     id: 'c-norm-3nf',
     name: '3. Normalform (3NF)',
     description: 'Keine transitiven Abhängigkeiten',
-    parentId: 'c-normalization'
+    parentId: 'c-normalization',
+    prerequisites: [{ competencyId: 'c-norm-2nf', minimumMastery: 0.6 }]
   },
   {
     id: 'c-norm-bcnf',
     name: 'BCNF',
     description: 'Boyce-Codd Normalform',
-    parentId: 'c-normalization'
+    parentId: 'c-normalization',
+    prerequisites: [{ competencyId: 'c-norm-3nf', minimumMastery: 0.6 }]
   },
   {
     id: 'c-norm-anomalies',
     name: 'Datenbankanomalien',
     description: 'Einfüge-, Änderungs-, Löschanomalien',
-    parentId: 'c-normalization'
+    parentId: 'c-normalization',
+    prerequisites: [{ competencyId: 'c-normalization', minimumMastery: 0.6 }]
   },
   {
     id: 'c-norm-dependencies',
     name: 'Funktionale Abhängigkeiten',
     description: 'Funktionale und transitive Abhängigkeiten',
-    parentId: 'c-normalization'
+    parentId: 'c-normalization',
+    prerequisites: [{ competencyId: 'c-normalization', minimumMastery: 0.6 }]
   },
 
   // ============================================================
@@ -146,13 +163,15 @@ export const competencies: Competency[] = [
     id: 'c-isolation-levels',
     name: 'Isolation Levels',
     description: 'READ UNCOMMITTED bis SERIALIZABLE',
-    parentId: 'c-concurrency'
+    parentId: 'c-concurrency',
+    prerequisites: [{ competencyId: 'c-concurrency', minimumMastery: 0.6 }]
   },
   {
     id: 'c-concurrency-issues',
     name: 'Concurrency Issues',
     description: 'Dirty Read, Lost Update, Phantom Read',
-    parentId: 'c-concurrency'
+    parentId: 'c-concurrency',
+    prerequisites: [{ competencyId: 'c-concurrency', minimumMastery: 0.6 }]
   }
 ]
 
@@ -516,6 +535,7 @@ const createQuestions = (competencyId: string, prompts: string[]): Question[] =>
     text: prompt,
     title: prompt,
     competencyIds: [competencyId],
+    competencyLinks: [{ competencyId, relation: 'required', weight: 1 }],
     difficulty: difficultyPattern[index]
   }))
 }

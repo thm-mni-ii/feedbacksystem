@@ -21,6 +21,14 @@
         @click="zoomLevel -= 0.1"
       ></v-btn>
     </div>
+    <div class="graph-toolbar-right pa-2" :style="graphToolbarStyle">
+      <QMatrixDialog
+        :competencies="competencies"
+        :questions="questions"
+        title="Q-Matrix: SkillGraph"
+        button-label="Q-Matrix"
+      />
+    </div>
     <v-network-graph
       class="graph"
       v-model:zoom-level="zoomLevel"
@@ -37,6 +45,8 @@
 import { computed } from 'vue'
 import * as vNG from 'v-network-graph'
 import { skillGraphPalette } from '@/plugins/vuetify'
+import QMatrixDialog from '@/dialog/DialogQMatrix.vue'
+import type { Competency, Question } from '@/model/types'
 
 interface Props {
   zoomLevel: number
@@ -45,6 +55,8 @@ interface Props {
   layouts: vNG.Layouts
   configs: vNG.Configs
   eventHandlers: vNG.EventHandlers
+  competencies: Competency[]
+  questions: Question[]
 }
 
 interface Emits {
@@ -85,6 +97,15 @@ const toolbarButtonStyle = {
   position: absolute;
   top: 6px;
   left: 6px;
+  z-index: 2;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
+.graph-toolbar-right {
+  position: absolute;
+  top: 6px;
+  right: 6px;
   z-index: 2;
   border-radius: 12px;
   backdrop-filter: blur(4px);
