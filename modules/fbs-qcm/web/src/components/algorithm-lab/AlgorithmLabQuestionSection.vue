@@ -53,8 +53,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { ProfileGroup } from '@/composables/competencyHierarchy'
 import type { NextQuestion } from '@/model/types'
-import type { ProfileGroup } from '@/composables/useAlgorithmLabView'
 import AlgorithmLabProfilePanel from './AlgorithmLabProfilePanel.vue'
 
 interface Props {

@@ -51,6 +51,8 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     return algo.getOverallScore(competencies_ref.value, session.value)
   })
 
+  const overallProgress = computed(() => overallScore.value)
+
   const historyCount = computed(() => session.value?.history.length ?? 0)
 
   function setCompetencies(values: Competency[]) {
@@ -116,7 +118,9 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     const { updatedState, result } = algo.submitAnswer(
       current.question,
       normalizedScore,
-      session.value
+      session.value,
+      competencies_ref.value,
+      questions_ref.value
     )
 
     session.value = updatedState
@@ -138,6 +142,12 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     await learningProgressRepository.saveSessionState(updatedState)
 
     lastResult.value = result
+    isComplete.value = result.sessionComplete
+    if (result.sessionComplete) {
+      currentQuestion.value = null
+      questionPresentedAt.value = null
+      return
+    }
 
     advance()
   }
@@ -153,7 +163,11 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     attempts.value = await learningProgressRepository.getAttempts(sessionId)
     currentQuestion.value = null
     lastResult.value = null
-    isComplete.value = false
+    isComplete.value = !!savedSession.completedAt
+    if (isComplete.value) {
+      questionPresentedAt.value = null
+      return true
+    }
     advance()
     return true
   }
@@ -231,6 +245,7 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
   return {
     // state
     competencies: competencies_ref,
+    skills: competencies_ref,
     questions: questions_ref,
 
     session,
@@ -242,6 +257,7 @@ export const useQuizSessionStore = defineStore('quizSession', () => {
     // computed
     progress,
     overallScore,
+    overallProgress,
     historyCount,
     excludedQuestionIds,
 

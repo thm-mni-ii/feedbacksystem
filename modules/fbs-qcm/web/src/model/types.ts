@@ -143,6 +143,7 @@ export interface SessionState {
   studentId: string
   startedAt: number
   updatedAt: number
+  completedAt?: number | null
   competencies: Record<string, CompetencyState>
   history: AnswerRecord[]
   recentQuestionIds: string[]
@@ -177,4 +178,6 @@ export interface ProgressItem {
   label: string
   score: number
   timesAssessed: number
+  uncertainty: number
+  certainty: number
 }

@@ -14,43 +14,37 @@ export const competencies: Competency[] = [
     id: 'c-sql-select',
     name: 'SELECT Statements',
     description: 'SELECT, WHERE, ORDER BY, LIMIT, DISTINCT',
-    parentId: 'c-sql',
-    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
+    parentId: 'c-sql'
   },
   {
     id: 'c-sql-joins',
     name: 'JOINs',
     description: 'INNER JOIN, OUTER JOIN, CROSS JOIN',
-    parentId: 'c-sql',
-    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
+    parentId: 'c-sql'
   },
   {
     id: 'c-sql-dml',
     name: 'DML Operationen',
     description: 'INSERT, UPDATE, DELETE',
-    parentId: 'c-sql',
-    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
+    parentId: 'c-sql'
   },
   {
     id: 'c-sql-aggregation',
     name: 'Aggregation & Gruppierung',
     description: 'COUNT, SUM, AVG, GROUP BY, HAVING',
-    parentId: 'c-sql',
-    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
+    parentId: 'c-sql'
   },
   {
     id: 'c-sql-subqueries',
     name: 'Subqueries',
     description: 'Verschachtelte Abfragen',
-    parentId: 'c-sql',
-    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
+    parentId: 'c-sql'
   },
   {
     id: 'c-sql-advanced',
     name: 'SQL Fortgeschritten',
     description: 'Views, Stored Procedures',
-    parentId: 'c-sql',
-    prerequisites: [{ competencyId: 'c-sql', minimumMastery: 0.6 }]
+    parentId: 'c-sql'
   },
 
   // ============================================================
@@ -66,36 +60,31 @@ export const competencies: Competency[] = [
     id: 'c-er-model',
     name: 'ER-Modellierung',
     description: 'Entity-Relationship Modellierung',
-    parentId: 'c-db-design',
-    prerequisites: [{ competencyId: 'c-db-design', minimumMastery: 0.6 }]
+    parentId: 'c-db-design'
   },
   {
     id: 'c-ser-model',
     name: 'SER-Modellierung',
     description: 'System Entity Relationship Modellierung',
-    parentId: 'c-db-design',
-    prerequisites: [{ competencyId: 'c-db-design', minimumMastery: 0.6 }]
+    parentId: 'c-db-design'
   },
   {
     id: 'c-er-typ',
     name: 'ER-Typen',
     description: 'Entity-Relationship Typen und Attribute',
-    parentId: 'c-ser-model',
-    prerequisites: [{ competencyId: 'c-ser-model', minimumMastery: 0.6 }]
+    parentId: 'c-ser-model'
   },
   {
     id: 'c-er-entities',
     name: 'Entitäten & Beziehungen',
     description: 'Entitäten, Beziehungen, Kardinalitäten',
-    parentId: 'c-er-model',
-    prerequisites: [{ competencyId: 'c-er-model', minimumMastery: 0.6 }]
+    parentId: 'c-er-model'
   },
   {
     id: 'c-er-cardinality',
     name: 'Kardinalitäten',
     description: '1:1, 1:n, n:m Beziehungen',
-    parentId: 'c-er-model',
-    prerequisites: [{ competencyId: 'c-er-model', minimumMastery: 0.6 }]
+    parentId: 'c-er-model'
   },
 
   // ============================================================
@@ -111,8 +100,7 @@ export const competencies: Competency[] = [
     id: 'c-norm-1nf',
     name: '1. Normalform (1NF)',
     description: 'Atomare Werte, keine Wiederholungsgruppen',
-    parentId: 'c-normalization',
-    prerequisites: [{ competencyId: 'c-normalization', minimumMastery: 0.6 }]
+    parentId: 'c-normalization'
   },
   {
     id: 'c-norm-2nf',
@@ -139,15 +127,13 @@ export const competencies: Competency[] = [
     id: 'c-norm-anomalies',
     name: 'Datenbankanomalien',
     description: 'Einfüge-, Änderungs-, Löschanomalien',
-    parentId: 'c-normalization',
-    prerequisites: [{ competencyId: 'c-normalization', minimumMastery: 0.6 }]
+    parentId: 'c-normalization'
   },
   {
     id: 'c-norm-dependencies',
     name: 'Funktionale Abhängigkeiten',
     description: 'Funktionale und transitive Abhängigkeiten',
-    parentId: 'c-normalization',
-    prerequisites: [{ competencyId: 'c-normalization', minimumMastery: 0.6 }]
+    parentId: 'c-normalization'
   },
 
   // ============================================================
@@ -163,15 +149,13 @@ export const competencies: Competency[] = [
     id: 'c-isolation-levels',
     name: 'Isolation Levels',
     description: 'READ UNCOMMITTED bis SERIALIZABLE',
-    parentId: 'c-concurrency',
-    prerequisites: [{ competencyId: 'c-concurrency', minimumMastery: 0.6 }]
+    parentId: 'c-concurrency'
   },
   {
     id: 'c-concurrency-issues',
     name: 'Concurrency Issues',
     description: 'Dirty Read, Lost Update, Phantom Read',
-    parentId: 'c-concurrency',
-    prerequisites: [{ competencyId: 'c-concurrency', minimumMastery: 0.6 }]
+    parentId: 'c-concurrency'
   }
 ]
 

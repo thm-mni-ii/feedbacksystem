@@ -32,8 +32,10 @@
           :get-competency-color="getCompetencyColor"
           :get-competency="getCompetency"
           :child-competencies="childCompetencies"
+          :get-available-prerequisites="getAvailablePrerequisites"
           :questions-with-competency="questionsWithCompetency"
           :remove-competency-from-question="removeCompetencyFromQuestion"
+          :save-competency-prerequisites="saveCompetencyPrerequisites"
           :select-course="selectCourse"
           :edit-question="editQuestion"
           :delete-question="deleteQuestion"
@@ -88,10 +90,12 @@ const {
   rootCompetencies,
   getCompetencyColor,
   childCompetencies,
+  getAvailablePrerequisites,
   questionsWithCompetency,
   nodeIcon,
   deleteQuestion,
   removeCompetencyFromQuestion,
+  saveCompetencyPrerequisites,
   selectCourse
 } = useSkillGraphLogic(mockCompetencies, mockQuestions)
 </script>

@@ -76,13 +76,13 @@
       </v-expansion-panels>
     </v-card>
 
-    <v-card variant="outlined" class="mt-3">
-      <v-card-text class="d-flex justify-space-between align-center">
+    <v-card elevation="0" rounded="lg" class="mt-3 question-summary-card">
+      <v-card-text>
         <div>
           <div class="text-caption text-medium-emphasis">Fragen</div>
           <div class="text-h6">{{ questions.length }}</div>
+          <div class="text-caption text-medium-emphasis">gesamt im aktuellen Kursmodell</div>
         </div>
-        <v-icon color="primary">mdi-help-circle-outline</v-icon>
       </v-card-text>
     </v-card>
   </div>
@@ -148,6 +148,12 @@ const panelStyles = {
 
 <style scoped>
 .profile-card {
+  background: linear-gradient(180deg, var(--sg-surface) 0%, var(--sg-surface-muted) 100%);
+  border: 1px solid var(--sg-border);
+  box-shadow: 0 8px 22px var(--sg-shadow);
+}
+
+.question-summary-card {
   background: linear-gradient(180deg, var(--sg-surface) 0%, var(--sg-surface-muted) 100%);
   border: 1px solid var(--sg-border);
   box-shadow: 0 8px 22px var(--sg-shadow);

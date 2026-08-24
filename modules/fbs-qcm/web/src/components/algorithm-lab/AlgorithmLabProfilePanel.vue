@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ProfileGroup } from '@/composables/useAlgorithmLabView'
+import type { ProfileGroup } from '@/composables/competencyHierarchy'
 
 interface Props {
   groups: ProfileGroup[]

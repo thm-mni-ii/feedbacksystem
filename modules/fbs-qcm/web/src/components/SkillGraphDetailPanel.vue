@@ -49,7 +49,9 @@
           :get-competency="getCompetency"
           :get-competency-color="getCompetencyColor"
           :child-competencies="childCompetencies"
+          :get-available-prerequisites="getAvailablePrerequisites"
           :questions-with-competency="questionsWithCompetency"
+          :save-competency-prerequisites="saveCompetencyPrerequisites"
         />
 
         <!-- Question Panel -->
@@ -68,8 +70,8 @@
     <v-card class="mt-3 action-card" elevation="0" rounded="lg">
       <v-card-text>
         <v-menu>
-          <template #activator="{ props }">
-            <v-btn block color="app-graph-primary" prepend-icon="mdi-plus" v-bind="props">
+          <template #activator="{ props: activatorProps }">
+            <v-btn block color="app-graph-primary" prepend-icon="mdi-plus" v-bind="activatorProps">
               Neu erstellen
             </v-btn>
           </template>
@@ -93,7 +95,7 @@
 import CourseDetailPanel from './skillgraph/CourseDetailPanel.vue'
 import CompetencyDetailPanel from './skillgraph/CompetencyDetailPanel.vue'
 import QuestionDetailPanel from './skillgraph/QuestionDetailPanel.vue'
-import type { Competency, Question } from '@/model/types'
+import type { Competency, CompetencyPrerequisite, Question } from '@/model/types'
 import { skillGraphPalette } from '@/plugins/vuetify'
 import { computed } from 'vue'
 
@@ -106,8 +108,13 @@ interface Props {
   getCompetencyColor: (comp?: Competency) => string
   getCompetency: (id: string) => Competency | undefined
   childCompetencies: (parentId: string) => Competency[]
+  getAvailablePrerequisites: (competencyId: string) => Competency[]
   questionsWithCompetency: (compId: string) => Question[]
   removeCompetencyFromQuestion: (questionId: string, compId: string) => void
+  saveCompetencyPrerequisites: (
+    competencyId: string,
+    prerequisites: CompetencyPrerequisite[]
+  ) => Promise<void>
   selectCourse: () => void
   editQuestion: (question?: Question) => void
   deleteQuestion: (id: string) => void

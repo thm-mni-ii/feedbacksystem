@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import * as vNG from 'v-network-graph'
 import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/layouts/force'
-import type { Competency, Question } from '@/model/types'
+import type { Competency, CompetencyPrerequisite, Question } from '@/model/types'
 import { skillGraphPalette } from '@/plugins/vuetify'
 import { getQuestionCompetencyIds } from '@/composables/qMatrix'
 
@@ -12,27 +12,43 @@ interface Course {
   description: string
 }
 
+export interface SkillGraphNodeData {
+  name: string
+  type: string
+  color: string
+  radius: number
+  data: Course | Competency | Question
+}
+
+export interface SkillGraphEdgeData {
+  source: string
+  target: string
+  color?: string
+  width?: number
+}
+
 // Layout Constants
 const BASE_R = 30
 const STEP_R = 30
 const Q_OFFSET = 30
 
-function hashString(value: string): number {
-  return value.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) | 0, 0)
+function cloneCompetency(competency: Competency): Competency {
+  return {
+    ...competency,
+    prerequisites: competency.prerequisites?.map((prerequisite) => ({
+      ...prerequisite
+    }))
+  }
 }
 
-function lightenHex(hexColor: string, factor: number): string {
-  const safeHex = hexColor.replace('#', '')
-  if (!/^[0-9a-fA-F]{6}$/.test(safeHex)) return skillGraphPalette.chipFallback
-
-  const r = parseInt(safeHex.slice(0, 2), 16)
-  const g = parseInt(safeHex.slice(2, 4), 16)
-  const b = parseInt(safeHex.slice(4, 6), 16)
-  const blend = (channel: number) => Math.round(channel + (255 - channel) * factor)
-
-  return `#${[blend(r), blend(g), blend(b)]
-    .map((channel) => channel.toString(16).padStart(2, '0'))
-    .join('')}`
+function cloneQuestion(question: Question): Question {
+  return {
+    ...question,
+    competencyIds: [...question.competencyIds],
+    competencyLinks: question.competencyLinks?.map((link) => ({
+      ...link
+    }))
+  }
 }
 
 export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions: Question[]) {
@@ -44,8 +60,8 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
       'Umfassendes Kurs-Kompetenzmodell für Datenbanken und objektorientierte Programmierung'
   })
 
-  const competencies = ref<Competency[]>(mockCompetencies)
-  const questions = ref<Question[]>(mockQuestions)
+  const competencies = ref<Competency[]>(mockCompetencies.map(cloneCompetency))
+  const questions = ref<Question[]>(mockQuestions.map(cloneQuestion))
   const selectedNodeId = ref<string | null>(course.value.id)
   const zoomLevel = ref(1)
 
@@ -74,6 +90,37 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
   const childCompetencies = (parentId: string): Competency[] =>
     competencies.value.filter((c) => c.parentId === parentId)
 
+  const clampMastery = (value: number): number => Math.min(1, Math.max(0, value))
+
+  const hasPrerequisitePath = (
+    sourceCompetencyId: string,
+    targetCompetencyId: string,
+    visited = new Set<string>()
+  ): boolean => {
+    if (sourceCompetencyId === targetCompetencyId) {
+      return true
+    }
+
+    if (visited.has(sourceCompetencyId)) {
+      return false
+    }
+
+    visited.add(sourceCompetencyId)
+    const sourceCompetency = getCompetency(sourceCompetencyId)
+
+    return (sourceCompetency?.prerequisites ?? []).some(
+      (prerequisite) =>
+        prerequisite.competencyId === targetCompetencyId ||
+        hasPrerequisitePath(prerequisite.competencyId, targetCompetencyId, visited)
+    )
+  }
+
+  const getAvailablePrerequisites = (competencyId: string): Competency[] =>
+    competencies.value.filter(
+      (competency) =>
+        competency.id !== competencyId && !hasPrerequisitePath(competency.id, competencyId)
+    )
+
   const questionsWithCompetency = (compId: string): Question[] =>
     questions.value.filter((q) => getQuestionCompetencyIds(q).includes(compId))
 
@@ -85,8 +132,8 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
   }
 
   // ─── Graph Nodes ──────────────────────────────────────────────────────
-  const graphNodes = computed(() => {
-    const nodes: Record<string, any> = {}
+  const graphNodes = computed<Record<string, SkillGraphNodeData>>(() => {
+    const nodes: Record<string, SkillGraphNodeData> = {}
 
     nodes[course.value.id] = {
       name: course.value.name,
@@ -124,8 +171,8 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
   })
 
   // ─── Graph Edges ──────────────────────────────────────────────────────
-  const graphEdges = computed(() => {
-    const edges: Record<string, any> = {}
+  const graphEdges = computed<Record<string, SkillGraphEdgeData>>(() => {
+    const edges: Record<string, SkillGraphEdgeData> = {}
 
     competencies.value
       .filter((c) => !c.parentId)
@@ -251,7 +298,7 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
   })
 
   // ─── Graph Configs ────────────────────────────────────────────────────
-  const configs = vNG.defineConfigs({
+  const configs = vNG.defineConfigs<SkillGraphNodeData, SkillGraphEdgeData>({
     view: {
       onBeforeInitialDisplay: async () => {
         return new Promise((resolve) => setTimeout(resolve, 400))
@@ -302,8 +349,6 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
         },
         fontSize: (n) =>
           n.type === 'course' ? 13 : n.type?.startsWith('competency-root') ? 12 : 10,
-        fontWeight: (n) =>
-          n.type === 'course' || n.type?.startsWith('competency-root') ? 'bold' : 'normal',
         color: skillGraphPalette.textPrimary
       }
     },
@@ -360,6 +405,42 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
     selectedNodeId.value = course.value.id
   }
 
+  async function saveCompetencyPrerequisites(
+    competencyId: string,
+    prerequisites: CompetencyPrerequisite[]
+  ): Promise<void> {
+    const availableCompetencyIds = new Set(
+      getAvailablePrerequisites(competencyId).map((competency) => competency.id)
+    )
+    const normalizedPrerequisites: CompetencyPrerequisite[] = []
+    const seenCompetencyIds = new Set<string>()
+
+    for (const prerequisite of prerequisites) {
+      if (
+        !prerequisite.competencyId ||
+        !availableCompetencyIds.has(prerequisite.competencyId) ||
+        seenCompetencyIds.has(prerequisite.competencyId)
+      ) {
+        continue
+      }
+
+      seenCompetencyIds.add(prerequisite.competencyId)
+      normalizedPrerequisites.push({
+        competencyId: prerequisite.competencyId,
+        minimumMastery: clampMastery(prerequisite.minimumMastery)
+      })
+    }
+
+    competencies.value = competencies.value.map((competency) =>
+      competency.id === competencyId
+        ? {
+            ...competency,
+            prerequisites: normalizedPrerequisites
+          }
+        : competency
+    )
+  }
+
   return {
     // State
     course,
@@ -380,11 +461,13 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
     getCompetencyColor,
     getCompetencyDepth,
     childCompetencies,
+    getAvailablePrerequisites,
     questionsWithCompetency,
     nodeIcon,
     // Actions
     deleteQuestion,
     removeCompetencyFromQuestion,
+    saveCompetencyPrerequisites,
     selectCourse
   }
 }

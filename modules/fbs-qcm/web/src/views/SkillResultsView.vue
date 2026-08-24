@@ -125,40 +125,42 @@ function buildSessionResults(): SessionResults {
   }
 
   const session = quizStore.session
-  const correctAnswers = session.history.filter((h) => h.isCorrect).length
-  const incorrectAnswers = session.history.length - correctAnswers
+  const correctAnswers = quizStore.attempts.filter((attempt) => attempt.evaluation.score >= 0.5).length
+  const incorrectAnswers = quizStore.attempts.length - correctAnswers
 
-  // Konvertiere SkillState zu SkillVisualization
-  const skills: SkillVisualization[] = quizStore.skills.map((skill) => {
-    const skillState = session.skills[skill.id]
-    const skillAnswers = session.history.filter((h) => h.skillId === skill.id)
-    const successCount = skillAnswers.filter((h) => h.isCorrect).length
-
-    // Berechne Statistiken
-    const avgDifficulty =
-      skillAnswers.length > 0
-        ? skillAnswers.reduce((sum, h) => sum + h.difficulty, 0) / skillAnswers.length
-        : 0
-
-    const totalTime = skillAnswers.reduce((sum, h) => {
-      // Wir speichern keine absoluten Zeiten, daher schätzen wir
-      return sum + 50 // ms, placeholder
-    }, 0)
-    const avgTimePerQuestion = skillAnswers.length > 0 ? totalTime / skillAnswers.length : 0
+  const skills: SkillVisualization[] = quizStore.progress.map((item) => {
+    const skillAttempts = quizStore.attempts.filter(
+      (attempt) =>
+        attempt.targetCompetencyId === item.competencyId ||
+        attempt.competencyIds.includes(item.competencyId)
+    )
 
     return {
-      skillId: skill.id,
-      label: skill.label,
-      pLearned: skillState.pLearned,
-      mastered: skillState.mastered,
-      unlocked: skillState.unlocked,
-      timesAsked: skillState.timesAsked,
-      successRate: skillAnswers.length > 0 ? successCount / skillAnswers.length : 0,
-      prerequisites: skill.prerequisites,
-      unlocks: skill.unlocks,
-      avgDifficulty,
-      avgTimePerQuestion,
-      status: skillState.mastered ? 'mastered' : skillState.unlocked ? 'progress' : 'locked'
+      skillId: item.competencyId,
+      label: item.label,
+      pLearned: item.score,
+      mastered: item.certainty >= 0.55 && item.timesAssessed >= 3,
+      unlocked: item.timesAssessed > 0,
+      timesAsked: item.timesAssessed,
+      successRate:
+        skillAttempts.length > 0
+          ? skillAttempts.reduce((sum, attempt) => sum + attempt.evaluation.score, 0) /
+            skillAttempts.length
+          : item.score,
+      prerequisites: [],
+      unlocks: [],
+      avgDifficulty: item.score,
+      avgTimePerQuestion:
+        skillAttempts.length > 0
+          ? skillAttempts.reduce((sum, attempt) => sum + attempt.responseTimeMs, 0) /
+            skillAttempts.length
+          : 0,
+      status:
+        item.certainty >= 0.55 && item.timesAssessed >= 3
+          ? 'mastered'
+          : item.timesAssessed > 0
+            ? 'progress'
+            : 'locked'
     }
   })
 
@@ -166,11 +168,11 @@ function buildSessionResults(): SessionResults {
     studentId: session.studentId,
     sessionId: `session-${session.startedAt}`,
     startedAt: session.startedAt,
-    completedAt: Date.now(),
-    totalTimeSeconds: Math.floor((Date.now() - session.startedAt) / 1000),
+    completedAt: session.completedAt ?? Date.now(),
+    totalTimeSeconds: Math.floor(((session.completedAt ?? Date.now()) - session.startedAt) / 1000),
     skills,
     overallProgress: quizStore.overallProgress,
-    questionsAnswered: session.history.length,
+    questionsAnswered: quizStore.attempts.length,
     correctAnswers,
     incorrectAnswers
   }
@@ -182,18 +184,22 @@ function buildSessionResults(): SessionResults {
 function getSkillAnswers(skillId: string): AnswerVisualization[] {
   if (!quizStore.session) return []
 
-  return quizStore.session.history
-    .filter((h) => h.skillId === skillId)
-    .map((record) => {
-      const question = quizStore.questions.find((q) => q.id === record.questionId)
-      const skill = quizStore.skills.find((s) => s.id === skillId)
+  return quizStore.attempts
+    .filter(
+      (attempt) =>
+        attempt.targetCompetencyId === skillId || attempt.competencyIds.includes(skillId)
+    )
+    .map((attempt) => {
+      const question = quizStore.questions.find((q) => q.id === attempt.questionId)
+      const skill = quizStore.progress.find((item) => item.competencyId === skillId)
 
       return {
-        ...record,
+        questionId: attempt.questionId,
+        skillId,
         questionText: question?.text ?? 'Unknown',
         skillLabel: skill?.label ?? 'Unknown',
-        timeSeconds: 0, // placeholder
-        wasCorrect: record.isCorrect
+        timeSeconds: Math.round(attempt.responseTimeMs / 1000),
+        wasCorrect: attempt.evaluation.score >= 0.5
       }
     })
 }

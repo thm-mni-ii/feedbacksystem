@@ -30,8 +30,8 @@
       />
     </div>
     <v-network-graph
-      class="graph"
       v-model:zoom-level="zoomLevel"
+      class="graph"
       :nodes="graphNodes"
       :edges="graphEdges"
       :layouts="layouts"
@@ -46,14 +46,15 @@ import { computed } from 'vue'
 import * as vNG from 'v-network-graph'
 import { skillGraphPalette } from '@/plugins/vuetify'
 import QMatrixDialog from '@/dialog/DialogQMatrix.vue'
+import type { SkillGraphEdgeData, SkillGraphNodeData } from '@/composables/useSkillGraphLogic'
 import type { Competency, Question } from '@/model/types'
 
 interface Props {
   zoomLevel: number
-  graphNodes: Record<string, any>
-  graphEdges: Record<string, any>
+  graphNodes: Record<string, SkillGraphNodeData>
+  graphEdges: Record<string, SkillGraphEdgeData>
   layouts: vNG.Layouts
-  configs: vNG.Configs
+  configs: ReturnType<typeof vNG.defineConfigs<SkillGraphNodeData, SkillGraphEdgeData>>
   eventHandlers: vNG.EventHandlers
   competencies: Competency[]
   questions: Question[]

@@ -1,20 +1,131 @@
 import { computed, ref, watch } from 'vue'
+import { AdaptiveQuizAlgorithm } from '@/composables/algorithm'
+import { buildProfileGroups } from '@/composables/competencyHierarchy'
+import { getQuestionCompetencyLinks } from '@/composables/qMatrix'
 import { useQuizSessionStore } from '@/stores/quizSessionStore'
+import type { Competency, Question, SessionState } from '@/model/types'
 
-export type ProfileItem = {
+export type AlgorithmLabInsightLinkedCompetency = {
+  competencyId: string
+  label: string
+  relationLabel: string
+  weight: number
+  score: number
+  timesAssessed: number
+  isTarget: boolean
+}
+
+export type AlgorithmLabInsightPrerequisite = {
   competencyId: string
   label: string
   score: number
-  timesAssessed: number
-  depth: number
-  isCurrent: boolean
-  isInCurrentPath: boolean
+  minimumMastery: number
+  isMet: boolean
 }
 
-export type ProfileGroup = {
-  root: ProfileItem
-  items: ProfileItem[]
-  isActive: boolean
+export type AlgorithmLabInsightCompetencyChange = {
+  competencyId: string
+  label: string
+  beforeScore: number
+  afterScore: number
+  delta: number
+  isTarget: boolean
+}
+
+export type AlgorithmLabInsightAnswerPreview = {
+  id: string
+  label: string
+  helperText: string
+  score: number
+  targetAfterScore: number
+  targetAfterTimesAssessed: number
+  selectionEffect: string
+  difficultyEffect: string
+  unlockedCompetencies: string[]
+  competencyChanges: AlgorithmLabInsightCompetencyChange[]
+}
+
+export type AlgorithmLabRealtimeInsight = {
+  targetCompetencyLabel: string
+  targetCompetencyScore: number
+  targetTimesAssessed: number
+  targetPriorityRank: number | null
+  targetPriorityTotal: number
+  currentAction: string
+  selectionReason: string
+  prerequisiteSummary: string
+  completionSummary: string
+  selectionSummary: string
+  difficultySummary: string
+  recentQuestionSummary: string
+  linkedCompetencies: AlgorithmLabInsightLinkedCompetency[]
+  prerequisites: AlgorithmLabInsightPrerequisite[]
+  answerPreviews: AlgorithmLabInsightAnswerPreview[]
+}
+
+const insightAlgorithm = new AdaptiveQuizAlgorithm()
+const LOW_PREVIEW_SCORE = 0.2
+const HIGH_PREVIEW_SCORE = 0.9
+const DIFFICULTY_WINDOW = 0.2
+
+function formatPercent(score: number): string {
+  return `${Math.round(score * 100)}%`
+}
+
+function getRelevantCompetencies(
+  competencies: Competency[],
+  questions: Question[],
+  excludedQuestionIds: Set<string>
+): Competency[] {
+  return competencies.filter((competency) =>
+    questions.some(
+      (question) =>
+        !question.excludeFromAlgorithm &&
+        !excludedQuestionIds.has(question.id) &&
+        getQuestionCompetencyLinks(question).some((link) => link.competencyId === competency.id)
+    )
+  )
+}
+
+function getUnlockedCompetencyIds(competencies: Competency[], session: SessionState): string[] {
+  return competencies
+    .filter(
+      (competency) =>
+        (competency.prerequisites ?? []).length > 0 &&
+        (competency.prerequisites ?? []).every((prerequisite) => {
+          const mastery = session.competencies[prerequisite.competencyId]?.score ?? 0
+          return mastery >= prerequisite.minimumMastery
+        })
+    )
+    .map((competency) => competency.id)
+}
+
+function buildDifficultySummary(targetScore: number, questionDifficulty: number): string {
+  const delta = questionDifficulty - targetScore
+
+  if (Math.abs(delta) <= DIFFICULTY_WINDOW) {
+    return `Die Schwierigkeit der aktuellen Frage liegt nah an der aktuellen Schätzung für diese Kompetenz (${formatPercent(targetScore)}).`
+  }
+
+  if (delta > 0) {
+    return `Die Frage ist bewusst etwas anspruchsvoller als die aktuelle Schätzung (${formatPercent(targetScore)}), um die obere Grenze der Beherrschung zu testen.`
+  }
+
+  return `Die Frage ist etwas leichter als die aktuelle Schätzung (${formatPercent(targetScore)}), damit der Algorithmus sichere Evidenz sammeln kann.`
+}
+
+function buildDifficultyEffect(beforeScore: number, afterScore: number): string {
+  const delta = afterScore - beforeScore
+
+  if (delta >= 0.08) {
+    return 'Der passende Schwierigkeitsbereich verschiebt sich nach oben. Dadurch bekommen eher anspruchsvollere Fragen mehr Gewicht.'
+  }
+
+  if (delta <= -0.03) {
+    return 'Der passende Schwierigkeitsbereich verschiebt sich nach unten. Dadurch werden eher leichtere Fragen attraktiver.'
+  }
+
+  return 'Der passende Schwierigkeitsbereich bleibt nahe am aktuellen Niveau. Dadurch sind weiterhin Fragen mit ähnlicher Schwierigkeit wahrscheinlich.'
 }
 
 export function useAlgorithmLabView() {
@@ -24,71 +135,13 @@ export function useAlgorithmLabView() {
   const expandedPanel = ref<string | null>(null)
   const showFeedback = ref(false)
 
-  const hierarchicalProgress = computed<ProfileGroup[]>(() => {
-    const competencies = [...store.competencies]
-    const progressById = new Map(store.progress.map((item) => [item.competencyId, item]))
-    const competencyIds = new Set(competencies.map((c) => c.id))
-    const parentById = new Map(competencies.map((c) => [c.id, c.parentId ?? null]))
-    const currentCompetencyId = store.currentQuestion?.targetCompetency.id ?? null
-
-    const currentPathIds = new Set<string>()
-    let cursor = currentCompetencyId
-    while (cursor) {
-      currentPathIds.add(cursor)
-      cursor = parentById.get(cursor) ?? null
-    }
-
-    const childrenByParent = new Map<string, string[]>()
-    for (const competency of competencies) {
-      if (!competency.parentId || !competencyIds.has(competency.parentId)) {
-        continue
-      }
-
-      const existing = childrenByParent.get(competency.parentId) ?? []
-      existing.push(competency.id)
-      childrenByParent.set(competency.parentId, existing)
-    }
-
-    const nameById = new Map(competencies.map((c) => [c.id, c.name]))
-    const toItem = (competencyId: string, depth: number): ProfileItem => {
-      const progress = progressById.get(competencyId)
-
-      return {
-        competencyId,
-        label: nameById.get(competencyId) ?? competencyId,
-        score: progress?.score ?? 0,
-        timesAssessed: progress?.timesAssessed ?? 0,
-        depth,
-        isCurrent: competencyId === currentCompetencyId,
-        isInCurrentPath: currentPathIds.has(competencyId)
-      }
-    }
-
-    const roots = competencies
-      .filter((c) => !c.parentId || !competencyIds.has(c.parentId))
-      .sort((a, b) => a.name.localeCompare(b.name))
-
-    const collectChildren = (parentId: string, depth: number, acc: ProfileItem[]) => {
-      const childIds = (childrenByParent.get(parentId) ?? []).sort((a, b) =>
-        (nameById.get(a) ?? '').localeCompare(nameById.get(b) ?? '')
-      )
-
-      for (const childId of childIds) {
-        acc.push(toItem(childId, depth))
-        collectChildren(childId, depth + 1, acc)
-      }
-    }
-
-    return roots.map((root) => {
-      const items: ProfileItem[] = []
-      collectChildren(root.id, 1, items)
-      return {
-        root: toItem(root.id, 0),
-        items,
-        isActive: currentPathIds.has(root.id)
-      }
-    })
-  })
+  const hierarchicalProgress = computed(() =>
+    buildProfileGroups(
+      [...store.competencies],
+      store.progress,
+      store.currentQuestion?.targetCompetency.id ?? null
+    )
+  )
 
   watch(
     hierarchicalProgress,
@@ -110,6 +163,207 @@ export function useAlgorithmLabView() {
     if (timesAssessed === 0) return 'Nicht bewertet'
     return `${Math.round(score * 100)}%`
   }
+
+  const algorithmInsight = computed<AlgorithmLabRealtimeInsight | null>(() => {
+    const session = store.session
+    const currentQuestion = store.currentQuestion
+
+    if (!session || !currentQuestion) {
+      return null
+    }
+
+    const excludedQuestionIds = new Set(session.excludedQuestionIds)
+    const relevantCompetencies = getRelevantCompetencies(
+      store.competencies,
+      store.questions,
+      excludedQuestionIds
+    )
+    const completion = insightAlgorithm.getCompletionStatus(
+      store.competencies,
+      store.questions,
+      session
+    )
+    const competencyNameById = new Map(
+      store.competencies.map((competency) => [competency.id, competency.name])
+    )
+    const targetCompetencyId = currentQuestion.targetCompetency.id
+    const targetState = session.competencies[targetCompetencyId]
+    const linkedCompetencies = getQuestionCompetencyLinks(currentQuestion.question)
+      .map((link) => {
+        const state = session.competencies[link.competencyId]
+        return {
+          competencyId: link.competencyId,
+          label: competencyNameById.get(link.competencyId) ?? link.competencyId,
+          relationLabel: link.relation === 'supporting' ? 'Unterstützend' : 'Direkt bewertet',
+          weight: link.weight ?? 1,
+          score: state?.score ?? 0,
+          timesAssessed: state?.timesAssessed ?? 0,
+          isTarget: link.competencyId === targetCompetencyId
+        }
+      })
+      .sort((a, b) => Number(b.isTarget) - Number(a.isTarget) || b.weight - a.weight)
+
+    const pendingCompetencyIds = new Set(completion.pendingCompetencyIds)
+    const rankedCompetencies = (
+      pendingCompetencyIds.size > 0 ? relevantCompetencies : store.competencies
+    )
+      .filter(
+        (competency) => pendingCompetencyIds.size === 0 || pendingCompetencyIds.has(competency.id)
+      )
+      .map((competency) => {
+        const state = session.competencies[competency.id]
+        return {
+          competencyId: competency.id,
+          priority: (1 / ((state?.timesAssessed ?? 0) + 1)) * (1 - (state?.score ?? 0))
+        }
+      })
+      .sort((a, b) => b.priority - a.priority)
+
+    const targetPriorityRankIndex = rankedCompetencies.findIndex(
+      (competency) => competency.competencyId === targetCompetencyId
+    )
+    const targetPriorityRank = targetPriorityRankIndex >= 0 ? targetPriorityRankIndex + 1 : null
+    const prerequisites = (currentQuestion.targetCompetency.prerequisites ?? []).map(
+      (prerequisite) => {
+        const state = session.competencies[prerequisite.competencyId]
+        return {
+          competencyId: prerequisite.competencyId,
+          label: competencyNameById.get(prerequisite.competencyId) ?? prerequisite.competencyId,
+          score: state?.score ?? 0,
+          minimumMastery: prerequisite.minimumMastery,
+          isMet: (state?.score ?? 0) >= prerequisite.minimumMastery
+        }
+      }
+    )
+
+    const prerequisiteSummary =
+      prerequisites.length === 0
+        ? `${currentQuestion.targetCompetency.name} hat keine fachlichen Voraussetzungen und kann direkt beobachtet werden.`
+        : prerequisites.every((prerequisite) => prerequisite.isMet)
+          ? `Alle fachlichen Voraussetzungen für ${currentQuestion.targetCompetency.name} sind aktuell erfüllt.`
+          : `Mindestens eine fachliche Voraussetzung für ${currentQuestion.targetCompetency.name} ist noch nicht sicher erfüllt.`
+
+    const baseUnlockedCompetencies = getUnlockedCompetencyIds(store.competencies, session)
+    const answerPreviews: AlgorithmLabInsightAnswerPreview[] = [
+      {
+        id: 'low',
+        label: 'Niedrige Einschätzung',
+        helperText: 'simuliert eine eher unsichere Antwort',
+        score: LOW_PREVIEW_SCORE
+      },
+      {
+        id: 'current',
+        label: 'Dein aktueller Slider',
+        helperText: 'aktualisiert sich live während du den Regler bewegst',
+        score: sliderScore.value
+      },
+      {
+        id: 'high',
+        label: 'Hohe Einschätzung',
+        helperText: 'simuliert eine sehr sichere Antwort',
+        score: HIGH_PREVIEW_SCORE
+      }
+    ].map((preview) => {
+      const { updatedState } = insightAlgorithm.submitAnswer(
+        currentQuestion.question,
+        preview.score,
+        session,
+        store.competencies,
+        store.questions
+      )
+      const updatedCompletion = insightAlgorithm.getCompletionStatus(
+        store.competencies,
+        store.questions,
+        updatedState
+      )
+      const updatedUnlockedCompetencies = getUnlockedCompetencyIds(store.competencies, updatedState)
+      const unlockedCompetencies = updatedUnlockedCompetencies
+        .filter((competencyId) => !baseUnlockedCompetencies.includes(competencyId))
+        .map((competencyId) => competencyNameById.get(competencyId) ?? competencyId)
+      const targetAfterState = updatedState.competencies[targetCompetencyId]
+      const targetStillPending = updatedCompletion.pendingCompetencyIds.includes(targetCompetencyId)
+      const competencyChanges = linkedCompetencies.map((competency) => {
+        const updatedCompetency = updatedState.competencies[competency.competencyId]
+        return {
+          competencyId: competency.competencyId,
+          label: competency.label,
+          beforeScore: competency.score,
+          afterScore: updatedCompetency?.score ?? competency.score,
+          delta: (updatedCompetency?.score ?? competency.score) - competency.score,
+          isTarget: competency.isTarget
+        }
+      })
+
+      let selectionEffect = `${currentQuestion.targetCompetency.name} bekommt danach `
+      if (updatedCompletion.isComplete) {
+        selectionEffect +=
+          'genug Evidenz für einen Session-Abschluss. Danach würde keine weitere Frage mehr benötigt.'
+      } else if (unlockedCompetencies.length > 0) {
+        selectionEffect += `mehr Konkurrenz durch neu freigeschaltete Kompetenzen wie ${unlockedCompetencies.join(', ')}.`
+      } else if (targetStillPending) {
+        selectionEffect +=
+          'weiterhin Gewicht in der Auswahl, weil für diese Kompetenz noch unsichere oder zu wenige Beobachtungen vorliegen.'
+      } else {
+        selectionEffect +=
+          'weniger Gewicht, weil für diese Kompetenz dann bereits genug Evidenz gesammelt wurde und andere offene Kompetenzen nach vorne rücken.'
+      }
+
+      return {
+        id: preview.id,
+        label: preview.label,
+        helperText: preview.helperText,
+        score: preview.score,
+        targetAfterScore: targetAfterState?.score ?? targetState?.score ?? 0,
+        targetAfterTimesAssessed:
+          targetAfterState?.timesAssessed ?? targetState?.timesAssessed ?? 0,
+        selectionEffect,
+        difficultyEffect: buildDifficultyEffect(
+          targetState?.score ?? 0,
+          targetAfterState?.score ?? targetState?.score ?? 0
+        ),
+        unlockedCompetencies,
+        competencyChanges
+      }
+    })
+
+    return {
+      targetCompetencyLabel: currentQuestion.targetCompetency.name,
+      targetCompetencyScore: targetState?.score ?? 0,
+      targetTimesAssessed: targetState?.timesAssessed ?? 0,
+      targetPriorityRank,
+      targetPriorityTotal: rankedCompetencies.length,
+      currentAction: `Der Algorithmus sammelt gerade Evidenz für ${currentQuestion.targetCompetency.name}.`,
+      selectionReason:
+        targetPriorityRank && rankedCompetencies.length > 0
+          ? `${currentQuestion.targetCompetency.name} steht aktuell auf Platz ${targetPriorityRank} der offenen Kompetenzen, weil hier noch wenig sichere Beobachtungen vorliegen.`
+          : `${currentQuestion.targetCompetency.name} bleibt im Schwerpunkt, weil diese Kompetenz für die nächste Auswahl noch zusätzliche Evidenz braucht.`,
+      prerequisiteSummary,
+      completionSummary: `${completion.completedCompetencyIds.length}/${completion.relevantCompetencyIds.length} Kompetenzen sind bereits ausreichend abgesichert.`,
+      selectionSummary:
+        targetPriorityRank && rankedCompetencies.length > 0
+          ? `${currentQuestion.targetCompetency.name} liegt aktuell bei Priorität ${targetPriorityRank} von ${rankedCompetencies.length}. Niedrige Schätzwerte und wenig Evidenz erhöhen die Chance, dass diese Kompetenz erneut ausgewählt wird. ${prerequisiteSummary}`
+          : `${currentQuestion.targetCompetency.name} wird gerade beobachtet, weil hier noch nützliche Evidenz für die nächste Auswahl gesammelt werden kann. ${prerequisiteSummary}`,
+      difficultySummary: buildDifficultySummary(
+        targetState?.score ?? 0,
+        currentQuestion.question.difficulty
+      ),
+      recentQuestionSummary:
+        session.recentQuestionIds.length > 0
+          ? `Die letzten ${session.recentQuestionIds.length} Frage(n) bleiben auf der Sperrliste, damit nach Möglichkeit nicht sofort wieder dieselbe Frage erscheint.`
+          : 'Sobald erste Antworten vorliegen, werden zuletzt gezeigte Fragen nach Möglichkeit ausgelassen.',
+      linkedCompetencies,
+      prerequisites,
+      answerPreviews
+    }
+  })
+
+  watch(
+    () => store.currentQuestion?.question.id,
+    () => {
+      sliderScore.value = 0.5
+    },
+    { immediate: true }
+  )
 
   const submitAnswer = async (score: number) => {
     if (!store.currentQuestion) {
@@ -135,6 +389,7 @@ export function useAlgorithmLabView() {
     hierarchicalProgress,
     scoreColor,
     scoreLabel,
+    algorithmInsight,
     submitAnswer
   }
 }
