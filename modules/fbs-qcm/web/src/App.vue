@@ -21,16 +21,9 @@
 
 <script setup lang="ts">
 import { RouterView, useRouter } from 'vue-router'
-import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
-
-onMounted(() => {
-  if (!authStore.token) {
-    console.error('No token found in localStorage')
-  }
-})
 
 const router = useRouter()
 </script>

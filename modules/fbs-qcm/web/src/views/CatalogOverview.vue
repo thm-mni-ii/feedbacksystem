@@ -108,8 +108,6 @@ const surfaceMutedStyle = {
 const jsessionid = router.currentRoute.value.query.jsessionid?.toString()
 if (jsessionid) {
   authStore.setToken(jsessionid)
-} else {
-  console.warn('No jsessionid found in query parameters')
 }
 
 const myCourses = ref<Course[]>([])

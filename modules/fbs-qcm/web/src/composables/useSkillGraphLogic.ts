@@ -202,13 +202,14 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
         return
       }
 
-      const primaryCompId = getMostSpecificCompetency(qCompIds)
-      edges[`e-${primaryCompId}-${q.id}`] = {
-        source: primaryCompId,
-        target: q.id,
-        color: skillGraphPalette.edgeDefault,
-        width: 1
-      }
+      qCompIds.forEach((competencyId) => {
+        edges[`e-${competencyId}-${q.id}`] = {
+          source: competencyId,
+          target: q.id,
+          color: skillGraphPalette.edgeDefault,
+          width: 1
+        }
+      })
     })
 
     return edges

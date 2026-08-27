@@ -39,72 +39,58 @@
         Familien gruppiert und direkt im Diagramm beim Hover.
       </p>
 
-      <v-row class="mb-2">
-        <v-col cols="12">
-          <AlgorithmLabRadarChart :competencies="competencies" :progress="progress" />
-        </v-col>
-      </v-row>
+      <div class="radar-panel">
+        <AlgorithmLabRadarChart :competencies="competencies" :progress="progress" />
+      </div>
+    </v-card>
 
-      <v-row>
-        <v-col cols="12">
-          <div class="text-subtitle-2 font-weight-bold mb-3">Kompetenzfamilien</div>
-          <div class="family-grid">
-            <v-card
-              v-for="family in radarFamilies"
-              :key="family.groupLabel"
-              class="family-card"
-              variant="outlined"
-            >
-              <div
-                class="family-card__accent"
-                :style="{ backgroundColor: family.groupColor }"
-              ></div>
-              <div class="family-card__content">
-                <div class="d-flex align-start justify-space-between ga-3 mb-3 flex-wrap">
-                  <div>
-                    <div class="text-subtitle-2 font-weight-bold">{{ family.groupLabel }}</div>
-                    <div class="text-caption text-medium-emphasis">
-                      {{ family.items.length }} Kompetenz{{ family.items.length === 1 ? '' : 'en' }}
-                    </div>
-                  </div>
-                  <v-chip size="small" variant="outlined" class="family-score-chip">
-                    {{ scoreLabel(family.rootScore, family.rootTimesAssessed) }}
-                  </v-chip>
-                </div>
-
-                <v-progress-linear
-                  :model-value="family.rootScore * 100"
-                  color="grey-darken-1"
-                  height="8"
-                  rounded
-                  class="mb-3"
-                />
-
-                <div class="family-list">
-                  <div
-                    v-for="item in family.items"
-                    :key="item.competencyId"
-                    class="family-list__item"
-                  >
-                    <div class="d-flex align-center ga-3 min-w-0">
-                      <span
-                        class="family-list__badge"
-                        :style="{ backgroundColor: family.groupColor }"
-                      >
-                        {{ item.axisIndex }}
-                      </span>
-                      <span class="family-list__label">{{ item.label }}</span>
-                    </div>
-                    <span class="family-list__value">{{
-                      scoreLabel(item.score, item.timesAssessed)
-                    }}</span>
-                  </div>
+    <v-card class="pa-6 mx-auto mt-6 family-section" max-width="1100" variant="outlined">
+      <h2 class="text-h6 mb-4">Kompetenzbereiche</h2>
+      <div class="family-grid">
+        <v-card
+          v-for="family in radarFamilies"
+          :key="family.groupLabel"
+          class="family-card"
+          variant="outlined"
+        >
+          <div class="family-card__accent" :style="{ backgroundColor: family.groupColor }"></div>
+          <div class="family-card__content">
+            <div class="d-flex align-start justify-space-between ga-3 mb-3 flex-wrap">
+              <div>
+                <div class="text-subtitle-2 font-weight-bold">{{ family.groupLabel }}</div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ family.items.length }} Kompetenz{{ family.items.length === 1 ? '' : 'en' }}
                 </div>
               </div>
-            </v-card>
+              <v-chip size="small" variant="outlined" class="family-score-chip">
+                {{ scoreLabel(family.rootScore, family.rootTimesAssessed) }}
+              </v-chip>
+            </div>
+
+            <v-progress-linear
+              :model-value="family.rootScore * 100"
+              color="grey-darken-1"
+              height="8"
+              rounded
+              class="mb-3"
+            />
+
+            <div class="family-list">
+              <div v-for="item in family.items" :key="item.competencyId" class="family-list__item">
+                <div class="d-flex align-center ga-3 min-w-0">
+                  <span class="family-list__badge" :style="{ backgroundColor: family.groupColor }">
+                    {{ item.axisIndex }}
+                  </span>
+                  <span class="family-list__label">{{ item.label }}</span>
+                </div>
+                <span class="family-list__value">{{
+                  scoreLabel(item.score, item.timesAssessed)
+                }}</span>
+              </div>
+            </div>
           </div>
-        </v-col>
-      </v-row>
+        </v-card>
+      </div>
     </v-card>
 
     <v-card class="pa-6 mx-auto mt-6 feedback-card" max-width="1100" variant="outlined">
@@ -220,11 +206,11 @@ const feedbackSections = computed(() => {
         : 'Noch keine ausgeprägte Stärke erkennbar.'
     },
     {
-      title: 'Naechster Fokus',
+      title: 'Nächster Fokus',
       tone: 'warning',
       icon: 'mdi-target',
       text: weakest.value
-        ? `${weakest.value.label} ist momentan der beste Ansatzpunkt für weiteres Ueben (${Math.round(weakest.value.score * 100)}%).`
+        ? `${weakest.value.label} ist momentan der beste Ansatzpunkt für weiteres Üben (${Math.round(weakest.value.score * 100)}%).`
         : 'Aktuell ist kein klarer Fokusbereich vorhanden.'
     },
     {
@@ -319,6 +305,23 @@ function scoreLabel(score: number, timesAssessed: number): string {
     rgba(var(--v-theme-surface), 1) 0%,
     rgba(var(--v-theme-primary), 0.02) 100%
   );
+}
+
+.radar-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+}
+
+.family-section {
+  border-color: rgba(var(--v-theme-on-surface), 0.08);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--v-theme-surface), 1) 0%,
+    rgba(var(--v-theme-primary), 0.02) 100%
+  );
+  text-align: left;
 }
 
 .family-grid {

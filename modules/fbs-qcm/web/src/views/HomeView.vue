@@ -67,8 +67,6 @@ const myCourses = ref<Course[]>([])
 const jsessionid = router.currentRoute.value.query.jsessionid?.toString()
 if (jsessionid) {
   authStore.setToken(jsessionid)
-} else {
-  console.warn('No jsessionid found in query parameters')
 }
 
 onMounted(async () => {
