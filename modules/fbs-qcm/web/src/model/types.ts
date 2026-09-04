@@ -61,6 +61,12 @@ export interface LearningQuestion {
   competencyLinks?: QuestionCompetencyLink[]
   difficulty: number
   excludeFromAlgorithm?: boolean
+  /**
+   * Temporärer Übergangs-Bridge zu den rohen Dummy-Fragedaten (questiontype,
+   * Antwortoptionen etc.), damit das Algorithm-Lab echte Antwortmöglichkeiten
+   * anzeigen kann. Entfällt, sobald Backend v2 ein eigenes Question-DTO liefert.
+   */
+  legacyQuestion?: unknown
 }
 
 /** @deprecated Für die schrittweise Migration des Algorithmus-Labors. */

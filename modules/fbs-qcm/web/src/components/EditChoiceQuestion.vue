@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits, onMounted } from 'vue'
+import { ref, watch, defineProps, defineEmits, onMounted, type Ref } from 'vue'
 import type Question from '@/model/Question'
 import type { Choice } from '@/model/questionTypes/Choice'
 import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
 import QuestionType from '../enums/QuestionType'
 
-type QuestionConfiguration = Choice | FillInTheBlanks
+type questionConfiguration = Choice | FillInTheBlanks
 
 const props = defineProps<{ question: Question; isNew: boolean }>()
 
@@ -35,18 +35,18 @@ watch(
 )
 
 // Type Guard
-function isChoiceQuestionConfiguration(config: QuestionConfiguration): config is Choice {
+function isChoicequestionConfiguration(config: questionConfiguration): config is Choice {
   return (config as Choice).optionRows !== undefined
 }
 
 const addOptionRow = () => {
-  if (isChoiceQuestionConfiguration(localQuestion.value.questionconfiguration)) {
-    if (!localQuestion.value.questionconfiguration.optionRows) {
-      localQuestion.value.questionconfiguration.optionRows = []
+  if (isChoicequestionConfiguration(localQuestion.value.questionConfiguration)) {
+    if (!localQuestion.value.questionConfiguration.optionRows) {
+      localQuestion.value.questionConfiguration.optionRows = []
     }
 
-    localQuestion.value.questionconfiguration.optionRows.push({
-      id: localQuestion.value.questionconfiguration.optionRows.length + 1,
+    localQuestion.value.questionConfiguration.optionRows.push({
+      id: localQuestion.value.questionConfiguration.optionRows.length + 1,
       text: '',
       correctAnswers: []
     })
@@ -54,8 +54,8 @@ const addOptionRow = () => {
 }
 
 const addOptionCol = () => {
-  if (isChoiceQuestionConfiguration(localQuestion.value.questionconfiguration)) {
-    const answerColumns = localQuestion.value.questionconfiguration.answerColumns
+  if (isChoicequestionConfiguration(localQuestion.value.questionConfiguration)) {
+    const answerColumns = localQuestion.value.questionConfiguration.answerColumns
 
     if (!Array.isArray(answerColumns)) {
       console.error('answerColumns is not initialized or is not an array')
@@ -70,22 +70,22 @@ const addOptionCol = () => {
 }
 
 const deleteOption = (index: number) => {
-  if (isChoiceQuestionConfiguration(localQuestion.value.questionconfiguration)) {
-    localQuestion.value.questionconfiguration.optionRows.splice(index, 1)
+  if (isChoicequestionConfiguration(localQuestion.value.questionConfiguration)) {
+    localQuestion.value.questionConfiguration.optionRows.splice(index, 1)
   }
 }
 
 const deleteAnswerColumn = (index: number) => {
-  if (isChoiceQuestionConfiguration(localQuestion.value.questionconfiguration)) {
-    if (localQuestion.value.questionconfiguration.answerColumns.length > 0) {
-      localQuestion.value.questionconfiguration.answerColumns.splice(index, 1)
+  if (isChoicequestionConfiguration(localQuestion.value.questionConfiguration)) {
+    if (localQuestion.value.questionConfiguration.answerColumns.length > 0) {
+      localQuestion.value.questionConfiguration.answerColumns.splice(index, 1)
     }
   }
 }
 
 const toggleCorrectAnswer = (columnIndex: number, optionIndex: number, isSelected: boolean) => {
-  if (isChoiceQuestionConfiguration(localQuestion.value.questionconfiguration)) {
-    const optionRows = localQuestion.value.questionconfiguration.optionRows
+  if (isChoicequestionConfiguration(localQuestion.value.questionConfiguration)) {
+    const optionRows = localQuestion.value.questionConfiguration.optionRows
     if (!optionRows || !optionRows[optionIndex]) {
       return
     }
@@ -101,8 +101,8 @@ const toggleCorrectAnswer = (columnIndex: number, optionIndex: number, isSelecte
 }
 
 const isCorrectAnswer = (columnIndex: number, optionIndex: number) => {
-  if (isChoiceQuestionConfiguration(localQuestion.value.questionconfiguration)) {
-    const optionRows = localQuestion.value.questionconfiguration.optionRows
+  if (isChoicequestionConfiguration(localQuestion.value.questionConfiguration)) {
+    const optionRows = localQuestion.value.questionConfiguration.optionRows
     if (!optionRows || !optionRows[optionIndex] || !optionRows[optionIndex].correctAnswers) {
       return false
     }
@@ -112,16 +112,16 @@ const isCorrectAnswer = (columnIndex: number, optionIndex: number) => {
 }
 const resetChoiceQuestion = (q: Ref<Question>) => {
   q.value = {
-    owner: 1,
-    questiontext: '',
-    questiontags: [],
-    questiontype: QuestionType.Choice,
-    questionconfiguration: {
+    text: '',
+    competencyIds: [],
+    questionType: QuestionType.Choice,
+    difficulty: 0.5,
+    questionConfiguration: {
       multipleRow: false,
       multipleColumn: false,
       answerColumns: [{ id: 1, name: '' }],
       optionRows: [{ id: 1, text: '', correctAnswers: [] }]
-    } as ChoiceQuestionConfiguration
+    } as Choice
   }
   console.log(q.value)
 }
@@ -137,7 +137,7 @@ onMounted(() => {
     <div class="justify-space-between d-flex flex-row">
       <span class="d-flex flex-col">
         <v-switch
-          v-model="localQuestion.questionconfiguration.multipleColumn"
+          v-model="localQuestion.questionConfiguration.multipleColumn"
           class="ml-4"
           :label="`Multi-Select Matrix`"
           color="primary"
@@ -157,12 +157,12 @@ onMounted(() => {
         </span>
       </span>
 
-      <div v-if="localQuestion.questionconfiguration.multipleColumn === true">
+      <div v-if="localQuestion.questionConfiguration.multipleColumn === true">
         <v-btn
+          v-tooltip:start="'Add Column'"
           icon="mdi-plus"
           class="my-2 mr-10"
           size="small"
-          v-tooltip:start="'Add Column'"
           @click="addOptionCol"
         ></v-btn>
       </div>
@@ -170,7 +170,7 @@ onMounted(() => {
 
     <div class="overflow-x-auto">
       <div
-        v-for="(option, optionIndex) in localQuestion.questionconfiguration.optionRows"
+        v-for="(option, optionIndex) in localQuestion.questionConfiguration.optionRows"
         :key="optionIndex"
         class="d-flex flex-row flex-nowrap align-center my-4 justify-space-between"
       >
@@ -199,7 +199,7 @@ onMounted(() => {
         </v-responsive>
         <div class="d-flex flex-row flex-nowrap mx-auto">
           <v-checkbox
-            v-for="(column, columnIndex) in localQuestion.questionconfiguration.answerColumns"
+            v-for="(column, columnIndex) in localQuestion.questionConfiguration.answerColumns"
             :key="columnIndex"
             :model-value="isCorrectAnswer(columnIndex, optionIndex)"
             class="d-flex justify-center column-items mx-auto"
@@ -207,7 +207,7 @@ onMounted(() => {
             width="120"
             hide-details
             @update:model-value="
-              (newValue) => toggleCorrectAnswer(columnIndex, optionIndex, newValue)
+              (newValue) => toggleCorrectAnswer(columnIndex, optionIndex, !!newValue)
             "
           >
             <v-tooltip activator="parent" location="end">Correct Answer</v-tooltip>
@@ -227,7 +227,7 @@ onMounted(() => {
 
         <div class="d-flex flex-row flex-nowrap">
           <div
-            v-for="(column, columnIndex) in localQuestion.questionconfiguration.answerColumns"
+            v-for="(column, columnIndex) in localQuestion.questionConfiguration.answerColumns"
             :key="columnIndex"
             class="d-flex flex-column align-center"
           >

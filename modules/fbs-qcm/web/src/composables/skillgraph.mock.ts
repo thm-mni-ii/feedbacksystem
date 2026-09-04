@@ -538,7 +538,9 @@ function toLearningQuestion(question: QuestionMockItem): Question {
       weight: 1
     })),
     difficulty: mapDifficultyToLegacyRange(question.difficulty),
-    excludeFromAlgorithm: question.excludeFromAlgorithm
+    excludeFromAlgorithm: question.excludeFromAlgorithm,
+    // siehe LearningQuestion.legacyQuestion: nur für die Anzeige echter Antwortoptionen im Algorithm-Lab
+    legacyQuestion: question
   }
 }
 

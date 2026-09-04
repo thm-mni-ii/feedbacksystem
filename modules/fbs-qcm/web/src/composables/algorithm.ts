@@ -1,9 +1,3 @@
-// composables/algorithm.ts
-// ============================================================
-// Adaptive Quiz Algorithm
-// REFACTORED: Arbeitet mit vereinheitlichtem Competency-System
-// ============================================================
-
 import type {
   Competency,
   CompetencyState,
@@ -43,7 +37,7 @@ const DEFAULT_BKT_CONFIG: BktConfig = {
   slipRate: 0.1,
   minEvidencePerCompetency: 2,
   maxUncertainty: 0.7,
-  stickinessQuestions: 1,
+  stickinessQuestions: 3,
   maxQuestionsPerSession: 30
 }
 
@@ -56,27 +50,20 @@ function binaryEntropy(probability: number): number {
   const p = clampProbability(probability)
   if (p <= 0 || p >= 1) return 0
 
-  const entropy =
-    -p * Math.log(p) - (1 - p) * Math.log(1 - p)
+  const entropy = -p * Math.log(p) - (1 - p) * Math.log(1 - p)
 
   return entropy / Math.log(2)
 }
 
-function posteriorAfterResponse(
-  prior: number,
-  responseScore: number,
-  config: BktConfig
-): number {
+function posteriorAfterResponse(prior: number, responseScore: number, config: BktConfig): number {
   const p = clampProbability(prior)
   const r = clampProbability(responseScore)
 
   const correctPosterior =
-    (p * (1 - config.slipRate)) /
-    (p * (1 - config.slipRate) + (1 - p) * config.guessRate)
+    (p * (1 - config.slipRate)) / (p * (1 - config.slipRate) + (1 - p) * config.guessRate)
 
   const incorrectPosterior =
-    (p * config.slipRate) /
-    (p * config.slipRate + (1 - p) * (1 - config.guessRate))
+    (p * config.slipRate) / (p * config.slipRate + (1 - p) * (1 - config.guessRate))
 
   return clampProbability(r * correctPosterior + (1 - r) * incorrectPosterior)
 }
@@ -211,7 +198,10 @@ export class AdaptiveQuizAlgorithm {
           competencies.length > 0
             ? competencies.reduce(
                 (sum, competency) =>
-                  sum + binaryEntropy(session.competencies[competency.id]?.score ?? this.config.initialMastery),
+                  sum +
+                  binaryEntropy(
+                    session.competencies[competency.id]?.score ?? this.config.initialMastery
+                  ),
                 0
               ) / competencies.length
             : 1
@@ -221,9 +211,7 @@ export class AdaptiveQuizAlgorithm {
     const excludedQuestionIds = new Set(session.excludedQuestionIds)
     const relevantCompetencyIds = competencies
       .map((competency) => competency.id)
-      .filter((competencyId) =>
-        isCompetencyRelevant(competencyId, questions, excludedQuestionIds)
-      )
+      .filter((competencyId) => isCompetencyRelevant(competencyId, questions, excludedQuestionIds))
 
     if (relevantCompetencyIds.length === 0) {
       return {
@@ -302,8 +290,8 @@ export class AdaptiveQuizAlgorithm {
   }
 
   /**
- * Nächste Frage auswählen mit Schwierigkeitsadaption, Competency Stickiness
- * und expliziten fachlichen Voraussetzungen.
+   * Nächste Frage auswählen mit Schwierigkeitsadaption, Competency Stickiness
+   * und expliziten fachlichen Voraussetzungen.
    *
    * Strategie:
    * 1. VORAUSSETZUNGEN: Nur Kompetenzen mit erfüllten expliziten
@@ -374,10 +362,7 @@ export class AdaptiveQuizAlgorithm {
         forceCurrentCompetency = true
       } else {
         // Falls wirklich keine Frage mehr für diese Kompetenz verfügbar ist, darf gewechselt werden.
-        targetCompetency = this.selectNextCompetency(
-          candidateCompetencies,
-          session
-        )
+        targetCompetency = this.selectNextCompetency(candidateCompetencies, session)
       }
     } else {
       // SCHRITT 2: Wähle neue Zielkompetenz (gewichtet nach Häufigkeit Tests)
@@ -478,10 +463,7 @@ export class AdaptiveQuizAlgorithm {
    * - Gewichtung: weniger getestet + niedriger Score
    * - Dadurch wird ein "Zweig" komplett abgearbeitet, bevor man zum nächsten wechselt
    */
-  private selectNextCompetency(
-    candidates: Competency[],
-    session: SessionState
-  ): Competency {
+  private selectNextCompetency(candidates: Competency[], session: SessionState): Competency {
     // Filtere: Nur Kompetenzen, deren explizite Voraussetzungen erfüllt sind.
     const fullyUnlockedCandidates = candidates.filter((c) => {
       return (c.prerequisites ?? []).every((prerequisite) => {
@@ -492,10 +474,7 @@ export class AdaptiveQuizAlgorithm {
 
     // Ein ungültiger oder zyklischer Voraussetzungsgraf darf die Session nicht blockieren.
     // Die Struktur wird zusätzlich beim Speichern/Import der Kompetenzen validiert.
-    const activePool =
-      fullyUnlockedCandidates.length > 0
-        ? fullyUnlockedCandidates
-        : candidates
+    const activePool = fullyUnlockedCandidates.length > 0 ? fullyUnlockedCandidates : candidates
 
     return weightedSample(
       activePool.map((c) => {
@@ -578,11 +557,7 @@ export class AdaptiveQuizAlgorithm {
       recentQuestionIds: [question.id, ...state.recentQuestionIds].slice(0, 5)
     }
 
-    const completion = this.evaluateCompletionStatus(
-      competenciesInput,
-      questions,
-      updatedState
-    )
+    const completion = this.evaluateCompletionStatus(competenciesInput, questions, updatedState)
     if (completion.isComplete) {
       updatedState.completedAt = updatedState.completedAt ?? record.answeredAt
     }
@@ -610,8 +585,7 @@ export class AdaptiveQuizAlgorithm {
       score: state.competencies[c.id]?.score ?? 0,
       timesAssessed: state.competencies[c.id]?.timesAssessed ?? 0,
       uncertainty: binaryEntropy(state.competencies[c.id]?.score ?? this.config.initialMastery),
-      certainty:
-        1 - binaryEntropy(state.competencies[c.id]?.score ?? this.config.initialMastery)
+      certainty: 1 - binaryEntropy(state.competencies[c.id]?.score ?? this.config.initialMastery)
     }))
   }
 

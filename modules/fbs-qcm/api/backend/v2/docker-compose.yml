@@ -1,0 +1,28 @@
+version: "3.9"
+
+# Eigenständiges Compose-Setup nur für die lokale Entwicklung von backend v2.
+# Läuft unabhängig vom Haupt-docker-compose.yml der Feedbacksystem-Root (dort
+# liegt "mongodb_qcm" für das alte v1-Backend) – andere Ports, eigenes Volume,
+# damit v1 und v2 sich nicht in die Quere kommen.
+services:
+  mongodb_qcm_v2:
+    image: mongo:8.0
+    container_name: mongodb_qcm_v2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27019:27017"
+    volumes:
+      - ./data/mongodb_qcm_v2:/data/db
+
+  # Optionaler Web-UI-Client als Alternative/Ergänzung zu MongoDB Compass.
+  # Erreichbar unter http://localhost:8087 nach "docker compose up -d".
+  mongo-express_v2:
+    image: mongo-express:1.0.2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8087:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb_qcm_v2
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      - mongodb_qcm_v2

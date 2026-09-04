@@ -2,7 +2,20 @@
   <div>
     <v-row>
       <v-col cols="12" md="8">
-        <v-card class="pa-6">
+        <div class="d-flex justify-end mb-2">
+          <v-btn-toggle v-model="inputModeValue" color="primary" density="comfortable" mandatory>
+            <v-btn value="slider" prepend-icon="mdi-tune">Slider</v-btn>
+            <v-btn value="question" prepend-icon="mdi-format-list-checks">Frage</v-btn>
+          </v-btn-toggle>
+        </div>
+
+        <AlgorithmLabAnswerQuestion
+          v-if="inputModeValue === 'question'"
+          :current-question="currentQuestion"
+          @submit-answer="$emit('submitAnswer', $event)"
+        />
+
+        <v-card v-else class="pa-6">
           <div class="mb-4">
             <v-chip color="primary" variant="tonal">
               {{ currentQuestion.targetCompetency.name }}
@@ -52,10 +65,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { ProfileGroup } from '@/composables/competencyHierarchy'
 import type { NextQuestion } from '@/model/types'
 import AlgorithmLabProfilePanel from './AlgorithmLabProfilePanel.vue'
+import AlgorithmLabAnswerQuestion from './AlgorithmLabAnswerQuestion.vue'
 
 interface Props {
   currentQuestion: NextQuestion
@@ -73,6 +87,8 @@ const emit = defineEmits<{
   (e: 'update:expandedPanel', value: string | null): void
   (e: 'submitAnswer', value: number): void
 }>()
+
+const inputModeValue = ref<'slider' | 'question'>('slider')
 
 const sliderScoreValue = computed({
   get: () => props.sliderScore,

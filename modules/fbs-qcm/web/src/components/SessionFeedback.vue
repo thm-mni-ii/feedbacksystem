@@ -20,8 +20,8 @@ async function getQuestionTexts() {
   const promises = questionReport.map(async (report) => {
     try {
       const response = await questionService.getQuestion(report.questionId)
-      questionTexts.value[report.questionId] = response.data.questiontext
-      report.correctAnswer.textParts = response.data.questionconfiguration.textParts
+      questionTexts.value[report.questionId] = response.data.text ?? ''
+      report.correctAnswer.textParts = response.data.questionConfiguration.textParts
     } catch (error) {
       console.error(`Fehler beim Abrufen des Fragetextes für ${report.questionId}:`, error)
       questionTexts.value[report.questionId] = 'Fehler beim Laden der Frage'

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type Question from '@/model/Question'
+import { ref, computed, type Ref } from 'vue'
 import SelectQuestion from '@/components/SelectQuestion.vue'
 
 const AddQuestionDialog = ref(false)
 
-const questionOptionsVar = ref<Question[]>([])
+const questionOptionsVar = ref<any[]>([])
 const showInputVar = ref(false)
 const transitionVar = ref('')
 const resolvePromise = ref<Function | undefined>(undefined)
@@ -19,7 +18,8 @@ const scoreValidationError = computed(() =>
 )
 
 const openDialog = (
-  questionOptions: Question[],
+  // legacy catalog dialog: question shape here is v1/legacy, not the v2 Question model
+  questionOptions: any[],
   showInput: boolean,
   transition: string,
   currentQuestion: string

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../../../web/src",
+    "paths": {
+      "@/*": ["*"]
+    },
+    "noEmit": true
+  },
+  "include": ["src/seed"]
+}

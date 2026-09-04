@@ -1,36 +1,34 @@
 <script setup lang="ts">
 import { ref, watch, defineEmits } from 'vue'
 import type Question from '../model/Question'
-import type FillInTheBlanks from '../model/questionTypes/FillInTheBlanks.ts'
 import { onMounted } from 'vue'
 
 const props = defineProps<{ question: Question; isNew: boolean }>()
 
-const emit = defineEmits<{ (e: 'update', updatedQuestion: FillInTheBlanks): void }>()
+const emit = defineEmits<{ (e: 'update', updatedQuestion: Question): void }>()
 
 const localQuestion = ref<Question>({ ...props.question })
 
 const addTextPart = () => {
-  localQuestion.value.questionconfiguration.textParts.push({
-    order: localQuestion.value.questionconfiguration.textParts.length + 1,
+  localQuestion.value.questionConfiguration.textParts.push({
+    order: localQuestion.value.questionConfiguration.textParts.length + 1,
     text: '',
     isBlank: false
   })
 }
 const removeLastTextPart = () => {
-  if (localQuestion.value.questionconfiguration.textParts.length > 0) {
-    localQuestion.value.questionconfiguration.textParts.pop()
+  if (localQuestion.value.questionConfiguration.textParts.length > 0) {
+    localQuestion.value.questionConfiguration.textParts.pop()
   }
 }
 
 watch(
   localQuestion,
-  (newVal, oldVal) => {
-    const updatedConfig = newVal as FillInTheBlanks
-    updatedConfig.questionconfiguration.textParts.forEach((part: { text: string }) => {
+  (newVal) => {
+    newVal.questionConfiguration.textParts.forEach((part: { text: string }) => {
       part.text = part.text.trim()
     })
-    emit('update', updatedConfig)
+    emit('update', newVal)
   },
   { deep: true }
 )
@@ -38,15 +36,15 @@ watch(
 onMounted(() => {
   if (props.isNew) {
     console.log('QUESTION: ', props.question)
-    localQuestion.value.questionconfiguration = {
+    localQuestion.value.questionConfiguration = {
       showBlanks: true,
       textParts: [{ order: 1, text: '', isBlank: false }]
     }
   } else if (
-    props.question.questiontype === 'FillInTheBlanks' &&
-    !localQuestion.value.questionconfiguration
+    props.question.questionType === 'FillInTheBlanks' &&
+    !localQuestion.value.questionConfiguration
   ) {
-    localQuestion.value.questionconfiguration = {
+    localQuestion.value.questionConfiguration = {
       showBlanks: true,
       textParts: [{ order: 1, text: '', isBlank: false }]
     }
@@ -60,7 +58,7 @@ onMounted(() => {
   <div>
     <div class="d-flex">
       <v-switch
-        v-model="localQuestion.questionconfiguration.showBlanks"
+        v-model="localQuestion.questionConfiguration.showBlanks"
         class="ml-4"
         :label="`Show Missing Words`"
         color="primary"
@@ -82,7 +80,7 @@ onMounted(() => {
     </div>
 
     <div
-      v-for="(part, index) in localQuestion.questionconfiguration.textParts"
+      v-for="(part, index) in localQuestion.questionConfiguration.textParts"
       :key="index"
       class="d-flex"
     >
@@ -121,7 +119,7 @@ onMounted(() => {
   <h2 class="text-primary text-center">Preview</h2>
   <div class="text-body-1 d-flex flex-wrap">
     <span
-      v-for="(part, index) in localQuestion.questionconfiguration.textParts"
+      v-for="(part, index) in localQuestion.questionConfiguration.textParts"
       :key="index"
       :class="{ 'bg-yellow-lighten-2 px-1 rounded': part.isBlank }"
       class="inline-block"

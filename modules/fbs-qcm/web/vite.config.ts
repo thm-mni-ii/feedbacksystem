@@ -7,6 +7,7 @@ import eslintPlugin from 'vite-plugin-eslint'
 import vuetify from 'vite-plugin-vuetify'
 
 const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:3000/';
+const backendV2Url = process.env.BACKEND_V2_URL ?? 'http://localhost:3001/';
 const coreUrl = process.env.CORE_URL ?? 'https://localhost/';
 
 // https://vitejs.dev/config/
@@ -52,6 +53,11 @@ export default defineConfig({
     proxy: {
       '/api_v1': {
         target: backendUrl,
+        changeOrigin: true,
+        secure: false
+      },
+      '/api_v2': {
+        target: backendV2Url,
         changeOrigin: true,
         secure: false
       },

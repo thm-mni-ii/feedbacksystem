@@ -1,6 +1,4 @@
-import type Question from '../Question.ts'
-
-export interface Choice extends Question {
+export interface Choice {
   multipleRow: boolean // false = single Choice, true = multiple Choice
   multipleColumn: boolean
   answerColumns: OptionColumn[] // 1 = true/false, mehr = matrix

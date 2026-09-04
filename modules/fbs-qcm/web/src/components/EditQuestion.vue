@@ -6,7 +6,7 @@ import type { Choice } from '@/model/questionTypes/Choice'
 import questionService from '@/services/question.service'
 import QuestionType from '../enums/QuestionType'
 import { onMounted, onBeforeUnmount } from 'vue'
-import QuestionTags from './QuestionTags.vue'
+import QuestionCompetencies from './QuestionCompetencies.vue'
 import EditFillInTheBlanks from './EditFillInTheBlanks.vue'
 import EditChoiceQuestion from './EditChoiceQuestion.vue'
 
@@ -29,12 +29,11 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 
 const question = ref<Question>({
-  owner: 1,
-  questiontext: '',
-  questiontags: [] as string[],
-  questiontype: QuestionType.Choice,
-  difficulty: 1,
-  questionconfiguration: {
+  text: '',
+  competencyIds: [] as string[],
+  questionType: QuestionType.Choice,
+  difficulty: 0.5,
+  questionConfiguration: {
     multipleRow: false,
     multipleColumn: false,
     answerColumns: [{ id: 1, name: '' }],
@@ -42,7 +41,7 @@ const question = ref<Question>({
   } as ChoiceQuestionConfiguration
 } as Question)
 
-const tickLabels = { 1: 'Basic', 2: 'Moderate', 3: 'Challenging', 4: 'Complex' }
+const difficultyTicks = { 0: 'Easy', 0.5: 'Medium', 1: 'Hard' }
 
 // Type Guard
 function isChoiceQuestionConfiguration(config: any): config is Choice {
@@ -67,11 +66,11 @@ onBeforeUnmount(() => {
 })
 
 const checkMultipleRows = () => {
-  if (isChoiceQuestionConfiguration(question.value.questionconfiguration)) {
-    const optionRows = question.value.questionconfiguration.optionRows
+  if (isChoiceQuestionConfiguration(question.value.questionConfiguration)) {
+    const optionRows = question.value.questionConfiguration.optionRows
     const rowsWithAnswers = optionRows.filter((row) => row.correctAnswers.length > 0)
     if (rowsWithAnswers.length > 1) {
-      question.value.questionconfiguration.multipleRow = true
+      question.value.questionConfiguration.multipleRow = true
     }
   }
 }
@@ -79,12 +78,12 @@ const checkMultipleRows = () => {
 const handleUpdate = (updatedQuestion: Question) => {
   question.value = {
     ...question.value,
-    questionconfiguration: updatedQuestion.questionconfiguration
+    questionConfiguration: updatedQuestion.questionConfiguration
   }
 }
 
-const updateTags = (newTags: string[]) => {
-  question.value.questiontags = newTags
+const updateCompetencyIds = (newCompetencyIds: string[]) => {
+  question.value.competencyIds = newCompetencyIds
 }
 
 const handleSubmit = async () => {
@@ -117,14 +116,14 @@ const handleSubmit = async () => {
     <v-card-text>
       <v-form>
         <v-select
-          v-model="question.questiontype"
+          v-model="question.questionType"
           :disabled="!isNew"
           label="Fragetyp"
           :items="questionTypes"
           variant="solo-filled"
         ></v-select>
         <v-textarea
-          v-model="question.questiontext"
+          v-model="question.text"
           maxlength="130"
           auto-grow
           counter
@@ -132,29 +131,33 @@ const handleSubmit = async () => {
           label="Question"
           required
         ></v-textarea>
-        <QuestionTags :questiontags="question.questiontags" @update-tags="updateTags" />
+        <QuestionCompetencies
+          :competency-ids="question.competencyIds"
+          @update-competency-ids="updateCompetencyIds"
+        />
 
         <v-slider
           v-model="question.difficulty"
           class="custom-slider"
           label="Difficulty"
-          :ticks="tickLabels"
+          :ticks="difficultyTicks"
           show-ticks="always"
           tick-size="4"
           color="primary"
-          min="1"
-          max="4"
-          step="1"
+          min="0"
+          max="1"
+          step="0.1"
+          thumb-label="always"
         ></v-slider>
 
         <EditChoiceQuestion
-          v-if="question.questiontype === 'Choice'"
+          v-if="question.questionType === 'Choice'"
           :question="question"
           :is-new="isNew"
           @update="handleUpdate"
         />
         <EditFillInTheBlanks
-          v-if="question.questiontype === 'FillInTheBlanks'"
+          v-if="question.questionType === 'FillInTheBlanks'"
           :question="question"
           :is-new="isNew"
           @update="handleUpdate"

@@ -1,63 +1,33 @@
 import type Question from '@/model/Question'
-import axios, { type AxiosResponse } from 'axios'
+import apiV2 from '@/services/apiV2Client'
+import type { AxiosResponse } from 'axios'
 
+/**
+ * `Question` in `@/model/Question` entspricht jetzt 1:1 dem v2-Backend-DTO
+ * (`api/backend/v2/src/question/question.model.ts`), daher braucht es hier
+ * keine Mapper-Funktionen mehr zwischen zwei unterschiedlichen Shapes.
+ */
 class QuestionService {
   getQuestion(questionId: string): Promise<AxiosResponse<Question>> {
-    return axios
-      .get(`/api_v1/question/${questionId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-      })
-      .then((response) => {
-        console.log('Response status:', response.status)
-        console.log('Response data:', response.data)
-        return response
-      })
-      .catch((error) => {
-        console.error('Error fetching question:', error)
-        throw error
-      })
+    return apiV2.get<Question>(`/questions/${questionId}`)
   }
+
   createQuestion(question: Question): Promise<AxiosResponse<Question>> {
-    return axios.post('api_v1/question', question, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-    })
+    const { id, ...payload } = question
+    return apiV2.post<Question>('/questions', payload)
   }
+
   updateQuestion(question: Question): Promise<AxiosResponse<Question>> {
-    return axios.put('api_v1/question', question, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-    })
+    const { id, ...payload } = question
+    return apiV2.put<Question>(`/questions/${id}`, payload)
   }
-  addQuestionToCatalog(question: Question, catalog: string): Promise<AxiosResponse<Question>> {
-    return axios.put(
-      '/api_v1/addQuestionToCatalog',
-      { question: question, catalog: catalog, children: [] },
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-      }
-    )
+
+  deleteQuestion(questionId: string): Promise<AxiosResponse<void>> {
+    return apiV2.delete(`/questions/${questionId}`)
   }
+
   getAllQuestions(): Promise<AxiosResponse<Question[]>> {
-    return axios.get('/api_v1/allquestions', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-    })
-  }
-  getAllCatalogQuestions(catalogId: string): Promise<AxiosResponse<Question[]>> {
-    return axios.get(`/api_v1/allquestionsInCatalog/${catalogId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-    })
-  }
-  getAllTags(): Promise<AxiosResponse<String[]>> {
-    return axios
-      .get('/api_v1/getAllTags', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('jsessionid')}` }
-      })
-      .then((res) => {
-        console.log('all tags: ', res.data)
-        return res
-      })
-      .catch((err) => {
-        return err
-      })
+    return apiV2.get<Question[]>('/questions')
   }
 }
 
