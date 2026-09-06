@@ -379,6 +379,12 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
     if (selectedNodeId.value === id) selectedNodeId.value = null
   }
 
+  const updateQuestion = (updatedQuestion: Question) => {
+    questions.value = questions.value.map((q) =>
+      q.id === updatedQuestion.id ? updatedQuestion : q
+    )
+  }
+
   const removeCompetencyFromQuestion = (questionId: string, compId: string) => {
     const q = questions.value.find((q) => q.id === questionId)
     if (!q) {
@@ -399,6 +405,19 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
       q.competencyLinks = q.competencyLinks.filter((link) =>
         normalizedLinkIds.has(link.competencyId)
       )
+    }
+  }
+
+  const addCompetencyToQuestion = (questionId: string, compId: string) => {
+    const q = questions.value.find((q) => q.id === questionId)
+    if (!q || q.competencyIds.includes(compId)) {
+      return
+    }
+
+    q.competencyIds = [...q.competencyIds, compId]
+
+    if (q.competencyLinks && q.competencyLinks.length > 0) {
+      q.competencyLinks = [...q.competencyLinks, { competencyId: compId, relation: 'required', weight: 1 }]
     }
   }
 
@@ -467,7 +486,9 @@ export function useSkillGraphLogic(mockCompetencies: Competency[], mockQuestions
     nodeIcon,
     // Actions
     deleteQuestion,
+    updateQuestion,
     removeCompetencyFromQuestion,
+    addCompetencyToQuestion,
     saveCompetencyPrerequisites,
     selectCourse
   }

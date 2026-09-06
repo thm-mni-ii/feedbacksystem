@@ -66,6 +66,15 @@ const orderedCompetencies = computed(() => {
   return result
 })
 
+/**
+ * Zeigt zu einer Competency-ID den Anzeigenamen. Fällt auf die rohe ID
+ * zurück, falls die Competency (noch) nicht geladen ist – verhindert
+ * Crashes im Chip-/Item-Template durch fehlende Werte, z.B. solange
+ * `competencyService.getAllCompetencies()` noch lädt.
+ */
+const competencyName = (competencyId: string): string =>
+  competencies.value.find((c) => c.id === competencyId)?.name ?? competencyId
+
 onMounted(async () => {
   try {
     const res = await competencyService.getAllCompetencies()
@@ -94,16 +103,16 @@ onMounted(async () => {
       <v-list-item
         v-bind="itemProps"
         :title="undefined"
-        :style="{ paddingLeft: `${16 + item.raw.depth * 20}px` }"
+        :style="{ paddingLeft: `${16 + (item.raw?.depth ?? 0) * 20}px` }"
       >
-        <span v-if="item.raw.depth > 0" class="text-medium-emphasis">└ </span>{{
-          item.raw.competency.name
+        <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">└ </span>{{
+          item.raw?.competency?.name ?? competencyName(item.value)
         }}
       </v-list-item>
     </template>
     <template #chip="{ props: chipProps, item }">
       <v-chip v-bind="chipProps">
-        <strong>{{ item.raw.competency.name }}</strong>
+        <strong>{{ item.raw?.competency?.name ?? competencyName(item.value) }}</strong>
       </v-chip>
     </template>
   </v-select>

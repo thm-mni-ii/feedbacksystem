@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { QuestionRepository } from "./question.repository";
-import { validateQuestionInput, validateQuestionUpdate } from "./question.validation";
+import {
+  validateQuestionInput,
+  validateQuestionUpdate,
+} from "./question.validation";
 
 export class QuestionController {
   constructor(private readonly repository: QuestionRepository) {}

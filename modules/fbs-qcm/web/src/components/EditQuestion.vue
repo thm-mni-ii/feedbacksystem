@@ -10,17 +10,40 @@ import QuestionCompetencies from './QuestionCompetencies.vue'
 import EditFillInTheBlanks from './EditFillInTheBlanks.vue'
 import EditChoiceQuestion from './EditChoiceQuestion.vue'
 
-const props = defineProps<{
-  inputQuestion?: Question
-  isNew: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    inputQuestion?: Question
+    isNew: boolean
+    /**
+     * Steuert, ob beim Speichern der echte Backend-Call (questionService)
+     * ausgeführt wird. Der SkillGraph arbeitet mit lokalen Mock-Fragen, die
+     * im Backend nicht existieren – dort wird `persist=false` übergeben und
+     * die bearbeitete Frage stattdessen per `update`-Event nach oben gereicht.
+     */
+    persist?: boolean
+  }>(),
+  { persist: true }
+)
 
 const emit = defineEmits<{
-  (e: 'update'): void
+  (e: 'update', question: Question): void
   (e: 'cancel'): void
 }>()
 
 const questionTypes = Object.values(QuestionType)
+
+// Der Backend v2-/Seed-Datenbestand nutzt Legacy-Fragetyp-Strings
+// ('single-choice', 'matrix', 'matching', 'fill-in-the-blank'), die nie
+// exakt mit dem Frontend-Enum QuestionType ('Choice', 'FillInTheBlanks')
+// übereinstimmen. Beide Varianten teilen sich aber dieselbe
+// questionConfiguration-Struktur (optionRows/answerColumns bzw.
+// textParts), daher hier auf Basis beider Werte matchen statt nur des Enums.
+const choiceLikeTypes = new Set(['Choice', 'single-choice', 'matrix', 'matching'])
+const fillInTheBlanksLikeTypes = new Set(['FillInTheBlanks', 'fill-in-the-blank'])
+
+const isChoiceLikeQuestionType = (type?: string) => !!type && choiceLikeTypes.has(type)
+const isFillInTheBlanksLikeQuestionType = (type?: string) =>
+  !!type && fillInTheBlanksLikeTypes.has(type)
 
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
@@ -88,12 +111,18 @@ const updateCompetencyIds = (newCompetencyIds: string[]) => {
 
 const handleSubmit = async () => {
   checkMultipleRows()
+
+  if (!props.persist) {
+    emit('update', question.value)
+    return
+  }
+
   if (props.isNew) {
     questionService
       .createQuestion(question.value)
       .then((res) => {
         console.log(res)
-        emit('update')
+        emit('update', question.value)
       })
       .catch((err) => console.log(err))
   } else {
@@ -101,7 +130,7 @@ const handleSubmit = async () => {
       .updateQuestion(question.value)
       .then((res) => {
         console.log(res)
-        emit('update')
+        emit('update', question.value)
       })
       .catch((err) => console.log(err))
   }
@@ -151,13 +180,13 @@ const handleSubmit = async () => {
         ></v-slider>
 
         <EditChoiceQuestion
-          v-if="question.questionType === 'Choice'"
+          v-if="isChoiceLikeQuestionType(question.questionType)"
           :question="question"
           :is-new="isNew"
           @update="handleUpdate"
         />
         <EditFillInTheBlanks
-          v-if="question.questionType === 'FillInTheBlanks'"
+          v-if="isFillInTheBlanksLikeQuestionType(question.questionType)"
           :question="question"
           :is-new="isNew"
           @update="handleUpdate"

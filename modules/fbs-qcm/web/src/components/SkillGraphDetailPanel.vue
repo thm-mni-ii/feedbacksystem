@@ -57,9 +57,11 @@
         <!-- Question Panel -->
         <QuestionDetailPanel
           :selected-node="selectedNode"
+          :competencies="competencies"
           :get-competency="getCompetency"
           :get-competency-color="getCompetencyColor"
           :remove-competency-from-question="removeCompetencyFromQuestion"
+          :add-competency-to-question="addCompetencyToQuestion"
           :edit-question="editQuestion"
           :delete-question="deleteQuestion"
         />
@@ -103,6 +105,7 @@ interface Props {
   selectedNodeId: string | null
   selectedNode: any
   questions: Question[]
+  competencies: Competency[]
   nodeIcon: (type?: string) => string
   rootCompetencies: Competency[]
   getCompetencyColor: (comp?: Competency) => string
@@ -111,6 +114,7 @@ interface Props {
   getAvailablePrerequisites: (competencyId: string) => Competency[]
   questionsWithCompetency: (compId: string) => Question[]
   removeCompetencyFromQuestion: (questionId: string, compId: string) => void
+  addCompetencyToQuestion: (questionId: string, compId: string) => void
   saveCompetencyPrerequisites: (
     competencyId: string,
     prerequisites: CompetencyPrerequisite[]
