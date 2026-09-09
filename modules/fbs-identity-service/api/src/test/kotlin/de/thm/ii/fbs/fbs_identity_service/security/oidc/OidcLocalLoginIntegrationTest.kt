@@ -254,4 +254,74 @@ class OidcLocalLoginIntegrationTest() {
                 }
             }
     }
+
+    @Test
+    fun `local oidc form login authenticates user and redirects`() {
+        val session = MockHttpSession()
+
+        mockMvc.get("/oauth2/authorize") {
+            queryParam("response_type", "code")
+            queryParam("client_id", "fbs-test-client")
+            queryParam(
+                "redirect_uri",
+                "http://127.0.0.1:4200/oauth2/callback"
+            )
+            queryParam("scope", "openid profile")
+            queryParam(
+                "code_challenge",
+                "ZKvd7XvDllsX65fhzUdFzFvYti9384GOnbbmpWOpF-Q"
+            )
+            queryParam("code_challenge_method", "S256")
+            queryParam("state", "test-state")
+            this.session = session
+        }
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+
+        val loginResult = mockMvc.post("/api/v1/auth/oidc-login") {
+            with(csrf())
+            this.session = session
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            param("username", "oidc-integration-test-user")
+            param("password", "test123")
+        }
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+            .andReturn()
+
+        val authorizationRedirectUrl = requireNotNull(loginResult.response.redirectedUrl)
+        assertTrue(authorizationRedirectUrl.contains("/oauth2/authorize"))
+
+        val securityContext = session.getAttribute(
+            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
+        ) as SecurityContext
+
+        assertTrue(securityContext.authentication.isAuthenticated)
+        assertEquals("oidc-integration-test-user", securityContext.authentication.name)
+    }
+
+    @Test
+    fun `local oidc form login with invalid credentials redirects to login with error`() {
+        val session = MockHttpSession()
+
+        mockMvc.post("/api/v1/auth/oidc-login") {
+            with(csrf())
+            this.session = session
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            param("username", "oidc-integration-test-user")
+            param("password", "wrong-password")
+        }
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl("/login?error=1")
+            }
+
+        val securityContext = session.getAttribute(
+            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
+        ) as? SecurityContext
+
+        assertNull(securityContext)
+    }
 }

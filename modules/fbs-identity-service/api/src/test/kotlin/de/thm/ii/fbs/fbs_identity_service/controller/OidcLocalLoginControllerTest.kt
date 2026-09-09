@@ -207,4 +207,73 @@ class OidcLocalLoginControllerTest {
 
         assertNotEquals(initialSessionId, session.id)
     }
+
+    @Test
+    fun `form login redirects to error when client ip cannot be resolved`() {
+        whenever(clientIpResolver.resolve(any())).thenReturn(null)
+
+        mockMvc.post("/api/v1/auth/oidc-login") {
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            param("username", "Paul")
+            param("password", "password")
+        }.andExpect {
+            status { is3xxRedirection() }
+            redirectedUrl("/login?error=1")
+        }
+    }
+
+    @Test
+    fun `form login redirects to rate limit error when blocked`() {
+        whenever(clientIpResolver.resolve(any())).thenReturn("202.0.11.50")
+        whenever(loginAttemptService.isBlocked("202.0.11.50", "Paul")).thenReturn(true)
+
+        mockMvc.post("/api/v1/auth/oidc-login") {
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            param("username", "Paul")
+            param("password", "password")
+        }.andExpect {
+            status { is3xxRedirection() }
+            redirectedUrl("/login?error=rate-limit")
+        }
+    }
+
+    @Test
+    fun `form login redirects to error when credentials invalid`() {
+        whenever(clientIpResolver.resolve(any())).thenReturn("202.0.11.50")
+        whenever(loginAttemptService.isBlocked("202.0.11.50", "Paul")).thenReturn(false)
+        whenever(oidcLocalLoginService.authenticate("Paul", "wrong-pass"))
+            .thenThrow(BadCredentialsException("Bad credentials"))
+
+        mockMvc.post("/api/v1/auth/oidc-login") {
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            param("username", "Paul")
+            param("password", "wrong-pass")
+        }.andExpect {
+            status { is3xxRedirection() }
+            redirectedUrl("/login?error=1")
+        }
+
+        verify(loginAttemptService).recordFailure("202.0.11.50", "Paul")
+    }
+
+    @Test
+    fun `form login saves context and redirects when valid`() {
+        whenever(clientIpResolver.resolve(any())).thenReturn("202.0.11.50")
+        whenever(loginAttemptService.isBlocked("202.0.11.50", "Paul")).thenReturn(false)
+
+        val authentication = mock<Authentication>()
+        whenever(oidcLocalLoginService.authenticate("Paul", "password"))
+            .thenReturn(authentication)
+
+        mockMvc.post("/api/v1/auth/oidc-login") {
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            param("username", "Paul")
+            param("password", "password")
+        }.andExpect {
+            status { is3xxRedirection() }
+        }
+
+        verify(loginAttemptService).recordSuccess("Paul")
+        verify(securityContextRepository).saveContext(any(), any(), any())
+    }
 }

@@ -98,7 +98,15 @@ class SecurityConfig(
                         "/graphiql",
                         "/graphiql/**"
                     ).permitAll()
-                    .requestMatchers("/login").permitAll()
+                    .requestMatchers(
+                        "/login",
+                        "/legal/terms-of-use",
+                        "/legal/termsofuse",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/favicon.ico"
+                    ).permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/oidc-login").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/impressum").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/privacy-text").permitAll()
@@ -107,7 +115,11 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.POST, "/graphql").authenticated()
                     .anyRequest().authenticated()
             }
-            .formLogin(Customizer.withDefaults())
+            .formLogin { form ->
+                form
+                    .loginPage("/login")
+                    .permitAll()
+            }
             .requestCache {
                 it.requestCache(requestCache)
             }

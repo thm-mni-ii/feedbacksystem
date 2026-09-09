@@ -24,6 +24,7 @@ import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
@@ -119,6 +120,65 @@ class OidcLocalLoginController(
         }
 
         loginAttemptService.recordSuccess(request.username)
+
+        // Rotate session ID to prevent session fixation attacks
+        if (httpRequest.getSession(false) != null) {
+            httpRequest.changeSessionId()
+        }
+
+        val securityContext = SecurityContextHolder.createEmptyContext()
+        securityContext.authentication = authentication
+
+        SecurityContextHolder.setContext(securityContext)
+
+        securityContextRepository.saveContext(
+            securityContext,
+            httpRequest,
+            httpResponse
+        )
+
+        authenticationSuccessHandler.onAuthenticationSuccess(
+            httpRequest,
+            httpResponse,
+            authentication
+        )
+    }
+
+    @PostMapping("/oidc-login", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    fun oidcFormLogin(
+        @RequestParam("username") username: String,
+        @RequestParam("password") password: String,
+        httpRequest: HttpServletRequest,
+        httpResponse: HttpServletResponse
+    ) {
+        val trimmedUsername = username.trim()
+        val clientIp = clientIpResolver.resolve(httpRequest)
+            ?: run {
+                httpResponse.sendRedirect("/login?error=1")
+                return
+            }
+
+        if (loginAttemptService.isBlocked(clientIp, trimmedUsername)) {
+            logger.warn("Blocked local login attempt from IP {}: rate limit exceeded", clientIp)
+            httpResponse.sendRedirect("/login?error=rate-limit")
+            return
+        }
+
+        val authentication = try {
+            oidcLocalLoginService.authenticate(
+                trimmedUsername,
+                password
+            )
+        } catch (exception: AuthenticationException) {
+            loginAttemptService.recordFailure(
+                clientIp,
+                trimmedUsername
+            )
+            httpResponse.sendRedirect("/login?error=1")
+            return
+        }
+
+        loginAttemptService.recordSuccess(trimmedUsername)
 
         // Rotate session ID to prevent session fixation attacks
         if (httpRequest.getSession(false) != null) {
