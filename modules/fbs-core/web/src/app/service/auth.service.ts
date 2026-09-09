@@ -30,8 +30,16 @@ export class AuthService {
 
   private configure() {
     this.oauthService.configure(authCodeFlowConfig);
-    this.oauthService.loadDiscoveryDocumentAndTryLogin().catch(() => {});
     this.oauthService.setupAutomaticSilentRefresh();
+  }
+
+  public async tryLogin(): Promise<boolean> {
+    try {
+      await this.oauthService.loadDiscoveryDocumentAndTryLogin();
+    } catch (e) {
+      // Ignore discovery or login errors
+    }
+    return this.isAuthenticated();
   }
 
   public login() {
@@ -184,9 +192,7 @@ export class AuthService {
    * @return Get token as string or null if no token exists.
    */
   public loadToken(): string {
-    return (
-      this.oauthService.getAccessToken() || localStorage.getItem(TOKEN_ID)
-    );
+    return this.oauthService.getAccessToken() || localStorage.getItem(TOKEN_ID);
   }
 
   public storeToken(token: string, syncFromToken: boolean = true): void {

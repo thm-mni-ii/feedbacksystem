@@ -30,7 +30,7 @@ class CheckerStorageService(val checkerStorageRepository: CheckerStorageReposito
         )
     }
 
-    inline fun <reified T> getValue(configurationId: Int, storageKey: String): T? {
+    final inline fun <reified T> getValue(configurationId: Int, storageKey: String): T? {
         val value = checkerStorageRepository.findByConfigurationIdAndStorageKey(
             configurationId,
             storageKey
@@ -38,7 +38,7 @@ class CheckerStorageService(val checkerStorageRepository: CheckerStorageReposito
         return objectMapper.treeToValue(value, T::class.java)
     }
 
-    inline fun <reified T : Any> getOrStoreValue(configurationId: Int, storageKey: String, generateValue: () -> T): T {
+    final inline fun <reified T : Any> getOrStoreValue(configurationId: Int, storageKey: String, generateValue: () -> T): T {
         var value = this.getValue<T>(configurationId, storageKey)
 
         if (value != null) {

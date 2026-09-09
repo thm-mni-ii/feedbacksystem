@@ -27,18 +27,29 @@ export class LoginComponent implements OnInit {
     private goToService: GoToService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     const token = this.cookieService.get("jwt");
     if (token) {
       this.auth.storeToken(token);
       this.cookieService.delete("jwt");
     }
 
+    await this.auth.tryLogin();
+
     if (this.auth.isAuthenticated()) {
       this.navigateAfterAuthentication();
+      return;
     }
 
     this.goToService.clearGoTo();
+
+    if (
+      this.router.url.includes("oauth2/callback") ||
+      this.router.url === "/login" ||
+      this.router.url === "/login/"
+    ) {
+      this.auth.login();
+    }
   }
 
   /**

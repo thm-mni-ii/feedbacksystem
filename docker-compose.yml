@@ -97,7 +97,7 @@ services:
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - APP_SAML_ENABLED=false
       - OIDC_ISSUER=http://localhost:8080
-      - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback
+      - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback,https://localhost/oauth2/callback,http://127.0.0.1:4200/oauth2/callback,http://localhost:4200/oauth2/callback
       - OIDC_SIGNING_KEY_LOCATION=/run/secrets/identity-signing-key.p12
       - OIDC_SIGNING_KEY_STORE_PASSWORD=changeit
       - OIDC_SIGNING_KEY_ALIAS=identity-signing
@@ -134,8 +134,8 @@ services:
     environment:
       POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - 5432:5432
+    #ports:
+    #  - 5432:5432
     volumes:
       - ./data/postgres2:/var/lib/postgresql/data
     networks:
@@ -188,8 +188,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/mongodb:/data/db
-    ports:
-      - "127.0.0.1:27117:27017"
+    #ports:
+    #  - "127.0.0.1:27117:27017"
     networks:
       fbs:
     healthcheck:
@@ -204,8 +204,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/mongodb-playground:/data/db
-    ports:
-      - "127.0.0.1:27018:27017"
+    #ports:
+    #  - "127.0.0.1:27018:27017"
     networks:
       fbs:
     healthcheck:
@@ -221,8 +221,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/mongodb_qcm/:/data/qcm_db
-    ports:
-      - "127.0.0.1:27018:27017"
+    #ports:
+    #  - "127.0.0.1:27018:27017"
     networks:
       fbs:
 

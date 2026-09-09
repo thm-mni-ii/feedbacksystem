@@ -1,6 +1,12 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { MatDialogModule } from "@angular/material/dialog";
-import { CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule } from "@angular/core";
+import {
+  APP_INITIALIZER,
+  CUSTOM_ELEMENTS_SCHEMA,
+  Injectable,
+  Injector,
+  NgModule,
+} from "@angular/core";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { LayoutModule } from "@angular/cdk/layout";
@@ -11,12 +17,14 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
   HTTP_INTERCEPTORS,
   HttpClientModule,
+  HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
   HttpResponse,
 } from "@angular/common/http";
+import { Router } from "@angular/router";
 import { JwtModule } from "@auth0/angular-jwt";
 import { Observable } from "rxjs";
 import { DataprivacyDialogComponent } from "./dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
@@ -115,14 +123,38 @@ import { OAuthModule } from "angular-oauth2-oidc";
 import { AngularEditorModule } from "@kolkov/angular-editor";
 import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
 
+export function initAuth(authService: AuthService) {
+  return () => authService.tryLogin();
+}
+
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) {}
+  private authService: AuthService;
+
+  constructor(private injector: Injector, private router: Router) {}
+
+  private getAuthService(): AuthService {
+    if (!this.authService) {
+      this.authService = this.injector.get(AuthService);
+    }
+    return this.authService;
+  }
+
   public intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const token = this.authService.getAccessToken();
+    if (
+      req.url.includes(".well-known") ||
+      req.url.includes("/oauth2/") ||
+      req.url.startsWith("http://localhost:8080") ||
+      req.url.startsWith("https://localhost:8080")
+    ) {
+      return next.handle(req);
+    }
+
+    const authService = this.getAuthService();
+    const token = authService ? authService.getAccessToken() : null;
     let authReq = req;
     if (token) {
       authReq = req.clone({
@@ -132,12 +164,25 @@ export class AuthInterceptor implements HttpInterceptor {
       });
     }
     return next.handle(authReq).pipe(
-      tap((event) => {
-        if (event instanceof HttpResponse) {
-          const response = <HttpResponse<any>>event;
-          this.authService.renewToken(response);
+      tap(
+        (event) => {
+          if (event instanceof HttpResponse && authService) {
+            authService.renewToken(event);
+          }
+        },
+        (error) => {
+          if (
+            error instanceof HttpErrorResponse &&
+            error.status === 401 &&
+            !req.url.includes("/api/v1/login")
+          ) {
+            if (authService) {
+              authService.logout();
+            }
+            this.router.navigate(["login"]);
+          }
         }
-      })
+      )
     );
   }
 }
@@ -260,6 +305,12 @@ export const httpInterceptorProviders = [
   providers: [
     CookieService,
     httpInterceptorProviders,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initAuth,
+      deps: [AuthService],
+      multi: true,
+    },
     {
       provide: MAT_DATE_FORMATS,
       useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },

@@ -21,6 +21,9 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableMethodSecurity
@@ -41,6 +44,7 @@ class SecurityConfig(
 
         http
             .securityMatcher(authorizationServerConfigurer.endpointsMatcher)
+            .cors(Customizer.withDefaults())
             .with(authorizationServerConfigurer) { authorizationServer ->
                 authorizationServer
                     .oidc { oidc ->
@@ -74,6 +78,7 @@ class SecurityConfig(
         requestCache: RequestCache
     ): SecurityFilterChain {
         var security = http
+            .cors(Customizer.withDefaults())
             .csrf { csrf ->
                 csrf
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -142,5 +147,19 @@ class SecurityConfig(
                 }
             }
             .build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration().apply {
+            allowedOriginPatterns = listOf("*")
+            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+            maxAge = 3600L
+        }
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
     }
 }

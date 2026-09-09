@@ -38,11 +38,10 @@ class RegisteredClientInitializer(
     }
 
     private fun createRegisteredClient(id: String = UUID.randomUUID().toString()): RegisteredClient {
-        return RegisteredClient.withId(id)
+        val builder = RegisteredClient.withId(id)
             .clientId(clientId)
             .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .redirectUri(redirectUri)
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .clientSettings(
@@ -57,6 +56,11 @@ class RegisteredClientInitializer(
                     .authorizationCodeTimeToLive(Duration.ofMinutes(authorizationCodeTtlMinutes))
                     .build()
             )
-            .build()
+
+        redirectUri.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { uri ->
+            builder.redirectUri(uri)
+        }
+
+        return builder.build()
     }
 }
