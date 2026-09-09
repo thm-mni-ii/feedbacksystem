@@ -29,6 +29,7 @@ import { FbsQuestionaryComponent } from "./page-components/fbs-questionary/fbs-q
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
+  { path: "oauth2/callback", component: LoginComponent },
   {
     path: "",
     component: SidebarComponent,

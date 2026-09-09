@@ -111,21 +111,27 @@ import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.comp
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component";
 import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
+import { OAuthModule } from "angular-oauth2-oidc";
 import { AngularEditorModule } from "@kolkov/angular-editor";
 import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
 
 @Injectable()
-export class ApiURIHttpInterceptor implements HttpInterceptor {
+export class AuthInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
   public intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const clonedRequest: HttpRequest<any> = req.clone({
-      // url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
-      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
-    });
-    return next.handle(clonedRequest).pipe(
+    const token = this.authService.getAccessToken();
+    let authReq = req;
+    if (token) {
+      authReq = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+    return next.handle(authReq).pipe(
       tap((event) => {
         if (event instanceof HttpResponse) {
           const response = <HttpResponse<any>>event;
@@ -136,7 +142,7 @@ export class ApiURIHttpInterceptor implements HttpInterceptor {
   }
 }
 export const httpInterceptorProviders = [
-  { provide: HTTP_INTERCEPTORS, useClass: ApiURIHttpInterceptor, multi: true },
+  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
 ];
 
 /**
@@ -242,6 +248,7 @@ export const httpInterceptorProviders = [
     MatTableModule,
     MatSortModule,
     I18NextModule.forRoot(),
+    OAuthModule.forRoot(),
     SqlPlaygroundModule,
     AngularEditorModule,
   ],

@@ -35,6 +35,7 @@ services:
       dockerfile: modules/fbs-core/api/Dockerfile
     restart: unless-stopped
     depends_on:
+      - identity-service
       - mysql1
       - runner
       - mongodb
@@ -66,6 +67,8 @@ services:
       - MINIO_URL=http://minio
       - ASSA_URL=https://feedback.mni.thm.de/ai_feedback/api/v1/analyse
       - ASSA_TOKEN=MY_ASSA_TOKEN
+      - OIDC_ISSUER=http://localhost:8080
+      - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
     networks:
       classroom:
       fbs:
@@ -93,6 +96,8 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - APP_SAML_ENABLED=false
+      - OIDC_ISSUER=http://localhost:8080
+      - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback
       - OIDC_SIGNING_KEY_LOCATION=/run/secrets/identity-signing-key.p12
       - OIDC_SIGNING_KEY_STORE_PASSWORD=changeit
       - OIDC_SIGNING_KEY_ALIAS=identity-signing
@@ -311,8 +316,12 @@ services:
       - 5001:8050
     networks:
       - fbs
+    depends_on:
+      - identity-service
     environment:
       - JWT_SECRET=8Dsupersecurekeydf0
+      - OIDC_ISSUER=http://localhost:8080
+      - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
       - SERVER_SESSION_SECRET=sessiosecret
       - MONGODB_URL=mongodb://mongodb:27017/sql-checker
       - MONGODB_PLAYGROUND_URL=mongodb://mongodb-playground:27018/playground-db
@@ -328,8 +337,12 @@ services:
       - 1234:1234
     networks:
       - fbs
+    depends_on:
+      - identity-service
     environment:
       - FBS_ROOT_URL=https://core:443
+      - OIDC_ISSUER=http://localhost:8080
+      - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
       - NODE_TLS_REJECT_UNAUTHORIZED=0
 
   parsr:
@@ -353,9 +366,12 @@ services:
       - fbs
     environment:
       - JWT_SECRET=8Dsupersecurekeydf0
+      - OIDC_ISSUER=http://localhost:8080
+      - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
       - FBS_BASE_URL=https://core:443
     depends_on:
+      - identity-service
       - mongodb_qcm
 
   qcm-frontend:

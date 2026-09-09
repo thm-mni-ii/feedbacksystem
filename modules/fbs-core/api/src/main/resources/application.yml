@@ -93,6 +93,12 @@ integrations:
 spring:
   main:
     allow-bean-definition-overriding: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER:http://localhost:8080}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://identity-service:8080/oauth2/jwks}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     password: ${MYSQL_PASSWORD:twRuvi2ejllDdA4nnQLa08O}

@@ -71,13 +71,17 @@ export class LoginComponent implements OnInit {
   }
 
   /**
-   * Redirect to cas login
+   * Redirect to OIDC login
    */
   casLogin() {
-    const getUrl = window.location;
-    const baseUrl = getUrl.protocol + "//" + getUrl.host;
-    this.document.location.href =
-      "https://cas.thm.de/cas/login?service=" + baseUrl + "/api/v1/login/cas";
+    this.auth.login();
+  }
+
+  /**
+   * Redirect to OIDC login
+   */
+  oidcLogin() {
+    this.auth.login();
   }
 
   private navigateAfterAuthentication() {
