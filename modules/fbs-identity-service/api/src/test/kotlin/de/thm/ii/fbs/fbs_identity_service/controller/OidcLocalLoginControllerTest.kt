@@ -19,8 +19,10 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.mock.web.MockHttpSession
 import org.springframework.test.web.servlet.post
 import kotlin.test.Test
+import kotlin.test.assertNotEquals
 import kotlin.test.assertSame
 
 @WebMvcTest(OidcLocalLoginController::class)
@@ -175,5 +177,34 @@ class OidcLocalLoginControllerTest {
         assertSame(authentication, securityContextCaptor.firstValue.authentication)
 
         verify(loginAttemptService, never()).recordFailure(any(), any())
+    }
+
+    @Test
+    fun `rotates session id when session exists on login`() {
+        whenever(clientIpResolver.resolve(any())).thenReturn("202.0.11.50")
+        whenever(loginAttemptService.isBlocked("202.0.11.50", "Paul")).thenReturn(false)
+
+        val authentication = mock<Authentication>()
+        whenever(oidcLocalLoginService.authenticate("Paul", "password"))
+            .thenReturn(authentication)
+
+        val session = MockHttpSession()
+        val initialSessionId = session.id
+
+        mockMvc.post("/api/v1/auth/oidc-login") {
+            this.session = session
+            contentType = MediaType.APPLICATION_JSON
+            content =
+                """
+            {
+              "username": "Paul",
+              "password": "password"
+            }
+            """.trimIndent()
+        }.andExpect {
+            status { is3xxRedirection() }
+        }
+
+        assertNotEquals(initialSessionId, session.id)
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -93,6 +94,7 @@ class OidcLocalLoginIntegrationTest() {
             }
 
         val loginResult = mockMvc.post("/api/v1/auth/oidc-login") {
+            with(csrf())
             this.session = session
             contentType = MediaType.APPLICATION_JSON
             content =
@@ -173,6 +175,7 @@ class OidcLocalLoginIntegrationTest() {
         }
 
         val loginResult = mockMvc.post("/api/v1/auth/oidc-login") {
+            with(csrf())
             this.session = session
             contentType = MediaType.APPLICATION_JSON
             content =
@@ -206,6 +209,7 @@ class OidcLocalLoginIntegrationTest() {
         val session = MockHttpSession()
 
         mockMvc.post("/api/v1/auth/oidc-login") {
+            with(csrf())
             this.session = session
             contentType = MediaType.APPLICATION_JSON
             content =
@@ -227,5 +231,27 @@ class OidcLocalLoginIntegrationTest() {
         ) as? SecurityContext
 
         assertNull(securityContext)
+    }
+
+    @Test
+    fun `oidc login returns forbidden when csrf token is missing`() {
+        val session = MockHttpSession()
+
+        mockMvc.post("/api/v1/auth/oidc-login") {
+            this.session = session
+            contentType = MediaType.APPLICATION_JSON
+            content =
+                """
+            {
+              "username": "oidc-integration-test-user",
+              "password": "test123"
+            }
+            """.trimIndent()
+        }
+            .andExpect {
+                status {
+                    isForbidden()
+                }
+            }
     }
 }

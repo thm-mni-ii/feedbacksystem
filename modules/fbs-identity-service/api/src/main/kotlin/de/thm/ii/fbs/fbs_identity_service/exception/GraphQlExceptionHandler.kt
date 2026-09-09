@@ -53,6 +53,30 @@ class GraphQlExceptionHandler {
     }
 
     @GraphQlExceptionHandler
+    fun handleInvalidPassword(ex: InvalidCurrentPasswordException, env: DataFetchingEnvironment): GraphQLError =
+        GraphqlErrorBuilder.newError(env)
+            .errorType(ErrorType.BAD_REQUEST)
+            .message(ex.message ?: "Current password does not match")
+            .extensions(mapOf("code" to "INVALID_CURRENT_PASSWORD"))
+            .build()
+
+    @GraphQlExceptionHandler
+    fun handlePasswordMismatch(ex: PasswordMismatchException, env: DataFetchingEnvironment): GraphQLError =
+        GraphqlErrorBuilder.newError(env)
+            .errorType(ErrorType.BAD_REQUEST)
+            .message(ex.message ?: "New password and confirmation do not match")
+            .extensions(mapOf("code" to "PASSWORD_MISMATCH"))
+            .build()
+
+    @GraphQlExceptionHandler
+    fun handleUserNotFound(ex: UserNotFoundException, env: DataFetchingEnvironment): GraphQLError =
+        GraphqlErrorBuilder.newError(env)
+            .errorType(ErrorType.NOT_FOUND)
+            .message(ex.message ?: "User not found")
+            .extensions(mapOf("code" to "USER_NOT_FOUND"))
+            .build()
+
+    @GraphQlExceptionHandler
     fun handleAccessDeniedException(
         exception: AccessDeniedException,
         environment: DataFetchingEnvironment

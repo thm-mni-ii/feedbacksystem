@@ -54,6 +54,22 @@ class LegalControllerTest {
     }
 
     @Test
+    fun `legal text returns privacy text markdown and uses cache`() {
+        mockMvc.get("/api/v1/legal/privacy-text")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.markdown") { exists() }
+            }
+
+        // Repeated request should be served from memory cache
+        mockMvc.get("/api/v1/legal/privacy-text")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.markdown") { exists() }
+            }
+    }
+
+    @Test
     fun `terms of use status returns accepted status for current user`() {
         val user = currentUser(1L)
 

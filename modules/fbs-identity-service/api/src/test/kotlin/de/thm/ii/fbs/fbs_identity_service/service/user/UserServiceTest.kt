@@ -1,5 +1,8 @@
 package de.thm.ii.fbs.fbs_identity_service.service.user
 
+import de.thm.ii.fbs.fbs_identity_service.exception.InvalidCurrentPasswordException
+import de.thm.ii.fbs.fbs_identity_service.exception.PasswordMismatchException
+import de.thm.ii.fbs.fbs_identity_service.exception.UserNotFoundException
 import de.thm.ii.fbs.fbs_identity_service.exception.UsernameAlreadyExistsException
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
@@ -305,23 +308,43 @@ class UserServiceTest {
     }
 
     @Test
-    fun `changeOwnPassword returns false when current password is wrong`(){
+    fun `changeOwnPassword throws InvalidCurrentPasswordException when current password is wrong`(){
         val userEntity = testUserEntity(id = 42, password = "old-encoded-password")
 
-        whenever (currentUserService.getCurrentUser()).thenReturn(userEntity.toModel())
+        whenever(currentUserService.getCurrentUser()).thenReturn(userEntity.toModel())
         whenever(userRepository.findById(42)).thenReturn(Optional.of(userEntity))
         whenever(passwordEncoder.matches("wrong-password", "old-encoded-password")).thenReturn(false)
 
-        val result = userService.changeOwnPassword(
-            "wrong-password",
-            "new-password",
-            "new-password"
-        )
-
-        assertFalse(result)
+        assertThrows<InvalidCurrentPasswordException> {
+            userService.changeOwnPassword(
+                "wrong-password",
+                "new-password",
+                "new-password"
+            )
+        }
 
         verify(passwordEncoder).matches("wrong-password", "old-encoded-password")
         verify(passwordEncoder, never()).encode("new-password")
+        verify(userRepository, never()).save(userEntity)
+    }
+
+    @Test
+    fun `changeOwnPassword throws PasswordMismatchException when new passwords do not match`() {
+        val userEntity = testUserEntity(id = 42, password = "old-encoded-password")
+
+        whenever(currentUserService.getCurrentUser()).thenReturn(userEntity.toModel())
+        whenever(userRepository.findById(42)).thenReturn(Optional.of(userEntity))
+        whenever(passwordEncoder.matches("old-password", "old-encoded-password")).thenReturn(true)
+
+        assertThrows<PasswordMismatchException> {
+            userService.changeOwnPassword(
+                "old-password",
+                "new-password",
+                "different-password"
+            )
+        }
+
+        verify(passwordEncoder, never()).encode(any())
         verify(userRepository, never()).save(userEntity)
     }
 
@@ -343,6 +366,39 @@ class UserServiceTest {
 
         verify(passwordEncoder).encode("new-password")
         verify(userRepository).save(targetEntity)
+    }
+
+    @Test
+    fun `changeUserPassword throws PasswordMismatchException when passwords do not match`() {
+        val userEntity = testUserEntity(id = 41, globalRole = GlobalRole.ADMIN.id)
+
+        whenever(currentUserService.getCurrentUser()).thenReturn(userEntity.toModel())
+
+        assertThrows<PasswordMismatchException> {
+            userService.changeUserPassword(
+                42, "new-password", "mismatch-password"
+            )
+        }
+
+        verify(passwordEncoder, never()).encode(any())
+        verify(userRepository, never()).save(any())
+    }
+
+    @Test
+    fun `changeUserPassword throws UserNotFoundException when target user does not exist`() {
+        val userEntity = testUserEntity(id = 41, globalRole = GlobalRole.ADMIN.id)
+
+        whenever(currentUserService.getCurrentUser()).thenReturn(userEntity.toModel())
+        whenever(userRepository.findByIdAndDeletedFalse(42)).thenReturn(null)
+
+        assertThrows<UserNotFoundException> {
+            userService.changeUserPassword(
+                42, "new-password", "new-password"
+            )
+        }
+
+        verify(userRepository).findByIdAndDeletedFalse(42)
+        verify(passwordEncoder, never()).encode(any())
     }
 
     @Test

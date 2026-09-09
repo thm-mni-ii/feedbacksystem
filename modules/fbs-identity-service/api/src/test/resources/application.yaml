@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: fbs-identity-service
+  graphql:
+    graphiql:
+      enabled: false
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:fbs_identity;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password: ""
+  flyway:
+    enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+
+app:
+  frontend:
+    base-url: https://localhost
+  saml:
+    enabled: false
+    registration-id: keycloak
+    principal-attribute: uid
+    prename-attribute: givenName
+    surname-attribute: sn
+    email-attribute: mail
+    failure-path: /login?ssoError=1
+
+security:
+  login-attempts:
+    max-failures-per-ip: 150
+    max-failures-per-ip-user: 15
+    window-seconds: 600
+    cleanup-interval-ms: 600000
+    trusted-proxy-count: 0
+    allow-list: ""
+  oidc:
+    issuer: http://localhost:8080
+    client:
+      id: fbs-test-client
+      redirect-uri: http://127.0.0.1:4200/oauth2/callback
+      access-token-ttl-minutes: 10
+      authorization-code-ttl-minutes: 5
+    signing-key:
+      location: src/test/resources/identity-signing-test.p12
+      store-password: changeit
+      alias: identity-signing-test
+      key-password: changeit

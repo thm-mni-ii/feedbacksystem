@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
-import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -52,8 +52,8 @@ class GlobalExceptionHandler {
         )
     }
 
-    @ExceptionHandler(BadCredentialsException::class)
-    fun handleBadCredentialsException(
+    @ExceptionHandler(AuthenticationException::class)
+    fun handleAuthenticationException(
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
 

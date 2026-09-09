@@ -12,8 +12,8 @@ class LoginAttemptService(
     @param:Value("\${security.login-attempts.max-failures-per-ip:150}")
     private val maxFailuresPerIp: Int,
 
-    @param:Value("\${security.login-attempts.max-failures-per-username:10}")
-    private val maxFailuresPerUsername: Int,
+    @param:Value("\${security.login-attempts.max-failures-per-ip-user:15}")
+    private val maxFailuresPerIpUser: Int,
 
     @param:Value("\${security.login-attempts.window-seconds:600}")
     private val windowSeconds: Long,
@@ -28,26 +28,34 @@ class LoginAttemptService(
 
     private val attemptsByIp = ConcurrentHashMap<String, AttemptWindow>()
 
-    private val attemptsByUsername = ConcurrentHashMap<String, AttemptWindow>()
+    private val attemptsByIpUser = ConcurrentHashMap<String, AttemptWindow>()
 
     fun recordFailure(ip: String, username: String) {
+        val normalizedUser = normalize(username)
         if (maxFailuresPerIp > 0) {
             recordAttempt(attemptsByIp, ip)
         }
 
-        if (maxFailuresPerUsername > 0) {
-            recordAttempt(attemptsByUsername, username)
+        if (maxFailuresPerIpUser > 0) {
+            recordAttempt(attemptsByIpUser, compositeKey(ip, normalizedUser))
         }
     }
 
     fun recordSuccess(username: String) {
-        attemptsByUsername.remove(username)
+        // Clear IP+User failure counters on successful login
+        val normalizedUser = normalize(username)
+        attemptsByIpUser.keys.removeIf { it.endsWith(":$normalizedUser") }
     }
 
     fun isBlocked(ip: String, username: String): Boolean {
+        val normalizedUser = normalize(username)
         return isLimitReached(attemptsByIp, ip, maxFailuresPerIp) ||
-                isLimitReached(attemptsByUsername, username, maxFailuresPerUsername)
+                isLimitReached(attemptsByIpUser, compositeKey(ip, normalizedUser), maxFailuresPerIpUser)
     }
+
+    private fun normalize(username: String): String = username.trim().lowercase()
+
+    private fun compositeKey(ip: String, normalizedUser: String): String = "$ip:$normalizedUser"
 
     private fun isLimitReached(
         attempts: ConcurrentHashMap<String, AttemptWindow>,
@@ -93,7 +101,7 @@ class LoginAttemptService(
         val now = clock.instant()
 
         cleanupExpiredEntries(attemptsByIp, now)
-        cleanupExpiredEntries(attemptsByUsername, now)
+        cleanupExpiredEntries(attemptsByIpUser, now)
     }
 
     private fun cleanupExpiredEntries(attempts: ConcurrentHashMap<String, AttemptWindow>, now: Instant) {

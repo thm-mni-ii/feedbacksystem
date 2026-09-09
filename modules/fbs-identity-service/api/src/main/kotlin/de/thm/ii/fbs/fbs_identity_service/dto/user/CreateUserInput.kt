@@ -24,6 +24,7 @@ data class CreateUserInput(
     val username: String,
 
     @field:NotBlank
+    @field:Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters long")
     val password: String,
 
     val globalRole: GlobalRole?,

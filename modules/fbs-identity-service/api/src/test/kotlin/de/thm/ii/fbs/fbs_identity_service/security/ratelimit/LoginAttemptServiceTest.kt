@@ -40,7 +40,7 @@ class LoginAttemptServiceTest {
 
         service = LoginAttemptService(
             maxFailuresPerIp = 150,
-            maxFailuresPerUsername = 10,
+            maxFailuresPerIpUser = 15,
             windowSeconds = 600,
             clock = clock
         )
@@ -76,44 +76,66 @@ class LoginAttemptServiceTest {
     }
 
     @Test
-    fun `username is blocked when configured failure limit is reached`() {
+    fun `ip and user compound key is blocked when configured failure limit is reached`() {
         val clientIp = "202.0.11.50"
         val username = "Paul"
 
-        repeat(10) {
+        repeat(15) {
             assertFalse(service.isBlocked(clientIp, username))
             service.recordFailure(clientIp, username)
         }
 
-        val isBlocked = service.isBlocked(
+        val isBlockedOnSameIp = service.isBlocked(
+            clientIp,
+            username
+        )
+        assertTrue(isBlockedOnSameIp)
+
+        // Denial of Service protection: a different IP is NOT blocked
+        val isBlockedOnDifferentIp = service.isBlocked(
             "202.0.11.51",
             username
         )
-
-        assertTrue(isBlocked)
+        assertFalse(isBlockedOnDifferentIp)
     }
 
     @Test
-    fun `successful login resets the username counter`() {
+    fun `username normalization treats different casing and whitespace as identical`() {
         val clientIp = "202.0.11.50"
+
+        repeat(5) {
+            service.recordFailure(clientIp, "Paul")
+            service.recordFailure(clientIp, "paul")
+            service.recordFailure(clientIp, "  PAUL  ")
+        }
+
+        assertTrue(service.isBlocked(clientIp, "pAuL"))
+        assertTrue(service.isBlocked(clientIp, "  paul"))
+    }
+
+    @Test
+    fun `successful login resets the compound counter for user across ips`() {
+        val clientIp1 = "202.0.11.50"
+        val clientIp2 = "202.0.11.51"
         val username = "Paul"
 
-        repeat(9) {
-            service.recordFailure(clientIp, username)
+        repeat(14) {
+            service.recordFailure(clientIp1, username)
+            service.recordFailure(clientIp2, username)
         }
 
-        service.recordSuccess(username)
+        service.recordSuccess("PAUL")
 
-        repeat(9) {
-            assertFalse(service.isBlocked(clientIp, username))
-            service.recordFailure(clientIp, username)
+        repeat(14) {
+            assertFalse(service.isBlocked(clientIp1, username))
+            service.recordFailure(clientIp1, username)
         }
 
-        assertFalse(service.isBlocked(clientIp, username))
+        assertFalse(service.isBlocked(clientIp1, username))
 
-        service.recordFailure(clientIp, username)
+        service.recordFailure(clientIp1, username)
 
-        assertTrue(service.isBlocked(clientIp, username))
+        assertTrue(service.isBlocked(clientIp1, username))
     }
 
     @Test
@@ -151,11 +173,11 @@ class LoginAttemptServiceTest {
     }
 
     @Test
-    fun `username is no longer blocked after window expires`() {
+    fun `ip and user is no longer blocked after window expires`() {
         val clientIp = "202.0.11.50"
         val username = "Paul"
 
-        repeat(10) {
+        repeat(15) {
             service.recordFailure(
                 clientIp,
                 username
@@ -226,10 +248,10 @@ class LoginAttemptServiceTest {
     }
 
     @Test
-    fun `username limit is disabled when configured limit is zero`() {
+    fun `ip-user limit is disabled when configured limit is zero`() {
         val service = LoginAttemptService(
             maxFailuresPerIp = 150,
-            maxFailuresPerUsername = 0,
+            maxFailuresPerIpUser = 0,
             windowSeconds = 600,
             clock = clock
         )
@@ -255,7 +277,7 @@ class LoginAttemptServiceTest {
     fun `ip limit is disabled when configured limit is zero`() {
         val service = LoginAttemptService(
             maxFailuresPerIp = 0,
-            maxFailuresPerUsername = 10,
+            maxFailuresPerIpUser = 15,
             windowSeconds = 600,
             clock = clock
         )
@@ -275,5 +297,22 @@ class LoginAttemptServiceTest {
                 "another-user"
             )
         )
+    }
+
+    @Test
+    fun `cleanupExpiredAttempts removes expired entries`() {
+        val clientIp = "202.0.11.50"
+        val username = "Paul"
+
+        service.recordFailure(clientIp, username)
+        clock.advance(Duration.ofMinutes(11))
+
+        service.cleanupExpiredAttempts()
+
+        // Should not be blocked even after recording 14 more attempts (total would be 15 if not cleaned)
+        repeat(14) {
+            service.recordFailure(clientIp, username)
+        }
+        assertFalse(service.isBlocked(clientIp, username))
     }
 }

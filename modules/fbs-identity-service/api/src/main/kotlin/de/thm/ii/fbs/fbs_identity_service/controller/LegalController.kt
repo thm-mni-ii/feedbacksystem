@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
+import java.util.concurrent.ConcurrentHashMap
 
 @Tag(name = "Legal", description = "Legal text and terms-of-use endpoints")
 @RestController
 @RequestMapping("/api/v1/legal")
 class LegalController(private val userService: UserService, private val currentUserService: CurrentUserService) {
+
+    private val textCache = ConcurrentHashMap<String, String>()
 
     @Operation(
         summary = "Get legal text",
@@ -55,10 +58,12 @@ class LegalController(private val userService: UserService, private val currentU
             else -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Legal text file not found")
         }
 
-        val text = ClassPathResource(resourceName)
-            .inputStream
-            .bufferedReader()
-            .use { it.readText() }
+        val text = textCache.computeIfAbsent(resourceName) { res ->
+            ClassPathResource(res)
+                .inputStream
+                .bufferedReader()
+                .use { it.readText() }
+        }
 
         return LegalTextResponse(text)
     }

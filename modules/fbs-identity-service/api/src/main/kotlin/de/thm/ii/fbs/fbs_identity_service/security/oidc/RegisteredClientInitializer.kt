@@ -32,13 +32,13 @@ class RegisteredClientInitializer(
 ) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        if (registeredClientRepository.findByClientId(clientId) == null) {
-            registeredClientRepository.save(createRegisteredClient())
-        }
+        val existing = registeredClientRepository.findByClientId(clientId)
+        val clientConfig = createRegisteredClient(existing?.id ?: UUID.randomUUID().toString())
+        registeredClientRepository.save(clientConfig)
     }
 
-    private fun createRegisteredClient(): RegisteredClient {
-        return RegisteredClient.withId(UUID.randomUUID().toString())
+    private fun createRegisteredClient(id: String = UUID.randomUUID().toString()): RegisteredClient {
+        return RegisteredClient.withId(id)
             .clientId(clientId)
             .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)

@@ -1,5 +1,8 @@
 package de.thm.ii.fbs.fbs_identity_service.service.user
 
+import de.thm.ii.fbs.fbs_identity_service.exception.InvalidCurrentPasswordException
+import de.thm.ii.fbs.fbs_identity_service.exception.PasswordMismatchException
+import de.thm.ii.fbs.fbs_identity_service.exception.UserNotFoundException
 import de.thm.ii.fbs.fbs_identity_service.exception.UsernameAlreadyExistsException
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
@@ -156,18 +159,18 @@ class UserService (private val userRepository: UserRepository, private val passw
         newPassword: String,
         newPasswordRepeat: String
     ): Boolean {
-        val currentUser = currentUserService.getCurrentUser() ?: return false
+        val currentUser = currentUserService.getCurrentUser() ?: throw UserNotFoundException(0)
 
-        val userEntity = userRepository.findById(currentUser.id).orElse(null) ?: return false
+        val userEntity = userRepository.findById(currentUser.id).orElseThrow { UserNotFoundException(currentUser.id) }
 
-        val storedPassword = userEntity.password ?: return false
+        val storedPassword = userEntity.password ?: throw InvalidCurrentPasswordException()
 
-        if (
-            !passwordEncoder.matches(currentPassword, storedPassword) ||
-            newPassword.isBlank() ||
-            newPassword != newPasswordRepeat
-        ) {
-            return false
+        if (!passwordEncoder.matches(currentPassword, storedPassword)) {
+            throw InvalidCurrentPasswordException()
+        }
+
+        if (newPassword != newPasswordRepeat) {
+            throw PasswordMismatchException()
         }
 
         userEntity.password = passwordEncoder.encode(newPassword)
@@ -181,17 +184,17 @@ class UserService (private val userRepository: UserRepository, private val passw
         newPassword: String,
         newPasswordRepeat: String
     ): Boolean {
-        val currentUser = currentUserService.getCurrentUser() ?: return false
+        val currentUser = currentUserService.getCurrentUser() ?: throw UserNotFoundException(0)
 
-        if (
-            currentUser.globalRole != GlobalRole.ADMIN
-            || newPassword.isBlank()
-            || newPassword != newPasswordRepeat
-        ){
+        if (currentUser.globalRole != GlobalRole.ADMIN) {
             return false
         }
 
-        val targetUser = userRepository.findByIdAndDeletedFalse(userId) ?: return false
+        if (newPassword != newPasswordRepeat) {
+            throw PasswordMismatchException()
+        }
+
+        val targetUser = userRepository.findByIdAndDeletedFalse(userId) ?: throw UserNotFoundException(userId)
 
         targetUser.password = passwordEncoder.encode(newPassword)
         userRepository.save(targetUser)

@@ -22,7 +22,7 @@ interface UserRepository: JpaRepository <UserEntity, Long> {
     @Query(
         value = """
             SELECT *
-            FROM user
+            FROM `user`
             WHERE deleted = false
               AND (
                   :query IS NULL
@@ -51,7 +51,7 @@ interface UserRepository: JpaRepository <UserEntity, Long> {
     @Query(
         value = """
             SELECT COUNT(*)
-            FROM user
+            FROM `user`
             WHERE deleted = false
               AND (
                   :query IS NULL

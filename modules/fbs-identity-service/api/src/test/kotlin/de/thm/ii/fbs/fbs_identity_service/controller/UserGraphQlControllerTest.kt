@@ -1,6 +1,9 @@
 package de.thm.ii.fbs.fbs_identity_service.controller
 
 import de.thm.ii.fbs.fbs_identity_service.exception.GraphQlExceptionHandler
+import de.thm.ii.fbs.fbs_identity_service.exception.InvalidCurrentPasswordException
+import de.thm.ii.fbs.fbs_identity_service.exception.PasswordMismatchException
+import de.thm.ii.fbs.fbs_identity_service.exception.UserNotFoundException
 import de.thm.ii.fbs.fbs_identity_service.exception.UsernameAlreadyExistsException
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
@@ -385,6 +388,207 @@ class UserGraphQlControllerTest {
             any(),
             any()
         )
+    }
+
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `createUser mutation with short password returns validation error`() {
+        graphQlTester.document(
+            """
+        mutation {
+          createUser(input: {
+            prename: "Niklas",
+            surname: "Test",
+            email: "niklas@example.com",
+            username: "niklas",
+            password: "short",
+            globalRole: USER
+          }) {
+            id
+          }
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .satisfy { errors ->
+                assertEquals(1, errors.size)
+                val error = errors.first()
+                assertEquals("Invalid input", error.message)
+                assertEquals(ErrorType.BAD_REQUEST, error.errorType)
+                assertEquals("VALIDATION_ERROR", error.extensions["code"])
+            }
+
+        verify(userService, never()).createUser(any(), any(), any(), any(), any(), any(), any())
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `changeOwnPassword mutation returns true when successful`() {
+        whenever(
+            userService.changeOwnPassword("oldPassword123", "newPassword123", "newPassword123")
+        ).thenReturn(true)
+
+        graphQlTester.document(
+            """
+        mutation {
+          changeOwnPassword(input: {
+            currentPassword: "oldPassword123",
+            newPassword: "newPassword123",
+            newPasswordRepeat: "newPassword123"
+          })
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .verify()
+            .path("changeOwnPassword")
+            .entity(Boolean::class.java)
+            .isEqualTo(true)
+
+        verify(userService).changeOwnPassword("oldPassword123", "newPassword123", "newPassword123")
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `changeOwnPassword mutation with invalid current password returns INVALID_CURRENT_PASSWORD error`() {
+        whenever(
+            userService.changeOwnPassword("wrongPassword123", "newPassword123", "newPassword123")
+        ).thenThrow(InvalidCurrentPasswordException())
+
+        graphQlTester.document(
+            """
+        mutation {
+          changeOwnPassword(input: {
+            currentPassword: "wrongPassword123",
+            newPassword: "newPassword123",
+            newPasswordRepeat: "newPassword123"
+          })
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .satisfy { errors ->
+                assertEquals(1, errors.size)
+                val error = errors.first()
+                assertEquals("Current password does not match", error.message)
+                assertEquals(ErrorType.BAD_REQUEST, error.errorType)
+                assertEquals("INVALID_CURRENT_PASSWORD", error.extensions["code"])
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `changeOwnPassword mutation with password mismatch returns PASSWORD_MISMATCH error`() {
+        whenever(
+            userService.changeOwnPassword("oldPassword123", "newPassword123", "differentPassword123")
+        ).thenThrow(PasswordMismatchException())
+
+        graphQlTester.document(
+            """
+        mutation {
+          changeOwnPassword(input: {
+            currentPassword: "oldPassword123",
+            newPassword: "newPassword123",
+            newPasswordRepeat: "differentPassword123"
+          })
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .satisfy { errors ->
+                assertEquals(1, errors.size)
+                val error = errors.first()
+                assertEquals("New password and confirmation do not match", error.message)
+                assertEquals(ErrorType.BAD_REQUEST, error.errorType)
+                assertEquals("PASSWORD_MISMATCH", error.extensions["code"])
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `changeOwnPassword mutation with short new password returns validation error`() {
+        graphQlTester.document(
+            """
+        mutation {
+          changeOwnPassword(input: {
+            currentPassword: "oldPassword123",
+            newPassword: "short",
+            newPasswordRepeat: "short"
+          })
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .satisfy { errors ->
+                assertEquals(1, errors.size)
+                val error = errors.first()
+                assertEquals("Invalid input", error.message)
+                assertEquals(ErrorType.BAD_REQUEST, error.errorType)
+                assertEquals("VALIDATION_ERROR", error.extensions["code"])
+            }
+
+        verify(userService, never()).changeOwnPassword(any(), any(), any())
+    }
+
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `changeUserPassword mutation with password mismatch returns PASSWORD_MISMATCH error`() {
+        whenever(
+            userService.changeUserPassword(42L, "newPassword123", "differentPassword123")
+        ).thenThrow(PasswordMismatchException())
+
+        graphQlTester.document(
+            """
+        mutation {
+          changeUserPassword(input: {
+            userId: 42,
+            newPassword: "newPassword123",
+            newPasswordRepeat: "differentPassword123"
+          })
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .satisfy { errors ->
+                assertEquals(1, errors.size)
+                val error = errors.first()
+                assertEquals("New password and confirmation do not match", error.message)
+                assertEquals(ErrorType.BAD_REQUEST, error.errorType)
+                assertEquals("PASSWORD_MISMATCH", error.extensions["code"])
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `changeUserPassword mutation with short new password returns validation error`() {
+        graphQlTester.document(
+            """
+        mutation {
+          changeUserPassword(input: {
+            userId: 42,
+            newPassword: "short",
+            newPasswordRepeat: "short"
+          })
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .satisfy { errors ->
+                assertEquals(1, errors.size)
+                val error = errors.first()
+                assertEquals("Invalid input", error.message)
+                assertEquals(ErrorType.BAD_REQUEST, error.errorType)
+                assertEquals("VALIDATION_ERROR", error.extensions["code"])
+            }
+
+        verify(userService, never()).changeUserPassword(any(), any(), any())
     }
 
     private fun testUser(

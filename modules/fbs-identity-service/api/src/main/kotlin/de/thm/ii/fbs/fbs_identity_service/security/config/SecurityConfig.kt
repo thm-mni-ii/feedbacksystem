@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 
@@ -73,7 +74,17 @@ class SecurityConfig(
         requestCache: RequestCache
     ): SecurityFilterChain {
         var security = http
-            .csrf { it.disable() }
+            .csrf { csrf ->
+                csrf
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .ignoringRequestMatchers(
+                        "/graphql",
+                        "/oauth2/token",
+                        "/oauth2/jwks",
+                        "/saml2/**",
+                        "/login/saml2/**"
+                    )
+            }
             .authorizeHttpRequests {
                 it
                     .requestMatchers(

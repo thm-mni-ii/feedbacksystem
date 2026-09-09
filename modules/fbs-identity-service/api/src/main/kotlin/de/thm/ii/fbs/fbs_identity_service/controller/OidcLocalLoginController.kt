@@ -17,7 +17,7 @@ import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.context.SecurityContextRepository
@@ -90,15 +90,10 @@ class OidcLocalLoginController(
         httpResponse: HttpServletResponse
     ) {
         val clientIp = clientIpResolver.resolve(httpRequest)
-
-        if (clientIp == null) {
-            logger.warn("Blocked local login attempt: Failed to determine client IP")
-
-            throw ResponseStatusException(
+            ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Failed to determine client IP"
             )
-        }
 
         if (loginAttemptService.isBlocked(clientIp, request.username)) {
             logger.warn("Blocked local login attempt from IP {}: rate limit exceeded", clientIp)
@@ -114,7 +109,7 @@ class OidcLocalLoginController(
                 request.username,
                 request.password
             )
-        } catch (exception: BadCredentialsException) {
+        } catch (exception: AuthenticationException) {
             loginAttemptService.recordFailure(
                 clientIp,
                 request.username
@@ -124,6 +119,11 @@ class OidcLocalLoginController(
         }
 
         loginAttemptService.recordSuccess(request.username)
+
+        // Rotate session ID to prevent session fixation attacks
+        if (httpRequest.getSession(false) != null) {
+            httpRequest.changeSessionId()
+        }
 
         val securityContext = SecurityContextHolder.createEmptyContext()
         securityContext.authentication = authentication
