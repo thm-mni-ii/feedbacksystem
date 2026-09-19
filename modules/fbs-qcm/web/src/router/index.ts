@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,106 +11,75 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/EditCatalogInformation/:id',
-      name: '/EditCatalogInformation',
-      component: () => import('../views/EditCatalogView.vue')
+      // Globaler, kursunabhängiger Fragenpool: Kompetenzen und Fragen werden
+      // hier angelegt und später einzelnen Kursen zugeordnet.
+      path: '/pool',
+      name: 'questionPool',
+      component: () => import('../views/QuestionOverviewView.vue'),
+      meta: { requiresAdmin: true }
     },
     {
-      path: '/catalogManagement',
-      name: '/CatalogManagement',
-      component: () => import('../views/CatalogOverview.vue')
-    },
-    {
-      path: '/manageCatalog/:catalogId/:questionId',
-      name: 'manageCatalog',
-      component: () => import('../views/ManageCatalogView.vue')
-    },
-    {
-      path: '/newQuestion',
-      name: 'newQuestion',
-      component: () => import('../views/NewQuestionView.vue')
-    },
-    {
-      path: '/catalogSession/:courseId?/:catalogId?',
-      name: 'catalogSession',
-      component: () => import('../views/CatalogSessionView.vue')
-    },
-    {
-      path: '/question',
-      name: 'question',
-      component: () => import('../views/QuestionView.vue')
-    },
-    {
-      path: '/allQuestions',
-      name: 'allQuestions',
-      component: () => import('../views/AllQuestionsView.vue')
-    },
-    {
-      path: '/study/:courseId?',
-      name: 'study',
-      component: () => import('../views/StudyDashboardView.vue')
-    },
-    {
-      path: '/questionCatalogs',
-      name: 'questionCatalogs',
-      component: () => import('../views/CatalogOverview.vue')
-    },
-    {
-      path: '/manageSkill/:skillId?',
-      name: 'manageSkill',
-      component: () => import('../views/ManageSkillView.vue')
-    },
-    {
-      path: '/skillGraph',
-      name: 'skillGraph',
-      component: () => import('../views/SkillGraphView.vue')
-    },
-    {
+      // Dozenten-Sandbox zum Simulieren von Algorithmus + Fragenpool, bevor
+      // eine Konfiguration für Studenten live geschaltet wird.
       path: '/lab',
       name: 'AlgorithmLab',
-      component: () => import('../views/AlgorithmLabView.vue')
+      component: () => import('../views/AlgorithmLabView.vue'),
+      meta: { requiresAdmin: true }
+    },
+    {
+      // Kurs-Workspace: gemeinsamer Rahmen (Kopfzeile + kursbezogene
+      // Unternavigation) für alle Ansichten, die zu genau einem Kurs gehören.
+      path: '/courses/:courseId',
+      component: () => import('../views/CourseWorkspaceView.vue'),
+      children: [
+        {
+          path: '',
+          name: 'studyCourse',
+          component: () => import('../views/StudyCourseView.vue')
+        },
+        {
+          path: 'competencies',
+          name: 'courseCompetencies',
+          component: () => import('../views/CompetencyGraphView.vue')
+        },
+        {
+          path: 'questions',
+          name: 'courseQuestions',
+          component: () => import('../views/CourseQuestionsView.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
+          path: 'settings',
+          name: 'courseSettings',
+          component: () => import('../views/CourseSettingsView.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
+          path: 'session/:sessionId',
+          name: 'studySession',
+          component: () => import('../views/StudySessionView.vue')
+        }
+      ]
     }
     // {
     //   path: "/:pathMatch(.*)*",
     //   name: "not-found",
     //   component: () => import("../views/NotFoundView.vue"),
     // },
-    // {
-    //   path: '/about',
-    //   name: 'about',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import('../views/AboutView.vue')
-    // }
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  // console.log('beforeEach', to, from)
+// Dozenten-Werkzeuge (Fragenpool, Algorithm Lab, Kurs-Fragen/-Einstellungen)
+// sind nur für ADMIN in der Navigation sichtbar - zusätzlich hier als Guard
+// absichern, damit sie nicht per Direktaufruf der URL umgangen werden können.
+router.beforeEach((to) => {
+  if (!to.meta.requiresAdmin) return true
 
-  // //Check if ongoing session
-  // if (to.name === 'home') {
-  //   sessionService
-  //     .checkOngoingSessions()
-  //     .then((session) => {
-  //       console.log('router check session -->', session.data)
-  //       if (session.data.length > 0) {
-  //         // route to catalog session with /catalogSession/:courseId?/:catalogId?
-  //         next({
-  //           name: 'catalogSession',
-  //           params: { courseId: session.data[0].courseId, catalogId: session.data[0].catalogId }
-  //         })
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('router check session error -->', error)
-  //     })
-  // } else {
-  //   next()
-  // }
+  const authStore = useAuthStore()
+  const isAdmin = authStore.decodedToken?.globalRole === 'ADMIN'
+  if (isAdmin) return true
 
-  next()
+  return { name: 'home', query: { forbidden: '1' } }
 })
 
 export default router

@@ -1,8 +1,12 @@
 import { createApp } from "./app";
 import { connect } from "./mongo/mongo";
+import { ensureSessionIndexes } from "./session/session.repository";
+import { ensureStudyConfigurationIndexes } from "./studyConfiguration/studyConfiguration.repository";
 
 async function startServer() {
   const db = await connect();
+  await ensureSessionIndexes(db);
+  await ensureStudyConfigurationIndexes(db);
   const app = createApp(db);
 
   const port = Number(process.env.PORT ?? 3001);

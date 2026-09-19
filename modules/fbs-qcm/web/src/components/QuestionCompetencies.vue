@@ -75,6 +75,14 @@ const orderedCompetencies = computed(() => {
 const competencyName = (competencyId: string): string =>
   competencies.value.find((c) => c.id === competencyId)?.name ?? competencyId
 
+/**
+ * Baumpräfix für die Einrückung im Dropdown: zeigt neben der reinen
+ * Einrückung (padding-left) auch die Anzahl der übergeordneten Ebenen an
+ * (z.B. "─└ " bei Tiefe 2), damit die vollständige Hierarchie (nicht nur
+ * die erste Ebene) erkennbar bleibt.
+ */
+const treePrefix = (depth: number) => `${'─'.repeat(Math.max(0, depth - 1))}└ `
+
 onMounted(async () => {
   try {
     const res = await competencyService.getAllCompetencies()
@@ -91,6 +99,7 @@ onMounted(async () => {
     :items="orderedCompetencies"
     item-title="competency.name"
     item-value="competency.id"
+    item-color="primary"
     label="Competencies dieser Frage"
     prepend-icon="mdi-shape-outline"
     variant="solo"
@@ -105,9 +114,10 @@ onMounted(async () => {
         :title="undefined"
         :style="{ paddingLeft: `${16 + (item.raw?.depth ?? 0) * 20}px` }"
       >
-        <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">└ </span>{{
-          item.raw?.competency?.name ?? competencyName(item.value)
-        }}
+        <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">{{
+          treePrefix(item.raw?.depth ?? 0)
+        }}</span
+        >{{ item.raw?.competency?.name ?? competencyName(item.value) }}
       </v-list-item>
     </template>
     <template #chip="{ props: chipProps, item }">

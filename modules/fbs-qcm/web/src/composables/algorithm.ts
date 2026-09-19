@@ -3,24 +3,17 @@ import type {
   CompetencyState,
   Question,
   QuestionCompetencyLink,
-  SessionState,
+  StudySession,
   AnswerRecord,
   NextQuestion,
   AnswerResult,
   ProgressItem
 } from '@/model/types'
 import { getQuestionCompetencyIds, getQuestionCompetencyLinks } from '@/composables/qMatrix'
-
-type BktConfig = {
-  initialMastery: number
-  learnRate: number
-  guessRate: number
-  slipRate: number
-  minEvidencePerCompetency: number
-  maxUncertainty: number
-  stickinessQuestions: number
-  maxQuestionsPerSession: number
-}
+import {
+  DEFAULT_STUDY_ALGORITHM_CONFIG,
+  type StudyAlgorithmConfig
+} from '@/model/StudyAlgorithmConfig'
 
 type CompletionStatus = {
   isComplete: boolean
@@ -28,17 +21,6 @@ type CompletionStatus = {
   completedCompetencyIds: string[]
   pendingCompetencyIds: string[]
   averageUncertainty: number
-}
-
-const DEFAULT_BKT_CONFIG: BktConfig = {
-  initialMastery: 0.35,
-  learnRate: 0.18,
-  guessRate: 0.2,
-  slipRate: 0.1,
-  minEvidencePerCompetency: 2,
-  maxUncertainty: 0.7,
-  stickinessQuestions: 3,
-  maxQuestionsPerSession: 30
 }
 
 function clampProbability(value: number): number {
@@ -55,7 +37,11 @@ function binaryEntropy(probability: number): number {
   return entropy / Math.log(2)
 }
 
-function posteriorAfterResponse(prior: number, responseScore: number, config: BktConfig): number {
+function posteriorAfterResponse(
+  prior: number,
+  responseScore: number,
+  config: StudyAlgorithmConfig['model']
+): number {
   const p = clampProbability(prior)
   const r = clampProbability(responseScore)
 
@@ -68,7 +54,10 @@ function posteriorAfterResponse(prior: number, responseScore: number, config: Bk
   return clampProbability(r * correctPosterior + (1 - r) * incorrectPosterior)
 }
 
-function applyLearningTransition(mastery: number, config: BktConfig): number {
+function applyLearningTransition(
+  mastery: number,
+  config: StudyAlgorithmConfig['model']
+): number {
   return clampProbability(mastery + (1 - mastery) * config.learnRate)
 }
 
@@ -94,15 +83,16 @@ function isCompetencyRelevant(
 export function createSession(
   studentId: string,
   competencies: Competency[],
-  initialMastery = DEFAULT_BKT_CONFIG.initialMastery
-): SessionState {
+  configuration: StudyAlgorithmConfig = DEFAULT_STUDY_ALGORITHM_CONFIG,
+  courseConfigurationRevision = 0
+): StudySession {
   const competencyStates: Record<string, CompetencyState> = {}
   const now = Date.now()
 
   for (const competency of competencies) {
     competencyStates[competency.id] = {
       competencyId: competency.id,
-      score: initialMastery,
+      score: configuration.model.initialMastery,
       timesAssessed: 0,
       lastAssessedAt: null
     }
@@ -111,6 +101,10 @@ export function createSession(
   return {
     id: crypto.randomUUID(),
     studentId,
+    algorithm: {
+      configuration,
+      courseConfigurationRevision
+    },
     startedAt: now,
     updatedAt: now,
     completedAt: null,
@@ -167,13 +161,7 @@ function relationFactor(link: QuestionCompetencyLink): number {
  * - Recent History (um Wiederholungen zu vermeiden)
  */
 export class AdaptiveQuizAlgorithm {
-  private readonly config: BktConfig
-
-  constructor(config: Partial<BktConfig> = {}) {
-    this.config = {
-      ...DEFAULT_BKT_CONFIG,
-      ...config
-    }
+  constructor(private readonly config: StudyAlgorithmConfig = DEFAULT_STUDY_ALGORITHM_CONFIG) {
   }
 
   private questionTargetsCompetency(question: Question, competencyId: string): boolean {
@@ -183,11 +171,11 @@ export class AdaptiveQuizAlgorithm {
   private evaluateCompletionStatus(
     competencies: Competency[],
     questions: Question[],
-    session: SessionState
+    session: StudySession
   ): CompletionStatus {
     if (
-      Number.isFinite(this.config.maxQuestionsPerSession) &&
-      session.history.length >= this.config.maxQuestionsPerSession
+      Number.isFinite(this.config.session.maxQuestionsPerSession) &&
+      session.history.length >= this.config.session.maxQuestionsPerSession
     ) {
       return {
         isComplete: true,
@@ -200,7 +188,7 @@ export class AdaptiveQuizAlgorithm {
                 (sum, competency) =>
                   sum +
                   binaryEntropy(
-                    session.competencies[competency.id]?.score ?? this.config.initialMastery
+                    session.competencies[competency.id]?.score ?? this.config.model.initialMastery
                   ),
                 0
               ) / competencies.length
@@ -229,13 +217,13 @@ export class AdaptiveQuizAlgorithm {
 
     for (const competencyId of relevantCompetencyIds) {
       const state = session.competencies[competencyId]
-      const uncertainty = binaryEntropy(state?.score ?? this.config.initialMastery)
+      const uncertainty = binaryEntropy(state?.score ?? this.config.model.initialMastery)
       uncertaintySum += uncertainty
 
       if (
         state &&
-        state.timesAssessed >= this.config.minEvidencePerCompetency &&
-        uncertainty <= this.config.maxUncertainty
+        state.timesAssessed >= this.config.completion.minEvidencePerCompetency &&
+        uncertainty <= this.config.completion.maxUncertainty
       ) {
         completedCompetencyIds.push(competencyId)
       } else {
@@ -254,7 +242,7 @@ export class AdaptiveQuizAlgorithm {
 
   private scoreQuestionUtility(
     question: Question,
-    session: SessionState,
+    session: StudySession,
     targetCompetencyId: string
   ): number {
     const links = getQuestionCompetencyLinks(question)
@@ -274,7 +262,10 @@ export class AdaptiveQuizAlgorithm {
       const uncertainty = binaryEntropy(state.score)
       const evidenceNeed = 1 / (state.timesAssessed + 1)
       const difficultyFit = Math.max(0, 1 - Math.abs(question.difficulty - state.score))
-      const utility = uncertainty * 0.5 + evidenceNeed * 0.3 + difficultyFit * 0.2
+      const utility =
+        uncertainty * this.config.utilityWeights.uncertainty +
+        evidenceNeed * this.config.utilityWeights.evidenceNeed +
+        difficultyFit * this.config.utilityWeights.difficultyFit
 
       total += linkWeight * utility
       weights += linkWeight
@@ -285,7 +276,9 @@ export class AdaptiveQuizAlgorithm {
     }
 
     const base = total / weights
-    const targetBonus = this.questionTargetsCompetency(question, targetCompetencyId) ? 0.1 : 0
+    const targetBonus = this.questionTargetsCompetency(question, targetCompetencyId)
+      ? this.config.utilityWeights.targetCompetencyBonus
+      : 0
     return base + targetBonus
   }
 
@@ -300,15 +293,15 @@ export class AdaptiveQuizAlgorithm {
    * 2. STICKINESS: Falls gerade eine Kompetenz bearbeitet wird und < 5 Fragen gestellt,
    *    bleib bei dieser Kompetenz (reduziert Kontextwechsel)
    * 3. Wähle Zielkompetenz (gewichtet nach Anzahl Tests, Score und Hierarchie)
-   * 4. IRT-Adaption: Filtere Fragen nach Schwierigkeit (Rasch-Modell):
-   *    Ideal: |difficulty - studentScore| < 0.2 (50% Erfolgschance)
+   * 4. IRT-Adaption: Filtere Fragen anhand des konfigurierten
+   *    Schwierigkeitsfensters um den aktuellen Kompetenzwert.
    * 5. Vermeide kürzlich gestellte Fragen
    * 6. Zufällige Auswahl aus dem angepassten Pool
    */
   nextQuestion(
     competencies: Competency[],
     questions: Question[],
-    session: SessionState
+    session: StudySession
   ): NextQuestion | null {
     const completion = this.evaluateCompletionStatus(competencies, questions, session)
     if (completion.isComplete) {
@@ -343,14 +336,13 @@ export class AdaptiveQuizAlgorithm {
         : competenciesWithQuestions
 
     let targetCompetency: Competency
-    let forceCurrentCompetency = false
 
     // SCHRITT 1: Sehr kurze Stickiness
     // Bei aktiver Kompetenz bleibt der Flow höchstens für eine direkte Folgefrage dort.
     if (
       session.currentCompetencyId &&
       pendingCompetencyIds.has(session.currentCompetencyId) &&
-      session.questionsInCurrentCompetency < this.config.stickinessQuestions
+      session.questionsInCurrentCompetency < this.config.selection.stickinessQuestions
     ) {
       const currentCompetency = competencies.find((c) => c.id === session.currentCompetencyId)
       const hasAnyQuestionForCurrentCompetency =
@@ -359,7 +351,6 @@ export class AdaptiveQuizAlgorithm {
 
       if (currentCompetency && hasAnyQuestionForCurrentCompetency) {
         targetCompetency = currentCompetency
-        forceCurrentCompetency = true
       } else {
         // Falls wirklich keine Frage mehr für diese Kompetenz verfügbar ist, darf gewechselt werden.
         targetCompetency = this.selectNextCompetency(candidateCompetencies, session)
@@ -381,10 +372,8 @@ export class AdaptiveQuizAlgorithm {
     // SCHRITT 4: BKT-geleitete Schwierigkeitseingrenzung
     // Ideal: Schwierigkeit nahe an der aktuellen Kompetenzschätzung
     const studentScore = session.competencies[targetCompetency.id]?.score ?? 0
-    const DIFFICULTY_WINDOW = 0.2 // Fenster: [score - 0.2, score + 0.2]
-
     let difficultyAdapted = questionsForCompetency.filter(
-      (q) => Math.abs(q.difficulty - studentScore) <= DIFFICULTY_WINDOW
+      (q) => Math.abs(q.difficulty - studentScore) <= this.config.selection.difficultyWindow
     )
 
     // Fallback 1: Falls keine Fragen im idealen Bereich, nimm nächstbeste
@@ -403,9 +392,9 @@ export class AdaptiveQuizAlgorithm {
       return null
     }
 
-    // Harte Regel: Nie exakt dieselbe Frage direkt hintereinander stellen
-    // Ausnahme: Bei erzwungener Mindestanzahl pro Kompetenz und Mini-Pool
-    // darf die letzte Frage wiederholt werden, bevor die Kompetenz gewechselt wird.
+    // Harte Regel: Nie exakt dieselbe Frage direkt hintereinander stellen.
+    // Bei einem Mini-Pool wird stattdessen kompetenzübergreifend ausgewichen;
+    // Wiederholung kann später bewusst als Spaced-Retrieval-Strategie modelliert werden.
     const lastQuestionId = session.history[session.history.length - 1]?.questionId ?? null
 
     let selectionPool = pool
@@ -415,10 +404,6 @@ export class AdaptiveQuizAlgorithm {
 
       if (withoutLastQuestion.length > 0) {
         selectionPool = withoutLastQuestion
-      } else if (forceCurrentCompetency) {
-        // In der erzwungenen Phase bleiben wir in derselben Kompetenz,
-        // auch wenn dadurch die letzte Frage erneut kommen kann.
-        selectionPool = pool
       } else {
         // Fallback für kleine Pools: weiche auf eine andere Frage aus beliebiger Kompetenz aus
         const globalWithoutLast = availableQuestions.filter((q) => q.id !== lastQuestionId)
@@ -463,7 +448,7 @@ export class AdaptiveQuizAlgorithm {
    * - Gewichtung: weniger getestet + niedriger Score
    * - Dadurch wird ein "Zweig" komplett abgearbeitet, bevor man zum nächsten wechselt
    */
-  private selectNextCompetency(candidates: Competency[], session: SessionState): Competency {
+  private selectNextCompetency(candidates: Competency[], session: StudySession): Competency {
     // Filtere: Nur Kompetenzen, deren explizite Voraussetzungen erfüllt sind.
     const fullyUnlockedCandidates = candidates.filter((c) => {
       return (c.prerequisites ?? []).every((prerequisite) => {
@@ -499,14 +484,50 @@ export class AdaptiveQuizAlgorithm {
    * - anschließender Lernübergang nach der Antwort
    * - alle mit dieser Frage assoziierten Kompetenzen werden aktualisiert
    */
+  /**
+   * Übernimmt historische Evidenz, ohne sie als Antwort der neuen Session zu
+   * zählen. Die zeitliche Gewichtung wird vor dem Aufruf auf den Score
+   * angewendet; dadurch bleibt die BKT-Aktualisierung identisch zur aktiven
+   * Antwortauswertung.
+   */
+  applyHistoricalEvidence(
+    question: Question,
+    score: number,
+    state: StudySession
+  ): StudySession {
+    const competencies = { ...state.competencies }
+    const links = getQuestionCompetencyLinks(question)
+
+    for (const link of links) {
+      const current = competencies[link.competencyId]
+      if (!current) continue
+
+      const influence = Math.max(0.2, Math.min(1.2, (link.weight ?? 1) * relationFactor(link)))
+      const posterior = posteriorAfterResponse(current.score, score, this.config.model)
+      const updatedScore = applyLearningTransition(
+        current.score + (posterior - current.score) * influence,
+        this.config.model
+      )
+
+      competencies[link.competencyId] = {
+        ...current,
+        score: updatedScore,
+        timesAssessed: current.timesAssessed + 1,
+        lastAssessedAt: Date.now()
+      }
+    }
+
+    return { ...state, competencies }
+  }
+
   submitAnswer(
     question: Question,
     score: number,
-    state: SessionState,
+    state: StudySession,
     competenciesInput: Competency[],
     questions: Question[]
   ): {
-    updatedState: SessionState
+    updatedState: StudySession
     result: AnswerResult
   } {
     // Kopie der Kompetenzen erstellen
@@ -523,10 +544,10 @@ export class AdaptiveQuizAlgorithm {
       if (!current) continue
 
       const influence = Math.max(0.2, Math.min(1.2, (link.weight ?? 1) * relationFactor(link)))
-      const posterior = posteriorAfterResponse(current.score, score, this.config)
+      const posterior = posteriorAfterResponse(current.score, score, this.config.model)
       const updatedScore = applyLearningTransition(
         current.score + (posterior - current.score) * influence,
-        this.config
+        this.config.model
       )
 
       competencies[link.competencyId] = {
@@ -548,13 +569,16 @@ export class AdaptiveQuizAlgorithm {
     }
 
     // Session updaten
-    const updatedState: SessionState = {
+    const updatedState: StudySession = {
       ...state,
       competencies,
       history: [...state.history, record],
       updatedAt: record.answeredAt,
       // Behalte die letzten 5 Fragen zur Vermeidung von Wiederholungen
-      recentQuestionIds: [question.id, ...state.recentQuestionIds].slice(0, 5)
+      recentQuestionIds: [question.id, ...state.recentQuestionIds].slice(
+        0,
+        this.config.selection.recentQuestionWindow
+      )
     }
 
     const completion = this.evaluateCompletionStatus(competenciesInput, questions, updatedState)
@@ -578,14 +602,18 @@ export class AdaptiveQuizAlgorithm {
    *
    * Gibt formatierte Progress-Items für die UI zurück
    */
-  getProgress(competencies: Competency[], state: SessionState): ProgressItem[] {
+  getProgress(competencies: Competency[], state: StudySession): ProgressItem[] {
     return competencies.map((c) => ({
       competencyId: c.id,
       label: c.name,
       score: state.competencies[c.id]?.score ?? 0,
       timesAssessed: state.competencies[c.id]?.timesAssessed ?? 0,
-      uncertainty: binaryEntropy(state.competencies[c.id]?.score ?? this.config.initialMastery),
-      certainty: 1 - binaryEntropy(state.competencies[c.id]?.score ?? this.config.initialMastery)
+      uncertainty: binaryEntropy(
+        state.competencies[c.id]?.score ?? this.config.model.initialMastery
+      ),
+      certainty:
+        1 -
+        binaryEntropy(state.competencies[c.id]?.score ?? this.config.model.initialMastery)
     }))
   }
 
@@ -594,7 +622,7 @@ export class AdaptiveQuizAlgorithm {
    *
    * Durchschnitt aller Kompetenzscores
    */
-  getOverallScore(competencies: Competency[], state: SessionState): number {
+  getOverallScore(competencies: Competency[], state: StudySession): number {
     if (competencies.length === 0) {
       return 0
     }
@@ -610,7 +638,7 @@ export class AdaptiveQuizAlgorithm {
   getCompletionStatus(
     competencies: Competency[],
     questions: Question[],
-    session: SessionState
+    session: StudySession
   ): CompletionStatus {
     return this.evaluateCompletionStatus(competencies, questions, session)
   }

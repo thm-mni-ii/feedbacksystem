@@ -5,6 +5,7 @@ interface TextPart {
   order: number
   text: string
   isBlank: boolean
+  distractors?: string[]
 }
 
 interface QuestionConfiguration {
@@ -19,10 +20,35 @@ const props = defineProps<{
 
 const fillInTheBlanksAnswer = defineModel<{ [key: number]: string }>({ default: {} })
 
-const possibleAnswers = computed(() => {
-  return props.blankStrings.length > 0
-    ? props.blankStrings
-    : props.questionconfiguration.textParts.filter((part) => part.isBlank).map((part) => part.text)
+// Fisher-Yates, damit die korrekte Antwort nicht immer an derselben Position steht.
+function shuffle<T>(items: T[]): T[] {
+  const result = [...items]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
+const allBlankParts = computed(() =>
+  props.questionconfiguration.textParts.filter((part) => part.isBlank)
+)
+
+// Optionen je Lücke: bevorzugt die pro Lücke festgelegten Distraktoren, gemischt mit der
+// richtigen Antwort. Fällt mangels Distraktoren auf den bisherigen globalen Wortpool
+// (alle Blank-Texte der Frage) zurück, damit ältere Fragen ohne Distraktoren weiter funktionieren.
+const possibleAnswersByOrder = computed(() => {
+  const map = new Map<number, string[]>()
+  for (const part of allBlankParts.value) {
+    const options =
+      props.blankStrings.length > 0
+        ? props.blankStrings
+        : part.distractors && part.distractors.length > 0
+          ? shuffle([part.text, ...part.distractors])
+          : allBlankParts.value.map((blank) => blank.text)
+    map.set(part.order, options)
+  }
+  return map
 })
 
 const formattedText = computed(() => {
@@ -31,13 +57,15 @@ const formattedText = computed(() => {
       return {
         order: part.order,
         component: props.questionconfiguration.showBlanks ? 'select' : 'input',
-        value: fillInTheBlanksAnswer.value?.[part.order] || ''
+        value: fillInTheBlanksAnswer.value?.[part.order] || '',
+        options: possibleAnswersByOrder.value.get(part.order) ?? []
       }
     } else {
       return {
         order: part.order,
         component: 'text',
-        value: part.text
+        value: part.text,
+        options: [] as string[]
       }
     }
   })
@@ -65,7 +93,7 @@ watch(
         <v-select
           v-else-if="part.component === 'select'"
           v-model="fillInTheBlanksAnswer[part.order]"
-          :items="possibleAnswers"
+          :items="part.options"
           density="compact"
           class="blank-input"
         />

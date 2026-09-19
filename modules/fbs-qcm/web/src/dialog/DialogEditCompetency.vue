@@ -10,6 +10,15 @@ const dialogConfirm = ref<typeof DialogConfirm>()
 const isNew = ref<boolean>(true)
 const competencyId = ref<string | undefined>(undefined)
 
+/**
+ * Steuert, ob beim Speichern der echte Backend-Call (competencyService)
+ * ausgeführt wird. Der Kompetenzgraph arbeitet mit lokalen Mock-Competencies, die
+ * im Backend nicht existieren – dort wird `persist=false` übergeben und die
+ * angelegte/bearbeitete Kompetenz stattdessen über den Resolve-Wert des
+ * `openDialog`-Promise (als `Competency`) nach oben gereicht.
+ */
+const persist = ref<boolean>(true)
+
 const competency = ref<Omit<Competency, 'id'>>({
   name: '',
   description: '',
@@ -105,8 +114,15 @@ const prerequisiteCompetencyIds = computed<string[]>({
   }
 })
 
-const competencyName = (id: string) =>
-  allCompetencies.value.find((c) => c.id === id)?.name ?? id
+const competencyName = (id: string) => allCompetencies.value.find((c) => c.id === id)?.name ?? id
+
+/**
+ * Baumpräfix für die Einrückung in den Auswahl-Dropdowns: zeigt neben der
+ * reinen Einrückung (padding-left) auch die Anzahl der übergeordneten
+ * Ebenen an (z.B. "─└ " bei Tiefe 2), damit die vollständige Hierarchie
+ * (nicht nur die erste Ebene) erkennbar bleibt.
+ */
+const treePrefix = (depth: number) => `${'─'.repeat(Math.max(0, depth - 1))}└ `
 
 const updateMinimumMastery = (competencyIdToUpdate: string, value: number) => {
   prerequisites.value = prerequisites.value.map((p) =>
@@ -130,8 +146,25 @@ const nameValidationError = computed(() =>
 // Promise resolve
 const resolvePromise = ref<Function | undefined>(undefined)
 
-const openDialog = (editCompetency?: Competency) => {
-  loadCompetencies()
+/**
+ * @param editCompetency Zu bearbeitende Kompetenz, oder undefined für "neu erstellen".
+ * @param options.persist Ob beim Speichern der echte Backend-Call ausgeführt wird
+ * (default true). Auf false setzen, wenn die Kompetenz nur lokal (z.B. im
+ * Kompetenzgraph) verwaltet wird und im Backend nicht existiert.
+ * @param options.competencies Vorhandene Kompetenzen für Parent-/Prerequisite-
+ * Auswahl, wenn `persist=false` und daher nicht per Backend-Call geladen wird.
+ */
+const openDialog = (
+  editCompetency?: Competency,
+  options?: { persist?: boolean; competencies?: Competency[] }
+) => {
+  persist.value = options?.persist ?? true
+
+  if (persist.value) {
+    loadCompetencies()
+  } else {
+    allCompetencies.value = options?.competencies ?? []
+  }
 
   if (editCompetency) {
     const { id, ...rest } = editCompetency
@@ -156,9 +189,9 @@ const openDialog = (editCompetency?: Competency) => {
   })
 }
 
-const _confirm = () => {
+const _confirm = (result: Competency | boolean = true) => {
   editCompetencyDialog.value = false
-  resolvePromise.value && resolvePromise.value(true)
+  resolvePromise.value && resolvePromise.value(result)
 }
 
 const _cancel = () => {
@@ -167,10 +200,19 @@ const _cancel = () => {
 }
 
 const createCompetency = () => {
+  if (!persist.value) {
+    const localCompetency: Competency = {
+      ...competency.value,
+      id: `local-${crypto.randomUUID()}`
+    }
+    _confirm(localCompetency)
+    return
+  }
+
   competencyService
     .createCompetency(competency.value)
-    .then(() => {
-      _confirm()
+    .then((res) => {
+      _confirm(res.data)
     })
     .catch((error) => {
       console.error(error)
@@ -182,10 +224,16 @@ const updateCompetency = () => {
   if (!competencyId.value) {
     return
   }
+
+  if (!persist.value) {
+    _confirm({ id: competencyId.value, ...competency.value })
+    return
+  }
+
   competencyService
     .updateCompetency(competencyId.value, competency.value)
-    .then(() => {
-      _confirm()
+    .then((res) => {
+      _confirm(res.data)
     })
     .catch((error) => {
       console.error(error)
@@ -205,7 +253,7 @@ const handleSubmit = () => {
 }
 
 const deleteCompetency = async () => {
-  if (!competencyId.value || !dialogConfirm.value) {
+  if (!competencyId.value || !dialogConfirm.value || !persist.value) {
     return
   }
   const confirmed = await dialogConfirm.value.openDialog(
@@ -256,8 +304,8 @@ defineExpose({
   <v-dialog v-model="editCompetencyDialog" class="w-100 w-md-75">
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="text-h4 ma-2 border-b-md border-primary">
-          {{ isNew ? 'Add new Competency' : 'Update Competency' }}
+        <span class="text-h5 font-weight-medium text-primary">
+          {{ isNew ? 'Neue Kompetenz anlegen' : 'Kompetenz bearbeiten' }}
         </span>
         <v-btn icon variant="text" @click="_cancel">
           <v-icon>mdi-close</v-icon>
@@ -287,6 +335,7 @@ defineExpose({
             :items="orderedCompetencies"
             item-title="competency.name"
             item-value="competency.id"
+            item-color="primary"
             label="Parent Competency"
             prepend-icon="mdi-family-tree"
             variant="solo"
@@ -298,7 +347,9 @@ defineExpose({
                 :title="undefined"
                 :style="{ paddingLeft: `${16 + (item.raw?.depth ?? 0) * 20}px` }"
               >
-                <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">└ </span
+                <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">{{
+                  treePrefix(item.raw?.depth ?? 0)
+                }}</span
                 >{{ item.raw?.competency?.name ?? competencyName(item.value) }}
               </v-list-item>
             </template>
@@ -308,6 +359,7 @@ defineExpose({
             v-model="prerequisiteCompetencyIds"
             :items="orderedCompetencies"
             item-title="competency.name"
+            item-color="primary"
             item-value="competency.id"
             label="Prerequisites"
             prepend-icon="mdi-arrow-decision-outline"
@@ -323,7 +375,9 @@ defineExpose({
                 :title="undefined"
                 :style="{ paddingLeft: `${16 + (item.raw?.depth ?? 0) * 20}px` }"
               >
-                <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">└ </span
+                <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">{{
+                  treePrefix(item.raw?.depth ?? 0)
+                }}</span
                 >{{ item.raw?.competency?.name ?? competencyName(item.value) }}
               </v-list-item>
             </template>
@@ -356,7 +410,13 @@ defineExpose({
       </v-card-text>
 
       <v-card-actions class="justify-end">
-        <v-btn v-if="!isNew" color="red" variant="text" class="mr-auto" @click="deleteCompetency">
+        <v-btn
+          v-if="!isNew && persist"
+          color="red"
+          variant="text"
+          class="mr-auto"
+          @click="deleteCompetency"
+        >
           Delete
         </v-btn>
         <v-btn variant="text" @click="_cancel">Cancel</v-btn>

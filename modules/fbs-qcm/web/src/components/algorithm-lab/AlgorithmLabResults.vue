@@ -93,30 +93,7 @@
       </div>
     </v-card>
 
-    <v-card class="pa-6 mx-auto mt-6 feedback-card" max-width="1100" variant="outlined">
-      <div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-4">
-        <div>
-          <h2 class="text-h6 mb-1">Lernhinweise</h2>
-          <p class="text-body-2 text-medium-emphasis mb-0">
-            Zusammenfassung der wichtigsten Beobachtungen aus dieser Session.
-          </p>
-        </div>
-      </div>
-
-      <div class="feedback-grid">
-        <div v-for="section in feedbackSections" :key="section.title" class="feedback-panel">
-          <div class="feedback-panel__icon" :class="`feedback-panel__icon--${section.tone}`">
-            <v-icon size="18">{{ section.icon }}</v-icon>
-          </div>
-          <div class="feedback-panel__content">
-            <div class="feedback-panel__title">{{ section.title }}</div>
-            <div class="feedback-panel__text">{{ section.text }}</div>
-          </div>
-        </div>
-      </div>
-    </v-card>
-
-    <v-btn class="mt-6" color="primary" @click="$emit('restart')">Neue Analyse</v-btn>
+    <v-btn class="mt-6" color="primary" @click="$emit('restart')">{{ actionLabel }}</v-btn>
   </div>
 </template>
 
@@ -130,9 +107,12 @@ interface Props {
   competencies: Competency[]
   progress: ProgressItem[]
   historyCount: number
+  actionLabel?: string
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  actionLabel: 'Neue Analyse'
+})
 defineEmits<{
   (e: 'restart'): void
 }>()

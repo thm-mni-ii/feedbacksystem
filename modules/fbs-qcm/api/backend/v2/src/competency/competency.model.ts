@@ -11,6 +11,7 @@ export interface Competency {
   id: string;
   name: string;
   description?: string;
+  courseIds?: string[];
   parentId?: string | null;
   category?: string;
   prerequisites?: CompetencyPrerequisite[];

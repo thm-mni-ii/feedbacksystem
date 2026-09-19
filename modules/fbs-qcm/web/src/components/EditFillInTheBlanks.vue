@@ -25,9 +25,20 @@ const removeLastTextPart = () => {
 watch(
   localQuestion,
   (newVal) => {
-    newVal.questionConfiguration.textParts.forEach((part: { text: string }) => {
-      part.text = part.text.trim()
-    })
+    newVal.questionConfiguration.textParts.forEach(
+      (part: { text: string; isBlank: boolean; distractors?: string[] }) => {
+        part.text = part.text.trim()
+        if (!part.isBlank) {
+          // Distraktoren sind nur für Lücken relevant; ohne isBlank keine veralteten Daten behalten.
+          part.distractors = undefined
+        } else if (part.distractors) {
+          const trimmedText = part.text.trim()
+          part.distractors = [...new Set(part.distractors.map((d) => d.trim()))].filter(
+            (d) => d.length > 0 && d !== trimmedText
+          )
+        }
+      }
+    )
     emit('update', newVal)
   },
   { deep: true }
@@ -79,23 +90,39 @@ onMounted(() => {
       </span>
     </div>
 
-    <div
-      v-for="(part, index) in localQuestion.questionConfiguration.textParts"
-      :key="index"
-      class="d-flex"
-    >
-      <v-text-field
-        v-model="part.text"
-        :label="'Textpart ' + part.order"
-        class="pr-10"
-      ></v-text-field>
-      <v-switch
-        v-model="part.isBlank"
-        class="ml-4"
-        :label="`Is Blank`"
-        color="primary"
-        hide-details
-      ></v-switch>
+    <div v-for="(part, index) in localQuestion.questionConfiguration.textParts" :key="index">
+      <div class="d-flex">
+        <v-text-field
+          v-model="part.text"
+          :label="'Textpart ' + part.order"
+          class="pr-10"
+        ></v-text-field>
+        <v-switch
+          v-model="part.isBlank"
+          class="ml-4"
+          :label="`Is Blank`"
+          color="primary"
+          hide-details
+        ></v-switch>
+      </div>
+      <v-combobox
+        v-if="part.isBlank && localQuestion.questionConfiguration.showBlanks"
+        v-model="part.distractors"
+        multiple
+        chips
+        closable-chips
+        clearable
+        density="compact"
+        class="pr-10 mb-2"
+        label="Falsche Antwortoptionen"
+        hint="Plausible Falschantworten für diese Lücke eingeben, mit Enter bestätigen"
+        persistent-hint
+        :rules="[
+          (value: string[]) =>
+            !value?.some((v) => v.trim() === part.text.trim()) ||
+            'Darf nicht mit der korrekten Antwort übereinstimmen'
+        ]"
+      ></v-combobox>
     </div>
   </div>
   <v-btn
@@ -117,7 +144,7 @@ onMounted(() => {
   </v-btn>
 
   <h2 class="text-primary text-center">Preview</h2>
-  <div class="text-body-1 d-flex flex-wrap">
+  <div class="text-body-1 d-flex flex-wrap align-center">
     <span
       v-for="(part, index) in localQuestion.questionConfiguration.textParts"
       :key="index"
@@ -125,6 +152,17 @@ onMounted(() => {
       class="inline-block"
     >
       {{ part.text }}
+      <v-chip
+        v-if="part.isBlank && localQuestion.questionConfiguration.showBlanks"
+        size="x-small"
+        class="ml-1"
+        :color="part.distractors?.length ? 'primary' : 'warning'"
+        variant="tonal"
+      >
+        {{ part.distractors?.length ?? 0 }} Distraktor{{
+          part.distractors?.length === 1 ? '' : 'en'
+        }}
+      </v-chip>
       <span v-if="!part.isBlank">&nbsp;</span>
     </span>
   </div>

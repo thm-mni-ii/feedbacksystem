@@ -1,8 +1,12 @@
 // model/types.ts
 // ============================================================
-// REFACTORED: Einheitliches Competency-System
-// Skills und Tags sind jetzt beide Competencies mit Hierarchie
+// Einheitliches Competency-System mit Hierarchie
 // ============================================================
+import type QuestionType from '@/enums/QuestionType'
+import type { Choice } from './questionTypes/Choice'
+import type FillInTheBlanks from './questionTypes/FillInTheBlanks'
+import type { Matching } from './questionTypes/Matching'
+import type { StudyAlgorithmConfig } from './StudyAlgorithmConfig'
 
 /**
  * Competency: fachlich abgegrenzte, beobachtbare Kompetenz.
@@ -15,6 +19,8 @@ export interface Competency {
   id: string
   name: string
   description?: string
+  // Kurse, in denen die global wiederverwendbare Kompetenz angeboten wird.
+  courseIds?: string[]
   // Hierarchie: optional Verweis auf übergeordnete Kompetenz
   parentId?: string | null
   // Kategorisierung (z.B. "SQL", "Datenbank", "OOP")
@@ -46,31 +52,33 @@ export interface QuestionCompetencyLink {
 }
 
 /**
- * LearningQuestion: Frage im adaptiven Lern- und Diagnosemodell.
+ * Question: Frage im adaptiven Lern- und Diagnosemodell.
  * Dieses Domänenmodell ist absichtlich von den älteren REST-DTOs unter
  * `model/Question.ts` getrennt; diese repräsentieren weiterhin das bestehende
  * Backend-Format.
+ *
+ * `questionType`/`questionConfiguration` sind bewusst 1:1 zum v2-Wire-Format
+ * (`model/Question.ts`) gehalten, damit das Algorithm-Lab echte
+ * Antwortmöglichkeiten rendern kann, ohne auf ein separates,
+ * lose typisiertes Legacy-Objekt angewiesen zu sein.
  */
-export interface LearningQuestion {
+export interface Question {
   id: string
   text: string
   title?: string // für Kompatibilität
-  // Legacy/kompakte Form: Array von Competency-IDs, die diese Frage abprüft
+  /**
+   * @deprecated Kompakte Legacy-Form. `competencyLinks` ist die Source of
+   * Truth für Kompetenz-Zuordnungen; `competencyIds` wird daraus abgeleitet
+   * und nur noch für Rückwärtskompatibilität mitgeführt.
+   */
   competencyIds: string[]
   // Erweiterte Q-Matrix-Form mit Mehrfach-Attributen und optionalen Gewichten
   competencyLinks?: QuestionCompetencyLink[]
+  questionType: QuestionType
+  questionConfiguration: Choice | FillInTheBlanks | Matching
   difficulty: number
   excludeFromAlgorithm?: boolean
-  /**
-   * Temporärer Übergangs-Bridge zu den rohen Dummy-Fragedaten (questiontype,
-   * Antwortoptionen etc.), damit das Algorithm-Lab echte Antwortmöglichkeiten
-   * anzeigen kann. Entfällt, sobald Backend v2 ein eigenes Question-DTO liefert.
-   */
-  legacyQuestion?: unknown
 }
-
-/** @deprecated Für die schrittweise Migration des Algorithmus-Labors. */
-export type Question = LearningQuestion
 
 /**
  * Kompakte Darstellung einer Q-Matrix als Items x Kompetenzen.
@@ -128,7 +136,7 @@ export interface AnswerEvaluation {
  * Unveränderliches Lernereignis. Es ist die fachliche Grundlage für spätere
  * Verlaufsansichten, Reproduzierbarkeit und Knowledge Tracing.
  */
-export interface LearningAttempt {
+export interface QuestionAttempt {
   id: string
   sessionId: string
   studentId: string
@@ -144,9 +152,15 @@ export interface LearningAttempt {
 /**
  * State einer Quiz-Session
  */
-export interface SessionState {
+export interface StudySession {
   id: string
   studentId: string
+  // Optionale Kurs-Zuordnung, z.B. für späteres Reporting nach Kurs.
+  courseId?: string | null
+  algorithm: {
+    configuration: StudyAlgorithmConfig
+    courseConfigurationRevision: number
+  }
   startedAt: number
   updatedAt: number
   completedAt?: number | null

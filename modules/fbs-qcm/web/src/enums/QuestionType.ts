@@ -1,6 +1,6 @@
 enum QuestionType {
   Choice = 'Choice',
-  FillInTheBlanks = 'FillInTheBlanks'
-  // SQL: geplanter Fragetyp, existiert noch nicht (kein Editor/Runtime-Support).
+  FillInTheBlanks = 'FillInTheBlanks',
+  Matching = 'Matching'
 }
 export default QuestionType

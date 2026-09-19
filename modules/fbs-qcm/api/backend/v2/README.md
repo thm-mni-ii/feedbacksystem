@@ -6,18 +6,27 @@ es startest und damit entwickelst.
 
 ## Kurz gesagt: Was ist der aktuelle Stand?
 
-- **Backend v2** (dieser Ordner): läuft, hat zwei Bereiche ("Questions" und
-  "Competencies/Skills") mit echten Daten in MongoDB.
-- **Frontend** (`web/`): ist **noch nicht** mit diesem Backend verbunden. Es
-  zeigt weiterhin seine eigenen eingebauten Test-Daten an (Dummy-Daten direkt
-  im Frontend-Code). Das Backend zu starten ändert also aktuell noch nichts
-  im Frontend, was du im Browser siehst.
-- Das heißt: **Für's Frontend musst du gerade nichts extra tun.** Es läuft
-  wie gewohnt mit `npm run dev` im `web/`-Ordner, unabhängig vom Backend. Die
-  Verbindung Frontend ↔ Backend v2 ist ein späterer Schritt, den wir noch
-  nicht gemacht haben.
+- **Backend v2** (dieser Ordner): stellt Questions, Competencies,
+  StudySessions, QuestionAttempts und kursbezogene Study-Konfigurationen aus
+  MongoDB bereit.
+- **Frontend** (`web/`) greift über `/api_v2` auf dieses Backend zu. Für den
+  vollständigen Study-Ablauf müssen daher Frontend, Backend v2 und MongoDB
+  laufen.
 
 Der Rest dieser Anleitung dreht sich nur um das Backend.
+
+## Kursbezogene Study-Konfiguration
+
+Die Endpunkte
+`GET`, `PUT` und `DELETE /api_v2/courses/:courseId/study-configuration`
+liefern, ändern beziehungsweise setzen die Algorithmuseinstellungen eines
+Kurses zurück. MongoDB speichert nur Abweichungen von den
+Anwendungsstandards. Schreibzugriffe verwenden das Feld `revision`; veraltete
+Revisionen werden mit HTTP 409 abgelehnt.
+
+Beim Anlegen einer StudySession erzeugt das Backend einen unveränderlichen
+Snapshot der zu diesem Zeitpunkt effektiven Konfiguration. Spätere
+Kursänderungen beeinflussen bestehende Sessions nicht.
 
 ## Voraussetzungen (einmalig prüfen)
 

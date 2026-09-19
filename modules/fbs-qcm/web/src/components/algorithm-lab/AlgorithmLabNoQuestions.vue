@@ -6,12 +6,21 @@
       <p class="text-medium-emphasis mb-6">
         Es sind keine weiteren Fragen für die aktuelle Sitzung vorhanden.
       </p>
-      <v-btn color="primary" @click="$emit('restart')">Neue Analyse starten</v-btn>
+      <v-btn color="primary" @click="$emit('restart')">{{ actionLabel }}</v-btn>
     </v-card>
   </div>
 </template>
 
 <script setup lang="ts">
+withDefaults(
+  defineProps<{
+    actionLabel?: string
+  }>(),
+  {
+    actionLabel: 'Neue Analyse starten'
+  }
+)
+
 defineEmits<{
   (e: 'restart'): void
 }>()

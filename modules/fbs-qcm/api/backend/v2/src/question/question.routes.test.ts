@@ -122,4 +122,49 @@ describe("Question routes", () => {
 
     expect(getRes.status).toBe(404);
   });
+
+  it("creates a matching question with valid category references", async () => {
+    const payload = {
+      text: "Ordnen Sie die Begriffe zu.",
+      competencyIds: ["c1"],
+      difficulty: 0.5,
+      questionType: "Matching",
+      questionConfiguration: {
+        categories: [
+          { id: "entity", label: "ERM-Begriff" },
+          { id: "key", label: "Schlüssel" }
+        ],
+        items: [
+          { id: "item-1", text: "Entität", correctCategoryId: "entity" },
+          { id: "item-2", text: "Primärschlüssel", correctCategoryId: "key" }
+        ]
+      }
+    };
+
+    const res = await request(app)
+      .post("/api_v2/questions")
+      .set("authorization", authHeader)
+      .send(payload);
+
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject(payload);
+  });
+
+  it("rejects matching items that reference an unknown category", async () => {
+    const res = await request(app)
+      .post("/api_v2/questions")
+      .set("authorization", authHeader)
+      .send({
+        text: "Ordnen Sie die Begriffe zu.",
+        competencyIds: ["c1"],
+        difficulty: 0.5,
+        questionType: "Matching",
+        questionConfiguration: {
+          categories: [{ id: "entity", label: "ERM-Begriff" }],
+          items: [{ id: "item-1", text: "Entität", correctCategoryId: "unknown" }]
+        }
+      });
+
+    expect(res.status).toBe(400);
+  });
 });

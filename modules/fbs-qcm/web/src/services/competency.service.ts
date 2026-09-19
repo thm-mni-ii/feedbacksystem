@@ -13,6 +13,10 @@ class CompetencyService {
     return apiV2.get('/competencies')
   }
 
+  getCompetenciesByCourse(courseId: string): Promise<AxiosResponse<Competency[]>> {
+    return apiV2.get('/competencies', { params: { courseId } })
+  }
+
   getCompetency(competencyId: string): Promise<AxiosResponse<Competency>> {
     return apiV2.get(`/competencies/${competencyId}`)
   }

@@ -49,6 +49,7 @@ describe("Competency routes", () => {
 
     const payload = {
       name: "Dateikonzept",
+      courseIds: ["course-1", "course-2"],
       parentId: parent.body.id,
       category: "database",
       prerequisites: [{ competencyId: parent.body.id, minimumMastery: 0.6 }]
@@ -70,11 +71,42 @@ describe("Competency routes", () => {
     expect(listRes.body).toHaveLength(2);
   });
 
+  it("filters competencies by course", async () => {
+    await request(app)
+      .post("/api_v2/competencies")
+      .set("authorization", authHeader)
+      .send({ name: "Shared", courseIds: ["course-1", "course-2"] });
+    await request(app)
+      .post("/api_v2/competencies")
+      .set("authorization", authHeader)
+      .send({ name: "Other", courseIds: ["course-3"] });
+
+    const res = await request(app)
+      .get("/api_v2/competencies?courseId=course-2")
+      .set("authorization", authHeader);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0]).toMatchObject({
+      name: "Shared",
+      courseIds: ["course-1", "course-2"]
+    });
+  });
+
   it("returns 400 for invalid input", async () => {
     const res = await request(app)
       .post("/api_v2/competencies")
       .set("authorization", authHeader)
       .send({ name: "" });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 for invalid course ids", async () => {
+    const res = await request(app)
+      .post("/api_v2/competencies")
+      .set("authorization", authHeader)
+      .send({ name: "Invalid", courseIds: ["course-1", ""] });
 
     expect(res.status).toBe(400);
   });

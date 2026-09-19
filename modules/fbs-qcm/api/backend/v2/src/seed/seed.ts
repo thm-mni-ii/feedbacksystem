@@ -1,6 +1,6 @@
 /**
  * Seed-Script: importiert die Frontend-Dummy-Daten (Fragen + Competencies)
- * aus web/src/composables/question.mock.ts und skillgraph.mock.ts 1:1 ins
+ * aus web/src/composables/question.mock.ts und competencyGraph.mock.ts 1:1 ins
  * v2-Backend (MongoDB).
  *
  * Nutzung:
@@ -16,7 +16,7 @@
 import { connect, disconnect } from "../mongo/mongo";
 import { CompetencyRepository } from "../competency/competency.repository";
 import { QuestionRepository } from "../question/question.repository";
-import { competencies, questions } from "@/composables/skillgraph.mock";
+import { competencies, questions } from "@/composables/competencyGraph.mock";
 
 async function seed() {
   const db = await connect();
@@ -39,6 +39,7 @@ async function seed() {
     const created = await competencyRepository.create({
       name: competency.name,
       description: competency.description,
+      courseIds: ["1"],
       category: competency.category
       // parentId/prerequisites werden erst im zweiten Durchlauf gesetzt,
       // weil sie auf andere (evtl. noch nicht angelegte) Competencies verweisen.
@@ -61,20 +62,6 @@ async function seed() {
 
   let questionCount = 0;
   for (const question of questions) {
-    const legacy = question.legacyQuestion as
-      | (Record<string, unknown> & { questiontype?: string })
-      | undefined;
-
-    // Die Antwortoptionen (optionRows, answerColumns, multipleRow, ...) liegen
-    // als Top-Level-Felder im rohen Mock-Objekt, nicht in questionconfiguration.
-    // Wir übernehmen daher das komplette Rohobjekt (ohne die bereits separat
-    // gespeicherten Felder) als questionConfiguration.
-    const { _id, owner, questiontext, questiontags, questiontype, ...rawConfig } = legacy ?? {};
-    void _id;
-    void owner;
-    void questiontext;
-    void questiontags;
-
     await questionRepository.create({
       text: question.text,
       title: question.title,
@@ -85,8 +72,8 @@ async function seed() {
       })),
       difficulty: question.difficulty,
       excludeFromAlgorithm: question.excludeFromAlgorithm,
-      questionType: questiontype as string | undefined,
-      questionConfiguration: Object.keys(rawConfig).length > 0 ? rawConfig : undefined
+      questionType: question.questionType,
+      questionConfiguration: { ...question.questionConfiguration }
     });
     questionCount += 1;
   }

@@ -1,12 +1,17 @@
 import { Request, Response } from "express";
 import { CompetencyRepository } from "./competency.repository";
-import { validateCompetencyInput, validateCompetencyUpdate } from "./competency.validation";
+import {
+  validateCompetencyInput,
+  validateCompetencyUpdate,
+  validateCourseIdFilter
+} from "./competency.validation";
 
 export class CompetencyController {
   constructor(private readonly repository: CompetencyRepository) {}
 
-  list = async (_req: Request, res: Response) => {
-    const competencies = await this.repository.findAll();
+  list = async (req: Request, res: Response) => {
+    const courseId = validateCourseIdFilter(req.query.courseId);
+    const competencies = await this.repository.findAll(courseId);
     res.json(competencies);
   };
 

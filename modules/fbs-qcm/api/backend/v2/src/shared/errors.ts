@@ -26,3 +26,17 @@ export class ValidationError extends HttpError {
     this.name = "ValidationError";
   }
 }
+
+export class ForbiddenError extends HttpError {
+  constructor(message = "Forbidden") {
+    super(403, message);
+    this.name = "ForbiddenError";
+  }
+}
+
+export class ConflictError extends HttpError {
+  constructor(message = "Resource was modified by another request") {
+    super(409, message);
+    this.name = "ConflictError";
+  }
+}

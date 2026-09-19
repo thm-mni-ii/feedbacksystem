@@ -2,13 +2,13 @@
   <div>
     <h2>Question Flow</h2>
     <div id="cy" style="width: 100%; height: 500px; border: 1px solid black"></div>
-    <button @click="addNode" style="margin-top: 10px">Add Question</button>
+    <button style="margin-top: 10px" @click="addNode">Add Question</button>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
-import cytoscape, { Core } from 'cytoscape'
+import cytoscape, { type Core } from 'cytoscape'
 
 export default defineComponent({
   name: 'CytoscapeGraph',

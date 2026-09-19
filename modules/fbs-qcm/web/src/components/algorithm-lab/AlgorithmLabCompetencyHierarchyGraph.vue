@@ -193,8 +193,8 @@ const configs = vNG.defineConfigs<GraphNodeData, GraphEdgeData>({
       type: 'circle',
       color: (node) => node.color,
       radius: (node) => node.radius,
-      borderWidth: (node) => (node.isRoot ? 4 : 2),
-      borderColor: (node) => (node.isRoot ? '#0D47A1' : 'rgba(13, 71, 161, 0.25)')
+      strokeWidth: (node) => (node.isRoot ? 4 : 2),
+      strokeColor: (node) => (node.isRoot ? '#0D47A1' : 'rgba(13, 71, 161, 0.25)')
     },
     hover: {
       radius: (node) => node.radius + 3

@@ -40,7 +40,7 @@ const SEMANTIC = {
   dangerHover: '#C0392B'
 } as const
 
-const skillGraphPaletteBase = {
+const competencyGraphPaletteBase = {
   viewBackground: BLUE[50],
   viewBackgroundAlt: '#E0F2FE',
   surface: NEUTRAL.surface,
@@ -85,10 +85,10 @@ export const appPalette = {
   graphPrimaryDark: BLUE[600],
   graphText: '#1E3A5F',
   graphMuted: '#64748B',
-  skillGraph: skillGraphPaletteBase
+  competencyGraph: competencyGraphPaletteBase
 } as const
 
-export const skillGraphPalette = appPalette.skillGraph
+export const competencyGraphPalette = appPalette.competencyGraph
 
 export default createVuetify({
   components: {},
@@ -128,11 +128,11 @@ export default createVuetify({
           'app-graph-primary-dark': appPalette.graphPrimaryDark,
           'app-graph-text': appPalette.graphText,
           'app-graph-muted': appPalette.graphMuted,
-          'skill-graph-bg': skillGraphPalette.viewBackground,
-          'skill-graph-header-start': skillGraphPalette.headerStart,
-          'skill-graph-header-end': skillGraphPalette.headerEnd,
-          'skill-graph-course': skillGraphPalette.courseNode,
-          'skill-graph-question': skillGraphPalette.questionNode
+          'competency-graph-bg': competencyGraphPalette.viewBackground,
+          'competency-graph-header-start': competencyGraphPalette.headerStart,
+          'competency-graph-header-end': competencyGraphPalette.headerEnd,
+          'competency-graph-course': competencyGraphPalette.courseNode,
+          'competency-graph-question': competencyGraphPalette.questionNode
         }
       }
     }

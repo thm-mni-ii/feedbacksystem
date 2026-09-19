@@ -5,6 +5,7 @@ import { Competency, CompetencyInput, CompetencyUpdate } from "./competency.mode
 interface CompetencyDocument {
   name: string;
   description?: string;
+  courseIds?: string[];
   parentId?: string | null;
   category?: string;
   prerequisites?: Competency["prerequisites"];
@@ -15,6 +16,7 @@ function toCompetency(doc: WithId<CompetencyDocument>): Competency {
     id: doc._id.toHexString(),
     name: doc.name,
     description: doc.description,
+    courseIds: doc.courseIds,
     parentId: doc.parentId,
     category: doc.category,
     prerequisites: doc.prerequisites
@@ -28,8 +30,8 @@ export class CompetencyRepository {
     this.collection = db.collection<CompetencyDocument>("competency");
   }
 
-  async findAll(): Promise<Competency[]> {
-    const docs = await this.collection.find().toArray();
+  async findAll(courseId?: string): Promise<Competency[]> {
+    const docs = await this.collection.find(courseId ? { courseIds: courseId } : {}).toArray();
     return docs.map(toCompetency);
   }
 

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode'
 
 /**
  * Gemeinsamer axios-Client für das neue Backend v2 (`api/backend/v2`).
@@ -17,6 +18,14 @@ import axios from 'axios'
  */
 const DEV_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRldiIsImlkIjoxLCJpYXQiOjE3ODg1MTQ2NjF9.pEsXaCo7QbOz1k7FjFPecnxVICm4CIKMnrJXGjvF16w'
+
+type AuthTokenClaims = {
+  id: number
+}
+
+export function getAuthenticatedStudentId(): string {
+  return String(jwtDecode<AuthTokenClaims>(DEV_TOKEN).id)
+}
 
 const apiV2 = axios.create({
   baseURL: '/api_v2',

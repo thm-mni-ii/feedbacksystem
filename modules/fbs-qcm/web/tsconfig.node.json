@@ -2,6 +2,7 @@
   "extends": "@tsconfig/node20/tsconfig.json",
   "include": [
     "vite.config.*",
+    "vite-plugin-eslint.d.ts",
     "vitest.config.*",
     "cypress.config.*",
     "nightwatch.conf.*",

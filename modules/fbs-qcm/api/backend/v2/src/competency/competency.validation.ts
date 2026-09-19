@@ -7,6 +7,15 @@ function assertString(value: unknown, field: string): asserts value is string {
   }
 }
 
+function assertStringArray(value: unknown, field: string): asserts value is string[] {
+  if (
+    !Array.isArray(value) ||
+    value.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
+  ) {
+    throw new ValidationError(`Field "${field}" must be an array of non-empty strings`);
+  }
+}
+
 function assertPrerequisites(value: unknown): void {
   if (value === undefined) return;
   if (!Array.isArray(value)) {
@@ -34,12 +43,14 @@ export function validateCompetencyInput(body: unknown): CompetencyInput {
   assertPrerequisites(b.prerequisites);
 
   if (b.description !== undefined) assertString(b.description, "description");
+  if (b.courseIds !== undefined) assertStringArray(b.courseIds, "courseIds");
   if (b.category !== undefined) assertString(b.category, "category");
   if (b.parentId !== undefined && b.parentId !== null) assertString(b.parentId, "parentId");
 
   return {
     name: b.name as string,
     description: b.description as string | undefined,
+    courseIds: b.courseIds as string[] | undefined,
     parentId: b.parentId as string | null | undefined,
     category: b.category as string | undefined,
     prerequisites: b.prerequisites as CompetencyInput["prerequisites"]
@@ -54,9 +65,16 @@ export function validateCompetencyUpdate(body: unknown): CompetencyUpdate {
 
   if (b.name !== undefined) assertString(b.name, "name");
   if (b.description !== undefined) assertString(b.description, "description");
+  if (b.courseIds !== undefined) assertStringArray(b.courseIds, "courseIds");
   if (b.category !== undefined) assertString(b.category, "category");
   if (b.parentId !== undefined && b.parentId !== null) assertString(b.parentId, "parentId");
   assertPrerequisites(b.prerequisites);
 
   return b as CompetencyUpdate;
+}
+
+export function validateCourseIdFilter(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  assertString(value, "courseId");
+  return value;
 }

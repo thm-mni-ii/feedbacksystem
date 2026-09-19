@@ -1,7 +1,7 @@
 /**
  * Question-DTOs für v2.
  *
- * Bewusst am Frontend-Domänenmodell `LearningQuestion` aus
+ * Bewusst am Frontend-Domänenmodell `Question` aus
  * web/src/model/types.ts orientiert (nicht am alten api/backend/src/model/Question.ts),
  * damit der adaptive Algorithmus (web/src/composables/algorithm.ts) später ohne
  * Modellbruch an die echte API andocken kann.

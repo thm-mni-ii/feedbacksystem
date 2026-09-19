@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "npm run build && node --env-file=.env dist/index.js",
     "test": "jest --runInBand",
-    "seed": "tsx --tsconfig tsconfig.seed.json --env-file=.env src/seed/seed.ts"
+    "seed": "tsx --tsconfig tsconfig.seed.json --env-file=.env src/seed/seed.ts",
+    "migrate:matching-questions": "tsx --env-file=.env src/seed/migrate-matching-questions.ts"
   },
   "keywords": [],
   "author": "",

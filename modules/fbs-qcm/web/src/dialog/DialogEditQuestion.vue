@@ -15,7 +15,7 @@ const resolvePromise = ref<Function | undefined>(undefined)
 /**
  * @param editQuestion Zu bearbeitende Frage, oder undefined für "neu erstellen".
  * @param options.persist Ob beim Speichern der echte Backend-Call ausgeführt wird
- * (default true). Auf false setzen, wenn die Frage nur lokal (z.B. im SkillGraph)
+ * (default true). Auf false setzen, wenn die Frage nur lokal (z.B. im Kompetenzgraph)
  * verwaltet wird und im Backend nicht existiert.
  */
 const openDialog = (editQuestion?: Question, options?: { persist?: boolean }) => {

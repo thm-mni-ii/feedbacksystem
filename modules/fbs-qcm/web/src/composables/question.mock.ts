@@ -10,6 +10,8 @@ export interface QuestionMockItem {
   multipleColumn?: boolean
   answerColumns?: Array<{ id: number; name: string }>
   optionRows?: Array<{ id: number; text: string; correctAnswers: number[] }>
+  showBlanks?: boolean
+  textParts?: Array<{ order: number; text: string; isBlank: boolean; acceptedAlternatives?: string[] }>
   excludeFromAlgorithm?: boolean
   [key: string]: unknown
 }
