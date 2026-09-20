@@ -4,6 +4,7 @@ import de.thm.ii.fbs.fbs_identity_service.exception.InvalidCurrentPasswordExcept
 import de.thm.ii.fbs.fbs_identity_service.exception.PasswordMismatchException
 import de.thm.ii.fbs.fbs_identity_service.exception.UserNotFoundException
 import de.thm.ii.fbs.fbs_identity_service.exception.UsernameAlreadyExistsException
+import de.thm.ii.fbs.fbs_identity_service.model.user.AuthSource
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.UserEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
@@ -48,8 +49,8 @@ class UserServiceTest {
     }
 
     @Test
-    fun `findUserById returns active user`() {
-        val userEntity = testUserEntity(id = 42, username = "niklas")
+    fun `findUserById returns active user with derived properties`() {
+        val userEntity = testUserEntity(id = 42, username = "niklas", prename = "Niklas", surname = "Test", alias = "nik")
 
         whenever(userRepository.findByIdAndDeletedFalse(42)).thenReturn(userEntity)
 
@@ -57,6 +58,30 @@ class UserServiceTest {
 
         assertEquals(42, user?.id)
         assertEquals("niklas", user?.username)
+        assertEquals(AuthSource.INTERNAL, user?.source)
+        assertTrue(user?.hasPassword == true)
+        assertEquals("nik", user?.displayName)
+    }
+
+    @Test
+    fun `toModel calculates displayName fallback when alias is missing`() {
+        val userEntity = testUserEntity(id = 42, username = "jdoe", prename = "Jane", surname = "Doe", alias = null)
+
+        val model = userEntity.toModel()
+
+        assertEquals("Jane Doe", model.displayName)
+        assertEquals(AuthSource.INTERNAL, model.source)
+        assertTrue(model.hasPassword)
+    }
+
+    @Test
+    fun `toModel identifies SAML user when password is null`() {
+        val userEntity = testUserEntity(id = 42, username = "samlUser", password = null)
+
+        val model = userEntity.toModel()
+
+        assertEquals(AuthSource.SAML, model.source)
+        assertFalse(model.hasPassword)
     }
 
     @Test
@@ -101,6 +126,8 @@ class UserServiceTest {
         assertEquals(42, user.id)
         assertEquals("niklas", user.username)
         assertEquals(GlobalRole.ADMIN, user.globalRole)
+        assertEquals(AuthSource.INTERNAL, user.source)
+        assertTrue(user.hasPassword)
 
         val captor = argumentCaptor<UserEntity>()
         verify(userRepository).saveAndFlush(captor.capture())
@@ -166,6 +193,8 @@ class UserServiceTest {
         assertEquals(42, user.id)
         assertEquals("samlUser", user.username)
         assertEquals(GlobalRole.USER, user.globalRole)
+        assertEquals(AuthSource.SAML, user.source)
+        assertFalse(user.hasPassword)
 
         val captor = argumentCaptor<UserEntity>()
         verify(userRepository).saveAndFlush(captor.capture())
@@ -176,50 +205,35 @@ class UserServiceTest {
     }
 
     @Test
-    fun `createExternalUser with taken username throws UsernameAlreadyExistsException`() {
-        whenever(userRepository.existsByUsername("takenUsername")).thenReturn(true)
+    fun `updateUser successfully modifies user attributes`() {
+        val userEntity = testUserEntity(id = 42, prename = "OldPre", surname = "OldSur", email = "old@example.com")
+        whenever(userRepository.findByIdAndDeletedFalse(42)).thenReturn(userEntity)
+        whenever(userRepository.save(any<UserEntity>())).thenAnswer { invocation -> invocation.getArgument(0) }
 
-        val exception = assertThrows<UsernameAlreadyExistsException> {
-            userService.createExternalUser(
-                prename = "Niklas",
-                surname = "Test",
-                email = "niklas@example.com",
-                username = "takenUsername",
-                globalRole = GlobalRole.USER,
-                alias = "ne"
-            )
-        }
-
-        assertEquals(
-            "Username `takenUsername` already exists",
-            exception.message
+        val updated = userService.updateUser(
+            userId = 42,
+            prename = "NewPre",
+            surname = "NewSur",
+            email = "new@example.com",
+            alias = "newAlias"
         )
 
-        verify(userRepository).existsByUsername("takenUsername")
-        verify(userRepository, never()).saveAndFlush(any<UserEntity>())
+        assertEquals("NewPre", updated.prename)
+        assertEquals("NewSur", updated.surname)
+        assertEquals("new@example.com", updated.email)
+        assertEquals("newAlias", updated.alias)
+        assertEquals("newAlias", updated.displayName)
+
+        verify(userRepository).save(userEntity)
     }
 
     @Test
-    fun `createExternalUser maps database constraint violation to UsernameAlreadyExistsException`() {
-        whenever(userRepository.existsByUsername("takenUsername")).thenReturn(false)
-        whenever(userRepository.saveAndFlush(any<UserEntity>()))
-            .thenThrow(DataIntegrityViolationException("Duplicate username"))
+    fun `updateUser throws UserNotFoundException when user does not exist`() {
+        whenever(userRepository.findByIdAndDeletedFalse(99)).thenReturn(null)
 
-        val exception = assertThrows<UsernameAlreadyExistsException> {
-            userService.createExternalUser(
-                prename = "Niklas",
-                surname = "Test",
-                email = "niklas@example.com",
-                username = "takenUsername",
-                globalRole = GlobalRole.USER,
-                alias = "ne"
-            )
+        assertThrows<UserNotFoundException> {
+            userService.updateUser(99, "A", "B", "a@b.com", null)
         }
-
-        assertEquals("Username `takenUsername` already exists", exception.message)
-
-        verify(userRepository).existsByUsername("takenUsername")
-        verify(userRepository).saveAndFlush(any<UserEntity>())
     }
 
     @Test
@@ -483,7 +497,6 @@ class UserServiceTest {
 
     @Test
     fun `findUsers applies limit and offset`(){
-
         val user2 = testUserEntity(
             id = 2,
             username = "tom",

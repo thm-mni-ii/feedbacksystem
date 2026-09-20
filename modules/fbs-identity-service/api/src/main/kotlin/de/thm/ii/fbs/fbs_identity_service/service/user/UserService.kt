@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UserService (private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder, private val currentUserService: CurrentUserService) {
 
-
     fun getCurrentUser(): User? {
         return currentUserService.getCurrentUser()
     }
@@ -113,6 +112,29 @@ class UserService (private val userRepository: UserRepository, private val passw
         val savedUserEntity = saveUser(userEntity)
 
         return savedUserEntity
+    }
+
+    fun updateUser(
+        userId: Long,
+        prename: String,
+        surname: String,
+        email: String,
+        alias: String?
+    ): User {
+        val userEntity = userRepository.findByIdAndDeletedFalse(userId)
+            ?: throw UserNotFoundException(userId)
+
+        require(prename.isNotBlank()) { "Prename must not be blank" }
+        require(surname.isNotBlank()) { "Surname must not be blank" }
+        require(email.isNotBlank()) { "Email must not be blank" }
+
+        userEntity.prename = prename.trim()
+        userEntity.surname = surname.trim()
+        userEntity.email = email.trim()
+        userEntity.alias = alias?.trim()?.ifBlank { null }
+
+        val savedEntity = userRepository.save(userEntity)
+        return savedEntity.toModel()
     }
 
     private fun requireUsernameAvailable(username: String) {

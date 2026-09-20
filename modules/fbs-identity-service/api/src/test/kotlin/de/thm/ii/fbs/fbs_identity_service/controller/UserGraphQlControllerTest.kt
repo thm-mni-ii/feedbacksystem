@@ -5,6 +5,7 @@ import de.thm.ii.fbs.fbs_identity_service.exception.InvalidCurrentPasswordExcept
 import de.thm.ii.fbs.fbs_identity_service.exception.PasswordMismatchException
 import de.thm.ii.fbs.fbs_identity_service.exception.UserNotFoundException
 import de.thm.ii.fbs.fbs_identity_service.exception.UsernameAlreadyExistsException
+import de.thm.ii.fbs.fbs_identity_service.model.user.AuthSource
 import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.service.user.UserSearchResult
@@ -48,6 +49,9 @@ class UserGraphQlControllerTest {
             id
             username
             globalRole
+            source
+            hasPassword
+            displayName
           }
         }
         """.trimIndent()
@@ -64,6 +68,15 @@ class UserGraphQlControllerTest {
             .path("currentUser.globalRole")
             .entity(String::class.java)
             .isEqualTo("USER")
+            .path("currentUser.source")
+            .entity(String::class.java)
+            .isEqualTo("INTERNAL")
+            .path("currentUser.hasPassword")
+            .entity(Boolean::class.java)
+            .isEqualTo(true)
+            .path("currentUser.displayName")
+            .entity(String::class.java)
+            .isEqualTo("Niklas Test")
 
         verify(userService).getCurrentUser()
     }
@@ -94,6 +107,9 @@ class UserGraphQlControllerTest {
               id
               username
               globalRole
+              source
+              hasPassword
+              displayName
             }
           }
         }
@@ -225,6 +241,85 @@ class UserGraphQlControllerTest {
             globalRole = GlobalRole.ADMIN,
             alias = "ne"
         )
+    }
+
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `updateUser mutation updates user for admin`() {
+        whenever(
+            userService.updateUser(
+                userId = 42L,
+                prename = "Jane",
+                surname = "Doe",
+                email = "jane.doe@example.com",
+                alias = "jdoe"
+            )
+        ).thenReturn(
+            testUser(
+                id = 42,
+                username = "niklas",
+                globalRole = GlobalRole.ADMIN,
+                alias = "jdoe"
+            )
+        )
+
+        graphQlTester.document(
+            """
+        mutation {
+          updateUser(input: {
+            userId: 42,
+            prename: "Jane",
+            surname: "Doe",
+            email: "jane.doe@example.com",
+            alias: "jdoe"
+          }) {
+            id
+            username
+            alias
+          }
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .verify()
+            .path("updateUser.id")
+            .entity(String::class.java)
+            .isEqualTo("42")
+            .path("updateUser.alias")
+            .entity(String::class.java)
+            .isEqualTo("jdoe")
+
+        verify(userService).updateUser(42L, "Jane", "Doe", "jane.doe@example.com", "jdoe")
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `updateUser mutation is forbidden for normal user`() {
+        graphQlTester.document(
+            """
+        mutation {
+          updateUser(input: {
+            userId: 42,
+            prename: "Jane",
+            surname: "Doe",
+            email: "jane.doe@example.com",
+            alias: "jdoe"
+          }) {
+            id
+          }
+        }
+        """.trimIndent()
+        )
+            .execute()
+            .errors()
+            .satisfy { errors ->
+                assertEquals(1, errors.size)
+                assertEquals("Access denied", errors.first().message)
+                assertEquals(ErrorType.FORBIDDEN, errors.first().errorType)
+            }
+
+        verify(userService, never()).updateUser(any(), any(), any(), any(), any())
     }
 
     @Test
@@ -596,14 +691,17 @@ class UserGraphQlControllerTest {
         username: String = "niklas",
         globalRole: GlobalRole = GlobalRole.USER,
         alias: String? = null
-        ) = User(
+    ) = User(
         id = id,
         prename = "Niklas",
         surname = "Test",
         email = "niklas@example.com",
         username = username,
         globalRole = globalRole,
-        alias = alias
+        alias = alias,
+        source = AuthSource.INTERNAL,
+        hasPassword = true,
+        displayName = if (alias != null) alias else "Niklas Test"
     )
 }
 

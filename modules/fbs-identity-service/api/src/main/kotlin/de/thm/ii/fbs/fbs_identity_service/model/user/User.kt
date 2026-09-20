@@ -7,5 +7,8 @@ data class User(
     val email: String,
     val username: String,
     var globalRole: GlobalRole,
-    val alias: String? = null
+    val alias: String? = null,
+    val source: AuthSource = AuthSource.INTERNAL,
+    val hasPassword: Boolean = true,
+    val displayName: String = ""
 )

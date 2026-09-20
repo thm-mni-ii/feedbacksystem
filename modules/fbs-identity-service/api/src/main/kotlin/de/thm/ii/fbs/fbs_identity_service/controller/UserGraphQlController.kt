@@ -5,6 +5,7 @@ import de.thm.ii.fbs.fbs_identity_service.dto.user.ChangeUserPasswordInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.CreateUserInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.PaginationInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.UpdateGlobalRoleInput
+import de.thm.ii.fbs.fbs_identity_service.dto.user.UpdateUserInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.UserFilterInput
 import de.thm.ii.fbs.fbs_identity_service.dto.user.UserPage
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
@@ -46,7 +47,7 @@ class UserGraphQlController(
         )
 
         return UserPage(
-            items = result.items ,
+            items = result.items,
             totalCount = result.totalCount
         )
     }
@@ -61,6 +62,18 @@ class UserGraphQlController(
             username = input.username,
             password = input.password,
             globalRole = input.globalRole,
+            alias = input.alias
+        )
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @MutationMapping
+    fun updateUser(@Argument @Valid input: UpdateUserInput): User {
+        return userService.updateUser(
+            userId = input.userId,
+            prename = input.prename,
+            surname = input.surname,
+            email = input.email,
             alias = input.alias
         )
     }

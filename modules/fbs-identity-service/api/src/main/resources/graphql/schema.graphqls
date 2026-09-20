@@ -12,6 +12,14 @@ type User {
     username: String!
     globalRole: GlobalRole!
     alias: String
+    source: AuthSource!
+    hasPassword: Boolean!
+    displayName: String!
+}
+
+enum AuthSource {
+    INTERNAL
+    SAML
 }
 
 input UserFilterInput {
@@ -37,6 +45,7 @@ enum GlobalRole {
 
 type Mutation {
     createUser(input: CreateUserInput!): User!
+    updateUser(input: UpdateUserInput!): User!
     changeOwnPassword(input: ChangeOwnPasswordInput!): Boolean!
     changeUserPassword(input: ChangeUserPasswordInput!): Boolean!
     updateGlobalRole(input: UpdateGlobalRoleInput!): User
@@ -50,6 +59,14 @@ input CreateUserInput {
     username: String!
     password: String!
     globalRole: GlobalRole
+    alias: String
+}
+
+input UpdateUserInput {
+    userId: ID!
+    prename: String!
+    surname: String!
+    email: String!
     alias: String
 }
 

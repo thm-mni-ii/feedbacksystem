@@ -87,7 +87,8 @@ class SecurityConfig(
                         "/oauth2/token",
                         "/oauth2/jwks",
                         "/saml2/**",
-                        "/login/saml2/**"
+                        "/login/saml2/**",
+                        "/api/v2/**"
                     )
             }
             .authorizeHttpRequests {
@@ -115,6 +116,7 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/oidc-login").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/impressum").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/legal/privacy-text").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v2/application-providers").permitAll()
                     .requestMatchers("/saml2/**").permitAll()
                     .requestMatchers("/login/saml2/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/graphql").authenticated()
