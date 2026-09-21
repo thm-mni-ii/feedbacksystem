@@ -1,0 +1,23 @@
+<div class="container">
+  <div matDialogTitle>Temporäre Datenbank URI</div>
+  <mat-dialog-content style="max-height: 100%; overflow: hidden">
+    <mat-card-content class="content">
+      <mat-label>
+        <h3>{{ data.message }}</h3>
+      </mat-label>
+      <div class="uri">
+        <mat-label
+          ><i>{{ data.uri }}</i></mat-label
+        >
+        <button mat-icon-button (click)="copyURI()" matTooltip="URI kopieren">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-dialog-content>
+  <mat-dialog-actions class="actions">
+    <button mat-flat-button color="warn" (click)="closeDialog()">
+      Abbrechen
+    </button>
+  </mat-dialog-actions>
+</div>

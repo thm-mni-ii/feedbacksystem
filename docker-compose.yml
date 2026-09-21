@@ -388,6 +388,33 @@ services:
     depends_on:
       - qcm-backend
 
+  sql-playground-web:
+    build:
+      context: modules/sql-playground/web
+    ports:
+      - "3001:80"
+    environment:
+      - FBS_CORE_URL=https://core:443
+    networks:
+      - fbs
+    depends_on:
+      - core
+
+  web-shell:
+    build:
+      context: modules/fbs-web-shell
+    ports:
+      - "8083:80"
+    environment:
+      - VITE_OIDC_AUTHORITY=http://localhost:8080
+      - VITE_OIDC_CLIENT_ID=fbs-web-shell
+      - VITE_CORE_API_URL=https://localhost:443
+    networks:
+      - fbs
+    depends_on:
+      - identity-service
+      - core
+
 networks:
   classroom:
   fbs:
