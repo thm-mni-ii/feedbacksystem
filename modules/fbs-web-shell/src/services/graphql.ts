@@ -17,6 +17,11 @@ export function setGraphQlTokenGetter(getter: () => string | null) {
   tokenGetter = getter
 }
 
+interface GraphQlResponse<T> {
+  data: T
+  errors?: Array<{ message: string }>
+}
+
 async function graphqlRequest<T>(query: string, variables: Record<string, any> = {}): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json'
@@ -29,7 +34,7 @@ async function graphqlRequest<T>(query: string, variables: Record<string, any> =
     }
   }
 
-  const response = await axios.post(
+  const response = await axios.post<GraphQlResponse<T>>(
     '/graphql',
     {
       query,
@@ -38,7 +43,7 @@ async function graphqlRequest<T>(query: string, variables: Record<string, any> =
     { headers }
   )
 
-  if (response.data.errors && response.data.errors.length > 0) {
+  if (response.data?.errors && response.data.errors.length > 0) {
     const firstError = response.data.errors[0]
     throw new Error(firstError.message || 'GraphQL Error')
   }

@@ -1,4 +1,12 @@
 {
+  "name": "feedbacksystem",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:all": "bash scripts/run-all-tests.sh"
+  },
   "dependencies": {
     "axios": "^1.7.7",
     "cors": "^2.8.5",
@@ -8,8 +16,10 @@
     "jwt-decode": "^4.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/axios": "^0.9.36",
     "@types/cors": "^2.8.17",
+    "@types/node": "^22.13.10",
     "typescript": "^5.8.3"
   }
 }

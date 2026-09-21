@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -31,6 +32,16 @@ export default defineConfig({
       '/.well-known': {
         target: 'http://localhost:8080',
         changeOrigin: true
+      }
+    }
+  },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    setupFiles: ['./tests/setup.ts'],
+    server: {
+      deps: {
+        inline: ['vuetify']
       }
     }
   }

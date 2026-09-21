@@ -14,10 +14,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3.8.1
-        if: ${{ inputs.setupNode }}
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16.13.1"
+          node-version: "20"
       - name: Add Problem Matcher
         run: echo "::add-matcher::.github/problem-matchers/validate-api-docs.json"
       - run: bash ./scripts/ci/validate-api-docs/validate-api-docs.sh
@@ -30,6 +29,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v3
+
   validate-migration:
     name: fbs-core.api / DB Migration Validation
     runs-on: ubuntu-latest
@@ -38,20 +38,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check Migration files
         run: bash ./scripts/ci/validate-migrations.sh modules/fbs-core/api/src/main/resources/migrations
-
-  fbs-core-api:
-    name: fbs-core.api
-    uses: ./.github/workflows/check-fbs-module.yml
-    needs: [ "validate-gradle-wrapper", "validate-migration" ]
-    with:
-      name: fbs-core.api
-      lintArguments: :fbs-core.api:scalastyleCheck :fbs-core.api:ktlintCheck :fbs-core.math-parser:ktlintCheck
-      testArguments: :fbs-core.api:test :fbs-core.math-parser:test
-      coverageArguments: :fbs-core.api:jacocoReport :fbs-core.math-parser:jacocoReport
-      coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml,modules/fbs-core/math-parser/build/reports/jacoco/jacocoReport/jacocoReport.xml
-      startMysqlService: true
-      startMinioService: true
-      problemMatcher: java.json,kotlin.json
 
   fbs-identity-service:
     name: fbs-identity-service
@@ -72,10 +58,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: "17"
-          distribution: "adopt"
+          distribution: "temurin"
 
       - name: Wait for MySQL
         run: |
@@ -95,6 +81,70 @@ jobs:
       - name: Stop MySQL service container
         if: always()
         run: docker stop identity-mysql || true
+
+  fbs-web-shell:
+    name: fbs-web-shell (Vue 3 / Vitest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: 'modules/fbs-web-shell/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: modules/fbs-web-shell
+        run: npm ci
+
+      - name: Type Check
+        working-directory: modules/fbs-web-shell
+        run: npm run type-check
+
+      - name: Run Vitest Suite
+        working-directory: modules/fbs-web-shell
+        run: npm test
+
+      - name: Build Web Shell
+        working-directory: modules/fbs-web-shell
+        run: npm run build-only
+
+  sql-playground:
+    name: sql-playground (Angular)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: 'modules/sql-playground/web/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: modules/sql-playground/web
+        run: npm ci --legacy-peer-deps
+
+      - name: Build SQL Playground
+        working-directory: modules/sql-playground/web
+        run: npm run build
+
+  fbs-core-api:
+    name: fbs-core.api
+    uses: ./.github/workflows/check-fbs-module.yml
+    needs: [ "validate-gradle-wrapper", "validate-migration" ]
+    with:
+      name: fbs-core.api
+      lintArguments: :fbs-core.api:scalastyleCheck :fbs-core.api:ktlintCheck :fbs-core.math-parser:ktlintCheck
+      testArguments: :fbs-core.api:test :fbs-core.math-parser:test
+      coverageArguments: :fbs-core.api:jacocoReport :fbs-core.math-parser:jacocoReport
+      coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml,modules/fbs-core/math-parser/build/reports/jacoco/jacocoReport/jacocoReport.xml
+      startMysqlService: true
+      startMinioService: true
+      problemMatcher: java.json,kotlin.json
 
   fbs-core-web:
     name: fbs-core.web
@@ -140,3 +190,48 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Docker images
         run: docker compose build
+
+  e2e-playwright:
+    name: Playwright E2E Test Suite
+    runs-on: ubuntu-latest
+    needs: [ "fbs-web-shell", "fbs-identity-service", "sql-playground" ]
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start services with Docker Compose
+        run: |
+          docker compose up -d --build mysql1 identity-service core course-management-web sql-playground-web web-shell
+          echo "Waiting for services to become healthy..."
+          timeout 120 bash -c 'until docker compose ps | grep -v "Exit"; do sleep 3; done' || true
+
+      - name: Run Playwright E2E Tests
+        env:
+          E2E_BASE_URL: http://localhost:8083
+          IDP_URL: http://localhost:8080
+        run: npm run test:e2e
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Teardown Docker Compose
+        if: always()
+        run: docker compose down -v || true

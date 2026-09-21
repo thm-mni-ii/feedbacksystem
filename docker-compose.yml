@@ -35,15 +35,21 @@ services:
       dockerfile: modules/fbs-core/api/Dockerfile
     restart: unless-stopped
     depends_on:
-      - identity-service
-      - mysql1
-      - runner
-      - mongodb
-      - minio
-      - mongodb-playground
+      identity-service:
+        condition: service_healthy
+      mysql1:
+        condition: service_healthy
+      runner:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      mongodb-playground:
+        condition: service_healthy
     ports:
       - "127.0.0.1:443:443"
-      - "127.0.0.1:80:80"
+      - "127.0.0.1:8081:443"
     volumes:
       - ./data/upload-dir:/upload-dir
       - ./conf/fbs-core.api:/usr/local/fbs-core.api/conf
@@ -72,8 +78,30 @@ services:
     networks:
       classroom:
       fbs:
+        aliases:
+          - course-management-api
     healthcheck:
       test: curl -k https://localhost:443/actuator/health
+      timeout: 10s
+      interval: 10s
+      start_period: 15s
+      retries: 3
+
+  course-management-web:
+    build:
+      context: modules/fbs-core/web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8082:80"
+    environment:
+      - FBS_CORE_URL=https://core:443
+    networks:
+      fbs:
+    depends_on:
+      core:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
       timeout: 10s
       interval: 10s
       start_period: 10s
@@ -97,7 +125,7 @@ services:
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - APP_SAML_ENABLED=false
       - OIDC_ISSUER=http://localhost:8080
-      - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback,https://localhost/oauth2/callback,http://127.0.0.1:4200/oauth2/callback,http://localhost:4200/oauth2/callback
+      - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback,https://localhost/oauth2/callback,http://127.0.0.1:4200/oauth2/callback,http://localhost:4200/oauth2/callback,http://localhost:8083/oauth2/callback,http://127.0.0.1:8083/oauth2/callback
       - OIDC_SIGNING_KEY_LOCATION=/run/secrets/identity-signing-key.p12
       - OIDC_SIGNING_KEY_STORE_PASSWORD=changeit
       - OIDC_SIGNING_KEY_ALIAS=identity-signing
@@ -134,8 +162,6 @@ services:
     environment:
       POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PGDATA: /var/lib/postgresql/data/pgdata
-    #ports:
-    #  - 5432:5432
     volumes:
       - ./data/postgres2:/var/lib/postgresql/data
     networks:
@@ -188,8 +214,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/mongodb:/data/db
-    #ports:
-    #  - "127.0.0.1:27117:27017"
     networks:
       fbs:
     healthcheck:
@@ -204,8 +228,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/mongodb-playground:/data/db
-    #ports:
-    #  - "127.0.0.1:27018:27017"
     networks:
       fbs:
     healthcheck:
@@ -221,8 +243,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/mongodb_qcm/:/data/qcm_db
-    #ports:
-    #  - "127.0.0.1:27018:27017"
     networks:
       fbs:
 
@@ -253,14 +273,17 @@ services:
       dockerfile: modules/fbs-runner/checker/Dockerfile
     restart: always
     depends_on:
-      - mysql-checker
-      - psql-checker
-      - psql-sharing
+      mysql-checker:
+        condition: service_healthy
+      psql-checker:
+        condition: service_healthy
+      psql-sharing:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8081:8081"
     environment:
       BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
-      HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
+      HOST_TMP_DIR: /tmp/feebi
       INSIDE_DOCKER: "true"
       RESULT_SERVER_HOST: core
       RESULT_SERVER_PORT: 443
@@ -279,11 +302,13 @@ services:
       SQL_PLAYGROUND_SHARE_PSQL_SERVER_USERNAME: postgres
       RUNNER_DOCKER_DISABLE_REMOVE: "true"
     volumes:
-      - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
+      - /tmp/feebi:/dockertemp
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/upload-dir:/upload-dir
     networks:
       fbs:
+        aliases:
+          - sql-playground-api
     healthcheck:
       test: curl -k https://localhost:8081
       timeout: 10s
@@ -313,11 +338,12 @@ services:
       context: modules/fbs-eat/eat
     restart: always
     ports:
-      - 5001:8050
+      - "5001:8050"
     networks:
       - fbs
     depends_on:
-      - identity-service
+      identity-service:
+        condition: service_healthy
     environment:
       - JWT_SECRET=8Dsupersecurekeydf0
       - OIDC_ISSUER=http://localhost:8080
@@ -334,11 +360,12 @@ services:
       context: modules/fbs-collab
     restart: always
     ports:
-      - 1234:1234
+      - "1234:1234"
     networks:
       - fbs
     depends_on:
-      - identity-service
+      identity-service:
+        condition: service_healthy
     environment:
       - FBS_ROOT_URL=https://core:443
       - OIDC_ISSUER=http://localhost:8080
@@ -361,7 +388,7 @@ services:
       context: modules/fbs-qcm/api/backend
       target: production
     ports:
-      - 3000:3000
+      - "3000:3000"
     networks:
       - fbs
     environment:
@@ -371,8 +398,10 @@ services:
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
       - FBS_BASE_URL=https://core:443
     depends_on:
-      - identity-service
-      - mongodb_qcm
+      identity-service:
+        condition: service_healthy
+      mongodb_qcm:
+        condition: service_started
 
   qcm-frontend:
     build:
@@ -382,7 +411,7 @@ services:
       - BACKEND_URL=http://qcm-backend:3000/
       - CORE_URL=https://core/
     ports:
-      - 8086:8086
+      - "8086:8086"
     networks:
       - fbs
     depends_on:
@@ -398,12 +427,20 @@ services:
     networks:
       - fbs
     depends_on:
-      - core
+      core:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
 
   web-shell:
     build:
       context: modules/fbs-web-shell
     ports:
+      - "80:80"
       - "8083:80"
     environment:
       - VITE_OIDC_AUTHORITY=http://localhost:8080
@@ -412,8 +449,16 @@ services:
     networks:
       - fbs
     depends_on:
-      - identity-service
-      - core
+      identity-service:
+        condition: service_healthy
+      core:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
 
 networks:
   classroom:

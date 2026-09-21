@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from 'axios'
+import axios from 'axios'
 import type {
   ApplicationProvider,
   CreateApplicationProviderInput,
@@ -11,11 +11,11 @@ export function setAuthTokenGetter(getter: () => string | null) {
   tokenGetter = getter
 }
 
-const apiClient: AxiosInstance = axios.create({
+const apiClient = axios.create({
   baseURL: ''
 })
 
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use((config: any) => {
   if (tokenGetter) {
     const token = tokenGetter()
     if (token) {
