@@ -47,8 +47,14 @@ export class DbSchemeCollectionsComponent implements OnInit, OnChanges {
   }
 
   loadData(): void {
-    this.dbName = localStorage.getItem("playground-mongo-db")!;
+    const rawDb = localStorage.getItem("playground-mongo-db") || this.dbName || "";
+    this.dbName = rawDb;
     this.userId = this.auth.getToken()?.id ?? 0;
+
+    if (!this.userId || !this.dbName) {
+      this.collections = [];
+      return;
+    }
 
     const userId = this.userId;
     const prefix = `mongo_playground_student_${this.userId}_`;
@@ -56,17 +62,24 @@ export class DbSchemeCollectionsComponent implements OnInit, OnChanges {
       ? this.dbName.split(prefix)[1]
       : this.dbName;
 
+    if (!dbSuffix) {
+      this.collections = [];
+      return;
+    }
+
     setTimeout(() => {
       this.mongoService
         .getMongoCollections(userId, dbSuffix)
         .subscribe((cols) => {
-          this.collections = cols.map((col) => ({ name: col, count: 0 }));
+          this.collections = (cols || []).map((col) => ({ name: col, count: 0 }));
 
-          cols.forEach((col, idx) => {
+          (cols || []).forEach((col, idx) => {
             this.mongoService
               .getCollectionCount(userId, dbSuffix, col)
               .subscribe((count) => {
-                this.collections[idx].count = count;
+                if (this.collections[idx]) {
+                  this.collections[idx].count = count;
+                }
               });
           });
         });

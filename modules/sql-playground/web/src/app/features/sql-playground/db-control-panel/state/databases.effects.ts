@@ -42,12 +42,16 @@ export class DatabasesEffects {
     this.actions$.pipe(
       ofType(loadDatabases),
       switchMap((action) => {
-        const userId = this.authService.getToken().id;
+        const token = this.authService.getToken();
+        if (!token) {
+          return of(loadDatabasesFailure({ error: "No token available" }));
+        }
+        const userId = token.id;
 
         if (action.dbType === "postgres") {
           return this.sqlPlaygroundService.getDatabases(userId).pipe(
             switchMap((databases) => {
-              if (databases.length == 0) {
+              if (databases.length === 0) {
                 // create default database if none exists
                 return of(
                   createDatabase({
@@ -56,14 +60,32 @@ export class DatabasesEffects {
                   })
                 );
               } else {
+                const storedDbId = localStorage.getItem("playground-postgres-db");
+                const parsedStoredId = storedDbId ? parseInt(storedDbId, 10) : null;
+                const matchingStored = parsedStoredId !== null
+                  ? databases.find((db) => db.id === parsedStoredId)
+                  : null;
+
                 const activeId =
+                  matchingStored?.id ??
                   databases.find(({ active }) => active)?.id ??
                   databases[0]?.id;
-                return of(
-                  loadDatabasesSuccess({ databases }),
+
+                const updatedDatabases = databases.map((db) => ({
+                  ...db,
+                  active: db.id === activeId,
+                }));
+
+                if (activeId !== undefined) {
+                  localStorage.setItem("playground-postgres-db", activeId.toString());
+                }
+
+                return [
+                  loadDatabasesSuccess({ databases: updatedDatabases }),
+                  activateDatabaseSuccess({ id: activeId }),
                   changeActiveDbId({ dbId: activeId as number }),
-                  updateScheme()
-                );
+                  updateScheme(),
+                ];
               }
             }),
             catchError((error) => of(loadDatabasesFailure({ error })))
@@ -83,9 +105,11 @@ export class DatabasesEffects {
               const storedDbId = localStorage.getItem("playground-mongo-db");
               if (storedDbId && databases.length > 0) {
                 const fullDbId = `mongo_playground_student_${userId}_${storedDbId}`;
-                const dbIndex = databases.findIndex((db) => db.id === fullDbId);
+                const dbIndex = databases.findIndex((db) => db.id === fullDbId || db.id === storedDbId);
                 if (dbIndex >= 0) {
                   databases[dbIndex].active = true;
+                } else {
+                  databases[0].active = true;
                 }
               } else if (databases.length > 0) {
                 databases[0].active = true;
@@ -106,17 +130,28 @@ export class DatabasesEffects {
     this.actions$.pipe(
       ofType(createDatabase),
       mergeMap((action) => {
-        const userId = this.authService.getToken().id;
+        const token = this.authService.getToken();
+        if (!token) {
+          return of(createDatabaseFailure({ error: "No token available" }));
+        }
+        const userId = token.id;
 
         if (action.dbType === "postgres") {
           return this.sqlPlaygroundService
             .createDatabase(userId, action.name)
             .pipe(
-              map((database) => {
+              switchMap((database) => {
                 this.snackbar.open("Datenbank erfolgreich erstellt", "Ok", {
                   duration: 3000,
                 });
-                return createDatabaseSuccess({ database });
+                const dbWithActive = { ...database, active: true };
+                localStorage.setItem("playground-postgres-db", database.id.toString());
+                return [
+                  createDatabaseSuccess({ database: dbWithActive }),
+                  activateDatabaseSuccess({ id: database.id }),
+                  changeActiveDbId({ dbId: database.id as number }),
+                  updateScheme(),
+                ];
               }),
               catchError((error) => of(createDatabaseFailure({ error })))
             );
@@ -124,7 +159,7 @@ export class DatabasesEffects {
           return this.mongoPlaygroundService
             .createMongoDatabase(userId, action.name)
             .pipe(
-              map(() => {
+              switchMap(() => {
                 this.snackbar.open("MongoDB erfolgreich erstellt", "Ok", {
                   duration: 3000,
                 });
@@ -134,10 +169,14 @@ export class DatabasesEffects {
                   name: fullDbId,
                   version: "",
                   dbType: "MONGO",
-                  active: false,
+                  active: true,
                 };
                 localStorage.setItem("playground-mongo-db", action.name);
-                return createDatabaseSuccess({ database });
+                localStorage.setItem("playground-mongo-db-full", fullDbId);
+                return [
+                  createDatabaseSuccess({ database }),
+                  activateDatabaseSuccess({ id: fullDbId }),
+                ];
               }),
               catchError((error) => of(createDatabaseFailure({ error })))
             );
@@ -152,7 +191,14 @@ export class DatabasesEffects {
     this.actions$.pipe(
       ofType(deleteDatabase),
       mergeMap((action) => {
-        const userId = this.authService.getToken().id;
+        const token = this.authService.getToken();
+        if (!token || !token.id) {
+          return of(deleteDatabaseFailure({ error: "No token available" }));
+        }
+        if (!action.id) {
+          return of(deleteDatabaseFailure({ error: "No database ID provided" }));
+        }
+        const userId = token.id;
 
         if (action.dbType === "postgres") {
           return this.sqlPlaygroundService
@@ -195,7 +241,14 @@ export class DatabasesEffects {
     this.actions$.pipe(
       ofType(activateDatabase),
       mergeMap((action) => {
-        const userId = this.authService.getToken().id;
+        const token = this.authService.getToken();
+        if (!token || !token.id) {
+          return of(activateDatabaseFailure({ error: "No token available" }));
+        }
+        if (!action.id) {
+          return of(activateDatabaseFailure({ error: "No database ID provided" }));
+        }
+        const userId = token.id;
 
         if (action.dbType === "postgres") {
           return this.sqlPlaygroundService
@@ -205,6 +258,7 @@ export class DatabasesEffects {
                 this.snackbar.open("Datenbank erfolgreich aktiviert", "Ok", {
                   duration: 3000,
                 });
+                localStorage.setItem("playground-postgres-db", action.id.toString());
                 return [
                   activateDatabaseSuccess({ id: action.id }),
                   changeActiveDbId({ dbId: action.id as number }),
@@ -220,6 +274,7 @@ export class DatabasesEffects {
             ""
           );
           localStorage.setItem("playground-mongo-db", shortName);
+          localStorage.setItem("playground-mongo-db-full", action.id.toString());
           this.snackbar.open("MongoDB erfolgreich aktiviert", "Ok", {
             duration: 3000,
           });
@@ -235,7 +290,14 @@ export class DatabasesEffects {
     this.actions$.pipe(
       ofType(resetMongoDatabase),
       mergeMap((action) => {
-        const userId = this.authService.getToken().id;
+        const token = this.authService.getToken();
+        if (!token || !token.id) {
+          return of(resetMongoDatabaseFailure({ error: "No token available" }));
+        }
+        if (!action.id) {
+          return of(resetMongoDatabaseFailure({ error: "No database ID provided" }));
+        }
+        const userId = token.id;
         const shortName = action.id.replace(
           /^mongo_playground_student_\d+_/,
           ""

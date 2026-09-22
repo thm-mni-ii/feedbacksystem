@@ -6,6 +6,7 @@ import type { ApplicationProvider } from '@/types/app'
 export const useAppsStore = defineStore('apps', () => {
   const apps = ref<ApplicationProvider[]>([])
   const activeAppId = ref<string | null>(null)
+  const customTitle = ref<string | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -41,15 +42,21 @@ export const useAppsStore = defineStore('apps', () => {
     activeAppId.value = id
   }
 
+  function setCustomTitle(title: string | null) {
+    customTitle.value = title
+  }
+
   return {
     apps,
     activeAppId,
+    customTitle,
     loading,
     error,
     navbarApps,
     defaultApp,
     activeApp,
     fetchVisibleApps,
-    setActiveApp
+    setActiveApp,
+    setCustomTitle
   }
 })

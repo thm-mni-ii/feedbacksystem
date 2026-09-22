@@ -50,6 +50,7 @@ security:
     client:
       id: ${OIDC_CLIENT_ID:fbs-test-client}
       redirect-uri: ${OIDC_CLIENT_REDIRECT_URI:http://127.0.0.1:4200/oauth2/callback}
+      post-logout-redirect-uri: ${OIDC_CLIENT_POST_LOGOUT_REDIRECT_URI:http://localhost/,https://localhost/,http://127.0.0.1:4200/,http://localhost:4200/,http://localhost:8083/,http://127.0.0.1:8083/}
       access-token-ttl-minutes: ${OIDC_ACCESS_TOKEN_TTL_MINUTES:10}
       authorization-code-ttl-minutes: ${OIDC_AUTH_CODE_TTL_MINUTES:5}
     signing-key:

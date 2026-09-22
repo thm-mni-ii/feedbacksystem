@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import { Course } from "../model/Course";
 import { HttpClient } from "@angular/common/http";
 import { Participant } from "../model/Participant";
@@ -15,6 +15,7 @@ export class CourseRegistrationService {
    * @return All registered courses
    */
   getRegisteredCourses(uid: number): Observable<Course[]> {
+    if (!uid) return throwError(() => new Error("Invalid uid"));
     return this.http.get<Course[]>(`/api/v1/users/${uid}/courses`);
   }
 
@@ -23,6 +24,7 @@ export class CourseRegistrationService {
    * @return All participants of the course
    */
   getCourseParticipants(cid: number): Observable<Participant[]> {
+    if (!cid) return throwError(() => new Error("Invalid cid"));
     return this.http.get<Participant[]>(`/api/v1/courses/${cid}/participants`);
   }
 
@@ -38,6 +40,7 @@ export class CourseRegistrationService {
     cid: number,
     roleName: string = "STUDENT"
   ): Observable<void> {
+    if (!uid || !cid) return throwError(() => new Error("Invalid uid or cid"));
     return this.http.put<void>(`/api/v1/users/${uid}/courses/${cid}`, {
       roleName: roleName,
     });
@@ -49,6 +52,7 @@ export class CourseRegistrationService {
    * @param cid Course id
    */
   deregisterCourse(uid: number, cid: number): Observable<void> {
+    if (!uid || !cid) return throwError(() => new Error("Invalid uid or cid"));
     return this.http.delete<void>(`/api/v1/users/${uid}/courses/${cid}`);
   }
 
@@ -58,6 +62,7 @@ export class CourseRegistrationService {
    * @param cid Course id
    */
   deregisterRole(cid: number, roleName: string): Observable<void> {
+    if (!cid || !roleName) return throwError(() => new Error("Invalid cid or roleName"));
     return this.http.put<void>(`/api/v1/courses/${cid}/deregisterrole`, {
       roleName,
     });
@@ -68,6 +73,7 @@ export class CourseRegistrationService {
    * @param cid Course id
    */
   deregisterAll(cid: number): Observable<void> {
+    if (!cid) return throwError(() => new Error("Invalid cid"));
     return this.http.get<void>(`/api/v1/courses/${cid}/deregisterall`);
   }
 }

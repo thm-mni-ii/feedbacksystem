@@ -8,6 +8,23 @@
   color: #405e9a;
 }
 
+:host-context(.dark-theme) .highlight {
+  color: #aab6fe;
+}
+
+.mongo-warning {
+  margin-bottom: 16px;
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+  color: #664d03;
+}
+
+:host-context(.dark-theme) .mongo-warning {
+  background-color: #332b00;
+  border-left: 4px solid #ffc107;
+  color: #ffe082;
+}
+
 mat-form-field {
   width: 100%;
 }

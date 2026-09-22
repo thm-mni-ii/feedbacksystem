@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { EventEmitter, Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import { saveAs } from "file-saver";
 import { SubTaskResult } from "../model/SubTaskResult";
 import { Submission } from "../model/Submission";
@@ -24,7 +24,7 @@ export class SubmissionService {
    * @return Observable that succeeds with all submission of a user for a task
    */
   getAllSubmissions(uid: number, cid: number, tid: number): Observable<any> {
-    // TODO: do we need passed filter?
+    if (!uid || !cid || !tid) return throwError(() => new Error("Invalid uid, cid, or tid"));
     return this.http.get<any>(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`
     );
@@ -45,6 +45,7 @@ export class SubmissionService {
     sid: number,
     checkerOrders?: Array<number | string>
   ): Observable<void> {
+    if (!uid || !cid || !tid || !sid) return throwError(() => new Error("Invalid parameters for restartSubmission"));
     let params = new HttpParams();
     checkerOrders?.forEach(
       (order) => (params = params.append("checkerOrders", order.toString()))
@@ -70,6 +71,7 @@ export class SubmissionService {
     tid: number,
     sid: number
   ): Observable<Submission> {
+    if (!uid || !cid || !tid || !sid) return throwError(() => new Error("Invalid parameters for getSubmission"));
     return this.http.get<Submission>(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`
     );
@@ -84,6 +86,7 @@ export class SubmissionService {
     additionalInformation?: Record<string, any>,
     checkerOrders?: Array<number | string>
   ): Observable<Submission> {
+    if (!uid || !cid || !tid) return throwError(() => new Error("Invalid parameters for submitSolution"));
     const formData: FormData = new FormData();
     let formSolution;
     if (typeof solution === "object") {
@@ -120,6 +123,7 @@ export class SubmissionService {
     tid: number,
     sid: number
   ): Observable<SubTaskResult[]> {
+    if (!uid || !cid || !tid || !sid) return throwError(() => new Error("Invalid parameters for getSubTaskResults"));
     return this.http.get<SubTaskResult[]>(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/subresults`
     );
@@ -140,6 +144,7 @@ export class SubmissionService {
     tid: number,
     sid: number
   ): Observable<any> {
+    if (!uid || !cid || !tid || !sid) return throwError(() => new Error("Invalid parameters for getTaskSubmissionsContent"));
     return this.http.get(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/content`,
       { responseType: "text" }
@@ -155,6 +160,7 @@ export class SubmissionService {
   }
 
   downloadSubmission(uid: number, cid: number, tid: number, sid: number) {
+    if (!uid || !cid || !tid || !sid) return;
     return this.http
       .get(
         `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/content`,

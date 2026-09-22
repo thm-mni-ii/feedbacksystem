@@ -9,7 +9,10 @@ data class IdentityUserPrincipal(
     private val username: String,
     private val password: String,
     val globalRole: GlobalRole,
-    private val authorities: Collection<GrantedAuthority>
+    private val authorities: Collection<GrantedAuthority>,
+    val prename: String = "",
+    val surname: String = "",
+    val email: String? = null
 ) : UserDetails {
 
     override fun getUsername(): String = username

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { Participant } from "../model/Participant";
 import { Group } from "../model/Group";
@@ -15,6 +15,7 @@ export class GroupRegistrationService {
    * @return All registered groups
    */
   getRegisteredGroups(uid: number): Observable<Group[]> {
+    if (!uid) return throwError(() => new Error("Invalid uid"));
     return this.http.get<Group[]>(`/api/v1/users/${uid}/groups`);
   }
 
@@ -24,6 +25,7 @@ export class GroupRegistrationService {
    * @return All participants of the group
    */
   getGroupParticipants(cid: number, gid: number): Observable<Participant[]> {
+    if (!cid || !gid) return throwError(() => new Error("Invalid cid or gid"));
     return this.http.get<Participant[]>(
       `/api/v1/courses/${cid}/groups/${gid}/participants`
     );
@@ -37,6 +39,7 @@ export class GroupRegistrationService {
    * @return Observable that succeeds on successful registration
    */
   registerGroup(cid: number, gid: number, uid: number): Observable<void> {
+    if (!cid || !gid || !uid) return throwError(() => new Error("Invalid cid, gid or uid"));
     return this.http.put<void>(
       `/api/v1/courses/${cid}/groups/${gid}/users/${uid}`,
       {}
@@ -50,6 +53,7 @@ export class GroupRegistrationService {
    * @param uid User id
    */
   deregisterGroup(cid: number, gid: number, uid: number): Observable<void> {
+    if (!cid || !gid || !uid) return throwError(() => new Error("Invalid cid, gid or uid"));
     return this.http.delete<void>(
       `/api/v1/courses/${cid}/groups/${gid}/users/${uid}`
     );
@@ -61,6 +65,7 @@ export class GroupRegistrationService {
    * @param gid Group id
    */
   deregisterAll(cid: number, gid: number): Observable<void> {
+    if (!cid || !gid) return throwError(() => new Error("Invalid cid or gid"));
     return this.http.delete<void>(`/api/v1/courses/${cid}/groups/${gid}/users`);
   }
 
@@ -71,6 +76,7 @@ export class GroupRegistrationService {
    *  @return Number of members
    */
   getGroupMembership(cid: number, gid: number): Observable<number> {
+    if (!cid || !gid) return throwError(() => new Error("Invalid cid or gid"));
     return this.http.get<number>(
       `/api/v1/courses/${cid}/groups/${gid}/membership`
     );

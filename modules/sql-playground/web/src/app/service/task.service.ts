@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { forkJoin, Observable } from "rxjs";
+import { forkJoin, Observable, throwError } from "rxjs";
 import { take, catchError, map } from "rxjs/operators";
 import { Task } from "../model/Task";
 import { HttpClient } from "@angular/common/http";
@@ -19,6 +19,7 @@ export class TaskService {
    * @return Observable that succeeds with all tasks of the course
    */
   getAllTasks(cid: number): Observable<Task[]> {
+    if (!cid) return throwError(() => new Error("Invalid cid"));
     return this.http.get<Task[]>(`/api/v1/courses/${cid}/tasks`);
   }
 
@@ -28,6 +29,7 @@ export class TaskService {
    * @return Observable that succeeds with all task Results of the course
    */
   getTaskResults(cid: number): Observable<UserTaskResult[]> {
+    if (!cid) return throwError(() => new Error("Invalid cid"));
     return this.http.get<UserTaskResult[]>(
       `/api/v1/courses/${cid}/tasks/results`
     );
@@ -40,6 +42,7 @@ export class TaskService {
    * @return The task state adjusted by the server
    */
   createTask(cid: number, task: Task): Observable<Task> {
+    if (!cid) return throwError(() => new Error("Invalid cid"));
     return this.http.post<Task>(`/api/v1/courses/${cid}/tasks`, task);
   }
 
@@ -50,6 +53,7 @@ export class TaskService {
    * @return Observable that succeeds with the task state
    */
   getTask(cid: number, tid: number): Observable<Task> {
+    if (!cid || !tid) return throwError(() => new Error("Invalid cid or tid"));
     return this.http.get<Task>(`/api/v1/courses/${cid}/tasks/${tid}`);
   }
 
@@ -60,6 +64,7 @@ export class TaskService {
    * @return Observable that succeeds with the task Result of the the
    */
   getTaskResult(cid: number, tid: number): Observable<UserTaskResult> {
+    if (!cid || !tid) return throwError(() => new Error("Invalid cid or tid"));
     return this.http.get<UserTaskResult>(
       `/api/v1/courses/${cid}/tasks/${tid}/result`
     );
@@ -73,6 +78,7 @@ export class TaskService {
    * @return Observable that succeeds if updated successfully
    */
   updateTask(cid: number, tid: number, task: Task): Observable<void> {
+    if (!cid || !tid) return throwError(() => new Error("Invalid cid or tid"));
     return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}`, task);
   }
 
@@ -89,6 +95,7 @@ export class TaskService {
     referenceTask: Task,
     selectedFormFields: SelectedFormFields
   ): Observable<boolean> {
+    if (!cid) return throwError(() => new Error("Invalid cid"));
     const updateObservables = tasks.map((task) => {
       if (selectedFormFields.datePicker) {
         task.deadline = referenceTask.deadline;
@@ -125,10 +132,12 @@ export class TaskService {
    * @return Observable that succeeds if the task does not exists after this operation.
    */
   deleteTask(cid: number, tid: number): Observable<void> {
+    if (!cid || !tid) return throwError(() => new Error("Invalid cid or tid"));
     return this.http.delete<void>(`/api/v1/courses/${cid}/tasks/${tid}`);
   }
 
   public downloadTask(cid: number, tid: number, filename?: string) {
+    if (!cid || !tid) return;
     return this.http
       .get(`/api/v1/courses/${cid}/tasks/${tid}/export`, {
         responseType: "arraybuffer",
@@ -144,6 +153,7 @@ export class TaskService {
     tIds: Array<number>,
     filename?: string
   ) {
+    if (!cid) return;
     return this.http
       .post(
         `/api/v1/courses/${cid}/tasks/export`,

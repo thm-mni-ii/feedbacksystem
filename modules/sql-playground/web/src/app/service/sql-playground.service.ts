@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import { Constraint } from "../model/sql_playground/Constraint";
 import { Database } from "../model/sql_playground/Database";
 import { Routine } from "../model/sql_playground/Routine";
@@ -24,6 +24,7 @@ export class SqlPlaygroundService {
    * @param uid User id
    */
   getDatabases(uid: number): Observable<Database[]> {
+    if (!uid) return throwError(() => new Error("Invalid uid"));
     return this.http.get<Database[]>(`/api/v2/playground/${uid}/databases`);
   }
 
@@ -34,6 +35,7 @@ export class SqlPlaygroundService {
    * @return The created database, adjusted by the system
    */
   createDatabase(uid: number, name: string): Observable<Database> {
+    if (!uid) return throwError(() => new Error("Invalid uid"));
     return this.http.post<any>(`/api/v2/playground/${uid}/databases`, {
       name: name,
     });
@@ -42,10 +44,11 @@ export class SqlPlaygroundService {
   /**
    * Delete Database
    * @param uid User id
-   * @param name Name of the database
-   * @return The deletet database
+   * @param dbId Database id
+   * @return The deleted database
    */
   deleteDatabase(uid: number, dbId: number) {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.delete(`/api/v2/playground/${uid}/databases/${dbId}`);
   }
 
@@ -56,6 +59,7 @@ export class SqlPlaygroundService {
    * @returns Activated database
    */
   activateDatabase(uid: number, dbId: number): Observable<Database> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.post<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/activate`,
       {}
@@ -74,6 +78,7 @@ export class SqlPlaygroundService {
     dbId: number,
     statement: string
   ): Observable<SQLExecuteResponse> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.post<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/execute`,
       {
@@ -90,6 +95,7 @@ export class SqlPlaygroundService {
     uid: number,
     dbId: number
   ): Observable<SQLPlaygroundShare> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.post<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/share`,
       {}
@@ -104,6 +110,7 @@ export class SqlPlaygroundService {
    * @returns SQL Response
    */
   getResults(uid: number, dbId: number, rId: number): Observable<SQLResponse> {
+    if (!uid || !dbId || !rId) return throwError(() => new Error("Invalid parameters for getResults"));
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/results/${rId}`
     );
@@ -116,6 +123,7 @@ export class SqlPlaygroundService {
    * @returns all Results
    */
   getResultsList(uid: number, dbId: number): Observable<Database[]> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/results`
     );
@@ -128,6 +136,7 @@ export class SqlPlaygroundService {
    * @returns all Tables
    */
   getTables(uid: number, dbId: number): Observable<Table[]> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/tables`
     );
@@ -140,6 +149,7 @@ export class SqlPlaygroundService {
    * @returns all Constraints
    */
   getConstraints(uid: number, dbId: number): Observable<Constraint[]> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/constraints`
     );
@@ -152,6 +162,7 @@ export class SqlPlaygroundService {
    * @returns all Views
    */
   getViews(uid: number, dbId: number): Observable<View[]> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/views`
     );
@@ -164,6 +175,7 @@ export class SqlPlaygroundService {
    * @returns all Triggers
    */
   getTriggers(uid: number, dbId: number): Observable<Trigger[]> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/triggers`
     );
@@ -176,6 +188,7 @@ export class SqlPlaygroundService {
    * @returns all Routines
    */
   getRoutines(uid: number, dbId: number): Observable<Routine[]> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/routines`
     );
@@ -193,6 +206,7 @@ export class SqlPlaygroundService {
     dbId: number,
     groupId: number
   ): Observable<Database> {
+    if (!uid || !dbId || !groupId) return throwError(() => new Error("Invalid parameters for shareWithGroup"));
     return this.http.put<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/share-with-group`,
       { groupId }
@@ -206,6 +220,7 @@ export class SqlPlaygroundService {
    * @returns the update database
    */
   unshareWithGroup(uid: number, dbId: number): Observable<Database> {
+    if (!uid || !dbId) return throwError(() => new Error("Invalid uid or dbId"));
     return this.http.delete<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/share-with-group`
     );

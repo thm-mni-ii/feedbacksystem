@@ -8,6 +8,14 @@
   border-radius: 5px;
 }
 
+:host-context(.dark-theme) .code-container {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:host-context(.dark-theme) .text-area-code-editor {
+  caret-color: #ffffff;
+}
+
 .text-area-code-editor {
   &,
   &:focus {

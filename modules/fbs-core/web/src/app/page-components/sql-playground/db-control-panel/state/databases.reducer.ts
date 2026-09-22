@@ -43,7 +43,10 @@ export const databasesReducer = createReducer(
   on(createDatabase, (state) => ({ ...state })),
   on(createDatabaseSuccess, (state, { database }) => ({
     ...state,
-    databases: [...state.databases, database],
+    databases: [
+      ...state.databases.map((db) => ({ ...db, active: false })),
+      { ...database, active: true },
+    ],
   })),
   on(createDatabaseFailure, (state, { error }) => ({ ...state, error })),
   on(deleteDatabase, (state) => ({ ...state })),

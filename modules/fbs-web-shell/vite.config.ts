@@ -27,9 +27,18 @@ export default defineConfig({
       },
       '/oauth2': {
         target: 'http://localhost:8080',
-        changeOrigin: true
+        changeOrigin: true,
+        bypass: (req) => {
+          if (req.url?.startsWith('/oauth2/callback')) {
+            return '/index.html'
+          }
+        }
       },
       '/.well-known': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/connect': {
         target: 'http://localhost:8080',
         changeOrigin: true
       }

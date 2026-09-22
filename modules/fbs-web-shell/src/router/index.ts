@@ -21,7 +21,7 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/apps/:providerId',
+    path: '/apps/:providerId/:subPath(.*)*',
     name: 'app-host',
     component: AppHostView
   },

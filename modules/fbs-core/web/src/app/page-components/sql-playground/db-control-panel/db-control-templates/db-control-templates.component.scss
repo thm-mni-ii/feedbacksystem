@@ -12,6 +12,10 @@
   color: $cPrimary;
 }
 
+:host-context(.dark-theme) .highlight {
+  color: $cSecondary-light;
+}
+
 .info-text {
   margin: 2px 0;
 }

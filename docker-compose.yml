@@ -49,7 +49,6 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:443:443"
-      - "127.0.0.1:8081:443"
     volumes:
       - ./data/upload-dir:/upload-dir
       - ./conf/fbs-core.api:/usr/local/fbs-core.api/conf
@@ -126,6 +125,7 @@ services:
       - APP_SAML_ENABLED=false
       - OIDC_ISSUER=http://localhost:8080
       - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback,https://localhost/oauth2/callback,http://127.0.0.1:4200/oauth2/callback,http://localhost:4200/oauth2/callback,http://localhost:8083/oauth2/callback,http://127.0.0.1:8083/oauth2/callback
+      - OIDC_CLIENT_POST_LOGOUT_REDIRECT_URI=http://localhost/,https://localhost/,http://127.0.0.1:4200/,http://localhost:4200/,http://localhost:8083/,http://127.0.0.1:8083/
       - OIDC_SIGNING_KEY_LOCATION=/run/secrets/identity-signing-key.p12
       - OIDC_SIGNING_KEY_STORE_PASSWORD=changeit
       - OIDC_SIGNING_KEY_ALIAS=identity-signing

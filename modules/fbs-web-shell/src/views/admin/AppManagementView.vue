@@ -472,10 +472,25 @@ async function loadApps() {
   }
 }
 
+const ICON_MAP: Record<string, string> = {
+  terminal: 'console',
+  school: 'school',
+  build: 'wrench',
+  settings: 'cog',
+  dashboard: 'view-dashboard',
+  user: 'account',
+  users: 'account-group',
+  code: 'code-tags',
+  database: 'database',
+  assignment: 'clipboard-text',
+  assessment: 'chart-bar'
+}
+
 function formatIcon(icon: string): string {
   if (!icon) return 'mdi-application'
   if (icon.startsWith('mdi-')) return icon
-  return `mdi-${icon}`
+  const mapped = ICON_MAP[icon] || icon
+  return `mdi-${mapped}`
 }
 
 function getRoleColor(role: string): string {

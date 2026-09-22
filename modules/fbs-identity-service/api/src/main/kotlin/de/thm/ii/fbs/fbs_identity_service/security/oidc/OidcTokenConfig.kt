@@ -20,10 +20,37 @@ class OidcTokenConfig {
                 context.claims
                     .subject(principal.userId.toString())
 
+                val fullName = listOf(principal.prename, principal.surname)
+                    .filter { it.isNotBlank() }
+                    .joinToString(" ")
+                    .ifBlank { principal.username }
+
                 if (context.tokenType == OAuth2TokenType.ACCESS_TOKEN) {
                     context.claims
+                        .claim("id", principal.userId)
+                        .claim("userId", principal.userId)
                         .claim("username", principal.username)
+                        .claim("preferred_username", principal.username)
                         .claim("globalRole", principal.globalRole.name)
+                        .claim("global_role", principal.globalRole.name)
+                        .claim("roles", listOf("ROLE_${principal.globalRole.name}"))
+                        .claim("given_name", principal.prename)
+                        .claim("family_name", principal.surname)
+                        .claim("name", fullName)
+
+                    if (!principal.email.isNullOrBlank()) {
+                        context.claims.claim("email", principal.email)
+                    }
+                } else if (context.tokenType.value == "id_token") {
+                    context.claims
+                        .claim("preferred_username", principal.username)
+                        .claim("given_name", principal.prename)
+                        .claim("family_name", principal.surname)
+                        .claim("name", fullName)
+
+                    if (!principal.email.isNullOrBlank()) {
+                        context.claims.claim("email", principal.email)
+                    }
                 }
             }
         }

@@ -6,11 +6,14 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.firewall.HttpFirewall
+import org.springframework.security.web.firewall.StrictHttpFirewall
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +22,20 @@ open class ResourceServerSecurityConfig(
     @Value("\${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private val jwkSetUri: String
 ) {
+
+    @Bean
+    open fun httpFirewall(): HttpFirewall {
+        val firewall = StrictHttpFirewall()
+        firewall.setAllowUrlEncodedDoubleSlash(true)
+        return firewall
+    }
+
+    @Bean
+    open fun webSecurityCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer { web ->
+            web.httpFirewall(httpFirewall())
+        }
+    }
 
     @Bean
     open fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {

@@ -1,9 +1,9 @@
-import { Injectable } from "@angular/core";
+import { Inject, Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { JwtHelperService } from "@auth0/angular-jwt";
-import { Observable } from "rxjs";
-import { of, throwError } from "rxjs";
+import { Observable, BehaviorSubject, of, throwError } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
+import { I18NEXT_SERVICE, ITranslationService } from "angular-i18next";
 import { JWTToken } from "../model/JWTToken";
 
 const TOKEN_ID = "token";
@@ -15,9 +15,40 @@ const TOKEN_ID = "token";
   providedIn: "root",
 })
 export class AuthService {
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {
+  private readonly tokenReceivedSubject = new BehaviorSubject<boolean>(false);
+  public readonly tokenReceived$: Observable<boolean> = this.tokenReceivedSubject.asObservable();
+
+  constructor(
+    private http: HttpClient,
+    private jwtHelper: JwtHelperService,
+    @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
+  ) {
+    this.initTheme();
     if (this.isEmbedded()) {
       this.initPostMessageBridge();
+    }
+  }
+
+  public initTheme(): void {
+    if (typeof document === "undefined") return;
+    const storedTheme = typeof localStorage !== "undefined" ? localStorage.getItem("fbs_theme") : null;
+    if (storedTheme === "dark" || (!storedTheme && typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.body.classList.add("dark-theme");
+    } else if (storedTheme === "light") {
+      document.body.classList.remove("dark-theme");
+    }
+  }
+
+  public applyTheme(theme: string): void {
+    if (typeof document !== "undefined") {
+      if (theme === "dark") {
+        document.body.classList.add("dark-theme");
+      } else {
+        document.body.classList.remove("dark-theme");
+      }
+    }
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("fbs_theme", theme);
     }
   }
 
@@ -39,22 +70,23 @@ export class AuthService {
       if (data.type === "FBS_AUTH_TOKEN_RESPONSE" && data.accessToken) {
         this.storeToken(data.accessToken);
       }
-      if (data.type === "FBS_HANDSHAKE_ACK" && data.theme) {
-        if (typeof document !== "undefined") {
-          if (data.theme === "dark") {
-            document.body.classList.add("dark-theme");
-          } else {
-            document.body.classList.remove("dark-theme");
-          }
+      if (data.type === "FBS_HANDSHAKE_ACK") {
+        if (data.theme) {
+          this.applyTheme(data.theme);
+        }
+        if (data.locale && this.i18NextService && typeof this.i18NextService.changeLanguage === "function") {
+          const cleanLocale = data.locale === "en" ? "en" : "de";
+          this.i18NextService.changeLanguage(cleanLocale).then(() => {});
         }
       }
       if (data.type === "FBS_THEME_CHANGED" && data.theme) {
-        if (typeof document !== "undefined") {
-          if (data.theme === "dark") {
-            document.body.classList.add("dark-theme");
-          } else {
-            document.body.classList.remove("dark-theme");
-          }
+        this.applyTheme(data.theme);
+      }
+      if (data.type === "FBS_LOCALE_CHANGED") {
+        const locale = data.locale || data.payload?.locale;
+        if (locale && this.i18NextService && typeof this.i18NextService.changeLanguage === "function") {
+          const cleanLocale = locale === "en" ? "en" : "de";
+          this.i18NextService.changeLanguage(cleanLocale).then(() => {});
         }
       }
     });
@@ -94,11 +126,32 @@ export class AuthService {
   getToken(): JWTToken | null {
     const token = this.loadToken();
     if (!token) return null;
-    const decodedToken = this.decodeToken();
+    const decodedToken: any = this.decodeToken();
     if (!decodedToken) return null;
     if (this.jwtHelper.isTokenExpired(token)) return null;
-    decodedToken.courseRoles = JSON.parse(<any>decodedToken.courseRoles);
-    return decodedToken;
+
+    let courseRoles: any = decodedToken.courseRoles || [];
+    if (typeof courseRoles === "string") {
+      try {
+        courseRoles = JSON.parse(courseRoles);
+      } catch (e) {
+        courseRoles = [];
+      }
+    } else if (!Array.isArray(courseRoles) && typeof courseRoles !== "object") {
+      courseRoles = [];
+    }
+
+    const id = decodedToken.id !== undefined ? Number(decodedToken.id) : (decodedToken.sub ? parseInt(decodedToken.sub, 10) : 0);
+    const username = decodedToken.username ?? decodedToken.preferred_username ?? "";
+    const globalRole = decodedToken.globalRole ?? decodedToken.global_role ?? "USER";
+
+    return {
+      ...decodedToken,
+      id,
+      username,
+      globalRole,
+      courseRoles,
+    };
   }
 
   /**
@@ -199,6 +252,7 @@ export class AuthService {
 
   public storeToken(token: string): void {
     localStorage.setItem(TOKEN_ID, token);
+    this.tokenReceivedSubject.next(true);
   }
 
   public requestNewToken(): Observable<void> {

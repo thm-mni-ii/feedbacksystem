@@ -117,6 +117,17 @@ export class SqlInputTabsComponent
       ? this.courseRegistrationService.getRegisteredCourses(userID)
       : of([]);
 
+    this.subs.push(
+      this.authService.tokenReceived$.subscribe((received) => {
+        if (received) {
+          const uid = this.authService.getToken()?.id;
+          if (uid) {
+            this.courses = this.courseRegistrationService.getRegisteredCourses(uid);
+          }
+        }
+      })
+    );
+
     const queryPending$ = this.store.select(
       fromSqlPlayground.selectIsQueryPending
     );

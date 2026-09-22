@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { CheckerConfig } from "../model/CheckerConfig";
 import { saveAs as importedSaveAs } from "file-saver";
@@ -19,12 +19,14 @@ export class CheckerService {
    * @return Observable that succeeds with the configured Checker
    */
   public getChecker(cid: number, tid: number): Observable<CheckerConfig[]> {
+    if (!cid || !tid) return throwError(() => new Error("Invalid cid or tid"));
     return this.http.get<CheckerConfig[]>(
       `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`
     );
   }
 
   public checkForCheckerConfig(cid: number, tid: number): Observable<boolean> {
+    if (!cid || !tid) return throwError(() => new Error("Invalid cid or tid"));
     return this.getChecker(cid, tid).pipe(
       map((checker) => {
         return checker.length === 0;
@@ -44,6 +46,7 @@ export class CheckerService {
     tid: number,
     checker: CheckerConfig
   ): Observable<CheckerConfig> {
+    if (!cid || !tid) return throwError(() => new Error("Invalid cid or tid"));
     return this.http.post<CheckerConfig>(
       `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`,
       checker
@@ -64,6 +67,7 @@ export class CheckerService {
     ccid: number,
     checker: CheckerConfig
   ): Observable<void> {
+    if (!cid || !tid || !ccid) return throwError(() => new Error("Invalid parameters for updateChecker"));
     return this.http.put<void>(
       `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`,
       checker
@@ -82,6 +86,7 @@ export class CheckerService {
     tid: number,
     ccid: number
   ): Observable<void> {
+    if (!cid || !tid || !ccid) return throwError(() => new Error("Invalid parameters for deleteChecker"));
     return this.http.delete<void>(
       `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`
     );
@@ -102,6 +107,7 @@ export class CheckerService {
     fType: CheckerFileType,
     filename: string
   ) {
+    if (!cid || !tid || !ccid) return;
     //replace all illegal file characters with underscore
     filename = filename.replace(/[~"#%&*:<>?/\\{|}. ]+/g, "_");
     let fExtension: string;
@@ -138,6 +144,7 @@ export class CheckerService {
     ccid: number,
     fType: CheckerFileType
   ): Observable<Blob> {
+    if (!cid || !tid || !ccid) return throwError(() => new Error("Invalid parameters for fetchFile"));
     return this.http
       .get(
         `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`,
@@ -167,6 +174,7 @@ export class CheckerService {
     fType: CheckerFileType,
     file: File
   ): Observable<void> {
+    if (!cid || !tid || !ccid) return throwError(() => new Error("Invalid parameters for updateFile"));
     return this.uploadFile(
       file,
       `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`
@@ -176,9 +184,6 @@ export class CheckerService {
   private uploadFile(file: File, url: string): Observable<void> {
     const formData: FormData = new FormData();
     formData.append("file", file);
-    // let headers = new HttpHeaders({
-    //   'Content-Type': ''
-    // });
     return this.http.put<void>(url, formData);
   }
 }

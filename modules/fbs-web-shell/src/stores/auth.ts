@@ -9,11 +9,16 @@ import type { GlobalRole } from '@/types/user'
 
 interface JwtClaims {
   sub?: string
+  id?: number | string
+  userId?: number | string
   preferred_username?: string
+  username?: string
   email?: string
   given_name?: string
   family_name?: string
+  name?: string
   global_role?: GlobalRole
+  globalRole?: GlobalRole
   roles?: string[]
   [key: string]: any
 }
@@ -36,6 +41,9 @@ export const useAuthStore = defineStore('auth', () => {
     if (claims.value?.global_role) {
       return claims.value.global_role
     }
+    if (claims.value?.globalRole) {
+      return claims.value.globalRole
+    }
     if (claims.value?.roles?.includes('ROLE_ADMIN')) return 'ADMIN'
     if (claims.value?.roles?.includes('ROLE_MODERATOR')) return 'MODERATOR'
     return 'USER'
@@ -44,11 +52,22 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => globalRole.value === 'ADMIN')
   const isModerator = computed(() => globalRole.value === 'MODERATOR' || globalRole.value === 'ADMIN')
 
-  const preferredUsername = computed(() => claims.value?.preferred_username || claims.value?.sub || 'Benutzer')
+  const preferredUsername = computed(() => {
+    if (claims.value?.preferred_username) return claims.value.preferred_username
+    if (claims.value?.username) return claims.value.username
+    if (claims.value?.sub && !/^\d+$/.test(claims.value.sub)) return claims.value.sub
+    return 'Benutzer'
+  })
 
   const displayName = computed(() => {
+    if (claims.value?.name && claims.value.name.trim()) {
+      return claims.value.name.trim()
+    }
     if (claims.value?.given_name && claims.value?.family_name) {
-      return `${claims.value.given_name} ${claims.value.family_name}`
+      return `${claims.value.given_name} ${claims.value.family_name}`.trim()
+    }
+    if (claims.value?.given_name) {
+      return claims.value.given_name.trim()
     }
     return preferredUsername.value
   })

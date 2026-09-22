@@ -6,6 +6,7 @@ import TheNavbar from '@/components/layout/TheNavbar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppsStore } from '@/stores/apps'
 import { useThemeStore } from '@/stores/theme'
+import { useLocaleStore } from '@/stores/locale'
 
 const mockRouter = {
   push: vi.fn(),
@@ -44,7 +45,7 @@ describe('TheNavbar Component', () => {
 
   it('should render application brand name', () => {
     const wrapper = mount(TestWrapper)
-    expect(wrapper.text()).toContain('Feedback System')
+    expect(wrapper.text()).toContain('Feedbacksystem')
   })
 
   it('should render dynamic navigation items from apps store', async () => {
@@ -83,7 +84,7 @@ describe('TheNavbar Component', () => {
     expect(wrapper.text()).toContain('SQL Sandbox')
   })
 
-  it('should show Administration menu for ADMIN users', () => {
+  it('should show Administration menu and /admin/apps link for ADMIN users', () => {
     const authStore = useAuthStore()
     authStore.claims = {
       sub: '1',
@@ -94,6 +95,25 @@ describe('TheNavbar Component', () => {
 
     const wrapper = mount(TestWrapper)
     expect(wrapper.text()).toContain('Administration')
+    expect(wrapper.text()).toContain('Anwendungsverwaltung')
+  })
+
+  it('should show user display name instead of numeric user id', () => {
+    const authStore = useAuthStore()
+    authStore.claims = {
+      sub: '1',
+      username: 'admin',
+      preferred_username: 'admin',
+      name: 'Admin User',
+      given_name: 'Admin',
+      family_name: 'User',
+      globalRole: 'ADMIN'
+    } as any
+    authStore.token = 'fake-token'
+
+    const wrapper = mount(TestWrapper)
+    expect(wrapper.text()).toContain('Admin User')
+    expect(wrapper.text()).toContain('AU')
   })
 
   it('should not show Administration menu for standard USER', () => {
@@ -120,5 +140,67 @@ describe('TheNavbar Component', () => {
       await themeBtn.trigger('click')
       expect(toggleSpy).toHaveBeenCalled()
     }
+  })
+
+  it('should update document title and top app bar title dynamically', async () => {
+    const appsStore = useAppsStore()
+    const wrapper = mount(TestWrapper)
+
+    expect(document.title).toBe('Feedbacksystem')
+
+    appsStore.setCustomTitle('Mathematik 1 - Aufgaben')
+    await wrapper.vm.$nextTick()
+
+    expect(document.title).toBe('Mathematik 1 - Aufgaben - Feedbacksystem')
+    expect(wrapper.text()).toContain('Mathematik 1 - Aufgaben')
+  })
+
+  it('should display application navigation items above administration items for admin users', async () => {
+    const authStore = useAuthStore()
+    authStore.claims = {
+      sub: '1',
+      preferred_username: 'admin',
+      global_role: 'ADMIN'
+    } as any
+    authStore.token = 'fake-token'
+
+    const appsStore = useAppsStore()
+    appsStore.apps = [
+      {
+        id: 'course-mgmt',
+        title: 'Kurse & Aufgaben',
+        description: 'Course management',
+        icon: 'school',
+        url: 'http://localhost:8082',
+        embedMode: 'IFRAME',
+        requiredGlobalRole: 'USER',
+        navbarPosition: 1,
+        showInNavbar: true,
+        isDefault: true,
+        isActive: true
+      }
+    ]
+
+    const wrapper = mount(TestWrapper)
+    const text = wrapper.text()
+    const appIndex = text.indexOf('Kurse & Aufgaben')
+    const adminIndex = text.indexOf('Administration')
+
+    expect(appIndex).toBeGreaterThan(-1)
+    expect(adminIndex).toBeGreaterThan(-1)
+    expect(appIndex).toBeLessThan(adminIndex)
+  })
+
+  it('should display current locale and allow changing language', async () => {
+    const localeStore = useLocaleStore()
+    localeStore.setLocale('de')
+
+    const wrapper = mount(TestWrapper)
+    expect(wrapper.text()).toContain('DE')
+
+    localeStore.setLocale('en')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('EN')
   })
 })

@@ -21,16 +21,20 @@ export class GroupsEffects {
   loadGroups = createEffect(() =>
     this.actions$.pipe(
       ofType(loadGroups),
-      switchMap(() =>
-        this.groupRegistrationService
-          .getRegisteredGroups(this.authService.getToken().id)
+      switchMap(() => {
+        const token = this.authService.getToken();
+        if (!token || !token.id) {
+          return of(loadGroupsFailure({ error: "No token available" }));
+        }
+        return this.groupRegistrationService
+          .getRegisteredGroups(token.id)
           .pipe(
             switchMap((groups) => {
               return of(loadGroupsSuccess({ groups }));
             }),
             catchError((error) => of(loadGroupsFailure({ error })))
-          )
-      )
+          );
+      })
     )
   );
 }

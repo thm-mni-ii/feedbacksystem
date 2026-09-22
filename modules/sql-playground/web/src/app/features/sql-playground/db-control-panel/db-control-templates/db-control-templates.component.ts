@@ -172,8 +172,17 @@ export class DbControlTemplatesComponent implements OnInit {
     this.error$ = this.store.select(selectTemplatesError);
     this.activeDb$ = this.store.select(selectAllDatabases);
 
-    const globalRole = this.authService.getToken().globalRole;
-    this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
+    this.token = this.authService.getToken();
+    const globalRole = this.token?.globalRole;
+    this.isAdmin = globalRole ? Roles.GlobalRole.isAdmin(globalRole) : false;
+
+    this.authService.tokenReceived$.subscribe((received) => {
+      if (received) {
+        this.token = this.authService.getToken();
+        const role = this.token?.globalRole;
+        this.isAdmin = role ? Roles.GlobalRole.isAdmin(role) : false;
+      }
+    });
   }
 
   editTemplates() {

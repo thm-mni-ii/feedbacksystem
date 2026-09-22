@@ -69,18 +69,20 @@ export class DbControlDbOverviewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const dbType = localStorage.getItem("playground-db-type") as
+    const storedDbType = localStorage.getItem("playground-db-type") as
       | "postgres"
       | "mongo"
       | null;
+    const dbType = storedDbType || "postgres";
     this.selectedDbType = dbType;
+    if (!storedDbType) {
+      localStorage.setItem("playground-db-type", "postgres");
+    }
 
     // Always initialise databases$ so downstream .pipe() calls never crash.
     this.databases$ = this.store.select(selectDatabasesForCurrentType);
 
-    if (dbType === "postgres" || dbType === "mongo") {
-      this.store.dispatch(loadDatabases({ dbType }));
-    }
+    this.store.dispatch(loadDatabases({ dbType }));
 
     this.error$ = this.store.select(selectDatabasesError);
     this.backendDatabaseInformation$ = this.store.select(
@@ -103,6 +105,13 @@ export class DbControlDbOverviewComponent implements OnInit {
         this.selectedDb = activeDb.id;
       }
     });
+
+    this.authService.tokenReceived$.subscribe((received) => {
+      if (received) {
+        this.token = this.authService.getToken();
+        this.store.dispatch(loadDatabases({ dbType: this.selectedDbType || "postgres" }));
+      }
+    });
   }
 
   createDatabase(name: string) {
@@ -116,6 +125,12 @@ export class DbControlDbOverviewComponent implements OnInit {
 
   deleteDatabase() {
     const selectedDb = this.selectedDb;
+    if (!selectedDb) {
+      this.snackbar.open("Keine Datenbank zum Löschen ausgewählt", "Ok", {
+        duration: 3000,
+      });
+      return;
+    }
     const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
       panelClass: "sql-playground-delete-confirm-dialog",
       data: {
@@ -184,6 +199,12 @@ export class DbControlDbOverviewComponent implements OnInit {
   }
 
   resetMongoDatabase() {
+    if (!this.selectedDb) {
+      this.snackbar.open("Keine MongoDB zum Zurücksetzen ausgewählt", "Ok", {
+        duration: 3000,
+      });
+      return;
+    }
     const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
       panelClass: "sql-playground-delete-confirm-dialog",
       data: {
@@ -220,9 +241,10 @@ export class DbControlDbOverviewComponent implements OnInit {
 
     this.databases$.pipe(take(1)).subscribe((databases) => {
       const selectedDb = databases.find((db) => db.id === this.selectedDb);
-      if (selectedDb) {
+      const uid = this.token?.id || this.authService.getToken()?.id;
+      if (selectedDb && uid && selectedDb.id) {
         this.playgroundService
-          .getSharePlaygroundURI(this.token?.id ?? 0, selectedDb.id as number)
+          .getSharePlaygroundURI(uid, selectedDb.id as number)
           .subscribe((share) => {
             this.dialog.open(SharePlaygroundLinkDialogComponent, {
               height: "auto",

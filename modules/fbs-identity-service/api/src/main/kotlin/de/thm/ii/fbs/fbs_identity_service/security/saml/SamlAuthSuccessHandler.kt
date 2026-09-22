@@ -120,7 +120,10 @@ class SamlAuthSuccessHandler(
             globalRole = user.globalRole,
             authorities = listOf(
                 SimpleGrantedAuthority("ROLE_${user.globalRole.name}")
-            )
+            ),
+            prename = user.prename,
+            surname = user.surname,
+            email = user.email
         )
     }
 }

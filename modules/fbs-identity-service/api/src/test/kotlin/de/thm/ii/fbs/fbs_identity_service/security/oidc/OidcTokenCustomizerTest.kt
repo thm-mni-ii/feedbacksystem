@@ -45,12 +45,20 @@ class OidcTokenCustomizerTest {
         val claimsSet = claimsBuilder.build()
 
         assertEquals("1", claimsSet.subject)
+        assertEquals(1L, claimsSet.getClaim("id"))
         assertEquals("testUser", claimsSet.getClaim("username"))
+        assertEquals("testUser", claimsSet.getClaim("preferred_username"))
         assertEquals("USER", claimsSet.getClaim("globalRole"))
+        assertEquals("USER", claimsSet.getClaim("global_role"))
+        assertEquals(listOf("ROLE_USER"), claimsSet.getClaim("roles"))
+        assertEquals("Max", claimsSet.getClaim("given_name"))
+        assertEquals("Mustermann", claimsSet.getClaim("family_name"))
+        assertEquals("Max Mustermann", claimsSet.getClaim("name"))
+        assertEquals("test@example.org", claimsSet.getClaim("email"))
     }
 
     @Test
-    fun `id token contains user id but no access token claims`() {
+    fun `id token contains user profile claims`() {
         val principal = createLocalUserPrincipal()
 
         val authentication = UsernamePasswordAuthenticationToken.authenticated(
@@ -77,6 +85,11 @@ class OidcTokenCustomizerTest {
         val claimsSet = claimsBuilder.build()
 
         assertEquals("1", claimsSet.subject)
+        assertEquals("testUser", claimsSet.getClaim("preferred_username"))
+        assertEquals("Max", claimsSet.getClaim("given_name"))
+        assertEquals("Mustermann", claimsSet.getClaim("family_name"))
+        assertEquals("Max Mustermann", claimsSet.getClaim("name"))
+        assertEquals("test@example.org", claimsSet.getClaim("email"))
         assertNull(claimsSet.getClaim("username"))
         assertNull(claimsSet.getClaim("globalRole"))
     }
@@ -89,7 +102,10 @@ class OidcTokenCustomizerTest {
             globalRole = GlobalRole.USER,
             authorities = listOf(
                 SimpleGrantedAuthority("ROLE_USER")
-            )
+            ),
+            prename = "Max",
+            surname = "Mustermann",
+            email = "test@example.org"
         )
     }
 }

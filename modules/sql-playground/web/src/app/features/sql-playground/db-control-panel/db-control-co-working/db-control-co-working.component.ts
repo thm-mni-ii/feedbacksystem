@@ -56,7 +56,9 @@ export class DbControlCoWorkingComponent implements OnInit {
       "postgres";
 
     this.store.dispatch(loadDatabases({ dbType }));
-    this.store.dispatch(loadGroups());
+    if (this.authService.getToken()?.id) {
+      this.store.dispatch(loadGroups());
+    }
 
     // Use selector to get databases for current type from state
     this.databases$ = this.store.select(selectDatabasesForCurrentType);
@@ -67,6 +69,14 @@ export class DbControlCoWorkingComponent implements OnInit {
     this.groups$.subscribe((groups) => {
       this.groups = groups;
     });
+
+    this.authService.tokenReceived$.subscribe((received) => {
+      if (received) {
+        this.token = this.authService.getToken();
+        this.store.dispatch(loadDatabases({ dbType }));
+        this.store.dispatch(loadGroups());
+      }
+    });
   }
 
   disconect() {
@@ -74,11 +84,16 @@ export class DbControlCoWorkingComponent implements OnInit {
   }
 
   create() {
+    const token = this.authService.getToken();
+    if (!token?.id || !this.selectedDatabase || !this.selectedGroup) return;
+
     this.databases$.subscribe((dbs) => {
       const database = dbs.find(({ id }) => id === this.selectedDatabase);
+      if (!database) return;
+
       this.playgroundService
         .shareWithGroup(
-          this.authService.getToken().id,
+          token.id,
           this.selectedDatabase,
           this.selectedGroup
         )
@@ -91,7 +106,7 @@ export class DbControlCoWorkingComponent implements OnInit {
                 database: {
                   id: database.id as number,
                   name: database.name,
-                  owner: this.authService.getToken().username,
+                  owner: token.username,
                 },
               },
             })

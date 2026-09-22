@@ -40,15 +40,27 @@ export class DbSchemeMongoViewsComponent implements OnInit, OnChanges {
   }
 
   loadData(): void {
+    const rawDb = this.dbName || localStorage.getItem("playground-mongo-db") || "";
+    this.dbName = rawDb;
     this.userId = this.auth.getToken()?.id ?? 0;
+
+    if (!this.userId || !this.dbName) {
+      this.views = [];
+      return;
+    }
 
     const prefix = `mongo_playground_student_${this.userId}_`;
     const dbSuffix = this.dbName.startsWith(prefix)
       ? this.dbName.split(prefix)[1]
       : this.dbName;
 
+    if (!dbSuffix) {
+      this.views = [];
+      return;
+    }
+
     this.mongoService.getMongoViews(this.userId, dbSuffix).subscribe((res) => {
-      this.views = res.map((entry: any) =>
+      this.views = (res || []).map((entry: any) =>
         typeof entry === "string"
           ? { name: entry, source: "" }
           : { name: entry.name, source: entry.source }

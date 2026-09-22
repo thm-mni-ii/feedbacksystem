@@ -24,6 +24,10 @@ mat-form-field {
     overflow-y: auto;
   }
 
+  :host-context(.dark-theme) .templates {
+    border-color: rgba(255, 255, 255, 0.24);
+  }
+
   .edit-area {
     margin: 10px;
   }
@@ -60,6 +64,10 @@ mat-form-field {
 
 .grey {
   color: $grey-dark;
+}
+
+:host-context(.dark-theme) .grey {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .red {

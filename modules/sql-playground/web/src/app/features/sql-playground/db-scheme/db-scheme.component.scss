@@ -17,6 +17,10 @@ mat-expansion-panel {
   text-decoration: underline;
 }
 
+:host-context(.dark-theme) .title {
+  color: #b0bec5;
+}
+
 .attribute-list {
   margin: 5px 0px;
   padding: 0;
@@ -29,6 +33,10 @@ mat-expansion-panel {
   li:not(:first-child) {
     padding-top: 7px;
     border-top: 1px solid rgb(122, 122, 122);
+  }
+
+  :host-context(.dark-theme) & li:not(:first-child) {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .attribute {
@@ -59,10 +67,23 @@ mat-expansion-panel {
   color: #00ff00;
 }
 
+:host-context(.dark-theme) .foreign-key {
+  color: #81c784;
+}
+
 .view-definition {
   margin: 10px 15px;
   font-size: smaller;
   overflow-x: auto;
+}
+
+:host-context(.dark-theme) .view-definition,
+:host-context(.dark-theme) .trigger-definition,
+:host-context(.dark-theme) .routine-definition {
+  background: #242424;
+  color: #d4d4d4;
+  padding: 6px 10px;
+  border-radius: 4px;
 }
 
 .routine {

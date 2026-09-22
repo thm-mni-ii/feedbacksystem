@@ -10,7 +10,7 @@
     <template v-else-if="currentApp">
       <FbsAppHost
         :provider-id="currentApp.id"
-        :src="currentApp.url"
+        :src="appSrc"
         :app-title="currentApp.title"
       />
     </template>
@@ -51,8 +51,21 @@ const appsStore = useAppsStore()
 
 const providerId = computed(() => route.params.providerId as string)
 
+const subPath = computed(() => {
+  const p = route.params.subPath
+  if (Array.isArray(p)) return p.join('/')
+  return (p as string) || ''
+})
+
 const currentApp = computed(() => {
   return appsStore.apps.find((app) => app.id === providerId.value)
+})
+
+const appSrc = computed(() => {
+  if (!currentApp.value) return ''
+  const baseUrl = currentApp.value.url.replace(/\/+$/, '')
+  const sub = subPath.value ? (subPath.value.startsWith('/') ? subPath.value : `/${subPath.value}`) : ''
+  return baseUrl + sub
 })
 
 watch(

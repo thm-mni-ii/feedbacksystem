@@ -30,7 +30,10 @@ class LocalUserDetailsService(
             globalRole = role,
             authorities = listOf(
                 SimpleGrantedAuthority("ROLE_${role.name}")
-            )
+            ),
+            prename = user.prename,
+            surname = user.surname,
+            email = user.email
         )
     }
 }

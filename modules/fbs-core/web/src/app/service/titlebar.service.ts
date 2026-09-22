@@ -23,6 +23,23 @@ export class TitlebarService {
    * @param title The new title value of the title bar
    */
   emitTitle(title: string) {
+    if (
+      typeof window !== "undefined" &&
+      window.parent &&
+      window.parent !== window
+    ) {
+      try {
+        window.parent.postMessage(
+          {
+            type: "FBS_SET_TITLE",
+            title: title,
+          },
+          "*"
+        );
+      } catch (e) {
+        console.warn("Could not postMessage FBS_SET_TITLE to parent:", e);
+      }
+    }
     setTimeout(() => {
       this.subject.next(title);
     }, 0);

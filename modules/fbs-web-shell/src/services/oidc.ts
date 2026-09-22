@@ -1,6 +1,9 @@
 import { UserManager, type UserManagerSettings, User } from 'oidc-client-ts'
 
 const getAuthority = (): string => {
+  if (import.meta.env.VITE_OIDC_AUTHORITY) {
+    return import.meta.env.VITE_OIDC_AUTHORITY
+  }
   if (import.meta.env.VITE_OIDC_ISSUER) {
     return import.meta.env.VITE_OIDC_ISSUER
   }

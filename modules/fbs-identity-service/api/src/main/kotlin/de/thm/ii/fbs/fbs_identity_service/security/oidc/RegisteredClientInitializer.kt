@@ -24,6 +24,9 @@ class RegisteredClientInitializer(
     @param:Value("\${security.oidc.client.redirect-uri}")
     private val redirectUri: String,
 
+    @param:Value("\${security.oidc.client.post-logout-redirect-uri:}")
+    private val postLogoutRedirectUri: String = "",
+
     @param:Value("\${security.oidc.client.access-token-ttl-minutes}")
     private val accessTokenTtlMinutes: Long,
 
@@ -57,9 +60,22 @@ class RegisteredClientInitializer(
                     .build()
             )
 
+        val postLogoutUris = mutableSetOf<String>()
+        if (postLogoutRedirectUri.isNotBlank()) {
+            postLogoutRedirectUri.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { postLogoutUris.add(it) }
+        }
+
         redirectUri.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { uri ->
             builder.redirectUri(uri)
+            postLogoutUris.add(uri)
+            try {
+                val parsed = java.net.URI(uri)
+                val base = "${parsed.scheme}://${parsed.authority}/"
+                postLogoutUris.add(base)
+            } catch (_: Exception) {}
         }
+
+        postLogoutUris.forEach { builder.postLogoutRedirectUri(it) }
 
         return builder.build()
     }

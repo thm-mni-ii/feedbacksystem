@@ -83,6 +83,9 @@ class SamlAuthSuccessHandlerTest {
         whenever(user.id).thenReturn(1L)
         whenever(user.username).thenReturn("niklas")
         whenever(user.globalRole).thenReturn(GlobalRole.USER)
+        whenever(user.prename).thenReturn("Niklas")
+        whenever(user.surname).thenReturn("Tester")
+        whenever(user.email).thenReturn("niklas@example.com")
 
         whenever(samlLoginService.resolveUser(any())).thenReturn(user)
 

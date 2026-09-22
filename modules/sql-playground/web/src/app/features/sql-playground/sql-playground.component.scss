@@ -59,3 +59,9 @@
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+:host-context(.dark-theme) .mongo-output {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-color: rgba(255, 255, 255, 0.12);
+}

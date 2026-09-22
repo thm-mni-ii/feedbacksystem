@@ -1,6 +1,6 @@
 .bordered-container {
   display: block;
-  border: 1px solid;
+  border: 1px solid #ccc;
   border-radius: 5px;
   background-color: white;
   min-width: 80%;
@@ -8,6 +8,12 @@
   min-height: 100%;
   max-height: 100%;
   overflow: hidden;
+}
+
+:host-context(.dark-theme) .bordered-container {
+  background-color: #383838;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
 .bordered-container > legend {

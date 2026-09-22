@@ -123,4 +123,34 @@ describe('Auth Store', () => {
     expect(authStore.globalRole).toBe('USER')
     expect(authStore.isAdmin).toBe(false)
   })
+
+  it('should decode camelCase globalRole claim from identity service', () => {
+    const authStore = useAuthStore()
+    const token = createFakeJwt({
+      sub: '1',
+      username: 'admin',
+      preferred_username: 'admin',
+      name: 'System Admin',
+      globalRole: 'ADMIN'
+    })
+
+    authStore.setSession({ access_token: token, expired: false } as any)
+    expect(authStore.globalRole).toBe('ADMIN')
+    expect(authStore.isAdmin).toBe(true)
+    expect(authStore.displayName).toBe('System Admin')
+    expect(authStore.preferredUsername).toBe('admin')
+  })
+
+  it('should never show numeric sub as preferredUsername or displayName if username is present', () => {
+    const authStore = useAuthStore()
+    const token = createFakeJwt({
+      sub: '1',
+      username: 'jdoe',
+      globalRole: 'USER'
+    })
+
+    authStore.setSession({ access_token: token, expired: false } as any)
+    expect(authStore.preferredUsername).toBe('jdoe')
+    expect(authStore.displayName).toBe('jdoe')
+  })
 })

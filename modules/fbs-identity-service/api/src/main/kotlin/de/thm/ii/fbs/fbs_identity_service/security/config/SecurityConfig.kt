@@ -53,6 +53,7 @@ class SecurityConfig(
                                 metadata.scope(OidcScopes.PROFILE)
                             }
                         }
+                        oidc.logoutEndpoint(Customizer.withDefaults())
                     }
             }
             .authorizeHttpRequests {

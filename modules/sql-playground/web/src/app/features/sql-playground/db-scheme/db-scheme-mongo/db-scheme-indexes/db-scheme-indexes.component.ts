@@ -40,17 +40,29 @@ export class DbSchemeMongoIndexesComponent implements OnInit, OnChanges {
   }
 
   loadData(): void {
+    const rawDb = this.dbName || localStorage.getItem("playground-mongo-db") || "";
+    this.dbName = rawDb;
     this.userId = this.auth.getToken()?.id ?? 0;
+
+    if (!this.userId || !this.dbName) {
+      this.indexes = [];
+      return;
+    }
 
     const prefix = `mongo_playground_student_${this.userId}_`;
     const dbSuffix = this.dbName.startsWith(prefix)
       ? this.dbName.split(prefix)[1]
       : this.dbName;
 
+    if (!dbSuffix) {
+      this.indexes = [];
+      return;
+    }
+
     this.mongoService
       .getMongoIndexes(this.userId, dbSuffix)
       .subscribe((res) => {
-        this.indexes = res;
+        this.indexes = res || [];
       });
   }
 }

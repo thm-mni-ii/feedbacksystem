@@ -75,20 +75,33 @@ export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
     this.backendService.setupBackendHandler();
 
     if (this.selectedDbType === "mongo") {
-      const userId = this.authService.getToken()?.id ?? 0;
-      this.http
-        .get<string[]>(`/api/v2/playground/${userId}/databases/mongo/list`)
-        .subscribe((dbs) => {
-          if (!this.mongoDbId && dbs.length > 0) {
-            const fallbackFull = dbs[0];
-            const fallbackSuffix = this.getDbSuffix(fallbackFull);
-
-            this.mongoDbId = fallbackSuffix;
-            localStorage.setItem("playground-mongo-db-full", fallbackFull);
-            localStorage.setItem("playground-mongo-db", fallbackSuffix);
-          }
-        });
+      const userId = this.authService.getToken()?.id;
+      if (userId) {
+        this.loadMongoDbs(userId);
+      }
     }
+
+    this.authService.tokenReceived$.subscribe((received) => {
+      if (received && this.selectedDbType === "mongo") {
+        const userId = this.authService.getToken()?.id;
+        if (userId) {
+          this.loadMongoDbs(userId);
+        }
+      }
+    });
+  }
+
+  private loadMongoDbs(userId: number): void {
+    this.mongoPlaygroundService.getMongoDatabases(userId).subscribe((dbs) => {
+      if (!this.mongoDbId && dbs && dbs.length > 0) {
+        const fallbackFull = dbs[0];
+        const fallbackSuffix = this.getDbSuffix(fallbackFull);
+
+        this.mongoDbId = fallbackSuffix;
+        localStorage.setItem("playground-mongo-db-full", fallbackFull);
+        localStorage.setItem("playground-mongo-db", fallbackSuffix);
+      }
+    });
   }
 
   private getDbSuffix(fullName: string): string {

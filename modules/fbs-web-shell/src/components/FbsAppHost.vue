@@ -48,7 +48,7 @@
     <!-- Embedded Iframe -->
     <iframe
       ref="iframeRef"
-      :src="src"
+      :src="currentIframeSrc"
       :title="appTitle || 'Embedded Application'"
       class="fbs-embedded-iframe"
       allow="clipboard-read; clipboard-write; camera; microphone"
@@ -63,7 +63,9 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useAppsStore } from '@/stores/apps'
 import { useThemeStore } from '@/stores/theme'
+import { useLocaleStore } from '@/stores/locale'
 
 const props = defineProps<{
   src: string
@@ -73,16 +75,21 @@ const props = defineProps<{
 
 const router = useRouter()
 const authStore = useAuthStore()
+const appsStore = useAppsStore()
 const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
 
 const iframeRef = ref<HTMLIFrameElement | null>(null)
+const currentIframeSrc = ref<string>(props.src)
 const loading = ref(true)
 const error = ref<string | null>(null)
 let loadTimeout: ReturnType<typeof setTimeout> | null = null
+let lastEmittedPath: string | null = null
 
 function reloadIframe() {
   error.value = null
   loading.value = true
+  currentIframeSrc.value = props.src
   if (iframeRef.value) {
     iframeRef.value.src = props.src
   }
@@ -116,7 +123,7 @@ function handlePostMessage(event: MessageEvent) {
         {
           type: 'FBS_HANDSHAKE_ACK',
           theme: themeStore.isDark ? 'dark' : 'light',
-          locale: 'de',
+          locale: localeStore.currentLocale,
           hostOrigin: window.location.origin,
           providerId: props.providerId
         },
@@ -158,18 +165,67 @@ function handlePostMessage(event: MessageEvent) {
       }
       break
     }
+
+    case 'FBS_SET_TITLE':
+    case 'FBS_TITLE_CHANGED': {
+      const title = data.title || data.payload?.title
+      if (typeof title === 'string') {
+        appsStore.setCustomTitle(title)
+      }
+      break
+    }
+
+    case 'FBS_ROUTE_CHANGED': {
+      const rawPath = data.path || data.payload?.path
+      if (typeof rawPath === 'string') {
+        if (!rawPath.startsWith('//') && !rawPath.includes('://') && !rawPath.startsWith('javascript:')) {
+          const cleanPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`
+          const targetShellPath = `/apps/${props.providerId}${cleanPath}`
+          if (router.currentRoute.value.fullPath !== targetShellPath) {
+            lastEmittedPath = cleanPath
+            router.replace(targetShellPath)
+          }
+        }
+      }
+      break
+    }
   }
 }
 
 watch(
-  () => props.src,
+  () => props.providerId,
   () => {
+    lastEmittedPath = null
+    currentIframeSrc.value = props.src
     loading.value = true
     error.value = null
     if (loadTimeout) clearTimeout(loadTimeout)
     loadTimeout = setTimeout(() => {
       loading.value = false
     }, 15000)
+  }
+)
+
+watch(
+  () => props.src,
+  (newSrc) => {
+    if (lastEmittedPath) {
+      const cleanSub = lastEmittedPath.startsWith('/') ? lastEmittedPath : `/${lastEmittedPath}`
+      if (newSrc && (newSrc.endsWith(cleanSub) || newSrc.includes(cleanSub))) {
+        lastEmittedPath = null
+        return
+      }
+    }
+    lastEmittedPath = null
+    if (currentIframeSrc.value !== newSrc) {
+      currentIframeSrc.value = newSrc
+      loading.value = true
+      error.value = null
+      if (loadTimeout) clearTimeout(loadTimeout)
+      loadTimeout = setTimeout(() => {
+        loading.value = false
+      }, 15000)
+    }
   }
 )
 
@@ -182,6 +238,22 @@ watch(
         {
           type: 'FBS_THEME_CHANGED',
           theme: isDark ? 'dark' : 'light'
+        },
+        '*'
+      )
+    }
+  }
+)
+
+watch(
+  () => localeStore.currentLocale,
+  (locale) => {
+    const targetWindow = iframeRef.value?.contentWindow
+    if (targetWindow) {
+      targetWindow.postMessage(
+        {
+          type: 'FBS_LOCALE_CHANGED',
+          locale
         },
         '*'
       )

@@ -34,6 +34,7 @@ class RegisteredClientInitializerTest {
             argThat {
                 clientId == "configured-client" &&
                 redirectUris.contains("http://localhost:9999/test-callback") &&
+                postLogoutRedirectUris.contains("http://localhost:9999/") &&
                 tokenSettings.accessTokenTimeToLive == Duration.ofMinutes(10) &&
                 tokenSettings.authorizationCodeTimeToLive == Duration.ofMinutes(5)
             }
@@ -60,6 +61,7 @@ class RegisteredClientInitializerTest {
                 id == existingId &&
                 clientId == "configured-client" &&
                 redirectUris.contains("http://localhost:9999/test-callback") &&
+                postLogoutRedirectUris.contains("http://localhost:9999/") &&
                 tokenSettings.accessTokenTimeToLive == Duration.ofMinutes(10) &&
                 tokenSettings.authorizationCodeTimeToLive == Duration.ofMinutes(5)
             }

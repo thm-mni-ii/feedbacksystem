@@ -1,5 +1,8 @@
-import { Injectable } from "@angular/core";
+import { Inject, Injectable } from "@angular/core";
+import { Router, NavigationEnd } from "@angular/router";
 import { BehaviorSubject, Observable } from "rxjs";
+import { filter } from "rxjs/operators";
+import { I18NEXT_SERVICE, ITranslationService } from "angular-i18next";
 import { AuthService } from "./auth.service";
 
 export interface HandshakeAckPayload {
@@ -23,7 +26,11 @@ export class EmbeddingService {
   private hostOrigin: string = "*";
   private currentTheme: "light" | "dark" = "light";
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
+  ) {
     this._isEmbedded =
       typeof window !== "undefined" &&
       (window.self !== window.top ||
@@ -35,6 +42,7 @@ export class EmbeddingService {
     if (this._isEmbedded) {
       this.setupPostMessageListener();
       this.initHandshake();
+      this.setupRouteListener();
     }
   }
 
@@ -147,6 +155,9 @@ export class EmbeddingService {
           if (payload.theme) {
             this.applyTheme(payload.theme);
           }
+          if (payload.locale) {
+            this.applyLocale(payload.locale);
+          }
           break;
         }
 
@@ -165,10 +176,55 @@ export class EmbeddingService {
           break;
         }
 
+        case "FBS_LOCALE_CHANGED": {
+          const locale = data.locale || data.payload?.locale;
+          if (locale) {
+            this.applyLocale(locale);
+          }
+          break;
+        }
+
         default:
           break;
       }
     });
+  }
+
+  private setupRouteListener(): void {
+    if (typeof window === "undefined" || !window.parent) {
+      return;
+    }
+
+    this.router.events
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd
+        )
+      )
+      .subscribe((event: NavigationEnd) => {
+        try {
+          window.parent.postMessage(
+            {
+              type: "FBS_ROUTE_CHANGED",
+              providerId: "course-management",
+              path: event.urlAfterRedirects || event.url,
+            },
+            "*"
+          );
+        } catch (e) {
+          console.warn("Could not postMessage FBS_ROUTE_CHANGED to parent:", e);
+        }
+      });
+  }
+
+  private applyLocale(locale: string): void {
+    const cleanLocale = locale === "en" ? "en" : "de";
+    if (
+      this.i18NextService &&
+      typeof this.i18NextService.changeLanguage === "function"
+    ) {
+      this.i18NextService.changeLanguage(cleanLocale).then(() => {});
+    }
   }
 
   private applyTheme(theme: "light" | "dark"): void {

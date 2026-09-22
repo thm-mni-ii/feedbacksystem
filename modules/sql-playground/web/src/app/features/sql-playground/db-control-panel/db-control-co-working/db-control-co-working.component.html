@@ -2,11 +2,6 @@
   <mat-card
     *ngIf="(currentDbType$ | async) === 'mongo'"
     class="mongo-warning"
-    style="
-      margin-bottom: 16px;
-      background-color: #fff3cd;
-      border-left: 4px solid #ffc107;
-    "
   >
     <mat-card-content>
       <div style="display: flex; align-items: center; gap: 8px">
