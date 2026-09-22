@@ -25,8 +25,9 @@ const oidcSettings: UserManagerSettings = {
 
 export const userManager = new UserManager(oidcSettings)
 
-export async function login(): Promise<void> {
-  await userManager.signinRedirect()
+export async function login(redirectUrl?: string): Promise<void> {
+  const args = redirectUrl ? { state: { redirectUrl } } : undefined
+  await userManager.signinRedirect(args)
 }
 
 export async function handleCallback(): Promise<User | null> {

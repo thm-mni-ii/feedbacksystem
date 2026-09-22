@@ -124,8 +124,8 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
-  async function login(): Promise<void> {
-    await oidcLogin()
+  async function login(redirectUrl?: string): Promise<void> {
+    await oidcLogin(redirectUrl)
   }
 
   async function logout(): Promise<void> {

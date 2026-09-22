@@ -22,8 +22,11 @@ onMounted(async () => {
     const user = await handleCallback()
     authStore.setSession(user)
     await appsStore.fetchVisibleApps()
-    
-    if (appsStore.defaultApp) {
+
+    const redirectUrl = (user?.state as { redirectUrl?: string } | undefined)?.redirectUrl
+    if (redirectUrl && !redirectUrl.startsWith('/oauth2/callback') && redirectUrl !== '/') {
+      router.replace(redirectUrl)
+    } else if (appsStore.defaultApp) {
       router.replace(`/apps/${appsStore.defaultApp.id}`)
     } else {
       router.replace('/')

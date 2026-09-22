@@ -59,32 +59,37 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, _from) => {
   const authStore = useAuthStore()
+  const appsStore = useAppsStore()
 
   if (!authStore.isInitialized) {
     await authStore.initAuth()
   }
 
+  // Always allow the OIDC callback route through
+  if (to.name === 'oidc-callback' || to.path === '/oauth2/callback') {
+    return true
+  }
+
+  // If not signed in, automatically redirect to the login page (preserve requested path)
+  if (!authStore.isAuthenticated) {
+    await authStore.login(to.fullPath)
+    return false
+  }
+
+  // Ensure visible applications are loaded for the authenticated user
+  if (appsStore.apps.length === 0 && !appsStore.loading) {
+    await appsStore.fetchVisibleApps()
+  }
+
   if (to.meta.requiresAdmin) {
-    if (!authStore.isAuthenticated) {
-      authStore.login()
-      return
-    }
     if (!authStore.isAdmin) {
-      next('/')
-      return
+      return '/'
     }
   }
 
-  if (to.meta.requiresAuth) {
-    if (!authStore.isAuthenticated) {
-      authStore.login()
-      return
-    }
-  }
-
-  next()
+  return true
 })
 
 export default router

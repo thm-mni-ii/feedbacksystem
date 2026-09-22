@@ -42,11 +42,13 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { useAppsStore } from '@/stores/apps'
 import FbsAppHost from '@/components/FbsAppHost.vue'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const appsStore = useAppsStore()
 
 const providerId = computed(() => route.params.providerId as string)
@@ -77,6 +79,10 @@ watch(
 )
 
 onMounted(async () => {
+  if (!authStore.isAuthenticated) {
+    await authStore.login(route.fullPath)
+    return
+  }
   if (appsStore.apps.length === 0) {
     await appsStore.fetchVisibleApps()
   }

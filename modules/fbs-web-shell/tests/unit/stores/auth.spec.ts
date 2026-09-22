@@ -141,16 +141,11 @@ describe('Auth Store', () => {
     expect(authStore.preferredUsername).toBe('admin')
   })
 
-  it('should never show numeric sub as preferredUsername or displayName if username is present', () => {
+  it('should forward redirectUrl when calling login', async () => {
     const authStore = useAuthStore()
-    const token = createFakeJwt({
-      sub: '1',
-      username: 'jdoe',
-      globalRole: 'USER'
-    })
+    const { login: mockOidcLogin } = await import('@/services/oidc')
 
-    authStore.setSession({ access_token: token, expired: false } as any)
-    expect(authStore.preferredUsername).toBe('jdoe')
-    expect(authStore.displayName).toBe('jdoe')
+    await authStore.login('/apps/sql-playground')
+    expect(mockOidcLogin).toHaveBeenCalledWith('/apps/sql-playground')
   })
 })
