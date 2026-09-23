@@ -56,7 +56,14 @@ export class AuthService {
       return true;
     }
     const token = this.loadToken();
-    return !!token && !this.isTokenExpired(token);
+    if (!token) {
+      return false;
+    }
+    try {
+      return !this.jwtHelper.isTokenExpired(token);
+    } catch {
+      return false;
+    }
   }
 
   public getAccessToken(): string {
@@ -192,13 +199,10 @@ export class AuthService {
    * @return Get token as string or null if no token exists.
    */
   public loadToken(): string {
-    return this.oauthService.getAccessToken() || localStorage.getItem(TOKEN_ID);
+    return localStorage.getItem(TOKEN_ID) || this.oauthService.getAccessToken();
   }
 
-  public storeToken(token: string, syncFromToken: boolean = true): void {
-    if (syncFromToken) {
-      this.syncServerTimeFromToken(token);
-    }
+  public storeToken(token: string, syncFromToken: boolean = false): void {
     localStorage.setItem(TOKEN_ID, token);
   }
 
@@ -211,12 +215,11 @@ export class AuthService {
   }
 
   private isTokenExpired(token: string): boolean {
-    const expirationDate = this.jwtHelper.getTokenExpirationDate(token);
-    if (expirationDate) {
-      return expirationDate.getTime() <= this.getCurrentServerTime();
+    try {
+      return this.jwtHelper.isTokenExpired(token);
+    } catch {
+      return true;
     }
-
-    return this.jwtHelper.isTokenExpired(token);
   }
 
   private syncServerTime(response: HttpResponse<any>): boolean {

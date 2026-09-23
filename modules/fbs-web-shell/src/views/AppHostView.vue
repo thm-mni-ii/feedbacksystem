@@ -65,8 +65,18 @@ const currentApp = computed(() => {
 
 const appSrc = computed(() => {
   if (!currentApp.value) return ''
-  const baseUrl = currentApp.value.url.replace(/\/+$/, '')
-  const sub = subPath.value ? (subPath.value.startsWith('/') ? subPath.value : `/${subPath.value}`) : ''
+  const rawUrl = currentApp.value.url.trim()
+  let baseUrl: string
+  if (rawUrl.startsWith('/') || !/^https?:\/\//i.test(rawUrl)) {
+    const normalizedPath = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`
+    baseUrl = `${window.location.origin}${normalizedPath}`
+  } else {
+    baseUrl = rawUrl
+  }
+  if (!baseUrl.endsWith('/')) {
+    baseUrl = `${baseUrl}/`
+  }
+  const sub = subPath.value ? (subPath.value.startsWith('/') ? subPath.value.substring(1) : subPath.value) : ''
   return baseUrl + sub
 })
 

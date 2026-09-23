@@ -106,7 +106,7 @@
               </td>
               <td>
                 <a
-                  :href="app.url"
+                  :href="resolveAppUrl(app.url)"
                   target="_blank"
                   rel="noopener"
                   class="text-decoration-none text-primary d-flex align-center text-caption font-family-monospace"
@@ -437,13 +437,25 @@ const rules = {
   slug: (v: string) =>
     /^[a-zA-Z0-9_-]+$/.test(v) || 'Nur alphanumerische Zeichen, Bindestriche und Unterstriche',
   url: (v: string) => {
+    if (!v) return 'Dieses Feld ist erforderlich'
+    if (v.startsWith('/')) return true
     try {
       new URL(v)
       return true
     } catch {
-      return 'Gültige URL erforderlich (z.B. https://example.com)'
+      return 'Gültige absolute (z.B. https://example.com) oder relative URL (z.B. /course-management/) erforderlich'
     }
   }
+}
+
+function resolveAppUrl(url: string): string {
+  if (!url) return ''
+  const trimmed = url.trim()
+  if (trimmed.startsWith('/') || !/^https?:\/\//i.test(trimmed)) {
+    const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+    return `${window.location.origin}${normalized}`
+  }
+  return trimmed
 }
 
 const filteredApps = computed(() => {

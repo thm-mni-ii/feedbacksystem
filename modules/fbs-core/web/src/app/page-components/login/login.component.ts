@@ -5,6 +5,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
 import { CookieService } from "ngx-cookie-service";
 import { GoToService } from "../../service/goto.service";
+import { EmbeddingService } from "../../service/embedding.service";
 
 /**
  * Manages the login page for Submissionchecker
@@ -24,10 +25,21 @@ export class LoginComponent implements OnInit {
     @Inject(DOCUMENT) private document: Document,
     private snackbar: MatSnackBar,
     private cookieService: CookieService,
-    private goToService: GoToService
+    private goToService: GoToService,
+    private embeddingService: EmbeddingService
   ) {}
 
   async ngOnInit() {
+    if (this.embeddingService && this.embeddingService.isEmbedded) {
+      const tokenLoaded = await this.embeddingService.waitForToken(2000);
+      if (tokenLoaded && this.auth.isAuthenticated()) {
+        this.navigateAfterAuthentication();
+        return;
+      }
+      this.router.navigate(["/courses"]);
+      return;
+    }
+
     const token = this.cookieService.get("jwt");
     if (token) {
       this.auth.storeToken(token);

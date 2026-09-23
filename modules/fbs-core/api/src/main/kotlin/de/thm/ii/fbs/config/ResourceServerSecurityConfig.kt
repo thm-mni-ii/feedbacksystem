@@ -46,6 +46,8 @@ open class ResourceServerSecurityConfig(
                 auth
                     .antMatchers(
                         "/actuator/health",
+                        "/actuator/health/**",
+                        "/health",
                         "/api/v1/legal/**",
                         "/api/v1/login/**",
                         "/results/**",

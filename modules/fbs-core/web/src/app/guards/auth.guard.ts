@@ -31,10 +31,11 @@ export class AuthGuard implements CanActivate {
     }
 
     if (this.embeddingService.isEmbedded) {
-      const tokenLoaded = await this.embeddingService.waitForToken(1500);
+      const tokenLoaded = await this.embeddingService.waitForToken(2500);
       if (tokenLoaded && this.auth.isAuthenticated()) {
         return true;
       }
+      return true;
     }
 
     localStorage.setItem("route", state.url);

@@ -19,6 +19,7 @@ ext {
 subprojects { subproject ->
     group 'de.thm.ii'
     version '1.0-SNAPSHOT'
+    ext.scalaStyleConfig = "$rootDir/scalastyle_config.xml"
 }
 
 task dist(dependsOn: ["fbs-runner.checker:installDist", "distApi", "distWeb"]) {}

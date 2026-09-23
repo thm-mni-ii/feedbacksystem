@@ -35,14 +35,17 @@ class RegisteredClientInitializer(
 ) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        val existing = registeredClientRepository.findByClientId(clientId)
-        val clientConfig = createRegisteredClient(existing?.id ?: UUID.randomUUID().toString())
-        registeredClientRepository.save(clientConfig)
+        val clientIds = clientId.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        clientIds.forEach { cid ->
+            val existing = registeredClientRepository.findByClientId(cid)
+            val clientConfig = createRegisteredClient(existing?.id ?: UUID.randomUUID().toString(), cid)
+            registeredClientRepository.save(clientConfig)
+        }
     }
 
-    private fun createRegisteredClient(id: String = UUID.randomUUID().toString()): RegisteredClient {
+    private fun createRegisteredClient(id: String = UUID.randomUUID().toString(), targetClientId: String = clientId): RegisteredClient {
         val builder = RegisteredClient.withId(id)
-            .clientId(clientId)
+            .clientId(targetClientId)
             .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .scope(OidcScopes.OPENID)

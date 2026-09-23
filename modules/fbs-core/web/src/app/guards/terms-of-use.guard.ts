@@ -12,6 +12,7 @@ import { catchError, map, switchMap, take } from "rxjs/operators";
 import { DataprivacyDialogComponent } from "../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
 import { AuthService } from "../service/auth.service";
 import { LegalService } from "../service/legal.service";
+import { EmbeddingService } from "../service/embedding.service";
 
 /**
  * Blocks protected routes until the authenticated user accepted the terms of use.
@@ -26,7 +27,8 @@ export class TermsOfUseGuard implements CanActivate, CanActivateChild {
     private auth: AuthService,
     private dialog: MatDialog,
     private legalService: LegalService,
-    private router: Router
+    private router: Router,
+    private embeddingService: EmbeddingService
   ) {}
 
   canActivate(
@@ -89,6 +91,9 @@ export class TermsOfUseGuard implements CanActivate, CanActivateChild {
 
   private logoutAndRedirect(targetUrl: string): Observable<boolean> {
     this.acceptedUserIds.clear();
+    if (this.embeddingService.isEmbedded) {
+      return of(true);
+    }
     this.auth.logout();
     localStorage.setItem("route", targetUrl);
     this.router.navigate(["login"]);

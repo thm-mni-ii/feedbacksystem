@@ -2,13 +2,14 @@ package de.thm.ii.fbs.services.security
 
 import java.util.Date
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
-import de.thm.ii.fbs.model.{CourseRole, User}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
-import de.thm.ii.fbs.util.ScalaObjectMapper
+import de.thm.ii.fbs.util.{DB, ScalaObjectMapper}
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.context.SecurityContextHolder
@@ -25,6 +26,8 @@ class AuthService {
   private val userService: UserService = null
   @Autowired
   private val crs: CourseRegistrationService = null
+  @Autowired
+  private implicit val jdbc: JdbcTemplate = null
   @Autowired(required = false)
   private val jwtDecoder: JwtDecoder = null
 
@@ -49,6 +52,27 @@ class AuthService {
     // Deprecated for OIDC PKCE flow
   }
 
+  private def getOrProvisionUser(jwt: Jwt): Option[User] = {
+    Try(jwt.getSubject.toInt).toOption.flatMap { uid =>
+      userService.find(uid).orElse {
+        val username = Option(jwt.getClaimAsString("preferred_username"))
+          .orElse(Option(jwt.getClaimAsString("username")))
+          .getOrElse(s"user_$uid")
+        val prename = Option(jwt.getClaimAsString("given_name")).getOrElse("User")
+        val surname = Option(jwt.getClaimAsString("family_name")).getOrElse(s"$uid")
+        val email = Option(jwt.getClaimAsString("email")).orNull
+        val roleStr = Option(jwt.getClaimAsString("globalRole")).getOrElse("USER")
+        val role = GlobalRole.parse(roleStr)
+
+        Try {
+          DB.insert("INSERT INTO user (user_id, prename, surname, email, username, global_role) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = VALUES(username), global_role = VALUES(global_role);",
+            uid, prename, surname, email, username, role.id)
+        }
+        userService.find(uid)
+      }
+    }
+  }
+
   /**
     * Check for valid authentication information and return the user associated with the authentication.
     * @param req The http request
@@ -58,9 +82,8 @@ class AuthService {
   def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = {
     val userFromSecurityContext = Option(SecurityContextHolder.getContext.getAuthentication)
       .map(_.getPrincipal)
-      .collect { case jwt: Jwt => jwt.getSubject }
-      .flatMap(sub => Try(sub.toInt).toOption)
-      .flatMap(userService.find)
+      .collect { case jwt: Jwt => jwt }
+      .flatMap(getOrProvisionUser)
 
     userFromSecurityContext.orElse(authorizeRequest(req).flatMap(userService.find)) match {
       case Some(user) => user
@@ -73,9 +96,12 @@ class AuthService {
     * @param token The authentication token
     * @return The user.
     */
-  def authorize(token: String): User = userService.find(authorizeToken(token)) match {
-    case Some(user) => user
-    case None => throw new UnauthorizedException
+  def authorize(token: String): User = {
+    val userFromJwt = Option(jwtDecoder).flatMap(d => Try(d.decode(token)).toOption).flatMap(getOrProvisionUser)
+    userFromJwt.orElse(userService.find(authorizeToken(token))) match {
+      case Some(user) => user
+      case None => throw new UnauthorizedException
+    }
   }
 
   private def authorizeRequest(request: HttpServletRequest): Option[Int] =

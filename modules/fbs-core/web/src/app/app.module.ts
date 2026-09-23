@@ -79,6 +79,7 @@ import {
 import { InfoComponent } from "./tool-components/info/info.component";
 import { tap } from "rxjs/operators";
 import { AuthService } from "./service/auth.service";
+import { EmbeddingService } from "./service/embedding.service";
 import { ReversePipe } from "./pipes/reverse.pipe";
 import { TaskPointsDialogComponent } from "./dialogs/task-points-dialog/task-points-dialog.component";
 import { GoToComponent } from "./page-components/goto/goto.component";
@@ -176,10 +177,15 @@ export class AuthInterceptor implements HttpInterceptor {
             error.status === 401 &&
             !req.url.includes("/api/v1/login")
           ) {
-            if (authService) {
-              authService.logout();
+            const embeddingService = this.injector.get(EmbeddingService, null);
+            if (embeddingService && embeddingService.isEmbedded) {
+              embeddingService.requestAuthToken();
+            } else {
+              if (authService) {
+                authService.logout();
+              }
+              this.router.navigate(["login"]);
             }
-            this.router.navigate(["login"]);
           }
         }
       )

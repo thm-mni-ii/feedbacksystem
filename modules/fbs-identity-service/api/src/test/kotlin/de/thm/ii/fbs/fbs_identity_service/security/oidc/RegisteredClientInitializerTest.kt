@@ -67,4 +67,25 @@ class RegisteredClientInitializerTest {
             }
         )
     }
+
+    @Test
+    fun `registers multiple comma-separated client IDs`() {
+        val multiInitializer = RegisteredClientInitializer(
+            registeredClientRepository,
+            clientId = "client-one, client-two",
+            redirectUri = "http://localhost:9999/test-callback",
+            accessTokenTtlMinutes = 10,
+            authorizationCodeTtlMinutes = 5
+        )
+
+        whenever(registeredClientRepository.findByClientId("client-one")).thenReturn(null)
+        whenever(registeredClientRepository.findByClientId("client-two")).thenReturn(null)
+
+        multiInitializer.run(DefaultApplicationArguments())
+
+        verify(registeredClientRepository).findByClientId("client-one")
+        verify(registeredClientRepository).findByClientId("client-two")
+        verify(registeredClientRepository).save(argThat { clientId == "client-one" })
+        verify(registeredClientRepository).save(argThat { clientId == "client-two" })
+    }
 }

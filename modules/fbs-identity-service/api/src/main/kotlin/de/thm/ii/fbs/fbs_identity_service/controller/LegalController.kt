@@ -92,6 +92,17 @@ class LegalController(private val userService: UserService, private val currentU
     }
 
     @Operation(
+        summary = "Get terms of use acceptance status by user id (legacy compatibility)",
+        description = "Returns whether the user has accepted the terms of use."
+    )
+    @GetMapping("/termsofuse/{uid}", produces = [APPLICATION_JSON_VALUE])
+    fun getTermsOfUseAcceptanceStatusByUid(@PathVariable uid: Long): TermsOfUseAcceptanceResponse {
+        return TermsOfUseAcceptanceResponse(
+            accepted = userService.getPrivacyStatusOf(uid)
+        )
+    }
+
+    @Operation(
         summary = "Accept terms of use",
         description = "Marks the terms of use as accepted for the current user."
     )
@@ -112,5 +123,15 @@ class LegalController(private val userService: UserService, private val currentU
             ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not authenticated")
 
         userService.updateAgreementToPrivacyFor(user.id, true)
+    }
+
+    @Operation(
+        summary = "Accept terms of use by user id (legacy compatibility)",
+        description = "Marks the terms of use as accepted for the user."
+    )
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping("/termsofuse/{uid}")
+    fun acceptTermsOfUseByUid(@PathVariable uid: Long) {
+        userService.updateAgreementToPrivacyFor(uid, true)
     }
 }

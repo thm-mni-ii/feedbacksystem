@@ -19,7 +19,7 @@
         <!-- External link -->
         <v-list-item
           v-if="app.embedMode === 'EXTERNAL'"
-          :href="app.url"
+          :href="resolveAppUrl(app.url)"
           target="_blank"
           rel="noopener noreferrer"
           :prepend-icon="formatIcon(app.icon)"
@@ -322,6 +322,16 @@ function navigateToDefault() {
   } else {
     router.push('/')
   }
+}
+
+function resolveAppUrl(url: string): string {
+  if (!url) return ''
+  const trimmed = url.trim()
+  if (trimmed.startsWith('/') || !/^https?:\/\//i.test(trimmed)) {
+    const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+    return `${window.location.origin}${normalized}`
+  }
+  return trimmed
 }
 
 function toggleTheme() {
