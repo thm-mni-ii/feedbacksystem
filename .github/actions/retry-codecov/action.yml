@@ -10,7 +10,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v7
       name: Upload Coverage Report
       id: codecov
       with:
@@ -22,7 +22,7 @@ runs:
       shell: bash
       id: sleep-1
       if: always() && steps.codecov.outcome == 'failure'
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v7
       name: Upload Coverage Report (Retry 1)
       id: codecov-1
       if: always() && steps.codecov.outcome == 'failure'
@@ -35,7 +35,7 @@ runs:
       shell: bash
       id: sleep-2
       if: always() && steps.codecov-1.outcome == 'failure'
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v7
       name: Upload Coverage Report (Retry 2)
       id: codecov-2
       if: always() && steps.codecov-1.outcome == 'failure'

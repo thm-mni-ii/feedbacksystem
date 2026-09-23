@@ -282,7 +282,7 @@ services:
     ports:
       - "127.0.0.1:8081:8081"
     environment:
-      BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
+      BASH_DOCKER: ghcr.io/thm-mni-ii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi
       INSIDE_DOCKER: "true"
       RESULT_SERVER_HOST: core
