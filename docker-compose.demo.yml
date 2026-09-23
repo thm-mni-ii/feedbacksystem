@@ -1,0 +1,139 @@
+# Demo environment for the FBS Identity Service.
+#
+# Services:
+#   mysql1           MySQL 8 with the fbs_identity database (schema created via Flyway)
+#   identity-service Spring Boot identity service (OIDC authorization server + SAML SP)
+#   keycloak         Keycloak as local SAML IdP (realm "fbs" imported from demo/keycloak)
+#   demo-client      Static OIDC test client on http://127.0.0.1:4200
+#   demo-seed        One-shot job that seeds a local admin user after Flyway ran
+#
+# Usage (from the repository root):
+#   docker compose -f docker-compose.demo.yml up --build
+#
+# See demo/README.md for details.
+
+name: fbs-identity-demo
+
+services:
+  mysql1:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: demoRootPassword1
+      MYSQL_DATABASE: fbs
+    volumes:
+      - demo-mysql-data:/var/lib/mysql
+      # creates the fbs_identity schema on first startup
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      demo:
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 6
+
+  identity-service:
+    build:
+      context: modules/fbs-identity-service/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - mysql1
+      - keycloak
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./secrets/identity-signing-key.p12:/run/secrets/identity-signing-key.p12:ro
+    environment:
+      # enables the SAML relying-party registration for the local Keycloak IdP
+      SPRING_PROFILES_ACTIVE: saml-local
+      # the metadata URI from application-saml-local.yaml is overridden so the
+      # container can reach Keycloak through the docker network; the browser
+      # still uses http://localhost:8090 (Keycloak hostname setting)
+      SPRING_SECURITY_SAML2_RELYINGPARTY_REGISTRATION_KEYCLOAK_ASSERTINGPARTY_METADATA_URI: http://keycloak:8080/realms/fbs/protocol/saml/descriptor
+      MYSQL_URI: jdbc:mysql://mysql1:3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: demoRootPassword1
+      OIDC_ISSUER: http://localhost:8080
+      OIDC_CLIENT_ID: fbs-test-client
+      OIDC_CLIENT_REDIRECT_URI: http://127.0.0.1:4200/oauth2/callback
+      OIDC_SIGNING_KEY_LOCATION: /run/secrets/identity-signing-key.p12
+      OIDC_SIGNING_KEY_STORE_PASSWORD: changeit
+      OIDC_SIGNING_KEY_ALIAS: identity-signing
+      OIDC_SIGNING_KEY_PASSWORD: changeit
+    networks:
+      demo:
+    healthcheck:
+      test: curl -f http://localhost:8080/health
+      timeout: 10s
+      interval: 10s
+      start_period: 30s
+      retries: 6
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    restart: unless-stopped
+    command:
+      - start-dev
+      - --import-realm
+      - --hostname=http://localhost:8090
+      - --hostname-strict=false
+      - --hostname-backchannel-dynamic=false
+      - --health-enabled=true
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "127.0.0.1:8090:8080"
+    volumes:
+      - ./demo/keycloak:/opt/keycloak/data/import:ro
+    networks:
+      demo:
+    #healthcheck:
+      # the keycloak image has no curl; use bash /dev/tcp instead
+      #test: bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080 && printf "GET /health/ready HTTP/1.0\r\n\r\n" >&3 && grep -q "200 OK" <&3'
+      #timeout: 10s
+      #interval: 10s
+      #start_period: 30s
+      #retries: 12
+
+  demo-client:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      identity-service:
+        condition: service_started
+    ports:
+      - "127.0.0.1:4200:80"
+    volumes:
+      - ./demo/client/index.html:/usr/share/nginx/html/index.html:ro
+      - ./demo/client/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      demo:
+
+  demo-seed:
+    image: mysql:8.0
+    depends_on:
+      # flyway migrations run during identity-service startup, so the user
+      # table only exists once the service is healthy
+      identity-service:
+        condition: service_healthy
+    environment:
+      MYSQL_ROOT_PASSWORD: demoRootPassword1
+    volumes:
+      - ./demo/seed:/seed:ro
+    command: >
+      sh -c "mysql -h mysql1 -u root -p$$MYSQL_ROOT_PASSWORD fbs_identity < /seed/01_local_users.sql
+             && echo 'demo seed applied'"
+    networks:
+      demo:
+    restart: "no"
+
+volumes:
+  demo-mysql-data:
+
+networks:
+  demo:

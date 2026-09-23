@@ -2,14 +2,13 @@ package de.thm.ii.fbs.controller.v2
 
 import de.thm.ii.fbs.model.v2.taskprovider.CreateTaskProviderRequest
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderDTO
-import de.thm.ii.fbs.model.v2.taskprovider.UpdateTaskProviderRequest
 import de.thm.ii.fbs.services.v2.taskprovider.TaskProviderService
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 
 class TaskProviderControllerTest {
     private val service: TaskProviderService = mock(TaskProviderService::class.java)

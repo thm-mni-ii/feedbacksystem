@@ -35,34 +35,32 @@ class TaskProviderCheckerService extends CheckerService with CheckerServiceHandl
     * @param fu           the User model
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
-    val task = taskService.getOne(taskID) match {
-      case Some(t) => t
+    taskService.getOne(taskID) match {
+      case Some(task) =>
+        val solUrl = try {
+          minioStorageService.urlToSolutionFile(submissionID)
+        } catch {
+          case e: Exception =>
+            logger.warn(s"Could not resolve MinIO solution URL for submission $submissionID: ${e.getMessage}")
+            null
+        }
+
+        dispatcherService.dispatchEvaluation(
+          cc.checkerType,
+          submissionID,
+          cc.id,
+          taskID,
+          task.courseID,
+          fu.id,
+          fu.username,
+          task.mediaType,
+          null,
+          solUrl,
+          null
+        )
       case None =>
         logger.warn(s"Task $taskID not found when notifying TaskProvider ${cc.checkerType}")
-        return
     }
-
-    val solUrl = try {
-      minioStorageService.urlToSolutionFile(submissionID)
-    } catch {
-      case e: Exception =>
-        logger.warn(s"Could not resolve MinIO solution URL for submission $submissionID: ${e.getMessage}")
-        null
-    }
-
-    dispatcherService.dispatchEvaluation(
-      cc.checkerType,
-      submissionID,
-      cc.id,
-      taskID,
-      task.courseID,
-      fu.id,
-      fu.username,
-      task.mediaType,
-      null,
-      solUrl,
-      null
-    )
   }
 
   /**
