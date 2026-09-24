@@ -204,6 +204,9 @@ export class AuthService {
 
   public storeToken(token: string, syncFromToken: boolean = false): void {
     localStorage.setItem(TOKEN_ID, token);
+    if (syncFromToken) {
+      this.syncServerTimeFromToken(token);
+    }
   }
 
   public requestNewToken(): Observable<void> {
