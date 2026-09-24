@@ -16,6 +16,16 @@
   }
 }
 
+:host-context(.dark-theme) .downloadBtn,
+:host-context(.dark-theme) .submission-inactive-container button,
+:host-context(.dark-theme) .closeBtn {
+  color: rgba(255, 255, 255, 0.7);
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
 .submission-inactive-container button {
   color: rgba(0, 0, 0, 0.54);
 
@@ -30,6 +40,16 @@
 
   &:hover {
     color: black;
+  }
+}
+
+:host-context(.dark-theme) .submitBtn {
+  color: rgba(255, 255, 255, 0.87);
+  background-color: rgba(255, 255, 255, 0.12);
+
+  &:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.2);
   }
 }
 
@@ -68,6 +88,15 @@
   width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+:host-context(.dark-theme) .courseBtn {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.87);
+
+  &:hover {
+    color: #ffffff;
+  }
 }
 
 .description {
@@ -147,6 +176,23 @@
     }
   }
 
+  :host-context(.dark-theme) & button {
+    color: rgba(255, 255, 255, 0.7);
+
+    &:hover {
+      color: #ffffff;
+    }
+
+    mat-icon {
+      border: rgba(255, 255, 255, 0.38) 2px solid;
+
+      &:hover {
+        border: rgba(255, 255, 255, 0.54) 2px solid;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.38);
+      }
+    }
+  }
+
   // margin-left: 10px;
   // margin-right: 10px;
   // cursor: pointer;
@@ -207,6 +253,16 @@
       }
     }
   }
+
+  :host-context(.dark-theme) .error-block {
+    background: #2b1515;
+    border: 1px solid #6e2a2a;
+    color: #ff8a80;
+
+    .error-list pre {
+      color: #ffcdd2;
+    }
+  }
 }
 
 .staged-feedback {
@@ -224,6 +280,12 @@
   &.pending {
     justify-content: flex-start;
   }
+}
+
+:host-context(.dark-theme) .staged-feedback {
+  border: 1px solid #1e4d75;
+  background: #132438;
+  color: #90caf9;
 }
 
 .eye-btn {

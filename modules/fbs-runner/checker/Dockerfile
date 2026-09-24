@@ -1,9 +1,9 @@
-FROM gradle:jdk18 AS BUILD
+FROM gradle:jdk18 AS build
 
 COPY . /build
 WORKDIR /build
 
-RUN gradle fbs-runner.checker:installDist
+RUN chmod +x ./gradlew && ./gradlew :fbs-runner.checker:installDist --no-daemon
 
 FROM eclipse-temurin:21.0.1_12-jre-alpine
 

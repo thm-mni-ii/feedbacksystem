@@ -3,6 +3,7 @@ plugins {
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.5.0"
     id "org.jetbrains.kotlin.jvm" version "1.9.23"
+    id "org.jetbrains.kotlin.plugin.spring" version "1.9.23"
     id "org.jetbrains.kotlin.plugin.jpa" version "1.7.20"
     id "org.jlleitschuh.gradle.ktlint" version "11.3.2"
 }
@@ -33,7 +34,7 @@ repositories {
 }
 
 scalastyle {
-    config = file(scalaStyleConfig)
+    config = file(project.findProperty("scalaStyleConfig") ?: "${rootDir}/scalastyle_config.xml")
     failOnWarning = true
 }
 
@@ -72,7 +73,7 @@ dependencies {
     implementation 'org.springframework.data:spring-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    //implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'io.projectreactor:reactor-core:3.5.6'
     implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     implementation project(':fbs-core.math-parser')

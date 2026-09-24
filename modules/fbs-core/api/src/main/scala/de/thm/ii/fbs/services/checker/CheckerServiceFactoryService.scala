@@ -26,6 +26,7 @@ class CheckerServiceFactoryService {
     case "sql-checker" => applicationContext.getBean(classOf[LegacySqlCheckerService])
     case "ai-supported-sql-analyser" => applicationContext.getBean(classOf[AiSupportedSqlAnalysisService])
     case "sql-runner" => applicationContext.getBean(classOf[SqlRunnerCheckerService])
+    case "task-provider" => applicationContext.getBean(classOf[TaskProviderCheckerService])
     case _: String => applicationContext.getBean(classOf[RemoteCheckerService])
   }
 }

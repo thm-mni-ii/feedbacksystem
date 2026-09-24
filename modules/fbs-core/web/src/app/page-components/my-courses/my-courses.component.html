@@ -1,14 +1,29 @@
 <div class="container">
-  <mat-form-field class="search" appearance="outline">
-    <mat-label>{{ "course.search" | i18nextEager }}</mat-label>
-    <input
-      type="text"
-      attr.aria-label="{{ 'course.search' | i18nextEager }}"
-      matInput
-      [formControl]="control"
-    />
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
+  <div class="header-actions">
+    <mat-form-field class="search" appearance="outline">
+      <mat-label>{{ "course.search" | i18nextEager }}</mat-label>
+      <input
+        type="text"
+        attr.aria-label="{{ 'course.search' | i18nextEager }}"
+        matInput
+        [formControl]="control"
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="all-courses-action">
+      <button
+        mat-raised-button
+        color="accent"
+        routerLink="/courses/search"
+        matTooltip="{{ 'sidebar.label.allCourses' | i18nextEager }}"
+      >
+        <mat-icon>search</mat-icon>&nbsp;{{
+          "sidebar.label.allCourses" | i18nextEager
+        }}
+      </button>
+    </div>
+  </div>
 
   <app-course-preview-w-progress
     *ngFor="let course of filteredCourses | async"

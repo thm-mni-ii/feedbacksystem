@@ -79,11 +79,11 @@ object DockerService {
   /**
     * Get the Bash Docker image name
     *
-    * Read the name form the env `BASH_DOCKER`, will fallback to `thmmniii/fbs-runtime-bash:dev-latest`
+    * Read the name form the env `BASH_DOCKER`, will fallback to `ghcr.io/thm-mni-ii/fbs-runtime-bash:dev-latest`
     *
     * @return Bash Docker image name
     */
-  def getBashImage: String = Properties.envOrElse("BASH_DOCKER", "thmmniii/fbs-runtime-bash:dev-latest")
+  def getBashImage: String = Properties.envOrElse("BASH_DOCKER", "ghcr.io/thm-mni-ii/fbs-runtime-bash:dev-latest")
 
   /**
     * Convert the MountLocation to the Host Paths.

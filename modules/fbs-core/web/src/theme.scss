@@ -13,3 +13,15 @@ $warn: mat.define-palette(mat.$red-palette);
 $light-theme: mat.define-light-theme($primary, $accent, $warn);
 
 @include mat.all-component-themes($light-theme);
+
+$dark-primary: mat.define-palette(mat.$blue-grey-palette, 700, 600, 800);
+$dark-accent: mat.define-palette(mat.$indigo-palette, 300, 200, 400);
+$dark-warn: mat.define-palette(mat.$red-palette);
+
+$dark-theme: mat.define-dark-theme($dark-primary, $dark-accent, $dark-warn);
+
+.dark-theme {
+  @include mat.all-component-colors($dark-theme);
+  background-color: #303030;
+  color: #fff;
+}

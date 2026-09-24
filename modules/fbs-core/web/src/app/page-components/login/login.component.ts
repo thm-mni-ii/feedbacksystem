@@ -5,6 +5,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
 import { CookieService } from "ngx-cookie-service";
 import { GoToService } from "../../service/goto.service";
+import { EmbeddingService } from "../../service/embedding.service";
 
 /**
  * Manages the login page for Submissionchecker
@@ -24,21 +25,43 @@ export class LoginComponent implements OnInit {
     @Inject(DOCUMENT) private document: Document,
     private snackbar: MatSnackBar,
     private cookieService: CookieService,
-    private goToService: GoToService
+    private goToService: GoToService,
+    private embeddingService: EmbeddingService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    if (this.embeddingService && this.embeddingService.isEmbedded) {
+      const tokenLoaded = await this.embeddingService.waitForToken(2000);
+      if (tokenLoaded && this.auth.isAuthenticated()) {
+        this.navigateAfterAuthentication();
+        return;
+      }
+      this.router.navigate(["/courses"]);
+      return;
+    }
+
     const token = this.cookieService.get("jwt");
     if (token) {
       this.auth.storeToken(token);
       this.cookieService.delete("jwt");
     }
 
+    await this.auth.tryLogin();
+
     if (this.auth.isAuthenticated()) {
       this.navigateAfterAuthentication();
+      return;
     }
 
     this.goToService.clearGoTo();
+
+    if (
+      this.router.url.includes("oauth2/callback") ||
+      this.router.url === "/login" ||
+      this.router.url === "/login/"
+    ) {
+      this.auth.login();
+    }
   }
 
   /**
@@ -71,13 +94,17 @@ export class LoginComponent implements OnInit {
   }
 
   /**
-   * Redirect to cas login
+   * Redirect to OIDC login
    */
   casLogin() {
-    const getUrl = window.location;
-    const baseUrl = getUrl.protocol + "//" + getUrl.host;
-    this.document.location.href =
-      "https://cas.thm.de/cas/login?service=" + baseUrl + "/api/v1/login/cas";
+    this.auth.login();
+  }
+
+  /**
+   * Redirect to OIDC login
+   */
+  oidcLogin() {
+    this.auth.login();
   }
 
   private navigateAfterAuthentication() {

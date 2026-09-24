@@ -5,6 +5,7 @@ import json
 import os
 from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
+from jwt import PyJWKClient
 from flask_session import Session
 import flask
 import jwt
@@ -24,6 +25,29 @@ URL_BASE_PATH = os.getenv("URL_BASE_PATH")
 SECRET_KEY = os.getenv("JWT_SECRET")
 FBS_BASE_URL = os.getenv("FBS_BASE_URL")
 FBS_TLS_NO_VERIFY = os.getenv("FBS_TLS_NO_VERIFY") == "true"
+JWKS_URL = os.getenv("OIDC_JWK_SET_URI", "http://identity-service:8080/oauth2/jwks")
+OIDC_ISSUER = os.getenv("OIDC_ISSUER", "http://localhost:8080")
+
+jwks_client = PyJWKClient(JWKS_URL)
+
+
+def verify_token(token: str):
+    """
+    Verifies the JWT token using JWKS (RS256) or legacy secret key (HS256).
+    """
+    try:
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        return jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["RS256"],
+            issuer=OIDC_ISSUER,
+            options={"verify_aud": False},
+        )
+    except Exception:
+        if SECRET_KEY:
+            return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        raise
 
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, "./assets/style.css"]
@@ -92,7 +116,7 @@ def get_datas(url, daten):
     the real names of the courses in a list
     """
     try:
-        token = jwt.decode(daten, SECRET_KEY, algorithms=["HS256"])
+        token = verify_token(daten)
     # pylint: disable-next=broad-exception-caught
     except Exception:
         return (
@@ -102,12 +126,35 @@ def get_datas(url, daten):
             [],
             [],
         )
+    user_id = token.get("sub") or token.get("id")
     course_access = []
-    course_roles = json.loads(token["courseRoles"])
+    course_roles_raw = token.get("courseRoles")
 
-    for course, role in course_roles.items():
-        if role in ("DOCENT", "TUTOR"):
-            course_access.append(int(course))
+    if course_roles_raw:
+        course_roles = (
+            json.loads(course_roles_raw)
+            if isinstance(course_roles_raw, str)
+            else course_roles_raw
+        )
+        for course, role in course_roles.items():
+            if role in ("DOCENT", "TUTOR"):
+                course_access.append(int(course))
+
+    try:
+        courses_resp = requests.get(
+            f"{FBS_BASE_URL}/api/v1/users/{user_id}/courses",
+            headers={"Authorization": f"Bearer {daten}"},
+            verify=not FBS_TLS_NO_VERIFY,
+            timeout=10,
+        )
+        if courses_resp.status_code == 200:
+            courses = courses_resp.json()
+            if not course_access:
+                course_access = [int(course["id"]) for course in courses]
+        else:
+            courses = []
+    except Exception:
+        courses = []
 
     if not course_access:
         return (
@@ -118,12 +165,6 @@ def get_datas(url, daten):
             [],
         )
 
-    courses = requests.get(
-        f"{FBS_BASE_URL}/api/v1/users/{token['id']}/courses",
-        headers={"Authorization": f"Bearer {daten}"},
-        verify=not FBS_TLS_NO_VERIFY,
-        timeout=10,
-    ).json()
     courses_dict = {course["id"]: course["name"] for course in courses}
 
     return add_components(), get_data(course_access), courses_dict

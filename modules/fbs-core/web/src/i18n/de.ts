@@ -107,6 +107,7 @@ export const germanTranslation = {
   "course.not-found.message":
     "Entschuldigung, leider existiert die von Ihnen aufgerufenen Seite nicht.",
   "course.not-found.backHome": "Zurück zur Startseite",
+  "course.tooltip.backToOverview": "Zurück zur Kursübersicht",
   "course.tabs.tasks": "Aufgaben",
   "course.tabs.groups": "Gruppen",
   "result.comparison.resultsOfSubmissions": "Ergebnisse der Abgaben",

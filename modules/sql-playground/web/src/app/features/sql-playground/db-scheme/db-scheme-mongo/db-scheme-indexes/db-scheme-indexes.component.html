@@ -1,0 +1,14 @@
+<div>
+  <p class="title">Indexes</p>
+  <mat-expansion-panel *ngFor="let entry of indexes">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ entry.collection }}</mat-panel-title>
+    </mat-expansion-panel-header>
+    <ul class="attribute-list">
+      <li *ngFor="let idx of entry.indexes">
+        <span class="attribute"> Name: {{ idx.name }} </span>
+        <span class="attribute"> Felder: {{ idx.key | json }} </span>
+      </li>
+    </ul>
+  </mat-expansion-panel>
+</div>

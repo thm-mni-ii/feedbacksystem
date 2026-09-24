@@ -1,0 +1,181 @@
+/* File: src/main/resources/static/css/login.css */
+@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&family=Roboto:wght@300;400;500;700&display=swap');
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.fbs-login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.fbs-card-container {
+  background: url('../images/login-bg.jpg') center center / cover no-repeat;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 24px 16px;
+  min-height: calc(100vh - 180px);
+}
+
+.fbs-card-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+
+.fbs-github-link {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10;
+  text-decoration: none;
+}
+
+.fbs-github-text {
+  color: var(--fbs-primary);
+  font-family: 'Indie Flower', cursive, sans-serif;
+  font-size: 2rem;
+  text-shadow: 4px 4px 12px #ffffff, -2px -2px 8px #ffffff;
+  margin: 0 8px 0 0;
+  user-select: none;
+}
+
+.fbs-github-arrow {
+  width: 40px;
+  height: auto;
+  margin-right: 8px;
+  filter: drop-shadow(4px 4px 4px rgba(255, 255, 255, 0.9));
+  user-select: none;
+}
+
+.fbs-github-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--fbs-primary);
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.fbs-github-button:hover {
+  background-color: var(--fbs-primary-dark);
+  transform: scale(1.08);
+}
+
+.fbs-github-button img,
+.fbs-github-button svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Footer / Legal Links */
+.fbs-footer {
+  text-align: center;
+  padding: 16px;
+  background-color: var(--fbs-surface);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.8125rem;
+  color: var(--fbs-text-secondary);
+}
+
+.fbs-footer a {
+  color: var(--fbs-primary);
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.fbs-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Spinner in submit button */
+.fbs-spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: fbs-spin 0.8s linear infinite;
+  margin-left: 8px;
+}
+
+.is-submitting .fbs-spinner {
+  display: inline-block;
+}
+
+@keyframes fbs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Rules */
+@media screen and (max-width: 1000px) {
+  .fbs-github-text,
+  .fbs-github-arrow {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .fbs-header {
+    padding: 24px 12px 18px;
+  }
+
+  .fbs-header h1 {
+    font-size: 2.25rem;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .fbs-header h2 {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .fbs-card {
+    padding: 24px 20px;
+    max-width: 100%;
+  }
+
+  .fbs-card-title {
+    font-size: 1.25rem;
+    margin-bottom: 18px;
+  }
+
+  .fbs-github-link {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .fbs-github-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .fbs-github-button img,
+  .fbs-github-button svg {
+    width: 22px;
+    height: 22px;
+  }
+}

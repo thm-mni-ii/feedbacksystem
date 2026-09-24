@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { AuthService } from "./service/auth.service";
+import { EmbeddingService } from "./service/embedding.service";
 
 /**
  * Component that routes from login to app
@@ -10,9 +11,15 @@ import { AuthService } from "./service/auth.service";
   styleUrls: ["./app.component.scss"],
 })
 export class AppComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private embeddingService: EmbeddingService
+  ) {}
 
   ngOnInit(): void {
     this.authService.startTokenAutoRefresh();
+    if (this.embeddingService.isEmbedded) {
+      this.embeddingService.initHandshake();
+    }
   }
 }
