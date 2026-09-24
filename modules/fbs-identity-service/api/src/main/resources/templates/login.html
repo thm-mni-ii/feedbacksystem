@@ -44,8 +44,8 @@
 
       <!-- Federated SAML SSO Option -->
       <div th:if="${samlEnabled}">
-        <a th:href="@{${samlLoginUrl}}" class="fbs-button fbs-button-sso" id="sso-login-btn" role="button">
-          Login with SSO / Keycloak
+        <a th:href="@{${samlLoginUrl}}" class="fbs-button fbs-button-sso" id="sso-login-btn" role="button" th:text="${samlButtonText}">
+          Login with THM
         </a>
 
         <div class="fbs-divider-block" aria-hidden="true">

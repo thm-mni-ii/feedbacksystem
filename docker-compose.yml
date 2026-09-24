@@ -247,7 +247,7 @@ services:
       fbs:
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2022-10-29T06-21-33Z
+    image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"

@@ -81,7 +81,7 @@ jobs:
         if: ${{ inputs.startMinioService }}
         run: >
           docker run -d --rm --name minio -e MINIO_ROOT_USER=admin
-          -e MINIO_ROOT_PASSWORD=SqfyBWhiFGr7FK60cVR2rel -p 127.0.0.1:9010:9000 -p 127.0.0.1:9011:9001 quay.io/minio/minio:RELEASE.2022-10-29T06-21-33Z
+          -e MINIO_ROOT_PASSWORD=SqfyBWhiFGr7FK60cVR2rel -p 127.0.0.1:9010:9000 -p 127.0.0.1:9011:9001 docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
           server --console-address ":9001" /data
       - uses: actions/checkout@v7
       - name: Set up JDK 11
