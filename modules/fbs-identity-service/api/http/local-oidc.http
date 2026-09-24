@@ -1,0 +1,118 @@
+@baseUrl = http://localhost:8080
+@clientId = fbs-test-client
+@redirectUri = http://127.0.0.1:4200/oauth2/callback
+
+
+# OIDC Authorization Code Flow with PKCE
+#
+# Before starting a new authorization flow:
+#
+# 1. Generate PKCE values:
+#
+#    node http/generate-pkce.mjs
+#
+# 2. Use the generated code challenge and state in the browser:
+#
+#    http://localhost:8080/oauth2/authorize
+#      ?response_type=code
+#      &client_id=fbs-test-client
+#      &redirect_uri=http://127.0.0.1:4200/oauth2/callback
+#      &scope=openid%20profile
+#      &code_challenge=<CODE_CHALLENGE>
+#      &code_challenge_method=S256
+#      &state=<STATE>
+#
+# 3. Authenticate using local login or SAML.
+#
+# 4. Verify that the callback contains the same state:
+#
+#    http://127.0.0.1:4200/oauth2/callback
+#      ?code=<AUTHORIZATION_CODE>
+#      &state=<STATE>
+#
+# 5. Copy the authorization code and the corresponding code verifier
+#    into the token exchange below.
+#
+# Authorization codes can only be used once.
+# Generate a new PKCE pair for every new authorization request.
+
+
+### OIDC provider metadata
+GET {{baseUrl}}/.well-known/openid-configuration
+
+
+### OAuth 2.0 authorization server metadata
+GET {{baseUrl}}/.well-known/oauth-authorization-server
+
+
+### JWKS
+GET {{baseUrl}}/oauth2/jwks
+
+
+### Exchange authorization code - USER
+@authorizationCode = REPLACE_WITH_AUTHORIZATION_CODE
+@codeVerifier = REPLACE_WITH_CODE_VERIFIER
+
+POST {{baseUrl}}/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&
+client_id={{clientId}}&
+redirect_uri={{redirectUri}}&
+code={{authorizationCode}}&
+code_verifier={{codeVerifier}}
+
+> {%
+    client.global.set("accessToken", response.body.access_token);
+    client.global.set("idToken", response.body.id_token);
+%}
+
+
+### UserInfo - USER
+GET {{baseUrl}}/userinfo
+Authorization: Bearer {{accessToken}}
+
+
+### Exchange authorization code - ADMIN
+# Run generate-pkce.mjs again and start a new authorization flow as ADMIN.
+
+@adminAuthorizationCode = REPLACE_WITH_AUTHORIZATION_CODE
+@adminCodeVerifier = REPLACE_WITH_CODE_VERIFIER
+
+POST {{baseUrl}}/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&
+client_id={{clientId}}&
+redirect_uri={{redirectUri}}&
+code={{adminAuthorizationCode}}&
+code_verifier={{adminCodeVerifier}}
+
+> {%
+    client.global.set("adminToken", response.body.access_token);
+    client.global.set("adminIdToken", response.body.id_token);
+%}
+
+
+### Exchange authorization code - managed USER
+# Create the managed user first in local-graphql.http.
+# Then run generate-pkce.mjs again and authenticate as that user.
+
+@managedAuthorizationCode = REPLACE_WITH_AUTHORIZATION_CODE
+@managedCodeVerifier = REPLACE_WITH_CODE_VERIFIER
+
+POST {{baseUrl}}/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&
+client_id={{clientId}}&
+redirect_uri={{redirectUri}}&
+code={{managedAuthorizationCode}}&
+code_verifier={{managedCodeVerifier}}
+
+> {%
+    client.global.set(
+        "managedUserToken",
+        response.body.access_token
+    );
+%}

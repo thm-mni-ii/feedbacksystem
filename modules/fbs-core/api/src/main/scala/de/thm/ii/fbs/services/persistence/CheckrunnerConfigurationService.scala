@@ -26,14 +26,14 @@ class CheckrunnerConfigurationService {
     */
   def getAll(cid: Int, tid: Int): List[CheckrunnerConfiguration] =
     DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
-      " checker_type_information, is_in_block_storage " +
+      " main_file_name, secondary_file_name, checker_type_information, is_in_block_storage " +
       "FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
       "WHERE course_id = ? AND task_id = ? ORDER BY ord",
       (res, _) => parseResult(res), cid, tid)
 
   def getAllForSubmission(submissionID: Int): List[CheckrunnerConfiguration] =
     DB.query("SELECT configuration_id, t.task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
-      " checker_type_information, cc.is_in_block_storage " +
+      " main_file_name, secondary_file_name, checker_type_information, cc.is_in_block_storage " +
       "FROM user_task_submission JOIN task t on user_task_submission.task_id = t.task_id " +
       "JOIN checkrunner_configuration cc on t.task_id = cc.task_id WHERE submission_id = ? ORDER BY ord",
       (res, _) => parseResult(res), submissionID)
@@ -48,7 +48,7 @@ class CheckrunnerConfigurationService {
     */
   def find(cid: Int, tid: Int, ccid: Int): Option[CheckrunnerConfiguration] =
     DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
-      " checker_type_information, is_in_block_storage " +
+      " main_file_name, secondary_file_name, checker_type_information, is_in_block_storage " +
       "FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) WHERE " +
       "course_id = ? AND task_id = ? AND configuration_id = ?",
       (res, _) => parseResult(res), cid, tid, ccid).headOption
@@ -61,7 +61,7 @@ class CheckrunnerConfigurationService {
     */
   def getOne(ccid: Int): Option[CheckrunnerConfiguration] =
     DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
-      " checker_type_information, is_in_block_storage " +
+      " main_file_name, secondary_file_name, checker_type_information, is_in_block_storage " +
       "FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) WHERE configuration_id = ?",
       (res, _) => parseResult(res), ccid).headOption
 
@@ -94,10 +94,9 @@ class CheckrunnerConfigurationService {
     */
   def update(cid: Int, tid: Int, ccid: Int, cc: CheckrunnerConfiguration): Boolean = {
     1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
-      "SET checker_type = ?, main_file_uploaded = ?, secondary_file_uploaded = ?, ord = ?, checker_type_information = ? " +
+      "SET checker_type = ?, ord = ?, checker_type_information = ? " +
       "WHERE course_id = ? AND task_id = ? AND configuration_id = ?",
-      cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord,
-      cc.checkerTypeInformation.map(CheckerTypeInformation.toJSONString).orNull, cid, tid, ccid)
+      cc.checkerType, cc.ord, cc.checkerTypeInformation.map(CheckerTypeInformation.toJSONString).orNull, cid, tid, ccid)
   }
 
   /**
@@ -114,6 +113,12 @@ class CheckrunnerConfigurationService {
       "SET main_file_uploaded = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?", state, cid, tid, ccid)
   }
 
+  def setMainFileMetadata(cid: Int, tid: Int, ccid: Int, state: Boolean, fileName: Option[String]): Boolean = {
+    1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
+      "SET main_file_uploaded = ?, main_file_name = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?",
+      state, fileName.orNull, cid, tid, ccid)
+  }
+
   /**
     * Set secondary file uploaded state
     *
@@ -126,6 +131,12 @@ class CheckrunnerConfigurationService {
   def setSecondaryFileUploadedState(cid: Int, tid: Int, ccid: Int, state: Boolean): Boolean = {
     1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
       "SET secondary_file_uploaded = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?", state, cid, tid, ccid)
+  }
+
+  def setSecondaryFileMetadata(cid: Int, tid: Int, ccid: Int, state: Boolean, fileName: Option[String]): Boolean = {
+    1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
+      "SET secondary_file_uploaded = ?, secondary_file_name = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?",
+      state, fileName.orNull, cid, tid, ccid)
   }
 
   /**
@@ -160,6 +171,8 @@ class CheckrunnerConfigurationService {
     checkerType = res.getString("checker_type"),
     mainFileUploaded = res.getBoolean("main_file_uploaded"),
     secondaryFileUploaded = res.getBoolean("secondary_file_uploaded"),
+    mainFileName = Option(res.getString("main_file_name")),
+    secondaryFileName = Option(res.getString("secondary_file_name")),
     ord = res.getInt("ord"),
     checkerTypeInformation = Option(res.getString("checker_type_information")).map(CheckerTypeInformation.fromJSONString),
     id = res.getInt("configuration_id"),

@@ -45,7 +45,7 @@ class CourseResultController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      courseResultService.getAll(cid)
+      getCourseResultsWithEvaluationStatus(cid)
     } else {
       throw new ForbiddenException()
     }
@@ -91,9 +91,16 @@ class CourseResultController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      courseResultService.getAll(cid, 2, 2)
+      getCourseResultsWithEvaluationStatus(cid, 2, 2)
     } else {
       throw new ForbiddenException()
     }
+  }
+
+  private def getCourseResultsWithEvaluationStatus(cid: Int, minRole: Int = 0, maxRole: Int = 2): List[CourseResult] = {
+    val courseResults = courseResultService.getAll(cid, minRole, maxRole)
+    val evaluationContainers = evaluationContainerService.getAll(cid)
+
+    evaluationResultService.applyEvaluationStatus(evaluationContainers, courseResults)
   }
 }

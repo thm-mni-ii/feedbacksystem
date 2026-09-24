@@ -1,16 +1,20 @@
 import { Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { Store, select } from "@ngrx/store";
-import { of } from "rxjs";
+import { of, timer, throwError } from "rxjs";
 import {
   catchError,
   map,
   mergeMap,
   withLatestFrom,
-  retry,
+  filter,
+  take,
+  timeout,
 } from "rxjs/operators";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { AuthService } from "src/app/service/auth.service";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
 import * as SqlPlaygroundActions from "./sql-playground.actions";
 import { selectActiveDb } from "./sql-playground.selectors";
 import { changeActiveDbId, updateScheme } from "./sql-playground.actions";
@@ -21,7 +25,8 @@ export class SqlPlaygroundEffects {
     private actions$: Actions,
     private sqlPlaygroundService: SqlPlaygroundService,
     private authService: AuthService,
-    private store: Store
+    private store: Store,
+    private snackbar: MatSnackBar
   ) {}
 
   updateScheme$ = createEffect(() =>
@@ -74,29 +79,68 @@ export class SqlPlaygroundEffects {
       withLatestFrom(this.store.pipe(select(selectActiveDb))),
       mergeMap(([{ statement }, activeDb]) => {
         const token = this.authService.getToken();
+        if (!token) {
+          return of(
+            SqlPlaygroundActions.submitStatementFailure({
+              error: "Kein Token vorhanden",
+            })
+          );
+        }
+        if (!activeDb) {
+          this.snackbar.open("Keine Datenbank ausgewählt", "Fehler", {
+            duration: 3000,
+          });
+          return of(
+            SqlPlaygroundActions.submitStatementFailure({
+              error: "Keine Datenbank ausgewählt",
+            })
+          );
+        }
         return this.sqlPlaygroundService
           .submitStatement(token.id, activeDb, statement)
           .pipe(
             mergeMap((result) =>
-              this.sqlPlaygroundService
-                .getResults(token.id, activeDb, result.id)
-                .pipe(
-                  retry(),
-                  mergeMap((res) =>
-                    of(
-                      SqlPlaygroundActions.submitStatementSuccess({
-                        resultset: res,
-                      }),
-                      SqlPlaygroundActions.updateScheme()
+              timer(300, 500).pipe(
+                mergeMap(() =>
+                  this.sqlPlaygroundService
+                    .getResults(token.id, activeDb, result.id)
+                    .pipe(
+                      catchError((err) => {
+                        if (err.status === 404) {
+                          return of(null);
+                        }
+                        return throwError(() => err);
+                      })
                     )
-                  ),
-                  catchError((error) =>
-                    of(SqlPlaygroundActions.submitStatementFailure({ error }))
+                ),
+                filter((res): res is SQLResponse => res !== null),
+                take(1),
+                timeout(15000),
+                mergeMap((res) =>
+                  of(
+                    SqlPlaygroundActions.submitStatementSuccess({
+                      resultset: res,
+                    }),
+                    SqlPlaygroundActions.updateScheme()
+                  )
+                ),
+                catchError((error) =>
+                  of(
+                    SqlPlaygroundActions.submitStatementFailure({
+                      error:
+                        error?.message ?? "Fehler beim Abrufen der Ergebnisse",
+                    })
                   )
                 )
+              )
             ),
             catchError((error) =>
-              of(SqlPlaygroundActions.submitStatementFailure({ error }))
+              of(
+                SqlPlaygroundActions.submitStatementFailure({
+                  error:
+                    error?.message ?? "Fehler beim Ausführen der SQL-Anweisung",
+                })
+              )
             )
           );
       })

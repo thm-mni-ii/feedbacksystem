@@ -29,7 +29,12 @@
       </button>
     </mat-menu>
   </app-menu-bar>
-  <button mat-icon-button class="kanban-button">
-    <mat-icon (click)="navigateToKanban()">view_kanban</mat-icon>
+  <button
+    mat-icon-button
+    class="kanban-button"
+    *ngIf="kanbanUrl !== null"
+    (click)="navigateToKanban()"
+  >
+    <mat-icon>view_kanban</mat-icon>
   </button>
 </div>

@@ -98,6 +98,7 @@ export const englishTranslation = {
   "course.update.button.save": "Save",
   "course.not-found.message": "Sorry, the page you requested does not exist.",
   "course.not-found.backHome": "Back to Homepage",
+  "course.tooltip.backToOverview": "Back to course overview",
   "course.tabs.tasks": "Tasks",
   "course.tabs.groups": "Groups",
   "result.comparison.resultsOfSubmissions": "Results of Submissions",

@@ -1,5 +1,5 @@
 plugins {
-  id "com.github.node-gradle.node" version "3.1.1"
+  id "com.github.node-gradle.node" version "3.5.1"
 }
 
 apply plugin: 'distribution'
@@ -13,8 +13,13 @@ repositories {
 }
 
 node {
-    version = '16.13.1'
+    version = '18.20.4'
     download = true
+    npmInstallCommand = 'ci'
+}
+
+npmInstall {
+    args = ['--legacy-peer-deps']
 }
 
 clean.dependsOn npm_run_clean
@@ -33,9 +38,7 @@ distributions {
     }
 }
 
-// After build the ng app, we copy the dist content to or spring boot webservice static resoorce path
-// It will work on evry system, because of relative paths (at leat I hope so)
-
+// After build the ng app, we copy the dist content to our spring boot webservice static resource path
 task copyWebToWS(type: Copy, dependsOn: [build]) {
     from "${projectDir}/dist/web" // path from distributed web-gui
     into "${projectDir}/../api/src/main/resources/static"
@@ -44,7 +47,6 @@ task copyWebToWS(type: Copy, dependsOn: [build]) {
 copyWebToWS
 
 // Run eslint
-
 task lint(type: NpmTask, dependsOn: [npmInstall]) {
   args = ['run', 'lint']
 }

@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, switchMap } from "rxjs/operators";
+import { IntegrationService } from "./integration.service";
 
 @Injectable({
   providedIn: "root",
@@ -9,14 +10,16 @@ import { map } from "rxjs/operators";
 export class FeedbackAppService {
   private static readonly FBA_TOKEN_KEY = "flutter.authToken";
   private static readonly FBA_COURSE_ID_KEY = "flutter.courseId";
-  private static readonly FBA_PATH = "/feedbackApp/";
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private integrationService: IntegrationService
+  ) {}
 
   public getToken(): Observable<string> {
-    return this.http
-      .post<{ token: string }>("/feedbackApp/api/auth/fbs", null)
-      .pipe(map((res) => res.token));
+    return this.getBaseUrl().pipe(
+      switchMap((baseUrl) => this.getTokenForBaseUrl(baseUrl))
+    );
   }
 
   public open(
@@ -26,24 +29,40 @@ export class FeedbackAppService {
     if (typeof courseID === "number") {
       courseID = courseID.toString();
     }
-    return this.getToken().pipe(
-      map((token) => {
-        localStorage.setItem(
-          FeedbackAppService.FBA_TOKEN_KEY,
-          JSON.stringify(token)
-        );
-        if (courseID !== null) {
-          localStorage.setItem(
-            FeedbackAppService.FBA_COURSE_ID_KEY,
-            JSON.stringify(courseID)
-          );
-        }
-        if (newTab) {
-          window.open(FeedbackAppService.FBA_PATH);
-        } else {
-          window.location.pathname = FeedbackAppService.FBA_PATH;
-        }
-      })
+    return this.getBaseUrl().pipe(
+      switchMap((baseUrl) =>
+        this.getTokenForBaseUrl(baseUrl).pipe(
+          map((token) => {
+            localStorage.setItem(
+              FeedbackAppService.FBA_TOKEN_KEY,
+              JSON.stringify(token)
+            );
+            if (courseID !== null) {
+              localStorage.setItem(
+                FeedbackAppService.FBA_COURSE_ID_KEY,
+                JSON.stringify(courseID)
+              );
+            }
+            if (newTab) {
+              window.open(baseUrl);
+            } else {
+              window.location.assign(baseUrl);
+            }
+          })
+        )
+      )
     );
+  }
+
+  private getBaseUrl(): Observable<string> {
+    return this.integrationService
+      .getIntegration("feedbackApp")
+      .pipe(map(({ url }) => (url.endsWith("/") ? url : `${url}/`)));
+  }
+
+  private getTokenForBaseUrl(baseUrl: string): Observable<string> {
+    return this.http
+      .post<{ token: string }>(`${baseUrl}api/auth/fbs`, null)
+      .pipe(map((res) => res.token));
   }
 }

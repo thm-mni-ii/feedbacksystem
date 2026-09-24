@@ -216,7 +216,12 @@ export class ConfigurationListComponent implements OnInit {
           this.taskId,
           checker.id,
           CheckerFileType.MainFile,
-          task.name
+          checker.mainFileName ||
+            this.defaultCheckerFileName(
+              task.name,
+              checker.checkerType,
+              CheckerFileType.MainFile
+            )
         );
       });
     } else {
@@ -232,11 +237,52 @@ export class ConfigurationListComponent implements OnInit {
           this.taskId,
           checker.id,
           CheckerFileType.SecondaryFile,
-          task.name
+          checker.secondaryFileName ||
+            this.defaultCheckerFileName(
+              task.name,
+              checker.checkerType,
+              CheckerFileType.SecondaryFile
+            )
         );
       });
     } else {
       this.snackbar.open("Es gibt keine Hauptdatei.", "OK", { duration: 3000 });
+    }
+  }
+
+  private defaultCheckerFileName(
+    taskName: string,
+    checkerType: string,
+    fileType: CheckerFileType
+  ): string {
+    const baseName = taskName.replace(/[~"#%&*:<>?/\\{|} ]+/g, "_");
+
+    if (fileType === CheckerFileType.SecondaryFile) {
+      switch (checkerType) {
+        case "sql":
+        case "sql-runner":
+        case "sql-checker":
+        case "ai-supported-sql-analyser":
+          return `${baseName}_secondary.sql`;
+        case "excel":
+          return `${baseName}_secondary.json`;
+        default:
+          return `${baseName}_secondary`;
+      }
+    }
+
+    switch (checkerType) {
+      case "bash":
+        return `${baseName}.sh`;
+      case "excel":
+        return `${baseName}.xlsx`;
+      case "sql":
+      case "sql-runner":
+      case "sql-checker":
+      case "ai-supported-sql-analyser":
+        return `${baseName}_config.json`;
+      default:
+        return `${baseName}_config.txt`;
     }
   }
 }

@@ -1,6 +1,12 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { MatDialogModule } from "@angular/material/dialog";
-import { CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule } from "@angular/core";
+import {
+  APP_INITIALIZER,
+  CUSTOM_ELEMENTS_SCHEMA,
+  Injectable,
+  Injector,
+  NgModule,
+} from "@angular/core";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { LayoutModule } from "@angular/cdk/layout";
@@ -11,12 +17,14 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
   HTTP_INTERCEPTORS,
   HttpClientModule,
+  HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
   HttpResponse,
 } from "@angular/common/http";
+import { Router } from "@angular/router";
 import { JwtModule } from "@auth0/angular-jwt";
 import { Observable } from "rxjs";
 import { DataprivacyDialogComponent } from "./dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
@@ -71,6 +79,7 @@ import {
 import { InfoComponent } from "./tool-components/info/info.component";
 import { tap } from "rxjs/operators";
 import { AuthService } from "./service/auth.service";
+import { EmbeddingService } from "./service/embedding.service";
 import { ReversePipe } from "./pipes/reverse.pipe";
 import { TaskPointsDialogComponent } from "./dialogs/task-points-dialog/task-points-dialog.component";
 import { GoToComponent } from "./page-components/goto/goto.component";
@@ -111,33 +120,80 @@ import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.comp
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component";
 import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
+import { OAuthModule } from "angular-oauth2-oidc";
 import { AngularEditorModule } from "@kolkov/angular-editor";
 import { CodeEditorComponent } from "./page-components/task-detail/submission-text/code-editor/code-editor.component";
-import { FbsTimeTrackingComponent } from "./page-components/fbs-time-tracking/fbs-time-tracking.component";
+
+export function initAuth(authService: AuthService) {
+  return () => authService.tryLogin();
+}
 
 @Injectable()
-export class ApiURIHttpInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) {}
+export class AuthInterceptor implements HttpInterceptor {
+  private authService: AuthService;
+
+  constructor(private injector: Injector, private router: Router) {}
+
+  private getAuthService(): AuthService {
+    if (!this.authService) {
+      this.authService = this.injector.get(AuthService);
+    }
+    return this.authService;
+  }
+
   public intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const clonedRequest: HttpRequest<any> = req.clone({
-      // url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
-      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
-    });
-    return next.handle(clonedRequest).pipe(
-      tap((event) => {
-        if (event instanceof HttpResponse) {
-          const response = <HttpResponse<any>>event;
-          this.authService.renewToken(response);
+    if (
+      req.url.includes(".well-known") ||
+      req.url.includes("/oauth2/") ||
+      req.url.startsWith("http://localhost:8080") ||
+      req.url.startsWith("https://localhost:8080")
+    ) {
+      return next.handle(req);
+    }
+
+    const authService = this.getAuthService();
+    const token = authService ? authService.getAccessToken() : null;
+    let authReq = req;
+    if (token) {
+      authReq = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+    return next.handle(authReq).pipe(
+      tap(
+        (event) => {
+          if (event instanceof HttpResponse && authService) {
+            authService.renewToken(event);
+          }
+        },
+        (error) => {
+          if (
+            error instanceof HttpErrorResponse &&
+            error.status === 401 &&
+            !req.url.includes("/api/v1/login")
+          ) {
+            const embeddingService = this.injector.get(EmbeddingService, null);
+            if (embeddingService && embeddingService.isEmbedded) {
+              embeddingService.requestAuthToken();
+            } else {
+              if (authService) {
+                authService.logout();
+              }
+              this.router.navigate(["login"]);
+            }
+          }
         }
-      })
+      )
     );
   }
 }
 export const httpInterceptorProviders = [
-  { provide: HTTP_INTERCEPTORS, useClass: ApiURIHttpInterceptor, multi: true },
+  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
 ];
 
 /**
@@ -206,7 +262,6 @@ export const httpInterceptorProviders = [
     GroupDetailComponent,
     GroupDeregisterDialogComponent,
     FbsKanbanComponent,
-    FbsTimeTrackingComponent,
     FbsSciCheckComponent,
     FbsSqlPlaygroundComponent,
     SkipLinkComponent,
@@ -245,6 +300,7 @@ export const httpInterceptorProviders = [
     MatTableModule,
     MatSortModule,
     I18NextModule.forRoot(),
+    OAuthModule.forRoot(),
     AngularEditorModule,
   ],
   entryComponents: [
@@ -255,6 +311,12 @@ export const httpInterceptorProviders = [
   providers: [
     CookieService,
     httpInterceptorProviders,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initAuth,
+      deps: [AuthService],
+      multi: true,
+    },
     {
       provide: MAT_DATE_FORMATS,
       useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },

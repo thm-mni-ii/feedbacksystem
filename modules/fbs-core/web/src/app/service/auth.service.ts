@@ -1,90 +1,144 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { JwtHelperService } from "@auth0/angular-jwt";
-import { Observable } from "rxjs";
-import { of, throwError } from "rxjs";
-import { mergeMap, map } from "rxjs/operators";
+import { OAuthService } from "angular-oauth2-oidc";
+import { Observable, of, throwError } from "rxjs";
+import { map, mergeMap } from "rxjs/operators";
 import { JWTToken } from "../model/JWTToken";
+import { authCodeFlowConfig } from "../auth.config";
 
 const TOKEN_ID = "token";
+const SERVER_TIME_OFFSET_ID = "serverTimeOffset";
 
 /**
- * Manages login and logout of the user of the page.
+ * Manages login and logout of the user of the page using OIDC PKCE.
  */
 @Injectable({
   providedIn: "root",
 })
 export class AuthService {
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {}
+  private serverTimeAtSync: number = null;
+  private clientTimeAtSync: number = null;
 
-  /**
-   * Logout user by removing its token.
-   */
+  constructor(
+    private http: HttpClient,
+    private jwtHelper: JwtHelperService,
+    private oauthService: OAuthService
+  ) {
+    this.configure();
+  }
+
+  private configure() {
+    this.oauthService.configure(authCodeFlowConfig);
+    this.oauthService.setupAutomaticSilentRefresh();
+  }
+
+  public async tryLogin(): Promise<boolean> {
+    try {
+      await this.oauthService.loadDiscoveryDocumentAndTryLogin();
+    } catch (e) {
+      // Ignore discovery or login errors
+    }
+    return this.isAuthenticated();
+  }
+
+  public login() {
+    this.oauthService.initCodeFlow();
+  }
+
   public logout() {
     localStorage.removeItem(TOKEN_ID);
+    this.oauthService.logOut();
   }
 
-  /**
-   * Returns true only if a valid token exists.
-   */
   public isAuthenticated(): boolean {
+    if (this.oauthService.hasValidAccessToken()) {
+      return true;
+    }
     const token = this.loadToken();
-    return token && !this.jwtHelper.isTokenExpired(token);
+    if (!token) {
+      return false;
+    }
+    try {
+      return !this.jwtHelper.isTokenExpired(token);
+    } catch {
+      return false;
+    }
+  }
+
+  public getAccessToken(): string {
+    return this.oauthService.getAccessToken() || this.loadToken() || "";
+  }
+
+  public getIdentityClaims(): any {
+    return this.oauthService.getIdentityClaims();
   }
 
   /**
-   * @return The lastly received token.
+   * @return The decoded token object.
    */
   getToken(): JWTToken {
-    const token = this.loadToken();
-    const decodedToken = this.decodeToken();
-    if (!decodedToken) {
-      throw new Error("Decoding the token failed");
-    } else if (this.jwtHelper.isTokenExpired(token)) {
-      throw new Error("Token expired");
+    const token = this.getAccessToken();
+    if (!token) {
+      throw new Error("No token found");
     }
-    decodedToken.courseRoles = JSON.parse(<any>decodedToken.courseRoles);
-    return decodedToken;
+    const claims: any = this.oauthService.getIdentityClaims() || {};
+    let decodedToken: any = null;
+    try {
+      decodedToken = this.jwtHelper.decodeToken(token) || {};
+    } catch (e) {
+      decodedToken = {};
+    }
+    const merged = { ...claims, ...decodedToken };
+    const id = merged.sub ? parseInt(merged.sub, 10) : merged.id;
+    let courseRoles: any = merged.courseRoles || {};
+    if (typeof courseRoles === "string") {
+      try {
+        courseRoles = JSON.parse(courseRoles);
+      } catch (e) {
+        courseRoles = {};
+      }
+    }
+    return {
+      id: id,
+      username: merged.username || merged.preferred_username || "",
+      globalRole: merged.globalRole,
+      courseRoles: courseRoles,
+      iat: merged.iat,
+      exp: merged.exp,
+    };
   }
 
   /**
    * Use the cas authentication method
    */
   public casLogin(): Observable<JWTToken> {
-    return throwError("Not implemented yet!"); // TODO: impl cas login
+    this.login();
+    return of(null);
   }
 
   /**
    * Use the ldap authentication method of the server to login via user name and password
-   * @param username The username of a user
-   * @param password The password of a user
-   * @return Successful observable JWTToken, only if the token is valid.
    */
   public ldapLogin(username: string, password: string): Observable<JWTToken> {
-    return this.login(username, password, "/api/v1/login/ldap");
+    return this.loginLegacy(username, password, "/api/v1/login/ldap");
   }
 
   /**
    * Use the local authentication method of the server to login via user name and password
-   * @param username The username of a user
-   * @param password The password of a user
-   * @return Successful observable JWTToken, only if the token is valid.
    */
   public localLogin(username: string, password: string): Observable<JWTToken> {
-    return this.login(username, password, "/api/v1/login/local");
+    return this.loginLegacy(username, password, "/api/v1/login/local");
   }
 
   /**
    * Use the unified local and ldap authentication method of the server to login via username and password
-   * @param username The username of a user
-   * @param password The password of a user
-   * @return Successful observable JWTToken, only if the token is valid.
    */
   public unifiedLogin(
     username: string,
     password: string
   ): Observable<JWTToken> {
-    return this.login(username, password, "/api/v1/login/unified");
+    return this.loginLegacy(username, password, "/api/v1/login/unified");
   }
 
   /**
@@ -92,13 +146,18 @@ export class AuthService {
    * @param response The http response.
    */
   public renewToken(response: HttpResponse<any>) {
+    const syncedServerTime = this.syncServerTime(response);
     const token = this.extractTokenFromHeader(response);
-    if (token && !this.jwtHelper.isTokenExpired(token)) {
-      this.storeToken(token);
+    if (token && !syncedServerTime) {
+      this.syncServerTimeFromToken(token);
+    }
+
+    if (token && !this.isTokenExpired(token)) {
+      this.storeToken(token, false);
     }
   }
 
-  private login(
+  private loginLegacy(
     username: string,
     password: string,
     uri: string
@@ -111,24 +170,24 @@ export class AuthService {
       )
       .pipe(
         map((res) => {
+          const syncedServerTime = this.syncServerTime(res);
           const token = this.extractTokenFromHeader(res);
-          this.storeToken(token);
+          if (token && !syncedServerTime) {
+            this.syncServerTimeFromToken(token);
+          }
           return token;
         }),
         mergeMap((token) => {
-          const decodedToken = this.decodeToken();
+          const decodedToken = this.jwtHelper.decodeToken(token);
           if (!decodedToken) {
             return throwError("Decoding the token failed");
-          } else if (this.jwtHelper.isTokenExpired(token)) {
+          } else if (this.isTokenExpired(token)) {
             return throwError("Token expired");
           }
-          return of(decodedToken);
+          this.storeToken(token, false);
+          return of(this.getToken());
         })
       );
-  }
-
-  private decodeToken(): JWTToken | null {
-    return this.jwtHelper.decodeToken(localStorage.getItem("token"));
   }
 
   private extractTokenFromHeader(response: HttpResponse<any>): string {
@@ -140,11 +199,14 @@ export class AuthService {
    * @return Get token as string or null if no token exists.
    */
   public loadToken(): string {
-    return localStorage.getItem(TOKEN_ID);
+    return localStorage.getItem(TOKEN_ID) || this.oauthService.getAccessToken();
   }
 
-  private storeToken(token: string): void {
+  public storeToken(token: string, syncFromToken: boolean = false): void {
     localStorage.setItem(TOKEN_ID, token);
+    if (syncFromToken) {
+      this.syncServerTimeFromToken(token);
+    }
   }
 
   public requestNewToken(): Observable<void> {
@@ -152,13 +214,64 @@ export class AuthService {
   }
 
   public startTokenAutoRefresh() {
-    setInterval(() => {
-      if (this.isAuthenticated()) {
-        const token = this.getToken();
-        if (Math.floor(new Date().getTime() / 1000) + 90 >= token.exp) {
-          this.requestNewToken().subscribe(() => {});
-        }
-      }
-    }, 60000);
+    // With OIDC PKCE, automatic silent refresh is handled by angular-oauth2-oidc
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      return this.jwtHelper.isTokenExpired(token);
+    } catch {
+      return true;
+    }
+  }
+
+  private syncServerTime(response: HttpResponse<any>): boolean {
+    const serverDate = response.headers.get("Date");
+    if (!serverDate) {
+      return false;
+    }
+
+    const serverTime = Date.parse(serverDate);
+    if (Number.isNaN(serverTime)) {
+      return false;
+    }
+
+    this.syncServerTimeAt(serverTime);
+    return true;
+  }
+
+  private syncServerTimeFromToken(token: string): boolean {
+    const decodedToken = this.jwtHelper.decodeToken(token);
+    if (!decodedToken || !decodedToken.iat) {
+      return false;
+    }
+
+    this.syncServerTimeAt(decodedToken.iat * 1000);
+    return true;
+  }
+
+  private syncServerTimeAt(serverTime: number): void {
+    this.serverTimeAtSync = serverTime;
+    this.clientTimeAtSync = this.getClientTime();
+    localStorage.setItem(SERVER_TIME_OFFSET_ID, `${serverTime - Date.now()}`);
+  }
+
+  private getCurrentServerTime(): number {
+    if (this.serverTimeAtSync !== null && this.clientTimeAtSync !== null) {
+      return (
+        this.serverTimeAtSync + (this.getClientTime() - this.clientTimeAtSync)
+      );
+    }
+
+    const storedOffset = Number(localStorage.getItem(SERVER_TIME_OFFSET_ID));
+    return Number.isFinite(storedOffset)
+      ? Date.now() + storedOffset
+      : Date.now();
+  }
+
+  private getClientTime(): number {
+    return typeof performance !== "undefined" && performance.now
+      ? performance.now()
+      : Date.now();
   }
 }

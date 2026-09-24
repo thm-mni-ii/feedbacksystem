@@ -1,0 +1,89 @@
+<!-- File: src/main/resources/templates/terms-of-use.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Use – Feedback System</title>
+  <link rel="icon" type="image/svg+xml" th:href="@{/images/fbs-logo.svg}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" th:href="@{/css/material-theme.css}">
+  <style>
+    .fbs-terms-container {
+      max-width: 800px;
+      margin: 32px auto;
+      padding: 0 16px;
+      flex: 1;
+      width: 100%;
+    }
+
+    .fbs-terms-card {
+      background: var(--fbs-surface);
+      border-radius: var(--fbs-radius);
+      box-shadow: var(--fbs-elevation-2);
+      padding: 32px 36px;
+    }
+
+    .fbs-terms-text {
+      white-space: pre-wrap;
+      font-family: inherit;
+      line-height: 1.6;
+      color: var(--fbs-text-primary);
+      background-color: var(--fbs-bg-light);
+      padding: 24px;
+      border-radius: var(--fbs-radius);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      max-height: 480px;
+      overflow-y: auto;
+      margin: 20px 0;
+      font-size: 0.9375rem;
+    }
+
+    .fbs-terms-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .fbs-terms-actions .fbs-button {
+      width: auto;
+      min-width: 140px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .fbs-terms-card {
+        padding: 20px 16px;
+      }
+      .fbs-terms-actions {
+        flex-direction: column-reverse;
+      }
+      .fbs-terms-actions .fbs-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="fbs-header" role="banner">
+    <h1>Feedback System</h1>
+    <h2>Datenschutzbestimmungen &bull; Terms of Use</h2>
+  </header>
+
+  <main class="fbs-terms-container" role="main">
+    <div class="fbs-terms-card">
+      <h3 class="fbs-card-title">Datenschutz &amp; Nutzungsbedingungen</h3>
+
+      <div class="fbs-terms-text" th:text="${privacyText}">
+        Datenschutzbestimmungen Text...
+      </div>
+
+      <div class="fbs-terms-actions">
+        <a th:href="@{/login}" class="fbs-button fbs-button-outlined">
+          Back to Login
+        </a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

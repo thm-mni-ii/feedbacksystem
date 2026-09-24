@@ -25,7 +25,7 @@ class WebConfig extends WebMvcConfigurer {
       .allowedMethods(ALL)
       .allowedHeaders(ALL)
       .allowCredentials(true)
-      .exposedHeaders("Authorization")
+      .exposedHeaders("Authorization", "Date")
 
     super.addCorsMappings(registry)
   }

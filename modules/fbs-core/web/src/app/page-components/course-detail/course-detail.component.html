@@ -2,9 +2,16 @@
   <app-skip-link anchor="page-content">{{
     "accessibility.page.skip" | i18nextEager
   }}</app-skip-link>
-  <app-menu-bar *ngIf="role || isAuthorized()">
+  <app-menu-bar>
+    <button
+      mat-icon-button
+      [routerLink]="['/courses']"
+      matTooltip="{{ 'course.tooltip.backToOverview' | i18nextEager }}"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
     <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
-    <span>
+    <span *ngIf="role">
       <span *ngIf="role === 'DOCENT'">{{ "role.docent" | i18nextEager }}</span>
       <span *ngIf="role === 'TUTOR'">{{ "role.tutor" | i18nextEager }}</span>
       <span *ngIf="role === 'STUDENT'">{{
@@ -49,7 +56,9 @@
     <button
       mat-icon-button
       class="green"
-      *ngIf="externalClassroomService.isJoined()"
+      *ngIf="
+        isIntegrationEnabled('classroom') && externalClassroomService.isJoined()
+      "
       (click)="joinClassroom()"
       matTooltip="{{ 'course.join-digital-exercise-room' | i18nextEager }}"
     >
@@ -57,7 +66,10 @@
     </button>
     <button
       mat-icon-button
-      *ngIf="!externalClassroomService.isJoined()"
+      *ngIf="
+        isIntegrationEnabled('classroom') &&
+        !externalClassroomService.isJoined()
+      "
       (click)="joinClassroom()"
       matTooltip="{{ 'course.join-digital-exercise-room' | i18nextEager }}"
     >
@@ -66,6 +78,7 @@
     <!--<button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>voice_chat</mat-icon></button>-->
     <button
       mat-icon-button
+      *ngIf="isIntegrationEnabled('feedbackApp')"
       (click)="goToFBA()"
       matTooltip="{{ 'course.switch-to-feedback-app' | i18nextEager }}"
     >

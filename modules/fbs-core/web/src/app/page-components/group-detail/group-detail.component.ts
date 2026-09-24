@@ -14,6 +14,7 @@ import { I18NextPipe } from "angular-i18next";
 import { Course } from "../../model/Course";
 import { CourseService } from "../../service/course.service";
 import { NewGroupDialogComponent } from "../../dialogs/new-group-dialog/new-group-dialog.component";
+import { IntegrationService } from "../../service/integration.service";
 
 @Component({
   selector: "app-group-detail",
@@ -30,7 +31,8 @@ export class GroupDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private titlebar: TitlebarService,
-    private i18NextPipe: I18NextPipe
+    private i18NextPipe: I18NextPipe,
+    private integrationService: IntegrationService
   ) {}
   courseID: number;
   groupID: number;
@@ -38,6 +40,7 @@ export class GroupDetailComponent implements OnInit {
   role: string = null;
   student: boolean = true;
   course$: Observable<Course> = of();
+  kanbanUrl: string = null;
 
   ngOnInit(): void {
     this.route.params.subscribe((param) => {
@@ -46,6 +49,10 @@ export class GroupDetailComponent implements OnInit {
       this.loadGroup();
     });
     this.role = this.auth.getToken().courseRoles[this.courseID];
+    this.integrationService.getIntegration("kanban").subscribe(
+      (integration) => (this.kanbanUrl = integration.url),
+      () => (this.kanbanUrl = null)
+    );
   }
 
   updateGroup() {
@@ -112,7 +119,7 @@ export class GroupDetailComponent implements OnInit {
   }
 
   navigateToKanban() {
-    window.location.href = "http://localhost:3000/";
+    window.location.href = this.kanbanUrl;
   }
 
   public isAuthorized(ignoreTutor: boolean = false) {

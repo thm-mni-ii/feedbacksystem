@@ -21,7 +21,7 @@ run {
 }
 
 scalastyle {
-    config = file(scalaStyleConfig)
+    config = file(project.findProperty("scalaStyleConfig") ?: "${rootDir}/scalastyle_config.xml")
     failOnWarning = true
 }
 

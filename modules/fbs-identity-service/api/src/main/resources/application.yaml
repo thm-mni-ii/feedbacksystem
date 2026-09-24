@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: fbs-identity-service
+  graphql:
+    graphiql:
+      enabled: false
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/fbs_identity?createDatabaseIfNotExist=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false&allowMultiQueries=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:twRuvi2ejllDdA4nnQLa08O}
+
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: none
+    show-sql: ${JPA_SHOW_SQL:true}
+
+app:
+  frontend:
+    base-url: ${FRONTEND_BASE_URL:https://localhost}
+  saml:
+    enabled: ${APP_SAML_ENABLED:false}
+    registration-id: ${APP_SAML_REGISTRATION_ID:keycloak}
+    idp-metadata-uri: ${SAML_IDP_METADATA_URI:}
+    idp-entity-id: ${SAML_IDP_ENTITY_ID:}
+    idp-sso-url: ${SAML_IDP_SSO_URL:}
+    sp-entity-id: ${SAML_SP_ENTITY_ID:}
+    sign-request: ${SAML_SP_SIGN_REQUEST:false}
+    principal-attribute: ${APP_SAML_PRINCIPAL_ATTRIBUTE:uid}
+    prename-attribute: ${APP_SAML_PRENAME_ATTRIBUTE:givenName}
+    surname-attribute: ${APP_SAML_SURNAME_ATTRIBUTE:sn}
+    email-attribute: ${APP_SAML_EMAIL_ATTRIBUTE:mail}
+    failure-path: ${APP_SAML_FAILURE_PATH:/login?ssoError=1}
+
+info:
+  app:
+    version: 0.0.1-SNAPSHOT
+
+springdoc:
+  api-docs:
+    path: /openapi
+
+security:
+  login-attempts:
+    max-failures-per-ip: ${LOGIN_MAX_FAILURES_PER_IP:150}
+    max-failures-per-ip-user: ${LOGIN_MAX_FAILURES_PER_IP_USER:15}
+    window-seconds: ${LOGIN_FAILURE_WINDOW_SECONDS:600}
+    cleanup-interval-ms: ${LOGIN_ATTEMPT_CLEANUP_INTERVAL_MS:600000}
+    trusted-proxy-count: ${TRUSTED_PROXIES:0}
+    allow-list: ${BRUTEFORCE_ALLOW_LIST:""}
+  oidc:
+    issuer: ${OIDC_ISSUER:http://localhost:8080}
+    client:
+      id: ${OIDC_CLIENT_ID:fbs-test-client}
+      redirect-uri: ${OIDC_CLIENT_REDIRECT_URI:http://127.0.0.1:4200/oauth2/callback}
+      post-logout-redirect-uri: ${OIDC_CLIENT_POST_LOGOUT_REDIRECT_URI:http://localhost/,https://localhost/,http://127.0.0.1:4200/,http://localhost:4200/,http://localhost:8083/,http://127.0.0.1:8083/}
+      access-token-ttl-minutes: ${OIDC_ACCESS_TOKEN_TTL_MINUTES:10}
+      authorization-code-ttl-minutes: ${OIDC_AUTH_CODE_TTL_MINUTES:5}
+    signing-key:
+      location: ${OIDC_SIGNING_KEY_LOCATION}
+      store-password: ${OIDC_SIGNING_KEY_STORE_PASSWORD}
+      alias: ${OIDC_SIGNING_KEY_ALIAS:identity-signing}
+      key-password: ${OIDC_SIGNING_KEY_PASSWORD}

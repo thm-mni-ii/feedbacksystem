@@ -68,16 +68,18 @@ export class DbControlDbOverviewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const dbType = localStorage.getItem("playground-db-type") as
+    const storedDbType = localStorage.getItem("playground-db-type") as
       | "postgres"
       | "mongo"
       | null;
+    const dbType = storedDbType || "postgres";
     this.selectedDbType = dbType;
-
-    if (dbType === "postgres" || dbType === "mongo") {
-      this.store.dispatch(loadDatabases({ dbType }));
-      this.databases$ = this.store.select(selectDatabasesForCurrentType);
+    if (!storedDbType) {
+      localStorage.setItem("playground-db-type", "postgres");
     }
+
+    this.databases$ = this.store.select(selectDatabasesForCurrentType);
+    this.store.dispatch(loadDatabases({ dbType }));
 
     this.error$ = this.store.select(selectDatabasesError);
     this.backendDatabaseInformation$ = this.store.select(

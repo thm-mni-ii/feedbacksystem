@@ -1,4 +1,14 @@
 <div class="container">
+  <app-menu-bar>
+    <button
+      mat-icon-button
+      routerLink="/courses"
+      matTooltip="{{ 'course.tooltip.backToOverview' | i18nextEager }}"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+  </app-menu-bar>
+
   <mat-form-field class="search" appearance="outline">
     <mat-label>{{ "course.search.label.search" | i18nextEager }}</mat-label>
     <input

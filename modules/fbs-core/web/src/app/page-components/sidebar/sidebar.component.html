@@ -1,216 +1,234 @@
-<app-skip-link anchor="main-content">
-  {{ "accessibility.sidebar.skip" | i18nextEager }}
-</app-skip-link>
-<mat-sidenav-container class="container" role="presentation">
-  <mat-sidenav
-    class="sidenav"
-    #sidenav
-    mode="side"
-    [(opened)]="opened"
-    [style.width]="showSidebarMenu ? '100%' : null"
-    (window:resize)="onResize($event)"
-    role="navigation"
-    aria-label="Hauptmenü"
+<ng-container *ngIf="isEmbedded; else standaloneTemplate">
+  <main
+    class="content-container embedded-content"
+    id="main-content"
+    tabindex="-1"
+    aria-label="Hauptinhalt"
   >
-    <div class="sidenav-group">
-      <div class="logo">
-        <h1>
-          {{ "sidebar.label.feedbacksystem" | i18nextEager }}
-          <i class="material-icons" aria-hidden="true">feedback</i>
-          <button
-            mat-icon-button
-            *ngIf="showSidebarMenu"
-            aria-label="Menü ein- oder ausklappen"
-            (click)="sidenav.toggle()"
-          >
-            <mat-icon aria-hidden="true">menu</mat-icon>
-          </button>
-        </h1>
-        <a
-          routerLink="/courses"
-          aria-label="Zur Startseite"
-          class="logo-link"
-        ></a>
-      </div>
+    <router-outlet></router-outlet>
+  </main>
+</ng-container>
 
-      <mat-nav-list role="list" aria-label="Navigationspunkte">
-        <a
-          mat-list-item
-          routerLink="/courses"
-          routerLinkActive="selected"
-          aria-current="page"
-        >
-          <mat-icon aria-hidden="true">list</mat-icon>
-          <p>{{ "sidebar.label.myCourses" | i18nextEager }}</p>
-        </a>
-
-        <a
-          mat-list-item
-          routerLink="/courses/search"
-          routerLinkActive="selected"
-        >
-          <mat-icon aria-hidden="true">search</mat-icon>
-          <p>{{ "sidebar.label.allCourses" | i18nextEager }}</p>
-        </a>
-
-        <a mat-list-item routerLink="/groups" routerLinkActive="selected">
-          <mat-icon aria-hidden="true">groups</mat-icon>
-          <p>{{ "sidebar.label.myGroups" | i18nextEager }}</p>
-        </a>
-
-        <a
-          mat-list-item
-          *ngIf="isAdmin"
-          routerLink="/admin/user-management"
-          routerLinkActive="selected"
-        >
-          <mat-icon aria-hidden="true">supervised_user_circle</mat-icon>
-          <p>{{ "sidebar.label.users" | i18nextEager }}</p>
-        </a>
-
-        <a mat-list-item (click)="goToFBA()" aria-label="Feedback App öffnen">
-          <mat-icon aria-hidden="true">question_answer</mat-icon>
-          <p>{{ "sidebar.label.feedbackApp" | i18nextEager }}</p>
-        </a>
-
-        <a
-          mat-list-item
-          routerLink="/sqlplayground"
-          routerLinkActive="selected"
-        >
-          <mat-icon aria-hidden="true">extension</mat-icon>
-          <p>{{ "sidebar.label.sqlPlayground" | i18nextEager }}</p>
-        </a>
-
-        <a
-          mat-list-item
-          *ngIf="showAnalytics || isAdmin || isModerator"
-          routerLink="/analytics"
-          routerLinkActive="selected"
-        >
-          <mat-icon aria-hidden="true">bar_chart</mat-icon>
-          <p>{{ "sidebar.label.analyticsPlatform" | i18nextEager }}</p>
-        </a>
-
-        <button
-          mat-list-item
-          (click)="moveAndHideSidebar('/modelling')"
-          aria-label="FBS Modelling öffnen"
-        >
-          <mat-icon aria-hidden="true">format_shapes</mat-icon>
-          <p>FBS Modelling</p>
-        </button>
-
-        <button
-          mat-list-item
-          (click)="moveAndHideSidebar('/kanban')"
-          aria-label="FBS Kanban öffnen"
-        >
-          <mat-icon aria-hidden="true">view_kanban</mat-icon>
-          <p>FBS Kanban</p>
-        </button>
-
-        <button
-          mat-list-item
-          (click)="moveAndHideSidebar('/time-tracking')"
-          aria-label="Time Tracking"
-        >
-          <mat-icon aria-hidden="true">view_kanban</mat-icon>
-          <p>FBS Time Tracking</p>
-        </button>
-
-        <button
-          mat-list-item
-          (click)="moveAndHideSidebar('/sci-check')"
-          aria-label="FBS SciCheck öffnen"
-        >
-          <mat-icon aria-hidden="true">description</mat-icon>
-          <p>FBS SciCheck</p>
-        </button>
-
-        <button
-          mat-list-item
-          (click)="moveAndHideSidebar('/questionary')"
-          aria-label="Fragebogen öffnen"
-        >
-          <mat-icon aria-hidden="true">assignment</mat-icon>
-          <p>{{ "sidebar.label.questionary" | i18nextEager }}</p>
-        </button>
-      </mat-nav-list>
-
-      <span class="filler"></span>
-
-      <span class="legal">
-        <a
-          mat-list-item
-          class="general"
-          (click)="showImpressum()"
-          aria-label="Impressum anzeigen"
-          >{{ "sidebar.label.imprint" | i18nextEager }}</a
-        >
-        <a
-          mat-list-item
-          class="general"
-          (click)="showDataprivacy()"
-          aria-label="Datenschutz anzeigen"
-          >{{ "sidebar.label.dataProtection" | i18nextEager }}</a
-        >
-      </span>
-    </div>
-  </mat-sidenav>
-
-  <mat-sidenav-content>
-    <mat-toolbar role="banner">
-      <button mat-icon-button aria-label="Menü ein- oder ausklappen">
-        <mat-icon (click)="sidenav.toggle()" aria-hidden="true">menu</mat-icon>
-      </button>
-      <h2 class="mat-h1">{{ title | async }}</h2>
-      <span class="toolbar-spacer"></span>
-      <button
-        mat-icon-button
-        [matMenuTriggerFor]="menu"
-        class="toolbar-icon favorite-icon"
-        aria-label="Benutzermenü öffnen"
-      >
-        <mat-icon aria-hidden="true">account_circle</mat-icon>
-      </button>
-      <mat-menu #menu="matMenu">
-        <div class="userinfos">
-          <strong>{{ user?.prename }} {{ user?.surname }}</strong>
-          <br /><i>{{ user?.email }}</i>
-        </div>
-        <button
-          mat-menu-item
-          routerLink="/users/password"
-          aria-label="Passwort ändern"
-        >
-          <mat-icon aria-hidden="true">settings</mat-icon
-          >{{ "sidebar.label.changePassword" | i18nextEager }}
-        </button>
-        <button
-          mat-menu-item
-          [matMenuTriggerFor]="language.menu"
-          aria-label="Sprache ändern"
-        >
-          <mat-icon aria-hidden="true">language</mat-icon
-          >{{ "sidebar.label.changeLanguage" | i18nextEager }}
-        </button>
-        <button mat-menu-item (click)="logout()" aria-label="Abmelden">
-          <mat-icon class="logout-icon" aria-hidden="true"
-            >power_settings_new</mat-icon
-          >
-          {{ "sidebar.label.logout" | i18nextEager }}
-        </button>
-      </mat-menu>
-      <app-language-menu #language="languageMenu"></app-language-menu>
-    </mat-toolbar>
-    <main
-      class="content-container"
-      id="main-content"
-      tabindex="-1"
-      aria-label="Hauptinhalt"
+<ng-template #standaloneTemplate>
+  <app-skip-link anchor="main-content">
+    {{ "accessibility.sidebar.skip" | i18nextEager }}
+  </app-skip-link>
+  <mat-sidenav-container class="container" role="presentation">
+    <mat-sidenav
+      class="sidenav"
+      #sidenav
+      mode="side"
+      [(opened)]="opened"
+      [style.width]="showSidebarMenu ? '100%' : null"
+      (window:resize)="onResize($event)"
+      role="navigation"
+      aria-label="Hauptmenü"
     >
-      <router-outlet></router-outlet>
-    </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+      <div class="sidenav-group">
+        <div class="logo">
+          <h1>
+            {{ "sidebar.label.feedbacksystem" | i18nextEager }}
+            <i class="material-icons" aria-hidden="true">feedback</i>
+            <button
+              mat-icon-button
+              *ngIf="showSidebarMenu"
+              aria-label="Menü ein- oder ausklappen"
+              (click)="sidenav.toggle()"
+            >
+              <mat-icon aria-hidden="true">menu</mat-icon>
+            </button>
+          </h1>
+          <a
+            routerLink="/courses"
+            aria-label="Zur Startseite"
+            class="logo-link"
+          ></a>
+        </div>
+
+        <mat-nav-list role="list" aria-label="Navigationspunkte">
+          <a
+            mat-list-item
+            routerLink="/courses"
+            routerLinkActive="selected"
+            aria-current="page"
+          >
+            <mat-icon aria-hidden="true">list</mat-icon>
+            <p>{{ "sidebar.label.myCourses" | i18nextEager }}</p>
+          </a>
+
+          <a
+            mat-list-item
+            routerLink="/courses/search"
+            routerLinkActive="selected"
+          >
+            <mat-icon aria-hidden="true">search</mat-icon>
+            <p>{{ "sidebar.label.allCourses" | i18nextEager }}</p>
+          </a>
+
+          <a mat-list-item routerLink="/groups" routerLinkActive="selected">
+            <mat-icon aria-hidden="true">groups</mat-icon>
+            <p>{{ "sidebar.label.myGroups" | i18nextEager }}</p>
+          </a>
+
+          <a
+            mat-list-item
+            *ngIf="isAdmin"
+            routerLink="/admin/user-management"
+            routerLinkActive="selected"
+          >
+            <mat-icon aria-hidden="true">supervised_user_circle</mat-icon>
+            <p>{{ "sidebar.label.users" | i18nextEager }}</p>
+          </a>
+
+          <a
+            mat-list-item
+            *ngIf="isIntegrationEnabled('feedbackApp')"
+            (click)="goToFBA()"
+            aria-label="Feedback App öffnen"
+          >
+            <mat-icon aria-hidden="true">question_answer</mat-icon>
+            <p>{{ "sidebar.label.feedbackApp" | i18nextEager }}</p>
+          </a>
+
+          <a
+            mat-list-item
+            routerLink="/sqlplayground"
+            routerLinkActive="selected"
+          >
+            <mat-icon aria-hidden="true">extension</mat-icon>
+            <p>{{ "sidebar.label.sqlPlayground" | i18nextEager }}</p>
+          </a>
+
+          <a
+            mat-list-item
+            *ngIf="
+              isIntegrationEnabled('eat') &&
+              (showAnalytics || isAdmin || isModerator)
+            "
+            routerLink="/analytics"
+            routerLinkActive="selected"
+          >
+            <mat-icon aria-hidden="true">bar_chart</mat-icon>
+            <p>{{ "sidebar.label.analyticsPlatform" | i18nextEager }}</p>
+          </a>
+
+          <button
+            mat-list-item
+            *ngIf="isIntegrationEnabled('modelling')"
+            (click)="moveAndHideSidebar('/modelling')"
+            aria-label="FBS Modelling öffnen"
+          >
+            <mat-icon aria-hidden="true">format_shapes</mat-icon>
+            <p>FBS Modelling</p>
+          </button>
+
+          <button
+            mat-list-item
+            *ngIf="isIntegrationEnabled('kanban')"
+            (click)="moveAndHideSidebar('/kanban')"
+            aria-label="FBS Kanban öffnen"
+          >
+            <mat-icon aria-hidden="true">view_kanban</mat-icon>
+            <p>FBS Kanban</p>
+          </button>
+
+          <button
+            mat-list-item
+            *ngIf="isIntegrationEnabled('sciCheck')"
+            (click)="moveAndHideSidebar('/sci-check')"
+            aria-label="FBS SciCheck öffnen"
+          >
+            <mat-icon aria-hidden="true">description</mat-icon>
+            <p>FBS SciCheck</p>
+          </button>
+
+          <button
+            mat-list-item
+            *ngIf="isIntegrationEnabled('questionary')"
+            (click)="moveAndHideSidebar('/questionary')"
+            aria-label="Fragebogen öffnen"
+          >
+            <mat-icon aria-hidden="true">assignment</mat-icon>
+            <p>{{ "sidebar.label.questionary" | i18nextEager }}</p>
+          </button>
+        </mat-nav-list>
+
+        <span class="filler"></span>
+
+        <span class="legal">
+          <a
+            mat-list-item
+            class="general"
+            (click)="showImpressum()"
+            aria-label="Impressum anzeigen"
+            >{{ "sidebar.label.imprint" | i18nextEager }}</a
+          >
+          <a
+            mat-list-item
+            class="general"
+            (click)="showDataprivacy()"
+            aria-label="Datenschutz anzeigen"
+            >{{ "sidebar.label.dataProtection" | i18nextEager }}</a
+          >
+        </span>
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <mat-toolbar role="banner">
+        <button mat-icon-button aria-label="Menü ein- oder ausklappen">
+          <mat-icon (click)="sidenav.toggle()" aria-hidden="true"
+            >menu</mat-icon
+          >
+        </button>
+        <h2 class="mat-h1">{{ title | async }}</h2>
+        <span class="toolbar-spacer"></span>
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="menu"
+          class="toolbar-icon favorite-icon"
+          aria-label="Benutzermenü öffnen"
+        >
+          <mat-icon aria-hidden="true">account_circle</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <div class="userinfos">
+            <strong>{{ user?.prename }} {{ user?.surname }}</strong>
+            <br /><i>{{ user?.email }}</i>
+          </div>
+          <button
+            mat-menu-item
+            routerLink="/users/password"
+            aria-label="Passwort ändern"
+          >
+            <mat-icon aria-hidden="true">settings</mat-icon
+            >{{ "sidebar.label.changePassword" | i18nextEager }}
+          </button>
+          <button
+            mat-menu-item
+            [matMenuTriggerFor]="language.menu"
+            aria-label="Sprache ändern"
+          >
+            <mat-icon aria-hidden="true">language</mat-icon
+            >{{ "sidebar.label.changeLanguage" | i18nextEager }}
+          </button>
+          <button mat-menu-item (click)="logout()" aria-label="Abmelden">
+            <mat-icon class="logout-icon" aria-hidden="true"
+              >power_settings_new</mat-icon
+            >
+            {{ "sidebar.label.logout" | i18nextEager }}
+          </button>
+        </mat-menu>
+        <app-language-menu #language="languageMenu"></app-language-menu>
+      </mat-toolbar>
+      <main
+        class="content-container"
+        id="main-content"
+        tabindex="-1"
+        aria-label="Hauptinhalt"
+      >
+        <router-outlet></router-outlet>
+      </main>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</ng-template>

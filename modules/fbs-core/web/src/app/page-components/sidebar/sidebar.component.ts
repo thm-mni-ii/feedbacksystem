@@ -10,6 +10,9 @@ import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dat
 import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impressum-dialog.component";
 import { FeedbackAppService } from "../../service/feedback-app.service";
 import { User } from "src/app/model/User";
+import { IntegrationService } from "../../service/integration.service";
+import { Integration } from "../../model/Integration";
+import { EmbeddingService } from "../../service/embedding.service";
 
 /**
  * Root component shows sidenav and titlebar
@@ -26,7 +29,9 @@ export class SidebarComponent implements OnInit {
     private titlebar: TitlebarService,
     private dialog: MatDialog,
     private feedbackAppService: FeedbackAppService,
-    private userservice: UserService
+    private userservice: UserService,
+    private integrationService: IntegrationService,
+    private embeddingService: EmbeddingService
   ) {}
 
   title: Observable<string> = of("");
@@ -38,24 +43,38 @@ export class SidebarComponent implements OnInit {
   isModerator: boolean;
   showAnalytics: boolean;
   user: User;
+  integrations: Record<string, Integration> = {};
+  isEmbedded: boolean = false;
 
   ngOnInit() {
-    this.userID = this.auth.getToken().id;
-    this.userservice.getUser(this.userID).subscribe(
-      (user) => (this.user = user),
-      (error) => console.log(error)
-    );
-    const globalRole = this.auth.getToken().globalRole;
-    this.opened = true;
-
-    this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
-    this.isModerator = Roles.GlobalRole.isModerator(globalRole);
-
+    this.isEmbedded = this.embeddingService.isEmbedded;
     this.title = this.titlebar.getTitle();
     this.innerWidth = window.innerWidth;
+    this.opened = true;
 
-    this.showAnalytics = Object.values(this.auth.getToken().courseRoles).some(
-      (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
+    try {
+      const token = this.auth.getToken();
+      if (token) {
+        this.userID = token.id;
+        this.userservice.getUser(this.userID).subscribe(
+          (user) => (this.user = user),
+          (error) => console.log(error)
+        );
+        const globalRole = token.globalRole;
+        this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
+        this.isModerator = Roles.GlobalRole.isModerator(globalRole);
+
+        this.showAnalytics = Object.values(token.courseRoles || {}).some(
+          (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
+        );
+      }
+    } catch (e) {
+      // In embedded mode, token might still be loading asynchronously
+    }
+
+    this.integrationService.getAllIntegrations().subscribe(
+      (integrations) => (this.integrations = integrations),
+      (error) => console.log(error)
     );
   }
 
@@ -98,15 +117,16 @@ export class SidebarComponent implements OnInit {
    * Link to Feedback App
    */
   goToFBA() {
-    this.feedbackAppService.getToken().subscribe((token) => {
-      localStorage.setItem("flutter.authToken", JSON.stringify(token));
-      window.open("/feedbackApp/");
-    });
+    this.feedbackAppService.open(null, true).subscribe(() => {});
   }
 
   moveAndHideSidebar(route: string) {
     console.log("moveAndHideSidebar");
     this.router.navigate([route]);
     this.opened = false;
+  }
+
+  isIntegrationEnabled(name: string): boolean {
+    return this.integrations[name] !== undefined;
   }
 }

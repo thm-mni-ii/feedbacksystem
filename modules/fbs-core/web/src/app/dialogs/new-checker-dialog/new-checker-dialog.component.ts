@@ -4,8 +4,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerService } from "../../service/checker.service";
-import { Observable, of } from "rxjs";
-import { map } from "rxjs/operators";
+import { forkJoin, Observable, of } from "rxjs";
+import { switchMap } from "rxjs/operators";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
 
 @Component({
@@ -30,6 +30,8 @@ export class NewCheckerDialogComponent implements OnInit {
   secondaryFile: File[] = [];
   mainFileName: string;
   secondaryFileName: string;
+  mainFileChanged = false;
+  secondaryFileChanged = false;
   isUpdate: boolean;
   courseId: number;
   taskId: number;
@@ -85,50 +87,24 @@ export class NewCheckerDialogComponent implements OnInit {
       );
     }
 
-    if (this.checker.mainFileUploaded || this.checker.secondaryFileUploaded) {
-      this.checkerService
-        .getChecker(this.courseId, this.taskId)
-        .pipe(
-          map((checkers) =>
-            checkers.find((checker) => checker.id == this.data.checker.id)
-          )
-        )
-        .subscribe((checker) => {
-          if (this.checker.mainFileUploaded) {
-            this.checkerService
-              .fetchFile(
-                this.courseId,
-                this.taskId,
-                checker.id,
-                CheckerFileType.MainFile
-              )
-              .subscribe((mainFileBlob) => {
-                this.mainFile[0] = new File([mainFileBlob], this.mainFileName);
-                this.fileCounter++;
-              });
-          }
-          if (this.checker.secondaryFileUploaded) {
-            this.checkerService
-              .fetchFile(
-                this.courseId,
-                this.taskId,
-                checker.id,
-                CheckerFileType.SecondaryFile
-              )
-              .subscribe((secondaryFileBlob) => {
-                this.secondaryFile[0] = new File(
-                  [secondaryFileBlob],
-                  this.secondaryFileName
-                );
-                this.fileCounter++;
-              });
-          }
-        });
-    }
-
     this.defineForm(this.checkerForm.value);
     this.showHintsEvent(this.checkerForm.value);
     this.showExtendedHintsEvent(this.checkerForm.value);
+
+    if (this.checker.mainFileUploaded || this.checker.secondaryFileUploaded) {
+      if (this.checker.mainFileUploaded) {
+        this.mainFile[0] = new File(
+          [],
+          this.checker.mainFileName || this.mainFileName
+        );
+      }
+      if (this.checker.secondaryFileUploaded) {
+        this.secondaryFile[0] = new File(
+          [],
+          this.checker.secondaryFileName || this.secondaryFileName
+        );
+      }
+    }
 
     if (this.isUpdate != true) {
       this.setDefaultValues();
@@ -160,40 +136,32 @@ export class NewCheckerDialogComponent implements OnInit {
     if (
       this.checker.checkerType &&
       this.checker.ord &&
-      this.mainFile &&
-      (this.secondaryFile || this.checker.checkerType === "bash")
+      this.mainFile[0] &&
+      (this.secondaryFile[0] || this.checker.checkerType === "bash")
     ) {
       this.checkerService
         .createChecker(this.courseId, this.taskId, this.checker)
-        .subscribe((checker) => {
-          this.checkerService
-            .updateFile(
-              this.courseId,
-              this.taskId,
+        .pipe(
+          switchMap((checker) =>
+            this.uploadCheckerFiles(
               checker.id,
-              CheckerFileType.MainFile,
-              this.mainFile[0]
+              this.mainFile[0],
+              this.secondaryFile[0]
             )
-            .subscribe(
-              () => {},
-              (error) => console.error(error)
+          )
+        )
+        .subscribe(
+          () => {
+            this.dialogRef.close({ success: true });
+          },
+          (error) => {
+            console.error(error);
+            this.snackBar.open(
+              "Überprüfung erstellen hat nicht funktioniert.",
+              "ok"
             );
-          if (this.secondaryFile[0]) {
-            this.checkerService
-              .updateFile(
-                this.courseId,
-                this.taskId,
-                checker.id,
-                CheckerFileType.SecondaryFile,
-                this.secondaryFile[0]
-              )
-              .subscribe(
-                () => {},
-                (error) => console.error(error)
-              );
           }
-          this.dialogRef.close({ success: true });
-        });
+        );
     } else {
       this.snackBar.open("Alle Felder müssen gefüllt werden.", "ok");
     }
@@ -201,11 +169,13 @@ export class NewCheckerDialogComponent implements OnInit {
 
   updateMainFile(event) {
     this.mainFile = event["content"];
+    this.mainFileChanged = true;
     this.fileCounter++;
   }
 
   updateSecondaryFile(event) {
     this.secondaryFile = event["content"];
+    this.secondaryFileChanged = true;
     this.fileCounter++;
   }
 
@@ -227,8 +197,10 @@ export class NewCheckerDialogComponent implements OnInit {
     if (
       this.checker.checkerType &&
       this.checker.ord &&
-      this.mainFile &&
-      (this.secondaryFile || this.checker.checkerType === "bash")
+      (this.mainFile[0] || this.checker.mainFileUploaded) &&
+      (this.secondaryFile[0] ||
+        this.checker.secondaryFileUploaded ||
+        this.checker.checkerType === "bash")
     ) {
       this.checkerService
         .updateChecker(
@@ -237,38 +209,64 @@ export class NewCheckerDialogComponent implements OnInit {
           this.checker.id,
           this.checker
         )
-        .subscribe(() => {
-          this.checkerService
-            .updateFile(
-              this.courseId,
-              this.taskId,
+        .pipe(
+          switchMap(() =>
+            this.uploadCheckerFiles(
               this.checker.id,
-              CheckerFileType.MainFile,
-              this.mainFile[0]
+              this.mainFileChanged ? this.mainFile[0] : undefined,
+              this.secondaryFileChanged ? this.secondaryFile[0] : undefined
             )
-            .subscribe(
-              () => {},
-              (error) => console.error(error)
+          )
+        )
+        .subscribe(
+          () => {
+            this.dialogRef.close({ success: true });
+          },
+          (error) => {
+            console.error(error);
+            this.snackBar.open(
+              "Überprüfung ändern hat nicht funktioniert.",
+              "ok"
             );
-          if (this.secondaryFile[0]) {
-            this.checkerService
-              .updateFile(
-                this.courseId,
-                this.taskId,
-                this.checker.id,
-                CheckerFileType.SecondaryFile,
-                this.secondaryFile[0]
-              )
-              .subscribe(
-                () => {},
-                (error) => console.error(error)
-              );
           }
-          this.dialogRef.close({ success: true });
-        });
+        );
     } else {
       this.snackBar.open("Alle Felder müssen gefüllt werden.", "ok");
     }
+  }
+
+  private uploadCheckerFiles(
+    checkerId: number,
+    mainFile?: File,
+    secondaryFile?: File
+  ): Observable<void[]> {
+    const uploads: Observable<void>[] = [];
+
+    if (mainFile) {
+      uploads.push(
+        this.checkerService.updateFile(
+          this.courseId,
+          this.taskId,
+          checkerId,
+          CheckerFileType.MainFile,
+          mainFile
+        )
+      );
+    }
+
+    if (secondaryFile) {
+      uploads.push(
+        this.checkerService.updateFile(
+          this.courseId,
+          this.taskId,
+          checkerId,
+          CheckerFileType.SecondaryFile,
+          secondaryFile
+        )
+      );
+    }
+
+    return uploads.length ? forkJoin(uploads) : of([]);
   }
 
   setDefaultValues() {

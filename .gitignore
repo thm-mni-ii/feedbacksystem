@@ -1,4 +1,5 @@
 .gradle/
+.kotlin/
 .idea/
 .settings/
 .vscode/
@@ -9,6 +10,7 @@ out/
 dist/
 node_modules/
 zk-single-kafka-single/
+secrets/*.p12
 
 submissioncheck.iml
 .classpath

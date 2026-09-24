@@ -39,6 +39,14 @@
   }
 }
 
+:host-context(.dark-theme) .action-container button {
+  color: rgba(255, 255, 255, 0.7);
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
 .table-container {
   display: block;
   min-height: 100px;

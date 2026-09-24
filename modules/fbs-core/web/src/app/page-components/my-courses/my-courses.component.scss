@@ -4,8 +4,19 @@
   display: block;
   padding: 16px;
 
-  .search {
-    width: 100%;
+  .header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+
+    .search {
+      flex: 1 1 300px;
+    }
+
+    .all-courses-action {
+      margin-bottom: 1.25em;
+    }
   }
 
   .card {

@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation._
 
 /**
   * LoginController simply perform login request.
+  * @deprecated Delegated to fbs-identity-service
   */
 @RestController
 @EnableCasClient
 @RequestMapping(path = Array("/api/v1/login"))
+@deprecated("Authentication is delegated to fbs-identity-service", "2.0.0")
 class LoginController extends CasClientConfigurerAdapter {
   @Autowired
   private implicit val userService: UserService = null
@@ -110,6 +112,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @param jsonNode Request Body of User login
     */
+  @deprecated("Use fbs-identity-service OIDC flow", "2.0.0")
   @RequestMapping(value = Array("/ldap"), method = Array(RequestMethod.POST))
   def userLDAPLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Unit = {
     if (allowLdapLogin) {
@@ -138,6 +141,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @param jsonNode Request Body of User login
     */
+  @deprecated("Use fbs-identity-service OIDC flow", "2.0.0")
   @RequestMapping(value = Array("/local"), method = Array(RequestMethod.POST))
   def userLocalLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Unit = {
     val login = for {
@@ -158,6 +162,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @param jsonNode Request Body of User login
     */
+  @deprecated("Use fbs-identity-service OIDC flow", "2.0.0")
   @RequestMapping(value = Array("/unified"), method = Array(RequestMethod.POST))
   def userUnifiedLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Unit = {
     val credentials = for {

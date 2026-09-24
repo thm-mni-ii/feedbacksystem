@@ -75,7 +75,7 @@ services:
     sharedSecret: ${SQL_RUNNER_SHARED_SECRET:}
     insecure: ${SQL_RUNNER_INSECURE:false}
 integrations:
-  names: [modelling, feedbackApp, eat, kanban, sciCheck]
+  names: ${INTEGRATIONS_NAMES:modelling,feedbackApp,eat,kanban,sciCheck,questionary,classroom}
   modelling:
     url: ${MODELLING_URL:https://fbs-modelling.mni.thm.de/}
   feedbackApp:
@@ -86,9 +86,19 @@ integrations:
     url: ${KANBAN_URL:/kanban/}
   sciCheck:
     url: ${SCI_CHECK_URL:/scicheck/}
+  questionary:
+    url: ${QUESTIONARY_URL:/questionary/}
+  classroom:
+    url: ${CLASSROOM_URL:http://localhost:8085}
 spring:
   main:
     allow-bean-definition-overriding: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER:http://localhost:8080}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://identity-service:8080/oauth2/jwks}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     password: ${MYSQL_PASSWORD:twRuvi2ejllDdA4nnQLa08O}
