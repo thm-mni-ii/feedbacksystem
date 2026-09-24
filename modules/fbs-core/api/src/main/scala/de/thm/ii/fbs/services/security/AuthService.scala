@@ -65,7 +65,9 @@ class AuthService {
         val role = GlobalRole.parse(roleStr)
 
         Try {
-          DB.insert("INSERT INTO user (user_id, prename, surname, email, username, global_role) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = VALUES(username), global_role = VALUES(global_role);",
+          DB.insert(
+            "INSERT INTO user (user_id, prename, surname, email, username, global_role) VALUES (?, ?, ?, ?, ?, ?) " +
+              "ON DUPLICATE KEY UPDATE username = VALUES(username), global_role = VALUES(global_role);",
             uid, prename, surname, email, username, role.id)
         }
         userService.find(uid)
