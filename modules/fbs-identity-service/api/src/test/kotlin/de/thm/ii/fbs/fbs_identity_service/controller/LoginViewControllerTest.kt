@@ -30,6 +30,9 @@ class LoginViewControllerTest {
                 model {
                     attribute("samlEnabled", true)
                     attribute("samlLoginUrl", "/saml2/authenticate/keycloak")
+                    attribute("samlRegistrationId", "keycloak")
+                    attribute("samlProviderKey", "KEYCLOAK")
+                    attribute("samlButtonText", "Login with KEYCLOAK")
                     attribute("hasError", false)
                     attribute("hasSsoError", false)
                     attribute("hasLogout", false)

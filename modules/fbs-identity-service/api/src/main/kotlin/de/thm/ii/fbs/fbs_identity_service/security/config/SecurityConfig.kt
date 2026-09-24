@@ -136,6 +136,7 @@ class SecurityConfig(
             security = security
                 .saml2Login {
                     it
+                        .loginPage("/login")
                         .successHandler(samlAuthSuccessHandler)
                         .failureHandler(samlAuthFailureHandler)
                 }

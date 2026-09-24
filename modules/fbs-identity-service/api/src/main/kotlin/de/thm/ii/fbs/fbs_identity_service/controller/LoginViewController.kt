@@ -23,8 +23,12 @@ class LoginViewController(
         @RequestParam(value = "logout", required = false) logout: String?,
         model: Model
     ): String {
+        val samlProviderKey = samlRegistrationId.trim().uppercase()
         model.addAttribute("samlEnabled", samlEnabled)
-        model.addAttribute("samlLoginUrl", "/saml2/authenticate/$samlRegistrationId")
+        model.addAttribute("samlLoginUrl", "/saml2/authenticate/${samlRegistrationId.trim()}")
+        model.addAttribute("samlRegistrationId", samlRegistrationId.trim())
+        model.addAttribute("samlProviderKey", samlProviderKey)
+        model.addAttribute("samlButtonText", "Login with $samlProviderKey")
         model.addAttribute("hasError", error != null)
         model.addAttribute("hasSsoError", ssoError != null)
         model.addAttribute("hasLogout", logout != null)
