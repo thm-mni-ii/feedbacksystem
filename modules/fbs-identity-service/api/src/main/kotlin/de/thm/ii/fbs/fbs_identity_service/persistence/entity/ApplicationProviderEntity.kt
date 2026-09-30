@@ -51,6 +51,9 @@ class ApplicationProviderEntity(
     @Column(name = "is_active", nullable = false)
     var isActive: Boolean = true,
 
+    @Column(name = "is_internal", nullable = false)
+    var isInternal: Boolean = false,
+
     @Column(name = "client_id", length = 128)
     var clientId: String? = null,
 

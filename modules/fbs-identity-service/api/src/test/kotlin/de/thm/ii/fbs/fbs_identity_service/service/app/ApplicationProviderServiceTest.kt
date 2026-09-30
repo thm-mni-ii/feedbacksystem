@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -311,6 +312,48 @@ class ApplicationProviderServiceTest {
         verify(passwordEncoder).encode(any())
         verify(repository).save(entity)
         verify(oidcClientSyncService).syncClient(entity)
+    }
+
+    @Test
+    fun `createProvider with isInternal creates internal provider`() {
+        val request = CreateApplicationProviderRequest(
+            id = "internal-app",
+            title = "Internal App",
+            icon = "school",
+            url = "https://example.com/internal",
+            isInternal = true
+        )
+
+        whenever(repository.save(any<ApplicationProviderEntity>())).thenAnswer { invocation ->
+            invocation.getArgument(0)
+        }
+
+        val result = service.createProvider(request)
+
+        assertTrue(result.isInternal)
+        verify(repository).save(argThat<ApplicationProviderEntity> { isInternal })
+    }
+
+    @Test
+    fun `updateProvider updates isInternal flag`() {
+        val entity = createEntity("app-1", AppRequiredRole.USER)
+        entity.isInternal = false
+        whenever(repository.findById("app-1")).thenReturn(Optional.of(entity))
+        whenever(repository.save(any<ApplicationProviderEntity>())).thenAnswer { invocation ->
+            invocation.getArgument(0)
+        }
+
+        val request = UpdateApplicationProviderRequest(
+            title = "Updated",
+            icon = "school",
+            url = "https://example.com/app",
+            isInternal = true
+        )
+
+        val result = service.updateProvider("app-1", request)
+
+        assertTrue(result.isInternal)
+        assertTrue(entity.isInternal)
     }
 
     private fun createEntity(id: String, role: AppRequiredRole) = ApplicationProviderEntity(

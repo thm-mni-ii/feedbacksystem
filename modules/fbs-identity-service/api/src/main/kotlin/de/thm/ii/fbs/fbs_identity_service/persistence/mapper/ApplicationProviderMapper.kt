@@ -21,6 +21,7 @@ fun ApplicationProviderEntity.toModel(): ApplicationProvider {
         showInNavbar = showInNavbar,
         isDefault = isDefault,
         isActive = isActive,
+        isInternal = isInternal,
         clientId = clientId,
         oidcEnabled = oidcEnabled,
         redirectUris = parsedRedirectUris,
