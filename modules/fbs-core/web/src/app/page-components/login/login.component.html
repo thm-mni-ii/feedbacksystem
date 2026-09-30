@@ -19,31 +19,39 @@
         <mat-divider class="divider"></mat-divider>
         <div>{{ "login.or" | i18nextEager }}</div>
       </div>
-      <mat-card-content (keyup.enter)="localLogin()" class="login-inputs">
-        <mat-form-field>
-          <input
-            [(ngModel)]="username"
-            name="username"
-            type="text"
-            matInput
-            [placeholder]="'login.username' | i18nextEager"
-          />
-        </mat-form-field>
-        <mat-form-field>
-          <input
-            [(ngModel)]="password"
-            name="password"
-            type="password"
-            matInput
-            [placeholder]="'login.password' | i18nextEager"
-          />
-        </mat-form-field>
-      </mat-card-content>
-      <mat-card-actions class="login-buttons">
-        <button (click)="localLogin()" mat-flat-button color="accent">
-          {{ "login.localLogin" | i18nextEager }}
-        </button>
-      </mat-card-actions>
+
+      <mat-accordion class="local-login-accordion">
+        <mat-expansion-panel [expanded]="false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ "login.localLogin" | i18nextEager }}</mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-card-content (keyup.enter)="localLogin()" class="login-inputs">
+            <mat-form-field>
+              <input
+                [(ngModel)]="username"
+                name="username"
+                type="text"
+                matInput
+                [placeholder]="'login.username' | i18nextEager"
+              />
+            </mat-form-field>
+            <mat-form-field>
+              <input
+                [(ngModel)]="password"
+                name="password"
+                type="password"
+                matInput
+                [placeholder]="'login.password' | i18nextEager"
+              />
+            </mat-form-field>
+          </mat-card-content>
+          <mat-card-actions class="login-buttons">
+            <button (click)="localLogin()" mat-flat-button color="accent">
+              {{ "login.localLogin" | i18nextEager }}
+            </button>
+          </mat-card-actions>
+        </mat-expansion-panel>
+      </mat-accordion>
     </mat-card>
   </div>
   <div class="github-link">

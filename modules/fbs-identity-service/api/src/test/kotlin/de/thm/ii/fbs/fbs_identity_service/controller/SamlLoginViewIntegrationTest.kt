@@ -37,7 +37,9 @@ class SamlLoginViewIntegrationTest {
                 content { string(containsString("Login with THM")) }
                 content { string(containsString("/saml2/authenticate/thm")) }
                 content { string(containsString("fbs-button-sso")) }
-                // Local login form is displayed below
+                // Local login form is displayed below in a dropdown
+                content { string(containsString("fbs-local-login-dropdown")) }
+                content { string(containsString("local-login-toggle")) }
                 content { string(containsString("Local Login")) }
                 content { string(containsString("username")) }
                 content { string(containsString("password")) }
