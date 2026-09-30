@@ -17,6 +17,9 @@ spring:
       ddl-auto: none
 
 app:
+  cors:
+    dev-mode: true
+    allowed-origins: ""
   frontend:
     base-url: https://localhost
   saml:

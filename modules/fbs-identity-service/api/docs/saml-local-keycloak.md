@@ -27,8 +27,7 @@ The local flow is:
 /oauth2/authorize
     -> starts the OIDC Authorization Code Flow
     -> the original authorization request is stored in the HTTP session
-    -> the user selects SAML login
-    -> Spring Security redirects to /saml2/authenticate/keycloak
+    -> automatically redirects to /saml2/authenticate/keycloak (skipping the login form when SAML is configured)
     -> Spring Security creates the SAML AuthnRequest
     -> the browser is redirected to Keycloak
     -> the user authenticates at Keycloak
@@ -160,10 +159,10 @@ http://localhost:8080/oauth2/authorize
 &state=<STATE>
 ```
 
-On the login page, select the SAML / Keycloak login.
+When SAML is enabled (`app.saml.enabled=true`), requesting the authorization URL will automatically start SAML login and redirect to Keycloak without showing the login form.
 
 Expected result:
-* the browser is redirected to Keycloak
+* the browser is automatically redirected to Keycloak (skipping the login form)
 * the user authenticates at Keycloak
 * the local user is resolved or created
 * the original OIDC authorization request is continued

@@ -58,6 +58,15 @@ button {
   flex-direction: column;
 }
 
+.local-login-accordion {
+  width: 100%;
+  margin-top: 10px;
+  mat-expansion-panel {
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}
+
 .login-buttons {
   display: flex;
   justify-content: center;

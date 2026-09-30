@@ -16,13 +16,28 @@ class LoginViewIntegrationTest {
     private lateinit var mockMvc: MockMvc
 
     @Test
-    fun `login endpoint is publicly accessible and returns html`() {
+    fun `login endpoint is publicly accessible and returns html with local login dropdown`() {
         mockMvc.get("/login")
             .andExpect {
                 status { isOk() }
                 content { contentTypeCompatibleWith(MediaType.TEXT_HTML) }
                 content { string(org.hamcrest.Matchers.containsString("Feedback System")) }
                 content { string(org.hamcrest.Matchers.containsString("Local Login")) }
+                content { string(org.hamcrest.Matchers.containsString("fbs-local-login-dropdown")) }
+                content { string(org.hamcrest.Matchers.containsString("local-login-toggle")) }
+            }
+    }
+
+    @Test
+    fun `login endpoint with error opens local login dropdown automatically`() {
+        mockMvc.get("/login?error=1")
+            .andExpect {
+                status { isOk() }
+                content { contentTypeCompatibleWith(MediaType.TEXT_HTML) }
+                content { string(org.hamcrest.Matchers.containsString("fbs-alert-error")) }
+                content { string(org.hamcrest.Matchers.containsString("Invalid username or password")) }
+                content { string(org.hamcrest.Matchers.containsString("fbs-local-login-dropdown")) }
+                content { string(org.hamcrest.Matchers.containsString("open=\"open\"")) }
             }
     }
 

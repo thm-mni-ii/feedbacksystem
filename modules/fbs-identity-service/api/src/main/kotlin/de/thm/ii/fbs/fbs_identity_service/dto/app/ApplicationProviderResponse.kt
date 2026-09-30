@@ -18,11 +18,18 @@ data class ApplicationProviderResponse(
     val isDefault: Boolean,
     val isActive: Boolean,
     val clientId: String?,
+    val oidcEnabled: Boolean = false,
+    val redirectUris: List<String> = emptyList(),
+    val postLogoutRedirectUris: List<String> = emptyList(),
+    val clientType: String = "PUBLIC",
+    val scopes: List<String> = listOf("openid", "profile", "email"),
+    val clientSecret: String? = null,
+    val hasClientSecret: Boolean = false,
     val createdAt: Instant?,
     val updatedAt: Instant?
 ) {
     companion object {
-        fun fromModel(model: ApplicationProvider): ApplicationProviderResponse {
+        fun fromModel(model: ApplicationProvider, includeSecret: Boolean = false): ApplicationProviderResponse {
             return ApplicationProviderResponse(
                 id = model.id,
                 title = model.title,
@@ -36,6 +43,13 @@ data class ApplicationProviderResponse(
                 isDefault = model.isDefault,
                 isActive = model.isActive,
                 clientId = model.clientId,
+                oidcEnabled = model.oidcEnabled,
+                redirectUris = model.redirectUris,
+                postLogoutRedirectUris = model.postLogoutRedirectUris,
+                clientType = model.clientType,
+                scopes = model.scopes,
+                clientSecret = if (includeSecret) model.clientSecret else null,
+                hasClientSecret = model.hasClientSecret || !model.clientSecret.isNullOrBlank(),
                 createdAt = model.createdAt,
                 updatedAt = model.updatedAt
             )

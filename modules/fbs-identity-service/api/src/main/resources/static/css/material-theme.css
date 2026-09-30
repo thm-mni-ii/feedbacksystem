@@ -342,6 +342,81 @@ body {
   fill: currentColor;
 }
 
+/* Dropdown / Collapsible Component */
+.fbs-dropdown {
+  width: 100%;
+  border-radius: var(--fbs-radius);
+  transition: all 0.2s ease;
+}
+
+.fbs-dropdown-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--fbs-radius);
+  background-color: transparent;
+  color: var(--fbs-text-secondary);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  list-style: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.fbs-dropdown-summary::-webkit-details-marker {
+  display: none;
+}
+
+.fbs-dropdown-summary::marker {
+  display: none;
+}
+
+.fbs-dropdown-summary:hover {
+  background-color: rgba(64, 94, 154, 0.04);
+  border-color: var(--fbs-primary);
+  color: var(--fbs-primary);
+}
+
+.fbs-dropdown-summary:focus-visible {
+  outline: 2px solid var(--fbs-primary);
+  outline-offset: 2px;
+}
+
+.fbs-dropdown[open] > .fbs-dropdown-summary {
+  color: var(--fbs-primary);
+  border-color: var(--fbs-primary-light);
+  background-color: rgba(64, 94, 154, 0.05);
+  margin-bottom: 16px;
+}
+
+.fbs-dropdown-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+}
+
+.fbs-dropdown-icon {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fbs-dropdown[open] > .fbs-dropdown-summary .fbs-dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.fbs-dropdown-content {
+  animation: fbs-fade-in 0.25s ease-out;
+}
+
 @keyframes fbs-fade-in {
   from {
     opacity: 0;

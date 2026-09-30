@@ -57,6 +57,7 @@ services:
       MYSQL_URI: jdbc:mysql://mysql1:3306
       MYSQL_USER: root
       MYSQL_PASSWORD: demoRootPassword1
+      CORS_DEV_MODE: "true"
       OIDC_ISSUER: http://localhost:8080
       OIDC_CLIENT_ID: fbs-test-client
       OIDC_CLIENT_REDIRECT_URI: http://127.0.0.1:4200/oauth2/callback
