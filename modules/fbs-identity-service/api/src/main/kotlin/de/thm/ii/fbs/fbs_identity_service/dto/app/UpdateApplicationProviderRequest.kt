@@ -26,6 +26,7 @@ data class UpdateApplicationProviderRequest(
     val showInNavbar: Boolean = true,
     val isDefault: Boolean = false,
     val isActive: Boolean = true,
+    val isInternal: Boolean? = null,
     val clientId: String? = null,
     val oidcEnabled: Boolean? = null,
     val redirectUris: List<String>? = null,

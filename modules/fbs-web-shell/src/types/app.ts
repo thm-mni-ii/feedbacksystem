@@ -14,6 +14,7 @@ export interface ApplicationProvider {
   showInNavbar: boolean
   isDefault: boolean
   isActive: boolean
+  isInternal?: boolean
   clientId?: string | null
   oidcEnabled?: boolean
   redirectUris?: string[]
@@ -38,6 +39,7 @@ export interface CreateApplicationProviderInput {
   showInNavbar: boolean
   isDefault: boolean
   isActive: boolean
+  isInternal?: boolean
   clientId?: string | null
   oidcEnabled?: boolean
   redirectUris?: string[]
@@ -58,6 +60,7 @@ export interface UpdateApplicationProviderInput {
   showInNavbar: boolean
   isDefault: boolean
   isActive: boolean
+  isInternal?: boolean
   clientId?: string | null
   oidcEnabled?: boolean
   redirectUris?: string[]

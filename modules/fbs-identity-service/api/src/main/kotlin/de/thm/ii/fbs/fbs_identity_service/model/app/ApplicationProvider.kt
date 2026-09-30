@@ -14,6 +14,7 @@ data class ApplicationProvider(
     val showInNavbar: Boolean,
     val isDefault: Boolean,
     val isActive: Boolean,
+    val isInternal: Boolean = false,
     val clientId: String?,
     val oidcEnabled: Boolean = false,
     val redirectUris: List<String> = emptyList(),
