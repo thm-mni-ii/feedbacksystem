@@ -23,7 +23,9 @@
       <mat-accordion class="local-login-accordion">
         <mat-expansion-panel [expanded]="false">
           <mat-expansion-panel-header>
-            <mat-panel-title>{{ "login.localLogin" | i18nextEager }}</mat-panel-title>
+            <mat-panel-title>{{
+              "login.localLogin" | i18nextEager
+            }}</mat-panel-title>
           </mat-expansion-panel-header>
           <mat-card-content (keyup.enter)="localLogin()" class="login-inputs">
             <mat-form-field>
