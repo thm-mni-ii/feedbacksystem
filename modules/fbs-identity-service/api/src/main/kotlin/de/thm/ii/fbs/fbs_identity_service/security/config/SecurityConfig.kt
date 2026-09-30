@@ -31,16 +31,25 @@ class SecurityConfig(
     private val samlAuthSuccessHandler: SamlAuthSuccessHandler,
     private val samlAuthFailureHandler: SamlAuthFailureHandler,
     @param:Value("\${app.saml.enabled:false}")
-    private val samlEnabled: Boolean
+    private val samlEnabled: Boolean,
+    @param:Value("\${app.saml.registration-id:keycloak}")
+    private val samlRegistrationId: String
 ) {
 
     @Bean
     @Order(1)
     fun authServerSecurityFilterChain(
-        http: HttpSecurity
+        http: HttpSecurity,
+        requestCache: RequestCache
     ): SecurityFilterChain {
         val authorizationServerConfigurer =
             OAuth2AuthorizationServerConfigurer.authorizationServer()
+
+        val loginUrl = if (samlEnabled) {
+            "/saml2/authenticate/${samlRegistrationId.trim()}"
+        } else {
+            "/login"
+        }
 
         http
             .securityMatcher(authorizationServerConfigurer.endpointsMatcher)
@@ -62,9 +71,12 @@ class SecurityConfig(
             }
             .exceptionHandling {
                 it.defaultAuthenticationEntryPointFor(
-                    LoginUrlAuthenticationEntryPoint("/login"),
+                    LoginUrlAuthenticationEntryPoint(loginUrl),
                     MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                 )
+            }
+            .requestCache {
+                it.requestCache(requestCache)
             }
 
         return http.build()
