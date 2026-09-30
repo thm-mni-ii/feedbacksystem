@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
+import de.thm.ii.fbs.fbs_identity_service.persistence.repository.ApplicationProviderRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -17,6 +19,8 @@ import java.util.UUID
 @Component
 class RegisteredClientInitializer(
     private val registeredClientRepository: RegisteredClientRepository,
+    private val applicationProviderRepository: ApplicationProviderRepository,
+    private val oidcClientSyncService: OidcClientSyncService,
 
     @param:Value("\${security.oidc.client.id}")
     private val clientId: String,
@@ -34,12 +38,25 @@ class RegisteredClientInitializer(
     private val authorizationCodeTtlMinutes: Long
 ) : ApplicationRunner {
 
+    private val logger = LoggerFactory.getLogger(RegisteredClientInitializer::class.java)
+
     override fun run(args: ApplicationArguments) {
         val clientIds = clientId.split(",").map { it.trim() }.filter { it.isNotEmpty() }
         clientIds.forEach { cid ->
             val existing = registeredClientRepository.findByClientId(cid)
             val clientConfig = createRegisteredClient(existing?.id ?: UUID.randomUUID().toString(), cid)
             registeredClientRepository.save(clientConfig)
+        }
+
+        try {
+            val providers = applicationProviderRepository.findAll()
+            providers.forEach { provider ->
+                if (provider.oidcEnabled || !provider.clientId.isNullOrBlank()) {
+                    oidcClientSyncService.syncClient(provider)
+                }
+            }
+        } catch (e: Exception) {
+            logger.warn("Could not sync application providers on startup: ${e.message}")
         }
     }
 
@@ -48,8 +65,10 @@ class RegisteredClientInitializer(
             .clientId(targetClientId)
             .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
+            .scope(OidcScopes.EMAIL)
             .clientSettings(
                 ClientSettings.builder()
                     .requireProofKey(true)

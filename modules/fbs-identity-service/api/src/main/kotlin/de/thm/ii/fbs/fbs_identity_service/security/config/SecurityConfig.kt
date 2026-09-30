@@ -51,6 +51,7 @@ class SecurityConfig(
                         oidc.providerConfigurationEndpoint { providerConfiguration ->
                             providerConfiguration.providerConfigurationCustomizer { metadata ->
                                 metadata.scope(OidcScopes.PROFILE)
+                                metadata.scope(OidcScopes.EMAIL)
                             }
                         }
                         oidc.logoutEndpoint(Customizer.withDefaults())

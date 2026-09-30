@@ -1,5 +1,6 @@
 export type EmbedMode = 'IFRAME' | 'EXTERNAL'
 export type AppRequiredRole = 'ALL' | 'USER' | 'MODERATOR' | 'ADMIN'
+export type OidcClientType = 'PUBLIC' | 'CONFIDENTIAL'
 
 export interface ApplicationProvider {
   id: string
@@ -14,6 +15,12 @@ export interface ApplicationProvider {
   isDefault: boolean
   isActive: boolean
   clientId?: string | null
+  oidcEnabled?: boolean
+  redirectUris?: string[]
+  postLogoutRedirectUris?: string[]
+  clientType?: OidcClientType
+  scopes?: string[]
+  clientSecret?: string | null
   createdAt?: string | null
   updatedAt?: string | null
 }
@@ -31,6 +38,12 @@ export interface CreateApplicationProviderInput {
   isDefault: boolean
   isActive: boolean
   clientId?: string | null
+  oidcEnabled?: boolean
+  redirectUris?: string[]
+  postLogoutRedirectUris?: string[]
+  clientType?: OidcClientType
+  scopes?: string[]
+  clientSecret?: string | null
 }
 
 export interface UpdateApplicationProviderInput {
@@ -45,4 +58,10 @@ export interface UpdateApplicationProviderInput {
   isDefault: boolean
   isActive: boolean
   clientId?: string | null
+  oidcEnabled?: boolean
+  redirectUris?: string[]
+  postLogoutRedirectUris?: string[]
+  clientType?: OidcClientType
+  scopes?: string[]
+  clientSecret?: string | null
 }

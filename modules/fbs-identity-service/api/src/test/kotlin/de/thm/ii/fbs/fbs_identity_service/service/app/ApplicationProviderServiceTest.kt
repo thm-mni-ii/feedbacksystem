@@ -11,6 +11,7 @@ import de.thm.ii.fbs.fbs_identity_service.model.user.GlobalRole
 import de.thm.ii.fbs.fbs_identity_service.model.user.User
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.ApplicationProviderEntity
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.ApplicationProviderRepository
+import de.thm.ii.fbs.fbs_identity_service.security.oidc.OidcClientSyncService
 import de.thm.ii.fbs.fbs_identity_service.service.CurrentUserService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,11 +37,14 @@ class ApplicationProviderServiceTest {
     @Mock
     private lateinit var currentUserService: CurrentUserService
 
+    @Mock
+    private lateinit var oidcClientSyncService: OidcClientSyncService
+
     private lateinit var service: ApplicationProviderService
 
     @BeforeEach
     fun setUp() {
-        service = ApplicationProviderService(repository, currentUserService)
+        service = ApplicationProviderService(repository, currentUserService, oidcClientSyncService)
     }
 
     @Test
@@ -119,7 +123,10 @@ class ApplicationProviderServiceTest {
             navbarPosition = 15,
             showInNavbar = true,
             isDefault = false,
-            isActive = true
+            isActive = true,
+            oidcEnabled = true,
+            clientId = "new-app-client",
+            redirectUris = listOf("https://app.example.com/oauth2/callback")
         )
 
         whenever(repository.existsById("new-app")).thenReturn(false)
@@ -131,8 +138,12 @@ class ApplicationProviderServiceTest {
 
         assertEquals("new-app", result.id)
         assertEquals("New App", result.title)
+        assertEquals("new-app-client", result.clientId)
+        assertTrue(result.oidcEnabled)
+        assertEquals(listOf("https://app.example.com/oauth2/callback"), result.redirectUris)
         assertEquals(EmbedMode.IFRAME, result.embedMode)
         verify(repository).save(any<ApplicationProviderEntity>())
+        verify(oidcClientSyncService).syncClient(any())
     }
 
     @Test
@@ -171,7 +182,10 @@ class ApplicationProviderServiceTest {
             navbarPosition = 5,
             showInNavbar = false,
             isDefault = true,
-            isActive = true
+            isActive = true,
+            oidcEnabled = true,
+            clientId = "app-1-client",
+            redirectUris = listOf("https://updated.example.com/login")
         )
 
         whenever(repository.findAll()).thenReturn(listOf(entity))
@@ -183,19 +197,43 @@ class ApplicationProviderServiceTest {
         assertEquals(EmbedMode.EXTERNAL, result.embedMode)
         assertEquals(AppRequiredRole.ADMIN, result.requiredGlobalRole)
         assertEquals(5, result.navbarPosition)
+        assertEquals("app-1-client", result.clientId)
+        assertTrue(result.oidcEnabled)
         assertFalse(result.showInNavbar)
         assertTrue(result.isDefault)
+        verify(oidcClientSyncService).syncClient(any())
     }
 
     @Test
-    fun `deleteProvider removes entity`() {
+    fun `deleteProvider removes entity and cleans up oidc client`() {
         val entity = createEntity("app-to-delete", AppRequiredRole.ALL)
+        entity.clientId = "app-to-delete-client"
         whenever(repository.findById("app-to-delete")).thenReturn(Optional.of(entity))
 
         val result = service.deleteProvider("app-to-delete")
 
         assertTrue(result)
+        verify(oidcClientSyncService).deleteClient("app-to-delete-client")
         verify(repository).delete(entity)
+    }
+
+    @Test
+    fun `regenerateSecret generates a new secret, updates entity to CONFIDENTIAL, and syncs oidc client`() {
+        val entity = createEntity("confidential-app", AppRequiredRole.USER)
+        entity.clientSecret = "old-secret"
+        entity.clientType = "CONFIDENTIAL"
+        whenever(repository.findById("confidential-app")).thenReturn(Optional.of(entity))
+        whenever(repository.save(any<ApplicationProviderEntity>())).thenAnswer { invocation ->
+            invocation.getArgument(0)
+        }
+
+        val result = service.regenerateSecret("confidential-app")
+
+        assertTrue(result.clientSecret != null && result.clientSecret != "old-secret")
+        assertEquals("CONFIDENTIAL", result.clientType)
+        assertTrue(result.oidcEnabled)
+        verify(repository).save(entity)
+        verify(oidcClientSyncService).syncClient(entity)
     }
 
     private fun createEntity(id: String, role: AppRequiredRole) = ApplicationProviderEntity(
@@ -209,7 +247,9 @@ class ApplicationProviderServiceTest {
         navbarPosition = 10,
         showInNavbar = true,
         isDefault = false,
-        isActive = true
+        isActive = true,
+        clientId = "client-$id",
+        oidcEnabled = false
     )
 
     private fun testUser(role: GlobalRole) = User(

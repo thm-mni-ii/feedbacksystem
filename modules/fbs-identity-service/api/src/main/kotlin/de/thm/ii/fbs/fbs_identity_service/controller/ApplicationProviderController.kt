@@ -73,6 +73,14 @@ class ApplicationProviderController(
         return ApplicationProviderResponse.fromModel(updated)
     }
 
+    @Operation(summary = "Admin: Regenerate OIDC client secret for an application provider")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/application-providers/{id}/regenerate-secret")
+    fun regenerateSecret(@PathVariable id: String): ApplicationProviderResponse {
+        val updated = applicationProviderService.regenerateSecret(id)
+        return ApplicationProviderResponse.fromModel(updated)
+    }
+
     @Operation(summary = "Admin: Delete an application provider")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/application-providers/{id}")

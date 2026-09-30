@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
+import de.thm.ii.fbs.fbs_identity_service.persistence.repository.ApplicationProviderRepository
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argThat
@@ -14,9 +15,13 @@ import java.time.Duration
 class RegisteredClientInitializerTest {
 
     private val registeredClientRepository = mock<RegisteredClientRepository>()
+    private val applicationProviderRepository = mock<ApplicationProviderRepository>()
+    private val oidcClientSyncService = mock<OidcClientSyncService>()
 
     private val registeredClientInitializer = RegisteredClientInitializer(
         registeredClientRepository,
+        applicationProviderRepository,
+        oidcClientSyncService,
         clientId = "configured-client",
         redirectUri = "http://localhost:9999/test-callback",
         accessTokenTtlMinutes = 10,
@@ -26,6 +31,7 @@ class RegisteredClientInitializerTest {
     @Test
     fun `registers client with configured values when persistent client does not exist`() {
         whenever(registeredClientRepository.findByClientId("configured-client")).thenReturn(null)
+        whenever(applicationProviderRepository.findAll()).thenReturn(emptyList())
 
         registeredClientInitializer.run(DefaultApplicationArguments())
 
@@ -52,6 +58,7 @@ class RegisteredClientInitializerTest {
                 .build()
 
         whenever(registeredClientRepository.findByClientId("configured-client")).thenReturn(existingClient)
+        whenever(applicationProviderRepository.findAll()).thenReturn(emptyList())
 
         registeredClientInitializer.run(DefaultApplicationArguments())
 
@@ -72,6 +79,8 @@ class RegisteredClientInitializerTest {
     fun `registers multiple comma-separated client IDs`() {
         val multiInitializer = RegisteredClientInitializer(
             registeredClientRepository,
+            applicationProviderRepository,
+            oidcClientSyncService,
             clientId = "client-one, client-two",
             redirectUri = "http://localhost:9999/test-callback",
             accessTokenTtlMinutes = 10,
@@ -80,6 +89,7 @@ class RegisteredClientInitializerTest {
 
         whenever(registeredClientRepository.findByClientId("client-one")).thenReturn(null)
         whenever(registeredClientRepository.findByClientId("client-two")).thenReturn(null)
+        whenever(applicationProviderRepository.findAll()).thenReturn(emptyList())
 
         multiInitializer.run(DefaultApplicationArguments())
 

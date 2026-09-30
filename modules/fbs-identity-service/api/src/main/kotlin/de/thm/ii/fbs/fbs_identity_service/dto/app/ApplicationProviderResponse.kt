@@ -18,6 +18,12 @@ data class ApplicationProviderResponse(
     val isDefault: Boolean,
     val isActive: Boolean,
     val clientId: String?,
+    val oidcEnabled: Boolean = false,
+    val redirectUris: List<String> = emptyList(),
+    val postLogoutRedirectUris: List<String> = emptyList(),
+    val clientType: String = "PUBLIC",
+    val scopes: List<String> = listOf("openid", "profile", "email"),
+    val clientSecret: String? = null,
     val createdAt: Instant?,
     val updatedAt: Instant?
 ) {
@@ -36,6 +42,12 @@ data class ApplicationProviderResponse(
                 isDefault = model.isDefault,
                 isActive = model.isActive,
                 clientId = model.clientId,
+                oidcEnabled = model.oidcEnabled,
+                redirectUris = model.redirectUris,
+                postLogoutRedirectUris = model.postLogoutRedirectUris,
+                clientType = model.clientType,
+                scopes = model.scopes,
+                clientSecret = model.clientSecret,
                 createdAt = model.createdAt,
                 updatedAt = model.updatedAt
             )

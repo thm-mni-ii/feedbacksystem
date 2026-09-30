@@ -7,7 +7,7 @@
           Anwendungsverwaltung
         </h1>
         <p class="text-subtitle-1 text-medium-emphasis mt-1">
-          Registrieren und verwalten Sie Fachanwendungen (ApplicationProviders) für die Web Shell.
+          Registrieren und verwalten Sie Fachanwendungen (ApplicationProviders) und deren OIDC-Clients für die Web Shell.
         </p>
       </v-col>
       <v-col cols="12" sm="4" class="text-sm-right">
@@ -55,6 +55,7 @@
             <th class="text-left">Titel & Beschreibung</th>
             <th class="text-left">Einstiegs-URL</th>
             <th class="text-center">Modus</th>
+            <th class="text-center">OIDC Client</th>
             <th class="text-center">Erforderliche Rolle</th>
             <th class="text-center">Pos.</th>
             <th class="text-center">Navbar</th>
@@ -65,7 +66,7 @@
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="9" class="text-center py-8">
+              <td colspan="10" class="text-center py-8">
                 <v-progress-circular indeterminate color="primary"></v-progress-circular>
                 <div class="mt-2 text-caption">Lade Anwendungen...</div>
               </td>
@@ -73,7 +74,7 @@
           </template>
           <template v-else-if="filteredApps.length === 0">
             <tr>
-              <td colspan="9" class="text-center py-8 text-medium-emphasis">
+              <td colspan="10" class="text-center py-8 text-medium-emphasis">
                 Keine registrierten Fachanwendungen gefunden.
               </td>
             </tr>
@@ -126,6 +127,22 @@
               </td>
               <td class="text-center">
                 <v-chip
+                  v-if="app.oidcEnabled || app.clientId"
+                  size="small"
+                  :color="app.clientType === 'CONFIDENTIAL' ? 'warning' : 'indigo-darken-1'"
+                  variant="tonal"
+                  :prepend-icon="app.clientType === 'CONFIDENTIAL' ? 'mdi-shield-key' : 'mdi-shield-key-outline'"
+                  class="cursor-pointer"
+                  title="OIDC Konfiguration & Secret anzeigen"
+                  @click="openSecretDialog(app)"
+                >
+                  {{ app.clientId || app.id }}
+                  <span v-if="app.clientType === 'CONFIDENTIAL'" class="ml-1 text-caption font-weight-bold">(Secret)</span>
+                </v-chip>
+                <span v-else class="text-caption text-medium-emphasis">–</span>
+              </td>
+              <td class="text-center">
+                <v-chip
                   size="small"
                   :color="getRoleColor(app.requiredGlobalRole)"
                   variant="outlined"
@@ -154,6 +171,14 @@
               </td>
               <td class="text-right">
                 <v-btn
+                  icon="mdi-key-variant"
+                  size="small"
+                  variant="text"
+                  color="indigo-darken-1"
+                  title="OIDC Secret anzeigen / neu generieren"
+                  @click="openSecretDialog(app)"
+                ></v-btn>
+                <v-btn
                   icon="mdi-pencil"
                   size="small"
                   variant="text"
@@ -177,7 +202,7 @@
     </v-card>
 
     <!-- Create / Edit Modal Dialog -->
-    <v-dialog v-model="dialog" max-width="650" persistent>
+    <v-dialog v-model="dialog" max-width="750" persistent>
       <v-card class="rounded-lg">
         <v-card-title class="pa-4 bg-primary text-white d-flex align-center">
           <v-icon :icon="isEditing ? 'mdi-pencil' : 'mdi-plus-box'" class="mr-2"></v-icon>
@@ -290,42 +315,161 @@
                 ></v-text-field>
               </v-col>
 
-              <!-- Client ID -->
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="form.clientId"
-                  label="OIDC Client ID (optional)"
-                  variant="outlined"
-                  density="comfortable"
-                ></v-text-field>
-              </v-col>
-
-              <!-- Switches -->
-              <v-col cols="12" sm="4">
+              <!-- General Switches -->
+              <v-col cols="12" sm="6" class="d-flex align-center flex-wrap">
                 <v-switch
                   v-model="form.showInNavbar"
                   color="primary"
-                  label="In Navbar anzeigen"
+                  label="In Navbar"
+                  class="mr-4"
                   hide-details
                 ></v-switch>
-              </v-col>
-
-              <v-col cols="12" sm="4">
                 <v-switch
                   v-model="form.isDefault"
                   color="secondary"
                   label="Standard-App"
+                  class="mr-4"
                   hide-details
                 ></v-switch>
-              </v-col>
-
-              <v-col cols="12" sm="4">
                 <v-switch
                   v-model="form.isActive"
                   color="success"
                   label="Aktiv"
                   hide-details
                 ></v-switch>
+              </v-col>
+
+              <!-- OIDC Client Card Section -->
+              <v-col cols="12">
+                <v-card variant="outlined" class="pa-4 rounded-lg bg-surface">
+                  <div class="d-flex align-center justify-space-between mb-2">
+                    <div class="d-flex align-center font-weight-bold">
+                      <v-icon icon="mdi-shield-key-outline" color="primary" class="mr-2"></v-icon>
+                      <span>OAuth 2.0 / OIDC Client Konfiguration</span>
+                    </div>
+                    <v-switch
+                      v-model="oidcEnabled"
+                      color="primary"
+                      label="OIDC-Client aktivieren"
+                      hide-details
+                      density="compact"
+                    ></v-switch>
+                  </div>
+
+                  <template v-if="oidcEnabled">
+                    <p class="text-caption text-medium-emphasis mb-4">
+                      Konfiguriert den OAuth2-Client im Identity Service. Erlaubt dieser Fachanwendung die Single-Sign-On-Authentifizierung gegen das Feedback System.
+                    </p>
+
+                    <v-row>
+                      <!-- Client ID -->
+                      <v-col cols="12" sm="6">
+                        <v-text-field
+                          v-model="form.clientId"
+                          label="OIDC Client ID *"
+                          :placeholder="form.id || 'z.B. local'"
+                          hint="Standardmäßig die Anwendungs-ID"
+                          persistent-hint
+                          variant="outlined"
+                          density="comfortable"
+                        ></v-text-field>
+                      </v-col>
+
+                      <!-- Client Type -->
+                      <v-col cols="12" sm="6">
+                        <v-select
+                          v-model="clientType"
+                          :items="['PUBLIC', 'CONFIDENTIAL']"
+                          label="Client-Typ *"
+                          variant="outlined"
+                          density="comfortable"
+                          hint="PUBLIC (mit PKCE für SPAs) oder CONFIDENTIAL (Backend)"
+                          persistent-hint
+                        ></v-select>
+                      </v-col>
+
+                      <!-- Client Secret (for CONFIDENTIAL clients) -->
+                      <v-col v-if="clientType === 'CONFIDENTIAL'" cols="12">
+                        <v-text-field
+                          v-model="form.clientSecret"
+                          label="Client Secret (Geheimnis)"
+                          :type="showSecretInForm ? 'text' : 'password'"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="Automatisch generiert oder manuell eingeben"
+                          hint="Geheimnis für Server-Authentifizierung (Confidential Client)"
+                          persistent-hint
+                        >
+                          <template #append-inner>
+                            <v-btn
+                              :icon="showSecretInForm ? 'mdi-eye-off' : 'mdi-eye'"
+                              variant="text"
+                              density="compact"
+                              :title="showSecretInForm ? 'Secret verbergen' : 'Secret anzeigen'"
+                              @click="showSecretInForm = !showSecretInForm"
+                            ></v-btn>
+                            <v-btn
+                              v-if="form.clientSecret"
+                              icon="mdi-content-copy"
+                              variant="text"
+                              density="compact"
+                              title="In Zwischenablage kopieren"
+                              @click="copyToClipboard(form.clientSecret)"
+                            ></v-btn>
+                            <v-btn
+                              icon="mdi-refresh"
+                              variant="text"
+                              density="compact"
+                              title="Neues Secret im Formular erzeugen"
+                              @click="generateRandomFormSecret"
+                            ></v-btn>
+                          </template>
+                        </v-text-field>
+                      </v-col>
+
+                      <!-- Redirect URIs -->
+                      <v-col cols="12">
+                        <v-textarea
+                          v-model="redirectUrisText"
+                          label="Erlaubte Redirect URIs (Callback URLs)"
+                          placeholder="https://fbs-local.mni.thm.de/login&#10;http://localhost:3000/oauth2/callback"
+                          rows="3"
+                          variant="outlined"
+                          density="comfortable"
+                          hint="Zeilen- oder kommagetrennte Liste der autorisierten Callback-URIs"
+                          persistent-hint
+                        ></v-textarea>
+                      </v-col>
+
+                      <!-- Post Logout Redirect URIs -->
+                      <v-col cols="12">
+                        <v-textarea
+                          v-model="postLogoutRedirectUrisText"
+                          label="Erlaubte Post-Logout Redirect URIs (optional)"
+                          placeholder="https://fbs-local.mni.thm.de/&#10;http://localhost:3000/"
+                          rows="2"
+                          variant="outlined"
+                          density="comfortable"
+                          hint="Zeilen- oder kommagetrennte Liste der Redirect-URIs nach dem Abmelden"
+                          persistent-hint
+                        ></v-textarea>
+                      </v-col>
+
+                      <!-- Scopes -->
+                      <v-col cols="12">
+                        <v-combobox
+                          v-model="selectedScopes"
+                          :items="['openid', 'profile', 'email']"
+                          label="Erlaubte Scopes"
+                          multiple
+                          chips
+                          variant="outlined"
+                          density="comfortable"
+                        ></v-combobox>
+                      </v-col>
+                    </v-row>
+                  </template>
+                </v-card>
               </v-col>
             </v-row>
           </v-form>
@@ -344,6 +488,141 @@
             @click="saveApp"
           >
             {{ isEditing ? 'Änderungen speichern' : 'Registrieren' }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- OIDC Client Secret Management Dialog -->
+    <v-dialog v-model="secretDialog" max-width="600" persistent>
+      <v-card class="rounded-lg">
+        <v-card-title class="pa-4 bg-primary text-white d-flex align-center">
+          <v-icon icon="mdi-shield-key" class="mr-2"></v-icon>
+          <span>OIDC Secret: {{ selectedAppForSecret?.title }}</span>
+          <v-spacer></v-spacer>
+          <v-btn icon="mdi-close" variant="text" size="small" @click="secretDialog = false"></v-btn>
+        </v-card-title>
+
+        <v-card-text class="pa-6">
+          <v-row class="mb-2">
+            <v-col cols="12" sm="6" class="py-1">
+              <div class="text-caption text-medium-emphasis">Anwendungs-ID</div>
+              <div class="font-weight-medium font-family-monospace"><code>{{ selectedAppForSecret?.id }}</code></div>
+            </v-col>
+            <v-col cols="12" sm="6" class="py-1">
+              <div class="text-caption text-medium-emphasis">OIDC Client-ID</div>
+              <div class="font-weight-medium font-family-monospace"><code>{{ selectedAppForSecret?.clientId || selectedAppForSecret?.id }}</code></div>
+            </v-col>
+            <v-col cols="12" sm="6" class="py-1">
+              <div class="text-caption text-medium-emphasis">Client-Typ</div>
+              <v-chip size="small" :color="selectedAppForSecret?.clientType === 'CONFIDENTIAL' ? 'warning' : 'primary'" class="mt-1">
+                {{ selectedAppForSecret?.clientType || 'PUBLIC' }}
+              </v-chip>
+            </v-col>
+            <v-col cols="12" sm="6" class="py-1">
+              <div class="text-caption text-medium-emphasis">OIDC Status</div>
+              <v-chip size="small" :color="selectedAppForSecret?.oidcEnabled ? 'success' : 'grey'" class="mt-1">
+                {{ selectedAppForSecret?.oidcEnabled ? 'Aktiviert' : 'Deaktiviert' }}
+              </v-chip>
+            </v-col>
+          </v-row>
+
+          <v-divider class="my-4"></v-divider>
+
+          <div v-if="selectedAppForSecret?.clientSecret">
+            <div class="text-subtitle-2 font-weight-bold mb-2">Aktuelles Client Secret:</div>
+            <v-text-field
+              :model-value="selectedAppForSecret.clientSecret"
+              :type="showSecretInModal ? 'text' : 'password'"
+              variant="outlined"
+              density="comfortable"
+              readonly
+              hide-details
+              class="mb-2"
+            >
+              <template #append-inner>
+                <v-btn
+                  :icon="showSecretInModal ? 'mdi-eye-off' : 'mdi-eye'"
+                  variant="text"
+                  density="compact"
+                  :title="showSecretInModal ? 'Secret verbergen' : 'Secret anzeigen'"
+                  @click="showSecretInModal = !showSecretInModal"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-content-copy"
+                  variant="text"
+                  density="compact"
+                  title="In Zwischenablage kopieren"
+                  @click="copyToClipboard(selectedAppForSecret?.clientSecret)"
+                ></v-btn>
+              </template>
+            </v-text-field>
+            <p class="text-caption text-medium-emphasis">
+              Dieses Geheimnis wird für vertrauliche Clients (Server-to-Server) zur Authentifizierung am Token-Endpunkt (<code>/oauth2/token</code>) verwendet.
+            </p>
+          </div>
+          <div v-else>
+            <v-alert
+              type="info"
+              variant="tonal"
+              density="compact"
+              class="mb-2"
+              title="Kein Client Secret vorhanden"
+              text="Diese Anwendung ist aktuell als öffentlicher Client (PUBLIC mit PKCE) konfiguriert. Wenn Sie ein Client-Secret generieren, wird der Client-Typ automatisch auf CONFIDENTIAL umgestellt."
+            ></v-alert>
+          </div>
+
+          <v-alert
+            v-if="selectedAppForSecret?.clientSecret"
+            type="warning"
+            variant="tonal"
+            density="compact"
+            class="mt-4"
+            text="Hinweis: Beim Neugenerieren des Secrets wird das bisherige Secret sofort ungültig. Verknüpfte Backend-Dienste müssen aktualisiert werden."
+          ></v-alert>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions class="pa-4">
+          <v-btn
+            color="warning"
+            variant="outlined"
+            prepend-icon="mdi-refresh"
+            :loading="regeneratingSecret"
+            @click="openRegenerateConfirmDialog"
+          >
+            Neues Secret generieren
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="secretDialog = false">Schließen</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Regenerate Secret Confirmation Dialog -->
+    <v-dialog v-model="regenerateConfirmDialog" max-width="480">
+      <v-card class="rounded-lg">
+        <v-card-title class="pa-4 bg-warning text-white d-flex align-center">
+          <v-icon icon="mdi-alert" class="mr-2"></v-icon>
+          <span>Client Secret neu generieren?</span>
+        </v-card-title>
+        <v-card-text class="pa-6 text-body-1">
+          Möchten Sie für <strong>{{ selectedAppForSecret?.title }}</strong> wirklich ein neues Client Secret generieren?
+          <br><br>
+          <span class="text-error font-weight-bold">Das bisherige Secret wird sofort ungültig!</span>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="regenerateConfirmDialog = false">Abbrechen</v-btn>
+          <v-btn
+            color="warning"
+            variant="elevated"
+            :loading="regeneratingSecret"
+            @click="confirmRegenerateSecret"
+          >
+            Secret neu generieren
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -390,7 +669,8 @@ import type {
   ApplicationProvider,
   CreateApplicationProviderInput,
   EmbedMode,
-  AppRequiredRole
+  AppRequiredRole,
+  OidcClientType
 } from '@/types/app'
 
 const appsStore = useAppsStore()
@@ -404,6 +684,20 @@ const isEditing = ref(false)
 const saving = ref(false)
 const formValid = ref(false)
 const formRef = ref<any>(null)
+
+const oidcEnabled = ref(false)
+const redirectUrisText = ref('')
+const postLogoutRedirectUrisText = ref('')
+const clientType = ref<OidcClientType>('PUBLIC')
+const selectedScopes = ref<string[]>(['openid', 'profile', 'email'])
+
+// Secret modal & management
+const secretDialog = ref(false)
+const selectedAppForSecret = ref<ApplicationProvider | null>(null)
+const showSecretInModal = ref(false)
+const showSecretInForm = ref(false)
+const regenerateConfirmDialog = ref(false)
+const regeneratingSecret = ref(false)
 
 const deleteDialog = ref(false)
 const appToDelete = ref<ApplicationProvider | null>(null)
@@ -427,7 +721,8 @@ const defaultForm: CreateApplicationProviderInput = {
   showInNavbar: true,
   isDefault: false,
   isActive: true,
-  clientId: ''
+  clientId: '',
+  clientSecret: ''
 }
 
 const form = ref<CreateApplicationProviderInput>({ ...defaultForm })
@@ -521,6 +816,12 @@ function getRoleColor(role: string): string {
 function openCreateDialog() {
   isEditing.value = false
   form.value = { ...defaultForm }
+  oidcEnabled.value = false
+  redirectUrisText.value = ''
+  postLogoutRedirectUrisText.value = ''
+  clientType.value = 'PUBLIC'
+  selectedScopes.value = ['openid', 'profile', 'email']
+  showSecretInForm.value = false
   dialog.value = true
 }
 
@@ -538,15 +839,94 @@ function openEditDialog(app: ApplicationProvider) {
     showInNavbar: app.showInNavbar,
     isDefault: app.isDefault,
     isActive: app.isActive,
-    clientId: app.clientId || ''
+    clientId: app.clientId || '',
+    clientSecret: app.clientSecret || ''
   }
+  oidcEnabled.value = app.oidcEnabled ?? !!app.clientId
+  redirectUrisText.value = (app.redirectUris || []).join('\n')
+  postLogoutRedirectUrisText.value = (app.postLogoutRedirectUris || []).join('\n')
+  clientType.value = app.clientType || 'PUBLIC'
+  selectedScopes.value = app.scopes?.length ? [...app.scopes] : ['openid', 'profile', 'email']
+  showSecretInForm.value = false
   dialog.value = true
+}
+
+function openSecretDialog(app: ApplicationProvider) {
+  selectedAppForSecret.value = app
+  showSecretInModal.value = false
+  secretDialog.value = true
+}
+
+function openRegenerateConfirmDialog() {
+  regenerateConfirmDialog.value = true
+}
+
+async function confirmRegenerateSecret() {
+  if (!selectedAppForSecret.value) return
+  regeneratingSecret.value = true
+  try {
+    const updated = await appProviderApi.regenerateSecret(selectedAppForSecret.value.id)
+    selectedAppForSecret.value = updated
+    showSecretInModal.value = true
+    regenerateConfirmDialog.value = false
+    showSnackbar('Neues Client Secret erfolgreich generiert!', 'success')
+    await loadApps()
+  } catch (e: any) {
+    showSnackbar(e.response?.data?.message || e.message || 'Fehler beim Generieren des Secrets', 'error')
+  } finally {
+    regeneratingSecret.value = false
+  }
+}
+
+function generateRandomFormSecret() {
+  const arr = new Uint8Array(32)
+  window.crypto.getRandomValues(arr)
+  let binary = ''
+  for (let i = 0; i < arr.byteLength; i++) {
+    binary += String.fromCharCode(arr[i])
+  }
+  const base64 = window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  form.value.clientSecret = base64
+  showSecretInForm.value = true
+  showSnackbar('Neues Client Secret im Formular erzeugt', 'info')
+}
+
+async function copyToClipboard(text?: string | null) {
+  if (!text) return
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+    showSnackbar('Client Secret in die Zwischenablage kopiert', 'success')
+  } catch {
+    showSnackbar('Kopieren fehlgeschlagen', 'error')
+  }
 }
 
 async function saveApp() {
   if (!formRef.value) return
   const { valid } = await formRef.value.validate()
   if (!valid) return
+
+  const parsedRedirectUris = redirectUrisText.value
+    ? redirectUrisText.value.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean)
+    : []
+  const parsedPostLogoutUris = postLogoutRedirectUrisText.value
+    ? postLogoutRedirectUrisText.value.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean)
+    : []
+
+  const effectiveClientId = oidcEnabled.value
+    ? (form.value.clientId?.trim() || form.value.id.trim())
+    : null
 
   saving.value = true
   try {
@@ -562,11 +942,26 @@ async function saveApp() {
         showInNavbar: form.value.showInNavbar,
         isDefault: form.value.isDefault,
         isActive: form.value.isActive,
-        clientId: form.value.clientId
+        clientId: effectiveClientId,
+        oidcEnabled: oidcEnabled.value,
+        redirectUris: parsedRedirectUris,
+        postLogoutRedirectUris: parsedPostLogoutUris,
+        clientType: clientType.value,
+        scopes: selectedScopes.value,
+        clientSecret: clientType.value === 'CONFIDENTIAL' ? (form.value.clientSecret?.trim() || null) : null
       })
       showSnackbar('Fachanwendung erfolgreich aktualisiert', 'success')
     } else {
-      await appProviderApi.createProvider(form.value)
+      await appProviderApi.createProvider({
+        ...form.value,
+        clientId: effectiveClientId,
+        oidcEnabled: oidcEnabled.value,
+        redirectUris: parsedRedirectUris,
+        postLogoutRedirectUris: parsedPostLogoutUris,
+        clientType: clientType.value,
+        scopes: selectedScopes.value,
+        clientSecret: clientType.value === 'CONFIDENTIAL' ? (form.value.clientSecret?.trim() || null) : null
+      })
       showSnackbar('Fachanwendung erfolgreich registriert', 'success')
     }
     dialog.value = false
