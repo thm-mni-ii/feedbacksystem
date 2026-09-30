@@ -100,6 +100,14 @@
                   >
                     Standard
                   </v-chip>
+                  <v-chip
+                    v-if="app.isInternal"
+                    size="x-small"
+                    color="info"
+                    class="ml-2 font-weight-bold"
+                  >
+                    Intern
+                  </v-chip>
                 </div>
                 <div class="text-caption text-medium-emphasis text-truncate" style="max-width: 260px;">
                   {{ app.description || 'Keine Beschreibung' }}
@@ -336,6 +344,18 @@
                   color="success"
                   label="Aktiv"
                   hide-details
+                ></v-switch>
+              </v-col>
+
+              <!-- Internal Component Switch -->
+              <v-col cols="12">
+                <v-switch
+                  v-model="form.isInternal"
+                  color="info"
+                  label="Interne FBS-Komponente (sub = User-ID)"
+                  hint="Nur für Kernkomponenten des Feedback-Systems aktivieren (sub = numerische User-ID). Externe Anwendungen erhalten sub = Username."
+                  persistent-hint
+                  density="compact"
                 ></v-switch>
               </v-col>
 
@@ -735,6 +755,7 @@ const defaultForm: CreateApplicationProviderInput = {
   showInNavbar: true,
   isDefault: false,
   isActive: true,
+  isInternal: false,
   clientId: '',
   clientSecret: ''
 }
@@ -853,6 +874,7 @@ function openEditDialog(app: ApplicationProvider) {
     showInNavbar: app.showInNavbar,
     isDefault: app.isDefault,
     isActive: app.isActive,
+    isInternal: app.isInternal ?? false,
     clientId: app.clientId || '',
     clientSecret: app.clientSecret || ''
   }
@@ -956,6 +978,7 @@ async function saveApp() {
         showInNavbar: form.value.showInNavbar,
         isDefault: form.value.isDefault,
         isActive: form.value.isActive,
+        isInternal: form.value.isInternal,
         clientId: effectiveClientId,
         oidcEnabled: oidcEnabled.value,
         redirectUris: parsedRedirectUris,
@@ -968,6 +991,7 @@ async function saveApp() {
     } else {
       const created = await appProviderApi.createProvider({
         ...form.value,
+        isInternal: form.value.isInternal,
         clientId: effectiveClientId,
         oidcEnabled: oidcEnabled.value,
         redirectUris: parsedRedirectUris,

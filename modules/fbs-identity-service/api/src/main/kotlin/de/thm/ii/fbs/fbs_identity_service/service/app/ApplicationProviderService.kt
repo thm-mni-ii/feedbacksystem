@@ -103,6 +103,7 @@ class ApplicationProviderService(
             showInNavbar = request.showInNavbar,
             isDefault = request.isDefault,
             isActive = request.isActive,
+            isInternal = request.isInternal,
             clientId = effectiveClientId,
             oidcEnabled = oidcEnabled,
             redirectUris = redirectUrisStr,
@@ -156,6 +157,7 @@ class ApplicationProviderService(
         entity.showInNavbar = request.showInNavbar
         entity.isDefault = request.isDefault
         entity.isActive = request.isActive
+        if (request.isInternal != null) entity.isInternal = request.isInternal
         entity.clientId = effectiveClientId
         entity.oidcEnabled = oidcEnabled
         if (request.redirectUris != null) entity.redirectUris = redirectUrisStr

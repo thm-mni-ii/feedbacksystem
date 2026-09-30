@@ -15,4 +15,6 @@ interface ApplicationProviderRepository : JpaRepository<ApplicationProviderEntit
     ): List<ApplicationProviderEntity>
 
     fun findAllByOrderByNavbarPositionAscTitleAsc(): List<ApplicationProviderEntity>
+
+    fun findByClientId(clientId: String): ApplicationProviderEntity?
 }
