@@ -23,6 +23,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.Optional
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -40,11 +41,14 @@ class ApplicationProviderServiceTest {
     @Mock
     private lateinit var oidcClientSyncService: OidcClientSyncService
 
+    @Mock
+    private lateinit var passwordEncoder: PasswordEncoder
+
     private lateinit var service: ApplicationProviderService
 
     @BeforeEach
     fun setUp() {
-        service = ApplicationProviderService(repository, currentUserService, oidcClientSyncService)
+        service = ApplicationProviderService(repository, currentUserService, oidcClientSyncService, passwordEncoder)
     }
 
     @Test
@@ -144,6 +148,34 @@ class ApplicationProviderServiceTest {
         assertEquals(EmbedMode.IFRAME, result.embedMode)
         verify(repository).save(any<ApplicationProviderEntity>())
         verify(oidcClientSyncService).syncClient(any())
+    }
+
+    @Test
+    fun `createProvider with confidential client encodes secret and stores hash in entity`() {
+        val request = CreateApplicationProviderRequest(
+            id = "confidential-app",
+            title = "Confidential App",
+            icon = "school",
+            url = "https://app.example.com",
+            clientType = "CONFIDENTIAL",
+            clientSecret = "my-custom-secret"
+        )
+
+        whenever(repository.existsById("confidential-app")).thenReturn(false)
+        whenever(passwordEncoder.encode("my-custom-secret")).thenReturn("hashed-custom-secret")
+        whenever(repository.save(any<ApplicationProviderEntity>())).thenAnswer { invocation ->
+            val entity = invocation.getArgument<ApplicationProviderEntity>(0)
+            assertEquals("hashed-custom-secret", entity.clientSecret)
+            entity
+        }
+
+        val result = service.createProvider(request)
+
+        assertEquals("confidential-app", result.id)
+        assertEquals("my-custom-secret", result.clientSecret)
+        assertTrue(result.hasClientSecret)
+        verify(passwordEncoder).encode("my-custom-secret")
+        verify(repository).save(any<ApplicationProviderEntity>())
     }
 
     @Test
@@ -262,18 +294,21 @@ class ApplicationProviderServiceTest {
     @Test
     fun `regenerateSecret generates a new secret, updates entity to CONFIDENTIAL, and syncs oidc client`() {
         val entity = createEntity("confidential-app", AppRequiredRole.USER)
-        entity.clientSecret = "old-secret"
+        entity.clientSecret = "hashed-old-secret"
         entity.clientType = "CONFIDENTIAL"
         whenever(repository.findById("confidential-app")).thenReturn(Optional.of(entity))
+        whenever(passwordEncoder.encode(any())).thenReturn("hashed-new-secret")
         whenever(repository.save(any<ApplicationProviderEntity>())).thenAnswer { invocation ->
             invocation.getArgument(0)
         }
 
         val result = service.regenerateSecret("confidential-app")
 
-        assertTrue(result.clientSecret != null && result.clientSecret != "old-secret")
+        assertTrue(result.clientSecret != null && result.clientSecret != "hashed-old-secret")
         assertEquals("CONFIDENTIAL", result.clientType)
         assertTrue(result.oidcEnabled)
+        assertEquals("hashed-new-secret", entity.clientSecret)
+        verify(passwordEncoder).encode(any())
         verify(repository).save(entity)
         verify(oidcClientSyncService).syncClient(entity)
     }

@@ -27,7 +27,8 @@ fun ApplicationProviderEntity.toModel(): ApplicationProvider {
         postLogoutRedirectUris = parsedPostLogoutUris,
         clientType = clientType,
         scopes = parsedScopes.ifEmpty { listOf("openid", "profile", "email") },
-        clientSecret = clientSecret,
+        clientSecret = null,
+        hasClientSecret = !clientSecret.isNullOrBlank(),
         createdAt = createdAt,
         updatedAt = updatedAt
     )

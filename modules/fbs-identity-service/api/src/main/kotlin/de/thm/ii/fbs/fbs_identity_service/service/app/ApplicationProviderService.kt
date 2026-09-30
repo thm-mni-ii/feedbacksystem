@@ -13,6 +13,7 @@ import de.thm.ii.fbs.fbs_identity_service.persistence.repository.ApplicationProv
 import de.thm.ii.fbs.fbs_identity_service.security.oidc.OidcClientSyncService
 import de.thm.ii.fbs.fbs_identity_service.service.CurrentUserService
 import de.thm.ii.fbs.fbs_identity_service.util.toCleanList
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.net.URI
@@ -23,7 +24,8 @@ import java.util.Base64
 class ApplicationProviderService(
     private val repository: ApplicationProviderRepository,
     private val currentUserService: CurrentUserService,
-    private val oidcClientSyncService: OidcClientSyncService
+    private val oidcClientSyncService: OidcClientSyncService,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     @Transactional(readOnly = true)
@@ -81,11 +83,13 @@ class ApplicationProviderService(
         val scopesStr = request.scopes?.joinToString(",") { it.trim() }?.ifBlank { null } ?: "openid,profile,email"
         val clientTypeStr = normalizeClientType(request.clientType)
 
-        val clientSecret = when {
+        val rawClientSecret = when {
             request.clientSecret != null && request.clientSecret.isNotBlank() -> request.clientSecret.trim()
             clientTypeStr.equals("CONFIDENTIAL", ignoreCase = true) -> generateSecureSecret()
             else -> null
         }
+
+        val encodedSecret = rawClientSecret?.let { passwordEncoder.encode(it) }
 
         val entity = ApplicationProviderEntity(
             id = request.id.trim(),
@@ -105,7 +109,7 @@ class ApplicationProviderService(
             postLogoutRedirectUris = postLogoutUrisStr,
             clientType = clientTypeStr,
             scopes = scopesStr,
-            clientSecret = clientSecret
+            clientSecret = encodedSecret
         )
 
         val saved = repository.save(entity)
@@ -113,7 +117,10 @@ class ApplicationProviderService(
             oidcClientSyncService.syncClient(saved)
         }
 
-        return saved.toModel()
+        return saved.toModel().copy(
+            clientSecret = rawClientSecret,
+            hasClientSecret = rawClientSecret != null
+        )
     }
 
     @Transactional
@@ -155,10 +162,15 @@ class ApplicationProviderService(
         if (request.postLogoutRedirectUris != null) entity.postLogoutRedirectUris = postLogoutUrisStr
         if (request.scopes != null) entity.scopes = scopesStr
         if (request.clientType != null) entity.clientType = clientTypeStr
-        if (request.clientSecret != null) {
-            entity.clientSecret = request.clientSecret.trim().ifBlank { null }
+        var rawClientSecret: String? = null
+        if (request.clientSecret != null && request.clientSecret.isNotBlank()) {
+            rawClientSecret = request.clientSecret.trim()
+            entity.clientSecret = passwordEncoder.encode(rawClientSecret)
         } else if (clientTypeStr.equals("CONFIDENTIAL", ignoreCase = true) && entity.clientSecret.isNullOrBlank()) {
-            entity.clientSecret = generateSecureSecret()
+            rawClientSecret = generateSecureSecret()
+            entity.clientSecret = passwordEncoder.encode(rawClientSecret)
+        } else if (clientTypeStr.equals("PUBLIC", ignoreCase = true)) {
+            entity.clientSecret = null
         }
 
         val saved = repository.save(entity)
@@ -173,7 +185,10 @@ class ApplicationProviderService(
             oidcClientSyncService.deleteClient(oldClientId)
         }
 
-        return saved.toModel()
+        return saved.toModel().copy(
+            clientSecret = rawClientSecret,
+            hasClientSecret = !saved.clientSecret.isNullOrBlank()
+        )
     }
 
     @Transactional
@@ -196,7 +211,7 @@ class ApplicationProviderService(
             .orElseThrow { ApplicationProviderNotFoundException(id) }
 
         val newSecret = generateSecureSecret()
-        entity.clientSecret = newSecret
+        entity.clientSecret = passwordEncoder.encode(newSecret)
         entity.clientType = "CONFIDENTIAL"
         entity.oidcEnabled = true
         if (entity.clientId.isNullOrBlank()) {
@@ -206,7 +221,10 @@ class ApplicationProviderService(
         val saved = repository.save(entity)
         oidcClientSyncService.syncClient(saved)
 
-        return saved.toModel()
+        return saved.toModel().copy(
+            clientSecret = newSecret,
+            hasClientSecret = true
+        )
     }
 
     private fun normalizeClientType(clientType: String?): String {

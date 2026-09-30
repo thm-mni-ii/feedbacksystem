@@ -51,7 +51,7 @@ class OidcClientSyncService(
             builder.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
             if (!provider.clientSecret.isNullOrBlank()) {
                 val secret = provider.clientSecret!!.trim()
-                val encodedSecret = if (secret.startsWith("{")) secret else passwordEncoder.encode(secret)
+                val encodedSecret = if (secret.startsWith("{") || secret.startsWith("$2")) secret else passwordEncoder.encode(secret)
                 builder.clientSecret(encodedSecret)
             }
         } else {
