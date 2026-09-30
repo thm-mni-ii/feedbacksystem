@@ -201,7 +201,18 @@ class SecurityConfig(
             allowCredentials = true
             maxAge = 3600L
         }
+
+        val samlCorsConfiguration = CorsConfiguration().apply {
+            allowedOriginPatterns = listOf("*")
+            allowedMethods = listOf("GET", "POST", "OPTIONS", "HEAD")
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+            maxAge = 3600L
+        }
+
         val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/login/saml2/**", samlCorsConfiguration)
+        source.registerCorsConfiguration("/saml2/**", samlCorsConfiguration)
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
