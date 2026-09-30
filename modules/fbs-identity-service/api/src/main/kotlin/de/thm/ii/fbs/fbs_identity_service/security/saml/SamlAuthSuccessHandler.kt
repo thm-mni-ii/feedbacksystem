@@ -16,6 +16,7 @@ import org.springframework.security.saml2.provider.service.authentication.Saml2A
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.stereotype.Component
 
 @Component
@@ -24,6 +25,8 @@ class SamlAuthSuccessHandler(
     private val samlLoginService: SamlLoginService,
 
     private val securityContextRepository: SecurityContextRepository,
+
+    private val requestCache: RequestCache,
 
     @param:Value("\${app.saml.principal-attribute:uid}")
     private val principalAttribute: String,
@@ -45,7 +48,9 @@ class SamlAuthSuccessHandler(
     private val log = LoggerFactory.getLogger(SamlAuthSuccessHandler::class.java)
 
     private val authenticationSuccessHandler =
-        SavedRequestAwareAuthenticationSuccessHandler()
+        SavedRequestAwareAuthenticationSuccessHandler().apply {
+            setRequestCache(requestCache)
+        }
 
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,

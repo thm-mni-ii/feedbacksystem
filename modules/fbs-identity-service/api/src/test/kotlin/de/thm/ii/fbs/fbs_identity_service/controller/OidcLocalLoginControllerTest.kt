@@ -44,6 +44,9 @@ class OidcLocalLoginControllerTest {
     @MockitoBean
     private lateinit var clientIpResolver: ClientIpResolver
 
+    @MockitoBean
+    private lateinit var requestCache: org.springframework.security.web.savedrequest.RequestCache
+
     @Test
     fun `returns bad request when client ip cannot be determined`() {
 

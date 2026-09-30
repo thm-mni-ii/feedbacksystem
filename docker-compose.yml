@@ -122,6 +122,7 @@ services:
       - MYSQL_URI=jdbc:mysql://mysql1:3306
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
+      - CORS_DEV_MODE=true
       - APP_SAML_ENABLED=false
       - OIDC_ISSUER=http://localhost:8080
       - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback,https://localhost/oauth2/callback,http://127.0.0.1:4200/oauth2/callback,http://localhost:4200/oauth2/callback,http://localhost:8083/oauth2/callback,http://127.0.0.1:8083/oauth2/callback

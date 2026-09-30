@@ -54,6 +54,24 @@ class ApplicationProviderEntity(
     @Column(name = "client_id", length = 128)
     var clientId: String? = null,
 
+    @Column(name = "oidc_enabled", nullable = false)
+    var oidcEnabled: Boolean = false,
+
+    @Column(name = "redirect_uris", columnDefinition = "TEXT")
+    var redirectUris: String? = null,
+
+    @Column(name = "post_logout_redirect_uris", columnDefinition = "TEXT")
+    var postLogoutRedirectUris: String? = null,
+
+    @Column(name = "client_type", length = 32, nullable = false)
+    var clientType: String = "PUBLIC",
+
+    @Column(name = "scopes", length = 255, nullable = false)
+    var scopes: String = "openid,profile,email",
+
+    @Column(name = "client_secret", length = 255)
+    var clientSecret: String? = null,
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     var createdAt: Instant? = null,

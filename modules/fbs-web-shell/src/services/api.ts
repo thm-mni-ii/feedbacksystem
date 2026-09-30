@@ -51,6 +51,11 @@ export const appProviderApi = {
     return response.data
   },
 
+  async regenerateSecret(id: string): Promise<ApplicationProvider> {
+    const response = await apiClient.post<ApplicationProvider>(`/api/v2/admin/application-providers/${id}/regenerate-secret`)
+    return response.data
+  },
+
   async deleteProvider(id: string): Promise<void> {
     await apiClient.delete(`/api/v2/admin/application-providers/${id}`)
   }

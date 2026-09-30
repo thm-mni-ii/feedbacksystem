@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPasswordToggle();
   initRippleEffect();
   initFormValidation();
+  initLocalLoginDropdown();
 });
 
 /**
@@ -38,7 +39,7 @@ function initPasswordToggle() {
  * Material ink ripple effect for buttons
  */
 function initRippleEffect() {
-  const buttons = document.querySelectorAll('.fbs-button, .fbs-github-button');
+  const buttons = document.querySelectorAll('.fbs-button, .fbs-github-button, .fbs-dropdown-summary');
 
   buttons.forEach((button) => {
     button.addEventListener('click', function (e) {
@@ -120,4 +121,27 @@ function initFormValidation() {
       if (group) group.classList.remove('has-error');
     });
   });
+}
+
+/**
+ * Initializes local login dropdown auto-focus behavior
+ */
+function initLocalLoginDropdown() {
+  const dropdown = document.getElementById('local-login-dropdown');
+  const usernameInput = document.getElementById('username');
+
+  if (!dropdown || !usernameInput) return;
+
+  dropdown.addEventListener('toggle', () => {
+    if (dropdown.open) {
+      setTimeout(() => {
+        usernameInput.focus();
+      }, 50);
+    }
+  });
+
+  // If already open (e.g. on error parameter), focus username
+  if (dropdown.open) {
+    usernameInput.focus();
+  }
 }

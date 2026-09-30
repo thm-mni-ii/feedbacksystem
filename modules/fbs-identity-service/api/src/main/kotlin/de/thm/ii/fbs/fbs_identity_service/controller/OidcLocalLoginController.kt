@@ -21,6 +21,7 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -35,10 +36,14 @@ class OidcLocalLoginController(
     private val oidcLocalLoginService: OidcLocalLoginService,
     private val securityContextRepository: SecurityContextRepository,
     private val loginAttemptService: LoginAttemptService,
-    private val clientIpResolver: ClientIpResolver
+    private val clientIpResolver: ClientIpResolver,
+    private val requestCache: RequestCache
 ) {
 
-    private val authenticationSuccessHandler = SavedRequestAwareAuthenticationSuccessHandler()
+    private val authenticationSuccessHandler =
+        SavedRequestAwareAuthenticationSuccessHandler().apply {
+            setRequestCache(requestCache)
+        }
 
     private val logger = LoggerFactory.getLogger(OidcLocalLoginController::class.java)
 

@@ -49,6 +49,8 @@ class ApplicationProviderControllerTest {
                 jsonPath("$[0].title") { value("Kurse & Aufgaben") }
                 jsonPath("$[0].embedMode") { value("IFRAME") }
                 jsonPath("$[0].requiredGlobalRole") { value("USER") }
+                jsonPath("$[0].clientSecret") { doesNotExist() }
+                jsonPath("$[0].clientId") { doesNotExist() }
             }
 
         verify(applicationProviderService).getVisibleProvidersForCurrentUser()
@@ -63,6 +65,7 @@ class ApplicationProviderControllerTest {
             .andExpect {
                 status { isOk() }
                 jsonPath("$[0].id") { value("admin-app") }
+                jsonPath("$[0].clientSecret") { doesNotExist() }
             }
 
         verify(applicationProviderService).getAllProvidersAdmin()
@@ -106,7 +109,10 @@ class ApplicationProviderControllerTest {
             navbarPosition = 10,
             showInNavbar = true,
             isDefault = false,
-            isActive = true
+            isActive = true,
+            clientId = "new-app-client",
+            oidcEnabled = true,
+            redirectUris = listOf("https://new.example.com/login")
         )
         val provider = testProvider("new-app")
         whenever(applicationProviderService.createProvider(any())).thenReturn(provider)
@@ -148,7 +154,10 @@ class ApplicationProviderControllerTest {
             navbarPosition = 5,
             showInNavbar = true,
             isDefault = true,
-            isActive = true
+            isActive = true,
+            clientId = "updated-client",
+            oidcEnabled = true,
+            redirectUris = listOf("https://updated.example.com/oauth2/callback")
         )
         val provider = testProvider("app-1")
         whenever(applicationProviderService.updateProvider(any(), any())).thenReturn(provider)
@@ -161,6 +170,20 @@ class ApplicationProviderControllerTest {
         }
 
         verify(applicationProviderService).updateProvider(any(), any())
+    }
+
+    @Test
+    fun `regenerateSecret regenerates client secret and returns 200`() {
+        val provider = testProvider("app-1").copy(clientSecret = "new-generated-secret")
+        whenever(applicationProviderService.regenerateSecret("app-1")).thenReturn(provider)
+
+        mockMvc.post("/api/v2/admin/application-providers/app-1/regenerate-secret")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.clientSecret") { value("new-generated-secret") }
+            }
+
+        verify(applicationProviderService).regenerateSecret("app-1")
     }
 
     @Test
@@ -186,6 +209,9 @@ class ApplicationProviderControllerTest {
         navbarPosition = 10,
         showInNavbar = true,
         isDefault = true,
-        isActive = true
+        isActive = true,
+        clientId = "client-$id",
+        oidcEnabled = true,
+        redirectUris = listOf("https://example.com/$id/login")
     )
 }
