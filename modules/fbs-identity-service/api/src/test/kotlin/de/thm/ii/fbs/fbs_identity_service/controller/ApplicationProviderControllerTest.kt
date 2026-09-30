@@ -49,6 +49,8 @@ class ApplicationProviderControllerTest {
                 jsonPath("$[0].title") { value("Kurse & Aufgaben") }
                 jsonPath("$[0].embedMode") { value("IFRAME") }
                 jsonPath("$[0].requiredGlobalRole") { value("USER") }
+                jsonPath("$[0].clientSecret") { doesNotExist() }
+                jsonPath("$[0].clientId") { doesNotExist() }
             }
 
         verify(applicationProviderService).getVisibleProvidersForCurrentUser()
@@ -63,6 +65,7 @@ class ApplicationProviderControllerTest {
             .andExpect {
                 status { isOk() }
                 jsonPath("$[0].id") { value("admin-app") }
+                jsonPath("$[0].clientSecret") { doesNotExist() }
             }
 
         verify(applicationProviderService).getAllProvidersAdmin()

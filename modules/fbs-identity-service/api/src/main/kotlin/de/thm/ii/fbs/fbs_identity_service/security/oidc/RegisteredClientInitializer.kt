@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.ApplicationProviderRepository
+import de.thm.ii.fbs.fbs_identity_service.util.toCleanList
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
@@ -41,7 +42,7 @@ class RegisteredClientInitializer(
     private val logger = LoggerFactory.getLogger(RegisteredClientInitializer::class.java)
 
     override fun run(args: ApplicationArguments) {
-        val clientIds = clientId.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        val clientIds = clientId.toCleanList()
         clientIds.forEach { cid ->
             val existing = registeredClientRepository.findByClientId(cid)
             val clientConfig = createRegisteredClient(existing?.id ?: UUID.randomUUID().toString(), cid)
@@ -84,10 +85,10 @@ class RegisteredClientInitializer(
 
         val postLogoutUris = mutableSetOf<String>()
         if (postLogoutRedirectUri.isNotBlank()) {
-            postLogoutRedirectUri.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { postLogoutUris.add(it) }
+            postLogoutRedirectUri.toCleanList().forEach { postLogoutUris.add(it) }
         }
 
-        redirectUri.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { uri ->
+        redirectUri.toCleanList().forEach { uri ->
             builder.redirectUri(uri)
             postLogoutUris.add(uri)
             try {

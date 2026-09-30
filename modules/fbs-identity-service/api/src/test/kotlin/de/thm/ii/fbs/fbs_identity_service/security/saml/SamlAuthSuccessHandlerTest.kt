@@ -28,9 +28,12 @@ class SamlAuthSuccessHandlerTest {
 
     private val securityContextRepository = mock<SecurityContextRepository>()
 
+    private val requestCache = HttpSessionRequestCache()
+
     private val handler = SamlAuthSuccessHandler(
         samlLoginService = samlLoginService,
         securityContextRepository = securityContextRepository,
+        requestCache = requestCache,
         principalAttribute = "uid",
         prenameAttribute = "givenName",
         surnameAttribute = "sn",

@@ -12,8 +12,10 @@ import de.thm.ii.fbs.fbs_identity_service.persistence.mapper.toModel
 import de.thm.ii.fbs.fbs_identity_service.persistence.repository.ApplicationProviderRepository
 import de.thm.ii.fbs.fbs_identity_service.security.oidc.OidcClientSyncService
 import de.thm.ii.fbs.fbs_identity_service.service.CurrentUserService
+import de.thm.ii.fbs.fbs_identity_service.util.toCleanList
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.net.URI
 import java.security.SecureRandom
 import java.util.Base64
 
@@ -67,6 +69,9 @@ class ApplicationProviderService(
             unsetDefaultOnOtherProviders()
         }
 
+        validateUris(request.redirectUris, "redirectUris")
+        validateUris(request.postLogoutRedirectUris, "postLogoutRedirectUris")
+
         val oidcEnabled = request.oidcEnabled ?: (!request.clientId.isNullOrBlank())
         val effectiveClientId = request.clientId?.trim()?.ifBlank { null }
             ?: if (oidcEnabled) request.id.trim() else null
@@ -74,7 +79,7 @@ class ApplicationProviderService(
         val redirectUrisStr = request.redirectUris?.joinToString(",") { it.trim() }?.ifBlank { null }
         val postLogoutUrisStr = request.postLogoutRedirectUris?.joinToString(",") { it.trim() }?.ifBlank { null }
         val scopesStr = request.scopes?.joinToString(",") { it.trim() }?.ifBlank { null } ?: "openid,profile,email"
-        val clientTypeStr = request.clientType?.trim()?.ifBlank { null } ?: "PUBLIC"
+        val clientTypeStr = normalizeClientType(request.clientType)
 
         val clientSecret = when {
             request.clientSecret != null && request.clientSecret.isNotBlank() -> request.clientSecret.trim()
@@ -122,6 +127,9 @@ class ApplicationProviderService(
             unsetDefaultOnOtherProviders()
         }
 
+        validateUris(request.redirectUris, "redirectUris")
+        validateUris(request.postLogoutRedirectUris, "postLogoutRedirectUris")
+
         val oidcEnabled = request.oidcEnabled ?: (request.clientId?.isNotBlank() ?: entity.oidcEnabled)
         val effectiveClientId = request.clientId?.trim()?.ifBlank { null }
             ?: if (oidcEnabled) entity.id else null
@@ -129,7 +137,7 @@ class ApplicationProviderService(
         val redirectUrisStr = request.redirectUris?.joinToString(",") { it.trim() }?.ifBlank { null }
         val postLogoutUrisStr = request.postLogoutRedirectUris?.joinToString(",") { it.trim() }?.ifBlank { null }
         val scopesStr = request.scopes?.joinToString(",") { it.trim() }?.ifBlank { null } ?: entity.scopes
-        val clientTypeStr = request.clientType?.trim()?.ifBlank { null } ?: entity.clientType
+        val clientTypeStr = if (request.clientType != null) normalizeClientType(request.clientType) else entity.clientType
 
         entity.title = request.title.trim()
         entity.description = request.description?.trim()
@@ -199,6 +207,36 @@ class ApplicationProviderService(
         oidcClientSyncService.syncClient(saved)
 
         return saved.toModel()
+    }
+
+    private fun normalizeClientType(clientType: String?): String {
+        val trimmed = clientType?.trim()?.uppercase() ?: "PUBLIC"
+        require(trimmed == "PUBLIC" || trimmed == "CONFIDENTIAL") {
+            "Client type must be either 'PUBLIC' or 'CONFIDENTIAL'"
+        }
+        return trimmed
+    }
+
+    private fun validateUris(uris: List<String>?, fieldName: String) {
+        uris?.forEach { uriStr ->
+            val trimmed = uriStr.trim()
+            if (trimmed.isNotBlank()) {
+                val uri = try {
+                    URI(trimmed)
+                } catch (e: Exception) {
+                    throw IllegalArgumentException("Invalid URI in $fieldName: '$trimmed'")
+                }
+                require(uri.scheme != null && (uri.scheme.equals("https", ignoreCase = true) || uri.scheme.equals("http", ignoreCase = true))) {
+                    "URI in $fieldName must use http or https scheme: '$trimmed'"
+                }
+                require(uri.host != null && uri.host.isNotBlank()) {
+                    "URI in $fieldName must have a valid host: '$trimmed'"
+                }
+                require(uri.fragment == null) {
+                    "OAuth2 redirect URI must not contain a URI fragment: '$trimmed'"
+                }
+            }
+        }
     }
 
     private fun generateSecureSecret(): String {

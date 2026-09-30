@@ -18,6 +18,9 @@ spring:
     show-sql: ${JPA_SHOW_SQL:true}
 
 app:
+  cors:
+    dev-mode: ${CORS_DEV_MODE:false}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
   frontend:
     base-url: ${FRONTEND_BASE_URL:https://localhost}
   saml:

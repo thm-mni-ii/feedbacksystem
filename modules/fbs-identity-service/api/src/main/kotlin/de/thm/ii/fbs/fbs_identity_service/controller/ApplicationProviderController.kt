@@ -2,6 +2,7 @@ package de.thm.ii.fbs.fbs_identity_service.controller
 
 import de.thm.ii.fbs.fbs_identity_service.dto.app.ApplicationProviderResponse
 import de.thm.ii.fbs.fbs_identity_service.dto.app.CreateApplicationProviderRequest
+import de.thm.ii.fbs.fbs_identity_service.dto.app.PublicApplicationProviderResponse
 import de.thm.ii.fbs.fbs_identity_service.dto.app.UpdateApplicationProviderRequest
 import de.thm.ii.fbs.fbs_identity_service.service.app.ApplicationProviderService
 import io.swagger.v3.oas.annotations.Operation
@@ -29,9 +30,9 @@ class ApplicationProviderController(
 
     @Operation(summary = "Get all active application providers visible to the current user's role")
     @GetMapping("/application-providers")
-    fun getVisibleApplicationProviders(): List<ApplicationProviderResponse> {
+    fun getVisibleApplicationProviders(): List<PublicApplicationProviderResponse> {
         return applicationProviderService.getVisibleProvidersForCurrentUser()
-            .map { ApplicationProviderResponse.fromModel(it) }
+            .map { PublicApplicationProviderResponse.fromModel(it) }
     }
 
     @Operation(summary = "Admin: Get all registered application providers")
@@ -39,7 +40,7 @@ class ApplicationProviderController(
     @GetMapping("/admin/application-providers")
     fun getAllApplicationProvidersAdmin(): List<ApplicationProviderResponse> {
         return applicationProviderService.getAllProvidersAdmin()
-            .map { ApplicationProviderResponse.fromModel(it) }
+            .map { ApplicationProviderResponse.fromModel(it, includeSecret = false) }
     }
 
     @Operation(summary = "Admin: Get a single application provider by ID")
@@ -47,7 +48,8 @@ class ApplicationProviderController(
     @GetMapping("/admin/application-providers/{id}")
     fun getApplicationProviderById(@PathVariable id: String): ApplicationProviderResponse {
         return ApplicationProviderResponse.fromModel(
-            applicationProviderService.getProviderById(id)
+            applicationProviderService.getProviderById(id),
+            includeSecret = false
         )
     }
 
@@ -59,7 +61,7 @@ class ApplicationProviderController(
         @Valid @RequestBody request: CreateApplicationProviderRequest
     ): ApplicationProviderResponse {
         val created = applicationProviderService.createProvider(request)
-        return ApplicationProviderResponse.fromModel(created)
+        return ApplicationProviderResponse.fromModel(created, includeSecret = true)
     }
 
     @Operation(summary = "Admin: Update an existing application provider")
@@ -70,7 +72,7 @@ class ApplicationProviderController(
         @Valid @RequestBody request: UpdateApplicationProviderRequest
     ): ApplicationProviderResponse {
         val updated = applicationProviderService.updateProvider(id, request)
-        return ApplicationProviderResponse.fromModel(updated)
+        return ApplicationProviderResponse.fromModel(updated, includeSecret = request.clientSecret != null)
     }
 
     @Operation(summary = "Admin: Regenerate OIDC client secret for an application provider")
@@ -78,7 +80,7 @@ class ApplicationProviderController(
     @PostMapping("/admin/application-providers/{id}/regenerate-secret")
     fun regenerateSecret(@PathVariable id: String): ApplicationProviderResponse {
         val updated = applicationProviderService.regenerateSecret(id)
-        return ApplicationProviderResponse.fromModel(updated)
+        return ApplicationProviderResponse.fromModel(updated, includeSecret = true)
     }
 
     @Operation(summary = "Admin: Delete an application provider")

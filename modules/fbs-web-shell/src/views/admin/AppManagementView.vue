@@ -530,7 +530,7 @@
           <v-divider class="my-4"></v-divider>
 
           <div v-if="selectedAppForSecret?.clientSecret">
-            <div class="text-subtitle-2 font-weight-bold mb-2">Aktuelles Client Secret:</div>
+            <div class="text-subtitle-2 font-weight-bold mb-2">Generiertes Client Secret:</div>
             <v-text-field
               :model-value="selectedAppForSecret.clientSecret"
               :type="showSecretInModal ? 'text' : 'password'"
@@ -557,9 +557,23 @@
                 ></v-btn>
               </template>
             </v-text-field>
-            <p class="text-caption text-medium-emphasis">
-              Dieses Geheimnis wird für vertrauliche Clients (Server-to-Server) zur Authentifizierung am Token-Endpunkt (<code>/oauth2/token</code>) verwendet.
-            </p>
+            <v-alert
+              type="info"
+              variant="tonal"
+              density="compact"
+              class="mb-2"
+              text="Wichtig: Bitte kopieren Sie dieses Secret jetzt. Aus Sicherheitsgründen wird es nach Schließen dieses Dialogs nicht erneut im Klartext angezeigt."
+            ></v-alert>
+          </div>
+          <div v-else-if="selectedAppForSecret?.hasClientSecret || selectedAppForSecret?.clientType === 'CONFIDENTIAL'">
+            <v-alert
+              type="info"
+              variant="tonal"
+              density="compact"
+              class="mb-2"
+              title="Client Secret ist sicher konfiguriert"
+              text="Diese Anwendung ist als vertraulicher Client (CONFIDENTIAL) konfiguriert und das Secret wird sicher gehasht gespeichert. Falls Sie das Secret verloren haben oder rotieren möchten, können Sie unten ein neues Secret generieren."
+            ></v-alert>
           </div>
           <div v-else>
             <v-alert
@@ -952,7 +966,7 @@ async function saveApp() {
       })
       showSnackbar('Fachanwendung erfolgreich aktualisiert', 'success')
     } else {
-      await appProviderApi.createProvider({
+      const created = await appProviderApi.createProvider({
         ...form.value,
         clientId: effectiveClientId,
         oidcEnabled: oidcEnabled.value,
@@ -963,6 +977,11 @@ async function saveApp() {
         clientSecret: clientType.value === 'CONFIDENTIAL' ? (form.value.clientSecret?.trim() || null) : null
       })
       showSnackbar('Fachanwendung erfolgreich registriert', 'success')
+      if (created.clientSecret) {
+        selectedAppForSecret.value = created
+        showSecretInModal.value = true
+        secretDialog.value = true
+      }
     }
     dialog.value = false
     await loadApps()

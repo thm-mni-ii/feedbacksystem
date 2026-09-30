@@ -21,6 +21,7 @@ export interface ApplicationProvider {
   clientType?: OidcClientType
   scopes?: string[]
   clientSecret?: string | null
+  hasClientSecret?: boolean
   createdAt?: string | null
   updatedAt?: string | null
 }

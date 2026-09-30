@@ -21,6 +21,7 @@ data class ApplicationProvider(
     val clientType: String = "PUBLIC",
     val scopes: List<String> = listOf("openid", "profile", "email"),
     val clientSecret: String? = null,
+    val hasClientSecret: Boolean = !clientSecret.isNullOrBlank(),
     val createdAt: Instant? = null,
     val updatedAt: Instant? = null
 )

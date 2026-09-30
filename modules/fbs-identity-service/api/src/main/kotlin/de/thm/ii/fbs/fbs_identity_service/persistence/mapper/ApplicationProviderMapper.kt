@@ -2,11 +2,12 @@ package de.thm.ii.fbs.fbs_identity_service.persistence.mapper
 
 import de.thm.ii.fbs.fbs_identity_service.model.app.ApplicationProvider
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.ApplicationProviderEntity
+import de.thm.ii.fbs.fbs_identity_service.util.toCleanList
 
 fun ApplicationProviderEntity.toModel(): ApplicationProvider {
-    val parsedRedirectUris = redirectUris?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-    val parsedPostLogoutUris = postLogoutRedirectUris?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-    val parsedScopes = scopes.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+    val parsedRedirectUris = redirectUris.toCleanList()
+    val parsedPostLogoutUris = postLogoutRedirectUris.toCleanList()
+    val parsedScopes = scopes.toCleanList()
 
     return ApplicationProvider(
         id = id,

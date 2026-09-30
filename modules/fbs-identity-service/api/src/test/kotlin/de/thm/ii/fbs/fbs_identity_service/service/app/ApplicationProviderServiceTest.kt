@@ -205,6 +205,48 @@ class ApplicationProviderServiceTest {
     }
 
     @Test
+    fun `createProvider throws IllegalArgumentException when redirect URI is invalid or has fragment`() {
+        val requestWithInvalidScheme = CreateApplicationProviderRequest(
+            id = "bad-scheme-app",
+            title = "Bad Scheme App",
+            icon = "school",
+            url = "https://app.example.com",
+            redirectUris = listOf("javascript:alert(1)")
+        )
+
+        assertThrows<IllegalArgumentException> {
+            service.createProvider(requestWithInvalidScheme)
+        }
+
+        val requestWithFragment = CreateApplicationProviderRequest(
+            id = "bad-fragment-app",
+            title = "Bad Fragment App",
+            icon = "school",
+            url = "https://app.example.com",
+            redirectUris = listOf("https://app.example.com/oauth2/callback#fragment")
+        )
+
+        assertThrows<IllegalArgumentException> {
+            service.createProvider(requestWithFragment)
+        }
+    }
+
+    @Test
+    fun `createProvider throws IllegalArgumentException when clientType is invalid`() {
+        val request = CreateApplicationProviderRequest(
+            id = "bad-type-app",
+            title = "Bad Type App",
+            icon = "school",
+            url = "https://app.example.com",
+            clientType = "INVALID_TYPE"
+        )
+
+        assertThrows<IllegalArgumentException> {
+            service.createProvider(request)
+        }
+    }
+
+    @Test
     fun `deleteProvider removes entity and cleans up oidc client`() {
         val entity = createEntity("app-to-delete", AppRequiredRole.ALL)
         entity.clientId = "app-to-delete-client"

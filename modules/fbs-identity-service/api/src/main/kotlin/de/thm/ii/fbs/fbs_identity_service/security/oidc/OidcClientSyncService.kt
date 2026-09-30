@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
 import de.thm.ii.fbs.fbs_identity_service.persistence.entity.ApplicationProviderEntity
+import de.thm.ii.fbs.fbs_identity_service.util.toCleanList
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.core.JdbcTemplate
@@ -57,13 +58,13 @@ class OidcClientSyncService(
             builder.clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
         }
 
-        val rawScopes = provider.scopes.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        val rawScopes = provider.scopes.toCleanList()
         val scopes = if (rawScopes.isEmpty()) listOf(OidcScopes.OPENID, OidcScopes.PROFILE, OidcScopes.EMAIL) else rawScopes
         scopes.forEach { builder.scope(it) }
 
         builder.clientSettings(
             ClientSettings.builder()
-                .requireProofKey(!isConfidential)
+                .requireProofKey(true)
                 .requireAuthorizationConsent(false)
                 .build()
         )
@@ -75,10 +76,9 @@ class OidcClientSyncService(
         )
 
         val redirectUris = mutableSetOf<String>()
-        if (!provider.redirectUris.isNullOrBlank()) {
-            provider.redirectUris!!.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach {
-                redirectUris.add(it)
-            }
+        val configuredRedirectUris = provider.redirectUris.toCleanList()
+        if (configuredRedirectUris.isNotEmpty()) {
+            redirectUris.addAll(configuredRedirectUris)
         } else if (provider.url.isNotBlank() && (provider.url.startsWith("http://") || provider.url.startsWith("https://"))) {
             val cleanUrl = provider.url.trim().removeSuffix("/")
             redirectUris.add(cleanUrl)
@@ -89,10 +89,9 @@ class OidcClientSyncService(
         redirectUris.forEach { builder.redirectUri(it) }
 
         val postLogoutUris = mutableSetOf<String>()
-        if (!provider.postLogoutRedirectUris.isNullOrBlank()) {
-            provider.postLogoutRedirectUris!!.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach {
-                postLogoutUris.add(it)
-            }
+        val configuredPostLogoutUris = provider.postLogoutRedirectUris.toCleanList()
+        if (configuredPostLogoutUris.isNotEmpty()) {
+            postLogoutUris.addAll(configuredPostLogoutUris)
         } else {
             redirectUris.forEach { uri ->
                 try {

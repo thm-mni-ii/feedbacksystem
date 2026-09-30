@@ -20,7 +20,6 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.savedrequest.RequestCache
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -70,9 +69,8 @@ class SecurityConfig(
                 it.anyRequest().authenticated()
             }
             .exceptionHandling {
-                it.defaultAuthenticationEntryPointFor(
-                    LoginUrlAuthenticationEntryPoint(loginUrl),
-                    MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+                it.authenticationEntryPoint(
+                    LoginUrlAuthenticationEntryPoint(loginUrl)
                 )
             }
             .requestCache {
@@ -101,8 +99,7 @@ class SecurityConfig(
                         "/oauth2/token",
                         "/oauth2/jwks",
                         "/saml2/**",
-                        "/login/saml2/**",
-                        "/api/v2/**"
+                        "/login/saml2/**"
                     )
             }
             .authorizeHttpRequests {
@@ -167,9 +164,38 @@ class SecurityConfig(
     }
 
     @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource {
+    fun corsConfigurationSource(
+        @Value("\${app.cors.dev-mode:false}") corsDevMode: Boolean,
+        @Value("\${app.cors.allowed-origins:}") allowedOrigins: String,
+        @Value("\${app.frontend.base-url:}") frontendBaseUrl: String
+    ): CorsConfigurationSource {
+        val origins = mutableListOf<String>()
+        if (allowedOrigins.isNotBlank()) {
+            origins.addAll(allowedOrigins.split(",").map { it.trim() }.filter { it.isNotEmpty() })
+        }
+        if (frontendBaseUrl.isNotBlank()) {
+            origins.add(frontendBaseUrl.trim().removeSuffix("/"))
+        }
+
+        if (corsDevMode) {
+            origins.addAll(
+                listOf(
+                    "http://localhost:*",
+                    "http://127.0.0.1:*",
+                    "https://localhost:*",
+                    "https://127.0.0.1:*",
+                    "https://*.thm.de",
+                    "https://*.feedback.thm.de"
+                )
+            )
+        }
+
+        val effectiveOrigins = origins.distinct().ifEmpty {
+            listOf("https://localhost")
+        }
+
         val configuration = CorsConfiguration().apply {
-            allowedOriginPatterns = listOf("*")
+            allowedOriginPatterns = effectiveOrigins
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
             allowedHeaders = listOf("*")
             allowCredentials = true
