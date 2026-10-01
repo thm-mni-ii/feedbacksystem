@@ -158,7 +158,9 @@ export class NewCheckerDialogComponent implements OnInit {
       this.checker.checkerType &&
       this.checker.ord &&
       (this.mainFile[0] || isCustomTp) &&
-      (this.secondaryFile[0] || this.checker.checkerType === "bash" || isCustomTp)
+      (this.secondaryFile[0] ||
+        this.checker.checkerType === "bash" ||
+        isCustomTp)
     ) {
       this.checkerService
         .createChecker(this.courseId, this.taskId, this.checker)

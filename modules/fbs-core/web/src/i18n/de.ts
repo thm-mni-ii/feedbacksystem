@@ -457,7 +457,8 @@ export const germanTranslation = {
   "task-provider.dialog.title-edit": "Task-Provider bearbeiten",
   "task-provider.dialog.section-general": "Allgemeine Informationen",
   "task-provider.dialog.field-id": "Eindeutige ID",
-  "task-provider.dialog.hint-id": "Erlaubt: Buchstaben, Zahlen, Bindestriche, Unterstriche",
+  "task-provider.dialog.hint-id":
+    "Erlaubt: Buchstaben, Zahlen, Bindestriche, Unterstriche",
   "task-provider.dialog.field-name": "Anzeigename",
   "task-provider.dialog.field-version": "Version",
   "task-provider.dialog.field-icon": "Material-Icon",
@@ -465,14 +466,17 @@ export const germanTranslation = {
   "task-provider.dialog.section-endpoints": "Backend Endpunkte",
   "task-provider.dialog.field-eval-url": "Evaluierungs-URL",
   "task-provider.dialog.field-health-url": "Health-Check-URL",
-  "task-provider.dialog.section-ui-contracts": "Frontend UI-Schnittstellen (Optional)",
-  "task-provider.dialog.hint-ui-contracts": "URLs zur Einbettung von Dozenten-Konfiguration, Aufgabenlöser und Ergebnisansicht",
+  "task-provider.dialog.section-ui-contracts":
+    "Frontend UI-Schnittstellen (Optional)",
+  "task-provider.dialog.hint-ui-contracts":
+    "URLs zur Einbettung von Dozenten-Konfiguration, Aufgabenlöser und Ergebnisansicht",
   "task-provider.dialog.field-config-ui": "Konfigurations-UI URL (/ui/config)",
   "task-provider.dialog.field-solve-ui": "Löser-UI URL (/ui/solve)",
   "task-provider.dialog.field-result-ui": "Ergebnis-UI URL (/ui/result)",
   "task-provider.dialog.section-capabilities": "Fähigkeiten & Medientypen",
   "task-provider.dialog.field-media-types": "Unterstützte Medientypen",
-  "task-provider.dialog.hint-media-types": "Komma-getrennte Liste von MIME-Typen (z.B. application/sql, text/plain)",
+  "task-provider.dialog.hint-media-types":
+    "Komma-getrennte Liste von MIME-Typen (z.B. application/sql, text/plain)",
   "task-provider.dialog.toggle-subtasks": "Teilaufgaben (Subtasks)",
   "task-provider.dialog.toggle-staged-feedback": "Stufenweises Feedback",
   "task-provider.dialog.toggle-active": "Aktiv",
@@ -481,16 +485,22 @@ export const germanTranslation = {
   "task-provider.dialog.btn-format-json": "JSON Formatieren",
   "task-provider.dialog.btn-sample-schema": "Beispiel laden",
   "task-provider.dialog.error-required": "Dieses Feld ist erforderlich.",
-  "task-provider.dialog.error-slug": "Nur Buchstaben, Zahlen, Bindestriche und Unterstriche erlaubt.",
-  "task-provider.dialog.error-url": "Ungültige URL (muss mit http:// oder https:// beginnen).",
+  "task-provider.dialog.error-slug":
+    "Nur Buchstaben, Zahlen, Bindestriche und Unterstriche erlaubt.",
+  "task-provider.dialog.error-url":
+    "Ungültige URL (muss mit http:// oder https:// beginnen).",
   "task-provider.dialog.error-invalid-json": "Ungültiges JSON-Format.",
   "task-provider.dialog.delete-title": "Task-Provider löschen?",
-  "task-provider.dialog.delete-message": "Möchten Sie den Task-Provider wirklich löschen:",
+  "task-provider.dialog.delete-message":
+    "Möchten Sie den Task-Provider wirklich löschen:",
   "task-provider.success.created": "Task-Provider erfolgreich registriert.",
   "task-provider.success.updated": "Task-Provider erfolgreich aktualisiert.",
   "task-provider.success.deleted": "Task-Provider gelöscht.",
   "task-provider.error.load-failed": "Fehler beim Laden der Task-Provider.",
-  "task-provider.error.create-failed": "Fehler beim Erstellen des Task-Providers.",
-  "task-provider.error.update-failed": "Fehler beim Aktualisieren des Task-Providers.",
-  "task-provider.error.delete-failed": "Fehler beim Löschen des Task-Providers.",
+  "task-provider.error.create-failed":
+    "Fehler beim Erstellen des Task-Providers.",
+  "task-provider.error.update-failed":
+    "Fehler beim Aktualisieren des Task-Providers.",
+  "task-provider.error.delete-failed":
+    "Fehler beim Löschen des Task-Providers.",
 };

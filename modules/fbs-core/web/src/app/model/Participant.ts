@@ -9,4 +9,3 @@ export interface Participant {
       };
   visible?: boolean;
 }
-

@@ -1,5 +1,5 @@
 <h2 mat-dialog-title class="dialog-title">
-  <mat-icon>{{ taskProvider.icon || 'extension' }}</mat-icon>
+  <mat-icon>{{ taskProvider.icon || "extension" }}</mat-icon>
   <span>{{ taskProvider.displayName }} ({{ taskProvider.id }})</span>
 </h2>
 
@@ -7,22 +7,49 @@
   <div class="meta-section">
     <div class="meta-grid">
       <div class="meta-item">
-        <span class="meta-label">{{ "task-provider.dialog.field-version" | i18nextEager }}:</span>
+        <span class="meta-label"
+          >{{ "task-provider.dialog.field-version" | i18nextEager }}:</span
+        >
         <span class="meta-value">{{ taskProvider.version }}</span>
       </div>
       <div class="meta-item">
-        <span class="meta-label">{{ "task-provider.dialog.toggle-active" | i18nextEager }}:</span>
-        <span class="meta-value" [class.text-success]="isProviderActive()" [class.text-muted]="!isProviderActive()">
-          {{ (isProviderActive() ? 'task-provider.table.status-active' : 'task-provider.table.status-inactive') | i18nextEager }}
+        <span class="meta-label"
+          >{{ "task-provider.dialog.toggle-active" | i18nextEager }}:</span
+        >
+        <span
+          class="meta-value"
+          [class.text-success]="isProviderActive()"
+          [class.text-muted]="!isProviderActive()"
+        >
+          {{
+            (isProviderActive()
+              ? "task-provider.table.status-active"
+              : "task-provider.table.status-inactive"
+            ) | i18nextEager
+          }}
         </span>
       </div>
       <div class="meta-item">
-        <span class="meta-label">{{ "task-provider.dialog.toggle-subtasks" | i18nextEager }}:</span>
-        <span class="meta-value">{{ (taskProvider.hasSubtasks ? 'dialog.button.yes' : 'dialog.button.no') | i18nextEager }}</span>
+        <span class="meta-label"
+          >{{ "task-provider.dialog.toggle-subtasks" | i18nextEager }}:</span
+        >
+        <span class="meta-value">{{
+          (taskProvider.hasSubtasks ? "dialog.button.yes" : "dialog.button.no")
+            | i18nextEager
+        }}</span>
       </div>
       <div class="meta-item">
-        <span class="meta-label">{{ "task-provider.dialog.toggle-staged-feedback" | i18nextEager }}:</span>
-        <span class="meta-value">{{ (taskProvider.supportsStagedFeedback ? 'dialog.button.yes' : 'dialog.button.no') | i18nextEager }}</span>
+        <span class="meta-label"
+          >{{
+            "task-provider.dialog.toggle-staged-feedback" | i18nextEager
+          }}:</span
+        >
+        <span class="meta-value">{{
+          (taskProvider.supportsStagedFeedback
+            ? "dialog.button.yes"
+            : "dialog.button.no"
+          ) | i18nextEager
+        }}</span>
       </div>
     </div>
 
@@ -60,7 +87,11 @@
   <div class="section-box" *ngIf="taskProvider.supportedMediaTypes?.length">
     <h3>{{ "task-provider.dialog.field-media-types" | i18nextEager }}</h3>
     <mat-chip-list aria-label="Media Types">
-      <mat-chip *ngFor="let mt of taskProvider.supportedMediaTypes" selected color="primary">
+      <mat-chip
+        *ngFor="let mt of taskProvider.supportedMediaTypes"
+        selected
+        color="primary"
+      >
         {{ mt }}
       </mat-chip>
     </mat-chip-list>

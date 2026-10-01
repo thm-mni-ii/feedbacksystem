@@ -59,9 +59,7 @@ export class SqlCheckerComponent implements OnInit {
           null;
         this.auth.fetchCourseRoles(uid).subscribe((roles) => {
           this.role =
-            roles?.[this.courseID] ||
-            roles?.[this.courseID.toString()] ||
-            null;
+            roles?.[this.courseID] || roles?.[this.courseID.toString()] || null;
         });
       } catch {
         // ignore

@@ -70,7 +70,9 @@ class TaskProviderDispatcherService(
                         node.put("secondaryFileUrl", "$selfUrl/api/v1/storage/checkers/$checkerConfigId/secondary-file?token=$callbackToken")
                     }
                     node
-                } else null
+                } else {
+                    null
+                }
 
                 val requestPayload = EvaluationWebhookRequest(
                     submissionId = submissionId,

@@ -1,19 +1,34 @@
 <h2 mat-dialog-title class="dialog-title">
-  <mat-icon>{{ isUpdate ? 'edit' : 'add_box' }}</mat-icon>
-  <span>{{ (isUpdate ? 'task-provider.dialog.title-edit' : 'task-provider.dialog.title-create') | i18nextEager }}</span>
+  <mat-icon>{{ isUpdate ? "edit" : "add_box" }}</mat-icon>
+  <span>{{
+    (isUpdate
+      ? "task-provider.dialog.title-edit"
+      : "task-provider.dialog.title-create"
+    ) | i18nextEager
+  }}</span>
 </h2>
 
 <mat-dialog-content class="dialog-content">
   <form [formGroup]="form" class="task-provider-form">
     <div class="form-section">
-      <h3 class="section-heading">{{ "task-provider.dialog.section-general" | i18nextEager }}</h3>
-      
+      <h3 class="section-heading">
+        {{ "task-provider.dialog.section-general" | i18nextEager }}
+      </h3>
+
       <div class="form-row">
         <!-- ID -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-id" | i18nextEager }} *</mat-label>
-          <input matInput formControlName="id" placeholder="z.B. sql-checker, deno-checker" />
-          <mat-hint>{{ "task-provider.dialog.hint-id" | i18nextEager }}</mat-hint>
+          <mat-label
+            >{{ "task-provider.dialog.field-id" | i18nextEager }} *</mat-label
+          >
+          <input
+            matInput
+            formControlName="id"
+            placeholder="z.B. sql-checker, deno-checker"
+          />
+          <mat-hint>{{
+            "task-provider.dialog.hint-id" | i18nextEager
+          }}</mat-hint>
           <mat-error *ngIf="form.get('id')?.hasError('required')">
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
@@ -24,8 +39,14 @@
 
         <!-- Display Name -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-name" | i18nextEager }} *</mat-label>
-          <input matInput formControlName="displayName" placeholder="z.B. SQL Query Checker" />
+          <mat-label
+            >{{ "task-provider.dialog.field-name" | i18nextEager }} *</mat-label
+          >
+          <input
+            matInput
+            formControlName="displayName"
+            placeholder="z.B. SQL Query Checker"
+          />
           <mat-error *ngIf="form.get('displayName')?.hasError('required')">
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
@@ -35,7 +56,12 @@
       <div class="form-row">
         <!-- Version -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-version" | i18nextEager }} *</mat-label>
+          <mat-label
+            >{{
+              "task-provider.dialog.field-version" | i18nextEager
+            }}
+            *</mat-label
+          >
           <input matInput formControlName="version" placeholder="1.0.0" />
           <mat-error *ngIf="form.get('version')?.hasError('required')">
             {{ "task-provider.dialog.error-required" | i18nextEager }}
@@ -44,9 +70,17 @@
 
         <!-- Icon -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-icon" | i18nextEager }} *</mat-label>
-          <input matInput formControlName="icon" placeholder="extension, terminal, code, etc." />
-          <mat-icon matSuffix>{{ form.get('icon')?.value || 'extension' }}</mat-icon>
+          <mat-label
+            >{{ "task-provider.dialog.field-icon" | i18nextEager }} *</mat-label
+          >
+          <input
+            matInput
+            formControlName="icon"
+            placeholder="extension, terminal, code, etc."
+          />
+          <mat-icon matSuffix>{{
+            form.get("icon")?.value || "extension"
+          }}</mat-icon>
           <mat-error *ngIf="form.get('icon')?.hasError('required')">
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
@@ -55,37 +89,72 @@
 
       <!-- Description -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>{{ "task-provider.dialog.field-description" | i18nextEager }}</mat-label>
-        <textarea matInput formControlName="description" rows="2" placeholder="Beschreibung des Task Providers..."></textarea>
+        <mat-label>{{
+          "task-provider.dialog.field-description" | i18nextEager
+        }}</mat-label>
+        <textarea
+          matInput
+          formControlName="description"
+          rows="2"
+          placeholder="Beschreibung des Task Providers..."
+        ></textarea>
       </mat-form-field>
     </div>
 
     <!-- Backend Endpoints Section -->
     <div class="form-section">
-      <h3 class="section-heading">{{ "task-provider.dialog.section-endpoints" | i18nextEager }}</h3>
+      <h3 class="section-heading">
+        {{ "task-provider.dialog.section-endpoints" | i18nextEager }}
+      </h3>
       <div class="form-row">
         <!-- Evaluation URL -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-eval-url" | i18nextEager }} *</mat-label>
-          <input matInput formControlName="evaluationEndpointUrl" placeholder="http://host:port/evaluate" />
+          <mat-label
+            >{{
+              "task-provider.dialog.field-eval-url" | i18nextEager
+            }}
+            *</mat-label
+          >
+          <input
+            matInput
+            formControlName="evaluationEndpointUrl"
+            placeholder="http://host:port/evaluate"
+          />
           <mat-hint>POST /evaluate Webhook</mat-hint>
-          <mat-error *ngIf="form.get('evaluationEndpointUrl')?.hasError('required')">
+          <mat-error
+            *ngIf="form.get('evaluationEndpointUrl')?.hasError('required')"
+          >
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
-          <mat-error *ngIf="form.get('evaluationEndpointUrl')?.hasError('invalidUrl')">
+          <mat-error
+            *ngIf="form.get('evaluationEndpointUrl')?.hasError('invalidUrl')"
+          >
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
         </mat-form-field>
 
         <!-- Health URL -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-health-url" | i18nextEager }} *</mat-label>
-          <input matInput formControlName="healthEndpointUrl" placeholder="http://host:port/health" />
+          <mat-label
+            >{{
+              "task-provider.dialog.field-health-url" | i18nextEager
+            }}
+            *</mat-label
+          >
+          <input
+            matInput
+            formControlName="healthEndpointUrl"
+            placeholder="http://host:port/health"
+          />
           <mat-hint>GET /health Probe</mat-hint>
-          <mat-error *ngIf="form.get('healthEndpointUrl')?.hasError('required')">
+          <mat-error
+            *ngIf="form.get('healthEndpointUrl')?.hasError('required')"
+          >
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
-          <mat-error *ngIf="form.get('healthEndpointUrl')?.hasError('invalidUrl')">
+          <mat-error
+            *ngIf="form.get('healthEndpointUrl')?.hasError('invalidUrl')"
+          >
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
         </mat-form-field>
@@ -94,14 +163,24 @@
 
     <!-- UI Schnittstellen Section -->
     <div class="form-section">
-      <h3 class="section-heading">{{ "task-provider.dialog.section-ui-contracts" | i18nextEager }}</h3>
-      <p class="section-subtext">{{ "task-provider.dialog.hint-ui-contracts" | i18nextEager }}</p>
+      <h3 class="section-heading">
+        {{ "task-provider.dialog.section-ui-contracts" | i18nextEager }}
+      </h3>
+      <p class="section-subtext">
+        {{ "task-provider.dialog.hint-ui-contracts" | i18nextEager }}
+      </p>
 
       <div class="form-row">
         <!-- Config UI URL -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-config-ui" | i18nextEager }}</mat-label>
-          <input matInput formControlName="configUiUrl" placeholder="http://host:port/ui/config" />
+          <mat-label>{{
+            "task-provider.dialog.field-config-ui" | i18nextEager
+          }}</mat-label>
+          <input
+            matInput
+            formControlName="configUiUrl"
+            placeholder="http://host:port/ui/config"
+          />
           <mat-error *ngIf="form.get('configUiUrl')?.hasError('invalidUrl')">
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
@@ -109,8 +188,14 @@
 
         <!-- Solve UI URL -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-solve-ui" | i18nextEager }}</mat-label>
-          <input matInput formControlName="solveUiUrl" placeholder="http://host:port/ui/solve" />
+          <mat-label>{{
+            "task-provider.dialog.field-solve-ui" | i18nextEager
+          }}</mat-label>
+          <input
+            matInput
+            formControlName="solveUiUrl"
+            placeholder="http://host:port/ui/solve"
+          />
           <mat-error *ngIf="form.get('solveUiUrl')?.hasError('invalidUrl')">
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
@@ -120,8 +205,14 @@
       <div class="form-row">
         <!-- Result UI URL -->
         <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>{{ "task-provider.dialog.field-result-ui" | i18nextEager }}</mat-label>
-          <input matInput formControlName="resultUiUrl" placeholder="http://host:port/ui/result" />
+          <mat-label>{{
+            "task-provider.dialog.field-result-ui" | i18nextEager
+          }}</mat-label>
+          <input
+            matInput
+            formControlName="resultUiUrl"
+            placeholder="http://host:port/ui/result"
+          />
           <mat-error *ngIf="form.get('resultUiUrl')?.hasError('invalidUrl')">
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
@@ -131,13 +222,23 @@
 
     <!-- Capabilities & Media Types -->
     <div class="form-section">
-      <h3 class="section-heading">{{ "task-provider.dialog.section-capabilities" | i18nextEager }}</h3>
-      
+      <h3 class="section-heading">
+        {{ "task-provider.dialog.section-capabilities" | i18nextEager }}
+      </h3>
+
       <!-- Supported Media Types -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>{{ "task-provider.dialog.field-media-types" | i18nextEager }}</mat-label>
-        <input matInput formControlName="supportedMediaTypesText" placeholder="application/sql, text/plain, application/pdf" />
-        <mat-hint>{{ "task-provider.dialog.hint-media-types" | i18nextEager }}</mat-hint>
+        <mat-label>{{
+          "task-provider.dialog.field-media-types" | i18nextEager
+        }}</mat-label>
+        <input
+          matInput
+          formControlName="supportedMediaTypesText"
+          placeholder="application/sql, text/plain, application/pdf"
+        />
+        <mat-hint>{{
+          "task-provider.dialog.hint-media-types" | i18nextEager
+        }}</mat-hint>
       </mat-form-field>
 
       <div class="toggles-row">
@@ -145,7 +246,10 @@
           {{ "task-provider.dialog.toggle-subtasks" | i18nextEager }}
         </mat-slide-toggle>
 
-        <mat-slide-toggle formControlName="supportsStagedFeedback" color="primary">
+        <mat-slide-toggle
+          formControlName="supportsStagedFeedback"
+          color="primary"
+        >
           {{ "task-provider.dialog.toggle-staged-feedback" | i18nextEager }}
         </mat-slide-toggle>
 
@@ -158,21 +262,37 @@
     <!-- Config Schema Section -->
     <div class="form-section">
       <div class="section-header-actions">
-        <h3 class="section-heading">{{ "task-provider.dialog.section-schema" | i18nextEager }}</h3>
+        <h3 class="section-heading">
+          {{ "task-provider.dialog.section-schema" | i18nextEager }}
+        </h3>
         <div class="schema-buttons">
           <button type="button" mat-stroked-button (click)="loadSampleSchema()">
-            <mat-icon>auto_fix_high</mat-icon>&nbsp;{{ "task-provider.dialog.btn-sample-schema" | i18nextEager }}
+            <mat-icon>auto_fix_high</mat-icon>&nbsp;{{
+              "task-provider.dialog.btn-sample-schema" | i18nextEager
+            }}
           </button>
           <button type="button" mat-stroked-button (click)="formatJson()">
-            <mat-icon>format_align_left</mat-icon>&nbsp;{{ "task-provider.dialog.btn-format-json" | i18nextEager }}
+            <mat-icon>format_align_left</mat-icon>&nbsp;{{
+              "task-provider.dialog.btn-format-json" | i18nextEager
+            }}
           </button>
         </div>
       </div>
 
       <mat-form-field appearance="outline" class="full-width schema-field">
-        <mat-label>{{ "task-provider.dialog.field-schema" | i18nextEager }}</mat-label>
-        <textarea matInput formControlName="configSchemaText" rows="6" class="code-textarea" placeholder='{"type": "object", "properties": { ... }}'></textarea>
-        <mat-error *ngIf="form.get('configSchemaText')?.hasError('invalidJson')">
+        <mat-label>{{
+          "task-provider.dialog.field-schema" | i18nextEager
+        }}</mat-label>
+        <textarea
+          matInput
+          formControlName="configSchemaText"
+          rows="6"
+          class="code-textarea"
+          placeholder='{"type": "object", "properties": { ... }}'
+        ></textarea>
+        <mat-error
+          *ngIf="form.get('configSchemaText')?.hasError('invalidJson')"
+        >
           {{ "task-provider.dialog.error-invalid-json" | i18nextEager }}
         </mat-error>
       </mat-form-field>
@@ -181,9 +301,19 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-button (click)="onCancel()">{{ "dialog.button.cancel" | i18nextEager }}</button>
-  <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">
-    <mat-icon>{{ isUpdate ? 'save' : 'check' }}</mat-icon>&nbsp;
-    {{ (isUpdate ? 'dialog.button.save' : 'dialog.button.create') | i18nextEager }}
+  <button mat-button (click)="onCancel()">
+    {{ "dialog.button.cancel" | i18nextEager }}
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="form.invalid"
+    (click)="onSubmit()"
+  >
+    <mat-icon>{{ isUpdate ? "save" : "check" }}</mat-icon
+    >&nbsp;
+    {{
+      (isUpdate ? "dialog.button.save" : "dialog.button.create") | i18nextEager
+    }}
   </button>
 </mat-dialog-actions>

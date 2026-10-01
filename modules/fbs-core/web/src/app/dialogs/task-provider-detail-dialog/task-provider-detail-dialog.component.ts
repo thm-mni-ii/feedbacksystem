@@ -23,7 +23,11 @@ export class TaskProviderDetailDialogComponent implements OnInit {
       try {
         this.formattedSchema =
           typeof this.taskProvider.configSchema === "string"
-            ? JSON.stringify(JSON.parse(this.taskProvider.configSchema), null, 2)
+            ? JSON.stringify(
+                JSON.parse(this.taskProvider.configSchema),
+                null,
+                2
+              )
             : JSON.stringify(this.taskProvider.configSchema, null, 2);
       } catch {
         this.formattedSchema = String(this.taskProvider.configSchema);
@@ -32,10 +36,16 @@ export class TaskProviderDetailDialogComponent implements OnInit {
   }
 
   isProviderActive(): boolean {
-    if (this.taskProvider.isActive !== undefined && this.taskProvider.isActive !== null) {
+    if (
+      this.taskProvider.isActive !== undefined &&
+      this.taskProvider.isActive !== null
+    ) {
       return Boolean(this.taskProvider.isActive);
     }
-    if (this.taskProvider.active !== undefined && this.taskProvider.active !== null) {
+    if (
+      this.taskProvider.active !== undefined &&
+      this.taskProvider.active !== null
+    ) {
       return Boolean(this.taskProvider.active);
     }
     return true;

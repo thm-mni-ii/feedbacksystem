@@ -44,7 +44,8 @@ export class GroupDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe((param) => {
-      this.courseID = parseInt(param.courseId, 10) || Number(param.courseId) || 0;
+      this.courseID =
+        parseInt(param.courseId, 10) || Number(param.courseId) || 0;
       this.groupID = parseInt(param.id, 10) || Number(param.id) || 0;
       this.loadGroup();
       try {
@@ -55,9 +56,7 @@ export class GroupDetailComponent implements OnInit {
           null;
         this.auth.fetchCourseRoles(uid).subscribe((roles) => {
           this.role =
-            roles?.[this.courseID] ||
-            roles?.[this.courseID.toString()] ||
-            null;
+            roles?.[this.courseID] || roles?.[this.courseID.toString()] || null;
         });
       } catch {
         // ignore

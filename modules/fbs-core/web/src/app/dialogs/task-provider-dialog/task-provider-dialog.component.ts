@@ -61,9 +61,7 @@ export class TaskProviderDialogComponent implements OnInit {
         this.taskProvider?.displayName || "",
         [Validators.required]
       ),
-      description: new UntypedFormControl(
-        this.taskProvider?.description || ""
-      ),
+      description: new UntypedFormControl(this.taskProvider?.description || ""),
       icon: new UntypedFormControl(this.taskProvider?.icon || "extension", [
         Validators.required,
       ]),
@@ -82,10 +80,9 @@ export class TaskProviderDialogComponent implements OnInit {
         this.taskProvider?.configUiUrl || "",
         [this.optionalUrlValidator]
       ),
-      solveUiUrl: new UntypedFormControl(
-        this.taskProvider?.solveUiUrl || "",
-        [this.optionalUrlValidator]
-      ),
+      solveUiUrl: new UntypedFormControl(this.taskProvider?.solveUiUrl || "", [
+        this.optionalUrlValidator,
+      ]),
       resultUiUrl: new UntypedFormControl(
         this.taskProvider?.resultUiUrl || "",
         [this.optionalUrlValidator]
@@ -99,16 +96,14 @@ export class TaskProviderDialogComponent implements OnInit {
       ),
       isActive: new UntypedFormControl(
         this.taskProvider
-          ? (this.taskProvider.isActive !== undefined
-              ? Boolean(this.taskProvider.isActive)
-              : (this.taskProvider.active !== undefined
-                  ? Boolean(this.taskProvider.active)
-                  : true))
+          ? this.taskProvider.isActive !== undefined
+            ? Boolean(this.taskProvider.isActive)
+            : this.taskProvider.active !== undefined
+            ? Boolean(this.taskProvider.active)
+            : true
           : true
       ),
-      configSchemaText: new UntypedFormControl(schemaStr, [
-        this.jsonValidator,
-      ]),
+      configSchemaText: new UntypedFormControl(schemaStr, [this.jsonValidator]),
     });
   }
 
@@ -145,7 +140,9 @@ export class TaskProviderDialogComponent implements OnInit {
     if (!raw || !raw.trim()) return;
     try {
       const parsed = JSON.parse(raw);
-      this.form.get("configSchemaText")?.setValue(JSON.stringify(parsed, null, 2));
+      this.form
+        .get("configSchemaText")
+        ?.setValue(JSON.stringify(parsed, null, 2));
       this.snackBar.open("JSON formatiert", "OK", { duration: 2500 });
     } catch {
       this.snackBar.open("Ungültiges JSON kann nicht formatiert werden", "OK", {

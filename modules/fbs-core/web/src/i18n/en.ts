@@ -447,7 +447,8 @@ export const englishTranslation = {
   "task-provider.dialog.title-edit": "Edit Task Provider",
   "task-provider.dialog.section-general": "General Information",
   "task-provider.dialog.field-id": "Unique ID",
-  "task-provider.dialog.hint-id": "Allowed: letters, numbers, hyphens, underscores",
+  "task-provider.dialog.hint-id":
+    "Allowed: letters, numbers, hyphens, underscores",
   "task-provider.dialog.field-name": "Display Name",
   "task-provider.dialog.field-version": "Version",
   "task-provider.dialog.field-icon": "Material Icon",
@@ -455,14 +456,17 @@ export const englishTranslation = {
   "task-provider.dialog.section-endpoints": "Backend Endpoints",
   "task-provider.dialog.field-eval-url": "Evaluation URL",
   "task-provider.dialog.field-health-url": "Health Check URL",
-  "task-provider.dialog.section-ui-contracts": "Frontend UI Contracts (Optional)",
-  "task-provider.dialog.hint-ui-contracts": "URLs for embedded instructor config, solver UI, and result feedback",
+  "task-provider.dialog.section-ui-contracts":
+    "Frontend UI Contracts (Optional)",
+  "task-provider.dialog.hint-ui-contracts":
+    "URLs for embedded instructor config, solver UI, and result feedback",
   "task-provider.dialog.field-config-ui": "Configuration UI URL (/ui/config)",
   "task-provider.dialog.field-solve-ui": "Solver UI URL (/ui/solve)",
   "task-provider.dialog.field-result-ui": "Result UI URL (/ui/result)",
   "task-provider.dialog.section-capabilities": "Capabilities & Media Types",
   "task-provider.dialog.field-media-types": "Supported Media Types",
-  "task-provider.dialog.hint-media-types": "Comma-separated list of MIME types (e.g. application/sql, text/plain)",
+  "task-provider.dialog.hint-media-types":
+    "Comma-separated list of MIME types (e.g. application/sql, text/plain)",
   "task-provider.dialog.toggle-subtasks": "Subtasks",
   "task-provider.dialog.toggle-staged-feedback": "Staged Feedback",
   "task-provider.dialog.toggle-active": "Active",
@@ -471,11 +475,14 @@ export const englishTranslation = {
   "task-provider.dialog.btn-format-json": "Format JSON",
   "task-provider.dialog.btn-sample-schema": "Load Example",
   "task-provider.dialog.error-required": "This field is required.",
-  "task-provider.dialog.error-slug": "Only letters, numbers, hyphens, and underscores allowed.",
-  "task-provider.dialog.error-url": "Invalid URL (must start with http:// or https://).",
+  "task-provider.dialog.error-slug":
+    "Only letters, numbers, hyphens, and underscores allowed.",
+  "task-provider.dialog.error-url":
+    "Invalid URL (must start with http:// or https://).",
   "task-provider.dialog.error-invalid-json": "Invalid JSON format.",
   "task-provider.dialog.delete-title": "Delete Task Provider?",
-  "task-provider.dialog.delete-message": "Do you really want to delete the task provider:",
+  "task-provider.dialog.delete-message":
+    "Do you really want to delete the task provider:",
   "task-provider.success.created": "Task provider successfully registered.",
   "task-provider.success.updated": "Task provider successfully updated.",
   "task-provider.success.deleted": "Task provider deleted.",

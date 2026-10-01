@@ -270,9 +270,7 @@ export class CourseDetailComponent implements OnInit {
       const uid = this.authService.getToken().id;
       this.authService.fetchCourseRoles(uid).subscribe((roles) => {
         this.role =
-          roles?.[this.courseID] ||
-          roles?.[this.courseID.toString()] ||
-          null;
+          roles?.[this.courseID] || roles?.[this.courseID.toString()] || null;
         this.cdr.detectChanges();
       });
     } catch {

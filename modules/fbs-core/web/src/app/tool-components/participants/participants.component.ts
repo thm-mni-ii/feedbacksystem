@@ -50,7 +50,10 @@ export class ParticipantsComponent implements OnInit {
           this.searchedUser = users || [];
         },
         (error) => {
-          console.warn("Could not load all users for participant search:", error);
+          console.warn(
+            "Could not load all users for participant search:",
+            error
+          );
           this.allUser = [];
           this.searchedUser = [];
         }
@@ -60,37 +63,33 @@ export class ParticipantsComponent implements OnInit {
 
   private refreshUserList() {
     this.user = [];
-    this.registrationService
-      .getCourseParticipants(this.courseID)
-      .subscribe(
-        (participants) => {
-          this.participants = participants || [];
-          this.user = this.participants
-            .map((participant) => participant.user)
-            .filter((u): u is User => !!u);
-          this.dataSource.data = this.user;
-          this.dataSource.sort = this.sort;
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sortingDataAccessor = (user: User, field: string) => {
-            if (field === "globalRole") {
-              return Roles.CourseRole.getSortOrder(this.getRole(user.id));
-            }
-            return (user as any)[field];
-          };
-        },
-        (error) => {
-          console.error("Error loading course participants:", error);
-          this.snackBar.open("Fehler beim Laden der Teilnehmerliste.", "OK", {
-            duration: 5000,
-          });
-        }
-      );
+    this.registrationService.getCourseParticipants(this.courseID).subscribe(
+      (participants) => {
+        this.participants = participants || [];
+        this.user = this.participants
+          .map((participant) => participant.user)
+          .filter((u): u is User => !!u);
+        this.dataSource.data = this.user;
+        this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sortingDataAccessor = (user: User, field: string) => {
+          if (field === "globalRole") {
+            return Roles.CourseRole.getSortOrder(this.getRole(user.id));
+          }
+          return (user as any)[field];
+        };
+      },
+      (error) => {
+        console.error("Error loading course participants:", error);
+        this.snackBar.open("Fehler beim Laden der Teilnehmerliste.", "OK", {
+          duration: 5000,
+        });
+      }
+    );
   }
 
   getRole(userID: number): string {
-    const participant = this.participants?.find(
-      (p) => p.user?.id === userID
-    );
+    const participant = this.participants?.find((p) => p.user?.id === userID);
     if (!participant || !participant.role) {
       return Roles.CourseRole.STUDENT;
     }
@@ -167,9 +166,13 @@ export class ParticipantsComponent implements OnInit {
               },
               (error) => {
                 console.error("Failed to unregister user:", error);
-                this.snackBar.open("Fehler beim Austragen des Benutzers.", "OK", {
-                  duration: 5000,
-                });
+                this.snackBar.open(
+                  "Fehler beim Austragen des Benutzers.",
+                  "OK",
+                  {
+                    duration: 5000,
+                  }
+                );
               }
             );
         }
@@ -195,9 +198,13 @@ export class ParticipantsComponent implements OnInit {
             },
             (error) => {
               console.error("Failed to unregister students:", error);
-              this.snackBar.open("Fehler beim Entfernen der Studierenden.", "OK", {
-                duration: 5000,
-              });
+              this.snackBar.open(
+                "Fehler beim Entfernen der Studierenden.",
+                "OK",
+                {
+                  duration: 5000,
+                }
+              );
             }
           );
       }
@@ -287,9 +294,13 @@ export class ParticipantsComponent implements OnInit {
               },
               (error) => {
                 console.error("Failed to add participant:", error);
-                this.snackBar.open("Fehler beim Hinzufügen des Teilnehmers.", "OK", {
-                  duration: 5000,
-                });
+                this.snackBar.open(
+                  "Fehler beim Hinzufügen des Teilnehmers.",
+                  "OK",
+                  {
+                    duration: 5000,
+                  }
+                );
               }
             );
         }
@@ -315,9 +326,13 @@ export class ParticipantsComponent implements OnInit {
           },
           (error) => {
             console.error("Failed to unregister all:", error);
-            this.snackBar.open("Fehler beim Entfernen aller Teilnehmenden.", "OK", {
-              duration: 5000,
-            });
+            this.snackBar.open(
+              "Fehler beim Entfernen aller Teilnehmenden.",
+              "OK",
+              {
+                duration: 5000,
+              }
+            );
           }
         );
       }
@@ -325,7 +340,9 @@ export class ParticipantsComponent implements OnInit {
   }
 
   displayFn(user?: User): string | undefined {
-    return user ? `${user.prename || ""} ${user.surname || ""}`.trim() : undefined;
+    return user
+      ? `${user.prename || ""} ${user.surname || ""}`.trim()
+      : undefined;
   }
   private openConfirmDialog(message: string) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {

@@ -15,7 +15,9 @@ export class CourseRegistrationService {
    * @return Map of course id to role name
    */
   getCourseRoles(uid: number): Observable<Record<string, string>> {
-    return this.http.get<Record<string, string>>(`/api/v1/users/${uid}/course-roles`);
+    return this.http.get<Record<string, string>>(
+      `/api/v1/users/${uid}/course-roles`
+    );
   }
 
   /**

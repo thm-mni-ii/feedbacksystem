@@ -70,7 +70,9 @@ export class TaskProviderManagementComponent implements OnInit {
           data: TaskProvider,
           filter: string
         ) => {
-          const matchStr = `${data.id} ${data.displayName} ${data.description || ""} ${data.supportedMediaTypes.join(" ")}`.toLowerCase();
+          const matchStr = `${data.id} ${data.displayName} ${
+            data.description || ""
+          } ${data.supportedMediaTypes.join(" ")}`.toLowerCase();
           return matchStr.includes(filter);
         };
         this.loading = false;
@@ -123,7 +125,9 @@ export class TaskProviderManagementComponent implements OnInit {
               console.error(err);
               this.snackBar.open(
                 err?.error?.message ||
-                  this.i18NextPipe.transform("task-provider.error.create-failed"),
+                  this.i18NextPipe.transform(
+                    "task-provider.error.create-failed"
+                  ),
                 "OK",
                 { duration: 5000 }
               );
@@ -157,7 +161,9 @@ export class TaskProviderManagementComponent implements OnInit {
                 console.error(err);
                 this.snackBar.open(
                   err?.error?.message ||
-                    this.i18NextPipe.transform("task-provider.error.update-failed"),
+                    this.i18NextPipe.transform(
+                      "task-provider.error.update-failed"
+                    ),
                   "OK",
                   { duration: 5000 }
                 );
@@ -178,8 +184,12 @@ export class TaskProviderManagementComponent implements OnInit {
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
-          title: this.i18NextPipe.transform("task-provider.dialog.delete-title"),
-          message: `${this.i18NextPipe.transform("task-provider.dialog.delete-message")} "${provider.displayName}" (${provider.id})?`,
+          title: this.i18NextPipe.transform(
+            "task-provider.dialog.delete-title"
+          ),
+          message: `${this.i18NextPipe.transform(
+            "task-provider.dialog.delete-message"
+          )} "${provider.displayName}" (${provider.id})?`,
         },
       })
       .afterClosed()

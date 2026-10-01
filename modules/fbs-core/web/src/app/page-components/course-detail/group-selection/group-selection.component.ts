@@ -60,9 +60,7 @@ export class GroupSelectionComponent implements OnInit {
           null;
         this.auth.fetchCourseRoles(this.userId).subscribe((roles) => {
           this.role =
-            roles?.[this.courseId] ||
-            roles?.[this.courseId.toString()] ||
-            null;
+            roles?.[this.courseId] || roles?.[this.courseId.toString()] || null;
         });
       } catch {
         // ignore

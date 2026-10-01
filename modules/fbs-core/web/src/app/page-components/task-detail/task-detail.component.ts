@@ -250,7 +250,9 @@ export class TaskDetailComponent implements OnInit {
             this.uid = this.authService.getToken().id;
             this.role =
               this.authService.getToken().courseRoles?.[this.courseId] ||
-              this.authService.getToken().courseRoles?.[this.courseId.toString()] ||
+              this.authService.getToken().courseRoles?.[
+                this.courseId.toString()
+              ] ||
               null;
             this.authService.fetchCourseRoles(this.uid).subscribe((roles) => {
               this.role =
