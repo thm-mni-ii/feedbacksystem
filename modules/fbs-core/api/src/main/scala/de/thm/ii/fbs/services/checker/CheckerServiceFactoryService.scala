@@ -3,6 +3,7 @@ package de.thm.ii.fbs.services.checker
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.checker.excel.ExcelCheckerService
 import de.thm.ii.fbs.services.checker.math.SpreadsheetCheckerService
+import de.thm.ii.fbs.services.v2.persistence.TaskProviderRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service
 class CheckerServiceFactoryService {
   @Autowired
   private val applicationContext: ApplicationContext = null
+  @Autowired
+  private val taskProviderRepository: TaskProviderRepository = null
 
   /**
     * Gets a checker for the given service
@@ -27,6 +30,8 @@ class CheckerServiceFactoryService {
     case "ai-supported-sql-analyser" => applicationContext.getBean(classOf[AiSupportedSqlAnalysisService])
     case "sql-runner" => applicationContext.getBean(classOf[SqlRunnerCheckerService])
     case "task-provider" => applicationContext.getBean(classOf[TaskProviderCheckerService])
+    case id: String if taskProviderRepository != null && taskProviderRepository.existsById(id) =>
+      applicationContext.getBean(classOf[TaskProviderCheckerService])
     case _: String => applicationContext.getBean(classOf[RemoteCheckerService])
   }
 }

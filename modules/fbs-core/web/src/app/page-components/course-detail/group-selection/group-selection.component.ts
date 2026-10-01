@@ -51,13 +51,26 @@ export class GroupSelectionComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe((param) => {
-      this.courseId = param.id;
+      this.courseId = parseInt(param.id, 10) || Number(param.id) || 0;
+      try {
+        this.userId = this.auth.getToken().id;
+        this.role =
+          this.auth.getToken().courseRoles?.[this.courseId] ||
+          this.auth.getToken().courseRoles?.[this.courseId.toString()] ||
+          null;
+        this.auth.fetchCourseRoles(this.userId).subscribe((roles) => {
+          this.role =
+            roles?.[this.courseId] ||
+            roles?.[this.courseId.toString()] ||
+            null;
+        });
+      } catch {
+        // ignore
+      }
+      this.loadGroups();
+      this.choose(this.preselectedGroup);
+      this.getSelectionPossibility();
     });
-    this.userId = this.auth.getToken().id;
-    this.loadGroups();
-    this.role = this.auth.getToken().courseRoles[this.courseId];
-    this.choose(this.preselectedGroup);
-    this.getSelectionPossibility();
   }
 
   choose(value: Group): void {
@@ -82,7 +95,10 @@ export class GroupSelectionComponent implements OnInit {
 
   public isAuthorized(ignoreTutor: boolean = false) {
     const token = this.auth.getToken();
-    const courseRole = token.courseRoles[this.courseId];
+    const courseRole =
+      this.role ||
+      token.courseRoles?.[this.courseId] ||
+      token.courseRoles?.[this.courseId.toString()];
     const globalRole = token.globalRole;
     return (
       Roles.GlobalRole.isAdmin(globalRole) ||

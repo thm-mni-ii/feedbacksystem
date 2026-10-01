@@ -117,18 +117,32 @@ export class SqlCheckerResultsComponent implements OnInit {
   resultTableObs: Observable<SqlCheckerResult[]> = of();
   ngOnInit() {
     this.route.params.subscribe((param) => {
-      this.courseID = param.id;
-      this.taskID = param.tid;
+      this.courseID = parseInt(param.id, 10) || Number(param.id) || 0;
+      this.taskID = parseInt(param.tid, 10) || Number(param.tid) || 0;
+      try {
+        const uid = this.authService.getToken().id;
+        this.role =
+          this.auth.getToken().courseRoles?.[this.courseID] ||
+          this.auth.getToken().courseRoles?.[this.courseID.toString()] ||
+          null;
+        this.auth.fetchCourseRoles(uid).subscribe((roles) => {
+          this.role =
+            roles?.[this.courseID] ||
+            roles?.[this.courseID.toString()] ||
+            null;
+        });
+      } catch {
+        // ignore
+      }
     });
     this.standardEvent();
-    this.role = this.auth.getToken().courseRoles[this.courseID];
     if (this.goToService.getAndClearAutoJoin() && !this.role) {
       this.courseRegistrationService
         .registerCourse(this.authService.getToken().id, this.courseID)
         .subscribe(
           () =>
-            this.courseService
-              .getCourse(this.courseID)
+            this.auth
+              .fetchCourseRoles(this.authService.getToken().id)
               .subscribe(() => this.ngOnInit()),
           (error) => console.error(error)
         );
@@ -136,7 +150,10 @@ export class SqlCheckerResultsComponent implements OnInit {
   }
   public isAuthorized(ignoreTutor: boolean = false) {
     const token = this.auth.getToken();
-    const courseRole = token.courseRoles[this.courseID];
+    const courseRole =
+      this.role ||
+      token.courseRoles?.[this.courseID] ||
+      token.courseRoles?.[this.courseID.toString()];
     const globalRole = token.globalRole;
     return (
       Roles.GlobalRole.isAdmin(globalRole) ||

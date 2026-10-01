@@ -67,6 +67,18 @@ export class SidebarComponent implements OnInit {
         this.showAnalytics = Object.values(token.courseRoles || {}).some(
           (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
         );
+
+        this.auth.fetchCourseRoles(this.userID).subscribe((roles) => {
+          this.showAnalytics = Object.values(roles || {}).some(
+            (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
+          );
+        });
+
+        this.auth.courseRoles$.subscribe((roles) => {
+          this.showAnalytics = Object.values(roles || {}).some(
+            (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
+          );
+        });
       }
     } catch (e) {
       // In embedded mode, token might still be loading asynchronously

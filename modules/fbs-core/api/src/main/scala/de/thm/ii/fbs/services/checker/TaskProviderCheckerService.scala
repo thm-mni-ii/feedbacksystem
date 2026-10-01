@@ -3,7 +3,6 @@ package de.thm.ii.fbs.services.checker
 import de.thm.ii.fbs.model.task.Task
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
-import de.thm.ii.fbs.services.persistence.storage.MinioStorageService
 import de.thm.ii.fbs.services.persistence.{SubmissionService, TaskService}
 import de.thm.ii.fbs.services.v2.taskprovider.TaskProviderDispatcherService
 import org.slf4j.LoggerFactory
@@ -22,8 +21,6 @@ class TaskProviderCheckerService extends CheckerService with CheckerServiceHandl
   @Autowired
   private val taskService: TaskService = null
   @Autowired
-  private val minioStorageService: MinioStorageService = null
-  @Autowired
   private val submissionService: SubmissionService = null
 
   /**
@@ -37,14 +34,6 @@ class TaskProviderCheckerService extends CheckerService with CheckerServiceHandl
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
     taskService.getOne(taskID) match {
       case Some(task) =>
-        val solUrl = try {
-          minioStorageService.urlToSolutionFile(submissionID)
-        } catch {
-          case e: Exception =>
-            logger.warn(s"Could not resolve MinIO solution URL for submission $submissionID: ${e.getMessage}")
-            null
-        }
-
         dispatcherService.dispatchEvaluation(
           cc.checkerType,
           submissionID,
@@ -55,8 +44,8 @@ class TaskProviderCheckerService extends CheckerService with CheckerServiceHandl
           fu.username,
           task.mediaType,
           null,
-          solUrl,
-          null
+          cc.mainFileUploaded,
+          cc.secondaryFileUploaded
         )
       case None =>
         logger.warn(s"Task $taskID not found when notifying TaskProvider ${cc.checkerType}")

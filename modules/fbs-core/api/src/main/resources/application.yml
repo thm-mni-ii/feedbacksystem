@@ -60,6 +60,8 @@ services:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
     insecure: ${MASTER_RUNNER_TLS_INSECURE:false}
     selfUrl: ${SELF_URL:https://localhost}
+  self:
+    url: ${SELF_URL:https://localhost}
   sqlPlayground:
     share:
       publicHost: ${SQL_PLAYGROUND_SHARE_PUBLIC_HOST:127.0.0.1}

@@ -21,7 +21,7 @@ class TaskProviderDispatcherService(
     private val scopedTaskTokenService: ScopedTaskTokenService,
     private val taskProviderService: TaskProviderService,
     private val objectMapper: ObjectMapper,
-    @Value("\${services.self.url:https://core:443}")
+    @Value("\${services.self.url:\${services.masterRunner.selfUrl:\${SELF_URL:https://core:443}}}")
     private val selfUrl: String,
     @Value("\${services.masterRunner.insecure:true}")
     private val insecure: Boolean
@@ -42,8 +42,8 @@ class TaskProviderDispatcherService(
         username: String,
         mediaType: String,
         submissionContent: String? = null,
-        fileDownloadUrl: String? = null,
-        configurationNode: JsonNode? = null
+        hasPrimaryFile: Boolean = false,
+        hasSecondaryFile: Boolean = false
     ): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync {
             try {
@@ -59,6 +59,18 @@ class TaskProviderDispatcherService(
 
                 val pseudonym = scopedTaskTokenService.generatePseudonym(userId, courseId)
                 val callbackUrl = "$selfUrl/api/v1/results/$submissionId/$checkerConfigId"
+                val fileDownloadUrl = "$selfUrl/api/v1/storage/submissions/$submissionId/file?token=$callbackToken"
+
+                val configurationNode: JsonNode? = if (hasPrimaryFile || hasSecondaryFile) {
+                    val node = objectMapper.createObjectNode()
+                    if (hasPrimaryFile) {
+                        node.put("primaryFileUrl", "$selfUrl/api/v1/storage/checkers/$checkerConfigId/primary-file?token=$callbackToken")
+                    }
+                    if (hasSecondaryFile) {
+                        node.put("secondaryFileUrl", "$selfUrl/api/v1/storage/checkers/$checkerConfigId/secondary-file?token=$callbackToken")
+                    }
+                    node
+                } else null
 
                 val requestPayload = EvaluationWebhookRequest(
                     submissionId = submissionId,

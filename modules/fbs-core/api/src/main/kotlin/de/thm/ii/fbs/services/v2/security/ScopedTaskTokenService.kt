@@ -107,6 +107,28 @@ class ScopedTaskTokenService(
         }
     }
 
+    fun validateSubmissionToken(token: String, expectedSubmissionId: Int): Boolean {
+        return try {
+            val claims = parseToken(token) ?: return false
+            val sid = claims["sid"]?.toString()?.toIntOrNull()
+            val scope = claims["scope"]?.toString() ?: ""
+            sid == expectedSubmissionId && (scope.contains("fbs:task:evaluate") || scope.contains("fbs:storage:read"))
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun validateCheckerConfigToken(token: String, expectedCheckerConfigId: Int): Boolean {
+        return try {
+            val claims = parseToken(token) ?: return false
+            val ccid = claims["ccid"]?.toString()?.toIntOrNull()
+            val scope = claims["scope"]?.toString() ?: ""
+            ccid == expectedCheckerConfigId && (scope.contains("fbs:task:evaluate") || scope.contains("fbs:storage:read"))
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     fun parseToken(token: String): Claims? {
         return try {
             Jwts.parser()
