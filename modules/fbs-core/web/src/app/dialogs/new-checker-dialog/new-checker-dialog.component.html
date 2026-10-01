@@ -13,14 +13,21 @@
       required
       (selectionChange)="defineForm(checkerForm.value)"
     >
-      <mat-option value="sql">Legacy SQL Runner</mat-option>
-      <mat-option value="sql-runner">SQL Runner</mat-option>
-      <mat-option value="sql-checker">SQL Checker</mat-option>
-      <mat-option value="ai-supported-sql-analyser"
-        >AI Supported SQL Analyser</mat-option
-      >
-      <mat-option value="bash">Bash</mat-option>
-      <mat-option value="excel">Excel</mat-option>
+      <mat-optgroup label="Task Providers" *ngIf="taskProviders.length > 0">
+        <mat-option *ngFor="let tp of taskProviders" [value]="tp.id">
+          {{ tp.displayName }} ({{ tp.id }})
+        </mat-option>
+      </mat-optgroup>
+      <mat-optgroup label="Standard / Legacy Checker">
+        <mat-option *ngIf="!isRegisteredProvider('sql')" value="sql">Legacy SQL Runner</mat-option>
+        <mat-option *ngIf="!isRegisteredProvider('sql-runner')" value="sql-runner">SQL Runner</mat-option>
+        <mat-option *ngIf="!isRegisteredProvider('sql-checker')" value="sql-checker">SQL Checker</mat-option>
+        <mat-option *ngIf="!isRegisteredProvider('ai-supported-sql-analyser')" value="ai-supported-sql-analyser"
+          >AI Supported SQL Analyser</mat-option
+        >
+        <mat-option *ngIf="!isRegisteredProvider('bash')" value="bash">Bash</mat-option>
+        <mat-option *ngIf="!isRegisteredProvider('excel')" value="excel">Excel</mat-option>
+      </mat-optgroup>
     </mat-select>
     <mat-form-field>
       <input

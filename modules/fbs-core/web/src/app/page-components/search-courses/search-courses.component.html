@@ -7,6 +7,18 @@
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
+    <span class="spacer"></span>
+    <button
+      mat-button
+      *ngIf="isAdmin()"
+      routerLink="/admin/task-providers"
+      color="primary"
+      matTooltip="{{ 'task-provider.management.title' | i18nextEager }}"
+    >
+      <mat-icon>settings_input_component</mat-icon>&nbsp;{{
+        "task-provider.management.button" | i18nextEager
+      }}
+    </button>
   </app-menu-bar>
 
   <mat-form-field class="search" appearance="outline">

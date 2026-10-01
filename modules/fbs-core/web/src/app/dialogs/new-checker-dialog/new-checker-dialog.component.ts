@@ -7,6 +7,8 @@ import { CheckerService } from "../../service/checker.service";
 import { forkJoin, Observable, of } from "rxjs";
 import { switchMap } from "rxjs/operators";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
+import { TaskProviderService } from "../../service/task-provider.service";
+import { TaskProvider } from "../../model/TaskProvider";
 
 @Component({
   selector: "app-new-checker-dialog",
@@ -51,9 +53,12 @@ export class NewCheckerDialogComponent implements OnInit {
   showExtendedHintsConfig;
   disableDistance;
 
+  taskProviders: TaskProvider[] = [];
+
   constructor(
     public dialogRef: MatDialogRef<NewCheckerDialogComponent>,
     private checkerService: CheckerService,
+    private taskProviderService: TaskProviderService,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private snackBar: MatSnackBar
   ) {}
@@ -91,6 +96,15 @@ export class NewCheckerDialogComponent implements OnInit {
     this.showHintsEvent(this.checkerForm.value);
     this.showExtendedHintsEvent(this.checkerForm.value);
 
+    this.taskProviderService.getAllActiveTaskProviders().subscribe(
+      (providers) => {
+        this.taskProviders = providers || [];
+      },
+      (err) => {
+        console.error("Could not load task providers for checker dialog", err);
+      }
+    );
+
     if (this.checker.mainFileUploaded || this.checker.secondaryFileUploaded) {
       if (this.checker.mainFileUploaded) {
         this.mainFile[0] = new File(
@@ -109,6 +123,12 @@ export class NewCheckerDialogComponent implements OnInit {
     if (this.isUpdate != true) {
       this.setDefaultValues();
     }
+  }
+
+  public isRegisteredProvider(id: string): boolean {
+    return (this.taskProviders || []).some(
+      (tp) => tp.id === id || tp.id === String(id).trim()
+    );
   }
 
   /**
@@ -133,11 +153,12 @@ export class NewCheckerDialogComponent implements OnInit {
       value.showExtendedHints;
     this.checker.checkerTypeInformation.showExtendedHintsAt =
       value.showExtendedHintsAt;
+    const isCustomTp = this.isRegisteredProvider(this.checker.checkerType);
     if (
       this.checker.checkerType &&
       this.checker.ord &&
-      this.mainFile[0] &&
-      (this.secondaryFile[0] || this.checker.checkerType === "bash")
+      (this.mainFile[0] || isCustomTp) &&
+      (this.secondaryFile[0] || this.checker.checkerType === "bash" || isCustomTp)
     ) {
       this.checkerService
         .createChecker(this.courseId, this.taskId, this.checker)
@@ -194,13 +215,15 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checker.checkerTypeInformation.showExtendedHintsAt =
       value.showExtendedHintsAt;
 
+    const isCustomTp = this.isRegisteredProvider(this.checker.checkerType);
     if (
       this.checker.checkerType &&
       this.checker.ord &&
-      (this.mainFile[0] || this.checker.mainFileUploaded) &&
+      (this.mainFile[0] || this.checker.mainFileUploaded || isCustomTp) &&
       (this.secondaryFile[0] ||
         this.checker.secondaryFileUploaded ||
-        this.checker.checkerType === "bash")
+        this.checker.checkerType === "bash" ||
+        isCustomTp)
     ) {
       this.checkerService
         .updateChecker(
@@ -311,8 +334,16 @@ export class NewCheckerDialogComponent implements OnInit {
         break;
       }
       default: {
-        this.mainFileName = "Not Implemented Checker Type";
-        this.secondaryFileName = "Not Implemented Checker Type";
+        const customTp = this.taskProviders.find(
+          (p) => p.id === value.checkerType
+        );
+        if (customTp) {
+          this.mainFileName = "Konfigurationsdatei (*)";
+          this.secondaryFileName = "Optionale Hilfsdatei (*)";
+        } else {
+          this.mainFileName = "Not Implemented Checker Type";
+          this.secondaryFileName = "Not Implemented Checker Type";
+        }
         break;
       }
     }
