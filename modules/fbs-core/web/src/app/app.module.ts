@@ -117,6 +117,10 @@ import { GroupPreviewComponent } from "./page-components/group-preview/group-pre
 import { GroupDetailComponent } from "./page-components/group-detail/group-detail.component";
 import { GroupDeregisterDialogComponent } from "./dialogs/group-deregister-dialog/group-deregister-dialog.component";
 import { FbsKanbanComponent } from "./page-components/fbs-kanban/fbs-kanban.component";
+import { TaskProviderManagementComponent } from "./page-components/task-provider-management/task-provider-management.component";
+import { TaskProviderDialogComponent } from "./dialogs/task-provider-dialog/task-provider-dialog.component";
+import { TaskProviderDetailDialogComponent } from "./dialogs/task-provider-detail-dialog/task-provider-detail-dialog.component";
+import { TaskProviderService } from "./service/task-provider.service";
 import { FbsSciCheckComponent } from "./page-components/fbs-sci-check/fbs-sci-check.component";
 import { SkipLinkComponent } from "./accessibility/skip-link/skip-link.component";
 import { UnstyledLinkComponent } from "./accessibility/unstyled-link/unstyled-link.component";
@@ -267,6 +271,9 @@ export const httpInterceptorProviders = [
     SkipLinkComponent,
     UnstyledLinkComponent,
     CodeEditorComponent,
+    TaskProviderManagementComponent,
+    TaskProviderDialogComponent,
+    TaskProviderDetailDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -307,9 +314,12 @@ export const httpInterceptorProviders = [
     DataprivacyDialogComponent,
     CreateGuestUserDialogComponent,
     ImpressumDialogComponent,
+    TaskProviderDialogComponent,
+    TaskProviderDetailDialogComponent,
   ],
   providers: [
     CookieService,
+    TaskProviderService,
     httpInterceptorProviders,
     {
       provide: APP_INITIALIZER,

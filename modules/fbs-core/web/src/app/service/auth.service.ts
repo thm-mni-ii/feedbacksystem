@@ -2,12 +2,13 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { OAuthService } from "angular-oauth2-oidc";
-import { Observable, of, throwError } from "rxjs";
-import { map, mergeMap } from "rxjs/operators";
+import { BehaviorSubject, Observable, of, throwError } from "rxjs";
+import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { JWTToken } from "../model/JWTToken";
 import { authCodeFlowConfig } from "../auth.config";
 
 const TOKEN_ID = "token";
+const COURSE_ROLES_ID = "courseRoles";
 const SERVER_TIME_OFFSET_ID = "serverTimeOffset";
 
 /**
@@ -19,12 +20,17 @@ const SERVER_TIME_OFFSET_ID = "serverTimeOffset";
 export class AuthService {
   private serverTimeAtSync: number = null;
   private clientTimeAtSync: number = null;
+  private cachedCourseRoles: Record<string, string> = {};
+  private courseRolesSubject = new BehaviorSubject<Record<string, string>>({});
+  public courseRoles$ = this.courseRolesSubject.asObservable();
 
   constructor(
     private http: HttpClient,
     private jwtHelper: JwtHelperService,
     private oauthService: OAuthService
   ) {
+    this.cachedCourseRoles = this.loadStoredCourseRoles();
+    this.courseRolesSubject.next(this.cachedCourseRoles);
     this.configure();
   }
 
@@ -48,6 +54,9 @@ export class AuthService {
 
   public logout() {
     localStorage.removeItem(TOKEN_ID);
+    localStorage.removeItem(COURSE_ROLES_ID);
+    this.cachedCourseRoles = {};
+    this.courseRolesSubject.next({});
     this.oauthService.logOut();
   }
 
@@ -74,6 +83,83 @@ export class AuthService {
     return this.oauthService.getIdentityClaims();
   }
 
+  private loadStoredCourseRoles(): Record<string, string> {
+    try {
+      const stored = localStorage.getItem(COURSE_ROLES_ID);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch {
+      // Ignore parsing errors
+    }
+    return {};
+  }
+
+  public fetchCourseRoles(uid?: number): Observable<Record<string, string>> {
+    let userId = uid;
+    if (!userId) {
+      try {
+        userId = this.getToken()?.id;
+      } catch {
+        // ignore
+      }
+    }
+    if (!userId) {
+      return of(this.loadStoredCourseRoles());
+    }
+    return this.http
+      .get<Record<string, string>>(`/api/v1/users/${userId}/course-roles`)
+      .pipe(
+        tap((roles) => {
+          this.cachedCourseRoles = roles || {};
+          try {
+            localStorage.setItem(
+              COURSE_ROLES_ID,
+              JSON.stringify(this.cachedCourseRoles)
+            );
+          } catch {
+            // ignore
+          }
+          this.courseRolesSubject.next(this.cachedCourseRoles);
+        }),
+        catchError((err) => {
+          console.warn("Could not fetch course roles:", err);
+          return of(this.loadStoredCourseRoles());
+        })
+      );
+  }
+
+  public setCourseRole(courseId: number | string, role: string): void {
+    this.cachedCourseRoles = {
+      ...this.cachedCourseRoles,
+      [courseId.toString()]: role,
+    };
+    try {
+      localStorage.setItem(
+        COURSE_ROLES_ID,
+        JSON.stringify(this.cachedCourseRoles)
+      );
+    } catch {
+      // ignore
+    }
+    this.courseRolesSubject.next(this.cachedCourseRoles);
+  }
+
+  public removeCourseRole(courseId: number | string): void {
+    const nextRoles = { ...this.cachedCourseRoles };
+    delete nextRoles[courseId.toString()];
+    this.cachedCourseRoles = nextRoles;
+    try {
+      localStorage.setItem(
+        COURSE_ROLES_ID,
+        JSON.stringify(this.cachedCourseRoles)
+      );
+    } catch {
+      // ignore
+    }
+    this.courseRolesSubject.next(this.cachedCourseRoles);
+  }
+
   /**
    * @return The decoded token object.
    */
@@ -91,12 +177,22 @@ export class AuthService {
     }
     const merged = { ...claims, ...decodedToken };
     const id = merged.sub ? parseInt(merged.sub, 10) : merged.id;
-    let courseRoles: any = merged.courseRoles || {};
-    if (typeof courseRoles === "string") {
-      try {
-        courseRoles = JSON.parse(courseRoles);
-      } catch (e) {
-        courseRoles = {};
+    const storedRoles = this.loadStoredCourseRoles();
+    let courseRoles: any = {
+      ...storedRoles,
+      ...this.cachedCourseRoles,
+    };
+    if (merged.courseRoles) {
+      let tokenCourseRoles = merged.courseRoles;
+      if (typeof tokenCourseRoles === "string") {
+        try {
+          tokenCourseRoles = JSON.parse(tokenCourseRoles);
+        } catch (e) {
+          tokenCourseRoles = {};
+        }
+      }
+      if (typeof tokenCourseRoles === "object" && tokenCourseRoles !== null) {
+        courseRoles = { ...courseRoles, ...tokenCourseRoles };
       }
     }
     return {

@@ -12,6 +12,7 @@ import { Roles } from "../../model/Roles";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
 import { TextConfirmDialogComponent } from "src/app/dialogs/text-confirm-dialog/text-confirm-dialog.component";
+import { AuthService } from "../../service/auth.service";
 
 @Component({
   selector: "app-participants",
@@ -25,39 +26,49 @@ export class ParticipantsComponent implements OnInit {
   courseID = 0;
   columns = ["surname", "prename", "email", "globalRole", "action"];
   dataSource = new MatTableDataSource<User>();
-  user: User[];
-  participants: Participant[];
-  allUser: User[];
-  searchedUser: User[];
+  user: User[] = [];
+  participants: Participant[] = [];
+  allUser: User[] = [];
+  searchedUser: User[] = [];
 
   constructor(
     private snackBar: MatSnackBar,
     private userService: UserService,
     private dialog: MatDialog,
     private registrationService: CourseRegistrationService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private auth: AuthService
   ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe((param) => {
-      this.courseID = param.id;
-      this.userService.getAllUsers().subscribe((user) => {
-        this.allUser = user;
-        this.searchedUser = user;
-        this.refreshUserList();
-      });
+      this.courseID = parseInt(param.id, 10) || Number(param.id) || 0;
+      this.refreshUserList();
+      this.userService.getAllUsers().subscribe(
+        (users) => {
+          this.allUser = users || [];
+          this.searchedUser = users || [];
+        },
+        (error) => {
+          console.warn(
+            "Could not load all users for participant search:",
+            error
+          );
+          this.allUser = [];
+          this.searchedUser = [];
+        }
+      );
     });
   }
 
   private refreshUserList() {
     this.user = [];
-    this.registrationService
-      .getCourseParticipants(this.courseID)
-      .subscribe((participants) => {
-        this.participants = participants;
-        participants.map((participant) => {
-          this.user.push(participant.user);
-        });
+    this.registrationService.getCourseParticipants(this.courseID).subscribe(
+      (participants) => {
+        this.participants = participants || [];
+        this.user = this.participants
+          .map((participant) => participant.user)
+          .filter((u): u is User => !!u);
         this.dataSource.data = this.user;
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
@@ -65,16 +76,27 @@ export class ParticipantsComponent implements OnInit {
           if (field === "globalRole") {
             return Roles.CourseRole.getSortOrder(this.getRole(user.id));
           }
-
-          return user[field];
+          return (user as any)[field];
         };
-      });
+      },
+      (error) => {
+        console.error("Error loading course participants:", error);
+        this.snackBar.open("Fehler beim Laden der Teilnehmerliste.", "OK", {
+          duration: 5000,
+        });
+      }
+    );
   }
 
   getRole(userID: number): string {
-    return this.participants.find(
-      (participant) => participant.user.id === userID
-    ).role.value;
+    const participant = this.participants?.find((p) => p.user?.id === userID);
+    if (!participant || !participant.role) {
+      return Roles.CourseRole.STUDENT;
+    }
+    if (typeof participant.role === "string") {
+      return participant.role;
+    }
+    return (participant.role as any).value || Roles.CourseRole.STUDENT;
   }
 
   /**
@@ -91,8 +113,17 @@ export class ParticipantsComponent implements OnInit {
             duration: 5000,
           });
           this.refreshUserList();
+          try {
+            const currentUserId = this.auth.getToken()?.id;
+            if (userID === currentUserId) {
+              this.auth.fetchCourseRoles(currentUserId).subscribe();
+            }
+          } catch {
+            // ignore
+          }
         },
-        () => {
+        (error) => {
+          console.error("Failed to update role:", error);
           this.snackBar.open(
             "Leider gab es einen Fehler mit dem Update.",
             "OK",
@@ -112,18 +143,38 @@ export class ParticipantsComponent implements OnInit {
         if (result === true) {
           this.registrationService
             .deregisterCourse(user.id, this.courseID)
-            .subscribe(() => {
-              this.snackBar.open(
-                "Der Benutzer " +
-                  user.prename +
-                  " " +
-                  user.surname +
-                  " wurde ausgetragen.",
-                "OK",
-                { duration: 5000 }
-              );
-              this.refreshUserList();
-            });
+            .subscribe(
+              () => {
+                this.snackBar.open(
+                  "Der Benutzer " +
+                    (user.prename || "") +
+                    " " +
+                    (user.surname || "") +
+                    " wurde ausgetragen.",
+                  "OK",
+                  { duration: 5000 }
+                );
+                this.refreshUserList();
+                try {
+                  const currentUserId = this.auth.getToken()?.id;
+                  if (user.id === currentUserId) {
+                    this.auth.fetchCourseRoles(currentUserId).subscribe();
+                  }
+                } catch {
+                  // ignore
+                }
+              },
+              (error) => {
+                console.error("Failed to unregister user:", error);
+                this.snackBar.open(
+                  "Fehler beim Austragen des Benutzers.",
+                  "OK",
+                  {
+                    duration: 5000,
+                  }
+                );
+              }
+            );
         }
       }
     );
@@ -138,12 +189,24 @@ export class ParticipantsComponent implements OnInit {
       if (result === true) {
         this.registrationService
           .deregisterRole(this.courseID, Roles.CourseRole.STUDENT)
-          .subscribe(() => {
-            this.snackBar.open("Alle Studierenden wurden entfernt.", "ok", {
-              duration: 3000,
-            });
-            this.refreshUserList();
-          });
+          .subscribe(
+            () => {
+              this.snackBar.open("Alle Studierenden wurden entfernt.", "OK", {
+                duration: 3000,
+              });
+              this.refreshUserList();
+            },
+            (error) => {
+              console.error("Failed to unregister students:", error);
+              this.snackBar.open(
+                "Fehler beim Entfernen der Studierenden.",
+                "OK",
+                {
+                  duration: 5000,
+                }
+              );
+            }
+          );
       }
     });
   }
@@ -157,12 +220,20 @@ export class ParticipantsComponent implements OnInit {
       if (result === true) {
         this.registrationService
           .deregisterRole(this.courseID, Roles.CourseRole.TUTOR)
-          .subscribe(() => {
-            this.snackBar.open("Alle Tutoren wurden entfernt.", "ok", {
-              duration: 3000,
-            });
-            this.refreshUserList();
-          });
+          .subscribe(
+            () => {
+              this.snackBar.open("Alle Tutoren wurden entfernt.", "OK", {
+                duration: 3000,
+              });
+              this.refreshUserList();
+            },
+            (error) => {
+              console.error("Failed to unregister tutors:", error);
+              this.snackBar.open("Fehler beim Entfernen der Tutoren.", "OK", {
+                duration: 5000,
+              });
+            }
+          );
       }
     });
   }
@@ -172,48 +243,66 @@ export class ParticipantsComponent implements OnInit {
    * @param filterValue String the admin provides to search for
    */
   applyFilter(filterValue: string) {
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    const search = (filterValue || "").trim().toLowerCase();
+    this.dataSource.filter = search;
+    if (!this.allUser) {
+      this.searchedUser = [];
+      return;
+    }
     this.searchedUser = this.allUser.filter((user) => {
       return (
-        user.prename
-          .toLocaleLowerCase()
-          .includes(filterValue.trim().toLowerCase()) ||
-        user.surname
-          .toLocaleLowerCase()
-          .includes(filterValue.trim().toLocaleLowerCase())
+        (user.prename || "").toLowerCase().includes(search) ||
+        (user.surname || "").toLowerCase().includes(search) ||
+        (user.email || "").toLowerCase().includes(search) ||
+        (user.username || "").toLowerCase().includes(search)
       );
     });
   }
 
   addParticipant(user: User) {
+    if (!user || !user.id) {
+      return;
+    }
     this.openConfirmDialog(
       "Soll " +
-        user.prename +
+        (user.prename || "") +
         " " +
-        user.surname +
+        (user.surname || "") +
         " dem Kurs hinzugefügt werden?"
     ).subscribe((result) => {
       if (result === true) {
         if (this.user.find((participant) => participant.id === user.id)) {
           this.snackBar.open(
-            user.prename +
+            (user.prename || "") +
               " " +
-              user.surname +
+              (user.surname || "") +
               " nimmt bereits an dem Kurs teil.",
-            "ok",
+            "OK",
             { duration: 5000 }
           );
         } else {
           this.registrationService
-            .registerCourse(user.id, this.courseID)
-            .subscribe(() => {
-              this.snackBar.open(
-                "Teilnehmende Personen wurden hinzugefügt.",
-                "OK",
-                { duration: 5000 }
-              );
-              this.refreshUserList();
-            });
+            .registerCourse(user.id, this.courseID, Roles.CourseRole.STUDENT)
+            .subscribe(
+              () => {
+                this.snackBar.open(
+                  "Teilnehmende Personen wurden hinzugefügt.",
+                  "OK",
+                  { duration: 5000 }
+                );
+                this.refreshUserList();
+              },
+              (error) => {
+                console.error("Failed to add participant:", error);
+                this.snackBar.open(
+                  "Fehler beim Hinzufügen des Teilnehmers.",
+                  "OK",
+                  {
+                    duration: 5000,
+                  }
+                );
+              }
+            );
         }
       }
     });
@@ -226,20 +315,34 @@ export class ParticipantsComponent implements OnInit {
       "Delete All"
     ).subscribe((result) => {
       if (result === true) {
-        this.registrationService.deregisterAll(this.courseID).subscribe(() => {
-          this.snackBar.open(
-            "Alle teilnehmenden Personen wurden entfernt.",
-            "ok",
-            { duration: 3000 }
-          );
-          this.refreshUserList();
-        });
+        this.registrationService.deregisterAll(this.courseID).subscribe(
+          () => {
+            this.snackBar.open(
+              "Alle teilnehmenden Personen wurden entfernt.",
+              "OK",
+              { duration: 3000 }
+            );
+            this.refreshUserList();
+          },
+          (error) => {
+            console.error("Failed to unregister all:", error);
+            this.snackBar.open(
+              "Fehler beim Entfernen aller Teilnehmenden.",
+              "OK",
+              {
+                duration: 5000,
+              }
+            );
+          }
+        );
       }
     });
   }
 
   displayFn(user?: User): string | undefined {
-    return user ? user.surname : undefined;
+    return user
+      ? `${user.prename || ""} ${user.surname || ""}`.trim()
+      : undefined;
   }
   private openConfirmDialog(message: string) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {

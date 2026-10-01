@@ -81,6 +81,11 @@ export class SearchCoursesComponent implements OnInit {
     );
   }
 
+  public isAdmin(): boolean {
+    const token = this.auth.getToken();
+    return token ? Roles.GlobalRole.isAdmin(token.globalRole) : false;
+  }
+
   /**
    * Navigates to subbed course
    * @param courseId The course to go to

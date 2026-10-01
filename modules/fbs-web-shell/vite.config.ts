@@ -17,6 +17,16 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      '/course-management': {
+        target: 'http://localhost:8082',
+        changeOrigin: true,
+        ws: true
+      },
+      '/sql-playground': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        ws: true
+      },
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true

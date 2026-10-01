@@ -2,6 +2,10 @@
   display: block;
   padding: 16px;
 
+  .spacer {
+    flex: 1 1 auto;
+  }
+
   .search {
     width: 100%;
   }

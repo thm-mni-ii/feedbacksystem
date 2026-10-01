@@ -44,6 +44,26 @@ class CourseRegistrationController {
   }
 
   /**
+    * Get course roles for a user
+    * @param uid User id
+    * @param req http request
+    * @param res http response
+    * @return Map of course id to role name
+    */
+  @GetMapping(value = Array("/users/{uid}/course-roles"))
+  @ResponseBody
+  def getCourseRoles(@PathVariable("uid") uid: Integer, req: HttpServletRequest, res: HttpServletResponse): Map[String, String] = {
+    val user = authService.authorize(req, res)
+    val globalRole = user.globalRole
+
+    if (globalRole == GlobalRole.ADMIN || globalRole == GlobalRole.MODERATOR || user.id == uid) {
+      courseRegistrationService.getCoursePrivileges(uid).map { case (cid, role) => cid.toString -> role.toString }
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  /**
     * Get participants of a course
     * @param cid Course id
     * @param req http request
