@@ -9,6 +9,7 @@ import { SearchCoursesComponent } from "./page-components/search-courses/search-
 import { CourseDetailComponent } from "./page-components/course-detail/course-detail.component";
 import { MyGroupsComponent } from "./page-components/my-groups/my-groups.component";
 import { UserManagementComponent } from "./page-components/user-management/user-management.component";
+import { TaskProviderManagementComponent } from "./page-components/task-provider-management/task-provider-management.component";
 import { NotFoundComponent } from "./page-components/not-found/not-found.component";
 import { LoginComponent } from "./page-components/login/login.component";
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
@@ -141,6 +142,11 @@ const routes: Routes = [
       {
         path: "admin/user-management",
         component: UserManagementComponent,
+        canActivate: [AdminGuard],
+      },
+      {
+        path: "admin/task-providers",
+        component: TaskProviderManagementComponent,
         canActivate: [AdminGuard],
       },
 

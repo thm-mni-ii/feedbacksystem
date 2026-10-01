@@ -54,13 +54,13 @@ class ResultController {
     val resultText = extractResultText(request)
     val extInfo = if (request.hasNonNull("extInfo")) request.get("extInfo").toString else null
 
-    processSubtasks(request, checkerConfiguration.id, submission.id)
-
     checkerService.asInstanceOf[CheckerServiceHandle].handle(
       submission, checkerConfiguration, task, exitCode,
       resultText,
       extInfo
     )
+
+    processSubtasks(request, checkerConfiguration.id, submission.id)
   }
 
   private def extractResultText(request: JsonNode): String = {

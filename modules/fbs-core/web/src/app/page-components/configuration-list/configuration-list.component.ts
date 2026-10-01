@@ -44,8 +44,8 @@ export class ConfigurationListComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       if (params) {
-        this.courseId = params.id;
-        this.taskId = params.tid;
+        this.courseId = parseInt(params.id, 10) || Number(params.id) || 0;
+        this.taskId = parseInt(params.tid, 10) || Number(params.tid) || 0;
         this.loadConfigurations();
         this.loadStagedConfig();
       }
@@ -104,7 +104,9 @@ export class ConfigurationListComponent implements OnInit {
   isAuthorized(): boolean {
     const token = this.authService.getToken();
     const globalRole = token.globalRole;
-    const courseRole = token.courseRoles[this.courseId];
+    const courseRole =
+      token.courseRoles?.[this.courseId] ||
+      token.courseRoles?.[this.courseId.toString()];
     return (
       Roles.GlobalRole.isAdmin(globalRole) ||
       Roles.GlobalRole.isModerator(globalRole) ||

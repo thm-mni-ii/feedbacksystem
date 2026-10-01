@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.model.v2.taskprovider
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,6 +20,8 @@ data class TaskProviderDTO(
     val hasSubtasks: Boolean,
     val supportsStagedFeedback: Boolean,
     val configSchema: JsonNode?,
+    @get:JsonProperty("isActive")
+    @JsonProperty("isActive")
     val isActive: Boolean
 )
 
@@ -37,6 +40,7 @@ data class CreateTaskProviderRequest(
     val hasSubtasks: Boolean = false,
     val supportsStagedFeedback: Boolean = false,
     val configSchema: JsonNode? = null,
+    @JsonProperty("isActive")
     val isActive: Boolean = true
 )
 
@@ -54,5 +58,6 @@ data class UpdateTaskProviderRequest(
     val hasSubtasks: Boolean? = null,
     val supportsStagedFeedback: Boolean? = null,
     val configSchema: JsonNode? = null,
+    @JsonProperty("isActive")
     val isActive: Boolean? = null
 )

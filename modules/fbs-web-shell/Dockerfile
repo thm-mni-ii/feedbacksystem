@@ -8,11 +8,11 @@ RUN npm ci
 COPY . .
 RUN npm run build-only
 
-FROM nginx:alpine
+FROM caddy:2-alpine
 
-COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /usr/src/app/dist /usr/share/caddy
+COPY Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

@@ -1,0 +1,95 @@
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 16px 24px;
+  background-color: var(--fbs-primary, #405e9a);
+  color: #fff;
+  font-weight: 500;
+}
+
+.dialog-content {
+  padding: 20px 24px !important;
+  max-height: 75vh;
+}
+
+.task-provider-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-section {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.section-heading {
+  margin: 0 0 12px 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--fbs-primary, #405e9a);
+}
+
+.section-subtext {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+.section-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .section-heading {
+    margin-bottom: 0;
+  }
+}
+
+.schema-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  .flex-item {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 240px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.toggles-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.code-textarea {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.dialog-actions {
+  padding: 12px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 0;
+}

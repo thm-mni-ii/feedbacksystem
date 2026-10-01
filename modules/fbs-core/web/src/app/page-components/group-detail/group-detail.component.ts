@@ -44,11 +44,24 @@ export class GroupDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe((param) => {
-      this.courseID = param.courseId;
-      this.groupID = param.id;
+      this.courseID =
+        parseInt(param.courseId, 10) || Number(param.courseId) || 0;
+      this.groupID = parseInt(param.id, 10) || Number(param.id) || 0;
       this.loadGroup();
+      try {
+        const uid = this.auth.getToken().id;
+        this.role =
+          this.auth.getToken().courseRoles?.[this.courseID] ||
+          this.auth.getToken().courseRoles?.[this.courseID.toString()] ||
+          null;
+        this.auth.fetchCourseRoles(uid).subscribe((roles) => {
+          this.role =
+            roles?.[this.courseID] || roles?.[this.courseID.toString()] || null;
+        });
+      } catch {
+        // ignore
+      }
     });
-    this.role = this.auth.getToken().courseRoles[this.courseID];
     this.integrationService.getIntegration("kanban").subscribe(
       (integration) => (this.kanbanUrl = integration.url),
       () => (this.kanbanUrl = null)
@@ -124,7 +137,10 @@ export class GroupDetailComponent implements OnInit {
 
   public isAuthorized(ignoreTutor: boolean = false) {
     const token = this.auth.getToken();
-    const courseRole = token.courseRoles[this.courseID];
+    const courseRole =
+      this.role ||
+      token.courseRoles?.[this.courseID] ||
+      token.courseRoles?.[this.courseID.toString()];
     const globalRole = token.globalRole;
     return (
       Roles.GlobalRole.isAdmin(globalRole) ||

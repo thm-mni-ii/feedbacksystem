@@ -245,8 +245,24 @@ export class TaskDetailComponent implements OnInit {
     this.route.params
       .pipe(
         mergeMap((params) => {
-          this.courseId = params.id;
-          this.role = this.authService.getToken().courseRoles[this.courseId];
+          this.courseId = parseInt(params.id, 10) || Number(params.id) || 0;
+          try {
+            this.uid = this.authService.getToken().id;
+            this.role =
+              this.authService.getToken().courseRoles?.[this.courseId] ||
+              this.authService.getToken().courseRoles?.[
+                this.courseId.toString()
+              ] ||
+              null;
+            this.authService.fetchCourseRoles(this.uid).subscribe((roles) => {
+              this.role =
+                roles?.[this.courseId] ||
+                roles?.[this.courseId.toString()] ||
+                null;
+            });
+          } catch {
+            // ignore
+          }
           const taskId = params.tid;
           this.getTasks();
           return this.taskService.getTask(this.courseId, taskId);
@@ -414,7 +430,10 @@ export class TaskDetailComponent implements OnInit {
       return true;
     }
 
-    const courseRole = this.authService.getToken().courseRoles[this.courseId];
+    const courseRole =
+      this.role ||
+      this.authService.getToken().courseRoles?.[this.courseId] ||
+      this.authService.getToken().courseRoles?.[this.courseId.toString()];
     return (
       Roles.CourseRole.isTutor(courseRole) ||
       Roles.CourseRole.isDocent(courseRole)

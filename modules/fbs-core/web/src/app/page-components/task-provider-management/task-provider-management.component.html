@@ -1,0 +1,261 @@
+<div class="container">
+  <!-- Top Menu Bar with Back Button -->
+  <app-menu-bar>
+    <button
+      mat-icon-button
+      routerLink="/courses/search"
+      matTooltip="{{ 'course.tooltip.backToOverview' | i18nextEager }}"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="bar-title">{{
+      "task-provider.management.title" | i18nextEager
+    }}</span>
+    <span class="spacer"></span>
+    <button
+      mat-icon-button
+      (click)="refreshProviderList()"
+      matTooltip="{{ 'task-provider.tooltip.refresh' | i18nextEager }}"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </app-menu-bar>
+
+  <!-- Filter & Action Row -->
+  <div class="filter-action-row">
+    <mat-form-field class="search-field" appearance="outline">
+      <mat-label>{{
+        "task-provider.management.search" | i18nextEager
+      }}</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event.target.value)"
+        placeholder="ID, Name, Medientyp..."
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="create-action">
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="openCreateDialog()"
+        class="create-btn"
+      >
+        <mat-icon>add</mat-icon>&nbsp;{{
+          "task-provider.management.create" | i18nextEager
+        }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-container mat-elevation-z4">
+    <table
+      mat-table
+      matSort
+      [dataSource]="dataSource"
+      class="task-provider-table"
+    >
+      <!-- Icon Column -->
+      <ng-container matColumnDef="icon">
+        <th mat-header-cell *matHeaderCellDef class="icon-col"></th>
+        <td mat-cell *matCellDef="let provider" class="icon-col">
+          <div class="icon-avatar">
+            <mat-icon>{{ provider.icon || "extension" }}</mat-icon>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+          {{ "task-provider.table.id" | i18nextEager }}
+        </th>
+        <td mat-cell *matCellDef="let provider">
+          <code>{{ provider.id }}</code>
+        </td>
+      </ng-container>
+
+      <!-- Display Name Column -->
+      <ng-container matColumnDef="displayName">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+          {{ "task-provider.table.name" | i18nextEager }}
+        </th>
+        <td mat-cell *matCellDef="let provider" class="name-cell">
+          <div class="name-header">
+            <span class="provider-title">{{ provider.displayName }}</span>
+            <span class="version-badge">v{{ provider.version }}</span>
+          </div>
+          <div *ngIf="provider.description" class="provider-desc text-truncate">
+            {{ provider.description }}
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Endpoints Column -->
+      <ng-container matColumnDef="endpoints">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ "task-provider.table.endpoints" | i18nextEager }}
+        </th>
+        <td mat-cell *matCellDef="let provider" class="endpoints-cell">
+          <div
+            class="endpoint-item"
+            matTooltip="Evaluation: {{ provider.evaluationEndpointUrl }}"
+          >
+            <mat-icon class="tiny-icon" color="primary">bolt</mat-icon>
+            <span class="endpoint-url">{{
+              provider.evaluationEndpointUrl
+            }}</span>
+          </div>
+          <div
+            class="endpoint-item"
+            matTooltip="Health: {{ provider.healthEndpointUrl }}"
+          >
+            <mat-icon class="tiny-icon" color="accent">favorite</mat-icon>
+            <span class="endpoint-url">{{ provider.healthEndpointUrl }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- UI Contracts Column -->
+      <ng-container matColumnDef="uiContracts">
+        <th mat-header-cell *matHeaderCellDef class="text-center">
+          {{ "task-provider.table.ui-contracts" | i18nextEager }}
+        </th>
+        <td mat-cell *matCellDef="let provider" class="text-center">
+          <div class="ui-badges">
+            <span
+              class="ui-tag"
+              [class.active]="provider.configUiUrl"
+              title="Config UI: {{ provider.configUiUrl || 'Nein' }}"
+            >
+              Config
+            </span>
+            <span
+              class="ui-tag"
+              [class.active]="provider.solveUiUrl"
+              title="Solve UI: {{ provider.solveUiUrl || 'Nein' }}"
+            >
+              Solve
+            </span>
+            <span
+              class="ui-tag"
+              [class.active]="provider.resultUiUrl"
+              title="Result UI: {{ provider.resultUiUrl || 'Nein' }}"
+            >
+              Result
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Media Types Column -->
+      <ng-container matColumnDef="mediaTypes">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ "task-provider.table.media-types" | i18nextEager }}
+        </th>
+        <td mat-cell *matCellDef="let provider">
+          <div class="media-chips">
+            <span
+              *ngFor="let mt of provider.supportedMediaTypes"
+              class="media-chip"
+            >
+              {{ mt }}
+            </span>
+            <span
+              *ngIf="!provider.supportedMediaTypes?.length"
+              class="text-muted"
+              >–</span
+            >
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="isActive">
+        <th
+          mat-header-cell
+          mat-sort-header
+          *matHeaderCellDef
+          class="text-center"
+        >
+          {{ "task-provider.table.status" | i18nextEager }}
+        </th>
+        <td mat-cell *matCellDef="let provider" class="text-center">
+          <span
+            class="status-chip"
+            [class.status-active]="isProviderActive(provider)"
+            [class.status-inactive]="!isProviderActive(provider)"
+          >
+            {{
+              (isProviderActive(provider)
+                ? "task-provider.table.status-active"
+                : "task-provider.table.status-inactive"
+              ) | i18nextEager
+            }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="text-right">
+          {{ "task-provider.table.actions" | i18nextEager }}
+        </th>
+        <td mat-cell *matCellDef="let provider" class="text-right actions-cell">
+          <!-- Schema / Details inspection -->
+          <button
+            mat-icon-button
+            color="primary"
+            matTooltip="{{
+              'task-provider.tooltip.view-details' | i18nextEager
+            }}"
+            (click)="openDetailDialog(provider)"
+          >
+            <mat-icon>info</mat-icon>
+          </button>
+
+          <!-- Edit -->
+          <button
+            mat-icon-button
+            color="primary"
+            matTooltip="{{ 'task-provider.tooltip.edit' | i18nextEager }}"
+            (click)="openEditDialog(provider)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          <!-- Delete -->
+          <button
+            mat-icon-button
+            color="warn"
+            matTooltip="{{ 'task-provider.tooltip.delete' | i18nextEager }}"
+            (click)="deleteProvider(provider)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+
+    <div *ngIf="loading" class="table-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div
+      *ngIf="!loading && dataSource.filteredData?.length === 0"
+      class="no-records"
+    >
+      {{ "task-provider.table.no-records" | i18nextEager }}
+    </div>
+
+    <mat-paginator
+      [pageSizeOptions]="[10, 25, 50]"
+      showFirstLastButtons
+    ></mat-paginator>
+  </div>
+</div>

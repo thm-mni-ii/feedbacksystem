@@ -100,10 +100,7 @@ export class CourseDetailComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe((param) => {
-      this.courseID = param.id;
-      this.courseID = param.id;
-
-      this.courseID = param.id;
+      this.courseID = parseInt(param.id, 10) || Number(param.id) || 0;
 
       this.reloadCourse();
       this.reloadTasks();
@@ -116,18 +113,25 @@ export class CourseDetailComponent implements OnInit {
       (error) => console.error(error)
     );
 
-    this.role = this.auth.getToken().courseRoles[this.courseID];
-    this.userID = this.authService.getToken().id;
-    if (this.goToService.getAndClearAutoJoin() && !this.role) {
-      this.courseRegistrationService
-        .registerCourse(this.userID, this.courseID)
-        .subscribe(
-          () =>
-            this.courseService
-              .getCourse(this.courseID)
-              .subscribe(() => this.ngOnInit()),
-          (error) => console.error(error)
-        );
+    try {
+      this.userID = this.authService.getToken().id;
+      this.role =
+        this.auth.getToken().courseRoles?.[this.courseID] ||
+        this.auth.getToken().courseRoles?.[this.courseID.toString()] ||
+        null;
+      if (this.goToService.getAndClearAutoJoin() && !this.role) {
+        this.courseRegistrationService
+          .registerCourse(this.userID, this.courseID)
+          .subscribe(
+            () =>
+              this.auth
+                .fetchCourseRoles(this.userID)
+                .subscribe(() => this.reloadCourse()),
+            (error) => console.error(error)
+          );
+      }
+    } catch {
+      // ignore
     }
   }
 
@@ -247,7 +251,10 @@ export class CourseDetailComponent implements OnInit {
       return true;
     }
 
-    const courseRole = this.authService.getToken().courseRoles[this.courseID];
+    const courseRole =
+      this.role ||
+      this.authService.getToken().courseRoles?.[this.courseID] ||
+      this.authService.getToken().courseRoles?.[this.courseID.toString()];
     return (
       Roles.CourseRole.isTutor(courseRole) ||
       Roles.CourseRole.isDocent(courseRole)
@@ -259,14 +266,16 @@ export class CourseDetailComponent implements OnInit {
     this.course.subscribe((course) => {
       this.titlebar.emitTitle(course.name);
     });
-    this.courseRegistrationService
-      .getRegisteredCourses(this.authService.getToken().id)
-      .subscribe((course) => {
-        const c = course.find((_c) => _c.id === this.courseID);
-        if (c && !this.role) {
-          this.role = "STUDENT";
-        }
+    try {
+      const uid = this.authService.getToken().id;
+      this.authService.fetchCourseRoles(uid).subscribe((roles) => {
+        this.role =
+          roles?.[this.courseID] || roles?.[this.courseID.toString()] || null;
+        this.cdr.detectChanges();
       });
+    } catch {
+      // ignore
+    }
   }
 
   reloadTasks() {
@@ -416,14 +425,29 @@ export class CourseDetailComponent implements OnInit {
       .afterClosed()
       .subscribe((confirmed) => {
         if (confirmed) {
+          const uid = this.authService.getToken().id;
           this.courseRegistrationService
-            .registerCourse(this.authService.getToken().id, this.courseID)
+            .registerCourse(uid, this.courseID, Roles.CourseRole.STUDENT)
+            .pipe(mergeMap(() => this.authService.fetchCourseRoles(uid)))
             .subscribe(
-              () =>
-                this.courseService
-                  .getCourse(this.courseID)
-                  .subscribe(() => this.ngOnInit()),
-              (error) => console.error(error)
+              (roles) => {
+                this.role =
+                  roles?.[this.courseID] ||
+                  roles?.[this.courseID.toString()] ||
+                  "STUDENT";
+                this.snackbar.open("Erfolgreich dem Kurs beigetreten.", "OK", {
+                  duration: 3000,
+                });
+                this.reloadCourse();
+                this.reloadTasks();
+                this.cdr.detectChanges();
+              },
+              (error) => {
+                console.error("Failed to join course:", error);
+                this.snackbar.open("Fehler beim Beitreten des Kurses.", "OK", {
+                  duration: 5000,
+                });
+              }
             );
         }
       });
@@ -442,25 +466,45 @@ export class CourseDetailComponent implements OnInit {
         },
       })
       .afterClosed()
-      .subscribe(() => {
-        this.courseRegistrationService
-          .deregisterCourse(this.authService.getToken().id, this.courseID)
-          .subscribe(
-            () => {
-              this.router.navigate(["/courses"]).then();
-            },
-            (error) => console.error(error)
-          );
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          const uid = this.authService.getToken().id;
+          this.courseRegistrationService
+            .deregisterCourse(uid, this.courseID)
+            .pipe(mergeMap(() => this.authService.fetchCourseRoles(uid)))
+            .subscribe(
+              () => {
+                this.role = null;
+                this.snackbar.open("Kurs erfolgreich verlassen.", "OK", {
+                  duration: 3000,
+                });
+                this.router.navigate(["/courses"]).then();
+              },
+              (error) => {
+                console.error("Failed to leave course:", error);
+                this.snackbar.open("Fehler beim Verlassen des Kurses.", "OK", {
+                  duration: 5000,
+                });
+              }
+            );
+        }
       });
   }
 
   public isAuthorized(ignoreTutor: boolean = false) {
     const token = this.auth.getToken();
-    const courseRole = token.courseRoles[this.courseID];
     const globalRole = token.globalRole;
-    return (
+    if (
       Roles.GlobalRole.isAdmin(globalRole) ||
-      Roles.GlobalRole.isModerator(globalRole) ||
+      Roles.GlobalRole.isModerator(globalRole)
+    ) {
+      return true;
+    }
+    const courseRole =
+      this.role ||
+      token.courseRoles?.[this.courseID] ||
+      token.courseRoles?.[this.courseID.toString()];
+    return (
       Roles.CourseRole.isDocent(courseRole) ||
       (Roles.CourseRole.isTutor(courseRole) && !ignoreTutor)
     );

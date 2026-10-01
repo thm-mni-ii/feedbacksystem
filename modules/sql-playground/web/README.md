@@ -1,7 +1,7 @@
-# sql-playground — Standalone Angular 14 App
+# sql-playground — Standalone Angular App
 
 Standalone front-end for the SQL Playground feature.  
-Built with **Angular 14**, served in production by **nginx** inside Docker.
+Built with **Angular**, served in production by **Caddy** inside Docker.
 
 ---
 
@@ -56,7 +56,7 @@ docker build -t sql-playground:latest .
 
 The multi-stage `Dockerfile`:
 1. **Stage 1 – builder** (`node:18-alpine`): runs `npm ci` + `npm run dist`
-2. **Stage 2 – serve** (`nginx:1.25-alpine`): copies the Angular build output and a custom `nginx.conf` that handles SPA routing
+2. **Stage 2 – serve** (`caddy:2-alpine`): copies the Angular build output and a custom `Caddyfile` that handles SPA routing
 
 ### Run the container
 
@@ -74,7 +74,7 @@ Open **http://localhost:8080** in your browser.
 modules/sql-playground/web/
 ├── angular.json               # Angular workspace config
 ├── Dockerfile                 # Multi-stage build
-├── nginx.conf                 # nginx SPA config
+├── Caddyfile                  # Caddy SPA config
 ├── package.json
 ├── proxy.config.json          # Dev proxy: /api → backend
 ├── tsconfig.json

@@ -11,21 +11,18 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run dist
 
-# ─── Stage 2: Serve with nginx ────────────────────────────────────────────────
-FROM nginx:1.25-alpine
+# ─── Stage 2: Serve with Caddy ────────────────────────────────────────────────
+FROM caddy:2-alpine
 
-# Remove default nginx static assets
-RUN rm -rf /usr/share/nginx/html/*
+# Remove default static assets
+RUN rm -rf /usr/share/caddy/*
 
 # Copy Angular build output
-COPY --from=builder /app/dist/sql-playground /usr/share/nginx/html
+COPY --from=builder /app/dist/sql-playground /usr/share/caddy
 
-# Copy custom nginx config template (SPA routing + API proxy)
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+# Copy custom Caddyfile (SPA routing + API proxy)
+COPY Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80
 
-# envsubst substitutes $FBS_CORE_URL at container start; nginx:alpine
-# images automatically process /etc/nginx/templates/*.template into
-# /etc/nginx/conf.d/ before nginx launches.
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
