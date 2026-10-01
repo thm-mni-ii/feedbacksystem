@@ -1,0 +1,52 @@
+:80 {
+    root * /usr/share/caddy
+
+    # Frame embedding security headers - allow embedding across any HTTP/HTTPS origin
+    header {
+        Content-Security-Policy "frame-ancestors 'self' http: https:;"
+        X-Frame-Options "ALLOWALL"
+        -Server
+    }
+
+    # Normalize trailing slash for base href resolution
+    handle /sql-playground {
+        redir /sql-playground/ 301
+    }
+
+    # Proxy /api to the FBS Core backend
+    handle /api/* {
+        reverse_proxy {$FBS_CORE_URL:https://core:443} {
+            transport http {
+                tls_insecure_skip_verify
+            }
+        }
+    }
+
+    # Cache-busted hashed assets (JS/CSS with content hash in filename, fonts, icons)
+    @static {
+        path *.js *.css *.woff *.woff2 *.ttf *.eot *.svg *.ico *.png *.jpg *.jpeg *.webp
+        path /sql-playground/*.js /sql-playground/*.css /sql-playground/*.woff /sql-playground/*.woff2 /sql-playground/*.ttf /sql-playground/*.eot /sql-playground/*.svg /sql-playground/*.ico /sql-playground/*.png /sql-playground/*.jpg /sql-playground/*.jpeg /sql-playground/*.webp
+    }
+    header @static {
+        Cache-Control "public, max-age=31536000, immutable"
+    }
+
+    @html {
+        path /index.html
+    }
+    header @html {
+        Cache-Control "no-store, no-cache, must-revalidate"
+    }
+
+    # Angular SPA routes prefixed with /sql-playground/
+    handle_path /sql-playground/* {
+        try_files {path} {path}/ /index.html
+        file_server
+    }
+
+    # Angular SPA fallback for direct root access
+    handle {
+        try_files {path} {path}/ /index.html
+        file_server
+    }
+}

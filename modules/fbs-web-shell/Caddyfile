@@ -1,0 +1,109 @@
+:80 {
+    root * /usr/share/caddy
+
+    header {
+        -Server
+    }
+
+    # Reverse proxy for Course Management frontend (Angular SPA)
+    handle /course-management {
+        redir /course-management/ 301
+    }
+    handle /course-management/* {
+        reverse_proxy http://course-management-web:80
+    }
+
+    # Reverse proxy for SQL Playground frontend (Angular SPA)
+    handle /sql-playground {
+        redir /sql-playground/ 301
+    }
+    handle /sql-playground/* {
+        reverse_proxy http://sql-playground-web:80
+    }
+
+    # SPA callback route for OIDC authorization code flow (must be handled by Web Shell SPA)
+    @oauth2Callback {
+        path /oauth2/callback /oauth2/callback/*
+    }
+    handle @oauth2Callback {
+        header {
+            X-Frame-Options "DENY"
+            Content-Security-Policy "frame-ancestors 'none';"
+            Cache-Control "no-store, no-cache, must-revalidate"
+        }
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Reverse proxy for identity-service OAuth2 endpoints (authorize, token, jwks, userinfo, etc.)
+    @oauth2Backend {
+        path /oauth2/*
+        not path /oauth2/callback /oauth2/callback/*
+    }
+    handle @oauth2Backend {
+        reverse_proxy http://identity-service:8080
+    }
+
+    # Reverse proxy for identity-service APIs
+    handle /api/v2/application-providers* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /api/v2/admin/application-providers* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /api/v1/auth/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /api/v1/legal/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /graphql* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /.well-known/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /connect/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /login* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /logout* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /saml2/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /legal/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /css/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /js/* {
+        reverse_proxy http://identity-service:8080
+    }
+    handle /images/* {
+        reverse_proxy http://identity-service:8080
+    }
+
+    # Reverse proxy for core APIs (e.g. /api/v2/playground, /api/v1/courses)
+    handle /api/* {
+        reverse_proxy https://core:443 {
+            transport http {
+                tls_insecure_skip_verify
+            }
+        }
+    }
+
+    # Web Shell SPA portal routes (top-level portal host must never be framed)
+    handle {
+        header {
+            X-Frame-Options "DENY"
+            Content-Security-Policy "frame-ancestors 'none';"
+        }
+        try_files {path} /index.html
+        file_server
+    }
+}

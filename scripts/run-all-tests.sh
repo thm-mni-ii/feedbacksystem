@@ -15,6 +15,15 @@ echo -e "${BLUE}====================================================${NC}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Auto-detect JDK 17/21 if current Java is >= 25 (Gradle compatibility)
+if [ -z "$JAVA_HOME" ] || [[ "$(java -version 2>&1)" =~ "25." ]]; then
+  JDK17_PATH=$(find /nix/store -maxdepth 1 -name "*openjdk*17*" -type d 2>/dev/null | head -n 1)
+  if [ -n "$JDK17_PATH" ] && [ -d "$JDK17_PATH" ]; then
+    export JAVA_HOME="$JDK17_PATH"
+    export PATH="$JAVA_HOME/bin:$PATH"
+  fi
+fi
+
 # 1. Identity Service Unit & Integration Tests
 echo -e "\n${YELLOW}[1/4] Running Identity Service Gradle Tests...${NC}"
 (
