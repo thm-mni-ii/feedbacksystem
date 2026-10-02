@@ -2,6 +2,7 @@ package de.thm.ii.fbs.controller.v2
 
 import de.thm.ii.fbs.model.v2.taskprovider.CreateTaskProviderRequest
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderDTO
+import de.thm.ii.fbs.model.v2.taskprovider.UpdateTaskProviderRequest
 import de.thm.ii.fbs.services.v2.taskprovider.TaskProviderService
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -37,6 +38,33 @@ class TaskProviderControllerTest {
         `when`(service.getAllActive()).thenReturn(listOf(dto))
 
         val result = controller.getAllActiveTaskProviders()
+        assertEquals(1, result.size)
+        assertEquals("sql-checker", result[0].id)
+    }
+
+    @Test
+    fun testGetAllAdmin() {
+        val dto = TaskProviderDTO(
+            id = "sql-checker",
+            displayName = "SQL Checker",
+            description = null,
+            icon = "code",
+            version = "1.0.0",
+            evaluationEndpointUrl = "http://sql-checker:5000/evaluate",
+            healthEndpointUrl = "http://sql-checker:5000/health",
+            configUiUrl = null,
+            solveUiUrl = null,
+            resultUiUrl = null,
+            supportedMediaTypes = listOf("application/sql"),
+            hasSubtasks = true,
+            supportsStagedFeedback = true,
+            configSchema = null,
+            isActive = false
+        )
+
+        `when`(service.getAll()).thenReturn(listOf(dto))
+
+        val result = controller.getAllTaskProvidersAdmin()
         assertEquals(1, result.size)
         assertEquals("sql-checker", result[0].id)
     }
@@ -100,6 +128,36 @@ class TaskProviderControllerTest {
 
         val created = controller.createTaskProvider(req)
         assertEquals("custom-checker", created.id)
+    }
+
+    @Test
+    fun testUpdate() {
+        val req = UpdateTaskProviderRequest(
+            id = "custom-checker",
+            displayName = "Updated Custom Checker"
+        )
+        val dto = TaskProviderDTO(
+            id = "custom-checker",
+            displayName = "Updated Custom Checker",
+            description = null,
+            icon = "code",
+            version = "1.0.0",
+            evaluationEndpointUrl = "http://custom:5000/evaluate",
+            healthEndpointUrl = "http://custom:5000/health",
+            configUiUrl = null,
+            solveUiUrl = null,
+            resultUiUrl = null,
+            supportedMediaTypes = emptyList(),
+            hasSubtasks = false,
+            supportsStagedFeedback = false,
+            configSchema = null,
+            isActive = true
+        )
+
+        `when`(service.update("custom-checker", req)).thenReturn(dto)
+
+        val updated = controller.updateTaskProvider("custom-checker", req)
+        assertEquals("Updated Custom Checker", updated.displayName)
     }
 
     @Test
