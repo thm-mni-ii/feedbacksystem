@@ -1,5 +1,5 @@
 /* File: src/main/resources/static/css/login.css */
-@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&family=Roboto:wght@300;400;500;700&display=swap');
+@import url('./fonts.css');
 
 html, body {
   height: 100%;

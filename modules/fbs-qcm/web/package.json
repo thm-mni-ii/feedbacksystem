@@ -14,8 +14,8 @@
     "serve": "vite serve"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.3.0",
     "@mdi/font": "^7.4.47",
-    "@types/webfontloader": "^1.6.38",
     "axios": "^1.6.8",
     "cytoscape": "^3.30.4",
     "date-fns": "^4.1.0",
@@ -28,8 +28,7 @@
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
     "vuedraggable": "^4.1.0",
-    "vuetify": "^3.5.15",
-    "webfontloader": "^1.6.28"
+    "vuetify": "^3.5.15"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",

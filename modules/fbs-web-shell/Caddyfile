@@ -28,7 +28,7 @@
     handle @oauth2Callback {
         header {
             X-Frame-Options "DENY"
-            Content-Security-Policy "frame-ancestors 'none';"
+            Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-src 'self' http: https: blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
             Cache-Control "no-store, no-cache, must-revalidate"
         }
         try_files {path} /index.html
@@ -87,6 +87,9 @@
     handle /images/* {
         reverse_proxy http://identity-service:8080
     }
+    handle /fonts/* {
+        reverse_proxy http://identity-service:8080
+    }
 
     # Reverse proxy for core APIs (e.g. /api/v2/playground, /api/v1/courses)
     handle /api/* {
@@ -101,7 +104,7 @@
     handle {
         header {
             X-Frame-Options "DENY"
-            Content-Security-Policy "frame-ancestors 'none';"
+            Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-src 'self' http: https: blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
         }
         try_files {path} /index.html
         file_server
