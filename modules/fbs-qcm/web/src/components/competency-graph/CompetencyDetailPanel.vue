@@ -18,49 +18,123 @@
           </v-chip>
         </div>
 
-        <v-row class="mb-4">
-          <v-col cols="12" md="6">
-            <div class="overview-tile">
-              <div class="info-block-label">
-                <v-icon size="16" color="var(--sg-accent)">mdi-map-marker-path</v-icon>
+        <div v-if="!readonly" class="d-flex align-center justify-space-between flex-wrap ga-2 mb-4">
+          <div class="d-flex flex-wrap ga-2">
+            <v-btn
+              size="small"
+              variant="tonal"
+              color="primary"
+              prepend-icon="mdi-source-branch-plus"
+              @click="selectedCompetency && editCompetency(undefined, selectedCompetency.id)"
+            >
+              Unterkompetenz hinzufügen
+            </v-btn>
+
+            <!--
+              Zwei gleichwertige, eigenständige Aktionen statt eines
+              Split-Buttons: "Neue Aufgabe erstellen" legt eine neue Aufgabe an,
+              "Bestehende Aufgabe verknüpfen" ordnet stattdessen eine bereits
+              vorhandene Pool-Aufgabe dieser Kompetenz zu (vermeidet Duplikate).
+            -->
+            <v-btn
+              size="small"
+              variant="tonal"
+              color="primary"
+              prepend-icon="mdi-help-circle-outline"
+              @click="selectedCompetency && editQuestion(undefined, selectedCompetency.id)"
+            >
+              Neue Aufgabe erstellen
+            </v-btn>
+            <v-btn
+              size="small"
+              variant="tonal"
+              color="primary"
+              prepend-icon="mdi-link-variant"
+              @click="selectedCompetency && linkExistingQuestion(selectedCompetency.id)"
+            >
+              Bestehende Aufgabe verknüpfen
+            </v-btn>
+          </div>
+
+          <!--
+            Bearbeiten/Löschen sind seltenere Pflege-Aktionen (im Gegensatz
+            zu den beiden Aufbau-Aktionen links) und daher bewusst als
+            unauffällige Icon-Buttons statt gleichwertiger Text-Buttons
+            dargestellt.
+          -->
+          <div class="d-flex ga-1">
+            <v-btn
+              icon="mdi-pencil-outline"
+              size="small"
+              variant="text"
+              aria-label="Kompetenz bearbeiten"
+              @click="selectedCompetency && editCompetency(selectedCompetency.id)"
+            >
+              <v-icon>mdi-pencil-outline</v-icon>
+              <v-tooltip activator="parent" location="top">Bearbeiten</v-tooltip>
+            </v-btn>
+            <v-btn
+              icon="mdi-delete-outline"
+              size="small"
+              variant="text"
+              color="error"
+              aria-label="Kompetenz löschen"
+              @click="selectedCompetency && deleteCompetency(selectedCompetency.id)"
+            >
+              <v-icon>mdi-delete-outline</v-icon>
+              <v-tooltip activator="parent" location="top">Löschen</v-tooltip>
+            </v-btn>
+          </div>
+        </div>
+
+        <v-row class="mb-4" dense>
+          <v-col cols="12">
+            <v-sheet border rounded="lg" class="pa-3">
+              <div class="d-flex align-center ga-2 mb-2 text-caption text-medium-emphasis">
+                <v-icon size="16" color="primary">mdi-map-marker-path</v-icon>
                 <span>Pfad</span>
               </div>
-              <div class="breadcrumb text-body-2">
-                <template v-for="(segment, index) in competencyPath" :key="`${segment}-${index}`">
-                  <span class="breadcrumb-segment text-truncate">{{ segment }}</span>
-                  <v-icon
-                    v-if="index < competencyPath.length - 1"
-                    size="18"
-                    color="var(--sg-accent)"
-                  >
-                    mdi-chevron-right
-                  </v-icon>
+              <v-breadcrumbs :items="competencyPath" density="compact" class="pa-0 text-body-2">
+                <template #divider>
+                  <v-icon icon="mdi-chevron-right" color="primary"></v-icon>
                 </template>
+              </v-breadcrumbs>
+            </v-sheet>
+          </v-col>
+
+          <v-col cols="6">
+            <v-sheet border rounded="lg" class="pa-3 h-100 d-flex align-center ga-3">
+              <v-icon color="primary">mdi-source-branch</v-icon>
+              <div>
+                <div class="text-caption text-medium-emphasis">Unterkompetenzen</div>
+                <div class="text-h6">{{ selectedHierarchy.length }}</div>
               </div>
-            </div>
+            </v-sheet>
           </v-col>
 
-          <v-col cols="6" md="3">
-            <div class="overview-tile">
-              <div class="text-caption text-medium-emphasis mb-1">Unterkompetenzen</div>
-              <div class="text-h6">{{ selectedHierarchy.length }}</div>
-            </div>
-          </v-col>
-
-          <v-col cols="6" md="3">
-            <div class="overview-tile">
-              <div class="text-caption text-medium-emphasis mb-1">Fragen</div>
-              <div class="text-h6">{{ assignedQuestions.length }}</div>
-            </div>
+          <v-col cols="6">
+            <v-sheet border rounded="lg" class="pa-3 h-100 d-flex align-center ga-3">
+              <v-icon color="primary">mdi-help-circle-outline</v-icon>
+              <div>
+                <div class="text-caption text-medium-emphasis">Aufgaben</div>
+                <div class="text-h6">{{ assignedQuestions.length }}</div>
+              </div>
+            </v-sheet>
           </v-col>
         </v-row>
 
         <v-tabs v-model="activeSection" color="primary" density="comfortable" class="mb-4">
           <v-tab value="overview">Überblick</v-tab>
           <v-tab value="prerequisites">Voraussetzungen</v-tab>
-          <v-tab value="questions">Fragen</v-tab>
         </v-tabs>
 
+        <!--
+          Unterkompetenzen und zugeordnete Aufgaben werden bewusst NICHT nochmal
+          als Namensliste dargestellt: diese Struktur ist bereits links in der
+          Graph-/Listenansicht sichtbar (inkl. Bearbeiten/Löschen-Aktionen).
+          Das Detail-Panel zeigt hier nur Inhalte, die dort nicht abgebildet
+          werden (Beschreibung, fachliche Voraussetzungen).
+        -->
         <v-window v-model="activeSection">
           <v-window-item value="overview">
             <div class="info-stack">
@@ -74,51 +148,6 @@
                 </p>
                 <p v-else class="info-block-text text-medium-emphasis mb-0">
                   Keine Beschreibung vorhanden.
-                </p>
-              </div>
-
-              <div class="info-block">
-                <div class="d-flex align-center justify-space-between mb-2">
-                  <div class="info-block-label mb-0">
-                    <v-icon size="16" color="var(--sg-accent)">mdi-source-branch</v-icon>
-                    <span>Unterkompetenzen</span>
-                  </div>
-                  <v-chip size="x-small" variant="tonal" color="primary">
-                    {{ selectedHierarchy.length }}
-                  </v-chip>
-                </div>
-
-                <div v-if="selectedHierarchy.length">
-                  <div
-                    v-for="item in selectedHierarchy"
-                    :key="item.competency.id"
-                    class="mb-2 profile-item"
-                    :class="`profile-item--depth-${Math.min(item.depth, 4)}`"
-                    :style="{ paddingLeft: `${item.depth * 14}px` }"
-                  >
-                    <div
-                      class="profile-item-line"
-                      :style="{ backgroundColor: getCompetencyColor(item.competency) }"
-                    ></div>
-                    <div class="d-flex align-center justify-space-between ga-2">
-                      <div class="d-flex align-center ga-2 min-w-0">
-                        <v-icon size="14" color="grey-darken-1">mdi-source-branch</v-icon>
-                        <span class="text-body-2 text-truncate">{{ item.competency.name }}</span>
-                      </div>
-                      <v-chip
-                        size="x-small"
-                        :color="getCompetencyColor(item.competency)"
-                        variant="tonal"
-                        class="level-chip"
-                      >
-                        L{{ item.depth }}
-                      </v-chip>
-                    </div>
-                  </div>
-                </div>
-
-                <p v-else class="text-body-2 text-medium-emphasis mb-0">
-                  Keine Unterkompetenzen vorhanden.
                 </p>
               </div>
             </div>
@@ -242,29 +271,6 @@
               </p>
             </div>
           </v-window-item>
-
-          <v-window-item value="questions">
-            <div v-if="assignedQuestions.length" class="questions-list">
-              <v-list density="compact" class="question-list bg-transparent">
-                <v-list-item
-                  v-for="question in assignedQuestions"
-                  :key="question.id"
-                  class="question-list-item"
-                >
-                  <template #prepend>
-                    <v-icon size="16" color="var(--sg-accent)">mdi-file-question-outline</v-icon>
-                  </template>
-                  <v-list-item-title class="text-body-2 text-wrap">
-                    {{ question.title || question.text }}
-                  </v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </div>
-
-            <p v-else class="text-body-2 text-medium-emphasis mb-0">
-              Für diese Kompetenz sind keine Fragen zugeordnet.
-            </p>
-          </v-window-item>
         </v-window>
       </v-card-text>
     </v-card>
@@ -288,6 +294,10 @@ interface Props {
     competencyId: string,
     prerequisites: CompetencyPrerequisite[]
   ) => Promise<void>
+  editCompetency: (competencyId?: string, presetParentId?: string) => void
+  editQuestion: (question?: Question, presetCompetencyId?: string) => void
+  deleteCompetency: (id: string) => void
+  linkExistingQuestion: (competencyId: string) => void
 }
 
 const props = defineProps<Props>()
@@ -300,11 +310,6 @@ interface HierarchyItem {
 interface EditablePrerequisite {
   competencyId: string | null
   minimumMasteryPercent: number
-}
-
-const categoryLabels: Record<string, string> = {
-  database: 'Datenbanken',
-  programming: 'Programmierung'
 }
 
 const panelStyles = {
@@ -352,7 +357,6 @@ const competencyPath = computed<string[]>(() => {
   }
 
   const path: string[] = [competency.name]
-  let rootCompetency: Competency = competency
   let currentParentId = competency.parentId
 
   while (currentParentId) {
@@ -360,14 +364,10 @@ const competencyPath = computed<string[]>(() => {
     if (!parent) break
 
     path.unshift(parent.name)
-    rootCompetency = parent
     currentParentId = parent.parentId ?? undefined
   }
 
-  const category = competency.category || rootCompetency.category
-  const categoryLabel = category ? categoryLabels[category] ?? category : undefined
-
-  return categoryLabel ? [categoryLabel, ...path] : path
+  return path
 })
 
 watch(
@@ -535,14 +535,6 @@ async function savePrerequisites() {
   background: var(--sg-accent);
 }
 
-.overview-tile {
-  height: 100%;
-  border: 1px solid var(--sg-border);
-  border-radius: 14px;
-  padding: 12px;
-  background: color-mix(in srgb, var(--sg-surface-muted) 72%, white 28%);
-}
-
 .info-stack {
   display: grid;
   gap: 10px;
@@ -558,7 +550,7 @@ async function savePrerequisites() {
 .info-block-label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -587,19 +579,6 @@ async function savePrerequisites() {
   border-radius: 12px;
   padding: 12px;
   background: color-mix(in srgb, var(--sg-surface-muted) 82%, white 18%);
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.breadcrumb-segment {
-  color: var(--sg-text-primary);
-  font-weight: 500;
-  max-width: 100%;
 }
 
 .profile-item {

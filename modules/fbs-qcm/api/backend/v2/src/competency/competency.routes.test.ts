@@ -32,6 +32,7 @@ describe("Competency routes", () => {
 
   afterEach(async () => {
     await db.collection("competency").deleteMany({});
+    await db.collection("question").deleteMany({});
   });
 
   it("rejects requests without a token", async () => {
@@ -144,5 +145,117 @@ describe("Competency routes", () => {
       .set("authorization", authHeader);
 
     expect(getRes.status).toBe(404);
+  });
+
+  it.each(["000000000000000000000000", "unknown"])(
+    "rejects unknown hierarchy and prerequisite references on create/update (%s)",
+    async (unknownId) => {
+      const created = await request(app)
+        .post("/api_v2/competencies")
+        .set("authorization", authHeader)
+        .send({ name: "Original" });
+      expect(created.status).toBe(201);
+      const original = await request(app)
+        .get(`/api_v2/competencies/${created.body.id}`)
+        .set("authorization", authHeader);
+      for (const references of [
+        { parentId: unknownId },
+        { prerequisites: [{ competencyId: unknownId, minimumMastery: 0.6 }] }
+      ]) {
+        const createRes = await request(app)
+          .post("/api_v2/competencies")
+          .set("authorization", authHeader)
+          .send({ name: "Invalid", ...references });
+        expect(createRes.status).toBe(400);
+        const updateRes = await request(app)
+          .put(`/api_v2/competencies/${created.body.id}`)
+          .set("authorization", authHeader)
+          .send(references);
+        expect(updateRes.status).toBe(400);
+      }
+      const getRes = await request(app)
+        .get(`/api_v2/competencies/${created.body.id}`)
+        .set("authorization", authHeader);
+      expect(getRes.body.name).toBe("Original");
+      expect(getRes.body).toEqual(original.body);
+      expect(await db.collection("competency").countDocuments()).toBe(1);
+    }
+  );
+
+  it.each(["questionIds", "questionLinks", "parent", "prerequisite"])(
+    "rejects deleting a competency used by %s, then allows deletion after unlinking",
+    async (usage) => {
+      const created = await request(app)
+        .post("/api_v2/competencies")
+        .set("authorization", authHeader)
+        .send({ name: "Used" });
+      expect(created.status).toBe(201);
+      const competencyId: string = created.body.id;
+      if (usage === "questionIds" || usage === "questionLinks") {
+        const question = await request(app)
+          .post("/api_v2/questions")
+          .set("authorization", authHeader)
+          .send({
+            text: "Uses skill",
+            difficulty: 0.3,
+            competencyIds: usage === "questionIds" ? [competencyId] : [],
+            competencyLinks: usage === "questionLinks" ? [{ competencyId }] : []
+          });
+        expect(question.status).toBe(201);
+      } else {
+        const dependent = await request(app)
+          .post("/api_v2/competencies")
+          .set("authorization", authHeader)
+          .send({
+            name: "Dependent without questions",
+            ...(usage === "parent"
+              ? { parentId: competencyId }
+              : { prerequisites: [{ competencyId, minimumMastery: 0.6 }] })
+          });
+        expect(dependent.status).toBe(201);
+      }
+      const rejected = await request(app)
+        .delete(`/api_v2/competencies/${competencyId}`)
+        .set("authorization", authHeader);
+      expect(rejected.status).toBe(409);
+      expect(await db.collection("competency").countDocuments({ name: "Used" })).toBe(1);
+
+      await db.collection("question").deleteMany({});
+      await db.collection("competency").deleteMany({ name: "Dependent without questions" });
+      const deleted = await request(app)
+        .delete(`/api_v2/competencies/${competencyId}`)
+        .set("authorization", authHeader);
+      expect(deleted.status).toBe(204);
+    }
+  );
+
+  it("allows updating and unlinking competencies that have no questions", async () => {
+    const parent = await request(app)
+      .post("/api_v2/competencies")
+      .set("authorization", authHeader)
+      .send({ name: "Parent" });
+    const child = await request(app)
+      .post("/api_v2/competencies")
+      .set("authorization", authHeader)
+      .send({ name: "Child" });
+    expect(parent.status).toBe(201);
+    expect(child.status).toBe(201);
+    const linked = await request(app)
+      .put(`/api_v2/competencies/${child.body.id}`)
+      .set("authorization", authHeader)
+      .send({
+        parentId: parent.body.id,
+        prerequisites: [{ competencyId: parent.body.id, minimumMastery: 0.6 }]
+      });
+    expect(linked.status).toBe(200);
+    const unlinked = await request(app)
+      .put(`/api_v2/competencies/${child.body.id}`)
+      .set("authorization", authHeader)
+      .send({ parentId: null, prerequisites: [] });
+    expect(unlinked.status).toBe(200);
+    const deleted = await request(app)
+      .delete(`/api_v2/competencies/${parent.body.id}`)
+      .set("authorization", authHeader);
+    expect(deleted.status).toBe(204);
   });
 });

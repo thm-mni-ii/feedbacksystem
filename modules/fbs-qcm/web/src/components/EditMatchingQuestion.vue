@@ -20,6 +20,17 @@
       „richtig“ / „falsch“ oder Begriffe und ihre Definitionen.
     </p>
 
+    <v-alert
+      v-if="hasReferencedCategories"
+      type="info"
+      variant="tonal"
+      density="compact"
+      class="mb-3"
+    >
+      Kategorien mit zugeordneten Lösungselementen können nicht gelöscht werden. Ordne die Elemente
+      unten zuerst ausdrücklich einer anderen Kategorie zu oder entferne sie.
+    </v-alert>
+
     <v-card
       v-for="(category, index) in configuration.categories"
       :key="category.id"
@@ -39,16 +50,13 @@
         icon="mdi-delete-outline"
         variant="text"
         density="comfortable"
-        :disabled="configuration.categories.length <= 1"
+        :disabled="configuration.categories.length <= 1 || isCategoryReferenced(category.id)"
+        :aria-label="categoryDeleteExplanation(category.id)"
         @click="removeCategory(index)"
       >
         <v-icon icon="mdi-delete-outline" />
         <v-tooltip activator="parent" location="top">
-          {{
-            configuration.categories.length <= 1
-              ? 'Es muss mindestens eine Kategorie geben'
-              : 'Kategorie entfernen'
-          }}
+          {{ categoryDeleteExplanation(category.id) }}
         </v-tooltip>
       </v-btn>
     </v-card>
@@ -164,6 +172,22 @@ const emit = defineEmits<{
 }>()
 
 const configuration = computed(() => props.question.questionConfiguration as Matching)
+const hasReferencedCategories = computed(() =>
+  configuration.value.categories.some((category) => isCategoryReferenced(category.id))
+)
+
+function isCategoryReferenced(categoryId: string): boolean {
+  return configuration.value.items.some((item) => item.correctCategoryId === categoryId)
+}
+
+function categoryDeleteExplanation(categoryId: string): string {
+  if (isCategoryReferenced(categoryId)) {
+    return 'Zugeordnete Elemente zuerst einer anderen Kategorie zuordnen oder entfernen'
+  }
+  return configuration.value.categories.length <= 1
+    ? 'Es muss mindestens eine Kategorie geben'
+    : 'Kategorie entfernen'
+}
 
 // Solange keine Kategorie eine Bezeichnung hat, ergibt eine Zuordnung von
 // Elementen keinen Sinn (die Auswahl wäre leer) – daher wird der
@@ -199,13 +223,10 @@ function addCategory(): void {
 function removeCategory(index: number): void {
   if (configuration.value.categories.length <= 1) return
 
-  const [removed] = configuration.value.categories.splice(index, 1)
-  const fallbackCategoryId = configuration.value.categories[0].id
-  configuration.value.items.forEach((item) => {
-    if (item.correctCategoryId === removed.id) {
-      item.correctCategoryId = fallbackCategoryId
-    }
-  })
+  const category = configuration.value.categories[index]
+  if (!category || isCategoryReferenced(category.id)) return
+
+  configuration.value.categories.splice(index, 1)
   update()
 }
 

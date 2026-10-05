@@ -19,6 +19,7 @@ function isChoiceConfiguration(config: any): config is Choice {
 
 function createDefaultChoiceConfig(): Choice {
   return {
+    answerMode: 'single',
     multipleRow: false,
     multipleColumn: false,
     answerColumns: [{ id: 1, name: '' }],
@@ -34,6 +35,13 @@ function normalizeChoiceQuestion(q: Question): Question {
   if (!isChoiceConfiguration(copy.questionConfiguration)) {
     copy.questionConfiguration = createDefaultChoiceConfig()
   } else {
+    const correctRowCount = copy.questionConfiguration.optionRows.filter(
+      (row) => row.correctAnswers?.length > 0
+    ).length
+    copy.questionConfiguration.answerMode =
+      copy.questionConfiguration.answerMode ??
+      (copy.questionConfiguration.multipleRow || correctRowCount > 1 ? 'multiple' : 'single')
+    copy.questionConfiguration.multipleRow = copy.questionConfiguration.answerMode === 'multiple'
     copy.questionConfiguration.multipleColumn = false
     if (!copy.questionConfiguration.answerColumns || copy.questionConfiguration.answerColumns.length === 0) {
       copy.questionConfiguration.answerColumns = [{ id: 1, name: '' }]
@@ -62,10 +70,8 @@ watch(
   localQuestion,
   (updatedQuestion) => {
     if (isChoiceConfiguration(updatedQuestion.questionConfiguration)) {
-      const rowsWithAnswers = updatedQuestion.questionConfiguration.optionRows.filter(
-        (row) => row.correctAnswers && row.correctAnswers.length > 0
-      )
-      updatedQuestion.questionConfiguration.multipleRow = rowsWithAnswers.length > 1
+      updatedQuestion.questionConfiguration.multipleRow =
+        updatedQuestion.questionConfiguration.answerMode === 'multiple'
     }
     emit('update', updatedQuestion)
   },
@@ -105,6 +111,11 @@ const toggleCorrectAnswer = (optionIndex: number, isSelected: boolean) => {
     if (!row) return
     const columnId = localQuestion.value.questionConfiguration.answerColumns[0]?.id ?? 1
     if (isSelected) {
+      if (localQuestion.value.questionConfiguration.answerMode === 'single') {
+        localQuestion.value.questionConfiguration.optionRows.forEach((option) => {
+          option.correctAnswers = option.correctAnswers.filter((id) => id !== columnId)
+        })
+      }
       if (!row.correctAnswers.includes(columnId)) {
         row.correctAnswers.push(columnId)
       }
@@ -133,8 +144,20 @@ onMounted(() => {
 <template>
   <div class="mt-4">
     <v-alert type="info" variant="tonal" density="comfortable" class="mb-4">
-      Antwortoptionen eingeben und richtige Antworten mit der Checkbox markieren.
+      Lege fest, ob eine oder mehrere Antworten ausgewählt werden können. Markiere anschließend die
+      richtige Antwortoption.
     </v-alert>
+
+    <v-radio-group
+      v-model="localQuestion.questionConfiguration.answerMode"
+      label="Antwortmodus"
+      inline
+      hide-details
+      class="mb-4"
+    >
+      <v-radio label="Genau eine Antwort" value="single" />
+      <v-radio label="Mehrere Antworten möglich" value="multiple" />
+    </v-radio-group>
 
     <div class="d-flex align-center justify-space-between mb-2">
       <h3 class="text-subtitle-1 font-weight-medium">Antwortoptionen</h3>

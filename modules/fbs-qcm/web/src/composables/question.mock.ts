@@ -7,6 +7,7 @@ export interface QuestionMockItem {
   questionconfiguration?: Record<string, unknown>
   difficulty: number
   multipleRow?: boolean
+  answerMode?: 'single' | 'multiple'
   multipleColumn?: boolean
   answerColumns?: Array<{ id: number; name: string }>
   optionRows?: Array<{ id: number; text: string; correctAnswers: number[] }>
@@ -5565,6 +5566,163 @@ export const questionMocks: QuestionMockItem[] = [
       {
         id: 4,
         text: 'Fehlende Netzwerkverbindung zwischen Client und Server',
+        correctAnswers: []
+      }
+    ]
+  },
+  {
+    _id: 'q-143',
+    owner: 0,
+    questiontext: 'Welche Aussage unterscheidet Daten, Information und Wissen korrekt?',
+    questiontags: ['c-datengrundlagen-daten-information-wissen'],
+    questiontype: 'single-choice',
+    questionconfiguration: {},
+    difficulty: 1,
+    multipleRow: false,
+    answerColumns: [{ id: 1, name: 'Richtig' }],
+    optionRows: [
+      {
+        id: 1,
+        text: 'Daten werden durch zweckbezogene Interpretation zu Information; Wissen verknüpft Informationen systematisch.',
+        correctAnswers: [1]
+      },
+      {
+        id: 2,
+        text: 'Information ist die kleinste logische Dateneinheit; Daten sind bereits interpretiert.',
+        correctAnswers: []
+      },
+      {
+        id: 3,
+        text: 'Wissen ist eine objektive Sammlung von Zeichen ohne Kontext.',
+        correctAnswers: []
+      },
+      {
+        id: 4,
+        text: 'Daten und Information unterscheiden sich ausschließlich durch ihre Speichergröße.',
+        correctAnswers: []
+      }
+    ]
+  },
+  {
+    _id: 'q-144',
+    owner: 0,
+    questiontext: 'Welche Aussagen zu den Eigenschaften von Information treffen zu?',
+    questiontags: ['c-datengrundlagen-informationsmerkmale'],
+    questiontype: 'single-choice',
+    questionconfiguration: {},
+    difficulty: 2,
+    multipleRow: false,
+    answerMode: 'multiple',
+    answerColumns: [{ id: 1, name: 'Richtig' }],
+    optionRows: [
+      {
+        id: 1,
+        text: 'Die Nutzung einer Information verbraucht sie nicht.',
+        correctAnswers: [1]
+      },
+      {
+        id: 2,
+        text: 'Mehrere Nutzer können dieselbe Information gleichzeitig verwenden.',
+        correctAnswers: [1]
+      },
+      {
+        id: 3,
+        text: 'Informationen können beliebig oft kopiert werden.',
+        correctAnswers: [1]
+      },
+      {
+        id: 4,
+        text: 'Informationen verlieren durch Nutzung zwingend ihre Verfügbarkeit für andere.',
+        correctAnswers: []
+      },
+      {
+        id: 5,
+        text: 'Der Wert einer Information kann durch Alterung, Qualitätsverlust oder fehlende Exklusivität sinken.',
+        correctAnswers: [1]
+      }
+    ]
+  },
+  {
+    _id: 'q-145',
+    owner: 0,
+    questiontext: 'Ordnen Sie den Begriff der passenden Beschreibung zu.',
+    questiontags: ['c-datengrundlagen-datenhierarchie'],
+    questiontype: 'matching',
+    questionconfiguration: {},
+    difficulty: 2,
+    answerColumns: [
+      { id: 1, name: 'Speichereinheit für ein einzelnes Datum' },
+      { id: 2, name: 'Zusammenfassung inhaltlich zusammengehöriger Datenfelder' },
+      { id: 3, name: 'Zusammenfassung gleichstrukturierter Datensätze zur persistenten Speicherung' }
+    ],
+    optionRows: [
+      { id: 1, text: 'Datenelement / Datenfeld', correctAnswers: [1] },
+      { id: 2, text: 'Datensatz (Record)', correctAnswers: [2] },
+      { id: 3, text: 'Datei', correctAnswers: [3] }
+    ]
+  },
+  {
+    _id: 'q-146',
+    owner: 0,
+    questiontext: 'Wozu dient die Festlegung eines Datentyps für ein Datenelement?',
+    questiontags: ['c-datengrundlagen-datentypen'],
+    questiontype: 'single-choice',
+    questionconfiguration: {},
+    difficulty: 1,
+    multipleRow: false,
+    answerColumns: [{ id: 1, name: 'Richtig' }],
+    optionRows: [
+      {
+        id: 1,
+        text: 'Sie bestimmt die speicherbaren Werte und die zulässigen Operationen auf diesen Daten.',
+        correctAnswers: [1]
+      },
+      {
+        id: 2,
+        text: 'Sie legt fest, welche Nutzer auf den Datensatz zugreifen dürfen.',
+        correctAnswers: []
+      },
+      {
+        id: 3,
+        text: 'Sie macht ein Datenmodell und Integritätsregeln überflüssig.',
+        correctAnswers: []
+      },
+      {
+        id: 4,
+        text: 'Sie bestimmt ausschließlich die physische Sortierung der Datensätze.',
+        correctAnswers: []
+      }
+    ]
+  },
+  {
+    _id: 'q-147',
+    owner: 0,
+    questiontext: 'Was unterscheidet strukturierte von unstrukturierten zeichenorientierten Daten?',
+    questiontags: ['c-datengrundlagen-datentypen'],
+    questiontype: 'single-choice',
+    questionconfiguration: {},
+    difficulty: 2,
+    multipleRow: false,
+    answerColumns: [{ id: 1, name: 'Richtig' }],
+    optionRows: [
+      {
+        id: 1,
+        text: 'Strukturierte Daten haben feste Felder und können über Schlüssel geordnet werden; unstrukturierte Daten werden über ihren Inhalt erschlossen.',
+        correctAnswers: [1]
+      },
+      {
+        id: 2,
+        text: 'Strukturierte Daten bestehen ausschließlich aus Bild- und Videodateien.',
+        correctAnswers: []
+      },
+      {
+        id: 3,
+        text: 'Unstrukturierte Daten können grundsätzlich nicht gespeichert werden.',
+        correctAnswers: []
+      },
+      {
+        id: 4,
+        text: 'Der Unterschied liegt ausschließlich in der Dateigröße.',
         correctAnswers: []
       }
     ]

@@ -6,8 +6,7 @@
  * Nutzung:
  *   npm run seed
  *
- * Läuft idempotent: bestehende Collections werden vorher geleert, damit ein
- * wiederholter Aufruf keine Duplikate erzeugt.
+ * Nur für eine leere Demo-Datenbank: vorhandene Daten werden nicht gelöscht.
  *
  * Hinweis: Dieses Script importiert die TS-Dateien des Frontends direkt
  * (siehe tsconfig.seed.json für den @/-Alias auf web/src). Es ist bewusst ein
@@ -17,15 +16,12 @@ import { connect, disconnect } from "../mongo/mongo";
 import { CompetencyRepository } from "../competency/competency.repository";
 import { QuestionRepository } from "../question/question.repository";
 import { competencies, questions } from "@/composables/competencyGraph.mock";
+import { assertEmptySeedDatabase } from "./seedSafety";
 
 async function seed() {
   const db = await connect();
 
-  const competencyCollection = db.collection("competency");
-  const questionCollection = db.collection("question");
-
-  await competencyCollection.deleteMany({});
-  await questionCollection.deleteMany({});
+  await assertEmptySeedDatabase(db);
 
   const competencyRepository = new CompetencyRepository(db);
   const questionRepository = new QuestionRepository(db);

@@ -4,7 +4,7 @@ import type { AxiosResponse } from 'axios'
 
 /**
  * Service für die v2-Competency-API (`api/backend/v2/src/competency`).
- * Ersetzt das alte "Tags"-Konzept: Fragen werden nicht mehr mit Freitext-Tags
+ * Ersetzt das alte "Tags"-Konzept: Aufgaben werden nicht mehr mit Freitext-Tags
  * versehen, sondern mit existierenden Competencies verknüpft (siehe
  * `question.service.ts`, `competencyIds`).
  */

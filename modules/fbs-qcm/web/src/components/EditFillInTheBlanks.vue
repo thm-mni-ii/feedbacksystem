@@ -22,20 +22,35 @@ const removeLastTextPart = () => {
   }
 }
 
+function arraysEqual(a: string[] | undefined, b: string[] | undefined): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+  return a.length === b.length && a.every((value, index) => value === b[index])
+}
+
 watch(
   localQuestion,
   (newVal) => {
     newVal.questionConfiguration.textParts.forEach(
       (part: { text: string; isBlank: boolean; distractors?: string[] }) => {
-        part.text = part.text.trim()
+        const trimmedText = part.text.trim()
+        if (part.text !== trimmedText) {
+          part.text = trimmedText
+        }
         if (!part.isBlank) {
           // Distraktoren sind nur für Lücken relevant; ohne isBlank keine veralteten Daten behalten.
-          part.distractors = undefined
+          if (part.distractors !== undefined) {
+            part.distractors = undefined
+          }
         } else if (part.distractors) {
-          const trimmedText = part.text.trim()
-          part.distractors = [...new Set(part.distractors.map((d) => d.trim()))].filter(
+          const cleaned = [...new Set(part.distractors.map((d) => d.trim()))].filter(
             (d) => d.length > 0 && d !== trimmedText
           )
+          // Nur zuweisen, wenn sich der Inhalt tatsächlich ändert, sonst triggert der deep
+          // watcher sich selbst erneut (neue Array-Referenz bei gleichem Inhalt).
+          if (!arraysEqual(part.distractors, cleaned)) {
+            part.distractors = cleaned
+          }
         }
       }
     )

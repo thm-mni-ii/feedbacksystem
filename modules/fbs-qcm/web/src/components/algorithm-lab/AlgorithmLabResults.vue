@@ -2,7 +2,7 @@
   <div class="text-center">
     <h1 class="mb-3">Lernsession abgeschlossen</h1>
     <p class="text-medium-emphasis mb-6">
-      {{ historyCount }} Fragen beantwortet · {{ summaryText }}
+      {{ historyCount }} Aufgaben beantwortet · {{ summaryText }}
     </p>
 
     <v-card class="mx-auto mb-4 overview-card" max-width="1100" variant="outlined">
@@ -10,7 +10,7 @@
         <div class="overview-metric">
           <div class="overview-label">Ø Kompetenzscore</div>
           <div class="overview-value">{{ Math.round(averageScore * 100) }}%</div>
-          <div class="overview-caption">Mittelwert ueber alle beobachteten Kompetenzen</div>
+          <div class="overview-caption">Mittelwert über alle beobachteten Kompetenzen</div>
         </div>
         <div class="overview-metric">
           <div class="overview-label">Bearbeitete Kompetenzen</div>
@@ -117,33 +117,33 @@ defineEmits<{
   (e: 'restart'): void
 }>()
 
-const averageScore = computed(() => {
-  if (props.progress.length === 0) return 0
-  return props.progress.reduce((total, item) => total + item.score, 0) / props.progress.length
-})
-const assessedCompetencyCount = computed(
-  () => props.progress.filter((item) => item.timesAssessed > 0).length
+const assessedProgress = computed(
+  () => props.progress.filter((item) => item.timesAssessed > 0)
 )
+const averageScore = computed(() => {
+  if (assessedProgress.value.length === 0) return 0
+  return (
+    assessedProgress.value.reduce((total, item) => total + item.score, 0) /
+    assessedProgress.value.length
+  )
+})
+const assessedCompetencyCount = computed(() => assessedProgress.value.length)
 
 const strongest = computed(
   () =>
-    [...props.progress].sort((a, b) => b.score - a.score || b.timesAssessed - a.timesAssessed)[0]
+    [...assessedProgress.value].sort((a, b) => b.score - a.score || b.timesAssessed - a.timesAssessed)[0]
 )
 
 const strongestEvidence = computed(
   () =>
-    [...props.progress].sort(
+    [...assessedProgress.value].sort(
       (a, b) => b.timesAssessed - a.timesAssessed || b.certainty - a.certainty
     )[0]
 )
 
-const weakest = computed(
-  () =>
-    [...props.progress].sort((a, b) => a.score - b.score || b.timesAssessed - a.timesAssessed)[0]
-)
-
 const summaryText = computed(() => {
   if (props.progress.length === 0) return 'Keine Kompetenzen vorhanden'
+  if (assessedProgress.value.length === 0) return 'Noch keine Kompetenzen bewertet'
   return `Ø Kompetenzscore ${Math.round(averageScore.value * 100)}%`
 })
 
@@ -162,57 +162,12 @@ const radarFamilies = computed(() =>
     groupLabel: group.root.label,
     groupColor:
       radarItems.value.find((item) => item.groupLabel === group.root.label)?.groupColor ??
-      '#2563EB',
+      'rgb(var(--v-theme-primary))',
     rootScore: group.root.score,
     rootTimesAssessed: group.root.timesAssessed,
     items: radarItems.value.filter((item) => item.groupLabel === group.root.label)
   }))
 )
-
-const feedbackSections = computed(() => {
-  const lowEvidence = props.progress.filter((item) => item.timesAssessed < 2)
-  const uncertain = props.progress
-    .filter((item) => item.uncertainty > 0.45)
-    .sort((a, b) => b.uncertainty - a.uncertainty)
-    .slice(0, 2)
-
-  return [
-    {
-      title: 'Stärke',
-      tone: 'success',
-      icon: 'mdi-trending-up',
-      text: strongest.value
-        ? `${strongest.value.label} ist aktuell am stärksten ausgeprägt (${Math.round(strongest.value.score * 100)}%).`
-        : 'Noch keine ausgeprägte Stärke erkennbar.'
-    },
-    {
-      title: 'Nächster Fokus',
-      tone: 'warning',
-      icon: 'mdi-target',
-      text: weakest.value
-        ? `${weakest.value.label} ist momentan der beste Ansatzpunkt für weiteres Üben (${Math.round(weakest.value.score * 100)}%).`
-        : 'Aktuell ist kein klarer Fokusbereich vorhanden.'
-    },
-    {
-      title: 'Evidenzlage',
-      tone: 'info',
-      icon: 'mdi-chart-timeline-variant',
-      text:
-        lowEvidence.length > 0
-          ? `Wenig Beobachtungen gibt es noch bei ${lowEvidence.map((item) => item.label).join(', ')}.`
-          : 'Für alle Kompetenzen liegt bereits brauchbare Evidenz vor.'
-    },
-    {
-      title: 'Unsicherheit',
-      tone: 'neutral',
-      icon: 'mdi-radar',
-      text:
-        uncertain.length > 0
-          ? `Noch instabil eingeschätzt sind vor allem ${uncertain.map((item) => item.label).join(', ')}.`
-          : 'Die aktuellen Schätzungen wirken insgesamt stabil.'
-    }
-  ]
-})
 
 function scoreLabel(score: number, timesAssessed: number): string {
   if (timesAssessed === 0) return 'Nicht bewertet'

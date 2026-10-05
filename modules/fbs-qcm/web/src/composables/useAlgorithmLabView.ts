@@ -1,6 +1,7 @@
-import { computed, ref, watch } from 'vue'
+import { computed, onScopeDispose, ref, watch } from 'vue'
+import { buildAnswerFeedback, type AnswerFeedback } from '@/composables/answerFeedback'
 import { buildProfileGroups } from '@/composables/competencyHierarchy'
-import { useStudySessionStore } from '@/stores/studySessionStore'
+import { useAlgorithmLabSessionStore, useStudySessionStore } from '@/stores/studySessionStore'
 
 interface AnswerSubmission {
   score: number
@@ -8,10 +9,25 @@ interface AnswerSubmission {
   responsePayload: unknown
 }
 
-export function useAlgorithmLabView() {
-  const store = useStudySessionStore()
+type SessionStore =
+  | ReturnType<typeof useStudySessionStore>
+  | ReturnType<typeof useAlgorithmLabSessionStore>
+
+export function useAlgorithmLabView(store: SessionStore = useStudySessionStore()) {
   const expandedPanel = ref<string | null>(null)
   const showFeedback = ref(false)
+  // Feedback zur zuletzt beantworteten Aufgabe. Solange gesetzt, bleibt die
+  // Auflösung sichtbar, obwohl der Store bereits zur nächsten Aufgabe gewechselt hat.
+  const answerFeedback = ref<AnswerFeedback | null>(null)
+  let feedbackTimeout: ReturnType<typeof setTimeout> | undefined
+
+  const resetFeedback = () => {
+    clearTimeout(feedbackTimeout)
+    answerFeedback.value = null
+    showFeedback.value = false
+  }
+
+  onScopeDispose(resetFeedback)
 
   const hierarchicalProgress = computed(() =>
     buildProfileGroups(
@@ -43,8 +59,9 @@ export function useAlgorithmLabView() {
   }
 
   const submitAnswer = async (answer: AnswerSubmission) => {
-    if (!store.currentQuestion) {
-      console.warn('Keine aktuelle Frage vorhanden')
+    const answeredQuestion = store.currentQuestion
+    if (!answeredQuestion) {
+      console.warn('Keine aktuelle Aufgabe vorhanden')
       return
     }
 
@@ -56,19 +73,32 @@ export function useAlgorithmLabView() {
       },
       answer.responsePayload
     )
+    answerFeedback.value = buildAnswerFeedback(
+      answeredQuestion,
+      Math.min(1, Math.max(0, answer.score)),
+      answer.responsePayload
+    )
     showFeedback.value = true
-    setTimeout(() => {
+    clearTimeout(feedbackTimeout)
+    feedbackTimeout = setTimeout(() => {
       showFeedback.value = false
     }, 1000)
+  }
+
+  const continueAfterFeedback = () => {
+    answerFeedback.value = null
   }
 
   return {
     store,
     expandedPanel,
     showFeedback,
+    answerFeedback,
     hierarchicalProgress,
     scoreColor,
     scoreLabel,
-    submitAnswer
+    submitAnswer,
+    continueAfterFeedback,
+    resetFeedback
   }
 }

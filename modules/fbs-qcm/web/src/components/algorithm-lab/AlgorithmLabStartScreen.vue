@@ -2,7 +2,7 @@
   <div class="text-center">
     <h1 class="mb-4">Kompetenzanalyse</h1>
     <p class="text-medium-emphasis mb-6">
-      Beantworte die Fragen möglichst ehrlich. Das System erstellt daraus ein Kompetenzprofil.
+      Beantworte die Aufgaben möglichst ehrlich. Das System erstellt daraus ein Kompetenzprofil.
     </p>
     <v-btn color="primary" size="large" :loading="loading" @click="$emit('start')">
       Test starten
@@ -49,7 +49,7 @@ defineEmits<{
 function sessionSubtitle(session: StudySession): string {
   const answers = session.history.length
   return session.completedAt
-    ? `Abgeschlossen · ${answers} beantwortete Fragen`
-    : `${answers} beantwortete Fragen · zuletzt aktiv ${new Date(session.updatedAt).toLocaleString('de-DE')}`
+    ? `Abgeschlossen · ${answers} beantwortete Aufgaben`
+    : `${answers} beantwortete Aufgaben · zuletzt aktiv ${new Date(session.updatedAt).toLocaleString('de-DE')}`
 }
 </script>

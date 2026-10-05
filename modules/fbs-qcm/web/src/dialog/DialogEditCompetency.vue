@@ -116,14 +116,6 @@ const prerequisiteCompetencyIds = computed<string[]>({
 
 const competencyName = (id: string) => allCompetencies.value.find((c) => c.id === id)?.name ?? id
 
-/**
- * Baumpräfix für die Einrückung in den Auswahl-Dropdowns: zeigt neben der
- * reinen Einrückung (padding-left) auch die Anzahl der übergeordneten
- * Ebenen an (z.B. "─└ " bei Tiefe 2), damit die vollständige Hierarchie
- * (nicht nur die erste Ebene) erkennbar bleibt.
- */
-const treePrefix = (depth: number) => `${'─'.repeat(Math.max(0, depth - 1))}└ `
-
 const updateMinimumMastery = (competencyIdToUpdate: string, value: number) => {
   prerequisites.value = prerequisites.value.map((p) =>
     p.competencyId === competencyIdToUpdate ? { ...p, minimumMastery: value } : p
@@ -153,10 +145,14 @@ const resolvePromise = ref<Function | undefined>(undefined)
  * Kompetenzgraph) verwaltet wird und im Backend nicht existiert.
  * @param options.competencies Vorhandene Kompetenzen für Parent-/Prerequisite-
  * Auswahl, wenn `persist=false` und daher nicht per Backend-Call geladen wird.
+ * @param options.presetParentId Vorbelegter Parent für eine neue Kompetenz,
+ * z.B. wenn "Unterkompetenz hinzufügen" direkt aus dem Detail-Panel einer
+ * bereits ausgewählten Kompetenz heraus aufgerufen wird. Wird ignoriert,
+ * wenn eine bestehende Kompetenz bearbeitet wird.
  */
 const openDialog = (
   editCompetency?: Competency,
-  options?: { persist?: boolean; competencies?: Competency[] }
+  options?: { persist?: boolean; competencies?: Competency[]; presetParentId?: string | null }
 ) => {
   persist.value = options?.persist ?? true
 
@@ -176,7 +172,7 @@ const openDialog = (
     competency.value = {
       name: '',
       description: '',
-      parentId: null,
+      parentId: options?.presetParentId ?? null,
       prerequisites: []
     }
     isNew.value = true
@@ -216,7 +212,7 @@ const createCompetency = () => {
     })
     .catch((error) => {
       console.error(error)
-      openSnackbar('Error creating Competency: ' + error.response?.data)
+      openSnackbar('Fehler beim Anlegen der Kompetenz: ' + error.response?.data)
     })
 }
 
@@ -237,7 +233,7 @@ const updateCompetency = () => {
     })
     .catch((error) => {
       console.error(error)
-      openSnackbar('Error updating Competency: ' + error.response?.data)
+      openSnackbar('Fehler beim Aktualisieren der Kompetenz: ' + error.response?.data)
     })
 }
 
@@ -259,7 +255,7 @@ const deleteCompetency = async () => {
   const confirmed = await dialogConfirm.value.openDialog(
     'Kompetenz löschen',
     `Kompetenz "${competency.value.name}" wirklich löschen?`,
-    'Delete'
+    'Löschen'
   )
   if (!confirmed) {
     return
@@ -271,7 +267,7 @@ const deleteCompetency = async () => {
     })
     .catch((error) => {
       console.error(error)
-      openSnackbar('Error deleting Competency: ' + error.response?.data)
+      openSnackbar('Fehler beim Löschen der Kompetenz: ' + error.response?.data)
     })
 }
 
@@ -325,7 +321,7 @@ defineExpose({
 
           <v-textarea
             v-model="competency.description"
-            label="Description"
+            label="Beschreibung"
             auto-grow
             rows="2"
           ></v-textarea>
@@ -336,7 +332,7 @@ defineExpose({
             item-title="competency.name"
             item-value="competency.id"
             item-color="primary"
-            label="Parent Competency"
+            label="Übergeordnete Kompetenz"
             prepend-icon="mdi-family-tree"
             variant="solo"
             clearable
@@ -347,21 +343,33 @@ defineExpose({
                 :title="undefined"
                 :style="{ paddingLeft: `${16 + (item.raw?.depth ?? 0) * 20}px` }"
               >
-                <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">{{
-                  treePrefix(item.raw?.depth ?? 0)
-                }}</span
-                >{{ item.raw?.competency?.name ?? competencyName(item.value) }}
+                <template v-if="(item.raw?.depth ?? 0) > 0" #prepend>
+                  <v-icon size="16" color="grey-darken-1">mdi-subdirectory-arrow-right</v-icon>
+                </template>
+                {{ item.raw?.competency?.name ?? competencyName(item.value) }}
               </v-list-item>
             </template>
           </v-select>
 
+          <div class="d-flex align-center mb-1 mt-2">
+            <span class="text-caption text-medium-emphasis">Voraussetzungen</span>
+            <v-tooltip location="right" max-width="320">
+              <template #activator="{ props: tooltipProps }">
+                <v-icon v-bind="tooltipProps" size="16" class="ml-1" color="grey-darken-1">
+                  mdi-information-outline
+                </v-icon>
+              </template>
+              Kompetenzen, die diese Kompetenz selbst voraussetzen (direkt oder über eine
+              Kette), stehen hier nicht zur Auswahl - das würde eine zyklische Abhängigkeit
+              erzeugen.
+            </v-tooltip>
+          </div>
           <v-select
             v-model="prerequisiteCompetencyIds"
             :items="orderedCompetencies"
             item-title="competency.name"
             item-color="primary"
             item-value="competency.id"
-            label="Prerequisites"
             prepend-icon="mdi-arrow-decision-outline"
             variant="solo"
             chips
@@ -375,16 +383,16 @@ defineExpose({
                 :title="undefined"
                 :style="{ paddingLeft: `${16 + (item.raw?.depth ?? 0) * 20}px` }"
               >
-                <span v-if="(item.raw?.depth ?? 0) > 0" class="text-medium-emphasis">{{
-                  treePrefix(item.raw?.depth ?? 0)
-                }}</span
-                >{{ item.raw?.competency?.name ?? competencyName(item.value) }}
+                <template v-if="(item.raw?.depth ?? 0) > 0" #prepend>
+                  <v-icon size="16" color="grey-darken-1">mdi-subdirectory-arrow-right</v-icon>
+                </template>
+                {{ item.raw?.competency?.name ?? competencyName(item.value) }}
               </v-list-item>
             </template>
           </v-select>
 
           <div v-if="prerequisites.length > 0" class="mb-2">
-            <div class="text-caption mb-1">Minimum Mastery je Prerequisite</div>
+            <div class="text-caption mb-1">Mindest-Kompetenzniveau je Voraussetzung</div>
             <div
               v-for="prerequisite in prerequisites"
               :key="prerequisite.competencyId"
@@ -417,10 +425,10 @@ defineExpose({
           class="mr-auto"
           @click="deleteCompetency"
         >
-          Delete
+          Löschen
         </v-btn>
-        <v-btn variant="text" @click="_cancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">{{ isNew ? 'Add' : 'Save' }}</v-btn>
+        <v-btn variant="text" @click="_cancel">Abbrechen</v-btn>
+        <v-btn color="primary" @click="handleSubmit">{{ isNew ? 'Hinzufügen' : 'Speichern' }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

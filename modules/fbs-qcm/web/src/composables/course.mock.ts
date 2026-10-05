@@ -2,7 +2,7 @@ import type Course from '@/model/Course'
 
 /**
  * Dummy-Kurs "Datenbanksysteme", für den bereits Beispiel-Kompetenzen und
- * -Fragen modelliert wurden (siehe `competencyGraph.mock.ts` / `question.mock.ts`).
+ * -Aufgaben modelliert wurden (siehe `competencyGraph.mock.ts` / `question.mock.ts`).
  * Bis eine echte Kurs-Domain existiert, dient dieser Mock als Datenquelle für
  * die Kursauswahl im Frontend (z.B. HomeView).
  */

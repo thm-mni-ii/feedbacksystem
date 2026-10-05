@@ -2,14 +2,14 @@
   <v-app>
     <v-app-bar app color="black">
       <v-tabs class="d-flex justify-between">
-        <v-tab :to="{ name: 'home' }">Home</v-tab>
+        <v-tab :to="{ name: 'home' }">Startseite</v-tab>
         <!--
-          Fragenpool und Algorithm Lab sind Dozenten-Werkzeuge und daher nur
-          für ADMIN sichtbar. Kompetenzen/Fragen/Einstellungen eines
+          Aufgabenpool und Algorithm Lab sind Dozenten-Werkzeuge und daher nur
+          für ADMIN sichtbar. Kompetenzen/Aufgaben/Einstellungen eines
           konkreten Kurses sind bewusst kein globaler Menüpunkt mehr, sondern
           Teil der Unternavigation im jeweiligen Kurs-Workspace.
         -->
-        <v-tab v-if="isAdmin" :to="{ name: 'questionPool' }">Fragenpool</v-tab>
+        <v-tab v-if="isAdmin" :to="{ name: 'questionPool' }">Aufgabenpool</v-tab>
         <v-tab v-if="isAdmin" :to="{ name: 'AlgorithmLab' }">Algorithm Lab</v-tab>
       </v-tabs>
     </v-app-bar>

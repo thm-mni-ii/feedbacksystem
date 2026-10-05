@@ -1,9 +1,15 @@
 <template>
   <DialogEditQuestion v-if="isAdmin" ref="dialogEditQuestion" />
   <DialogEditCompetency v-if="isAdmin" ref="dialogEditCompetency" />
+  <DialogLinkExistingQuestion v-if="isAdmin" ref="dialogLinkExistingQuestion" />
+  <DialogConfirm v-if="isAdmin" ref="dialogConfirm" />
 
-  <section class="competency-graph-view" :style="viewStyle">
+  <section class="competency-graph-view">
     <v-container fluid class="pa-2 pa-md-3 competency-graph-content">
+      <v-alert type="warning" variant="tonal" density="comfortable" class="mb-2">
+        Lokale Demo: Dieser Kompetenzgraph verwendet Beispieldaten. Änderungen werden nicht im
+        Backend gespeichert und gehen beim Neuladen verloren.
+      </v-alert>
       <v-alert v-if="!isAdmin" type="info" variant="tonal" density="comfortable" class="mb-2">
         Diese Ansicht zeigt deinen Kompetenzstand. Bearbeiten können nur Dozent:innen.
       </v-alert>
@@ -16,6 +22,7 @@
         >
           <CompetencyGraphContainer
             v-model:zoom-level="zoomLevel"
+            v-model:view-mode="viewMode"
             :graph-nodes="graphNodes"
             :graph-edges="graphEdges"
             :layouts="layouts"
@@ -23,6 +30,11 @@
             :event-handlers="eventHandlers"
             :competencies="competencies"
             :questions="questions"
+            :selected-node-id="selectedNodeId"
+            :readonly="!isAdmin"
+            :node-icon="nodeIcon"
+            @select-node="selectedNodeId = $event"
+            @add-root-competency="editCompetency()"
           />
         </v-col>
 
@@ -46,7 +58,9 @@
           :select-course="selectCourse"
           :edit-question="editQuestion"
           :edit-competency="editCompetency"
-          :delete-question="deleteQuestion"
+          :delete-question="confirmDeleteQuestion"
+          :delete-competency="confirmDeleteCompetency"
+          :link-existing-question="linkExistingQuestion"
         />
       </v-row>
     </v-container>
@@ -54,9 +68,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
 import DialogEditCompetency from '@/dialog/DialogEditCompetency.vue'
+import DialogLinkExistingQuestion from '@/dialog/DialogLinkExistingQuestion.vue'
+import DialogConfirm from '@/dialog/DialogConfirm.vue'
 import CompetencyGraphContainer from '@/components/CompetencyGraphContainer.vue'
 import CompetencyGraphDetailPanel from '@/components/CompetencyGraphDetailPanel.vue'
 import { useCompetencyGraph } from '@/composables/useCompetencyGraph'
@@ -64,9 +80,9 @@ import type { Competency, Question } from '@/model/types'
 import type EditableQuestion from '@/model/Question'
 import {
   toEditableQuestion,
-  fromEditableQuestion
+  fromEditableQuestion,
+  fromNewEditableQuestion
 } from '@/composables/competencyGraphQuestionAdapter'
-import { competencyGraphPalette } from '@/plugins/vuetify'
 import {
   competencies as mockCompetencies,
   questions as mockQuestions
@@ -76,46 +92,124 @@ import { useAuthStore } from '@/stores/authStore'
 const authStore = useAuthStore()
 const isAdmin = computed(() => authStore.decodedToken?.globalRole === 'ADMIN')
 
+const VIEW_MODE_STORAGE_KEY = 'qcm.competencyGraph.viewMode'
+const viewMode = ref<'graph' | 'list'>(
+  localStorage.getItem(VIEW_MODE_STORAGE_KEY) === 'list' ? 'list' : 'graph'
+)
+watch(viewMode, (value) => localStorage.setItem(VIEW_MODE_STORAGE_KEY, value))
+
 const dialogEditQuestion = ref<typeof DialogEditQuestion>()
 const dialogEditCompetency = ref<typeof DialogEditCompetency>()
-
-const viewStyle = computed(() => ({
-  background: `linear-gradient(180deg, ${competencyGraphPalette.viewBackground} 0%, ${competencyGraphPalette.viewBackgroundAlt} 100%)`
-}))
+const dialogLinkExistingQuestion = ref<typeof DialogLinkExistingQuestion>()
+const dialogConfirm = ref<typeof DialogConfirm>()
 
 /**
- * Der Kompetenzgraph verwaltet Fragen bislang nur lokal (Mock-Daten, siehe
+ * Der Kompetenzgraph verwaltet Aufgaben bislang nur lokal (Mock-Daten, siehe
  * useCompetencyGraph). Der Bearbeiten-Dialog wird deshalb mit `persist: false`
  * geöffnet, damit kein (fehlschlagender) Backend-Call gegen eine nicht
- * existierende Mock-Frage ausgelöst wird; stattdessen wird das Ergebnis lokal
- * über `updateQuestion` übernommen.
+ * existierende Mock-Aufgabe ausgelöst wird; stattdessen wird das Ergebnis lokal
+ * über `updateQuestion`/`addQuestion` übernommen.
+ *
+ * @param question Zu bearbeitende Aufgabe, oder undefined für "neu erstellen".
+ * @param presetCompetencyId Vorbelegte Kompetenz für eine neue Aufgabe, z.B. beim
+ * kontextsensitiven "Aufgabe zu dieser Kompetenz hinzufügen" aus dem Panel heraus.
  */
-const editQuestion = (question?: Question) => {
+const editQuestion = (question?: Question, presetCompetencyId?: string) => {
   if (!dialogEditQuestion.value) return
 
   const editable = question ? toEditableQuestion(question) : undefined
 
   dialogEditQuestion.value
-    .openDialog(editable, { persist: false })
+    .openDialog(editable, {
+      persist: false,
+      presetCompetencyIds: presetCompetencyId ? [presetCompetencyId] : undefined
+    })
     .then((result: EditableQuestion | false) => {
-      if (result && question) {
+      if (!result) return
+      if (question) {
         updateQuestion(fromEditableQuestion(result, question))
+      } else {
+        addQuestion(fromNewEditableQuestion(result))
       }
     })
 }
 
-const editCompetency = (competencyId?: string) => {
+/**
+ * @param competencyId Zu bearbeitende Kompetenz, oder undefined für "neu erstellen".
+ * @param presetParentId Vorbelegter Parent für eine neue Kompetenz, z.B. beim
+ * kontextsensitiven "Unterkompetenz hinzufügen" aus dem Panel heraus.
+ */
+const editCompetency = (competencyId?: string, presetParentId?: string) => {
   if (!dialogEditCompetency.value) return
 
   const editable = competencyId ? getCompetency(competencyId) : undefined
 
   dialogEditCompetency.value
-    .openDialog(editable, { persist: false, competencies: competencies.value })
+    .openDialog(editable, { persist: false, competencies: competencies.value, presetParentId })
     .then((result: Competency | false) => {
       if (result) {
         upsertCompetency(result)
       }
     })
+}
+
+/**
+ * Öffnet den Dialog zum Verknüpfen bestehender Pool-Aufgaben mit einer
+ * Kompetenz und ordnet nach Bestätigung alle ausgewählten Aufgaben dieser
+ * Kompetenz zu (statt sie als Duplikate neu anzulegen).
+ *
+ * @param competencyId Kompetenz, der bestehende Aufgaben zugeordnet werden sollen.
+ */
+const linkExistingQuestion = (competencyId: string) => {
+  if (!dialogLinkExistingQuestion.value) return
+
+  const competency = getCompetency(competencyId)
+  if (!competency) return
+
+  dialogLinkExistingQuestion.value
+    .openDialog(competency, questions.value)
+    .then((result: string[] | false) => {
+      if (!result) return
+      for (const questionId of result) {
+        addCompetencyToQuestion(questionId, competencyId)
+      }
+    })
+}
+
+const confirmDeleteQuestion = async (id: string) => {
+  if (!dialogConfirm.value) return
+
+  const question = questions.value.find((q) => q.id === id)
+  const confirmed = await dialogConfirm.value.openDialog(
+    'Aufgabe löschen',
+    `Aufgabe "${question?.title || question?.text || id}" wirklich löschen?`,
+    'Löschen'
+  )
+  if (confirmed) {
+    deleteQuestion(id)
+  }
+}
+
+const confirmDeleteCompetency = async (competencyId: string) => {
+  if (!dialogConfirm.value) return
+
+  const competency = getCompetency(competencyId)
+  const impact = getCompetencyDeletionImpact(competencyId)
+  const impactParts: string[] = []
+  if (impact.subCompetencyCount > 0) {
+    impactParts.push(`${impact.subCompetencyCount} Unterkompetenz(en) werden mit gelöscht`)
+  }
+  if (impact.affectedQuestionCount > 0) {
+    impactParts.push(`${impact.affectedQuestionCount} Aufgabe(n) verlieren diese Zuordnung`)
+  }
+  const message = impactParts.length
+    ? `Kompetenz "${competency?.name}" wirklich löschen? ${impactParts.join('. ')}.`
+    : `Kompetenz "${competency?.name}" wirklich löschen?`
+
+  const confirmed = await dialogConfirm.value.openDialog('Kompetenz löschen', message, 'Löschen')
+  if (confirmed) {
+    deleteCompetency(competencyId)
+  }
 }
 
 const {
@@ -138,17 +232,20 @@ const {
   nodeIcon,
   deleteQuestion,
   updateQuestion,
+  addQuestion,
   removeCompetencyFromQuestion,
   addCompetencyToQuestion,
   saveCompetencyPrerequisites,
   upsertCompetency,
+  deleteCompetency,
+  getCompetencyDeletionImpact,
   selectCourse
 } = useCompetencyGraph(mockCompetencies, mockQuestions)
 </script>
 
 <style scoped>
 .competency-graph-view {
-  height: calc(100dvh - var(--v-layout-top, 0px));
+  height: calc(88dvh - var(--v-layout-top, 0px));
   display: flex;
   flex-direction: column;
   overflow: hidden;

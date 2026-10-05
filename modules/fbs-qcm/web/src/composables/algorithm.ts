@@ -54,10 +54,19 @@ function posteriorAfterResponse(
   return clampProbability(r * correctPosterior + (1 - r) * incorrectPosterior)
 }
 
-function applyLearningTransition(
-  mastery: number,
-  config: StudyAlgorithmConfig['model']
-): number {
+function expectedInformationGain(mastery: number, config: StudyAlgorithmConfig['model']): number {
+  const p = clampProbability(mastery)
+  const probabilityCorrect = p * (1 - config.slipRate) + (1 - p) * config.guessRate
+  const correctPosterior = posteriorAfterResponse(p, 1, config)
+  const incorrectPosterior = posteriorAfterResponse(p, 0, config)
+  const expectedPosteriorEntropy =
+    probabilityCorrect * binaryEntropy(correctPosterior) +
+    (1 - probabilityCorrect) * binaryEntropy(incorrectPosterior)
+
+  return Math.max(0, binaryEntropy(p) - expectedPosteriorEntropy)
+}
+
+function applyLearningTransition(mastery: number, config: StudyAlgorithmConfig['model']): number {
   return clampProbability(mastery + (1 - mastery) * config.learnRate)
 }
 
@@ -122,10 +131,13 @@ export function createSession(
  *
  * Wählt ein Item basierend auf Gewichtung aus
  */
-function weightedSample<T>(items: Array<{ item: T; weight: number }>): T {
+function weightedSample<T>(
+  items: Array<{ item: T; weight: number }>,
+  randomSource: () => number
+): T {
   const totalWeight = items.reduce((sum, x) => sum + x.weight, 0)
 
-  let random = Math.random() * totalWeight
+  let random = randomSource() * totalWeight
 
   for (const entry of items) {
     random -= entry.weight
@@ -136,6 +148,18 @@ function weightedSample<T>(items: Array<{ item: T; weight: number }>): T {
   }
 
   return items[0].item
+}
+
+/** Deterministische Zufallsquelle für reproduzierbare Simulationen, nicht für Sicherheit. */
+export function createSeededRandom(seed: number): () => number {
+  if (!Number.isSafeInteger(seed)) {
+    throw new Error('Der Zufalls-Seed muss eine sichere Ganzzahl sein.')
+  }
+  let state = seed >>> 0
+  return () => {
+    state = (Math.imul(1664525, state) + 1013904223) >>> 0
+    return state / 4294967296
+  }
 }
 
 /**
@@ -155,17 +179,45 @@ function relationFactor(link: QuestionCompetencyLink): number {
 /**
  * Adaptive Quiz Algorithm
  *
- * Wählt adaptiv Fragen basierend auf:
+ * Wählt adaptiv Aufgaben basierend auf:
  * - Weniger getestete Kompetenzen
  * - Aktuelle Score-Werte
  * - Recent History (um Wiederholungen zu vermeiden)
  */
 export class AdaptiveQuizAlgorithm {
-  constructor(private readonly config: StudyAlgorithmConfig = DEFAULT_STUDY_ALGORITHM_CONFIG) {
+  constructor(
+    private readonly config: StudyAlgorithmConfig = DEFAULT_STUDY_ALGORITHM_CONFIG,
+    private readonly randomSource: () => number = Math.random
+  ) {
+    if (
+      config.selection.competencyStrategy === 'expected-information-gain' &&
+      (typeof config.selection.responseScoreThreshold !== 'number' ||
+        !Number.isFinite(config.selection.responseScoreThreshold) ||
+        config.selection.responseScoreThreshold < 0.01 ||
+        config.selection.responseScoreThreshold > 1 ||
+        config.selection.singleRequiredItemsOnly !== true)
+    ) {
+      throw new Error(
+        'Expected information gain requires a response score threshold and single-required-item filtering.'
+      )
+    }
   }
 
   private questionTargetsCompetency(question: Question, competencyId: string): boolean {
     return getQuestionCompetencyIds(question).includes(competencyId)
+  }
+
+  private isQuestionEligible(question: Question): boolean {
+    if (!this.config.selection.singleRequiredItemsOnly) {
+      return true
+    }
+
+    const links = getQuestionCompetencyLinks(question)
+    return links.length === 1 && links[0].relation === 'required'
+  }
+
+  private getSelectionQuestions(questions: Question[]): Question[] {
+    return questions.filter((question) => this.isQuestionEligible(question))
   }
 
   private evaluateCompletionStatus(
@@ -283,33 +335,29 @@ export class AdaptiveQuizAlgorithm {
   }
 
   /**
-   * Nächste Frage auswählen mit Schwierigkeitsadaption, Competency Stickiness
+   * Nächste Aufgabe auswählen mit Schwierigkeitsadaption, Competency Stickiness
    * und expliziten fachlichen Voraussetzungen.
    *
    * Strategie:
-   * 1. VORAUSSETZUNGEN: Nur Kompetenzen mit erfüllten expliziten
-   *    Voraussetzungen werden angeboten. `parentId` wird hierfür bewusst nicht
-   *    verwendet, da Taxonomie und Lernreihenfolge unterschiedliche Relationen sind.
-   * 2. STICKINESS: Falls gerade eine Kompetenz bearbeitet wird und < 5 Fragen gestellt,
-   *    bleib bei dieser Kompetenz (reduziert Kontextwechsel)
-   * 3. Wähle Zielkompetenz (gewichtet nach Anzahl Tests, Score und Hierarchie)
-   * 4. IRT-Adaption: Filtere Fragen anhand des konfigurierten
-   *    Schwierigkeitsfensters um den aktuellen Kompetenzwert.
-   * 5. Vermeide kürzlich gestellte Fragen
-   * 6. Zufällige Auswahl aus dem angepassten Pool
+   * 1. Filtere optional auf Items mit genau einer erforderlichen Kompetenz.
+   * 2. Behalte die bestehende Abschluss-, Stickiness- und Voraussetzungsauswahl bei.
+   * 3. Wähle die Zielkompetenz gewichtet oder nach erwartetem Informationsgewinn.
+   * 4. Filtere Aufgaben heuristisch nach Schwierigkeit und Wiederholung.
+   * 5. Wähle eine Aufgabe anhand der bestehenden Q-Matrix-Utility.
    */
   nextQuestion(
     competencies: Competency[],
     questions: Question[],
     session: StudySession
   ): NextQuestion | null {
-    const completion = this.evaluateCompletionStatus(competencies, questions, session)
+    const selectionQuestions = this.getSelectionQuestions(questions)
+    const completion = this.evaluateCompletionStatus(competencies, selectionQuestions, session)
     if (completion.isComplete) {
       return null
     }
 
     const excludedQuestionIds = new Set(session.excludedQuestionIds)
-    const availableQuestions = questions.filter(
+    const availableQuestions = selectionQuestions.filter(
       (question) => !question.excludeFromAlgorithm && !excludedQuestionIds.has(question.id)
     )
 
@@ -317,7 +365,7 @@ export class AdaptiveQuizAlgorithm {
       return null
     }
 
-    // Schritt 0: Filtere nur Kompetenzen, die Fragen haben und noch Evidenz brauchen.
+    // Schritt 0: Filtere nur Kompetenzen, die Aufgaben haben und noch Evidenz brauchen.
     const competenciesWithQuestions = competencies.filter((c) =>
       availableQuestions.some((q) => this.questionTargetsCompetency(q, c.id))
     )
@@ -330,29 +378,46 @@ export class AdaptiveQuizAlgorithm {
     const pendingCompetenciesWithQuestions = competenciesWithQuestions.filter((c) =>
       pendingCompetencyIds.has(c.id)
     )
-    const candidateCompetencies =
+    const baseCandidateCompetencies =
       pendingCompetenciesWithQuestions.length > 0
         ? pendingCompetenciesWithQuestions
         : competenciesWithQuestions
 
+    // Nach jeder Antwort wird die Lösung angezeigt. Eine erneut gestellte Aufgabe
+    // würde dann eher Erinnerung an die Lösung als Kompetenz messen. Deshalb
+    // werden innerhalb der Sitzung zuerst noch nicht beantwortete Aufgaben
+    // verwendet; Wiederholungen nur, wenn nichts anderes mehr übrig ist.
+    // Eigene Designentscheidung, kein Bestandteil von Standard-BKT.
+    const answeredQuestionIds = new Set(session.history.map((record) => record.questionId))
+    const hasUnansweredQuestion = (competencyId: string) =>
+      availableQuestions.some(
+        (q) => !answeredQuestionIds.has(q.id) && this.questionTargetsCompetency(q, competencyId)
+      )
+    const candidatesWithUnansweredQuestions = baseCandidateCompetencies.filter((c) =>
+      hasUnansweredQuestion(c.id)
+    )
+    const candidateCompetencies =
+      candidatesWithUnansweredQuestions.length > 0
+        ? candidatesWithUnansweredQuestions
+        : baseCandidateCompetencies
+
     let targetCompetency: Competency
 
     // SCHRITT 1: Sehr kurze Stickiness
-    // Bei aktiver Kompetenz bleibt der Flow höchstens für eine direkte Folgefrage dort.
+    // Bei aktiver Kompetenz bleibt der Flow höchstens für eine direkte Folgeaufgabe dort.
     if (
       session.currentCompetencyId &&
       pendingCompetencyIds.has(session.currentCompetencyId) &&
       session.questionsInCurrentCompetency < this.config.selection.stickinessQuestions
     ) {
       const currentCompetency = competencies.find((c) => c.id === session.currentCompetencyId)
-      const hasAnyQuestionForCurrentCompetency =
-        !!currentCompetency &&
-        availableQuestions.some((q) => this.questionTargetsCompetency(q, currentCompetency.id))
+      const canStayOnCurrentCompetency =
+        !!currentCompetency && candidateCompetencies.some((c) => c.id === currentCompetency.id)
 
-      if (currentCompetency && hasAnyQuestionForCurrentCompetency) {
+      if (currentCompetency && canStayOnCurrentCompetency) {
         targetCompetency = currentCompetency
       } else {
-        // Falls wirklich keine Frage mehr für diese Kompetenz verfügbar ist, darf gewechselt werden.
+        // Keine (unbeantwortete) Aufgabe mehr für diese Kompetenz: Wechsel erlaubt.
         targetCompetency = this.selectNextCompetency(candidateCompetencies, session)
       }
     } else {
@@ -360,10 +425,17 @@ export class AdaptiveQuizAlgorithm {
       targetCompetency = this.selectNextCompetency(candidateCompetencies, session)
     }
 
-    // SCHRITT 3: Finde Fragen für die Zielkompetenz
-    const questionsForCompetency = availableQuestions.filter((q) =>
+    // SCHRITT 3: Finde Aufgaben für die Zielkompetenz, bevorzugt unbeantwortete
+    const allQuestionsForCompetency = availableQuestions.filter((q) =>
       this.questionTargetsCompetency(q, targetCompetency.id)
     )
+    const unansweredQuestionsForCompetency = allQuestionsForCompetency.filter(
+      (q) => !answeredQuestionIds.has(q.id)
+    )
+    const questionsForCompetency =
+      unansweredQuestionsForCompetency.length > 0
+        ? unansweredQuestionsForCompetency
+        : allQuestionsForCompetency
 
     if (questionsForCompetency.length === 0) {
       return null
@@ -376,14 +448,14 @@ export class AdaptiveQuizAlgorithm {
       (q) => Math.abs(q.difficulty - studentScore) <= this.config.selection.difficultyWindow
     )
 
-    // Fallback 1: Falls keine Fragen im idealen Bereich, nimm nächstbeste
+    // Fallback 1: Falls keine Aufgaben im idealen Bereich, nimm nächstbeste
     if (difficultyAdapted.length === 0) {
       difficultyAdapted = questionsForCompetency.sort(
         (a, b) => Math.abs(a.difficulty - studentScore) - Math.abs(b.difficulty - studentScore)
       )
     }
 
-    // SCHRITT 5: Vermeide kürzlich gestellte Fragen
+    // SCHRITT 5: Vermeide kürzlich gestellte Aufgaben
     const candidates = difficultyAdapted.filter((q) => !session.recentQuestionIds.includes(q.id))
 
     const pool = candidates.length > 0 ? candidates : difficultyAdapted
@@ -392,7 +464,7 @@ export class AdaptiveQuizAlgorithm {
       return null
     }
 
-    // Harte Regel: Nie exakt dieselbe Frage direkt hintereinander stellen.
+    // Harte Regel: Nie exakt dieselbe Aufgabe direkt hintereinander stellen.
     // Bei einem Mini-Pool wird stattdessen kompetenzübergreifend ausgewichen;
     // Wiederholung kann später bewusst als Spaced-Retrieval-Strategie modelliert werden.
     const lastQuestionId = session.history[session.history.length - 1]?.questionId ?? null
@@ -405,16 +477,17 @@ export class AdaptiveQuizAlgorithm {
       if (withoutLastQuestion.length > 0) {
         selectionPool = withoutLastQuestion
       } else {
-        // Fallback für kleine Pools: weiche auf eine andere Frage aus beliebiger Kompetenz aus
+        // Fallback für kleine Pools: weiche auf eine andere Aufgabe aus beliebiger Kompetenz aus
         const globalWithoutLast = availableQuestions.filter((q) => q.id !== lastQuestionId)
 
         if (globalWithoutLast.length === 0) {
-          // Es existiert nur eine verfügbare Frage insgesamt
+          // Es existiert nur eine verfügbare Aufgabe insgesamt
           return null
         }
 
-        const fallbackQuestion =
-          globalWithoutLast[Math.floor(Math.random() * globalWithoutLast.length)]
+        const globalUnanswered = globalWithoutLast.filter((q) => !answeredQuestionIds.has(q.id))
+        const fallbackPool = globalUnanswered.length > 0 ? globalUnanswered : globalWithoutLast
+        const fallbackQuestion = fallbackPool[Math.floor(this.randomSource() * fallbackPool.length)]
         const fallbackTargetCompetency =
           competencies.find((c) => this.questionTargetsCompetency(fallbackQuestion, c.id)) ??
           targetCompetency
@@ -431,7 +504,7 @@ export class AdaptiveQuizAlgorithm {
       item: q,
       weight: Math.max(0.001, this.scoreQuestionUtility(q, session, targetCompetency.id))
     }))
-    const question = weightedSample(weightedPool)
+    const question = weightedSample(weightedPool, this.randomSource)
 
     return {
       question,
@@ -440,13 +513,9 @@ export class AdaptiveQuizAlgorithm {
   }
 
   /**
-   * Hilfsfunktion: Wähle nächste Zielkompetenz mit expliziten Voraussetzungen.
-   *
-   * Prerequisite-Based Learning:
-   * - Kompetenzen ohne Voraussetzungen sind verfügbar.
-   * - Jede explizite Voraussetzung muss den angegebenen Beherrschungsgrad erreichen.
-   * - Gewichtung: weniger getestet + niedriger Score
-   * - Dadurch wird ein "Zweig" komplett abgearbeitet, bevor man zum nächsten wechselt
+   * Wählt nach Voraussetzungen und konfigurierter Kompetenzstrategie.
+   * Sind keine Voraussetzungen erfüllt, bleibt der bestehende Fallback auf
+   * alle Kandidaten aktiv.
    */
   private selectNextCompetency(candidates: Competency[], session: StudySession): Competency {
     // Filtere: Nur Kompetenzen, deren explizite Voraussetzungen erfüllt sind.
@@ -461,9 +530,42 @@ export class AdaptiveQuizAlgorithm {
     // Die Struktur wird zusätzlich beim Speichern/Import der Kompetenzen validiert.
     const activePool = fullyUnlockedCandidates.length > 0 ? fullyUnlockedCandidates : candidates
 
+    if (this.config.selection.competencyStrategy === 'expected-information-gain') {
+      if (
+        this.config.selection.responseScoreThreshold === null ||
+        this.config.selection.responseScoreThreshold === undefined
+      ) {
+        throw new Error(
+          'Expected information gain requires a response score threshold for binary BKT updates.'
+        )
+      }
+
+      return [...activePool].sort((a, b) => {
+        const aMastery = session.competencies[a.id]?.score ?? this.config.model.initialMastery
+        const bMastery = session.competencies[b.id]?.score ?? this.config.model.initialMastery
+        const informationGainDifference =
+          expectedInformationGain(bMastery, this.config.model) -
+          expectedInformationGain(aMastery, this.config.model)
+
+        if (informationGainDifference !== 0) {
+          return informationGainDifference
+        }
+
+        const evidenceDifference =
+          (session.competencies[a.id]?.timesAssessed ?? 0) -
+          (session.competencies[b.id]?.timesAssessed ?? 0)
+        return evidenceDifference || a.id.localeCompare(b.id)
+      })[0]
+    }
+
     return weightedSample(
       activePool.map((c) => {
-        const state = session.competencies[c.id]
+        const state = session.competencies[c.id] ?? {
+          competencyId: c.id,
+          score: this.config.model.initialMastery,
+          timesAssessed: 0,
+          lastAssessedAt: null
+        }
         // Kombination: weniger getestet + niedriger Score
         const assessmentWeight = competencyWeight(state) // 1/(timesAssessed+1)
         const scoreWeight = 1 - state.score // Niedrige Scores bevorzugen
@@ -472,7 +574,8 @@ export class AdaptiveQuizAlgorithm {
           item: c,
           weight: combinedWeight
         }
-      })
+      }),
+      this.randomSource
     )
   }
 
@@ -482,28 +585,34 @@ export class AdaptiveQuizAlgorithm {
    * Algorithmus:
    * - BKT-Posterior pro verknüpfter Kompetenz
    * - anschließender Lernübergang nach der Antwort
-   * - alle mit dieser Frage assoziierten Kompetenzen werden aktualisiert
+   * - alle mit dieser Aufgabe assoziierten Kompetenzen werden aktualisiert
    */
   /**
    * Übernimmt historische Evidenz, ohne sie als Antwort der neuen Session zu
-   * zählen. Die zeitliche Gewichtung wird vor dem Aufruf auf den Score
-   * angewendet; dadurch bleibt die BKT-Aktualisierung identisch zur aktiven
-   * Antwortauswertung.
+   * zählen. Erst die ursprüngliche Antwort klassifizieren, dann zeitlich
+   * abschwächen: Alte richtige Antworten dürfen nicht zu falschen werden.
    */
   applyHistoricalEvidence(
     question: Question,
     score: number,
-    state: StudySession
+    state: StudySession,
+    reliability = 1
   ): StudySession {
+    if (!this.isQuestionEligible(question) || question.excludeFromAlgorithm) {
+      return state
+    }
+
     const competencies = { ...state.competencies }
     const links = getQuestionCompetencyLinks(question)
+    const modelScore =
+      0.5 + (this.getModelResponseScore(score) - 0.5) * clampProbability(reliability)
 
     for (const link of links) {
       const current = competencies[link.competencyId]
-      if (!current) continue
+      if (!current || (link.weight ?? 1) === 0) continue
 
       const influence = Math.max(0.2, Math.min(1.2, (link.weight ?? 1) * relationFactor(link)))
-      const posterior = posteriorAfterResponse(current.score, score, this.config.model)
+      const posterior = posteriorAfterResponse(current.score, modelScore, this.config.model)
       const updatedScore = applyLearningTransition(
         current.score + (posterior - current.score) * influence,
         this.config.model
@@ -530,6 +639,7 @@ export class AdaptiveQuizAlgorithm {
     updatedState: StudySession
     result: AnswerResult
   } {
+    const modelScore = this.getModelResponseScore(score)
     // Kopie der Kompetenzen erstellen
     const competencies = {
       ...state.competencies
@@ -537,14 +647,15 @@ export class AdaptiveQuizAlgorithm {
 
     const links = getQuestionCompetencyLinks(question)
 
-    // Alle Kompetenzen dieser Frage aktualisieren (gewichtet nach Q-Matrix-Link)
+    const answeredCompetencyIds: string[] = []
+    // Alle Kompetenzen dieser Aufgabe aktualisieren (gewichtet nach Q-Matrix-Link)
     for (const link of links) {
       const current = competencies[link.competencyId]
 
-      if (!current) continue
+      if (!current || (link.weight ?? 1) === 0) continue
 
       const influence = Math.max(0.2, Math.min(1.2, (link.weight ?? 1) * relationFactor(link)))
-      const posterior = posteriorAfterResponse(current.score, score, this.config.model)
+      const posterior = posteriorAfterResponse(current.score, modelScore, this.config.model)
       const updatedScore = applyLearningTransition(
         current.score + (posterior - current.score) * influence,
         this.config.model
@@ -556,9 +667,8 @@ export class AdaptiveQuizAlgorithm {
         timesAssessed: current.timesAssessed + 1,
         lastAssessedAt: Date.now()
       }
+      answeredCompetencyIds.push(link.competencyId)
     }
-
-    const answeredCompetencyIds = getQuestionCompetencyIds(question)
 
     // Datensatz erstellen
     const record: AnswerRecord = {
@@ -574,14 +684,18 @@ export class AdaptiveQuizAlgorithm {
       competencies,
       history: [...state.history, record],
       updatedAt: record.answeredAt,
-      // Behalte die letzten 5 Fragen zur Vermeidung von Wiederholungen
+      // Behalte die letzten 5 Aufgaben zur Vermeidung von Wiederholungen
       recentQuestionIds: [question.id, ...state.recentQuestionIds].slice(
         0,
         this.config.selection.recentQuestionWindow
       )
     }
 
-    const completion = this.evaluateCompletionStatus(competenciesInput, questions, updatedState)
+    const completion = this.evaluateCompletionStatus(
+      competenciesInput,
+      this.getSelectionQuestions(questions),
+      updatedState
+    )
     if (completion.isComplete) {
       updatedState.completedAt = updatedState.completedAt ?? record.answeredAt
     }
@@ -612,9 +726,19 @@ export class AdaptiveQuizAlgorithm {
         state.competencies[c.id]?.score ?? this.config.model.initialMastery
       ),
       certainty:
-        1 -
-        binaryEntropy(state.competencies[c.id]?.score ?? this.config.model.initialMastery)
+        1 - binaryEntropy(state.competencies[c.id]?.score ?? this.config.model.initialMastery)
     }))
+  }
+
+  private getModelResponseScore(score: number): number {
+    const normalizedScore = clampProbability(score)
+    const threshold = this.config.selection.responseScoreThreshold
+
+    if (threshold === null || threshold === undefined) {
+      return normalizedScore
+    }
+
+    return normalizedScore >= threshold ? 1 : 0
   }
 
   /**
@@ -640,6 +764,10 @@ export class AdaptiveQuizAlgorithm {
     questions: Question[],
     session: StudySession
   ): CompletionStatus {
-    return this.evaluateCompletionStatus(competencies, questions, session)
+    return this.evaluateCompletionStatus(
+      competencies,
+      this.getSelectionQuestions(questions),
+      session
+    )
   }
 }

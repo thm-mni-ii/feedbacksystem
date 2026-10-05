@@ -4,16 +4,23 @@
       <v-card-text class="pa-4">
         <div class="d-flex align-start justify-space-between ga-3 mb-4 flex-wrap">
           <div class="min-w-0">
-            <p class="mb-1 text-caption text-medium-emphasis">Fragendetails</p>
+            <p class="mb-1 text-caption text-medium-emphasis">Aufgabendetails</p>
             <h3 class="text-body-1 font-weight-bold">{{ selectedQuestion?.text }}</h3>
           </div>
-          <v-chip size="small" variant="flat" class="summary-chip">
-            {{ selectedQuestion?.competencyIds.length ?? 0 }} Kompetenzen
-          </v-chip>
         </div>
 
         <v-row class="mb-4">
-          <v-col cols="6" md="6">
+          <v-col cols="6" md="4">
+            <div class="overview-tile">
+              <div class="text-caption text-medium-emphasis mb-1">Aufgabentyp</div>
+              <div class="d-flex align-center ga-1">
+                <v-icon size="18" color="var(--sg-accent)">{{ questionTypeIcon }}</v-icon>
+                <span class="text-body-2 font-weight-medium">{{ questionTypeLabel }}</span>
+              </div>
+            </div>
+          </v-col>
+
+          <v-col cols="6" md="4">
             <div class="overview-tile">
               <div class="text-caption text-medium-emphasis mb-1">Schwierigkeit</div>
               <v-progress-linear
@@ -29,7 +36,7 @@
             </div>
           </v-col>
 
-          <v-col cols="6" md="6">
+          <v-col cols="12" md="4">
             <div class="overview-tile">
               <div class="text-caption text-medium-emphasis mb-1">Kompetenzen</div>
               <div class="text-h6">{{ selectedQuestion?.competencyIds.length ?? 0 }}</div>
@@ -41,7 +48,7 @@
           <div class="d-flex align-center justify-space-between mb-2">
             <div class="info-block-label mb-0">
               <v-icon size="16" color="var(--sg-accent)">mdi-brain</v-icon>
-              <span>Kompetenzen dieser Frage</span>
+              <span>Kompetenzen dieser Aufgabe</span>
             </div>
           </div>
 
@@ -52,61 +59,31 @@
               size="small"
               :color="getCompetencyColor(getCompetency(compId))"
               variant="tonal"
-              :closable="!readonly"
-              @click:close="removeCompetencyFromQuestion(selectedQuestion!.id, compId)"
             >
               {{ getCompetency(compId)?.name ?? compId }}
             </v-chip>
-
-            <v-menu v-if="!readonly" v-model="isAddingCompetency">
-              <template #activator="{ props: activatorProps }">
-                <v-chip
-                  size="small"
-                  variant="outlined"
-                  prepend-icon="mdi-plus"
-                  v-bind="activatorProps"
-                >
-                  Kompetenz hinzufügen
-                </v-chip>
-              </template>
-
-              <v-list density="compact">
-                <v-list-item
-                  v-for="competency in availableCompetencies"
-                  :key="competency.id"
-                  @click="handleAddCompetency(competency.id)"
-                >
-                  <v-list-item-title>{{ competency.name }}</v-list-item-title>
-                </v-list-item>
-                <v-list-item v-if="availableCompetencies.length === 0" disabled>
-                  <v-list-item-title class="text-medium-emphasis">
-                    Keine weiteren Kompetenzen verfügbar
-                  </v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
           </div>
         </div>
 
-        <div v-if="!readonly" class="d-flex ga-2">
+        <div v-if="!readonly" class="d-flex justify-end ga-1">
           <v-btn
+            icon="mdi-pencil-outline"
             size="small"
-            variant="tonal"
-            color="primary"
-            prepend-icon="mdi-pencil-outline"
-            class="flex-1-1"
+            variant="text"
             @click="selectedQuestion && editQuestion(selectedQuestion)"
           >
-            Bearbeiten
+            <v-icon>mdi-pencil-outline</v-icon>
+            <v-tooltip activator="parent" location="top">Bearbeiten</v-tooltip>
           </v-btn>
           <v-btn
+            icon="mdi-delete-outline"
             size="small"
-            variant="tonal"
+            variant="text"
             color="error"
-            prepend-icon="mdi-delete-outline"
             @click="deleteQuestion(selectedQuestion!.id)"
           >
-            Löschen
+            <v-icon>mdi-delete-outline</v-icon>
+            <v-tooltip activator="parent" location="top">Löschen</v-tooltip>
           </v-btn>
         </div>
       </v-card-text>
@@ -117,6 +94,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Competency, Question } from '@/model/types'
+import QuestionType from '@/enums/QuestionType'
+import { questionTypeMeta } from '@/composables/questionTypeMeta'
 import { competencyGraphPalette } from '@/plugins/vuetify'
 
 interface Props {
@@ -125,7 +104,6 @@ interface Props {
   readonly?: boolean
   getCompetency: (id: string) => Competency | undefined
   getCompetencyColor: (comp?: Competency) => string
-  removeCompetencyFromQuestion: (questionId: string, compId: string) => void
   addCompetencyToQuestion: (questionId: string, compId: string) => void
   editQuestion: (question: Question) => void
   deleteQuestion: (id: string) => void
@@ -141,6 +119,21 @@ const availableCompetencies = computed(() => {
   const assigned = new Set(selectedQuestion.value?.competencyIds ?? [])
   return props.competencies.filter((competency) => !assigned.has(competency.id))
 })
+
+/**
+ * Deutsche Kurzlabel/Icons je Aufgabentyp - siehe zentrale Definition in
+ * `@/composables/questionTypeMeta` (auch vom "Bestehende Aufgabe
+ * verknüpfen"-Dialog in CompetencyDetailPanel.vue genutzt).
+ */
+const questionTypeLabel = computed(
+  () => questionTypeMeta[selectedQuestion.value?.questionType as QuestionType]?.label ?? 'Unbekannt'
+)
+
+const questionTypeIcon = computed(
+  () =>
+    questionTypeMeta[selectedQuestion.value?.questionType as QuestionType]?.icon ??
+    'mdi-help-circle-outline'
+)
 
 const difficultyLabel = computed(() => {
   const difficulty = selectedQuestion.value?.difficulty ?? 0

@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore'
 
 /**
  * Gemeinsamer Rahmen für alle Ansichten, die zu genau einem Kurs gehören
- * (Lernen, Kompetenzen, Fragen, Einstellungen). Stellt die kursbezogene
+ * (Lernen, Kompetenzen, Aufgaben, Einstellungen). Stellt die kursbezogene
  * Unternavigation bereit, damit Dozent:innen nicht mehr zwischen getrennten
  * Top-Level-Seiten springen müssen, um an einem Kurs zu arbeiten.
  */
@@ -19,7 +19,7 @@ const course = computed(() => getCourseById(courseId.value))
 const isAdmin = computed(() => authStore.decodedToken?.globalRole === 'ADMIN')
 
 // Während einer laufenden Lernsitzung wird die Unternavigation ausgeblendet,
-// damit der Fokus vollständig auf der aktuellen Frage liegt.
+// damit der Fokus vollständig auf der aktuellen Aufgabe liegt.
 const showSubnav = computed(() => route.name !== 'studySession')
 
 const tabs = computed(() => {
@@ -28,7 +28,7 @@ const tabs = computed(() => {
     { title: 'Kompetenzen', icon: 'mdi-graph-outline', to: { name: 'courseCompetencies' } }
   ]
   const adminTabs = [
-    { title: 'Fragen', icon: 'mdi-help-circle-outline', to: { name: 'courseQuestions' } },
+    { title: 'Aufgaben', icon: 'mdi-help-circle-outline', to: { name: 'courseQuestions' } },
     { title: 'Einstellungen', icon: 'mdi-tune', to: { name: 'courseSettings' } }
   ]
   return isAdmin.value ? [...baseTabs, ...adminTabs] : baseTabs
@@ -39,6 +39,7 @@ const tabs = computed(() => {
   <div class="course-workspace">
     <v-container class="pt-4 pb-0" style="max-width: 1100px">
       <v-btn
+        v-if="route.name !== 'studySession'"
         variant="text"
         size="small"
         prepend-icon="mdi-arrow-left"

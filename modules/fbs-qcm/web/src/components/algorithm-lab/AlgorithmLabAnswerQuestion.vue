@@ -15,19 +15,35 @@
         v-if="isChoiceLike && !choiceConfig.multipleColumn"
         class="d-flex flex-column"
       >
-        <div
-          v-for="option in choiceConfig.optionRows"
-          :key="option.id"
-          class="d-flex justify-start mb-2"
+        <v-radio-group
+          v-if="choiceAnswerMode === 'single'"
+          :model-value="selectedOptionIds[0] ?? null"
+          hide-details
+          @update:model-value="selectSingleOption"
         >
-          <v-checkbox
-            :model-value="selectedOptionIds.includes(option.id)"
+          <v-radio
+            v-for="option in choiceConfig.optionRows"
+            :key="option.id"
+            :value="option.id"
             :label="option.text"
             color="primary"
-            hide-details
-            @update:model-value="toggleOption(option.id)"
           />
-        </div>
+        </v-radio-group>
+        <template v-else>
+          <div
+            v-for="option in choiceConfig.optionRows"
+            :key="option.id"
+            class="d-flex justify-start mb-2"
+          >
+            <v-checkbox
+              :model-value="selectedOptionIds.includes(option.id)"
+              :label="option.text"
+              color="primary"
+              hide-details
+              @update:model-value="toggleOption(option.id)"
+            />
+          </div>
+        </template>
       </div>
 
       <div v-else-if="isChoiceLike && choiceConfig.multipleColumn" class="mt-2">
@@ -64,11 +80,11 @@
       />
 
       <v-alert v-else type="warning" variant="tonal" class="mb-4">
-        Unbekannter Fragetyp: {{ currentQuestion.question.questionType }}
+        Unbekannter Aufgabentyp: {{ currentQuestion.question.questionType }}
       </v-alert>
     </template>
     <v-alert v-else type="info" variant="tonal" class="mb-4">
-      Für diese Frage liegen keine Antwortmöglichkeiten vor.
+      Für diese Aufgabe liegen keine Antwortmöglichkeiten vor.
     </v-alert>
 
     <v-btn color="primary" class="mt-6" @click="submit">Antwort speichern</v-btn>
@@ -95,6 +111,9 @@ const emit = defineEmits<{
 const answerConfig = computed(() => props.currentQuestion.question.questionConfiguration)
 const choiceConfig = computed(() => answerConfig.value as Choice)
 const fillInTheBlanksConfig = computed(() => answerConfig.value as FillInTheBlanks)
+const choiceAnswerMode = computed(
+  () => choiceConfig.value.answerMode ?? (choiceConfig.value.multipleRow ? 'multiple' : 'single')
+)
 const isChoiceLike = computed(
   () => props.currentQuestion.question.questionType === QuestionType.Choice
 )
@@ -116,6 +135,10 @@ function toggleOption(optionId: number) {
   selectedOptionIds.value = selectedOptionIds.value.includes(optionId)
     ? selectedOptionIds.value.filter((id) => id !== optionId)
     : [...selectedOptionIds.value, optionId]
+}
+
+function selectSingleOption(optionId: number | null) {
+  selectedOptionIds.value = optionId === null ? [] : [optionId]
 }
 
 function isMatrixSelected(rowId: number, colId: number): boolean {

@@ -1,9 +1,8 @@
 import apiV2 from '@/services/apiV2Client'
-import type { QuestionAttempt, StudySession } from '@/model/types'
+import type { QuestionAttempt, StudySession, StudySessionReplacement } from '@/model/types'
 import type { AxiosResponse } from 'axios'
 
 type StudySessionInput = Omit<StudySession, 'id' | 'history' | 'algorithm'>
-type StudySessionReplacement = Omit<StudySession, 'id' | 'studentId' | 'history' | 'algorithm'>
 
 /**
  * Service für die v2-StudySession-/QuestionAttempt-API

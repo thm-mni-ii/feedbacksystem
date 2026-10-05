@@ -57,7 +57,7 @@ function toSessionDocument(
     algorithm: input.algorithm,
     startedAt: new Date(input.startedAt),
     updatedAt: new Date(input.updatedAt),
-    completedAt: input.completedAt ? new Date(input.completedAt) : (input.completedAt as null | undefined),
+    completedAt: input.completedAt != null ? new Date(input.completedAt) : input.completedAt,
     competencies: input.competencies,
     recentQuestionIds: input.recentQuestionIds,
     excludedQuestionIds: input.excludedQuestionIds,
@@ -133,6 +133,7 @@ export class SessionRepository {
 interface QuestionAttemptDocument {
   sessionId: string;
   studentId: string;
+  clientAttemptId?: string;
   submittedAt: Date;
 }
 
@@ -157,7 +158,10 @@ export async function ensureSessionIndexes(db: Db): Promise<void> {
         }
       ])
       .toArray();
-    await db.collection(legacyAttemptCollection).drop();
+    console.warn(
+      "Legacy learningAttempt records copied non-destructively; source collection retained. " +
+      "Conflicting _id records keep the existing questionAttempt; inspect the retained source before manual cleanup."
+    );
   }
 
   await Promise.all([
@@ -169,7 +173,11 @@ export async function ensureSessionIndexes(db: Db): Promise<void> {
     db.collection<QuestionAttemptDocument>(attemptCollection).createIndex({
       studentId: 1,
       submittedAt: 1
-    })
+    }),
+    db.collection<QuestionAttemptDocument>(attemptCollection).createIndex(
+      { sessionId: 1, studentId: 1, clientAttemptId: 1 },
+      { unique: true, partialFilterExpression: { clientAttemptId: { $type: "string" } } }
+    )
   ]);
 }
 

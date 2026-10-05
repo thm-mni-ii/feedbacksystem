@@ -11,6 +11,17 @@ export function getLatestCourseSession(
   )
 }
 
+export function getOpenCourseSession(
+  sessions: StudySession[],
+  courseId: string
+): StudySession | null {
+  const latestStartedSession = sessions
+    .filter((session) => session.courseId === courseId)
+    .sort((a, b) => b.startedAt - a.startedAt || b.updatedAt - a.updatedAt)[0]
+
+  return latestStartedSession?.completedAt == null ? latestStartedSession ?? null : null
+}
+
 export function getCompetencyProgress(session: StudySession | null, competencyId: string): number {
   return Math.round((session?.competencies[competencyId]?.score ?? 0) * 100)
 }

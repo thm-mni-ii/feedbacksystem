@@ -8,5 +8,6 @@
     },
     "noEmit": true
   },
-  "include": ["src/seed"]
+  "include": ["src/seed"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

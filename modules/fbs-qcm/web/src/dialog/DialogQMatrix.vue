@@ -51,7 +51,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   title: 'Q-Matrix',
-  buttonLabel: 'Open Q-Matrix'
+  buttonLabel: 'Q-Matrix öffnen'
 })
 
 const isOpen = ref(false)

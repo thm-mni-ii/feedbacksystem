@@ -19,6 +19,51 @@ type CompetencyMockItem = {
 
 const competencyMocks: CompetencyMockItem[] = [
   {
+    _id: 'c-datengrundlagen',
+    name: 'Daten- und Informationsgrundlagen',
+    description: 'Grundbegriffe, Informationseigenschaften, Datenhierarchie und Datentypen (Kapitel 1)',
+    difficulty: 0.2,
+    courseId: null,
+    isPublic: true,
+    category: 'database'
+  },
+  {
+    _id: 'c-datengrundlagen-daten-information-wissen',
+    name: 'Daten, Information und Wissen',
+    description: 'Semantik, Zweckorientierung und systematische Verknüpfung von Informationen',
+    difficulty: 0.2,
+    courseId: null,
+    isPublic: true,
+    parentId: 'c-datengrundlagen'
+  },
+  {
+    _id: 'c-datengrundlagen-informationsmerkmale',
+    name: 'Eigenschaften von Information',
+    description: 'Nutzbarkeit, Non-Exklusivität, Kopierbarkeit und zeitabhängiger Wert',
+    difficulty: 0.2,
+    courseId: null,
+    isPublic: true,
+    parentId: 'c-datengrundlagen'
+  },
+  {
+    _id: 'c-datengrundlagen-datenhierarchie',
+    name: 'Datenhierarchie',
+    description: 'Datenelement, Datensegment, Datensatz, Datenblock und Datei',
+    difficulty: 0.2,
+    courseId: null,
+    isPublic: true,
+    parentId: 'c-datengrundlagen'
+  },
+  {
+    _id: 'c-datengrundlagen-datentypen',
+    name: 'Datentypen und Datenkategorien',
+    description: 'Wertebereiche, zulässige Operationen sowie strukturierte und unstrukturierte Daten',
+    difficulty: 0.2,
+    courseId: null,
+    isPublic: true,
+    parentId: 'c-datengrundlagen'
+  },
+  {
     _id: 'c-datenorganisation',
     name: 'Datenorganisation & Datenbankkonzept',
     description:
@@ -532,6 +577,11 @@ function toStudyQuestion(question: QuestionMockItem): Question {
   const isMatching = question.questiontype === 'matching'
   const isMatrix = question.questiontype === 'matrix'
   const hasMatrixColumns = (question.answerColumns?.length ?? 0) > 1
+  const optionRows = question.optionRows ?? [{ id: 1, text: '', correctAnswers: [] }]
+  const correctRowCount = optionRows.filter((row) => row.correctAnswers.length > 0).length
+  const answerMode =
+    question.answerMode ??
+    (question.multipleRow || correctRowCount > 1 ? 'multiple' : 'single')
 
   const questionType = isFillInTheBlanks
     ? QuestionType.FillInTheBlanks
@@ -557,11 +607,12 @@ function toStudyQuestion(question: QuestionMockItem): Question {
           }))
         }
       : {
-        multipleRow: question.multipleRow ?? false,
-        multipleColumn: isMatrix || hasMatrixColumns || (question.multipleColumn ?? false),
-        answerColumns: question.answerColumns ?? [{ id: 1, name: '' }],
-        optionRows: question.optionRows ?? [{ id: 1, text: '', correctAnswers: [] }]
-      }
+          answerMode,
+          multipleRow: answerMode === 'multiple',
+          multipleColumn: isMatrix || hasMatrixColumns || (question.multipleColumn ?? false),
+          answerColumns: question.answerColumns ?? [{ id: 1, name: '' }],
+          optionRows
+        }
 
   return {
     id: question._id,

@@ -36,7 +36,7 @@ const allBlankParts = computed(() =>
 
 // Optionen je Lücke: bevorzugt die pro Lücke festgelegten Distraktoren, gemischt mit der
 // richtigen Antwort. Fällt mangels Distraktoren auf den bisherigen globalen Wortpool
-// (alle Blank-Texte der Frage) zurück, damit ältere Fragen ohne Distraktoren weiter funktionieren.
+// (alle Blank-Texte der Aufgabe) zurück, damit ältere Aufgaben ohne Distraktoren weiter funktionieren.
 const possibleAnswersByOrder = computed(() => {
   const map = new Map<number, string[]>()
   for (const part of allBlankParts.value) {

@@ -4,92 +4,77 @@
       {{ selectedNode.data.description }}
     </p>
 
-    <v-card class="pa-4 profile-card" elevation="0" rounded="lg">
-      <div class="d-flex align-center justify-space-between mb-3">
-        <p class="mb-0 font-weight-bold">Kompetenzstruktur</p>
-        <v-chip size="small" variant="flat" class="summary-chip">
-          {{ totalCompetencies }} Kompetenzen
-        </v-chip>
-      </div>
-
-      <v-expansion-panels v-model="expandedPanel" variant="accordion" class="profile-panels">
-        <v-expansion-panel
-          v-for="group in competencyGroups"
-          :key="group.root.id"
-          :value="group.root.id"
-          elevation="0"
-          rounded="lg"
-          class="mb-2"
-        >
-          <v-expansion-panel-title>
-            <div class="w-100 d-flex align-center justify-space-between ga-2">
-              <div class="d-flex align-center ga-2 min-w-0">
-                <span
-                  class="root-dot"
-                  :style="{ backgroundColor: getCompetencyColor(group.root) }"
-                ></span>
-                <span class="font-weight-medium text-truncate">{{ group.root.name }}</span>
-              </div>
-              <v-chip size="x-small" :color="getCompetencyColor(group.root)" variant="flat">
-                {{ group.hierarchy.length }} Unterkompetenzen
-              </v-chip>
-            </div>
-          </v-expansion-panel-title>
-
-          <v-expansion-panel-text>
-            <p v-if="group.root.description" class="text-caption text-medium-emphasis mb-3">
-              {{ group.root.description }}
-            </p>
-
-            <div
-              v-for="item in group.hierarchy"
-              :key="item.competency.id"
-              class="mb-2 profile-item"
-              :class="`profile-item--depth-${Math.min(item.depth, 4)}`"
-              :style="{ paddingLeft: `${item.depth * 14}px` }"
-            >
-              <div
-                class="profile-item-line"
-                :style="{ backgroundColor: getCompetencyColor(item.competency) }"
-              ></div>
-              <div class="d-flex align-center justify-space-between ga-2">
-                <div class="d-flex align-center ga-2 min-w-0">
-                  <v-icon size="14" color="grey-darken-1">mdi-source-branch</v-icon>
-                  <span class="text-body-2 text-truncate">{{ item.competency.name }}</span>
-                </div>
-                <v-chip
-                  size="x-small"
-                  :color="getCompetencyColor(item.competency)"
-                  variant="tonal"
-                  class="level-chip"
-                >
-                  L{{ item.depth }}
-                </v-chip>
-              </div>
-            </div>
-
-            <p v-if="!group.hierarchy.length" class="text-caption text-medium-emphasis mb-0">
-              Keine Unterkompetenzen vorhanden.
-            </p>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+    <!-- Empty State: neuer Kurs ohne Kompetenzen -->
+    <v-card
+      v-if="rootCompetencies.length === 0"
+      class="pa-6 profile-card text-center empty-state-card"
+      elevation="0"
+      rounded="lg"
+    >
+      <v-icon size="40" color="var(--sg-accent)" class="mb-3">mdi-brain</v-icon>
+      <p class="text-body-1 font-weight-bold mb-1">Noch keine Kompetenzen angelegt</p>
+      <p class="text-body-2 text-medium-emphasis mb-4">
+        Lege deine erste Kompetenz an, um Aufgaben daran zuordnen zu können und den
+        Kompetenzbaum für diesen Kurs aufzubauen.
+      </p>
+      <v-btn
+        v-if="!readonly"
+        color="primary"
+        prepend-icon="mdi-plus"
+        @click="editCompetency()"
+      >
+        Erste Kompetenz anlegen
+      </v-btn>
     </v-card>
 
-    <v-card elevation="0" rounded="lg" class="mt-3 question-summary-card">
-      <v-card-text>
-        <div>
-          <div class="text-caption text-medium-emphasis">Fragen</div>
-          <div class="text-h6">{{ questions.length }}</div>
-          <div class="text-caption text-medium-emphasis">gesamt im aktuellen Kursmodell</div>
-        </div>
-      </v-card-text>
+    <!--
+      Die vollständige Kompetenzstruktur (Namen, Hierarchie) wird bewusst
+      NICHT nochmal hier aufgelistet: sie ist bereits links im Graphen bzw.
+      in der Listenansicht sichtbar. Dieses Panel liefert nur Kennzahlen und
+      handlungsrelevante Hinweise, die dort nicht auf einen Blick erkennbar
+      sind.
+    -->
+    <v-card v-else class="pa-4 profile-card" elevation="0" rounded="lg">
+      <p class="mb-3 font-weight-bold">Kursüberblick</p>
+
+      <v-row>
+        <v-col cols="6" md="4">
+          <div class="overview-tile">
+            <div class="text-caption text-medium-emphasis mb-1">Kompetenzen</div>
+            <div class="text-h6">{{ totalCompetencies }}</div>
+          </div>
+        </v-col>
+        <v-col cols="6" md="4">
+          <div class="overview-tile">
+            <div class="text-caption text-medium-emphasis mb-1">Aufgaben</div>
+            <div class="text-h6">{{ questions.length }}</div>
+          </div>
+        </v-col>
+        <v-col cols="12" md="4">
+          <div class="overview-tile">
+            <div class="text-caption text-medium-emphasis mb-1">Ohne Aufgaben</div>
+            <div class="text-h6">{{ competenciesWithoutQuestions.length }}</div>
+          </div>
+        </v-col>
+      </v-row>
+
+      <v-alert
+        v-if="competenciesWithoutQuestions.length"
+        type="warning"
+        variant="tonal"
+        density="comfortable"
+        class="mt-3"
+      >
+        {{ competenciesWithoutQuestions.length }} Kompetenz(en) haben noch keine Aufgaben
+        zugeordnet. Nutze den Graphen bzw. die Listenansicht links, um gezielt Aufgaben zu
+        ergänzen.
+      </v-alert>
     </v-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { Competency, Question } from '@/model/types'
 import { competencyGraphPalette } from '@/plugins/vuetify'
 
@@ -98,37 +83,26 @@ interface Props {
   questions: Question[]
   rootCompetencies: Competency[]
   childCompetencies: (parentId: string) => Competency[]
-  getCompetencyColor: (comp?: Competency) => string
+  questionsWithCompetency: (compId: string) => Question[]
+  readonly?: boolean
+  editCompetency: (competencyId?: string, presetParentId?: string) => void
 }
 
 const props = defineProps<Props>()
 
-interface HierarchyItem {
-  competency: Competency
-  depth: number
-}
-
-const expandedPanel = ref<string | undefined>(props.rootCompetencies[0]?.id)
-
-const buildHierarchy = (parentId: string, depth = 1): HierarchyItem[] => {
+const collectAllCompetencies = (parentId: string): Competency[] => {
   const children = props.childCompetencies(parentId)
-  return children.flatMap((child) => [
-    { competency: child, depth },
-    ...buildHierarchy(child.id, depth + 1)
-  ])
+  return children.flatMap((child) => [child, ...collectAllCompetencies(child.id)])
 }
 
-const competencyGroups = computed(() =>
-  props.rootCompetencies.map((root) => ({
-    root,
-    hierarchy: buildHierarchy(root.id)
-  }))
+const allCompetencies = computed(() =>
+  props.rootCompetencies.flatMap((root) => [root, ...collectAllCompetencies(root.id)])
 )
 
-const totalCompetencies = computed(
-  () =>
-    props.rootCompetencies.length +
-    competencyGroups.value.reduce((sum, g) => sum + g.hierarchy.length, 0)
+const totalCompetencies = computed(() => allCompetencies.value.length)
+
+const competenciesWithoutQuestions = computed(() =>
+  allCompetencies.value.filter((competency) => props.questionsWithCompetency(competency.id).length === 0)
 )
 
 const panelStyles = {
@@ -138,11 +112,7 @@ const panelStyles = {
   '--sg-shadow': competencyGraphPalette.panelShadow,
   '--sg-text-primary': competencyGraphPalette.textPrimary,
   '--sg-text-secondary': competencyGraphPalette.textSecondary,
-  '--sg-accent': competencyGraphPalette.accent,
-  '--sg-depth-1': competencyGraphPalette.hierarchyDepth1,
-  '--sg-depth-2': competencyGraphPalette.hierarchyDepth2,
-  '--sg-depth-3': competencyGraphPalette.hierarchyDepth3,
-  '--sg-depth-4': competencyGraphPalette.hierarchyDepth4
+  '--sg-accent': competencyGraphPalette.accent
 }
 </script>
 
@@ -153,10 +123,8 @@ const panelStyles = {
   box-shadow: 0 8px 22px var(--sg-shadow);
 }
 
-.question-summary-card {
-  background: linear-gradient(180deg, var(--sg-surface) 0%, var(--sg-surface-muted) 100%);
-  border: 1px solid var(--sg-border);
-  box-shadow: 0 8px 22px var(--sg-shadow);
+.empty-state-card {
+  border-style: dashed;
 }
 
 .course-description {
@@ -164,64 +132,10 @@ const panelStyles = {
   line-height: 1.4;
 }
 
-.summary-chip {
-  color: var(--sg-surface);
-  background: var(--sg-accent);
-}
-
-.profile-panels :deep(.v-expansion-panel) {
-  border: 1px solid var(--sg-border);
-  background: var(--sg-surface);
-}
-
-.profile-panels :deep(.v-expansion-panel-title) {
-  min-height: 48px;
-}
-
-.root-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  flex: 0 0 auto;
-  box-shadow: 0 0 0 3px var(--sg-surface);
-}
-
-.profile-item {
-  position: relative;
+.overview-tile {
   border-radius: 12px;
-  padding-top: 6px;
-  padding-right: 8px;
-  padding-bottom: 6px;
+  padding: 10px 12px;
   background: var(--sg-surface-muted);
   border: 1px solid var(--sg-border);
-}
-
-.profile-item-line {
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 6px;
-  width: 3px;
-  border-radius: 999px;
-}
-
-.profile-item--depth-1 {
-  background: var(--sg-depth-1);
-}
-
-.profile-item--depth-2 {
-  background: var(--sg-depth-2);
-}
-
-.profile-item--depth-3 {
-  background: var(--sg-depth-3);
-}
-
-.profile-item--depth-4 {
-  background: var(--sg-depth-4);
-}
-
-.level-chip {
-  font-weight: 600;
 }
 </style>

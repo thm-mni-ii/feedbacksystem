@@ -11,7 +11,7 @@ const router = createRouter({
       component: HomeView
     },
     {
-      // Globaler, kursunabhängiger Fragenpool: Kompetenzen und Fragen werden
+      // Globaler, kursunabhängiger Aufgabenpool: Kompetenzen und Aufgaben werden
       // hier angelegt und später einzelnen Kursen zugeordnet.
       path: '/pool',
       name: 'questionPool',
@@ -19,7 +19,7 @@ const router = createRouter({
       meta: { requiresAdmin: true }
     },
     {
-      // Dozenten-Sandbox zum Simulieren von Algorithmus + Fragenpool, bevor
+      // Dozenten-Sandbox zum Simulieren von Algorithmus + Aufgabenpool, bevor
       // eine Konfiguration für Studenten live geschaltet wird.
       path: '/lab',
       name: 'AlgorithmLab',
@@ -69,7 +69,7 @@ const router = createRouter({
   ]
 })
 
-// Dozenten-Werkzeuge (Fragenpool, Algorithm Lab, Kurs-Fragen/-Einstellungen)
+// Dozenten-Werkzeuge (Aufgabenpool, Algorithm Lab, Kurs-Aufgaben/-Einstellungen)
 // sind nur für ADMIN in der Navigation sichtbar - zusätzlich hier als Guard
 // absichern, damit sie nicht per Direktaufruf der URL umgangen werden können.
 router.beforeEach((to) => {

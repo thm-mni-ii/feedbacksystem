@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   buildProfileGroups,
   type ProfileGroup,
@@ -15,18 +15,32 @@ const props = defineProps<{
 }>()
 
 const expandedGroups = ref<string[]>([])
-const activeFilter = ref<'all' | 'needs-practice' | 'unassessed' | 'secure'>('all')
-
-const filterItems = [
-  { title: 'Alle', value: 'all' },
-  { title: 'Lernbedarf', value: 'needs-practice' },
-  { title: 'Nicht bewertet', value: 'unassessed' },
-  { title: 'Sicher', value: 'secure' }
-]
+type CompetencyFilter = 'all' | 'needs-practice' | 'high-estimate'
+const activeFilter = ref<CompetencyFilter>('all')
 
 const groups = computed(() => buildProfileGroups(props.competencies, props.progress))
 
 const assessedProgress = computed(() => props.progress.filter((item) => item.timesAssessed > 0))
+
+const filterItems = computed(
+  (): Array<{ title: string; value: CompetencyFilter; count: number }> => [
+    {
+      title: 'Alle',
+      value: 'all',
+      count: props.competencies.length
+    },
+    {
+      title: 'Übungsbedarf',
+      value: 'needs-practice',
+      count: props.progress.filter((item) => item.timesAssessed === 0 || item.score < 0.75).length
+    },
+    {
+      title: 'Fortgeschritten',
+      value: 'high-estimate',
+      count: props.progress.filter((item) => item.timesAssessed > 0 && item.score >= 0.75).length
+    }
+  ]
+)
 
 const averageScore = computed(() => {
   if (assessedProgress.value.length === 0) return 0
@@ -37,62 +51,63 @@ const averageScore = computed(() => {
   )
 })
 
-const strongest = computed(() => {
-  return [...assessedProgress.value].sort(
-    (a, b) => b.score - a.score || b.timesAssessed - a.timesAssessed
-  )[0]
-})
-
-const focus = computed(() => {
-  return [...assessedProgress.value].sort(
-    (a, b) => a.score - b.score || b.uncertainty - a.uncertainty
-  )[0]
-})
-
 const groupSummaries = computed(() =>
   groups.value
     .map((group) => {
       const items = groupItems(group)
+      const matchingItems = items.filter((item) => matchesFilter(item))
+      const assessedMatchingItems = matchingItems.filter((item) => item.timesAssessed > 0)
       const visibleItems = group.items.filter((item) => matchesFilter(item))
+      const filterLabel =
+        activeFilter.value === 'needs-practice'
+          ? 'mit Übungsbedarf'
+          : activeFilter.value === 'high-estimate'
+            ? 'fortgeschritten'
+            : 'Kompetenzen'
       return {
         ...group,
-        score: groupScore(group),
-        assessedCount: items.filter((item) => item.timesAssessed > 0).length,
+        score: groupScore(assessedMatchingItems),
+        assessedCount: assessedMatchingItems.length,
+        matchingCount: matchingItems.length,
+        filterLabel,
         visibleItems,
-        hasVisibleItems: activeFilter.value === 'all' || items.some((item) => matchesFilter(item))
+        hasVisibleItems: activeFilter.value === 'all' || matchingItems.length > 0
       }
     })
     .filter((group) => group.hasVisibleItems)
 )
 
+watch(activeFilter, (filter) => {
+  expandedGroups.value =
+    filter === 'all' ? [] : groupSummaries.value.map((group) => group.root.competencyId)
+})
+
 function groupItems(group: ProfileGroup): ProfileItem[] {
   return [group.root, ...group.items]
 }
 
-function groupScore(group: ProfileGroup): number {
-  const items = groupItems(group).filter((item) => item.timesAssessed > 0)
+function groupScore(items: ProfileItem[]): number {
   if (items.length === 0) return 0
   return Math.round((items.reduce((total, item) => total + item.score, 0) / items.length) * 100)
 }
 
 function matchesFilter(item: ProfileItem): boolean {
-  if (activeFilter.value === 'unassessed') return item.timesAssessed === 0
-  if (activeFilter.value === 'secure') return item.timesAssessed > 0 && item.score >= 0.75
+  if (activeFilter.value === 'high-estimate') return item.timesAssessed > 0 && item.score >= 0.75
   if (activeFilter.value === 'needs-practice') {
-    return item.timesAssessed > 0 && item.score < 0.75
+    return item.timesAssessed === 0 || item.score < 0.75
   }
   return true
 }
 
 function scoreLabel(item: Pick<ProfileItem, 'score' | 'timesAssessed'>): string {
-  return item.timesAssessed > 0 ? `${Math.round(item.score * 100)} %` : 'Nicht bewertet'
+  return item.timesAssessed > 0 ? `${Math.round(item.score * 100)} %` : 'Noch nicht geübt'
 }
 
 function statusLabel(item: ProfileItem): string {
-  if (item.timesAssessed === 0) return 'Noch offen'
-  if (item.score >= 0.75) return 'Sicher'
-  if (item.score >= 0.5) return 'In Arbeit'
-  return 'Übungsbedarf'
+  if (item.timesAssessed === 0) return 'Noch nicht geübt'
+  if (item.score >= 0.75) return 'Fortgeschritten'
+  if (item.score >= 0.5) return 'Übungsbedarf'
+  return 'Hoher Übungsbedarf'
 }
 
 function statusColor(item: ProfileItem): string {
@@ -101,6 +116,16 @@ function statusColor(item: ProfileItem): string {
   if (item.score >= 0.5) return 'warning'
   return 'error'
 }
+
+const filterDescription = computed(() => {
+  if (activeFilter.value === 'needs-practice') {
+    return 'Enthält noch nicht geübte Kompetenzen und Kompetenzen mit einem geschätzten Lernstand unter 75 %.'
+  }
+  if (activeFilter.value === 'high-estimate') {
+    return 'Kompetenzen mit einem geschätzten Lernstand ab 75 %. Der Wert basiert auf bisherigen Antworten und ist kein gesicherter Nachweis der Beherrschung.'
+  }
+  return 'Alle Kompetenzen dieses Kurses – mit ihrem bisherigen Lernstand.'
+})
 </script>
 
 <template>
@@ -109,7 +134,7 @@ function statusColor(item: ProfileItem): string {
       <div>
         <h2 id="learning-status-title" class="text-h5 font-weight-bold">Dein Lernstand</h2>
         <p class="text-body-2 text-medium-emphasis mb-0">
-          Eine Übersicht über den zuletzt ermittelten Kenntnisstand.
+          Eine Übersicht der algorithmischen Einschätzung auf Basis deiner bisherigen Antworten.
         </p>
       </div>
       <v-chip v-if="hasSession" variant="tonal" color="primary">
@@ -127,62 +152,63 @@ function statusColor(item: ProfileItem): string {
 
     <template v-else>
       <v-card variant="outlined" class="course-surface learning-summary mb-8">
-        <v-card-text class="pa-5">
-          <div class="summary-layout">
-            <div class="summary-primary">
-              <div class="text-overline text-medium-emphasis">Geschätzter Kenntnisstand</div>
-              <div class="summary-primary__value">{{ averageScore }} %</div>
+        <v-card-text class="pa-0">
+          <v-row no-gutters>
+            <v-col cols="12" sm="4" class="text-center text-sm-start pa-5">
+              <div class="text-overline text-medium-emphasis">Durchschnittlicher Lernstand</div>
+              <div class="text-h4 font-weight-bold text-primary">{{ averageScore }} %</div>
               <div class="text-caption text-medium-emphasis">
-                Durchschnitt aus bewerteten Kompetenzen
+                Geschätzter Mittelwert der geübten Kompetenzen
               </div>
-            </div>
-            <div class="summary-stats">
-              <div class="summary-stat">
-                <div class="text-overline text-medium-emphasis">Stärkste Kompetenz</div>
-                <div class="text-subtitle-1 font-weight-bold text-truncate">
-                  {{ strongest?.label ?? 'Noch keine Daten' }}
-                </div>
-                <div class="text-caption text-medium-emphasis">
-                  {{ strongest ? scoreLabel(strongest) : '—' }}
-                </div>
+            </v-col>
+            <v-divider vertical class="d-none d-sm-flex" />
+            <v-divider class="d-sm-none" />
+            <v-col cols="12" sm="4" class="text-center text-sm-start pa-5">
+              <div class="text-overline text-medium-emphasis">Bearbeitete Kompetenzen</div>
+              <div class="text-h4 font-weight-bold text-primary">
+                {{ assessedProgress.length }} / {{ competencies.length }}
               </div>
-              <div class="summary-stat">
-                <div class="text-overline text-medium-emphasis">Nächster Lernfokus</div>
-                <div class="text-subtitle-1 font-weight-bold text-truncate">
-                  {{ focus?.label ?? 'Noch keine Daten' }}
-                </div>
-                <div class="text-caption text-medium-emphasis">
-                  {{ focus ? scoreLabel(focus) : '—' }}
-                </div>
-              </div>
-              <div class="summary-stat">
-                <div class="text-overline text-medium-emphasis">Begegnete Fragen</div>
-                <div class="text-h5 font-weight-bold text-primary">{{ encounteredQuestions }}</div>
-                <div class="text-caption text-medium-emphasis">über alle Lernsitzungen</div>
-              </div>
-            </div>
-          </div>
+              <div class="text-caption text-medium-emphasis">bereits mindestens einmal geübt</div>
+            </v-col>
+            <v-divider vertical class="d-none d-sm-flex" />
+            <v-divider class="d-sm-none" />
+            <v-col cols="12" sm="4" class="text-center text-sm-start pa-5">
+              <div class="text-overline text-medium-emphasis">Begegnete Aufgaben</div>
+              <div class="text-h4 font-weight-bold text-primary">{{ encounteredQuestions }}</div>
+              <div class="text-caption text-medium-emphasis">über alle Lernsitzungen</div>
+            </v-col>
+          </v-row>
         </v-card-text>
       </v-card>
 
-      <div class="d-flex align-end justify-space-between flex-wrap ga-4 mb-4">
+      <div class="mb-4">
         <div>
           <h2 id="learning-status-title" class="text-h5 font-weight-bold">Kompetenzübersicht</h2>
           <p class="text-body-2 text-medium-emphasis mb-0">
             Öffne einen Bereich, um die einzelnen Kompetenzen zu sehen.
           </p>
         </div>
-        <v-btn-toggle v-model="activeFilter" mandatory color="primary" variant="outlined" divided>
-          <v-btn
-            v-for="filter in filterItems"
-            :key="filter.value"
-            :value="filter.value"
-            size="small"
-          >
-            {{ filter.title }}
+      </div>
+
+      <div class="mb-2">
+        <v-btn-toggle
+          v-model="activeFilter"
+          mandatory
+          color="primary"
+          variant="outlined"
+          divided
+          class="competency-filter-toggle"
+          role="group"
+          aria-label="Kompetenzen filtern"
+        >
+          <v-btn v-for="filter in filterItems" :key="filter.value" :value="filter.value" size="small">
+            {{ filter.title }} ({{ filter.count }})
           </v-btn>
         </v-btn-toggle>
       </div>
+      <p class="text-body-2 text-medium-emphasis mb-4">
+        {{ filterDescription }}
+      </p>
 
       <v-expansion-panels v-model="expandedGroups" multiple variant="accordion">
         <v-expansion-panel
@@ -199,14 +225,21 @@ function statusColor(item: ProfileItem): string {
                     {{ group.root.label }}
                   </div>
                   <div class="text-caption text-medium-emphasis">
-                    {{ group.items.length }} Unterkompetenz{{
-                      group.items.length === 1 ? '' : 'en'
-                    }}
-                    · {{ group.assessedCount }} bewertet
+                    {{ group.matchingCount }}
+                    {{ group.filterLabel }}
+                    <template v-if="group.assessedCount">
+                      · {{ group.assessedCount }} geübt
+                    </template>
                   </div>
                 </div>
                 <div class="group-score text-no-wrap mr-4">
-                  {{ group.assessedCount ? `${group.score} %` : 'Noch nicht bewertet' }}
+                  {{
+                    group.assessedCount
+                      ? `${group.score} %`
+                      : group.matchingCount
+                        ? 'Noch nicht geübt'
+                        : '—'
+                  }}
                 </div>
               </div>
               <v-progress-linear
@@ -245,7 +278,13 @@ function statusColor(item: ProfileItem): string {
                 </span>
               </div>
             </div>
-            <p v-if="group.visibleItems.length === 0" class="text-body-2 text-medium-emphasis mb-0">
+            <p
+              v-if="
+                group.visibleItems.length === 0 &&
+                !(activeFilter !== 'all' && matchesFilter(group.root))
+              "
+              class="text-body-2 text-medium-emphasis mb-0"
+            >
               Keine Kompetenzen entsprechen diesem Filter.
             </p>
           </v-expansion-panel-text>
@@ -268,41 +307,8 @@ function statusColor(item: ProfileItem): string {
   border-color: rgb(var(--v-theme-app-border));
 }
 
-.summary-layout {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 2.15fr);
-  gap: 0;
-}
-
-.summary-primary {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  padding: 4px 28px 4px 4px;
-  border-right: 1px solid rgb(var(--v-theme-app-border));
-}
-
-.summary-primary__value {
-  color: rgb(var(--v-theme-primary));
-  font-size: 2.25rem;
-  font-weight: 700;
-  line-height: 1.15;
-}
-
-.summary-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  min-width: 0;
-}
-
-.summary-stat {
-  min-width: 0;
-  padding: 4px 20px;
-}
-
-.summary-stat + .summary-stat {
-  border-left: 1px solid rgb(var(--v-theme-app-border));
+.competency-filter-toggle {
+  max-width: 100%;
 }
 
 .group-header {
@@ -329,42 +335,17 @@ function statusColor(item: ProfileItem): string {
   text-align: right;
 }
 
-@media (max-width: 700px) {
-  .summary-layout {
-    grid-template-columns: 1fr;
-    gap: 20px;
+@media (max-width: 600px) {
+  .competency-filter-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .summary-primary {
-    padding: 0 0 16px;
-    border-right: 0;
-    border-bottom: 1px solid rgb(var(--v-theme-app-border));
-  }
-
-  .summary-stat {
-    padding: 0 12px;
-  }
-
-  .summary-stat:first-child {
-    padding-left: 0;
-  }
-}
-
-@media (max-width: 450px) {
-  .summary-stats {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .summary-stat,
-  .summary-stat:first-child {
-    padding: 0;
-  }
-
-  .summary-stat + .summary-stat {
-    padding-top: 16px;
-    border-top: 1px solid rgb(var(--v-theme-app-border));
-    border-left: 0;
+  .competency-filter-toggle :deep(.v-btn) {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 44px;
   }
 }
 </style>

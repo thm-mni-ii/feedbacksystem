@@ -7,10 +7,6 @@
         :progress-label="progressLabel"
         @submit-answer="$emit('submitAnswer', $event)"
       />
-
-      <v-alert v-if="showFeedback" class="mt-4" type="success" variant="tonal">
-        Antwort gespeichert
-      </v-alert>
     </v-col>
   </v-row>
 </template>
@@ -29,7 +25,6 @@ defineProps<{
   currentQuestion: NextQuestion
   progress: number
   progressLabel: string
-  showFeedback: boolean
 }>()
 
 defineEmits<{

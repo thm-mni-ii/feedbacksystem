@@ -108,8 +108,7 @@ export function validateQMatrix(
     }
   }
 
-  // Practical CDM heuristic: for early-stage diagnostics, at least some single-attribute items
-  // improve identifiability and cleaner parameter estimation.
+  // Einfache Strukturwarnung, kein Nachweis der Identifizierbarkeit eines CDM.
   const singleAttributeItems = questions.filter(
     (q) => getQuestionCompetencyIds(q).length === 1
   ).length

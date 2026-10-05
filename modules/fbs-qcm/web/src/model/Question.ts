@@ -10,13 +10,16 @@ export default interface Question {
   id?: string
   text?: string
   title?: string
-  /** IDs der Competencies, die diese Frage abprüft (ersetzt das alte "Tags"-Konzept). */
+  /** IDs der Competencies, die diese Aufgabe abprüft (ersetzt das alte "Tags"-Konzept). */
   competencyIds: string[]
   /** Erweiterte Q-Matrix-Form mit Mehrfach-Attributen und optionalen Gewichten. */
-  competencyLinks?: { competencyId: string; weight?: number; relation?: 'required' | 'supporting' }[]
+  competencyLinks?: {
+    competencyId: string
+    weight?: number
+    relation?: 'required' | 'supporting'
+  }[]
   questionType: QuestionType
   questionConfiguration: any
   difficulty: number
   excludeFromAlgorithm?: boolean
 }
-

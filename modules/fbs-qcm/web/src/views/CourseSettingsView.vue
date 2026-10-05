@@ -33,6 +33,29 @@ const completionPresetItems = [
   { title: 'Individuell', value: 'custom' }
 ]
 
+const competencyStrategyItems = [
+  { title: 'Abdeckung und niedriger Lernstand (bisherige Methode)', value: 'coverage-weighted' },
+  { title: 'Erwarteter Informationsgewinn (experimentell)', value: 'expected-information-gain' }
+]
+
+const responseScoreModeItems = [
+  { title: 'Kontinuierliche Scores (bisheriges Verhalten)', value: 'continuous' },
+  { title: 'Binär nach Schwellenwert', value: 'threshold' }
+]
+
+const responseScoreMode = computed({
+  get: () =>
+    form.value?.selection.responseScoreThreshold === null ||
+    form.value?.selection.responseScoreThreshold === undefined
+      ? 'continuous'
+      : 'threshold',
+  set: (mode: 'continuous' | 'threshold') => {
+    if (!form.value) return
+    form.value.selection.responseScoreThreshold =
+      mode === 'continuous' ? null : (form.value.selection.responseScoreThreshold ?? 0.5)
+  }
+})
+
 const currentCompletionDescription = computed(() => {
   if (!form.value) return ''
   const { minEvidencePerCompetency, maxUncertainty } = form.value.completion
@@ -44,6 +67,9 @@ const currentCompletionDescription = computed(() => {
 const isFormValid = computed(() => {
   if (!form.value) return false
   const { session, selection, completion } = form.value
+  const hasValidResponseScoreThreshold =
+    selection.responseScoreThreshold === null ||
+    (selection.responseScoreThreshold >= 0.01 && selection.responseScoreThreshold <= 1)
   return (
     Number.isInteger(session.maxQuestionsPerSession) &&
     session.maxQuestionsPerSession >= 1 &&
@@ -56,6 +82,9 @@ const isFormValid = computed(() => {
     selection.recentQuestionWindow <= 100 &&
     selection.difficultyWindow >= 0 &&
     selection.difficultyWindow <= 1 &&
+    hasValidResponseScoreThreshold &&
+    (selection.competencyStrategy !== 'expected-information-gain' ||
+      (selection.responseScoreThreshold !== null && selection.singleRequiredItemsOnly)) &&
     Number.isInteger(completion.minEvidencePerCompetency) &&
     completion.minEvidencePerCompetency >= 1 &&
     completion.minEvidencePerCompetency <= 10 &&
@@ -63,6 +92,12 @@ const isFormValid = computed(() => {
     completion.maxUncertainty <= 0.95
   )
 })
+
+function onCompetencyStrategyChanged(strategy: string) {
+  if (!form.value || strategy !== 'expected-information-gain') return
+  form.value.selection.responseScoreThreshold ??= 0.5
+  form.value.selection.singleRequiredItemsOnly = true
+}
 
 function matchesCompletionPreset(
   value: StudyAlgorithmConfig['completion'],
@@ -119,14 +154,25 @@ function buildOverrides(
     overrides.completion = { ...value.completion }
   }
 
-  const selection = (
-    Object.keys(value.selection) as Array<keyof StudyAlgorithmConfig['selection']>
-  ).reduce<Partial<StudyAlgorithmConfig['selection']>>((result, key) => {
-    if (value.selection[key] !== defaults.selection[key]) {
-      result[key] = value.selection[key]
-    }
-    return result
-  }, {})
+  const selection: Partial<StudyAlgorithmConfig['selection']> = {}
+  if (value.selection.stickinessQuestions !== defaults.selection.stickinessQuestions) {
+    selection.stickinessQuestions = value.selection.stickinessQuestions
+  }
+  if (value.selection.difficultyWindow !== defaults.selection.difficultyWindow) {
+    selection.difficultyWindow = value.selection.difficultyWindow
+  }
+  if (value.selection.recentQuestionWindow !== defaults.selection.recentQuestionWindow) {
+    selection.recentQuestionWindow = value.selection.recentQuestionWindow
+  }
+  if (value.selection.competencyStrategy !== defaults.selection.competencyStrategy) {
+    selection.competencyStrategy = value.selection.competencyStrategy
+  }
+  if (value.selection.responseScoreThreshold !== defaults.selection.responseScoreThreshold) {
+    selection.responseScoreThreshold = value.selection.responseScoreThreshold
+  }
+  if (value.selection.singleRequiredItemsOnly !== defaults.selection.singleRequiredItemsOnly) {
+    selection.singleRequiredItemsOnly = value.selection.singleRequiredItemsOnly
+  }
   if (Object.keys(selection).length > 0) {
     overrides.selection = selection
   }
@@ -224,7 +270,7 @@ onMounted(loadConfiguration)
             <v-card-text class="text-body-2">
               Die <strong>Prüftiefe</strong> legt fest, wie sicher das System sein möchte, dass eine
               Kompetenz beherrscht wird. Ein <strong>Nachweis</strong> ist dabei eine beantwortete
-              Frage, die dem Algorithmus Informationen über diese Kompetenz liefert. Mehr Nachweise
+              Aufgabe, die dem Algorithmus Informationen über diese Kompetenz liefert. Mehr Nachweise
               und eine geringere Restunsicherheit führen zu einer gründlicheren, aber meist längeren
               Sitzung.
             </v-card-text>
@@ -243,7 +289,7 @@ onMounted(loadConfiguration)
                 type="number"
                 min="1"
                 max="200"
-                label="Maximale Fragen pro Sitzung"
+                label="Maximale Aufgaben pro Sitzung"
                 hint="Die Sitzung endet spätestens nach dieser Anzahl."
                 persistent-hint
                 :rules="[
@@ -284,7 +330,7 @@ onMounted(loadConfiguration)
                       min="1"
                       max="10"
                       label="Benötigte Nachweise je Kompetenz"
-                      hint="Wie viele beantwortete Fragen mindestens in die Einschätzung einfließen."
+                      hint="Wie viele beantwortete Aufgaben mindestens in die Einschätzung einfließen."
                       persistent-hint
                       :rules="[
                         (value) =>
@@ -312,7 +358,7 @@ onMounted(loadConfiguration)
                       @update:model-value="markCompletionAsCustom"
                     />
                     <p class="text-body-2 text-medium-emphasis">
-                      Niedrigere Werte verlangen mehr Sicherheit und können mehr Fragen erfordern.
+                      Niedrigere Werte verlangen mehr Sicherheit und können mehr Aufgaben erfordern.
                     </p>
                   </v-col>
                 </v-row>
@@ -320,10 +366,65 @@ onMounted(loadConfiguration)
             </v-expansion-panel>
           </v-expansion-panels>
 
-          <h2 class="text-h6 mb-4">Fragenauswahl</h2>
-          <p class="text-body-2 text-medium-emphasis mb-4">
-            Hier werden die Regeln für die Fragenauswahl festgelegt.
-          </p>
+          <h2 class="text-h6 mb-4">Aufgabenauswahl</h2>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="form.selection.competencyStrategy"
+                :items="competencyStrategyItems"
+                label="Auswahl der Zielkompetenz"
+                hint="Die experimentelle Methode priorisiert Kompetenzen nach erwartetem Informationsgewinn; die bisherige Methode bleibt Standard."
+                persistent-hint
+                @update:model-value="onCompetencyStrategyChanged"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="responseScoreMode"
+                :items="responseScoreModeItems"
+                label="Bewertung der Antwortscores"
+                hint="Für einen fairen Vergleich müssen beide Methoden mit derselben Score-Regel laufen."
+                persistent-hint
+              />
+            </v-col>
+          </v-row>
+          <v-alert
+            v-if="form.selection.competencyStrategy === 'expected-information-gain'"
+            type="info"
+            variant="tonal"
+            class="mb-4"
+          >
+            Experimentelle Methode: Sie wählt die Zielkompetenz, nicht das einzelne Item. Für die
+            Diagnose werden nur Aufgaben mit genau einer erforderlichen Kompetenz berücksichtigt.
+          </v-alert>
+          <v-row v-if="form.selection.responseScoreThreshold !== null">
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model.number="form.selection.responseScoreThreshold"
+                type="number"
+                min="0.01"
+                max="1"
+                step="0.01"
+                label="Richtig ab Score"
+                hint="Scores ab diesem Wert werden für die Wissensaktualisierung als richtig gewertet. Für Sensitivitätsanalysen kann der Wert variiert werden."
+                persistent-hint
+                :rules="[
+                  (value) =>
+                    (Number(value) >= 0.01 && Number(value) <= 1) ||
+                    'Erlaubt sind Werte von 0,01 bis 1.'
+                ]"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-checkbox
+                v-model="form.selection.singleRequiredItemsOnly"
+                label="Nur Aufgaben mit genau einer erforderlichen Kompetenz"
+                hint="Dieser Filter muss in beiden Vergleichsbedingungen identisch gesetzt sein."
+                persistent-hint
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
           <v-row>
             <v-col cols="12" md="6">
               <v-text-field
@@ -331,8 +432,8 @@ onMounted(loadConfiguration)
                 type="number"
                 min="1"
                 max="20"
-                label="Fragen pro Kompetenzblock"
-                hint="So viele Fragen bleiben nacheinander bei derselben Kompetenz, bevor der Fokus wechseln darf."
+                label="Aufgaben pro Kompetenzblock"
+                hint="So viele Aufgaben bleiben nacheinander bei derselben Kompetenz, bevor der Fokus wechseln darf."
                 persistent-hint
                 :rules="[
                   (value) =>
@@ -350,7 +451,7 @@ onMounted(loadConfiguration)
                 min="0"
                 max="100"
                 label="Wiederholungsabstand"
-                hint="So viele zuletzt gestellte Fragen werden zunächst übersprungen, damit sich Fragen nicht direkt wiederholen."
+                hint="So viele zuletzt gestellte Aufgaben werden zunächst übersprungen, damit sich Aufgaben nicht direkt wiederholen."
                 persistent-hint
                 :rules="[
                   (value) =>
@@ -368,7 +469,7 @@ onMounted(loadConfiguration)
               <span class="text-body-1">
                 Passende Schwierigkeit
                 <v-tooltip
-                  text="Wie weit die Schwierigkeit einer Frage vom geschätzten Lernstand abweichen darf."
+                  text="Wie weit die Schwierigkeit einer Aufgabe vom geschätzten Lernstand abweichen darf."
                 >
                   <template #activator="{ props: tooltipProps }">
                     <v-icon
@@ -393,7 +494,7 @@ onMounted(loadConfiguration)
               hide-details
             />
             <p class="text-body-2 text-medium-emphasis">
-              Kleinere Werte wählen Fragen näher am aktuell geschätzten Kompetenzniveau.
+              Kleinere Werte wählen Aufgaben näher am aktuell geschätzten Kompetenzniveau.
             </p>
           </div>
 

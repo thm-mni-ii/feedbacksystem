@@ -21,13 +21,19 @@ const props = withDefaults(
     isNew: boolean
     /**
      * Steuert, ob beim Speichern der echte Backend-Call (questionService)
-     * ausgeführt wird. Der Kompetenzgraph arbeitet mit lokalen Mock-Fragen, die
+     * ausgeführt wird. Der Kompetenzgraph arbeitet mit lokalen Mock-Aufgaben, die
      * im Backend nicht existieren – dort wird `persist=false` übergeben und
-     * die bearbeitete Frage stattdessen per `update`-Event nach oben gereicht.
+     * die bearbeitete Aufgabe stattdessen per `update`-Event nach oben gereicht.
      */
     persist?: boolean
+    /**
+     * Vorbelegte Kompetenz-IDs für eine neue Aufgabe, z.B. wenn "Aufgabe zu
+     * dieser Kompetenz hinzufügen" direkt aus dem Kompetenz-Detail-Panel
+     * heraus aufgerufen wird. Wird nur beim Neuanlegen berücksichtigt.
+     */
+    presetCompetencyIds?: string[]
   }>(),
-  { inputQuestion: undefined, persist: true }
+  { inputQuestion: undefined, persist: true, presetCompetencyIds: undefined }
 )
 
 const emit = defineEmits<{
@@ -73,6 +79,7 @@ const question = ref<Question>({
   questionType: QuestionType.Choice,
   difficulty: 0.5,
   questionConfiguration: {
+    answerMode: 'single',
     multipleRow: false,
     multipleColumn: false,
     answerColumns: [{ id: 1, name: '' }],
@@ -106,10 +113,11 @@ function initQuestion(q?: Question) {
     selectedQuestionType.value = 'Choice'
     question.value = {
       text: '',
-      competencyIds: [] as string[],
+      competencyIds: props.presetCompetencyIds ? [...props.presetCompetencyIds] : ([] as string[]),
       questionType: QuestionType.Choice,
       difficulty: 0.5,
       questionConfiguration: {
+        answerMode: 'single',
         multipleRow: false,
         multipleColumn: false,
         answerColumns: [{ id: 1, name: '' }],
@@ -138,6 +146,7 @@ watch(selectedQuestionType, (newType) => {
       }
     } else {
       question.value.questionConfiguration = {
+        answerMode: 'single',
         multipleRow: false,
         multipleColumn: false,
         answerColumns: [{ id: 1, name: '' }],
@@ -184,7 +193,7 @@ watch(selectedQuestionType, (newType) => {
   }
 })
 
-const difficultyTicks = { 0: 'Easy', 0.5: 'Medium', 1: 'Hard' }
+const difficultyTicks = { 0: 'Einfach', 0.5: 'Mittel', 1: 'Schwer' }
 
 const snackbar = ref({
   show: false,
@@ -223,17 +232,17 @@ function isMatchingConfiguration(config: any): config is Matching {
 }
 
 /**
- * Prüft die Pflichtfelder der aktuellen Frage vor dem Speichern.
+ * Prüft die Pflichtfelder der aktuellen Aufgabe vor dem Speichern.
  * Gibt eine Liste verständlicher Fehlermeldungen zurück (leer = gültig).
  * Bewusst als reine Funktion statt Vuetify-Formularregeln, weil die
- * Pflichtfelder je nach Fragetyp (Choice/Matrix/FillInTheBlanks/Matching) variieren
+ * Pflichtfelder je nach Aufgabentyp (Choice/Matrix/FillInTheBlanks/Matching) variieren
  * und mehrere verschachtelte Editor-Components betreffen.
  */
 function validateQuestion(): string[] {
   const errors: string[] = []
 
   if (!question.value.text?.trim()) {
-    errors.push('Bitte einen Fragetext eingeben.')
+    errors.push('Bitte einen Aufgabentext eingeben.')
   }
 
   if (!question.value.competencyIds || question.value.competencyIds.length === 0) {
@@ -249,8 +258,13 @@ function validateQuestion(): string[] {
       if (config.optionRows.some((row) => !row.text?.trim())) {
         errors.push('Bitte für alle Antwortoptionen einen Text eingeben.')
       }
-      if (!config.optionRows.some((row) => row.correctAnswers && row.correctAnswers.length > 0)) {
+      const correctAnswerCount = config.optionRows.filter(
+        (row) => row.correctAnswers && row.correctAnswers.length > 0
+      ).length
+      if (correctAnswerCount === 0) {
         errors.push('Bitte mindestens eine richtige Antwort markieren.')
+      } else if (config.answerMode === 'single' && correctAnswerCount !== 1) {
+        errors.push('Bei Einzelauswahl muss genau eine Antwort als richtig markiert sein.')
       }
     }
   }
@@ -314,11 +328,8 @@ onBeforeUnmount(() => {
 
 const checkMultipleRows = () => {
   if (isChoiceQuestionConfiguration(question.value.questionConfiguration)) {
-    const optionRows = question.value.questionConfiguration.optionRows
-    const rowsWithAnswers = optionRows.filter(
-      (row) => row.correctAnswers && row.correctAnswers.length > 0
-    )
-    question.value.questionConfiguration.multipleRow = rowsWithAnswers.length > 1
+    question.value.questionConfiguration.multipleRow =
+      question.value.questionConfiguration.answerMode === 'multiple'
   }
 }
 
@@ -357,7 +368,7 @@ const handleSubmit = async () => {
       .catch((err) => {
         console.log(err)
         openSnackbar(
-          'Frage konnte nicht gespeichert werden: ' + (err.response?.data ?? err.message)
+          'Aufgabe konnte nicht gespeichert werden: ' + (err.response?.data ?? err.message)
         )
       })
   } else {
@@ -370,7 +381,7 @@ const handleSubmit = async () => {
       .catch((err) => {
         console.log(err)
         openSnackbar(
-          'Frage konnte nicht aktualisiert werden: ' + (err.response?.data ?? err.message)
+          'Aufgabe konnte nicht aktualisiert werden: ' + (err.response?.data ?? err.message)
         )
       })
   }
@@ -381,7 +392,7 @@ const handleSubmit = async () => {
   <v-card class="w-75 mx-auto">
     <v-card-title class="d-flex justify-space-between align-center">
       <span class="text-h5 font-weight-medium text-primary">
-        {{ isNew ? 'Add new Question' : 'Update Question' }}
+        {{ isNew ? 'Neue Aufgabe erstellen ' : 'Aufgabe aktualisieren' }}
       </span>
       <v-btn icon variant="text" @click="$emit('cancel')">
         <v-icon>mdi-close</v-icon>
@@ -398,7 +409,7 @@ const handleSubmit = async () => {
           item-title="title"
           item-color="primary"
           item-value="value"
-          label="Fragetyp"
+          label="Aufgabentyp"
           :items="questionTypeOptions"
           variant="solo-filled"
         ></v-select>
@@ -408,7 +419,7 @@ const handleSubmit = async () => {
           auto-grow
           counter
           rows="3"
-          label="Question"
+          label="Aufgabentext"
           required
         ></v-textarea>
         <QuestionCompetencies
@@ -419,7 +430,7 @@ const handleSubmit = async () => {
         <v-slider
           v-model="question.difficulty"
           class="custom-slider"
-          label="Difficulty"
+          label="Schwierigkeitsgrad"
           :ticks="difficultyTicks"
           show-ticks="always"
           tick-size="4"
@@ -457,9 +468,9 @@ const handleSubmit = async () => {
     </v-card-text>
 
     <v-card-actions>
-      <v-btn variant="tonal" class="mx-4 mb-4" @click="$emit('cancel')">Cancel</v-btn>
+      <v-btn variant="tonal" class="mx-4 mb-4" @click="$emit('cancel')">Abbrechen</v-btn>
       <v-btn color="primary" variant="tonal" class="mx-4 mb-4" @click="handleSubmit">{{
-        isNew ? 'Save' : 'Update'
+        isNew ? 'Speichern' : 'Aktualisieren'
       }}</v-btn>
     </v-card-actions>
 
@@ -472,7 +483,7 @@ const handleSubmit = async () => {
       {{ snackbar.text }}
 
       <template #actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false">Close</v-btn>
+        <v-btn color="white" variant="text" @click="snackbar.show = false">Schließen</v-btn>
       </template>
     </v-snackbar>
   </v-card>

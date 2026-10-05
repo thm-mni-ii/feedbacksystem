@@ -164,9 +164,5 @@ export function validateQuestionUpdate(body: unknown): QuestionUpdate {
   ) {
     throw new ValidationError('Field "questionConfiguration" must be an object');
   }
-  if (MATCHING_QUESTION_TYPES.has(b.questionType as string)) {
-    assertMatchingConfiguration(b.questionConfiguration);
-  }
-
   return b as QuestionUpdate;
 }

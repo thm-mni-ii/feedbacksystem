@@ -13,6 +13,8 @@ const props = defineProps<{
   totalCompetencies?: number
   totalQuestions?: number
   isStartingSession?: boolean
+  hasOpenSession?: boolean
+  sessionActionsDisabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -37,18 +39,6 @@ const formattedDate = computed(() =>
         <h1 class="text-h4 font-weight-bold">{{ name }}</h1>
         <p class="text-body-1 mt-2 mb-0">{{ description }}</p>
       </div>
-      <v-menu v-if="authStore.decodedToken?.globalRole == 'ADMIN'">
-        <template #activator="{ props: menuProps }">
-          <v-btn v-bind="menuProps" icon="mdi-dots-vertical" variant="text" />
-        </template>
-        <v-list density="compact">
-          <v-list-item
-            prepend-icon="mdi-tune"
-            title="Lernalgorithmus konfigurieren"
-            @click="emit('openSettings')"
-          />
-        </v-list>
-      </v-menu>
     </div>
 
     <v-row align="center">
@@ -57,7 +47,7 @@ const formattedDate = computed(() =>
           <div class="course-metric">
             <v-icon icon="mdi-calendar-clock-outline" color="primary" size="22" />
             <div class="course-metric__content">
-              <div class="text-caption text-medium-emphasis">Letzte Sitzung</div>
+              <div class="text-caption text-medium-emphasis">Letzte Session</div>
               <div class="course-metric__value">{{ formattedDate }}</div>
             </div>
           </div>
@@ -71,20 +61,22 @@ const formattedDate = computed(() =>
           <div class="course-metric">
             <v-icon icon="mdi-help-circle-outline" color="primary" size="22" />
             <div class="course-metric__content">
-              <div class="text-caption text-medium-emphasis">Fragen</div>
+              <div class="text-caption text-medium-emphasis">Aufgaben</div>
               <div class="course-metric__value">{{ totalQuestions ?? '-' }}</div>
             </div>
           </div>
         </div>
 
         <v-btn
+          v-if="!hasOpenSession"
           color="primary"
           prepend-icon="mdi-play"
           size="large"
           :loading="isStartingSession"
+          :disabled="sessionActionsDisabled"
           @click="emit('startSession')"
         >
-          Lernsitzung starten
+          Lernsession starten
         </v-btn>
       </v-col>
 

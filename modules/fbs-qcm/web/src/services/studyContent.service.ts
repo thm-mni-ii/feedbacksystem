@@ -18,7 +18,7 @@ function toQuestionType(value: unknown): QuestionType | null {
   }
   // 'matching' ist der Legacy-/Backend-v2-String für Zuordnungsaufgaben (siehe
   // EditQuestion.vue). Er wurde hier fälschlich der Choice-Gruppe zugeordnet,
-  // wodurch Matching-Fragen in der Lernsession mit der Choice-UI (statt der
+  // wodurch Matching-Aufgaben in der Lernsession mit der Choice-UI (statt der
   // vue-draggable-Zuordnungskomponente) gerendert und dabei falsch angezeigt
   // wurden, da die Konfiguration (categories/items) nicht zu optionRows passt.
   if (value === QuestionType.Matching || value === 'matching') {
@@ -39,16 +39,35 @@ function toStudyQuestion(question: {
   excludeFromAlgorithm?: boolean
 }): Question {
   if (!question.id || !question.text) {
-    throw new Error('Eine geladene Frage enthält keine ID oder keinen Fragetext.')
+    throw new Error('Eine geladene Aufgabe enthält keine ID oder keinen Aufgabentext.')
   }
   const questionType = toQuestionType(question.questionType)
   if (!questionType) {
-    throw new Error(`Frage '${question.id}' verwendet einen nicht unterstützten Fragetyp.`)
+    throw new Error(`Aufgabe '${question.id}' verwendet einen nicht unterstützten Aufgabentyp.`)
   }
   if (!question.questionConfiguration || typeof question.questionConfiguration !== 'object') {
-    throw new Error(`Frage '${question.id}' enthält keine ausführbare Fragenkonfiguration.`)
+    throw new Error(`Aufgabe '${question.id}' enthält keine ausführbare Aufgabenkonfiguration.`)
   }
 
+  let questionConfiguration = question.questionConfiguration as QuestionConfiguration
+  if (
+    questionType === QuestionType.Choice &&
+    'optionRows' in question.questionConfiguration &&
+    Array.isArray(question.questionConfiguration.optionRows)
+  ) {
+    const configuration = question.questionConfiguration as Choice
+    const correctRowCount = configuration.optionRows.filter(
+      (row) => row.correctAnswers.length > 0
+    ).length
+    const answerMode =
+      configuration.answerMode ??
+      (configuration.multipleRow || correctRowCount > 1 ? 'multiple' : 'single')
+    questionConfiguration = {
+      ...configuration,
+      answerMode,
+      multipleRow: answerMode === 'multiple'
+    }
+  }
   return {
     id: question.id,
     text: question.text,
@@ -56,7 +75,7 @@ function toStudyQuestion(question: {
     competencyIds: question.competencyIds,
     competencyLinks: question.competencyLinks,
     questionType,
-    questionConfiguration: question.questionConfiguration as QuestionConfiguration,
+    questionConfiguration,
     difficulty: question.difficulty,
     excludeFromAlgorithm: question.excludeFromAlgorithm
   }

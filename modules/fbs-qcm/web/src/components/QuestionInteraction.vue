@@ -26,8 +26,23 @@
 
     <template v-if="isChoice">
       <div v-if="!choiceConfiguration.multipleColumn" class="d-flex flex-column ga-2">
+        <v-radio-group
+          v-if="choiceAnswerMode === 'single'"
+          :model-value="selectedOptionIds[0] ?? null"
+          hide-details
+          @update:model-value="selectSingleOption"
+        >
+          <v-radio
+            v-for="option in displayedOptionRows"
+            :key="option.id"
+            :value="option.id"
+            :label="option.text"
+            color="primary"
+          />
+        </v-radio-group>
         <v-checkbox
-          v-for="option in choiceConfiguration.optionRows"
+          v-for="option in displayedOptionRows"
+          v-else
           :key="option.id"
           :model-value="selectedOptionIds.includes(option.id)"
           :label="option.text"
@@ -51,7 +66,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="option in choiceConfiguration.optionRows" :key="option.id">
+          <tr v-for="option in displayedOptionRows" :key="option.id">
             <td>{{ option.text }}</td>
             <td v-for="column in choiceConfiguration.answerColumns" :key="column.id">
               <v-checkbox
@@ -87,7 +102,7 @@
     </v-alert>
 
     <v-alert v-else type="warning" variant="tonal">
-      Unbekannter Fragetyp: {{ currentQuestion.question.questionType }}
+      Unbekannter Aufgabentyp: {{ currentQuestion.question.questionType }}
     </v-alert>
 
     <v-btn color="primary" class="mt-6" :disabled="!hasAnswer" @click="submit">
@@ -104,7 +119,7 @@ import type { NextQuestion } from '@/model/types'
 import type { Choice } from '@/model/questionTypes/Choice'
 import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
 import type { Matching } from '@/model/questionTypes/Matching'
-import { levenshteinSimilarity } from '@/utils/textSimilarity'
+import { scoreChoice, scoreFillInTheBlanks, scoreMatching } from '@/composables/answerScoring'
 import MatchingQuestionInteraction from '@/components/MatchingQuestionInteraction.vue'
 
 interface Props {
@@ -128,6 +143,7 @@ const selectedOptionIds = ref<number[]>([])
 const selectedMatrixPairs = ref<Array<{ rowId: number; colId: number }>>([])
 const fillInTheBlanksAnswer = ref<Record<number, string>>({})
 const matchingAnswer = ref<Record<string, string>>({})
+const displayedOptionRows = ref<Choice['optionRows']>([])
 
 const isChoice = computed(
   () => props.currentQuestion.question.questionType === QuestionType.Choice
@@ -147,7 +163,10 @@ const fillInTheBlanksConfiguration = computed(
 const matchingConfiguration = computed(
   () => props.currentQuestion.question.questionConfiguration as Matching
 )
-// Schutz gegen unvollständig gespeicherte/migrierte Matching-Fragen (z.B.
+const choiceAnswerMode = computed(
+  () => choiceConfiguration.value.answerMode ?? (choiceConfiguration.value.multipleRow ? 'multiple' : 'single')
+)
+// Schutz gegen unvollständig gespeicherte/migrierte Matching-Aufgaben (z.B.
 // fehlende `items`/`categories`), siehe scoreMatching() weiter unten.
 const isMatchingConfigurationValid = computed(
   () =>
@@ -180,13 +199,31 @@ watch(
     selectedMatrixPairs.value = []
     fillInTheBlanksAnswer.value = {}
     matchingAnswer.value = {}
-  }
+    const optionRows = choiceConfiguration.value?.optionRows
+    displayedOptionRows.value = Array.isArray(optionRows) ? shuffleOptionRows(optionRows) : []
+  },
+  { immediate: true }
 )
+
+function shuffleOptionRows(optionRows: Choice['optionRows']): Choice['optionRows'] {
+  const shuffledRows = [...optionRows]
+  for (let index = shuffledRows.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    const currentRow = shuffledRows[index]
+    shuffledRows[index] = shuffledRows[swapIndex]
+    shuffledRows[swapIndex] = currentRow
+  }
+  return shuffledRows
+}
 
 function toggleOption(optionId: number) {
   selectedOptionIds.value = selectedOptionIds.value.includes(optionId)
     ? selectedOptionIds.value.filter((id) => id !== optionId)
     : [...selectedOptionIds.value, optionId]
+}
+
+function selectSingleOption(optionId: number | null) {
+  selectedOptionIds.value = optionId === null ? [] : [optionId]
 }
 
 function isMatrixSelected(rowId: number, colId: number) {
@@ -201,66 +238,16 @@ function toggleMatrix(rowId: number, colId: number) {
     : [...selectedMatrixPairs.value, { rowId, colId }]
 }
 
-function scoreChoice() {
-  const rows = choiceConfiguration.value.optionRows
-  if (rows.length === 0) return 0
-
-  const correctRows = rows.filter((row) => {
-    if (!choiceConfiguration.value.multipleColumn) {
-      return (row.correctAnswers.length > 0) === selectedOptionIds.value.includes(row.id)
-    }
-
-    const expected = new Set(row.correctAnswers)
-    const actual = new Set(
-      selectedMatrixPairs.value
-        .filter((pair) => pair.rowId === row.id)
-        .map((pair) => pair.colId)
-    )
-    return expected.size === actual.size && [...expected].every((id) => actual.has(id))
-  })
-
-  return correctRows.length / rows.length
-}
-
-function scoreFillInTheBlanks() {
-  const blanks = fillInTheBlanksConfiguration.value.textParts.filter((part) => part.isBlank)
-  if (blanks.length === 0) return 0
-
-  const blankScores = blanks.map((blank) => {
-    const given = fillInTheBlanksAnswer.value[blank.order] ?? ''
-    const acceptedAnswers = [blank.text, ...(blank.acceptedAlternatives ?? [])]
-
-    return Math.max(
-      ...acceptedAnswers.map((acceptedAnswer) =>
-        levenshteinSimilarity(given, acceptedAnswer)
-      )
-    )
-  })
-
-  return blankScores.reduce((sum, score) => sum + score, 0) / blankScores.length
-}
-
-function scoreMatching() {
-  // Verteidigung gegen unvollständig gespeicherte/migrierte Matching-Fragen
-  // (z.B. fehlende `items`, siehe EditQuestion.vue), damit eine kaputte
-  // Fragenkonfiguration die Session nicht mit einem TypeError abbricht.
-  const items = matchingConfiguration.value.items ?? []
-  if (items.length === 0) return 0
-
-  const correctAssignments = items.filter(
-    (item) => matchingAnswer.value[item.id] === item.correctCategoryId
-  )
-  return correctAssignments.length / items.length
-}
-
 function submit() {
+  if (!hasAnswer.value) throw new Error('Es wurde noch keine Antwort eingegeben.')
   const score = isChoice.value
-    ? scoreChoice()
+    ? scoreChoice(choiceConfiguration.value, selectedOptionIds.value, selectedMatrixPairs.value)
     : isFillInTheBlanks.value
-      ? scoreFillInTheBlanks()
+      ? scoreFillInTheBlanks(fillInTheBlanksConfiguration.value, fillInTheBlanksAnswer.value)
       : isMatching.value
-        ? scoreMatching()
-        : 0
+        ? scoreMatching(matchingConfiguration.value, matchingAnswer.value)
+        : null
+  if (score === null) throw new Error('Der Aufgabentyp kann nicht bewertet werden.')
   const responsePayload = isChoice.value
     ? choiceConfiguration.value.multipleColumn
       ? selectedMatrixPairs.value

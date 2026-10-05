@@ -15,6 +15,12 @@ es startest und damit entwickelst.
 
 Der Rest dieser Anleitung dreht sich nur um das Backend.
 
+Der TypeScript-Build des übergeordneten Legacy-Backends ist auf dessen eigenen
+`src`-Ordner begrenzt. Backend v2 wird separat in diesem Ordner gebaut.
+Der Legacy-Kursimport prüft wieder HTTPS-Zertifikate. Für lokale Dienste mit
+eigener CA muss diese ausdrücklich vertrauenswürdig konfiguriert werden,
+beispielsweise über `NODE_EXTRA_CA_CERTS`; Zertifikatsprüfungen nicht abschalten.
+
 ## Kursbezogene Study-Konfiguration
 
 Die Endpunkte
@@ -27,6 +33,65 @@ Revisionen werden mit HTTP 409 abgelehnt.
 Beim Anlegen einer StudySession erzeugt das Backend einen unveränderlichen
 Snapshot der zu diesem Zeitpunkt effektiven Konfiguration. Spätere
 Kursänderungen beeinflussen bestehende Sessions nicht.
+
+## Attempts: Retry und Wiederaufnahme
+
+`POST /api_v2/sessions/:id/attempts` akzeptiert optional `clientAttemptId`
+und `sessionStateAfter`. Der Client erzeugt die Retry-ID einmal pro Antwort
+und verwendet bei Wiederholungen dieselbe ID und denselben Payload.
+Ein eindeutiger MongoDB-Index über Session, Student und Retry-ID verhindert
+doppelte Lernereignisse auch bei parallelen Requests. Identische Wiederholungen
+liefern den ursprünglichen Attempt (HTTP 201); abweichende Payloads mit
+derselben ID liefern HTTP 409. Der authentifizierte Besitzer wird vor jedem
+Zugriff geprüft. Alte Attempts ohne Retry-ID bleiben lesbar und anlegbar.
+
+`sessionStateAfter` ist der nach der Antwort berechnete vollständige
+Session-Ersatz: `courseId`, `startedAt`, `updatedAt`, `completedAt`,
+`competencies`, `recentQuestionIds`, `excludedQuestionIds`,
+`currentCompetencyId`, `questionsInCurrentCompetency`. Er enthält weder
+Identität, Student, History noch Algorithmuskonfiguration. Scores müssen
+endlich und in [0, 1], Antwortdauer nicht-negativ sein; Zeitstempel,
+Kompetenzzustände und Zähler werden ebenfalls validiert.
+
+Wenn der Attempt-POST gelingt, aber das anschließende Session-PUT scheitert,
+rekonstruiert das Frontend beim Laden den adaptiven Zustand aus dem neuesten
+Attempt-Snapshot mit neuerem `updatedAt`. Es kombiniert alle zeitlich sortierten
+Attempts zur History und behält die serverseitige Algorithmuskonfiguration.
+Bei gleichem Zeitstempel werden Snapshots für noch offene Sessions verwendet;
+ein unvollständiger Snapshot öffnet keine bereits abgeschlossene Session erneut.
+Ohne Snapshot wird nur die History rekonstruiert. Das ist **Recovery im Client,
+keine serverseitige Transaktion**; rohe Session-GETs können bis zum nächsten
+erfolgreichen PUT noch den vorherigen Zustand liefern. Der Prototyp vertraut
+weiterhin der clientseitigen Bewertung und Zustandsberechnung; diese Daten
+sind keine manipulationssicheren Prüfungsnoten.
+
+Optionales `predictionBefore` speichert die vor der Antwort ermittelte
+Antwortwahrscheinlichkeit (endlich, [0, 1]) für spätere Kalibrierungsauswertungen.
+
+Das Algorithm-Lab verwendet ausschließlich den isolierten Browser-Schlüssel
+`fbs-qcm.algorithm-lab.v1`. Beschädigte lokale Daten werden ausdrücklich als
+Fehler gemeldet und niemals stillschweigend zurückgesetzt.
+
+Beim Start kopiert die Kompatibilitätsmigration alte `learningAttempt`-Daten
+nicht-destruktiv nach `questionAttempt`. Die Quellcollection bleibt erhalten,
+bei gleicher `_id` bleibt der bereits vorhandene Zielinhalt erhalten.
+Eine Warnung fordert zur manuellen Prüfung (insbesondere von Konflikten) vor
+einer etwaigen manuellen Bereinigung auf. Es wird keine Quellcollection gelöscht.
+
+## Validierung von Fragen und Kompetenzreferenzen
+
+Beim Anlegen und Ändern müssen die in `competencyIds`, `competencyLinks`,
+`parentId` und `prerequisites` referenzierten Kompetenzen existieren;
+ungültige Referenzen werden mit HTTP 400 abgelehnt. Teil-Updates einer Frage
+validieren den zusammengeführten Zustand aus gespeicherter Frage und Update.
+Das gilt insbesondere für `Matching`/`matching`, auch wenn `questionType`
+im Update fehlt.
+
+Das Löschen einer Kompetenz liefert HTTP 409, solange Fragen (einschließlich
+Q-Matrix-Links), Unterkompetenzen oder Voraussetzungen sie referenzieren.
+Kompetenzen ohne Fragen sind weiterhin erlaubt; unreferenzierte Kompetenzen
+können gelöscht werden. Die Prüfungen ersetzen keine Transaktionen bei
+gleichzeitigen Schreibzugriffen.
 
 ## Voraussetzungen (einmalig prüfen)
 
@@ -45,7 +110,7 @@ cd modules\fbs-qcm\api\backend\v2
 **Schritt 1 – Pakete installieren:**
 
 ```powershell
-npm install
+npm ci
 ```
 
 **Schritt 2 – Konfigurationsdatei anlegen:**
@@ -59,6 +124,10 @@ Das kopiert die Vorlage `.env.example` zu einer neuen Datei `.env`. Die
 (Adresse, Passwörter etc.). Sie ist bewusst nicht Teil von Git (jeder
 Entwickler hat seine eigene), deshalb musst du sie einmalig selbst erzeugen.
 Ohne diese Datei startet nichts.
+
+Für eine neue Vorführdatenbank `MONGODB_DB_NAME` in `.env` beispielsweise auf
+`QCM_v2_demo` setzen. Backend und Seed müssen dieselbe Datenbank verwenden.
+Bestehende `.env`-Dateien nicht einfach mit der Vorlage überschreiben.
 
 **Schritt 3 – Datenbank starten:**
 
@@ -76,9 +145,14 @@ Das startet im Hintergrund zwei Docker-Container:
 npm run seed
 ```
 
-Das befüllt die (noch leere) Datenbank mit den 142 Fragen und 43 Skills, die
-aktuell auch im Frontend als Dummy-Daten existieren. Kannst du jederzeit
-erneut ausführen, um die Datenbank zurückzusetzen.
+Das befüllt eine **leere** Datenbank mit den im Repository vorhandenen
+Frontend-Dummy-Daten. Die importierten Anzahlen stehen im Abschlussprotokoll.
+Enthält irgendeine Collection bereits Dokumente, bricht der Seed vor dem
+Import ausdrücklich ab; er löscht keine vorhandenen Fragen, Kompetenzen oder
+Lernverläufe. Für eine neue Vorführung eine neue leere Datenbank wählen.
+Bei Fehlern während des Imports bleibt der teilweise importierte Stand bestehen.
+Der Seed ist keine Transaktion und keine Reset-Funktion; währenddessen darf
+niemand in diese neue Datenbank schreiben.
 
 Damit ist die Einrichtung abgeschlossen.
 
@@ -107,6 +181,34 @@ wenn du Code änderst. Läuft dauerhaft in diesem Terminal-Fenster – zum
 Beenden `Strg+C`.
 
 Das war's – das Backend läuft jetzt und ist bereit, Anfragen zu beantworten.
+
+## Lokale Sicherheitsgrenze
+
+Die API bindet standardmäßig an `127.0.0.1` (`HOST` in `.env`).
+MongoDB und Mongo Express sind im Compose-Setup ebenfalls nur lokal
+freigegeben. Das ist eine Einschränkung der Erreichbarkeit, **kein Ersatz für
+Authentifizierung und Autorisierung**. `HOST=0.0.0.0` beziehungsweise ein
+abweichendes Frontend-`VITE_HOST` öffnet diese Grenze ausdrücklich wieder
+und ist nicht als sichere Produktionskonfiguration zu verstehen.
+
+Die Demo nur lokal mit synthetischen Daten betreiben. Entwickler-Token und
+Default-Secret, fehlende durchgängige Rollen-/Kursberechtigungen und
+clientseitige Bewertungen sind weiterhin Grenzen des Prototyps.
+
+## Automatisierte Abnahme
+
+```powershell
+$env:MONGOMS_IP = '127.0.0.1'
+npm test
+npm run build
+npx tsc --noEmit -p tsconfig.seed.json
+```
+
+Die Tests nutzen isolierte MongoMemoryServer-Datenbanken. Die Seed-Sicherheit
+wird ebenfalls dort geprüft; dabei wird die konfigurierte Demo-Datenbank nicht
+zurückgesetzt. Windows kann einen von MongoMemoryServer ausgewählten Port
+blockieren (`EACCES`); das ist ein Umgebungsfehler, kein bestandenes Testergebnis.
+Eine erfolgreiche erneute Ausführung muss weiterhin alle Tests bestehen.
 
 ## Wie beende ich alles wieder?
 

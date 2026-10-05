@@ -23,16 +23,16 @@ const openSnackbar = (text: string) => {
 }
 
 const headers = [
-  { title: 'Type', key: 'questionType' },
+  { title: 'Typ', key: 'questionType' },
   { title: 'Text', key: 'text' },
-  { title: 'Competencies', key: 'competencyIds' },
-  { title: 'Edit', key: 'actions', sortable: false }
+  { title: 'Kompetenzen', key: 'competencyIds' },
+  { title: 'Bearbeiten', key: 'actions', sortable: false }
 ]
 
 const competencyHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Parent', key: 'parentId' },
-  { title: 'Edit', key: 'actions', sortable: false }
+  { title: 'Übergeordnet', key: 'parentId' },
+  { title: 'Bearbeiten', key: 'actions', sortable: false }
 ]
 
 const competencyName = (competencyId: string) =>
@@ -52,10 +52,10 @@ const editQuestion = (question: Question) => {
   if (dialogEditQuestion.value) {
     dialogEditQuestion.value.openDialog(question).then((result: boolean) => {
       if (result) {
-        openSnackbar(`Update Question ${question.id} successful`)
+        openSnackbar(`Aufgabe ${question.id} aktualisiert`)
         loadQuestions()
       } else {
-        openSnackbar('Create / Edit Question Cancelled')
+        openSnackbar('Bearbeiten abgebrochen')
       }
     })
   }
@@ -65,10 +65,10 @@ const addQuestion = () => {
   if (dialogEditQuestion.value) {
     dialogEditQuestion.value.openDialog().then((result: boolean) => {
       if (result) {
-        openSnackbar('Create / Edit Question Successful')
+        openSnackbar('Aufgabe erfolgreich erstellt')
         loadQuestions()
       } else {
-        openSnackbar('Create / Edit Question Cancelled')
+        openSnackbar('Erstellen abgebrochen')
       }
     })
   }
@@ -79,15 +79,15 @@ const deleteQuestion = async (question: Question) => {
     return
   }
   const confirmed = await dialogConfirm.value.openDialog(
-    'Frage löschen',
-    `Frage "${question.text}" wirklich löschen?`,
-    'Delete'
+    'Aufgabe löschen',
+    `Aufgabe "${question.text}" wirklich löschen?`,
+    'Löschen'
   )
   if (!confirmed) {
     return
   }
   await questionService.deleteQuestion(question.id)
-  openSnackbar('Question deleted')
+  openSnackbar('Aufgabe gelöscht')
   loadQuestions()
 }
 
@@ -95,10 +95,10 @@ const editCompetency = (competency: Competency) => {
   if (dialogEditCompetency.value) {
     dialogEditCompetency.value.openDialog(competency).then((result: boolean) => {
       if (result) {
-        openSnackbar(`Update Competency ${competency.name} successful`)
+        openSnackbar(`Kompetenz ${competency.name} aktualisiert`)
         loadCompetencies()
       } else {
-        openSnackbar('Create / Edit Competency Cancelled')
+        openSnackbar('Bearbeiten abgebrochen')
       }
     })
   }
@@ -108,10 +108,10 @@ const addCompetency = () => {
   if (dialogEditCompetency.value) {
     dialogEditCompetency.value.openDialog().then((result: boolean) => {
       if (result) {
-        openSnackbar('Create Competency Successful')
+        openSnackbar('Kompetenz erfolgreich erstellt')
         loadCompetencies()
       } else {
-        openSnackbar('Create / Edit Competency Cancelled')
+        openSnackbar('Erstellen abgebrochen')
       }
     })
   }
@@ -124,13 +124,13 @@ const deleteCompetency = async (competency: Competency) => {
   const confirmed = await dialogConfirm.value.openDialog(
     'Kompetenz löschen',
     `Kompetenz "${competency.name}" wirklich löschen?`,
-    'Delete'
+    'Löschen'
   )
   if (!confirmed) {
     return
   }
   await competencyService.deleteCompetency(competency.id)
-  openSnackbar('Competency deleted')
+  openSnackbar('Kompetenz gelöscht')
   loadCompetencies()
 }
 
@@ -144,7 +144,7 @@ onMounted(() => {
   <v-snackbar v-model="snackbar" :timeout="4000">
     {{ snackbarText }}
     <template #actions>
-      <v-btn color="primary" variant="text" @click="snackbar = false">Close</v-btn>
+      <v-btn color="primary" variant="text" @click="snackbar = false">Schließen</v-btn>
     </template>
   </v-snackbar>
 
@@ -156,10 +156,10 @@ onMounted(() => {
     <v-data-table :headers="headers" :items="allQuestions" :items-per-page="10" class="elevation-1">
       <template #top>
         <v-toolbar flat>
-          <v-toolbar-title>Fragenpool</v-toolbar-title>
+          <v-toolbar-title>Aufgabenpool</v-toolbar-title>
           <v-spacer />
           <v-btn prepend-icon="mdi-plus" color="primary" variant="tonal" @click="addQuestion">
-            Create Question
+            Aufgabe erstellen
           </v-btn>
         </v-toolbar>
       </template>
@@ -185,7 +185,7 @@ onMounted(() => {
       <template #no-data>
         <v-btn
           prepend-icon="mdi-refresh"
-          text="Reload Questions"
+          text="Aufgaben neu laden"
           variant="text"
           @click="loadQuestions"
         />
@@ -220,7 +220,7 @@ onMounted(() => {
           <v-toolbar-title>Kompetenzen (global)</v-toolbar-title>
           <v-spacer />
           <v-btn prepend-icon="mdi-plus" color="primary" variant="tonal" @click="addCompetency">
-            Create Competency
+            Kompetenz erstellen
           </v-btn>
         </v-toolbar>
       </template>
@@ -246,7 +246,7 @@ onMounted(() => {
       <template #no-data>
         <v-btn
           prepend-icon="mdi-refresh"
-          text="Reload Competencies"
+          text="Kompetenzen neu laden"
           variant="text"
           @click="loadCompetencies"
         />

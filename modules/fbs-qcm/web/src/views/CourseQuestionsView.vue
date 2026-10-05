@@ -9,8 +9,8 @@ import DialogEditQuestion from '@/dialog/DialogEditQuestion.vue'
 import DialogConfirm from '@/dialog/DialogConfirm.vue'
 
 /**
- * Kursbezogene Sicht auf den globalen Fragenpool (Dozenten-Werkzeug): zeigt
- * nur Fragen, die einer Kompetenz dieses Kurses zugeordnet sind. Fragen und
+ * Kursbezogene Sicht auf den globalen Aufgabenpool (Dozenten-Werkzeug): zeigt
+ * nur Aufgaben, die einer Kompetenz dieses Kurses zugeordnet sind. Aufgaben und
  * Kompetenzen selbst bleiben global verwaltet (siehe `/pool`) - hier wird
  * lediglich gefiltert, damit Dozent:innen im Kurskontext bleiben können.
  */
@@ -33,10 +33,10 @@ const openSnackbar = (text: string) => {
 }
 
 const headers = [
-  { title: 'Type', key: 'questionType' },
+  { title: 'Typ', key: 'questionType' },
   { title: 'Text', key: 'text' },
-  { title: 'Competencies', key: 'competencyIds' },
-  { title: 'Edit', key: 'actions', sortable: false }
+  { title: 'Kompetenzen', key: 'competencyIds' },
+  { title: 'Bearbeiten', key: 'actions', sortable: false }
 ]
 
 const courseCompetencyIds = computed(() => new Set(courseCompetencies.value.map((c) => c.id)))
@@ -61,8 +61,8 @@ async function loadData() {
     courseCompetencies.value = competenciesRes.data
     allQuestions.value = questionsRes.data
   } catch (error) {
-    console.error('Fragen/Kompetenzen dieses Kurses konnten nicht geladen werden.', error)
-    loadError.value = 'Die Fragen dieses Kurses konnten nicht geladen werden.'
+    console.error('Aufgaben/Kompetenzen dieses Kurses konnten nicht geladen werden.', error)
+    loadError.value = 'Die Aufgaben dieses Kurses konnten nicht geladen werden.'
   } finally {
     isLoading.value = false
   }
@@ -72,10 +72,10 @@ const editQuestion = (question: Question) => {
   if (dialogEditQuestion.value) {
     dialogEditQuestion.value.openDialog(question).then((result: boolean) => {
       if (result) {
-        openSnackbar(`Update Question ${question.id} successful`)
+        openSnackbar(`Aufgabe ${question.id} aktualisiert`)
         loadData()
       } else {
-        openSnackbar('Create / Edit Question Cancelled')
+        openSnackbar('Bearbeiten abgebrochen')
       }
     })
   }
@@ -85,10 +85,10 @@ const addQuestion = () => {
   if (dialogEditQuestion.value) {
     dialogEditQuestion.value.openDialog().then((result: boolean) => {
       if (result) {
-        openSnackbar('Create / Edit Question Successful')
+        openSnackbar('Aufgabe erfolgreich erstellt')
         loadData()
       } else {
-        openSnackbar('Create / Edit Question Cancelled')
+        openSnackbar('Erstellen abgebrochen')
       }
     })
   }
@@ -99,15 +99,15 @@ const deleteQuestion = async (question: Question) => {
     return
   }
   const confirmed = await dialogConfirm.value.openDialog(
-    'Frage löschen',
-    `Frage "${question.text}" wirklich löschen?`,
-    'Delete'
+    'Aufgabe löschen',
+    `Aufgabe "${question.text}" wirklich löschen?`,
+    'Löschen'
   )
   if (!confirmed) {
     return
   }
   await questionService.deleteQuestion(question.id)
-  openSnackbar('Question deleted')
+  openSnackbar('Aufgabe gelöscht')
   loadData()
 }
 
@@ -119,7 +119,7 @@ onMounted(loadData)
     <v-snackbar v-model="snackbar" :timeout="4000">
       {{ snackbarText }}
       <template #actions>
-        <v-btn color="primary" variant="text" @click="snackbar = false">Close</v-btn>
+        <v-btn color="primary" variant="text" @click="snackbar = false">Schließen</v-btn>
       </template>
     </v-snackbar>
 
@@ -136,8 +136,8 @@ onMounted(loadData)
       variant="tonal"
       class="mb-4"
     >
-      Diesem Kurs sind noch keine Kompetenzen zugeordnet. Ordne im Fragenpool zunächst
-      Kompetenzen diesem Kurs zu, um hier passende Fragen zu sehen.
+      Diesem Kurs sind noch keine Kompetenzen zugeordnet. Ordne im Aufgabenpool zunächst
+      Kompetenzen diesem Kurs zu, um hier passende Aufgaben zu sehen.
     </v-alert>
 
     <v-card>
@@ -150,10 +150,10 @@ onMounted(loadData)
       >
         <template #top>
           <v-toolbar flat>
-            <v-toolbar-title>Fragen dieses Kurses</v-toolbar-title>
+            <v-toolbar-title>Aufgaben dieses Kurses</v-toolbar-title>
             <v-spacer />
             <v-btn prepend-icon="mdi-plus" color="primary" variant="tonal" @click="addQuestion">
-              Frage erstellen
+              Aufgabe erstellen
             </v-btn>
           </v-toolbar>
         </template>
@@ -178,7 +178,7 @@ onMounted(loadData)
 
         <template #no-data>
           <span class="text-medium-emphasis">
-            Für die Kompetenzen dieses Kurses sind noch keine Fragen vorhanden.
+            Für die Kompetenzen dieses Kurses sind noch keine Aufgaben vorhanden.
           </span>
         </template>
         <!-- eslint-disable-next-line vue/valid-v-slot -->

@@ -91,9 +91,45 @@ function validateOverrides(value: unknown): StudyAlgorithmOverrides {
     assertObject(value.selection, "overrides.selection");
     assertAllowedKeys(
       value.selection,
-      ["stickinessQuestions", "difficultyWindow", "recentQuestionWindow"],
+      [
+        "stickinessQuestions",
+        "difficultyWindow",
+        "recentQuestionWindow",
+        "competencyStrategy",
+        "responseScoreThreshold",
+        "singleRequiredItemsOnly"
+      ],
       "overrides.selection"
     );
+    if (value.selection.competencyStrategy !== undefined) {
+      if (
+        value.selection.competencyStrategy !== "coverage-weighted" &&
+        value.selection.competencyStrategy !== "expected-information-gain"
+      ) {
+        throw new ValidationError(
+          'Field "overrides.selection.competencyStrategy" is not supported'
+        );
+      }
+    }
+    if (value.selection.responseScoreThreshold !== undefined) {
+      if (value.selection.responseScoreThreshold === null) {
+        // Null keeps the existing continuous-score behavior.
+      } else {
+        assertNumberInRange(
+          value.selection.responseScoreThreshold,
+          "overrides.selection.responseScoreThreshold",
+          0.01,
+          1
+        );
+      }
+    }
+    if (value.selection.singleRequiredItemsOnly !== undefined) {
+      if (typeof value.selection.singleRequiredItemsOnly !== "boolean") {
+        throw new ValidationError(
+          'Field "overrides.selection.singleRequiredItemsOnly" must be a boolean'
+        );
+      }
+    }
     if (value.selection.stickinessQuestions !== undefined) {
       assertNumberInRange(
         value.selection.stickinessQuestions,
@@ -118,6 +154,16 @@ function validateOverrides(value: unknown): StudyAlgorithmOverrides {
         0,
         100,
         true
+      );
+    }
+    if (
+      value.selection.competencyStrategy === "expected-information-gain" &&
+      (value.selection.responseScoreThreshold === undefined ||
+        value.selection.responseScoreThreshold === null ||
+        value.selection.singleRequiredItemsOnly !== true)
+    ) {
+      throw new ValidationError(
+        'Expected information gain requires a response threshold and single-required-item filtering'
       );
     }
   }

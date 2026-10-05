@@ -52,7 +52,7 @@ export interface QuestionCompetencyLink {
 }
 
 /**
- * Question: Frage im adaptiven Lern- und Diagnosemodell.
+ * Question: Aufgabe im adaptiven Lern- und Diagnosemodell.
  * Dieses Domänenmodell ist absichtlich von den älteren REST-DTOs unter
  * `model/Question.ts` getrennt; diese repräsentieren weiterhin das bestehende
  * Backend-Format.
@@ -138,6 +138,9 @@ export interface AnswerEvaluation {
  */
 export interface QuestionAttempt {
   id: string
+  clientAttemptId?: string
+  sessionStateAfter?: StudySessionReplacement
+  predictionBefore?: number
   sessionId: string
   studentId: string
   questionId: string
@@ -148,6 +151,9 @@ export interface QuestionAttempt {
   submittedAt: number
   responseTimeMs: number
 }
+
+/** Adaptive state committed with an attempt; identity and algorithm stay server-owned. */
+export type StudySessionReplacement = Omit<StudySession, 'id' | 'studentId' | 'history' | 'algorithm'>
 
 /**
  * State einer Quiz-Session
@@ -168,14 +174,14 @@ export interface StudySession {
   history: AnswerRecord[]
   recentQuestionIds: string[]
   excludedQuestionIds: string[]
-  // Competency Stickiness: Aktuelle Kompetenz für mehrere Fragen fokussieren
+  // Competency Stickiness: Aktuelle Kompetenz für mehrere Aufgaben fokussieren
   currentCompetencyId: string | null
-  // Zähler: Wie viele Fragen wurden bereits zur aktuellen Kompetenz gestellt?
+  // Zähler: Wie viele Aufgaben wurden bereits zur aktuellen Kompetenz gestellt?
   questionsInCurrentCompetency: number
 }
 
 /**
- * Nächste zu stellende Frage mit Zielkompetenz
+ * Nächste zu stellende Aufgabe mit Zielkompetenz
  */
 export interface NextQuestion {
   question: Question

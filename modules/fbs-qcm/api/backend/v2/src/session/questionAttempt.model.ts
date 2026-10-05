@@ -8,6 +8,8 @@
  * und gelesen (siehe questionAttempt.repository.ts).
  */
 
+import type { StudySessionReplace } from "./session.model";
+
 export type EvaluationSource = "automatic" | "manual-self-assessment" | "teacher-review";
 
 /**
@@ -22,6 +24,9 @@ export interface AnswerEvaluation {
 
 export interface QuestionAttempt {
   id: string;
+  clientAttemptId?: string;
+  sessionStateAfter?: StudySessionReplace;
+  predictionBefore?: number;
   sessionId: string;
   studentId: string;
   questionId: string;

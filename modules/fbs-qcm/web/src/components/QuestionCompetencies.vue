@@ -88,7 +88,7 @@ onMounted(async () => {
     const res = await competencyService.getAllCompetencies()
     competencies.value = res.data
   } catch (error) {
-    console.error('Fehler beim Laden der Competencies:', error)
+    console.error('Fehler beim Laden der Kompetenzen:', error)
   }
 })
 </script>
@@ -100,7 +100,7 @@ onMounted(async () => {
     item-title="competency.name"
     item-value="competency.id"
     item-color="primary"
-    label="Competencies dieser Frage"
+    label="Kompetenzen dieser Aufgabe"
     prepend-icon="mdi-shape-outline"
     variant="solo"
     chips

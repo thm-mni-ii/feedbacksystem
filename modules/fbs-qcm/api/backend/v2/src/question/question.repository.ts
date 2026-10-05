@@ -1,6 +1,8 @@
 import { Collection, Db, ObjectId, WithId } from "mongodb";
 import { NotFoundError } from "../shared/errors";
 import { Question, QuestionInput, QuestionUpdate } from "./question.model";
+import { CompetencyRepository } from "../competency/competency.repository";
+import { validateQuestionInput } from "./question.validation";
 
 interface QuestionDocument {
   text: string;
@@ -33,9 +35,11 @@ function toQuestion(doc: WithId<QuestionDocument>): Question {
  */
 export class QuestionRepository {
   private readonly collection: Collection<QuestionDocument>;
+  private readonly competencies: CompetencyRepository;
 
   constructor(db: Db) {
     this.collection = db.collection<QuestionDocument>("question");
+    this.competencies = new CompetencyRepository(db);
   }
 
   async findAll(): Promise<Question[]> {
@@ -52,11 +56,15 @@ export class QuestionRepository {
   }
 
   async create(input: QuestionInput): Promise<Question> {
+    await this.validateReferences(input);
     const result = await this.collection.insertOne(input as QuestionDocument);
     return toQuestion({ _id: result.insertedId, ...input } as WithId<QuestionDocument>);
   }
 
   async update(id: string, update: QuestionUpdate): Promise<Question> {
+    const current = await this.findById(id);
+    const effective = validateQuestionInput({ ...current, ...update });
+    await this.validateReferences(effective);
     const result = await this.collection.findOneAndUpdate(
       { _id: parseId(id) },
       { $set: update },
@@ -66,6 +74,13 @@ export class QuestionRepository {
       throw new NotFoundError(`Question ${id} not found`);
     }
     return toQuestion(result);
+  }
+
+  private async validateReferences(input: QuestionInput): Promise<void> {
+    await this.competencies.assertExist([
+      ...input.competencyIds,
+      ...(input.competencyLinks ?? []).map((link) => link.competencyId)
+    ]);
   }
 
   async delete(id: string): Promise<void> {

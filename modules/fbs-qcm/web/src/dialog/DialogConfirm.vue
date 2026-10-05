@@ -3,7 +3,7 @@
     <v-card :title="deleteTitle" :text="deleteMessage">
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="tonal" @click="_cancel"> Cancel </v-btn>
+        <v-btn variant="tonal" @click="_cancel"> Abbrechen </v-btn>
         <v-btn variant="tonal" color="primary-dark" @click="_confirm">
           {{ deleteConfirmBtnText }}
         </v-btn>
@@ -18,7 +18,7 @@ import { ref } from 'vue'
 const deleteDialog = ref<boolean>(false)
 const deleteTitle = ref<string>('')
 const deleteMessage = ref<string | undefined>(undefined)
-const deleteConfirmBtnText = ref<string | undefined>('Delete')
+const deleteConfirmBtnText = ref<string | undefined>('Löschen')
 
 // Promis
 const resolvePromise: any = ref(undefined)

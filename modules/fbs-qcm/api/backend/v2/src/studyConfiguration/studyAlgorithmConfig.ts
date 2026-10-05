@@ -1,5 +1,9 @@
-export const STUDY_ALGORITHM_SCHEMA_VERSION = 1;
-export const STUDY_ALGORITHM_VERSION = "adaptive-bkt-v1";
+export const STUDY_ALGORITHM_SCHEMA_VERSION = 2;
+export const STUDY_ALGORITHM_VERSION = "adaptive-bkt-v2";
+
+export type CompetencySelectionStrategy =
+  | "coverage-weighted"
+  | "expected-information-gain";
 
 export interface StudyAlgorithmConfig {
   schemaVersion: number;
@@ -15,6 +19,9 @@ export interface StudyAlgorithmConfig {
     stickinessQuestions: number;
     difficultyWindow: number;
     recentQuestionWindow: number;
+    competencyStrategy: CompetencySelectionStrategy;
+    responseScoreThreshold: number | null;
+    singleRequiredItemsOnly: boolean;
   };
   model: {
     initialMastery: number;
@@ -47,7 +54,10 @@ export const DEFAULT_STUDY_ALGORITHM_CONFIG: StudyAlgorithmConfig = {
   selection: {
     stickinessQuestions: 3,
     difficultyWindow: 0.2,
-    recentQuestionWindow: 5
+    recentQuestionWindow: 5,
+    competencyStrategy: "coverage-weighted",
+    responseScoreThreshold: null,
+    singleRequiredItemsOnly: false
   },
   model: {
     initialMastery: 0.35,

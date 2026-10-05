@@ -1,0 +1,651 @@
+Allgemeine Hinweise zum Verfassen einer
+Bachelorarbeit oder Masterarbeit∗
+Fachbereich IEM der
+Technischen Hochschule Mittelhessen
+Prof. Dr. Dominik Schultes
+Version 2.6
+Friedberg, 2026
+∗Bei diesem Dokument handelt es sich um meine pers onlichen Empfehlungen und Ratschl age. Es handelt sich
+nicht um ein ozielles, allgemein verbindliches Dokument eines Studiengangs, Fachbereichs oder gar der gesamten
+Hochschule. Ausgangspunkt f ur die hier vorliegende Version ist das gleichnamige Dokument von Herrn Prof. Dr.
+Cornelius Malerczyk, Fachbereich MND, dessen LATEX-Quellen Herr Malerczyk mir freundlicherweise zur Verf ugung
+gestellt hat, siehe auch die Erkl arungen in Abschnitt 1.
+1
+
+Inhaltsverzeichnis
+1 Vorbemerkungen 2
+1.1 Vorbemerkungen zur Version 2.0 . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+1.2 Vorbemerkungen zu den Versionen 2.x . . . . . . . . . . . . . . . . . . . . . . . 3
+2 Vor der Anmeldung der Arbeit 3
+3 Anmeldung der Arbeit 3
+4 Inhalt und Struktur einer Abschlussarbeit 4
+4.1 Inhalt der Arbeit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+4.2 Aufbau der Arbeit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+4.3 Referenzen und Zitate . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+5 Benotung 9
+5.1 Innovation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+5.2 Umsetzung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+5.3 Verst andlichkeit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+5.4 Form . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+5.5 Gewichtung der vier Kategorien . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+6 Hinweise und Tipps 14
+7 Abgabe 14
+8 Kolloquium 15
+8.1 Nach dem Kolloquium . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+9 Sonstige organisatorische Hinweise 16
+1 Vorbemerkungen
+1.1 Vorbemerkungen zur Version 2.0
+Diese Hinweise wurden urspr unglich von Herrn Prof. Dr. Cornelius Malerczyk verfasst. Die hier
+vorliegende Version 2.0 habe ich dann im Januar 2013 basierend auf den freundlicherweise zur
+Verfugung gestellten L ATEX-Quellen erstellt. Die Original-Hinweise blieben gr otenteils erhalten,
+nur kleinere Anpassungen an der vorgeschlagenen Struktur einer Abschlussarbeit wurden vorge-
+nommen. Neu hinzugekommen sind konkrete Anhaltspunkte, wie die Note zu einer Abschlussarbeit
+entsteht, und uberarbeitet wurden die Tipps f ur eine erfolgreiche Abschlussarbeit. Auerdem wurde
+ein Abschnitt uber das Kolloquium hinzugef ugt. Diese Version wurde mit niemandem abgestimmt
+und erhebt daher nicht den Anspruch einer ubergreifenden Verbindlichkeit. Es handelt sich um
+ein inozielles Dokument, um Ratschl age zusammenzufassen, die ich sonst immer wieder nur
+mundlich geben w urde.
+Auf den ersten Blick erscheint dieses Dokument ziemlich lang zu sein, aber bedenken Sie, dass
+es sich bei einer Abschlussarbeit immerhin um etwas handelt, an dem Sie mehrere Monate Vollzeit
+arbeiten und das ein groes Gewicht in Ihrem Studium einnimmt. Deshalb sollte es sich schon
+2
+
+lohnen, auch Hinweise, die sich uber einige Seiten erstrecken, gr undlich zu lesen und zu beachten.
+Bei R uckfragen stehe ich gerne zur Verf ugung.
+1.2 Vorbemerkungen zu den Versionen 2.x
+Im Februar 2014 habe ich in der Version 2.1 diverse organisatorische Hinweise erg anzt (Abschnit-
+te 3, 7, 8.1 und 9).
+Im Oktober 2014 habe ich in der Version 2.2 im Abschnitt 4.1 genauer beschrieben, was bei
+einer Abschlussarbeit im Kapitel \Verwandte Arbeiten" erwartet wird.
+Im M arz 2015 habe ich in der Version 2.3 den Abschnitt 2 hinzugef ugt, der die Zusammen-
+fassung beschreibt, die bereits vor der Anmeldung der Abschlussarbeit erstellt werden soll.
+Im September 2017 habe ich in der Version 2.4 Hinweise zum Thema \Zusammenfassungen"
+(Abschnitte 4.1 und 4.2) und zum Kolloquium (Abschnitt 8) erg anzt.
+Im Februar 2025 habe ich in der Version 2.5 insbesondere Hinweise zur elektronischen Abgabe
+von Quellcode erg anzt.
+Im Mai 2026 habe ich in der Version 2.6 insbesondere Details zur Selbstst andigkeitserkl arung
+und zum Einsatz von L ATEX erg anzt oder uberarbeitet.
+2 Vor der Anmeldung der Arbeit
+Nach den ersten Vorgespr achen / dem ersten E-Mail-Austausch zur angedachten Abschlussarbeit
+bitte ich darum { noch vor der Anmeldung der Arbeit { eine 2{4-seitige Zusammenfassung Ihres
+Vorhabens zu erstellen. Die Zusammenfassung sollte die Motivation, die Problemstellung und die
+genauen Ziele der Arbeit enthalten. Oft ist es zweckm aig, die Ziele zu unterteilen in \Must-have-
+Features", also Ziele, die man auf jeden Fall erreichen m ochte, und \Nice-to-have-Features", also
+Ziele, die man eher nur dann angeht, wenn gen ugend Zeit bleibt. Solch eine Unterteilung erleich-
+tert es sp ater, sich auf das Wesentliche zu konzentrieren und sich nicht zu \verzetteln". Auerdem
+sollte in der Zusammenfassung bereits der Aspekt \Verwandte Arbeiten" angegangen werden, Sie
+sollten also bereits eine Recherche betreiben, ob es bereits Ver oentlichungen gibt, die ahnliche
+Ziele verfolgen, wie in Ihrer Arbeit vorgesehen. Sie sollten dabei verwandte Arbeiten auisten, kurz
+zusammenfassen und begr unden, warum bisher keine existierende Arbeit das Problem vollst andig
+lost, warum es sich also uberhaupt lohnt, Ihre Arbeit zu starten. Im Wesentlichen handelt es
+sich also bei der Zusammenfassung um eine erste, grobe, kurze Version der sp ateren Kapitel 1
+\Einleitung" und Kapitel 2 \Verwandte Arbeiten" Ihrer Abschlussarbeit, vgl. Abschnitt 4.1 dieses
+Hinweisdokuments. Dementsprechend ist die Zusammenfassung auch nicht als Zusatzaufwand zu
+verstehen, sondern sozusagen als Vorarbeit f ur die sp atere Abschlussarbeit. Durch die Zusam-
+menfassung soll sichergestellt werden, dass sich die Abschlussarbeit von Anfang an in die richtige
+Richtung bewegt.
+3 Anmeldung der Arbeit
+•Achten Sie bei der Anmeldung Ihrer Arbeit darauf, das richtige Formular (richtiger Studien-
+gang) zu verwenden. An der Hochschule kursieren diverse Formulare diverser Studieng ange.
+•Bringen Sie zur Anmeldung bitte einen aktuellen Notenausdruck mit, um pr ufen zu k onnen,
+dass Sie die Voraussetzungen zur Anmeldung erf ullt haben.
+3
+
+•Der Titel auf dem Anmeldeformular ist zun achst ein Arbeitstitel, der w ahrend der Bearbei-
+tung noch (leicht) ge andert/angepasst werden kann.
+4 Inhalt und Struktur einer Abschlussarbeit
+Auch wenn Abschlussarbeiten sehr verschieden sein k onnen, so gibt es doch eine ganze Reihe von
+Hinweisen bzgl. Inhalt und Struktur, an die man sich in der Regel halten sollte.
+4.1 Inhalt der Arbeit
+Eine Abschlussarbeit ist eine wissenschaftliche Schrift und kein Erfahrungsbericht!
+Folgen Sie deshalb bitte dem typischen Aufbau einer wissenschaftlichen Arbeit, die folgende Ka-
+pitel enth alt. Insgesamt sollte die Arbeit (inklusive Inhaltsverzeichnis, Anh angen und Leerseiten)
+aus etwa 60 bis 90 Seiten bestehen. Die im folgenden genannten Seitenzahlen f ur die einzelnen
+Kapitel sind nur (sehr) grobe Richtwerte und m ussen dem jeweiligen Thema der Arbeit angepasst
+werden.
+•Einleitung (4-8 Seiten)
+Gleich zu Anfang eines der wichtigsten Kapitel. Hier steht die komplette Begr undung, warum
+diese Arbeit uberhaupt geschrieben wird. Warum ist es das Thema wert, wissenschaftlich
+behandelt zu werden ( Motivation )? Was f ur ein ungel ostes Problem hat die Welt aber noch
+(Problemstellung )? Was soll in dieser Arbeit getan werden, um einen wissenschaftlichen
+Beitrag zu dem noch existerenden Problem zu liefern ( Zielsetzung )? Daneben enth alt das
+einleitende Kapitel auch einen Abschnitt, der erkl art, wie die Arbeit aufgebaut ist. Das
+einleitende Kapitel sollte bereits zu Beginn der Bachelor-/Masterarbeit geschrieben werden,
+also noch bevor es wirklich mit der praktischen Arbeit losgeht.
+•Verwandte Arbeiten / Stand der Technik (12-20 Seiten)
+Hier wird der Leser in die Problematik und das Thema der Arbeit eingef uhrt, indem ihm
+aufgezeigt wird, wer an dem Problem bereits gearbeitet hat und welche L osungswege es
+bereits gibt. Der Stand der Forschung und Technik kann in mehrere Abschnitte unterteilt
+werden, welche die Thematik von unterschiedlichen Sichten aus beleuchten. Am Ende dieses
+Kapitels sollte dem Leser klar sein, wo das Thema der Arbeit einzuordnen ist, und dass das
+Thema dieser Arbeit tats achlich einer weiteren Bearbeitung bedarf, um das in der Einleitung
+geschilderte Problem zu l osen. Wichtig! Dieses Kapitel ist nicht mit dem Grundlagenkapitel
+(siehe n achster Punkt) zu verwechseln. Es geht hier also nicht darum, Grundlagen des Ar-
+beitsgebietes oder Grundlagen, die man f ur die eigene L osung ben otigt, darzustellen, sondern
+in erster Linie darum, Arbeiten/Produkte/L osungen vorzustellen, die ein ahnliches (oder im
+Extremfall sogar identisches) Thema haben wie die eigene Abschlussarbeit. Beispiel: Das
+Thema der Abschlussarbeit lautet \Vergleich der Technologie X mit der Technologie Y".
+Sinn des Kapitels \Verwandte Arbeiten" ist dann nicht die Technologie X und die Techno-
+logie Y vorzustellen, sondern zu untersuchen, ob es bereits andere Arbeiten gibt, die sich
+mit einem Vergleich der Technologie X mit der Technologie Y besch aftigt haben, zu be-
+schreiben, zu welchen Ergebnissen diese andere Arbeiten gekommen sind und zu begr unden,
+warum diese Ergebnisse noch nicht ausreichend sind, so dass es einer n aheren Analyse in
+4
+
+der eigenen Abschlussarbeit bedarf. Zweites Beispiel: Das Thema der Abschlussarbeit lautet
+\Entwicklung einer Android-App zur Herstellung des Weltfriedens". Im Kapitel \Verwandte
+Arbeiten" sollen dann nicht Android-Grundlagen vermittelt werden, sondern es soll unter-
+sucht werden, welche Apps es schon gibt, die dasselbe Ziel verfolgen, und es soll dargestellt
+werden, wo die St arken und insbesondere Schw achen der existierenden Apps liegen, um zu
+begr unden, warum die Entwicklung einer eigenen App sinnvoll ist.
+•Grundlagenkapitel (8-16 Seiten)
+Oft ist es notwendig, den Hintergrund der Arbeit etwas ausf uhrlicher zu beschreiben. Bachelor-
+und Masterarbeiten sind oft in einem so speziellen Thema angesiedelt, dass die Grundlagen
+{ also das Basiswissen, auf dem die Idee der Arbeit aufbaut { noch einmal wiederholt werden
+oder sogar dem Leser von Grund auf erkl art werden muss. In diesem Kapitel wird deshalb
+all das aufbereitet, was f ur die folgenden methodischen Kapitel zum Verst andnis notwendig
+ist. Der Experte kann beim Lesen dieses Kapitel uberspringen und gleich die methodischen
+Kapitel der Arbeit lesen. Sollte das Thema sehr viel spezielles Fachwissen voraussetzen,
+konnen Teile der Grundlagen auch in Anh ange verlegt werden.
+•Methodik (2-4 Kapitel mit je 10-20 Seiten)
+Der eigentliche Kern der Arbeit. In diesen Kapiteln wird die Vorgehensweise methodisch
+erklart. Oft werden f ur Teilprobleme separate Kapitel angefertigt. Oft sind diese Methodik-
+Kapitel aber auch logisch getrennt. Beispielsweise Kapitel f urProblemanalyse ,Verfahrens-
+auswahl ,Umsetzung und Implementierung . Hinweis: Denken Sie daran: Diese Kapitel sind
+der Kern der Arbeit!! Sie sollten hier insbesondere klar herausstellen, was vorhandene Vor-
+arbeiten sind und was im Rahmen dieser Arbeit entwickelt und umgesetzt wurde, also was
+Eigenanteil und was Fremdanteil ist.
+•Ergebnisse (4-12 Seiten)
+Oft vernachl assigt oder gar vergessen: Ein Kapitel, das die Ergebnisse der Arbeit aufzeigt.
+Und wenn Sie programmiert haben: Es ist nicht das Ergebnis einer wissenschaftlichen Arbeit,
+dass das geschriebene Programm l auft oder die Erkl arungen, warum das Debuggen so lange
+gedauert hat. Vielmehr wird hier gezeigt, warum die in den vorangegangenen Kapiteln ver-
+wendete Methodik das in der Einleitung beschriebene Problem l ost (oder aber auch nicht).
+Insbesondere Vergleiche der eigenen L osung mit den im Stand der Technik beschriebenen
+Verfahren und Programmen lassen sich hier gut in Form von Tabellen und Graken darstel-
+len. Lassen sich bei einem Thema keine objektiven Kriterien zur Ergebniskontrolle aufstellen,
+kann auch eine Evaluation mittels Frageb ogen und deren Auswertung als Ergebnis verwendet
+werden.
+•Zusammenfassung und Ausblick (3-6 Seiten)
+Fur alle faulen Leser: Am Ende der Arbeit gibt es eine Zusammenfassung der gesamten Arbeit
+und auch einen Ausblick auf m ogliche weitere Arbeiten. Normalerweise ist es unm oglich, ein
+wissenschaftliches Problem in allen Facetten zu beleuchten und L osungen zu nden. Die
+nicht bearbeiteten Teile des Problems und erste Ideen f ur m ogliche L osungsans atze werden
+deshalb hier aufgezeigt. Die Zusammenfassung sollte man auch nutzen, um die gesamte
+Arbeit noch einmal mit etwas Distanz zu betrachten und kritisch zu reektieren: was hat
+gut funktioniert, was weniger gut? Letzteres kann dann auch schon direkt die Uberleitung
+zum Ausblick sein.
+5
+
+4.2 Aufbau der Arbeit
+Eine Abschlussarbeit ist immer auch ein ozielles Pr ufungsdokument, das somit einer vorgegebe-
+nen Form unterliegt. Neben den im vorigen Abschnitt aufgelisteten Kapiteln sind noch folgende
+Elemente Bestandteil einer Abschlussarbeit:
+•Titelblatt
+•Widmung (optional)
+•Kurzzusammenfassung { fasst die gesamte Arbeit auf 1{2 Seiten zusammen. Die Kurzzusam-
+menfassung sollte so geschrieben sein, dass es m oglich ist, sie herauszul osen und jemandem
+zu lesen zu geben, so dass der Leser nur anhand dieser 1{2 Seiten schon einen Uberblick uber
+den Inhalt und die Ergebnisse der Arbeit erh alt. Wichtig hierbei ist, dass auch Ergebnisse
+enthalten sind; nur die Struktur der Arbeit aufzulisten hilft an dieser Stelle nicht weiter.
+•Danksagung (optional)
+•Selbstst andigkeitserkl arung { beachten Sie hierbei unbedingt die Vorgaben der jeweiligen
+Prufungsordnung und ubernehmen Sie nicht einfach den Text aus einer Vorlage. Suchen Sie
+hierf ur auf der Webseite der THM nach den passenden \Allgemeinen Bestimmungen". Bei
+den Allgemeinen Bestimmungen f ur Bachelorpr ufungsordnungen nden Sie den Wortlaut
+derzeit in §18 (1).
+•Inhaltsverzeichnis
+•Kapitel und Anh ange (siehe Abschnitt 4.1)
+•Abbildungsverzeichnis { kann auch alternativ vor den Kapiteln stehen.
+•Tabellenverzeichnis { kann auch alternativ vor den Kapiteln stehen.
+•Glossar der Fachw orter (optional)
+•Liste der Abk urzungen (optional)
+•Literaturverzeichnis
+Sie k onnen die auf den Webseiten des Fachbereichs MND https://www.thm.de/mnd/studium/
+service/edokumente/studiengangsuebergreifende-dokumente-1 ladbare L ATEX-Vorlage f ur
+Abschlussarbeiten des Kollegen Malerczyk verwenden. Hier sind bereits alle Formatierungen vor-
+deniert und alle relevanten Eintragungen gemacht. Sie m ussen lediglich den Inhalt des Titelblatts
+an Ihre Arbeit anpassen (der Form halber { im Fall einer Medieninformatik-Abschlussarbeit { am
+besten auch den Fachbereich durch IEM ersetzen) und k onnen dann gleich mit dem Schreiben des
+ersten Kapitels beginnen. Wie bei jeder Vorlage gilt aber, dass Sie alles, was Sie ubernehmen, kri-
+tisch pr ufen sollte. Insbesondere muss die Selbstst andigkeitserkl arung, wie bereits oben erw ahnt,
+ggf. an die zutreende Pr ufungsordnung angepasst werden. Weitere Hinweise zum Einsatz von
+LATEX nden sich im Abschnitt 9.
+4.3 Referenzen und Zitate
+In einer wissenschaftlichen Arbeit m ussen alle Ideen und Gedanken, die nicht von Ihnen stammen,
+kenntlich gemacht werden, indem man die Quelle als Literaturquelle/Referenz markiert.
+6
+
+Vorbemerkungen zum Umgang mit Internetquellen. Gerade beim Umgang mit Zitaten aus
+dem Internet gibt es keine 100%-tig verbindlichen Regeln, an die sich alle Wissenschaftler halten
+wurden. Nachfolgend beschreibe ich meine eigene Meinung.
+Wahl der Quelle. Man k onnte unterschiedliche Quellen nach Seriosit at ranken und in vier
+Kategorien unterteilen:
+1. `traditionelle Quellen': B ucher, Artikel in Fachzeitschriften, : : :.
+2. im Internet ver oentlichte Texte von klar erkennbaren und/oder oensichtlich kompetenten
+Urhebern, optimalerweise auf einer seri osen Webseite einer Hochschule / eines Unterneh-
+mens / einer Nachrichtenagentur / : : :
+3. im Internet ver oentlichte Texte ohne klar erkennbaren Urheber, z.B. Wikipedia1
+4. informelle Texte im Internet, z.B. Diskussionen in Foren
+Immer wenn Sie etwas zitieren wollen aus der Kategorie 2{4, sollten Sie recherchieren, ob
+Sie nicht in der Lage sind, eine mindestens genauso gute Quelle aus einer besseren Kategorie zu
+nden, um diese dann zu zitieren. Beispiel: Wenn Sie etwas in Wikipedia nachschlagen, sollten
+Sie den am Ende gelisteten Quellenangaben folgen und pr ufen, ob Sie nicht diese zitieren k onnen
+statt dem Wikipedia-Artikel. Eigentlich sollte es immer m oglich sein, am Ende mindestens in der
+Kategorie 2 zu landen. Kategorie 4 sollte eigentlich nie ubrig bleiben. (Wenn man in einem Forum
+eine interessante Behauptung ndet, muss man sich die M uhe machen, um irgendwo anders einen
+Beleg der Kategorie 1 oder 2 zu nden.) Das Beste, was Sie gefunden haben, sollten Sie dann
+zitieren. Wenn Sie also beispielsweise in einem Fall nichts Besseres als Kategorie 2 nden, m ussen
+Sie eben das zitieren. Oder anders formuliert: Wenn es nicht anders geht, dann lieber auch einmal
+eine nicht so perfekte Quelle zitieren, als ein Zitat ganz wegzulassen. Die Frage \Welchen Eindruck
+macht meine Arbeit, wenn ich Internetseiten zitiere?" w urde ich folgendermaen beantworten:
+Wenn Sie 80{90% traditionelle Zitate (Kategorie 1) haben und 10{20% Zitate der Kategorie 2
+und diese auch berechtigt sind, weil es nichts oensichtlich Besseres gibt (weil es sich z.B. um
+eine ozielle Dokumentation zu einer Technologie handelt, die nur online ver oentlicht wurde),
+dann ist dies uberhaupt kein Problem. Anders sieht es aus, wenn 100% der Zitate aus Wikipedia
+stammen. Die Unterteilung nach Kategorien und die damit verbundenen Regeln habe ich mir
+selbst `ausgedacht'. Wie eingangs schon gesagt, gibt es keine 100%-tig klaren Regeln. Mir ist nur
+wichtig zu dierenzieren: Ich halte es f ur falsch, das gesamte Internet zu `verteufeln', und ebenso
+fur falsch, einfach jeden beliebigen Schrott aus dem Internet zu zitieren.
+Form des Zitats. Ich w urde alle Zitate gleich behandeln. Sprich: Wenn Sie sich guten Ge-
+wissens f ur ein Zitat der Kategorie 2 entschieden haben, dann k onnen Sie das in Ihrer Arbeit auch
+genauso zitieren wie eine traditionelle Quelle. Im Literaturverzeichnis k onnen Sie (m ussen aber
+nicht) die Quellen nach Kategorie gruppieren.
+Zusatzliche Manahmen bei Zitaten aus dem Internet. Um sich selbst abzusichern,
+sollten Sie lokale Kopien der zitierten Seiten machen (ggf. zumindest der Startseite) und diese am
+besten zusammen mit der Arbeit abgeben. Dies beugt dem Fall vor, dass zitierte Seiten aus dem
+Internet verschwinden und beim Lesen Ihrer Arbeit nicht mehr nachvollziehbar sind. Beim Zitieren
+sollten Sie den Tag notieren, an dem Sie die Seite betrachtet haben (Stand: xx.xx.xxxx).
+1www.wikipedia.de
+7
+
+Referenzen. Geizen Sie nicht mit Referenzen. Alles, was Sie an Informationen gelesen haben
+und in Ihrer Arbeit verwenden, sollte auch referenziert werden. Lesen Sie sich Ihre Arbeit immer
+wieder durch und fragen Sie sich, ob der Leser sich nicht wundert: Woher wei er/sie jetzt das?
+Wenn die Arbeit weniger als 30 Referenzen hat, ist erfahrungsgem a auch der Stand der Technik
+nicht ausreichend (oder zumindest nicht ausreichend dokumentiert und referenziert). Besser sind
+40-100 Referenzen.
+Beispiel:
+"Da heute viele einen Computer besitzen,... \ muss nicht referenziert werden.
+"Laut Statistischem Bundesamt nutzen heute uber 80 Prozent der Deutschen einen Computer
+[Rad08]. \ muss referenziert werden.
+Achtung! Insbesondere ist alles zu referenzieren, was nicht neu in dieser Arbeit entwickelt
+wurde! Ein Satz wie"Mithilfe des Levenberg-Marquardt-Algorithmus k onnen die Unbekannten
+der nichtlinearen Funktion bestimmt werden. \ schreit f ormlich nach einer Referenz als Erkl arung,
+wer dieses Verfahren wann entwickelt hat [Lev44, Mar63].
+Zitate sind w ortliche oder fast w ortliche Textpassagen aus anderen Publikationen. Zitate d urfen
+nicht aus ihrem Kontext gerissen werden, damit sich die Kernaussage des Zitats nicht andert.
+Wenn Sie direkt zitieren, setzen Sie das Zitat in Anf uhrungsstriche und verweisen auf den Autor
+im Text oder zumindest per Referenz auf die entsprechende Publikation. Wenn Sie Teile eines Sat-
+zes weglassen (ohne den Sinn zu ver andern), verwenden Sie das Auslassungssymbol (...). M ussen
+Sie das Zitat anpassen, damit es in Ihren Text grammatikalisch passt, markieren Sie die ver ander-
+ten Worte durch eckige Klammern.
+Beispiel:
+Wie Alan Watt in seinem Buch uber 3D-Computergrak [Wat02] erw ahnt,"kann die Gruppe von
+... Rotationen einer Ober ache der vierdimensionalen Einheits-Hypersph are im Quaternionenraum
+zugeordnet werden \.
+Wenn Sie nur sinngem a zitieren, nennen und referenzieren Sie den Autor und stellen das Zitat
+in Kursivschrift dar:
+Alan Watt erkl art in [Wat02], dass 3D-Rotationen eindeutig im Quaternionenraum abgebildet
+werden k onnen .
+Abbildungen. Vergessen Sie beim Schreiben Ihrer Abschlussarbeit nicht, dass auch Bilder und
+Tabellen, die Sie nicht selbst erzeugt haben, referenziert werden m ussen. Abbildungen werden wie
+Zitate behandelt. Es reicht aus, wenn Sie einen entsprechenden Quellenhinweis (beispielsweise Foto
+Eigentum von Sony Pictures, Inc. oder Abbildung entnommen aus [Wat02] ) in die Bildunterschrift
+aufnehmen. Wie bei allen Zitaten in wissenschaftlichen Arbeiten d urfen Sie das Zitat (hier das
+Bild) inhaltlich nicht ver andern, m ussen den Urheber aber auch nicht um Erlaubnis bitten, das
+Werk verwenden zu d urfen.
+8
+
+5 Benotung
+Die faire Benotung einer Abschlussarbeit ist sehr schwierig, erheblich schwieriger als beispielsweise
+die Bewertung einer Klausur, bei der es eine klare Aufgabenstellung gibt, die f ur alle Teilnehmer
+gleichermaen gilt. Abschlussarbeiten k onnen sehr unterschiedliche Schwerpunkte haben, so dass
+es schwer f allt, ein einheitliches Bewertungsraster anzuwenden. Zum Beispiel k onnen eine externe
+Arbeit, die in einem Unternehmen entstanden ist, und eine st arker wissenschaftlich orientierte
+Arbeit, die an der Hochschule entstanden ist, sehr unterschiedlich aussehen und schwer zu verglei-
+chen sein. Trotz alledem kann man eine einheitliche Betrachtung versuchen. Ich orientiere mich
+hierbei an den vier Kategorien Innovation ,Umsetzung ,Verst andlichkeit und Form . Diese Kategori-
+en sind nicht unbedingt allgemeinverbindlich. Jeder Referent wendet letztlich sein eigenes Schema
+an. Mir erscheinen diese vier Kategorien aber besonders geeignet zu sein, um systematisch die
+unterschiedlichen Aspekte, auf die es bei einer Abschlussarbeit ankommt, zu untersuchen.
+5.1 Innovation
+Unabh angig davon, ob in der Abschlussarbeit eine Problemstellung aus einem Unternehmen be-
+handelt wird oder eine wissenschaftliche Fragestellung bearbeitet wird, ist immer das Ziel, auch
+eigene (sinnvolle) Ideen einzubringen und nicht nur die ausf uhrende Kraft zu sein, die das Problem
+strikt nach den Vorgaben des Chefs im Unternehmen bzw. des Professors an der Hochschule l ost.
+Eine Abschlussarbeit sollte also immer auch etwas 'Eigenes' enthalten, einen Ansatz, den man
+selbst entwickelt hat, ein Feature, das urspr unglich vielleicht gar nicht vorgesehen war, ein Pro-
+grammiertrick, auf den man nicht so leicht kommt, der aber ein Teilproblem besonders elegant
+lost (statt einfach nur die Standard-L osung zu verwenden), ein Fazit, mit dem vorher niemand
+gerechnet hat, : : :. Beim Begri \Innovation" brauchen Sie aber auch nicht zu erschrecken. Die
+Messlatte ist hierbei auch nicht extrem hoch gelegt. Es wird nicht erwartet, dass Sie eine neue
+Relativit atstheorie entwickeln. Sie m ussen sich auch nicht unbedingt selbst ein komplett eigenes
+Thema ausdenken. Sie m ussen auch nicht unbedingt an etwas arbeiten, woran noch nie zuvor
+ein Mensch gearbeitet hat. Aber selbst bei einer vorgegebenen Aufgabenstellung gibt es in der
+Regel zahlreiche M oglichkeiten, die eigene Kreativit at einzubringen. Es gilt durchaus auch schon
+als innovativ, wenn man f ur ein Teilproblem einen bereits existierenden L osungsansatz anwendet,
+der bisher vielleicht immer nur in anderen Zusammenh angen verwendet wurde. Man muss also
+nicht immer gleich selbst etwas Neues ernden, um innovativ zu sein.
+Generell z ahlen in dieser Kategorie auch sinnvolle Entscheidungen, die man nach einer gr undli-
+chen Analyse getroen und angemessen begr undet hat, sehr positiv. Umgekehrt sollten Sie vorsich-
+tig sein, wenn Ihnen eine Aufgabenstellung f ur Ihre Abschlussarbeit angeboten wird, bei der jedes
+Detail schon vorgegeben ist. Beispiel: Ein Unternehmen kommt auf Sie zu mit folgender Anfor-
+derung: \Wir brauchen eine Webanwendung, die die nachfolgend beschriebenen zehn Funktionen
+abdecken soll. Das Design steht bereits und sollte von Ihnen verwendet werden. Die Anwendung soll
+in PHP, Version 5.4.10, geschrieben werden." Hier sollten Sie sich die Frage stellen: \Wo kann ich
+noch meine eigenen Ideen einbringen?" Die Antwort wird vermutlich lauten: \Nirgendwo." Wenn
+Sie solch eine Aufgabenstellung annehmen, werden Sie von Anfang an Schwierigkeiten haben, im
+Bereich \Innovation" zu punkten. Sie k onnen solche `Innovations-feindlichen' Aufgabenstellungen
+auch durch folgendes Gedankenexperiment entlarven: Stellen Sie sich vor, eine Kommilitonin oder
+ein Kommilitone w urde exakt die gleiche Aufgabenstellung erhalten und parallel zu Ihnen, ohne
+dass Sie sich abstimmen, das Thema bearbeiten. W urde das Ergebnis der beiden Arbeiten fast
+gleich aussehen? Wenn ja, handelt es sich vermutlich um eine Aufgabenstellung, die wenig eigene
+9
+
+Ideen zul asst. Es fehlt gar nicht viel, um im obigen Beispiel zu einer Aufgabenstellung zu kommen,
+die f ur eine Abschlussarbeit besser geeignet ist. Beispiele:
+•\Wir brauchen eine Webanwendung, die den nachfolgend beschriebenen Zweck erf ullen soll.
+Das Design steht bereits und sollte von Ihnen verwendet werden. Die Anwendung soll in
+PHP, Version 5.4.10, geschrieben werden."
+)Hier ist nur der Zweck vorgegeben. Wie genau der Zweck erf ullt wird, welche Funktionen
+also genau gebraucht werden, ist oen. Sprich: Sie k onnen im Bereich Fachlichkeit eigene
+Ideen einbringen.
+•\Wir brauchen eine Webanwendung, die die nachfolgend beschriebenen zehn Funktionen
+abdecken soll. Das Design sollte zum dynamischen Charakter unseres Unternehmens passen.
+Die Anwendung soll in PHP, Version 5.4.10, geschrieben werden."
+)Hier gibt es f ur das Design nur sehr grobe Vorgaben. Bei der konkreten Ausgestaltung
+konnen Sie Ihre Kreativit at einbringen.
+•\Wir brauchen eine Webanwendung, die die nachfolgend beschriebenen zehn Funktionen
+abdecken soll. Das Design steht bereits und sollte von Ihnen verwendet werden. Die Anwen-
+dung sollte in einem auf PHP-basierenden Framework geschrieben werden."
+)Hier wird f ur die einzusetzende Technik nur ein grober Rahmen vorgegeben. Sie k onnen
+im Bereich Technik eigene Entscheidungen treen, indem Sie verschiedene Frameworks ana-
+lysieren und uberlegen, welches f ur den vorliegenden Zweck am geeignesten ist.
+Naturlich sind auch Kombinationen der soeben erw ahnten Beispiele denkbar.
+Sie sollten vor der Annahme der Aufgabenstellung oen mit demjenigen, der das Thema vor-
+geschlagen hat, sprechen, bei welchen Aspekten Sie sich auch gr oere Freiheiten nehmen k onnen.
+Gemeinsam k onnen Sie uberlegen, ob Sie eine urspr unglich sehr einengende Aufgabenstellung auf-
+brechen und Platz f ur Freir aume schaen k onnen, wie in den obigen Beispielen dargestellt. Notfalls
+sollten Sie auch schlichtweg ein anderes Thema suchen, wenn Sie sich zu eingeengt f uhlen.
+Die Messlatte f ur die Kategorie \Innovation" h angt auch von dem Umfeld ab, in dem Sie sich
+bewegen. Wenn Sie in Ihrer Arbeit eine vergleichsweise neue Technologie einsetzen, die erst wenige
+Jahre alt ist und auch noch nicht Bestandteil mehrere Lehrveranstaltungen war, ist dies schon eine
+Herausforderung und es werden weniger eigene Ideen erwartet, als wenn Sie eine Standard-Java-
+Anwendung entwickeln.
+Vollig unabh angig davon, wo und wie Sie eigene Ideen und Entscheidungen in Ihre Arbeit
+einbringen, auf jeden Fall sollten sie nat urlich sinnvoll sein. Es bringt keine Pluspunkte, wenn man
+am Schluss einer 'langweiligen' Arbeit noch ein Kapitel \Zukunftsmusik" anh angt, in dem eine
+Reihe wilder Ideen formuliert wird, um zu dokumentieren, dass man auch kreativ ist. Die Ideen
+mussen schon harmonisch in die Arbeit integriert sein. (Dies schliet nicht aus, dass zus atzlich im
+letzten Abschnitt auch noch 1{2 etwas abgehobene Ideen formuliert werden.)
+5.2 Umsetzung
+Die Kategorie \Umsetzung" ist die oensichlichste der vier Kategorien. Nat urlich geht es bei einer
+Abschlussarbeit immer darum, dass die Problemstellung { egal, um was es sich genau handelt {
+ordentlich gel ost wurde. Ein wichtiges Kriterium ist nat urlich die Zielerreichung , sprich: Wurde
+das Problem gel ost? Wenn dies der Fall ist, ist dies immer erfreulich und bringt auch in der Regel
+sofort einige positive Punkte. Dies heit aber nicht, dass es umgekehrt sofort Punktabzug gibt,
+10
+
+wenn das Problem (oder ein Teilproblem) nicht gel ost wurde. Gerade bei eher wissenschaftlichen
+Fragestellungen kann es durchaus auch einmal vorkommen, dass ein (Teil)Problem (unter den
+gegebenen Umst anden) nicht l osbar ist; dies l asst sich im Vorfeld auch nicht immer absch atzen.2
+Wenn man die Gr unde hierf ur erkennt, klar beschreibt, was l osbar war und was nicht, und all
+dies geeignet dokumentiert, kann man genauso die volle Punktzahl erhalten, wie jemand, der ein
+losbares Problem `erwischt' hat.
+In die Kategorie \Umsetzung" f allt auch der Umfang . Der Umfang der Arbeit sollte angemes-
+sensein. Was angemessen ist, h angt von der Bearbeitungsdauer (drei Monate / sechs Monate),
+dem Schwierigkeitsgrad, der Ausgangssituation (Weiterentwicklung eines existerenden Projekts,
+Neuentwicklung) usw. ab und l asst sich daher schlecht pauschal anhand einer Seitenzahl (oder ei-
+ner Anzahl von Programmzeilen) denieren. Wenn am Ende einer sechsmonatigen Abschlussarbeit
+aber ein 200 Zeilen langes Programm steht, was man ebenso im Rahmen einer Ubungsaufgabe zu
+einer Lehrveranstaltung im 5. Semester im Laufe einer Woche h atte realisieren k onnen, dann ist
+das schlichtweg zu wenig. Selbst wenn das Programm super funktioniert, wird es in der Kategorie
+\Umsetzung" in solch einem Fall deutliche Abz uge geben. Ein zu geringer Umfang ist aber ein
+eher seltenes Problem bei einer Abschlussarbeit und es w are ein Fehler zu schlieen, dass es bei
+einer Abschlussarbeit haupts achlich darum geht, Masse zu produzieren, indem man bspw. durch
+Formatierungstricks die Seitenanzahl m oglichst gro erscheinen l asst.
+Extrem wichtig ist zu beachten, dass zur Umsetzung die komplette Arbeit geh ort, von der
+Konzeption uber die Realisierung bis zur Auswertung der Ergebnisse. Mit Umsetzung ist hier also
+nicht nur die reine Realisierung gemeint, im Fall eines Software-Entwicklungsprojektes also nicht
+nur das reine Programmieren. Dies bedeutet, zu einer perfekten Umsetzung geh ort nicht nur
+ein umfangreiches, fehlerfreies Programm, mit dem ein potentieller Kunde vielleicht sehr zufrieden
+ware, sondern eben auch all die anderen Kapitel der Arbeit, wie im Abschnitt 4.1 genauer dargelegt.
+Gerade wenn man seine Abschlussarbeit in einem Unternehmen anfertigt, besteht die Gefahr, dass
+die Arbeit zu sehr auf die Realisierung fokusiert wird, was daran liegt, dass es f ur das Unternehmen
+oft wichtiger ist, noch ein paar Features mehr zu realisieren und daf ur beispielsweise auf eine
+genauere Analyse der eingesetzten Technologie zu verzichten. Hier m ussen Sie sehr vorsichtig
+sein. Ein umfangreiches und perfekt funktionierendes Programm kann Ihnen im Extremfall eine
+sehr schlechte Note einbringen, wenn das `Drumherum' miserabel in Ihrer Arbeit dokumentiert ist.
+Das Argument \Aber das Programm l auft doch!" wird Ihnen in solch einem Fall nicht helfen.
+5.3 Verst andlichkeit
+Wie bereits im vorhergehenden Abschnitt beschrieben, geht es nicht nur darum, das Problem zu
+losen, sondern auch darum, die L osung ordentlich zu dokumentieren. In die Kategorie \Umsetzung"
+iet ein, dass die einzelnen Abschnitte im angemessenen Umfang vorhanden und inhaltlich sinnvoll
+und richtig sind. Die Kategorie \Verst andlichkeit" geht noch einen Schritt weiter und erwartet,
+dass die Beschreibung nicht nur vollst andig und richtig ist, sondern auch verst andlich geschrieben
+wurde. Verst andlichkeit ist auf allen Ebenen wichtig:
+•Wortebene: Fachbegrie werden beim ersten Erscheinen im Text in einem Nebensatz erkl art.
+Zusatzlich ist es m oglich, ein Glossar anzulegen, das alle Fachausdr ucke mit jeweils ein
+bis drei S atzen zusammenfassend erkl art. Sehr ausgefallene Fremdw orter k onnen vielleicht
+komplett vermieden werden.
+2Schon Albert Einstein soll gesagt haben \Wenn wir w ussten, was wir tun, w urden wir es nicht Forschung nennen,
+oder?" Sprich, gerade bei einem Forschungsprojekt kann man unm oglich schon am Anfang mit Sicherheit wissen,
+ob alles, wie geplant, funktionieren wird.
+11
+
+•Satzebene: Jeder einzelne Satz sollte verst andlich geschrieben sein. Im besten Fall muss
+man einen Satz nur einmal lesen, um ihn zu verstehen. Wenn man ihn mehr als zweimal
+lesen muss, sollte man uber eine Vereinfachung nachdenken, z.B. uber eine Aufteilung eines
+langen, verschachtelten Satzes in mehrere kurze. Es sollte jedenfalls nicht das Ziel einer
+(guten) Abschlussarbeit sein, durch besonders kompliziert konstruierte S atze Eindruck zu
+schinden.
+•Abschnittsebene: Der Gedanke / die Aussage, den/die man in einem Abschnitt zum Aus-
+druck bringen will, sollte klar werden. Es sollten nicht zu viele verschiedene Ideen auf engstem
+Raum gemischt werden, die Gedanken sollten idealerweise zur Uberschrift des Abschnitts
+passen, f ur die Arbeit relevant sein, auf den vorherigen Gedanken aufbauen usw.. Scheuen
+Sie sich nicht davor, nachdem die erste Version Ihrer Arbeit fertig ist, noch einmal wesent-
+liche Umstrukturierungen vorzunehmen. Es ist nicht ungew ohnlich, dass beim Aufschreiben
+der eigenen Gedanken zwar auf Anhieb viel Gutes dabei ist, aber auch ein bisschen Cha-
+os entsteht. Nachdem man die erste Version aufgeschrieben hat, sollte man sich die Zeit
+nehmen, die Gedanken ggf. noch einmal neu und besser zu sortieren.
+•Kapitelebene: Achten Sie insbesondere darauf, dass die Arbeit einen roten Faden enth alt.
+Jedes Kapitel endet mit einem Abschnitt, der den Inhalt des Kapitels zusammenfasst und
+zum n achsten Kapitel uberleitet. Jedes Kapitel nimmt die Ergebnisse des vorigen Kapitels
+auf und gibt eine kurze Erl auterung, was im folgenden Kapitel auf den Leser wartet. Mit
+dem roten Faden f ullen sich auch Zeilen zwischen Uberschrift des Kapitels und Uberschrift
+des ersten Abschnitts eines Kapitels. Zwei direkt aufeinanderfolgende Uberschriften (auch
+unterschiedlicher Tiefe) sollten vermieden werden.
+Die Kategorie \Verst andlichkeit" ist sehr wichtig, weil es eben bei einer Abschlussarbeit nicht
+nur darum geht, irgendwie ein Problem zu l osen, sondern zu zeigen, dass man in der Lage ist, den
+Losungsweg auch anderen begreiich zu machen.
+Als Zielgruppe f ur Ihre Arbeit k onnen Sie sich Kommilitonen desselben Studiengangs vorstellen,
+die ebenfalls kurz vor ihren Abschl ussen stehen. Sprich: Sie k onnen umfangreiche Grundkenntnisse
+Ihrer Fachrichtung voraussetzen und m ussen Dinge, die allgemein bekannt sind, nicht noch einmal
+erklaren. Sie m ussen zum Beispiel nicht erkl aren, was eine Programmiersprache ist. Sie d urfen
+aber nicht voraussetzen, dass sich der Leser in dem Spezialgebiet Ihrer Arbeit gut auskennt oder
+selbst schon seit Jahrzehnten in demselben Bereich arbeitet. Fachbegrie, Techniken, Methoden,
+die auerhalb des Spezialgebiets nicht bekannt sind, m ussen also erkl art werden. Hierzu eignen
+sich insbesondere die Grundlagenkapitel, vgl. Abschnitt 4.1. Beispiel: Sie schreiben eine Mobile
+Anwendung unter Android. Android ist ein mobiles Betriebssystem, das auf Linux aufbaut, und
+gleichzeitig ein Softwareentwicklungsframework, das auf Java aufbaut. Sie d urfen voraussetzen,
+dass der Leser sowohl Linux als auch Java zumindest grob kennt und m ussen die Grundlagen
+von Linux und Java nicht erkl aren. Sie sollten aber die Grundlagen von Android erkl aren (wie
+ausfuhrlich h angt vom genauen Schwerpunkt der Arbeit ab).
+Lassen Sie, gerade was die Verst andlichkeit angeht, Ihre Arbeit von einer Person Ihres Ver-
+trauens inhaltlich uberpr ufen.
+5.4 Form
+Da es sich bei einer Abschlussarbeit um ein ozielles Dokument handelt spielt auch die Form eine
+wichtige Rolle. Der in diesem Zusammenhang mit Abstand wichtigste Aspekt ist die Abgrenzung
+12
+
+der eigenen Leistung von der Leistung anderer. Die wichtigsten Regeln hierzu wurden bereits
+in vorangehenden Abschnitten (insbesondere im Abschnitt 4.3) erl autert. Insbesondere wenn die
+Arbeit im Rahmen eines gr oeren Projekts entsteht, an dem mehrere Personen beteiligt sind,
+(sei es in einem Unternehmen oder auch an der Hochschule) und/oder wenn die Arbeit eine
+Weiterentwicklung eines existerenden Projekts ist, muss ganz klar werden, welche Teile schon da
+waren bzw. von Kollegen entwickelt wurden und welche Teile von Ihnen stammen. Auch wenn es
+um Entscheidungen geht, muss klar werden, wer die Entscheidungen getroen hat. Es ist v ollig
+normal, dass man bei einem gr oeren Projekt nicht immer f ur alles allein verantwortlich ist und
+nicht immer ausgehend von einem leeren Blatt alles alleine entwickelt. Es ist also auch nicht
+schlimm, wenn man einr aumt, dass gewisse Teile schon da waren. Zu deutlichen Abz ugen kann es
+aber f uhren, wenn die Arbeitsteilung aus Ihrer Abschlussarbeit nicht eindeutig hervorgeht.
+Im Extremfall kann eine Missachtung dieser Regeln auch dazu f uhren, dass Ihre Arbeit als
+Plagiat eingestuft wird und als nicht bestanden gewertet werden muss, unabh angig davon, wie
+gut Ihre Arbeit bei den anderen Kategorien abgeschnitten hat.
+Weitere Vorgaben zur Form, die Sie unbedingt einhalten m ussen, nden Sie auch im Abschnitt
+4.2. Des Weiteren sollten Sie folgende Aspekte beachten:
+•Eine Abbildung, eine Tabelle oder ein Programmcodeausschnitt sollte nie 'einfach so' in
+den Flietext integriert werden, sondern stets eine Nummer und einen kurzen Titel (Bild-
+unterschrift) tragen. Auf die jeweilige Nummer sollte im Flietext dann ausdr ucklich Bezug
+genommen werden, zum Beispiel \Wie man in Abbildung 2 sieht, verh alt sich : : :". Zu jeder
+Abbildung, Tabelle usw. sollte es im Flietext auch eine Erl auterung / Erkl arung / Inter-
+pretation geben. Es ist nicht Aufgabe des Lesers zu erraten, worauf Sie mit einer Abbildung
+hinaus wollen.
+•Die im Abschnitt 4.2 erw ahnten Verzeichnisse (Inhaltsverzeichnis, Literaturverzeichnis usw.)
+sollten ubersichtlich und fehlerfrei sein, ganz besonders wichtig ist dies beim Literaturver-
+zeichnis.
+•Achten Sie auch auf die Rechtschreibung! Auch LaTeX-Editoren wie LEd3bieten heute die
+Moglichkeit einer Rechtschreibpr ufung. Dass eine Arbeit uber mehr als 50 Seiten vielleicht
+1{2 kleinere grammatikalische Fehler enth alt, ist durchaus auch mal verzeihlich und f uhrt
+nicht sofort zu Punktabzug. Einfache Tippfehler, die die primitivste Rechtschreibpr ufung in
+Sekundenschnelle erkennen w urde, die man aber auf jeder zweiten Seite oder an besonders
+wichtigen Stellen (z.B. in Uberschriften) ndet, sind hingegen nicht akzeptabel und f uhren
+zu Abz ugen. Wie schon bei der Verst andlichkeit gilt, dass Sie, auch was die Rechtschreibung
+angeht, Ihre Arbeit am besten von einer Person Ihres Vertrauens uberpr ufen lassen sollten.
+Wenn Sie Schwierigkeiten mit der deutschen Sprache haben, d urfen Sie sich auch bei rein
+sprachlichen Problemen helfen lassen. Am Ende sollte aber auf jeden Fall auch ein sprachlich
+moglichst fehlerfreies Dokument entstanden sein.
+5.5 Gewichtung der vier Kategorien
+Die vier Kategorien sind grunds atzlich ungef ahr gleich wichtig, lediglich beim Verh altnis von Inno-
+vation zu Umsetzung kann es zu Verschiebungen kommen, wenn, dann aber nur zu Ihren Gunsten,
+sprich:
+3www.latexeditor.org
+13
+
+•Wenn Ihre Arbeit ganz besonders innovativ ist und sie sehr viele gute eigene Ideen einbringen,
+dann kann der Umfang Ihrer Arbeit auch ein wenig kleiner sein und die Innovation wird
+starker positiv gewichtet, so dass die etwas schlechtere Umsetzung ausgeglichen wird.
+•Umgekehrt k onnen Sie auch eine Arbeit in einem eher traditionellen, weniger innovativen
+Themengebiet schreiben und durch eine besonders umfangreiche und gute Umsetzung auch
+mit etwas weniger eigenen Ideen auskommen. In diesem Fall w urde die Umsetzung zu Ihren
+Gunsten etwas h oher gewichtet als die Innovation.
+Dadurch, dass die Gewichtung nicht v ollig starr festgelegt ist, k onnen auch sehr verschiedene
+Arbeiten die Bestnote erhalten.
+6 Hinweise und Tipps
+•Vergessen Sie nie, dass es sich um Ihre Abschlussarbeit handelt. Sie sind verantwortlich
+dafur, dass innerhalb der vorgegebenen Zeit ein ausgereiftes Werk entsteht. Melden Sie
+sich bei mir, wenn Sie Fragen haben, wenn Schwierigkeiten auftauchen, wenn Sie unsicher
+sind, ob sich die Arbeit in die richtige Richtung bewegt. Haken Sie ruhig nach, wenn Sie
+beispielsweise per E-Mail eine dringende Frage gestellt haben und auch nach Tagen keine
+Antwort bei Ihnen eingetroen ist. (Auch E-Mails gehen ab und zu verloren.) Warten Sie
+nicht darauf, bis Sie gefragt werden, ob alles in Ordnung ist. Es ist Ihre Aufgabe, den aktiven
+Part zu spielen.
+•Eine Abschlussarbeit ist auch immer etwas sehr Individuelles. Es ist daher unm oglich, sehr
+prazise, umfassende und allgemeing ultige Regeln zu formulieren. Die in diesem Dokument
+genannten Regeln und Anforderungen sollen Ihnen daher als Orientierung dienen. Es ist
+aber auch wichtig, dass Sie sich den notwendigen Freiraum zum wissenschaftlichen Arbeiten
+nehmen. Sie m ussen sich daher nicht strikt an alle Vorgaben halten. Sprechen Sie aber bitte
+alle Abweichungen in Form und Inhalt vorher mit mir ab.
+•Erstellen Sie gleich zu Beginn zumindest einen groben Zeitplan und sprechen Sie ihn mit mir
+ab. Kontrollieren Sie selbst immer wieder, ob Sie noch im Zeitplan liegen. Passen Sie den
+Zeitplan ggf. an und/oder sprechen Sie rechtzeitig mit mir, wenn Sie groe Schwierigkeiten
+erkennen, noch fertig zu werden. Planen Sie gegen Ende der Arbeit gen ugend Puer ein
+fur Dinge, die eventuell schief gehen und insbesondere auch f ur das Korrekturlesen, die
+Endkontrolle, Druck und Abgabe, um zu vermeiden, dass Sie ganz am Schluss aufgrund zu
+groer Hektik noch etwas Wesentliches in Ihrem Dokument versehentlich kaputt machen.4
+•Sprechen Sie am besten mit mir auch schon uber Zwischenergebnisse. So erhalten Sie fr uhzei-
+tig Feedback, das Sie beim Erstellen der endg ultigen Version noch ber ucksichtigen k onnen.
+7 Abgabe
+•Die Abgabe Ihrer Arbeit erfolgt am besten im IEM Sekretariat. Falls Sie am aller letzten
+Tag abgeben wollen { wovon ich grunds atzlich abrate { sollten Sie im Vorfeld kl aren, zu
+4Ich hatte schon den Fall, dass das Literaturverzeichnis v ollig durcheinander war. Dies kann passieren, wenn man
+in letzter Sekunde noch hektisch etwas einf ugen will.
+14
+
+welchen Uhrzeiten das Sekretariat besetzt ist, um die Onungszeiten nicht verpassen zu
+konnen. Notfalls ist auch eine Abgabe bei der Information m oglich, wobei diese nat urlich
+auch nicht rund um die Uhr besetzt ist.
+•Fallt der ozielle Abgabetermin auf ein Wochenende, ist es ausreichend, Ihre Arbeit am
+Montag fr uh morgens abzugeben. Erkundigen Sie sich in diesem Fall am besten vorab, wann
+das Sekretariat onet. Auch in diesem Fall rate ich ausdr ucklich davon ab, diese aller letzte
+Moglichkeit anzupeilen, und empfehle stattdessen, die Arbeit schon freitags abzugeben.
+•Es reicht, wenn Sie zwei gedruckte Exemplare Ihrer Arbeit abgeben.
+•Die Arbeit sollte ordentlich gebunden sein, d.h. Klebebindung, kein Schnellhefter oder einfa-
+che Heftklammern und am besten auch keine Spiralbindung. Der Ausdruck sollte doppelseitig
+erfolgen.
+•Es ist ublich, dass Quellcode auf einem geeigneten Datentr ager beigelegt wird oder elektro-
+nisch zur Verf ugung gestellt wird. Wenn der Quellcode elektronisch zur Verf ugung gestellt
+wird, sollten ozielle Plattformen der Hochschule (git.thm.de, Hessenbox o. a.) bevorzugt
+verwendet werden. In der schriftlich eingereichten Arbeit sollte sich dann ein entsprechender
+Link benden.
+8 Kolloquium
+Nach Abgabe Ihrer Arbeit vereinbaren wir einen Termin f ur das Kolloquium. Insgesamt dauert das
+Kolloquium circa eine Stunde. (Direkt im Anschluss kommt dann noch die Notenbesprechung im
+Geheimen und dann die Notenverk undung.) Es geht los mit Ihrem Vortrag, der circa 20 Minuten
+dauern sollte. Der Vortrag ist prinzipiell oentlich. Insbesondere k onnen Sie gerne befreundeten
+Kommilitonen oder auch Kollegen Bescheid sagen. Nach dem Vortrag gibt es eine kurze oentliche
+Fragerunde und dann eine l angere Fragerunde unter Ausschluss der Oentlichkeit.
+Der Vortrag soll logischerweise Ihre Abschlussarbeit vorstellen. Das Zweckm aigste ist in den
+meisten F allen, den Vortrag ahnlich zu gliedern, wie die Arbeit: also mit einer Einleitung zu be-
+ginnen, dann die wichtigsten Grundlagen zu erw ahnen, Ihre Vorgehensweise zu erl autern, Ihre
+Ergebnisse vorzustellen und am Ende eine Zusammenfassung und Ausblick zu bieten. Wie ge-
+nau Sie den Vortrag gestalten, ist Ihnen uberlassen. Ein Tipp noch von mir: Ein Einblick in die
+Technik ist immer gut; richtig gut ist, wenn dies gelingt, ohne seitenweise Quellcode zu zeigen.
+Schon ist immer, wenn man eher etwas anhand von Ubersichtsdiagrammen oder nur ganz kurzen
+Codeausschnitten zeigen kann.
+Sie sollten das Kolloquium auch als Chance begreifen, Ihre Arbeit auf andere Weise zu pr asen-
+tieren, als dies in der rein schriftlichen Form m oglich ist. Vielleicht k onnen Sie das fertige Ergebnis
+live vorf uhren und damit 'zum Leben erwecken' oder Sie haben vorher ein kurzes Video vom ferti-
+gen Produkt aufgezeichnet, was Sie abspielen und live kommentieren oder Sie machen eine kurze
+(gut geprobte) Live-Coding-Vorf uhrung, wenn es z.B. ein wesentlicher Teil Ihrer Arbeit war, sich
+in eine neue (Programmier-)Technologie einzuarbeiten. Nur exakt noch einmal das herunter zu
+beten, was man bereits schriftlich abgegeben hat, und daf ur einfach alle Abbildungen der Arbeit
+vorher auf Folien kopiert zu haben, erzielt hingegen keinen gr oeren Mehrwert.
+Wichtig ist auch { aber das ist selbstverst andlich { Ihre eigene Arbeit sehr gut zu kennen.
+Schlecht ist, wenn auf eine konkrete Frage zur Arbeit die Antwort kommt: \Das ist ja jetzt schon
+drei Monate her, da wei ich nicht mehr, warum ich das so geschrieben habe." Ansonsten wird
+15
+
+naturlich vorausgesetzt, dass Sie sich grunds atzlich mit dem von Ihnen behandelten Themenge-
+biet ganz gut auskennen. Sie m ussen aber keine Bedenken haben, dass wir im Kolloquium v ollig
+abdriften und auf einmal eher abwegige Fragen zu ganz anderen Themen gestellt werden.
+8.1 Nach dem Kolloquium
+•Um Ihr Zeugnis zu erhalten, ben otigen Sie einen Laufzettel, auf dem u.a. vom betreuenden
+Professor best atigt wird, dass keine Materialien an Sie verliehen wurden bzw. dass alles
+zuruckgegeben wurde. Wenn Sie sich diesen Laufzettel bereits im Vorfeld besorgen und
+mitbringen, kann ich diesen gerne direkt im Anschluss an das Kolloquium unterschreiben.
+•Nach bestandendem Kolloquium k onnen Sie Ihre Abschlussarbeit gerne kostenlos elektro-
+nisch ver oentlichen, was ich grunds atzlich f ur eine gute Idee halte. Siehe http://digdok.
+bib.thm.de/veroeffentlichen.php .
+•Bitte bedenken Sie, dass nach bestandendem Kolloquium Ihr Studium abgeschlossen ist
+und Sie sich deshalb um diverse organisatorische Dinge k ummern m ussen, z.B. Pr ufung des
+Krankenversicherungsschutzes. Insbesondere wird empfohlen, sich aktiv zu exmatrikulieren,
+da dies ger uchteweise wichtig bei der Anerkennung von Rentenversicherungszeiten ist. Dieser
+Punkt ist sicher unvollst andig und unverbindlich. Es w urde den Rahmen dieses Dokumentes
+sprengen, noch einen Sozialversicherungsratgeber zu integrieren. Bitte informieren Sie sich
+hierzu an geeigneteren Stellen.
+9 Sonstige organisatorische Hinweise
+•Kummern Sie sich rechtzeitig, d.h. am besten gleich zu Beginn, um einen Zweitpr ufer. Gerne
+mache ich Vorschl age, wer bei dem gew ahlten Thema besonders gut als Zweitpr ufer in Frage
+kommt.
+•Ich pers onlich halte L ATEX fur die Erstellung einer wissenschaftlichen Arbeit, wie eben z.B.
+einer Abschlussarbeit, f ur besonders geeignet. Wenn man einmal etwas Erfahrung mit L ATEX
+gesammelt hat, stellt man in der Regel fest, dass man bequem und ezient damit arbeiten
+kann; bis es aber einmal soweit ist, kann aber auch einiges an Zeit verloren gehen, um ein-
+fachste Dinge, wie z.B. das Einbinden von Abbildungen, zu erreichen. Bei einer 3-monatigen
+Abschlussarbeit kann dies problematisch sein. Sie sollten sich also schon vor Beginn der
+Arbeit uberlegen, ob Sie sich sicher genug f uhlen, L ATEX zu verwenden.
+Wenn Ihnen der Einsatz von L ATEX zu riskant ist, k onnen Sie gerne auch auf ein 'normales'
+Textverarbeitungsprogramm zur uckgreifen.
+16
+
+Literatur
+[Lev44] K. Levenberg. A Method for the Solution of Certain Problems in Least Squares. Quarterly of Applied
+Mathematics , 2:164{168, 1944.
+[Mar63] D. W. Marquardt. An Algorithm for Least-Squares Estimation of Nonlinear Parameters. SIAM Journal on
+Applied Mathematics , 11(2):431{441, 1963.
+[Rad08] W. Radermacher, editor. Statistisches Jahrbuch 2008 f ur die Bundesrepublik Deutschland . Statistisches
+Bundesamt, Wiesbaden, September 2008. ISBN: 978-3-8246-0822-5.
+[Wat02] A. Watt. 3D-Computergrak . Pearson Studium, M unchen, 3. auage edition, 2002. ISBN: 3-8273-70140.
+17

@@ -8,8 +8,22 @@ function assertString(value: unknown, field: string): asserts value is string {
 }
 
 function assertNumber(value: unknown, field: string): asserts value is number {
-  if (typeof value !== "number" || Number.isNaN(value)) {
-    throw new ValidationError(`Field "${field}" must be a number`);
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new ValidationError(`Field "${field}" must be a finite number`);
+  }
+}
+
+function assertCount(value: unknown, field: string): void {
+  assertNumber(value, field);
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new ValidationError(`Field "${field}" must be a non-negative safe integer`);
+  }
+}
+
+function assertTimestamp(value: unknown, field: string): void {
+  assertNumber(value, field);
+  if (value < 0 || !Number.isFinite(new Date(value).getTime())) {
+    throw new ValidationError(`Field "${field}" must be a valid non-negative timestamp`);
   }
 }
 
@@ -20,28 +34,31 @@ function assertStringArray(value: unknown, field: string): asserts value is stri
 }
 
 function assertCompetencies(value: unknown): asserts value is Record<string, CompetencyState> {
-  if (typeof value !== "object" || value === null) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new ValidationError('Field "competencies" must be an object');
   }
   for (const [competencyId, state] of Object.entries(value as Record<string, unknown>)) {
-    if (typeof state !== "object" || state === null) {
+    if (typeof state !== "object" || state === null || Array.isArray(state)) {
       throw new ValidationError(`Field "competencies.${competencyId}" must be an object`);
     }
     const s = state as Record<string, unknown>;
     assertString(s.competencyId, `competencies.${competencyId}.competencyId`);
     assertNumber(s.score, `competencies.${competencyId}.score`);
-    assertNumber(s.timesAssessed, `competencies.${competencyId}.timesAssessed`);
+    if (s.score < 0 || s.score > 1) {
+      throw new ValidationError(`Field "competencies.${competencyId}.score" must be in [0, 1]`);
+    }
+    assertCount(s.timesAssessed, `competencies.${competencyId}.timesAssessed`);
     if (s.lastAssessedAt !== null) {
-      assertNumber(s.lastAssessedAt, `competencies.${competencyId}.lastAssessedAt`);
+      assertTimestamp(s.lastAssessedAt, `competencies.${competencyId}.lastAssessedAt`);
     }
   }
 }
 
 function assertCommonSessionFields(b: Record<string, unknown>): void {
-  assertNumber(b.startedAt, "startedAt");
-  assertNumber(b.updatedAt, "updatedAt");
+  assertTimestamp(b.startedAt, "startedAt");
+  assertTimestamp(b.updatedAt, "updatedAt");
   if (b.completedAt !== undefined && b.completedAt !== null) {
-    assertNumber(b.completedAt, "completedAt");
+    assertTimestamp(b.completedAt, "completedAt");
   }
   if (b.courseId !== undefined && b.courseId !== null) {
     assertString(b.courseId, "courseId");
@@ -52,11 +69,11 @@ function assertCommonSessionFields(b: Record<string, unknown>): void {
   if (b.currentCompetencyId !== null) {
     assertString(b.currentCompetencyId, "currentCompetencyId");
   }
-  assertNumber(b.questionsInCurrentCompetency, "questionsInCurrentCompetency");
+  assertCount(b.questionsInCurrentCompetency, "questionsInCurrentCompetency");
 }
 
 export function validateSessionInput(body: unknown): StudySessionInput {
-  if (typeof body !== "object" || body === null) {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
     throw new ValidationError("Request body must be an object");
   }
   const b = body as Record<string, unknown>;
@@ -68,7 +85,7 @@ export function validateSessionInput(body: unknown): StudySessionInput {
 }
 
 export function validateSessionReplace(body: unknown): StudySessionReplace {
-  if (typeof body !== "object" || body === null) {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
     throw new ValidationError("Request body must be an object");
   }
   const b = body as Record<string, unknown>;

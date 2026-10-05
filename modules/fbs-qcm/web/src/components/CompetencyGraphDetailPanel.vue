@@ -40,7 +40,9 @@
           :questions="questions"
           :root-competencies="rootCompetencies"
           :child-competencies="childCompetencies"
-          :get-competency-color="getCompetencyColor"
+          :questions-with-competency="questionsWithCompetency"
+          :readonly="readonly"
+          :edit-competency="editCompetency"
         />
 
         <!-- Competency Panel -->
@@ -53,6 +55,10 @@
           :get-available-prerequisites="getAvailablePrerequisites"
           :questions-with-competency="questionsWithCompetency"
           :save-competency-prerequisites="saveCompetencyPrerequisites"
+          :edit-competency="editCompetency"
+          :edit-question="editQuestion"
+          :delete-competency="deleteCompetency"
+          :link-existing-question="linkExistingQuestion"
         />
 
         <!-- Question Panel -->
@@ -70,28 +76,6 @@
       </v-card-text>
     </v-card>
 
-    <!-- Action Menu -->
-    <v-card v-if="!readonly" class="mt-3 action-card" elevation="0" rounded="lg">
-      <v-card-text>
-        <v-menu>
-          <template #activator="{ props: activatorProps }">
-            <v-btn block color="app-graph-primary" prepend-icon="mdi-plus" v-bind="activatorProps">
-              Neu erstellen
-            </v-btn>
-          </template>
-
-          <v-list>
-            <v-list-item prepend-icon="mdi-help-circle-outline" @click="editQuestion()">
-              <v-list-item-title>Frage hinzufügen</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item prepend-icon="mdi-brain" @click="editCompetency()">
-              <v-list-item-title>Kompetenz hinzufügen</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-card-text>
-    </v-card>
   </v-col>
 </template>
 
@@ -123,9 +107,11 @@ interface Props {
     prerequisites: CompetencyPrerequisite[]
   ) => Promise<void>
   selectCourse: () => void
-  editQuestion: (question?: Question) => void
-  editCompetency: (competencyId?: string) => void
+  editQuestion: (question?: Question, presetCompetencyId?: string) => void
+  editCompetency: (competencyId?: string, presetParentId?: string) => void
   deleteQuestion: (id: string) => void
+  deleteCompetency: (id: string) => void
+  linkExistingQuestion: (competencyId: string) => void
 }
 
 const props = defineProps<Props>()
@@ -171,9 +157,4 @@ const panelStyles = {
   color: var(--sg-accent);
 }
 
-.action-card {
-  border: 1px solid var(--sg-panel-border);
-  background: var(--sg-panel-bg);
-  box-shadow: 0 8px 24px var(--sg-panel-shadow);
-}
 </style>

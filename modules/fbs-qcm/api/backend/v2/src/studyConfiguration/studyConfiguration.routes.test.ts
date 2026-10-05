@@ -47,6 +47,10 @@ describe("Course study configuration routes", () => {
     expect(response.body.revision).toBe(0);
     expect(response.body.overrides).toEqual({});
     expect(response.body.effectiveConfig.selection.stickinessQuestions).toBe(3);
+    expect(response.body.effectiveConfig.selection.competencyStrategy).toBe(
+      "coverage-weighted"
+    );
+    expect(response.body.effectiveConfig.selection.responseScoreThreshold).toBeNull();
     expect(response.body.effectiveConfig.session.maxQuestionsPerSession).toBe(30);
   });
 
@@ -137,5 +141,42 @@ describe("Course study configuration routes", () => {
         overrides: { selection: { stickinessQuestions: 0 } }
       });
     expect(invalidValueResponse.status).toBe(400);
+  });
+
+  it("accepts expected-information-gain configuration with its required constraints", async () => {
+    const response = await request(app)
+      .put("/api_v2/courses/1/study-configuration")
+      .set("authorization", authHeader)
+      .send({
+        revision: 0,
+        overrides: {
+          selection: {
+            competencyStrategy: "expected-information-gain",
+            responseScoreThreshold: 0.5,
+            singleRequiredItemsOnly: true
+          }
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.effectiveConfig.selection.competencyStrategy).toBe(
+      "expected-information-gain"
+    );
+    expect(response.body.effectiveConfig.selection.responseScoreThreshold).toBe(0.5);
+    expect(response.body.effectiveConfig.selection.singleRequiredItemsOnly).toBe(true);
+  });
+
+  it("rejects expected-information-gain without binary scoring and item filtering", async () => {
+    const response = await request(app)
+      .put("/api_v2/courses/1/study-configuration")
+      .set("authorization", authHeader)
+      .send({
+        revision: 0,
+        overrides: {
+          selection: { competencyStrategy: "expected-information-gain" }
+        }
+      });
+
+    expect(response.status).toBe(400);
   });
 });

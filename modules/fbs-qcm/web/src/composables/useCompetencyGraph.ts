@@ -385,6 +385,78 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
     )
   }
 
+  /**
+   * Fügt eine neu im Dialog angelegte Aufgabe lokal hinzu. Ergänzt
+   * `updateQuestion`, das nur für das Bearbeiten bestehender Aufgaben gedacht
+   * ist (vgl. Bug: "Aufgabe hinzufügen" hatte bislang keinen Effekt, da es
+   * keine Stelle gab, die eine neue Aufgabe tatsächlich in `questions` aufnahm).
+   */
+  const addQuestion = (newQuestion: Question) => {
+    questions.value = [...questions.value, newQuestion]
+  }
+
+  /**
+   * Alle IDs einer Kompetenz inkl. aller (rekursiven) Unterkompetenzen -
+   * Grundlage für Lösch-Impact-Vorschau und das eigentliche Löschen.
+   */
+  const collectCompetencySubtreeIds = (rootId: string): string[] => {
+    const result: string[] = [rootId]
+    const visit = (parentId: string) => {
+      childCompetencies(parentId).forEach((child) => {
+        result.push(child.id)
+        visit(child.id)
+      })
+    }
+    visit(rootId)
+    return result
+  }
+
+  /**
+   * Vorschau, was beim Löschen einer Kompetenz zusätzlich betroffen wäre,
+   * damit die aufrufende UI vor dem eigentlichen Löschen eine aussagekräftige
+   * Warnung anzeigen kann (statt Kompetenzen mit Kindern/Aufgaben "leise"
+   * verschwinden zu lassen).
+   */
+  const getCompetencyDeletionImpact = (competencyId: string) => {
+    const affectedIds = new Set(collectCompetencySubtreeIds(competencyId))
+    const affectedQuestionCount = questions.value.filter((q) =>
+      getQuestionCompetencyIds(q).some((id) => affectedIds.has(id))
+    ).length
+
+    return {
+      subCompetencyCount: affectedIds.size - 1,
+      affectedQuestionCount
+    }
+  }
+
+  /**
+   * Löscht eine Kompetenz inkl. aller Unterkompetenzen (Kaskade über die
+   * Taxonomie/`parentId`). Betroffene Aufgaben verlieren nur die Zuordnung zu
+   * den gelöschten Kompetenzen, werden aber nicht selbst gelöscht. Andere
+   * Kompetenzen, die eine der gelöschten Kompetenzen als Prerequisite
+   * hatten, verlieren ebenfalls nur diese Referenz.
+   */
+  const deleteCompetency = (competencyId: string) => {
+    const affectedIds = new Set(collectCompetencySubtreeIds(competencyId))
+
+    competencies.value = competencies.value
+      .filter((c) => !affectedIds.has(c.id))
+      .map((c) => ({
+        ...c,
+        prerequisites: c.prerequisites?.filter((p) => !affectedIds.has(p.competencyId))
+      }))
+
+    questions.value = questions.value.map((q) => ({
+      ...q,
+      competencyIds: q.competencyIds.filter((id) => !affectedIds.has(id)),
+      competencyLinks: q.competencyLinks?.filter((link) => !affectedIds.has(link.competencyId))
+    }))
+
+    if (selectedNodeId.value && affectedIds.has(selectedNodeId.value)) {
+      selectCourse()
+    }
+  }
+
   const removeCompetencyFromQuestion = (questionId: string, compId: string) => {
     const q = questions.value.find((q) => q.id === questionId)
     if (!q) {
@@ -499,10 +571,13 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
     // Actions
     deleteQuestion,
     updateQuestion,
+    addQuestion,
     removeCompetencyFromQuestion,
     addCompetencyToQuestion,
     saveCompetencyPrerequisites,
     upsertCompetency,
+    deleteCompetency,
+    getCompetencyDeletionImpact,
     selectCourse
   }
 }

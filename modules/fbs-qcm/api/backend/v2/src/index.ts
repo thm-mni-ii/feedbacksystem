@@ -10,7 +10,8 @@ async function startServer() {
   const app = createApp(db);
 
   const port = Number(process.env.PORT ?? 3001);
-  app.listen(port, () => console.log(`v2 backend LISTENING on port ${port}`));
+  const host = process.env.HOST ?? "127.0.0.1";
+  app.listen(port, host, () => console.log(`v2 backend LISTENING on ${host}:${port}`));
 }
 
 startServer().catch((err) => {
