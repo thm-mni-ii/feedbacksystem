@@ -18,7 +18,7 @@ class OidcMetadataIntegrationTest {
     private lateinit var mockMvc: MockMvc
 
     @Test
-    fun `openid configuration exposes oidc endpoints`() {
+    fun `openid configuration dynamically derives endpoints from request host`() {
         mockMvc.get("/.well-known/openid-configuration")
             .andExpect {
                 status { isOk() }
@@ -26,19 +26,19 @@ class OidcMetadataIntegrationTest {
                     contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 }
                 jsonPath("$.issuer") {
-                    value("http://localhost:8080")
+                    value("http://localhost")
                 }
                 jsonPath("$.authorization_endpoint") {
-                    value("http://localhost:8080/oauth2/authorize")
+                    value("http://localhost/oauth2/authorize")
                 }
                 jsonPath("$.token_endpoint") {
-                    value("http://localhost:8080/oauth2/token")
+                    value("http://localhost/oauth2/token")
                 }
                 jsonPath("$.jwks_uri") {
-                    value("http://localhost:8080/oauth2/jwks")
+                    value("http://localhost/oauth2/jwks")
                 }
                 jsonPath("$.userinfo_endpoint") {
-                    value("http://localhost:8080/userinfo")
+                    value("http://localhost/userinfo")
                 }
                 jsonPath("$.response_types_supported") {
                     value(hasItem("code"))
@@ -48,6 +48,26 @@ class OidcMetadataIntegrationTest {
                 }
                 jsonPath("$.scopes_supported") {
                     value(hasItems("openid", "profile"))
+                }
+            }
+    }
+
+    @Test
+    fun `openid configuration dynamically respects reverse proxy forwarded host headers`() {
+        mockMvc.get("http://localhost:8083/.well-known/openid-configuration")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.issuer") {
+                    value("http://localhost:8083")
+                }
+                jsonPath("$.authorization_endpoint") {
+                    value("http://localhost:8083/oauth2/authorize")
+                }
+                jsonPath("$.token_endpoint") {
+                    value("http://localhost:8083/oauth2/token")
+                }
+                jsonPath("$.jwks_uri") {
+                    value("http://localhost:8083/oauth2/jwks")
                 }
             }
     }

@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 @Configuration
 class OidcTokenConfig(
     private val applicationProviderRepository: ApplicationProviderRepository,
-    @param:Value("\${security.oidc.client.id:fbs-test-client}")
+    @param:Value("\${security.oidc.client.id:fbs-web-shell}")
     private val configuredClientIds: String
 ) {
 

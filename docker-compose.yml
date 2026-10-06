@@ -68,7 +68,7 @@ services:
       - MONGODB_DATABASE=sql-checker
       - MONGODB_PLAYGROUND_URI=mongodb://mongodb-playground:27017
       - MONGODB_PLAYGROUND_DATABASE=playground-db
-      - SELF_URL=https://core
+      - SELF_URL=http://172.17.0.1:8083
       - MINIO_URL=http://minio
       - ASSA_URL=https://feedback.mni.thm.de/ai_feedback/api/v1/analyse
       - ASSA_TOKEN=MY_ASSA_TOKEN
@@ -124,7 +124,6 @@ services:
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - CORS_DEV_MODE=true
       - APP_SAML_ENABLED=false
-      - OIDC_ISSUER=http://localhost:8080
       - OIDC_CLIENT_REDIRECT_URI=http://localhost/oauth2/callback,https://localhost/oauth2/callback,http://127.0.0.1:4200/oauth2/callback,http://localhost:4200/oauth2/callback,http://localhost:8083/oauth2/callback,http://127.0.0.1:8083/oauth2/callback
       - OIDC_CLIENT_POST_LOGOUT_REDIRECT_URI=http://localhost/,https://localhost/,http://127.0.0.1:4200/,http://localhost:4200/,http://localhost:8083/,http://127.0.0.1:8083/
       - OIDC_SIGNING_KEY_LOCATION=/run/secrets/identity-signing-key.p12
@@ -444,7 +443,6 @@ services:
       - "80:80"
       - "8083:80"
     environment:
-      - VITE_OIDC_AUTHORITY=http://localhost:8080
       - VITE_OIDC_CLIENT_ID=fbs-web-shell
       - VITE_CORE_API_URL=https://localhost:443
     networks:

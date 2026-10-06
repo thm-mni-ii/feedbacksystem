@@ -29,7 +29,7 @@ class AuthorizationServerKeyConfig(
 ) {
 
     @Bean
-    fun jwkSource(): JWKSource<SecurityContext> {
+    fun rsaKey(): RSAKey {
         val keyStore = KeyStore.getInstance("PKCS12")
 
         FileInputStream(keyStoreLocation).use { inputStream ->
@@ -56,11 +56,14 @@ class AuthorizationServerKeyConfig(
             "Certificate for alias '$keyAlias' does not contain an RSA public key"
         }
 
-        val rsaKey = RSAKey.Builder(publicKey)
+        return RSAKey.Builder(publicKey)
             .privateKey(privateKey)
             .keyID(keyAlias)
             .build()
+    }
 
+    @Bean
+    fun jwkSource(rsaKey: RSAKey = rsaKey()): JWKSource<SecurityContext> {
         return ImmutableJWKSet(JWKSet(rsaKey))
     }
 }

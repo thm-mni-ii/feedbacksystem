@@ -66,6 +66,11 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppsStore } from '@/stores/apps'
 import { useThemeStore } from '@/stores/theme'
 import { useLocaleStore } from '@/stores/locale'
+import {
+  getAudienceToken,
+  getCachedAudienceToken,
+  getRemainingValiditySeconds
+} from '@/services/audienceToken'
 
 const props = defineProps<{
   src: string
@@ -84,6 +89,7 @@ const currentIframeSrc = ref<string>(props.src)
 const loading = ref(true)
 const error = ref<string | null>(null)
 let loadTimeout: ReturnType<typeof setTimeout> | null = null
+let proactiveRenewInterval: ReturnType<typeof setInterval> | null = null
 let lastEmittedPath: string | null = null
 
 function reloadIframe() {
@@ -97,7 +103,6 @@ function reloadIframe() {
 
 function onIframeLoad() {
   if (loadTimeout) clearTimeout(loadTimeout)
-  // Give a brief moment for handshake or fallback hide
   setTimeout(() => {
     loading.value = false
   }, 400)
@@ -109,7 +114,43 @@ function onIframeError() {
   error.value = `Die Anwendung "${props.appTitle || props.providerId}" konnte nicht geladen werden (${props.src}).`
 }
 
-function handlePostMessage(event: MessageEvent) {
+async function sendAudienceToken(forceRefresh = false) {
+  const targetWindow = iframeRef.value?.contentWindow
+  if (!targetWindow) return
+
+  try {
+    const audienceToken = await getAudienceToken(props.providerId, forceRefresh)
+    const cached = getCachedAudienceToken(props.providerId)
+    const expiresIn = cached ? Math.max(30, Math.floor((cached.expiresAt - Date.now()) / 1000)) : 3600
+
+    targetWindow.postMessage(
+      {
+        source: 'FBS_HOST',
+        type: 'FBS_AUTH_TOKEN_RESPONSE',
+        accessToken: audienceToken || authStore.token || '',
+        tokenType: 'Bearer',
+        expiresIn
+      },
+      '*'
+    )
+  } catch (err) {
+    console.warn(`Failed to dispatch audience token to provider '${props.providerId}':`, err)
+    if (authStore.token) {
+      targetWindow.postMessage(
+        {
+          source: 'FBS_HOST',
+          type: 'FBS_AUTH_TOKEN_RESPONSE',
+          accessToken: authStore.token,
+          tokenType: 'Bearer',
+          expiresIn: 3600
+        },
+        '*'
+      )
+    }
+  }
+}
+
+async function handlePostMessage(event: MessageEvent) {
   const data = event.data
   if (!data || typeof data !== 'object') return
 
@@ -121,6 +162,7 @@ function handlePostMessage(event: MessageEvent) {
       loading.value = false
       targetWindow.postMessage(
         {
+          source: 'FBS_HOST',
           type: 'FBS_HANDSHAKE_ACK',
           theme: themeStore.isDark ? 'dark' : 'light',
           locale: localeStore.currentLocale,
@@ -129,38 +171,25 @@ function handlePostMessage(event: MessageEvent) {
         },
         '*'
       )
-      // Send token right away if available
-      if (authStore.token) {
-        targetWindow.postMessage(
-          {
-            type: 'FBS_AUTH_TOKEN_RESPONSE',
-            accessToken: authStore.token,
-            expiresIn: 3600
-          },
-          '*'
-        )
-      }
+      // Dispatch audience token
+      await sendAudienceToken(false)
       break
     }
 
     case 'FBS_REQUEST_AUTH_TOKEN': {
-      targetWindow.postMessage(
-        {
-          type: 'FBS_AUTH_TOKEN_RESPONSE',
-          accessToken: authStore.token || '',
-          expiresIn: 3600
-        },
-        '*'
-      )
+      // Refresh audience token on demand
+      await sendAudienceToken(true)
       break
     }
 
     case 'FBS_NAVIGATE': {
-      if (data.path) {
-        if (data.external) {
-          window.open(data.path, '_blank')
+      const navPath = data.path || data.payload?.path
+      const isExternal = data.external || data.payload?.external
+      if (navPath) {
+        if (isExternal) {
+          window.open(navPath, '_blank')
         } else {
-          router.push(data.path)
+          router.push(navPath)
         }
       }
       break
@@ -203,6 +232,8 @@ watch(
     loadTimeout = setTimeout(() => {
       loading.value = false
     }, 15000)
+    // Send updated audience token for the new provider
+    sendAudienceToken(false)
   }
 )
 
@@ -236,6 +267,7 @@ watch(
     if (targetWindow) {
       targetWindow.postMessage(
         {
+          source: 'FBS_HOST',
           type: 'FBS_THEME_CHANGED',
           theme: isDark ? 'dark' : 'light'
         },
@@ -252,6 +284,7 @@ watch(
     if (targetWindow) {
       targetWindow.postMessage(
         {
+          source: 'FBS_HOST',
           type: 'FBS_LOCALE_CHANGED',
           locale
         },
@@ -263,17 +296,10 @@ watch(
 
 watch(
   () => authStore.token,
-  (token) => {
-    const targetWindow = iframeRef.value?.contentWindow
-    if (targetWindow && token) {
-      targetWindow.postMessage(
-        {
-          type: 'FBS_AUTH_TOKEN_RESPONSE',
-          accessToken: token,
-          expiresIn: 3600
-        },
-        '*'
-      )
+  async (token) => {
+    if (token) {
+      // User re-authenticated or renewed token -> refresh audience token and push to iframe
+      await sendAudienceToken(true)
     }
   }
 )
@@ -283,10 +309,21 @@ onMounted(() => {
   loadTimeout = setTimeout(() => {
     loading.value = false
   }, 15000)
+
+  // Proactive token renewal interval: check every 30 seconds
+  proactiveRenewInterval = setInterval(async () => {
+    if (!authStore.isAuthenticated) return
+    const remaining = getRemainingValiditySeconds(props.providerId)
+    // If token expires in less than 60s (or no cached token), proactively renew and post
+    if (remaining > 0 && remaining < 60) {
+      await sendAudienceToken(true)
+    }
+  }, 30000)
 })
 
 onUnmounted(() => {
   if (loadTimeout) clearTimeout(loadTimeout)
+  if (proactiveRenewInterval) clearInterval(proactiveRenewInterval)
   window.removeEventListener('message', handlePostMessage)
 })
 </script>

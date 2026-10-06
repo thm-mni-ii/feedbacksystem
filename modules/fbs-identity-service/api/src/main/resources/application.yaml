@@ -1,3 +1,6 @@
+server:
+  forward-headers-strategy: framework
+
 spring:
   application:
     name: fbs-identity-service
@@ -54,9 +57,9 @@ security:
     trusted-proxy-count: ${TRUSTED_PROXIES:0}
     allow-list: ${BRUTEFORCE_ALLOW_LIST:""}
   oidc:
-    issuer: ${OIDC_ISSUER:http://localhost:8080}
+    issuer: ${OIDC_ISSUER:}
     client:
-      id: ${OIDC_CLIENT_ID:fbs-test-client}
+      id: ${OIDC_CLIENT_ID:fbs-web-shell}
       redirect-uri: ${OIDC_CLIENT_REDIRECT_URI:http://127.0.0.1:4200/oauth2/callback}
       post-logout-redirect-uri: ${OIDC_CLIENT_POST_LOGOUT_REDIRECT_URI:http://localhost/,https://localhost/,http://127.0.0.1:4200/,http://localhost:4200/,http://localhost:8083/,http://127.0.0.1:8083/}
       access-token-ttl-minutes: ${OIDC_ACCESS_TOKEN_TTL_MINUTES:10}
