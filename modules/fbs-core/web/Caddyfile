@@ -3,7 +3,7 @@
 
     # Frame embedding security headers - allow embedding across any HTTP/HTTPS origin
     header {
-        Content-Security-Policy "frame-ancestors 'self' http: https:;"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-src 'self' blob:; frame-ancestors 'self' http: https:; object-src 'none'; base-uri 'self';"
         X-Frame-Options "ALLOWALL"
         -Server
     }

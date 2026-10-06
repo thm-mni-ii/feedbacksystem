@@ -14,6 +14,13 @@ class CurrentUserResolver(
         val authentication = SecurityContextHolder.getContext().authentication
         val jwt = authentication?.principal as? Jwt ?: return null
         return jwt.subject.toIntOrNull()
+            ?: (jwt.getClaim<Any>("id") as? Number)?.toInt()
+            ?: (jwt.getClaim<Any>("userId") as? Number)?.toInt()
+            ?: jwt.getClaim<String>("id")?.toIntOrNull()
+            ?: jwt.getClaim<String>("userId")?.toIntOrNull()
+            ?: (jwt.getClaimAsString("preferred_username") ?: jwt.getClaimAsString("username") ?: jwt.subject)?.let { username ->
+                userRepository.findByUsername(username)?.id
+            }
     }
 
     fun resolveCurrentUser(): User? {

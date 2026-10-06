@@ -15,10 +15,22 @@ class CurrentUserService(
     fun getCurrentUser(): User? {
         val jwt = SecurityContextHolder.getContext().authentication?.principal as? Jwt ?: return null
 
-        val userId = jwt.subject.toLongOrNull()  ?: return null
+        val userId = jwt.subject.toLongOrNull()
+            ?: (jwt.claims["id"] as? Number)?.toLong()
+            ?: (jwt.claims["userId"] as? Number)?.toLong()
 
-        val userEntity = userRepository.findByIdAndDeletedFalse(userId)?: return null
+        if (userId != null) {
+            val userEntity = userRepository.findByIdAndDeletedFalse(userId)
+            if (userEntity != null) {
+                return userEntity.toModel()
+            }
+        }
 
+        val username = (jwt.claims["preferred_username"] as? String)
+            ?: (jwt.claims["username"] as? String)
+            ?: jwt.subject
+
+        val userEntity = userRepository.findByUsernameAndDeletedFalse(username) ?: return null
         return userEntity.toModel()
     }
 }

@@ -36,6 +36,7 @@ export interface CreateTaskProviderRequest {
 }
 
 export interface UpdateTaskProviderRequest {
+  id?: string;
   displayName?: string;
   description?: string;
   icon?: string;

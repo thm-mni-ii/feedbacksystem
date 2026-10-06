@@ -23,6 +23,7 @@ import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.ForwardedHeaderFilter
 
 @Configuration
 @EnableMethodSecurity
@@ -34,6 +35,9 @@ class SecurityConfig(
     @param:Value("\${app.saml.registration-id:keycloak}")
     private val samlRegistrationId: String
 ) {
+
+    @Bean
+    fun forwardedHeaderFilter(): ForwardedHeaderFilter = ForwardedHeaderFilter()
 
     @Bean
     @Order(1)
@@ -53,6 +57,11 @@ class SecurityConfig(
         http
             .securityMatcher(authorizationServerConfigurer.endpointsMatcher)
             .cors(Customizer.withDefaults())
+            .headers { headers ->
+                headers.contentSecurityPolicy { csp ->
+                    csp.policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; frame-ancestors 'self' http: https:; object-src 'none'; base-uri 'self';")
+                }
+            }
             .with(authorizationServerConfigurer) { authorizationServer ->
                 authorizationServer
                     .oidc { oidc ->
@@ -91,6 +100,11 @@ class SecurityConfig(
     ): SecurityFilterChain {
         var security = http
             .cors(Customizer.withDefaults())
+            .headers { headers ->
+                headers.contentSecurityPolicy { csp ->
+                    csp.policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; frame-ancestors 'self' http: https:; object-src 'none'; base-uri 'self';")
+                }
+            }
             .csrf { csrf ->
                 csrf
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -99,7 +113,8 @@ class SecurityConfig(
                         "/oauth2/token",
                         "/oauth2/jwks",
                         "/saml2/**",
-                        "/login/saml2/**"
+                        "/login/saml2/**",
+                        "/api/v1/auth/token/exchange"
                     )
             }
             .authorizeHttpRequests {
@@ -122,6 +137,7 @@ class SecurityConfig(
                         "/css/**",
                         "/js/**",
                         "/images/**",
+                        "/fonts/**",
                         "/favicon.ico"
                     ).permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/oidc-login").permitAll()

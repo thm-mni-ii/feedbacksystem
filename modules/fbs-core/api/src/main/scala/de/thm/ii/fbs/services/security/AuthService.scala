@@ -53,25 +53,47 @@ class AuthService {
   }
 
   private def getOrProvisionUser(jwt: Jwt): Option[User] = {
-    Try(jwt.getSubject.toInt).toOption.flatMap { uid =>
-      userService.find(uid).orElse {
-        val username = Option(jwt.getClaimAsString("preferred_username"))
-          .orElse(Option(jwt.getClaimAsString("username")))
-          .getOrElse(s"user_$uid")
-        val prename = Option(jwt.getClaimAsString("given_name")).getOrElse("User")
-        val surname = Option(jwt.getClaimAsString("family_name")).getOrElse(s"$uid")
-        val email = Option(jwt.getClaimAsString("email")).orNull
-        val roleStr = Option(jwt.getClaimAsString("globalRole")).getOrElse("USER")
-        val role = GlobalRole.parse(roleStr)
+    val uidOpt = Try(jwt.getSubject.toInt).toOption
+      .orElse(Option(jwt.getClaim[Object]("id")).flatMap(x => Try(x.toString.toInt).toOption))
+      .orElse(Option(jwt.getClaim[Object]("userId")).flatMap(x => Try(x.toString.toInt).toOption))
 
+    val username = Option(jwt.getClaimAsString("preferred_username"))
+      .orElse(Option(jwt.getClaimAsString("username")))
+      .getOrElse(uidOpt.map(u => s"user_$u").getOrElse(jwt.getSubject))
+    val prename = Option(jwt.getClaimAsString("given_name")).getOrElse("User")
+    val surname = Option(jwt.getClaimAsString("family_name")).getOrElse("User")
+    val email = Option(jwt.getClaimAsString("email")).orNull
+    val roleStr = Option(jwt.getClaimAsString("globalRole"))
+      .orElse(Option(jwt.getClaimAsString("global_role")))
+      .getOrElse("USER")
+    val role = GlobalRole.parse(roleStr)
+
+    val finalUid = uidOpt.orElse(userService.find(username).map(_.id))
+
+    finalUid match {
+      case Some(uid) =>
         Try {
           DB.insert(
             "INSERT INTO user (user_id, prename, surname, email, username, global_role) VALUES (?, ?, ?, ?, ?, ?) " +
-              "ON DUPLICATE KEY UPDATE username = VALUES(username), global_role = VALUES(global_role);",
+              "ON DUPLICATE KEY UPDATE prename = VALUES(prename), surname = VALUES(surname), " +
+              "email = VALUES(email), username = VALUES(username), global_role = VALUES(global_role);",
             uid, prename, surname, email, username, role.id)
         }
-        userService.find(uid)
-      }
+        userService.find(uid).map { user =>
+          new User(user.prename, user.surname, user.email, user.username, role, user.alias, user.id)
+        }
+      case None =>
+        userService.find(username).map { user =>
+          Try {
+            DB.update("UPDATE user SET prename = ?, surname = ?, email = ?, global_role = ? WHERE user_id = ?",
+              prename, surname, email, role.id, user.id)
+          }
+          new User(prename, surname, email, user.username, role, user.alias, user.id)
+        }.orElse {
+          Try {
+            userService.create(new User(prename, surname, email, username, role), null)
+          }.toOption
+        }
     }
   }
 
@@ -110,7 +132,19 @@ class AuthService {
     Try(request.getHeader(HttpHeaders.AUTHORIZATION)).map(_.split(" ")(1)).map(authorizeToken).toOption
 
   private def authorizeToken(jwtToken: String): Int = {
-    val decodedFromJwk = Option(jwtDecoder).flatMap(decoder => Try(decoder.decode(jwtToken).getSubject.toInt).toOption)
+    val decodedFromJwk = Option(jwtDecoder).flatMap { decoder =>
+      Try(decoder.decode(jwtToken)).toOption.flatMap { jwt =>
+        Try(jwt.getSubject.toInt).toOption
+          .orElse(Option(jwt.getClaim[Object]("id")).flatMap(x => Try(x.toString.toInt).toOption))
+          .orElse(Option(jwt.getClaim[Object]("userId")).flatMap(x => Try(x.toString.toInt).toOption))
+          .orElse {
+            val username = Option(jwt.getClaimAsString("preferred_username"))
+              .orElse(Option(jwt.getClaimAsString("username")))
+              .getOrElse(jwt.getSubject)
+            userService.find(username).map(_.id)
+          }
+      }
+    }
 
     decodedFromJwk match {
       case Some(id) => id

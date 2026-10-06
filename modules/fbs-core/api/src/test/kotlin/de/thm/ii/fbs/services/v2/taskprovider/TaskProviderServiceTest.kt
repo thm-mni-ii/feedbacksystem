@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.v2.taskprovider
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import de.thm.ii.fbs.model.v2.taskprovider.CreateTaskProviderRequest
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderEntity
 import de.thm.ii.fbs.model.v2.taskprovider.UpdateTaskProviderRequest
@@ -16,7 +16,7 @@ import java.util.Optional
 
 class TaskProviderServiceTest {
     private val repository: TaskProviderRepository = mock(TaskProviderRepository::class.java)
-    private val objectMapper = ObjectMapper()
+    private val objectMapper = jacksonObjectMapper()
     private val service = TaskProviderService(repository, objectMapper)
 
     @Test
@@ -110,7 +110,28 @@ class TaskProviderServiceTest {
             it.arguments[0] as TaskProviderEntity
         }
 
-        val updated = service.update("sql-checker", UpdateTaskProviderRequest(displayName = "New Name"))
+        val updated = service.update("sql-checker", UpdateTaskProviderRequest(id = "sql-checker", displayName = "New Name"))
         assertEquals("New Name", updated.displayName)
+    }
+
+    @Test
+    fun testUpdateDeserializationWithExtraProperties() {
+        val json = """
+            {
+                "id": "sql-checker",
+                "displayName": "Updated SQL Checker",
+                "description": "Updated description",
+                "icon": "terminal",
+                "version": "1.1.0",
+                "evaluationEndpointUrl": "http://checker:5000/evaluate",
+                "healthEndpointUrl": "http://checker:5000/health",
+                "unknownField": "should-be-ignored",
+                "isActive": true
+            }
+        """.trimIndent()
+
+        val req = objectMapper.readValue(json, UpdateTaskProviderRequest::class.java)
+        assertEquals("Updated SQL Checker", req.displayName)
+        assertEquals("sql-checker", req.id)
     }
 }
