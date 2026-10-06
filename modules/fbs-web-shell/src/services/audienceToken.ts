@@ -47,8 +47,8 @@ export async function getAudienceToken(
   const cached = tokenCache.get(cleanProviderId)
   const now = Date.now()
 
-  // Return cached token if it is valid for at least 45 more seconds
-  if (!forceRefresh && cached && cached.expiresAt - now > 45 * 1000) {
+  // Return cached token if it is valid for at least 60 more seconds
+  if (!forceRefresh && cached && cached.expiresAt - now > 60 * 1000) {
     return cached.accessToken
   }
 

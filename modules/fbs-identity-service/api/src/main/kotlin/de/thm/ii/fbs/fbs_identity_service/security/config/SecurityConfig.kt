@@ -54,6 +54,7 @@ class SecurityConfig(
             .securityMatcher(authorizationServerConfigurer.endpointsMatcher)
             .cors(Customizer.withDefaults())
             .headers { headers ->
+                headers.frameOptions { it.sameOrigin() }
                 headers.contentSecurityPolicy { csp ->
                     csp.policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; frame-ancestors 'self' http: https:; object-src 'none'; base-uri 'self';")
                 }
@@ -65,6 +66,7 @@ class SecurityConfig(
                             providerConfiguration.providerConfigurationCustomizer { metadata ->
                                 metadata.scope(OidcScopes.PROFILE)
                                 metadata.scope(OidcScopes.EMAIL)
+                                metadata.scope("offline_access")
                             }
                         }
                         oidc.logoutEndpoint(Customizer.withDefaults())
@@ -97,6 +99,7 @@ class SecurityConfig(
         var security = http
             .cors(Customizer.withDefaults())
             .headers { headers ->
+                headers.frameOptions { it.sameOrigin() }
                 headers.contentSecurityPolicy { csp ->
                     csp.policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; frame-ancestors 'self' http: https:; object-src 'none'; base-uri 'self';")
                 }

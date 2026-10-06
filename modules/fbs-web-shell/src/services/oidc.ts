@@ -21,7 +21,7 @@ const oidcSettings: UserManagerSettings = {
   client_id: import.meta.env.VITE_OIDC_CLIENT_ID || 'fbs-web-shell',
   redirect_uri: `${origin}/oauth2/callback`,
   response_type: 'code',
-  scope: 'openid profile email',
+  scope: 'openid profile email offline_access',
   post_logout_redirect_uri: `${origin}/`,
   automaticSilentRenew: true,
   silent_redirect_uri: `${origin}/oauth2/callback`,
