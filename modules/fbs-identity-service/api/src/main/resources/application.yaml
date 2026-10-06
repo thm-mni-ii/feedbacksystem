@@ -33,6 +33,7 @@ app:
     idp-entity-id: ${SAML_IDP_ENTITY_ID:}
     idp-sso-url: ${SAML_IDP_SSO_URL:}
     sp-entity-id: ${SAML_SP_ENTITY_ID:}
+    acs-url: ${SAML_SP_ACS_URL:}
     sign-request: ${SAML_SP_SIGN_REQUEST:false}
     principal-attribute: ${APP_SAML_PRINCIPAL_ATTRIBUTE:uid}
     prename-attribute: ${APP_SAML_PRENAME_ATTRIBUTE:givenName}
