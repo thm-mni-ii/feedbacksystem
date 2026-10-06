@@ -33,6 +33,12 @@ class SamlRelyingPartyConfig(
     @param:Value("\${app.saml.sp-entity-id:}")
     private val spEntityId: String,
 
+    @param:Value("\${app.saml.acs-url:}")
+    private val spAcsUrl: String,
+
+    @param:Value("\${app.saml.sign-request:false}")
+    private val signRequest: Boolean,
+
     @param:Value("\${app.frontend.base-url:https://localhost}")
     private val frontendBaseUrl: String,
 
@@ -78,6 +84,14 @@ class SamlRelyingPartyConfig(
             "${frontendBaseUrl.trimEnd('/')}/saml2/metadata/$registrationId"
         }
 
+        val acsUrl = if (spAcsUrl.isNotBlank()) {
+            spAcsUrl
+        } else if (frontendBaseUrl.isNotBlank()) {
+            "${frontendBaseUrl.trimEnd('/')}/login/saml2/sso/$registrationId"
+        } else {
+            "{baseUrl}/login/saml2/sso/{registrationId}"
+        }
+
         val builder: RelyingPartyRegistration.Builder = if (idpMetadataUri.isNotBlank()) {
             RelyingPartyRegistrations.fromMetadataLocation(idpMetadataUri)
         } else {
@@ -91,15 +105,25 @@ class SamlRelyingPartyConfig(
                 }
         }
 
-        val registration = builder
+        val registrationBuilder = builder
             .registrationId(registrationId)
             .entityId(entityId)
-            .assertionConsumerServiceLocation("{baseUrl}/login/saml2/sso/{registrationId}")
-            .signingX509Credentials { it.add(signingCredential) }
+            .assertionConsumerServiceLocation(acsUrl)
             .decryptionX509Credentials { it.add(signingCredential) }
-            .build()
 
-        log.info("Initialized SAML 2.0 RelyingPartyRegistration for registration-id '{}' with entity-id '{}'", registrationId, entityId)
+        if (signRequest) {
+            registrationBuilder.signingX509Credentials { it.add(signingCredential) }
+        }
+
+        val registration = registrationBuilder.build()
+
+        log.info(
+            "Initialized SAML 2.0 RelyingPartyRegistration for registration-id '{}' with entity-id '{}', acs-url '{}', sign-request: {}",
+            registrationId,
+            entityId,
+            acsUrl,
+            signRequest
+        )
 
         return InMemoryRelyingPartyRegistrationRepository(registration)
     }
