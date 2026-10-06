@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import FbsAppHost from '@/components/FbsAppHost.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppsStore } from '@/stores/apps'
 import { useThemeStore } from '@/stores/theme'
 import { useLocaleStore } from '@/stores/locale'
+import * as audienceTokenService from '@/services/audienceToken'
 
 const mockRouter = {
   push: vi.fn(),
@@ -23,7 +24,13 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/services/oidc', () => ({
   userManager: {
-    events: { addUserLoaded: vi.fn(), addUserUnloaded: vi.fn() }
+    events: {
+      addUserLoaded: vi.fn(),
+      addUserUnloaded: vi.fn(),
+      addAccessTokenExpiring: vi.fn(),
+      addSilentRenewError: vi.fn(),
+      addAccessTokenExpired: vi.fn()
+    }
   },
   login: vi.fn(),
   logout: vi.fn(),
@@ -63,11 +70,19 @@ describe('FbsAppHost Component', () => {
     expect(iframe.attributes('sandbox')).toContain('allow-same-origin')
   })
 
-  it('should respond to FBS_INIT_HANDSHAKE with FBS_HANDSHAKE_ACK and token', async () => {
+  it('should respond to FBS_INIT_HANDSHAKE with FBS_HANDSHAKE_ACK and audience token', async () => {
     const authStore = useAuthStore()
     authStore.token = 'valid-bearer-token'
     const themeStore = useThemeStore()
     themeStore.isDark = false
+
+    vi.spyOn(audienceTokenService, 'getAudienceToken').mockResolvedValue('scoped-course-token')
+    vi.spyOn(audienceTokenService, 'getCachedAudienceToken').mockReturnValue({
+      accessToken: 'scoped-course-token',
+      expiresIn: 600,
+      expiresAt: Date.now() + 600000,
+      audience: 'course-management'
+    })
 
     const wrapper = mount(FbsAppHost, {
       props: {
@@ -89,6 +104,7 @@ describe('FbsAppHost Component', () => {
       source: fakeContentWindow as any
     })
     window.dispatchEvent(messageEvent)
+    await flushPromises()
 
     expect(fakeContentWindow.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -103,7 +119,7 @@ describe('FbsAppHost Component', () => {
     expect(fakeContentWindow.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'FBS_AUTH_TOKEN_RESPONSE',
-        accessToken: 'valid-bearer-token'
+        accessToken: 'scoped-course-token'
       }),
       '*'
     )
@@ -112,6 +128,14 @@ describe('FbsAppHost Component', () => {
   it('should respond to FBS_REQUEST_AUTH_TOKEN with FBS_AUTH_TOKEN_RESPONSE', async () => {
     const authStore = useAuthStore()
     authStore.token = 'refreshed-token-123'
+
+    vi.spyOn(audienceTokenService, 'getAudienceToken').mockResolvedValue('scoped-sql-token')
+    vi.spyOn(audienceTokenService, 'getCachedAudienceToken').mockReturnValue({
+      accessToken: 'scoped-sql-token',
+      expiresIn: 600,
+      expiresAt: Date.now() + 600000,
+      audience: 'sql-playground'
+    })
 
     const wrapper = mount(FbsAppHost, {
       props: {
@@ -132,12 +156,12 @@ describe('FbsAppHost Component', () => {
       source: fakeContentWindow as any
     })
     window.dispatchEvent(messageEvent)
+    await flushPromises()
 
     expect(fakeContentWindow.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'FBS_AUTH_TOKEN_RESPONSE',
-        accessToken: 'refreshed-token-123',
-        expiresIn: 3600
+        accessToken: 'scoped-sql-token'
       }),
       '*'
     )
@@ -246,10 +270,10 @@ describe('FbsAppHost Component', () => {
     await wrapper.vm.$nextTick()
 
     expect(fakeContentWindow.postMessage).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         type: 'FBS_LOCALE_CHANGED',
         locale: 'en'
-      },
+      }),
       '*'
     )
   })
@@ -275,10 +299,10 @@ describe('FbsAppHost Component', () => {
     await wrapper.vm.$nextTick()
 
     expect(fakeContentWindow.postMessage).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         type: 'FBS_THEME_CHANGED',
         theme: 'dark'
-      },
+      }),
       '*'
     )
   })

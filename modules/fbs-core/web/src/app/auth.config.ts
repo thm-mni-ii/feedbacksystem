@@ -8,7 +8,7 @@ export const authCodeFlowConfig: AuthConfig = {
   redirectUri:
     (typeof window !== "undefined" ? window.location.origin : "") +
     "/oauth2/callback",
-  clientId: "fbs-test-client",
+  clientId: "fbs-web-shell",
   responseType: "code",
   scope: "openid profile",
   showDebugInformation: false,

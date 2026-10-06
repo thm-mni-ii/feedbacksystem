@@ -4,12 +4,14 @@
     <v-main>
       <router-view />
     </v-main>
+    <ReLoginDialog />
   </v-app>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import TheNavbar from '@/components/layout/TheNavbar.vue'
+import ReLoginDialog from '@/components/auth/ReLoginDialog.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()

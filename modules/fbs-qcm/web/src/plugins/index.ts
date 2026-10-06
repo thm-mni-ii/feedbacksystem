@@ -4,9 +4,7 @@
  * Automatically included in `./src/main.js`
  */
 
-import { loadFonts } from './webfontloader'
-
 export function registerPlugins () {
-  loadFonts()
+  // Fonts and icons are imported directly in plugins/vuetify.ts
 }
  

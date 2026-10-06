@@ -2,9 +2,16 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { jwtDecode } from 'jwt-decode'
 import type { User as OidcUser } from 'oidc-client-ts'
-import { userManager, login as oidcLogin, logout as oidcLogout, getCurrentOidcUser } from '@/services/oidc'
+import {
+  userManager,
+  login as oidcLogin,
+  logout as oidcLogout,
+  getCurrentOidcUser,
+  reloginPopup
+} from '@/services/oidc'
 import { setAuthTokenGetter } from '@/services/api'
 import { setGraphQlTokenGetter } from '@/services/graphql'
+import { setAudienceAuthTokenGetter, clearAudienceTokens } from '@/services/audienceToken'
 import type { GlobalRole } from '@/types/user'
 
 interface JwtClaims {
@@ -28,13 +35,15 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
   const claims = ref<JwtClaims | null>(null)
   const isInitialized = ref(false)
+  const isSessionExpired = ref(false)
 
   // Configure global API token getters
   setAuthTokenGetter(() => token.value)
   setGraphQlTokenGetter(() => token.value)
+  setAudienceAuthTokenGetter(() => token.value)
 
   const isAuthenticated = computed(() => {
-    return !!token.value && (oidcUser.value ? !oidcUser.value.expired : true)
+    return !!token.value && (oidcUser.value ? !oidcUser.value.expired : true) && !isSessionExpired.value
   })
 
   const globalRole = computed<GlobalRole>(() => {
@@ -88,6 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (user?.access_token) {
       token.value = user.access_token
       claims.value = parseTokenClaims(user.access_token)
+      isSessionExpired.value = false
     } else {
       token.value = null
       claims.value = null
@@ -106,6 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
           setSession(renewedUser)
         } catch {
           setSession(null)
+          isSessionExpired.value = true
         }
       }
     } catch (e) {
@@ -115,12 +126,32 @@ export const useAuthStore = defineStore('auth', () => {
       isInitialized.value = true
     }
 
-    userManager.events.addUserLoaded((loadedUser) => {
+    userManager.events?.addUserLoaded?.((loadedUser) => {
       setSession(loadedUser)
+      isSessionExpired.value = false
     })
 
-    userManager.events.addUserUnloaded(() => {
+    userManager.events?.addUserUnloaded?.(() => {
       setSession(null)
+      isSessionExpired.value = true
+      clearAudienceTokens()
+    })
+
+    userManager.events?.addAccessTokenExpiring?.(async () => {
+      try {
+        await userManager.signinSilent()
+      } catch (e) {
+        console.warn('Automatic silent renew attempt failed:', e)
+      }
+    })
+
+    userManager.events?.addSilentRenewError?.((error) => {
+      console.warn('OIDC silent renew error:', error)
+      isSessionExpired.value = true
+    })
+
+    userManager.events?.addAccessTokenExpired?.(() => {
+      isSessionExpired.value = true
     })
   }
 
@@ -128,8 +159,24 @@ export const useAuthStore = defineStore('auth', () => {
     await oidcLogin(redirectUrl)
   }
 
+  async function reloginInPlace(): Promise<boolean> {
+    try {
+      const user = await reloginPopup()
+      if (user && !user.expired) {
+        setSession(user)
+        isSessionExpired.value = false
+        return true
+      }
+      return false
+    } catch (error) {
+      console.warn('In-place re-login popup failed:', error)
+      return false
+    }
+  }
+
   async function logout(): Promise<void> {
     setSession(null)
+    clearAudienceTokens()
     await oidcLogout()
   }
 
@@ -142,6 +189,7 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     claims,
     isInitialized,
+    isSessionExpired,
     isAuthenticated,
     globalRole,
     isAdmin,
@@ -151,6 +199,7 @@ export const useAuthStore = defineStore('auth', () => {
     email,
     initAuth,
     login,
+    reloginInPlace,
     logout,
     getToken,
     setSession
