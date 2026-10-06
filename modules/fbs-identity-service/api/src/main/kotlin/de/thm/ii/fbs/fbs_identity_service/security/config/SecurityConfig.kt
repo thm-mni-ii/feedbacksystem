@@ -23,7 +23,6 @@ import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
-import org.springframework.web.filter.ForwardedHeaderFilter
 
 @Configuration
 @EnableMethodSecurity
@@ -35,9 +34,6 @@ class SecurityConfig(
     @param:Value("\${app.saml.registration-id:keycloak}")
     private val samlRegistrationId: String
 ) {
-
-    @Bean
-    fun forwardedHeaderFilter(): ForwardedHeaderFilter = ForwardedHeaderFilter()
 
     @Bean
     @Order(1)
