@@ -13,7 +13,7 @@ import java.util.Date
 class ScopedTaskTokenService(
     @Value("\${jwt.secret:8Dsupersecurekeydf0}")
     private val jwtSecret: String,
-    @Value("\${services.self.url:https://feedback.thm.de/course-management}")
+    @Value("\${services.self.url:\${server.host:https://feedback.thm.de/course-management}}")
     private val issuer: String
 ) {
 

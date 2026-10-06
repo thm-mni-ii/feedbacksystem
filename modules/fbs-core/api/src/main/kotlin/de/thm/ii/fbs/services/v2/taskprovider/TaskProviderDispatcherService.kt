@@ -21,7 +21,7 @@ class TaskProviderDispatcherService(
     private val scopedTaskTokenService: ScopedTaskTokenService,
     private val taskProviderService: TaskProviderService,
     private val objectMapper: ObjectMapper,
-    @Value("\${services.self.url:\${services.masterRunner.selfUrl:\${SELF_URL:https://core:443}}}")
+    @Value("\${services.self.url:\${server.host:\${services.masterRunner.selfUrl:\${SELF_URL:https://core:443}}}}")
     private val selfUrl: String,
     @Value("\${services.masterRunner.insecure:true}")
     private val insecure: Boolean

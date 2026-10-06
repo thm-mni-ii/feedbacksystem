@@ -59,9 +59,9 @@ services:
   masterRunner:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
     insecure: ${MASTER_RUNNER_TLS_INSECURE:false}
-    selfUrl: ${SELF_URL:https://localhost}
+    selfUrl: ${MASTER_RUNNER_SELF_URL:${SELF_URL:https://localhost}}
   self:
-    url: ${SELF_URL:https://localhost}
+    url: ${PUBLIC_SELF_URL:${SERVER_HOST:${SELF_URL:https://localhost}}}
   sqlPlayground:
     share:
       publicHost: ${SQL_PLAYGROUND_SHARE_PUBLIC_HOST:127.0.0.1}
