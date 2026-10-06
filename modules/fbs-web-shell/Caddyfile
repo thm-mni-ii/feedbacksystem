@@ -27,8 +27,8 @@
     }
     handle @oauth2Callback {
         header {
-            X-Frame-Options "DENY"
-            Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-src 'self' http: https: blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+            X-Frame-Options "SAMEORIGIN"
+            Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-src 'self' http: https: blob:; frame-ancestors 'self'; object-src 'none'; base-uri 'self';"
             Cache-Control "no-store, no-cache, must-revalidate"
         }
         try_files {path} /index.html
