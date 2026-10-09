@@ -70,6 +70,7 @@ class RegisteredClientInitializer(
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .scope(OidcScopes.EMAIL)
+            .scope("offline_access")
             .clientSettings(
                 ClientSettings.builder()
                     .requireProofKey(true)
@@ -80,6 +81,8 @@ class RegisteredClientInitializer(
                 TokenSettings.builder()
                     .accessTokenTimeToLive(Duration.ofMinutes(accessTokenTtlMinutes))
                     .authorizationCodeTimeToLive(Duration.ofMinutes(authorizationCodeTtlMinutes))
+                    .refreshTokenTimeToLive(Duration.ofDays(30))
+                    .reuseRefreshTokens(true)
                     .build()
             )
 

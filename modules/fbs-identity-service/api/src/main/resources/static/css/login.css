@@ -179,3 +179,84 @@ html, body {
     height: 22px;
   }
 }
+
+/* Error Card & Error View */
+.fbs-card.fbs-error-card {
+  max-width: 480px;
+}
+
+.fbs-error-description {
+  margin-bottom: 20px;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--fbs-text-primary);
+}
+
+.fbs-error-description p {
+  margin: 0 0 12px 0;
+}
+
+.fbs-error-description p:last-child {
+  margin-bottom: 0;
+}
+
+.fbs-error-notice {
+  color: var(--fbs-text-primary);
+  background-color: rgba(64, 94, 154, 0.06);
+  border-left: 3px solid var(--fbs-primary);
+  padding: 10px 14px;
+  border-radius: 0 var(--fbs-radius) var(--fbs-radius) 0;
+}
+
+.fbs-error-de-notice {
+  font-size: 0.875rem;
+  color: var(--fbs-text-secondary);
+  margin-top: 8px;
+}
+
+.fbs-error-dropdown {
+  margin-bottom: 20px;
+}
+
+.fbs-error-details {
+  background-color: var(--fbs-bg-light);
+  padding: 14px 16px;
+  border-radius: var(--fbs-radius);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fbs-error-detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fbs-detail-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fbs-text-secondary);
+}
+
+.fbs-detail-value {
+  color: var(--fbs-text-primary);
+  word-break: break-all;
+}
+
+.fbs-detail-value code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+}
+
+.fbs-error-actions {
+  margin-top: 24px;
+}
+

@@ -137,20 +137,25 @@ export const useAuthStore = defineStore('auth', () => {
       clearAudienceTokens()
     })
 
-    userManager.events?.addAccessTokenExpiring?.(async () => {
-      try {
-        await userManager.signinSilent()
-      } catch (e) {
-        console.warn('Automatic silent renew attempt failed:', e)
+    userManager.events?.addSilentRenewError?.(async (error) => {
+      console.warn('OIDC silent renew error:', error)
+      const currentUser = await getCurrentOidcUser()
+      if (!currentUser || currentUser.expired) {
+        isSessionExpired.value = true
       }
     })
 
-    userManager.events?.addSilentRenewError?.((error) => {
-      console.warn('OIDC silent renew error:', error)
-      isSessionExpired.value = true
-    })
-
-    userManager.events?.addAccessTokenExpired?.(() => {
+    userManager.events?.addAccessTokenExpired?.(async () => {
+      try {
+        const renewedUser = await userManager.signinSilent()
+        if (renewedUser && !renewedUser.expired) {
+          setSession(renewedUser)
+          isSessionExpired.value = false
+          return
+        }
+      } catch (e) {
+        console.warn('Renewal after access token expiration failed:', e)
+      }
       isSessionExpired.value = true
     })
   }

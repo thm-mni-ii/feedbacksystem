@@ -8,7 +8,9 @@ vi.mock('@/services/oidc', () => ({
     signinSilent: vi.fn(),
     events: {
       addUserLoaded: vi.fn(),
-      addUserUnloaded: vi.fn()
+      addUserUnloaded: vi.fn(),
+      addSilentRenewError: vi.fn(),
+      addAccessTokenExpired: vi.fn()
     }
   },
   login: vi.fn(),
@@ -147,5 +149,59 @@ describe('Auth Store', () => {
 
     await authStore.login('/apps/sql-playground')
     expect(mockOidcLogin).toHaveBeenCalledWith('/apps/sql-playground')
+  })
+
+  it('should register event handlers on initAuth and update session seamlessly on user loaded', async () => {
+    const authStore = useAuthStore()
+    const { userManager } = await import('@/services/oidc')
+
+    let userLoadedCallback: ((user: any) => void) | null = null
+    vi.mocked(userManager.events.addUserLoaded).mockImplementation((cb: any) => {
+      userLoadedCallback = cb
+    })
+
+    await authStore.initAuth()
+    expect(authStore.isInitialized).toBe(true)
+
+    const refreshedToken = createFakeJwt({
+      sub: '99',
+      username: 'refreshed_user',
+      globalRole: 'USER'
+    })
+    const refreshedUser: any = {
+      access_token: refreshedToken,
+      expired: false,
+      profile: { sub: '99' }
+    }
+
+    expect(userLoadedCallback).toBeDefined()
+    userLoadedCallback!(refreshedUser)
+
+    expect(authStore.isAuthenticated).toBe(true)
+    expect(authStore.isSessionExpired).toBe(false)
+    expect(authStore.getToken()).toBe(refreshedToken)
+  })
+
+  it('should not mark session expired on transient silent renew error when user is still valid', async () => {
+    const authStore = useAuthStore()
+    const { userManager, getCurrentOidcUser } = await import('@/services/oidc')
+
+    let silentRenewErrorCallback: ((error: any) => void) | null = null
+    vi.mocked(userManager.events.addSilentRenewError).mockImplementation((cb: any) => {
+      silentRenewErrorCallback = cb
+    })
+
+    const token = createFakeJwt({ sub: '123', username: 'user1', globalRole: 'USER' })
+    const currentUser: any = { access_token: token, expired: false }
+    vi.mocked(getCurrentOidcUser).mockResolvedValue(currentUser)
+
+    await authStore.initAuth()
+    authStore.setSession(currentUser)
+
+    expect(silentRenewErrorCallback).toBeDefined()
+    await silentRenewErrorCallback!(new Error('Network timeout'))
+
+    expect(authStore.isSessionExpired).toBe(false)
+    expect(authStore.isAuthenticated).toBe(true)
   })
 })
