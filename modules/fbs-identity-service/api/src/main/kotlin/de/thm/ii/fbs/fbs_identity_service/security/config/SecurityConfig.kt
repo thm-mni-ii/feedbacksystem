@@ -12,7 +12,9 @@ import org.springframework.http.MediaType
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.oauth2.core.oidc.OidcIdToken
 import org.springframework.security.oauth2.core.oidc.OidcScopes
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
@@ -20,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.savedrequest.RequestCache
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -39,7 +42,10 @@ class SecurityConfig(
     @Order(1)
     fun authServerSecurityFilterChain(
         http: HttpSecurity,
-        requestCache: RequestCache
+        requestCache: RequestCache,
+        @Qualifier("authorizationServerJwtDecoder")
+        authorizationServerJwtDecoder: JwtDecoder,
+        jwtAuthenticationConverter: JwtAuthenticationConverter
     ): SecurityFilterChain {
         val authorizationServerConfigurer =
             OAuth2AuthorizationServerConfigurer.authorizationServer()
@@ -69,6 +75,26 @@ class SecurityConfig(
                                 metadata.scope("offline_access")
                             }
                         }
+                        oidc.userInfoEndpoint { userInfo ->
+                            userInfo.userInfoMapper { context ->
+                                val idToken = context.authorization.getToken(OidcIdToken::class.java)?.token
+                                val claims = mutableMapOf<String, Any>()
+                                if (idToken != null) {
+                                    claims.putAll(idToken.claims)
+                                    claims.remove("c_hash")
+                                    claims.remove("at_hash")
+                                    claims.remove("nonce")
+                                    claims.remove("aud")
+                                    claims.remove("iss")
+                                    claims.remove("exp")
+                                    claims.remove("iat")
+                                    claims.remove("auth_time")
+                                } else {
+                                    claims["sub"] = context.authorization.principalName
+                                }
+                                OidcUserInfo(claims)
+                            }
+                        }
                         oidc.logoutEndpoint(Customizer.withDefaults())
                     }
             }
@@ -76,9 +102,16 @@ class SecurityConfig(
                 it.anyRequest().authenticated()
             }
             .exceptionHandling {
-                it.authenticationEntryPoint(
-                    LoginUrlAuthenticationEntryPoint(loginUrl)
+                it.defaultAuthenticationEntryPointFor(
+                    LoginUrlAuthenticationEntryPoint(loginUrl),
+                    MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                 )
+            }
+            .oauth2ResourceServer { resourceServer ->
+                resourceServer.jwt { jwt ->
+                    jwt.decoder(authorizationServerJwtDecoder)
+                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
+                }
             }
             .requestCache {
                 it.requestCache(requestCache)

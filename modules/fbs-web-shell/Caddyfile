@@ -43,6 +43,9 @@
     handle @oauth2Backend {
         reverse_proxy http://identity-service:8080
     }
+    handle /userinfo* {
+        reverse_proxy http://identity-service:8080
+    }
 
     # Reverse proxy for identity-service APIs
     handle /api/v2/application-providers* {
