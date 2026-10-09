@@ -1,3 +1,10 @@
+server:
+  forward-headers-strategy: framework
+  error:
+    include-message: always
+    whitelabel:
+      enabled: false
+
 spring:
   application:
     name: fbs-identity-service

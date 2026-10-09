@@ -72,10 +72,15 @@ router.beforeEach(async (to, _from) => {
     return true
   }
 
-  // If not signed in, automatically redirect to the login page (preserve requested path)
+  // If not signed in at all (initial unauthenticated visitor), automatically redirect to login
   if (!authStore.isAuthenticated) {
-    await authStore.login(to.fullPath)
-    return false
+    if (!authStore.token && !authStore.oidcUser) {
+      await authStore.login(to.fullPath)
+      return false
+    }
+    // If session expired in-place during active usage, do not hard redirect/reload the page.
+    // The ReLoginDialog will allow seamless in-place re-authentication.
+    return true
   }
 
   // Ensure visible applications are loaded for the authenticated user

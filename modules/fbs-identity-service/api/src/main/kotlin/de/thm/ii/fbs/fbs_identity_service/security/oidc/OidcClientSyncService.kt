@@ -59,7 +59,7 @@ class OidcClientSyncService(
         }
 
         val rawScopes = provider.scopes.toCleanList()
-        val scopes = if (rawScopes.isEmpty()) listOf(OidcScopes.OPENID, OidcScopes.PROFILE, OidcScopes.EMAIL) else rawScopes
+        val scopes = if (rawScopes.isEmpty()) listOf(OidcScopes.OPENID, OidcScopes.PROFILE, OidcScopes.EMAIL, "offline_access") else rawScopes
         scopes.forEach { builder.scope(it) }
 
         builder.clientSettings(
@@ -72,6 +72,8 @@ class OidcClientSyncService(
             TokenSettings.builder()
                 .accessTokenTimeToLive(Duration.ofMinutes(accessTokenTtlMinutes))
                 .authorizationCodeTimeToLive(Duration.ofMinutes(authorizationCodeTtlMinutes))
+                .refreshTokenTimeToLive(Duration.ofDays(30))
+                .reuseRefreshTokens(true)
                 .build()
         )
 

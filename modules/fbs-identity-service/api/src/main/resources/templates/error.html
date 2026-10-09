@@ -1,0 +1,141 @@
+<!-- File: src/main/resources/templates/error.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${status == null or status == 400 or status == 999 ? 'Invalid Request – Feedback System' : (status == 404 ? 'Page Not Found – Feedback System' : (status == 403 ? 'Access Denied – Feedback System' : 'Error – Feedback System'))}">Invalid Request – Feedback System</title>
+  <link rel="icon" type="image/svg+xml" th:href="@{/images/fbs-logo.svg}">
+  <link rel="stylesheet" th:href="@{/css/fonts.css}">
+  <link rel="stylesheet" th:href="@{/css/material-theme.css}">
+  <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body class="fbs-login-page">
+  <header class="fbs-header" role="banner">
+    <h1>Feedback System</h1>
+    <h2>Submit your work and get automated feedback</h2>
+  </header>
+
+  <main class="fbs-card-container" role="main">
+    <div class="fbs-card fbs-error-card" role="region" aria-labelledby="error-title">
+      <h3 id="error-title" class="fbs-card-title"
+          th:text="${status == null or status == 400 or status == 999 ? 'Invalid Request' : (status == 404 ? 'Page Not Found' : (status == 403 ? 'Access Denied' : 'Application Error'))}">
+        Invalid Request
+      </h3>
+
+      <!-- Error Alert Box -->
+      <div class="fbs-alert fbs-alert-error" role="alert" aria-live="polite">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+        <span th:if="${status == 400 or status == null or status == 999}">Invalid request to Identity Provider.</span>
+        <span th:if="${status == 404}">The requested page was not found.</span>
+        <span th:if="${status == 403}">Access to this resource is denied.</span>
+        <span th:if="${status != null and status != 400 and status != 404 and status != 403 and status != 999}"
+              th:text="${error != null and error != 'None' ? error : 'An unexpected error occurred.'}">An unexpected error occurred.</span>
+      </div>
+
+      <!-- Informative error message -->
+      <div class="fbs-error-description">
+        <div th:if="${status == 400 or status == null or status == 999}">
+          <p>
+            Your login request could not be processed because the authorization request is not valid.
+          </p>
+          <p class="fbs-error-notice">
+            <strong>This is an error in the application that redirected you here.</strong> Please contact the administrator of that application so they can correct their integration settings.
+          </p>
+          <p class="fbs-error-de-notice">
+            <em>Ihre Anfrage ist ungültig. Dies ist ein Fehler in der Anwendung, die Sie hierher weitergeleitet hat. Bitte wenden Sie sich an den Administrator dieser Anwendung.</em>
+          </p>
+        </div>
+
+        <div th:if="${status == 404}">
+          <p>
+            The page or endpoint you requested does not exist on this server.
+          </p>
+          <p class="fbs-error-notice">
+            If you were redirected here by another application, please contact the administrator of that application.
+          </p>
+        </div>
+
+        <div th:if="${status == 403}">
+          <p>
+            You do not have permission to access the requested resource.
+          </p>
+          <p class="fbs-error-notice">
+            Please contact the administrator of the application if you believe this is an error.
+          </p>
+        </div>
+
+        <div th:if="${status != null and status != 400 and status != 404 and status != 403 and status != 999}">
+          <p>
+            An unexpected error occurred while processing your request.
+          </p>
+          <p class="fbs-error-notice">
+            Please try again later or contact the system administrator if the issue persists.
+          </p>
+        </div>
+      </div>
+
+      <!-- Technical Details Dropdown -->
+      <details class="fbs-dropdown fbs-error-dropdown" th:if="${(status != null and status != 999) or (message != null and message != '' and message != 'No message available') or (path != null and path != '')}">
+        <summary class="fbs-dropdown-summary" aria-label="Toggle technical details">
+          <span class="fbs-dropdown-title">
+            <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 18px; height: 18px; fill: currentColor; margin-right: 6px;">
+              <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+            </svg>
+            Technical Details
+          </span>
+          <svg class="fbs-dropdown-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+          </svg>
+        </summary>
+        <div class="fbs-dropdown-content fbs-error-details">
+          <div class="fbs-error-detail-row" th:if="${status != null and status != 999}">
+            <span class="fbs-detail-label">Status:</span>
+            <span class="fbs-detail-value" th:text="${status} + (${error != null and error != 'None'} ? ' (' + ${error} + ')' : '')">400 Bad Request</span>
+          </div>
+          <div class="fbs-error-detail-row" th:if="${path != null and path != ''}">
+            <span class="fbs-detail-label">Path:</span>
+            <span class="fbs-detail-value"><code th:text="${path}">/oauth2/authorize</code></span>
+          </div>
+          <div class="fbs-error-detail-row" th:if="${message != null and message != '' and message != 'No message available'}">
+            <span class="fbs-detail-label">Error Details:</span>
+            <span class="fbs-detail-value"><code th:text="${message}">[invalid_request] OAuth 2.0 Parameter: client_id</code></span>
+          </div>
+          <div class="fbs-error-detail-row" th:if="${timestamp != null}">
+            <span class="fbs-detail-label">Timestamp:</span>
+            <span class="fbs-detail-value" th:text="${#dates.format(timestamp, 'yyyy-MM-dd HH:mm:ss')}">2025-10-10 12:00:00</span>
+          </div>
+        </div>
+      </details>
+
+      <!-- Action Button -->
+      <div class="fbs-error-actions">
+        <a th:href="@{/login}" class="fbs-button fbs-button-primary" id="back-to-login-btn">
+          <span>Back to Login</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Discover More / GitHub Link matching FBS Core -->
+    <a href="https://github.com/thm-mni-ii/feedbacksystem" target="_blank" rel="noopener noreferrer" class="fbs-github-link" aria-label="Discover more on GitHub">
+      <span class="fbs-github-text">discover more</span>
+      <img th:src="@{/images/arrow.png}" class="fbs-github-arrow" alt="" aria-hidden="true">
+      <div class="fbs-github-button" role="img" aria-label="GitHub Repository">
+        <img th:src="@{/images/github.svg}" alt="GitHub">
+      </div>
+    </a>
+  </main>
+
+  <footer class="fbs-footer" role="contentinfo">
+    <span>Feedback System &copy; Technische Hochschule Mittelhessen</span>
+    <span>&bull;</span>
+    <a th:href="@{/legal/terms-of-use}">Terms of Use</a>
+    <span>&bull;</span>
+    <a th:href="@{/api/v1/legal/impressum}" target="_blank">Imprint</a>
+  </footer>
+
+  <script th:src="@{/js/login.js}"></script>
+</body>
+</html>

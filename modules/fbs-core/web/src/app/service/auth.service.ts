@@ -36,7 +36,13 @@ export class AuthService {
 
   private configure() {
     this.oauthService.configure(authCodeFlowConfig);
-    this.oauthService.setupAutomaticSilentRefresh();
+    const isEmbedded =
+      typeof window !== "undefined" &&
+      (window.self !== window.top ||
+        window.location.search.includes("embedded=true"));
+    if (!isEmbedded) {
+      this.oauthService.setupAutomaticSilentRefresh();
+    }
   }
 
   public async tryLogin(): Promise<boolean> {
