@@ -1,6 +1,6 @@
 import { Component, Inject, ViewChild } from "@angular/core";
 import { I18NEXT_SERVICE, ITranslationService } from "angular-i18next";
-import { MatMenu } from "@angular/material/menu";
+import { MatLegacyMenu as MatMenu } from "@angular/material/legacy-menu";
 
 /**
  * Language Menu

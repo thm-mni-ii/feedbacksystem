@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Course } from "../../model/Course";

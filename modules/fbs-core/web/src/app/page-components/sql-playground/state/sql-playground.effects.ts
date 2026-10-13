@@ -13,7 +13,7 @@ import {
 } from "rxjs/operators";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { AuthService } from "src/app/service/auth.service";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
 import * as SqlPlaygroundActions from "./sql-playground.actions";
 import { selectActiveDb } from "./sql-playground.selectors";

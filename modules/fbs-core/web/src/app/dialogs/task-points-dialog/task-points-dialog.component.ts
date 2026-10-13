@@ -1,14 +1,14 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import {
-  MAT_DIALOG_DATA,
-  MatDialog,
-  MatDialogRef,
-} from "@angular/material/dialog";
+  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialog as MatDialog,
+  MatLegacyDialogRef as MatDialogRef,
+} from "@angular/material/legacy-dialog";
 import { Task } from "../../model/Task";
 import { TaskPointsService } from "../../service/task-points.service";
 import { Requirement } from "../../model/Requirement";
 import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.component";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 
 @Component({
   selector: "app-task-points-dialog",

@@ -2,9 +2,9 @@ import { Component, OnInit } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Database } from "../../../../model/sql_playground/Database";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { AuthService } from "src/app/service/auth.service";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { loadDatabases } from "src/app/page-components/sql-playground/db-control-panel/state/databases.actions";
 import {
   selectDatabasesForCurrentType,

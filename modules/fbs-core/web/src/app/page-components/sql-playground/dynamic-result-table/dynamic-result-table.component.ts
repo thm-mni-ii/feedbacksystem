@@ -5,7 +5,7 @@ import { ResultTab } from "src/app/model/ResultTab";
 import * as DynamicResultTableActions from "./state/dynamic-result-table.actions";
 import * as fromDynamicResultTable from "./state/dynamic-result-table.selectors";
 import * as fromSqlPlayground from "../state/sql-playground.selectors";
-import { MatTabGroup } from "@angular/material/tabs";
+import { MatLegacyTabGroup as MatTabGroup } from "@angular/material/legacy-tabs";
 
 @Component({
   selector: "app-dynamic-result-table",

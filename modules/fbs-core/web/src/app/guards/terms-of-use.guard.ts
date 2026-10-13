@@ -6,7 +6,7 @@ import {
   Router,
   RouterStateSnapshot,
 } from "@angular/router";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { Observable, of } from "rxjs";
 import { catchError, map, switchMap, take } from "rxjs/operators";
 import { DataprivacyDialogComponent } from "../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
