@@ -71,7 +71,7 @@
           :remove-competency-from-question="removeCompetencyFromQuestion"
           :add-competency-to-question="addCompetencyToQuestion"
           :edit-question="editQuestion"
-          :delete-question="deleteQuestion"
+          :unlink-question="unlinkQuestion"
         />
       </v-card-text>
     </v-card>
@@ -109,7 +109,7 @@ interface Props {
   selectCourse: () => void
   editQuestion: (question?: Question, presetCompetencyId?: string) => void
   editCompetency: (competencyId?: string, presetParentId?: string) => void
-  deleteQuestion: (id: string) => void
+  unlinkQuestion: (id: string) => void
   deleteCompetency: (id: string) => void
   linkExistingQuestion: (competencyId: string) => void
 }

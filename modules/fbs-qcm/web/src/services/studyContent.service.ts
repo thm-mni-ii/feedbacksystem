@@ -109,6 +109,29 @@ class StudyContentService {
         : questions
     }
   }
+
+  async getCompetencyGraphContent(courseId: string): Promise<{
+    competencies: Competency[]
+    questions: Question[]
+  }> {
+    const [competenciesResponse, questionsResponse] = await Promise.all([
+      competencyService.getCompetenciesByCourse(courseId),
+      questionService.getAllQuestions()
+    ])
+    const competencies = competenciesResponse.data
+    const competencyIds = new Set(competencies.map((competency) => competency.id))
+    const questions = questionsResponse.data
+      .map(toStudyQuestion)
+      .map((question) => ({
+        ...question,
+        competencyIds: getQuestionCompetencyIds(question)
+      }))
+      .filter((question) =>
+        getQuestionCompetencyIds(question).some((competencyId) => competencyIds.has(competencyId))
+      )
+
+    return { competencies, questions }
+  }
 }
 
 export default new StudyContentService()

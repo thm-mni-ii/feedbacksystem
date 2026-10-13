@@ -51,17 +51,19 @@ function cloneQuestion(question: Question): Question {
   }
 }
 
-export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions: Question[]) {
+export function useCompetencyGraph(
+  initialCompetencies: Competency[],
+  initialQuestions: Question[]
+) {
   // ─── State ────────────────────────────────────────────────────────────
   const course = ref<Course>({
     id: 'course1',
-    name: 'Datenbanken & OOP',
-    description:
-      'Umfassendes Kurs-Kompetenzmodell für Datenbanken und objektorientierte Programmierung'
+    name: 'Kurs',
+    description: ''
   })
 
-  const competencies = ref<Competency[]>(mockCompetencies.map(cloneCompetency))
-  const questions = ref<Question[]>(mockQuestions.map(cloneQuestion))
+  const competencies = ref<Competency[]>(initialCompetencies.map(cloneCompetency))
+  const questions = ref<Question[]>(initialQuestions.map(cloneQuestion))
   const selectedNodeId = ref<string | null>(course.value.id)
   const zoomLevel = ref(1)
 
@@ -69,7 +71,9 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
   const getCompetency = (id: string): Competency | undefined =>
     competencies.value.find((c) => c.id === id)
 
-  const rootCompetencies = computed(() => competencies.value.filter((c) => !c.parentId))
+  const rootCompetencies = computed(() =>
+    competencies.value.filter((c) => !c.parentId || !getCompetency(c.parentId))
+  )
 
   const getCompetencyColor = (comp?: Competency): string => {
     if (!comp) return competencyGraphPalette.chipFallback
@@ -78,7 +82,7 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
 
   function getCompetencyDepth(compId: string): number {
     const comp = competencies.value.find((c) => c.id === compId)
-    if (!comp?.parentId) return 0
+    if (!comp?.parentId || !getCompetency(comp.parentId)) return 0
     return 1 + getCompetencyDepth(comp.parentId)
   }
 
@@ -173,9 +177,10 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
   // ─── Graph Edges ──────────────────────────────────────────────────────
   const graphEdges = computed<Record<string, CompetencyGraphEdgeData>>(() => {
     const edges: Record<string, CompetencyGraphEdgeData> = {}
+    const competencyIds = new Set(competencies.value.map((competency) => competency.id))
 
     competencies.value
-      .filter((c) => !c.parentId)
+      .filter((c) => !c.parentId || !competencyIds.has(c.parentId))
       .forEach((c) => {
         edges[`e-course-${c.id}`] = {
           source: course.value.id,
@@ -186,7 +191,7 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
       })
 
     competencies.value
-      .filter((c) => c.parentId)
+      .filter((c) => c.parentId && competencyIds.has(c.parentId))
       .forEach((c) => {
         edges[`e-${c.parentId}-${c.id}`] = {
           source: c.parentId!,
@@ -203,6 +208,7 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
       }
 
       qCompIds.forEach((competencyId) => {
+        if (!competencyIds.has(competencyId)) return
         edges[`e-${competencyId}-${q.id}`] = {
           source: competencyId,
           target: q.id,
@@ -374,6 +380,24 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
   )
 
   // ─── Actions ──────────────────────────────────────────────────────────
+  const setGraphData = (
+    courseId: string,
+    newCompetencies: Competency[],
+    newQuestions: Question[]
+  ) => {
+    const previousSelection = selectedNodeId.value
+    course.value = { id: courseId, name: `Kurs ${courseId}`, description: '' }
+    competencies.value = newCompetencies.map(cloneCompetency)
+    questions.value = newQuestions.map(cloneQuestion)
+    const availableNodeIds = new Set([
+      courseId,
+      ...competencies.value.map((competency) => competency.id),
+      ...questions.value.map((question) => question.id)
+    ])
+    selectedNodeId.value =
+      previousSelection && availableNodeIds.has(previousSelection) ? previousSelection : courseId
+  }
+
   const deleteQuestion = (id: string) => {
     questions.value = questions.value.filter((q) => q.id !== id)
     if (selectedNodeId.value === id) selectedNodeId.value = null
@@ -386,7 +410,7 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
   }
 
   /**
-   * Fügt eine neu im Dialog angelegte Aufgabe lokal hinzu. Ergänzt
+   * Fügt eine Aufgabe zum aktuellen Graph-Zustand hinzu. Ergänzt
    * `updateQuestion`, das nur für das Bearbeiten bestehender Aufgaben gedacht
    * ist (vgl. Bug: "Aufgabe hinzufügen" hatte bislang keinen Effekt, da es
    * keine Stelle gab, die eine neue Aufgabe tatsächlich in `questions` aufnahm).
@@ -410,6 +434,9 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
     visit(rootId)
     return result
   }
+
+  const getCompetencySubtreeIds = (competencyId: string): string[] =>
+    collectCompetencySubtreeIds(competencyId)
 
   /**
    * Vorschau, was beim Löschen einer Kompetenz zusätzlich betroffen wäre,
@@ -498,9 +525,7 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
   }
 
   /**
-   * Legt eine neue lokale Kompetenz an oder aktualisiert eine bestehende.
-   * Wird vom `DialogEditCompetency` (mit `persist: false`) genutzt, da der
-   * Kompetenzgraph-Competencies werden bisher nur lokal (Mock-Daten) verwaltet.
+   * Aktualisiert eine Kompetenz im Graph-Zustand.
    */
   const upsertCompetency = (updatedCompetency: Competency) => {
     const exists = competencies.value.some((c) => c.id === updatedCompetency.id)
@@ -578,6 +603,8 @@ export function useCompetencyGraph(mockCompetencies: Competency[], mockQuestions
     upsertCompetency,
     deleteCompetency,
     getCompetencyDeletionImpact,
-    selectCourse
+    getCompetencySubtreeIds,
+    selectCourse,
+    setGraphData
   }
 }

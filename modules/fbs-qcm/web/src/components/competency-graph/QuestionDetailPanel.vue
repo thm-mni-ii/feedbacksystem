@@ -76,14 +76,14 @@
             <v-tooltip activator="parent" location="top">Bearbeiten</v-tooltip>
           </v-btn>
           <v-btn
-            icon="mdi-delete-outline"
+            icon="mdi-link-off"
             size="small"
             variant="text"
             color="error"
-            @click="deleteQuestion(selectedQuestion!.id)"
+            @click="unlinkQuestion(selectedQuestion!.id)"
           >
-            <v-icon>mdi-delete-outline</v-icon>
-            <v-tooltip activator="parent" location="top">Löschen</v-tooltip>
+            <v-icon>mdi-link-off</v-icon>
+            <v-tooltip activator="parent" location="top">Aus diesem Kurs lösen</v-tooltip>
           </v-btn>
         </div>
       </v-card-text>
@@ -106,7 +106,7 @@ interface Props {
   getCompetencyColor: (comp?: Competency) => string
   addCompetencyToQuestion: (questionId: string, compId: string) => void
   editQuestion: (question: Question) => void
-  deleteQuestion: (id: string) => void
+  unlinkQuestion: (id: string) => void
 }
 
 const props = defineProps<Props>()

@@ -178,9 +178,17 @@
               density="comfortable"
               class="mb-3 prerequisite-hint"
             >
-              Hier definierst du nur fachlich begründete Abhängigkeiten. Die Taxonomie über
-              <code>parentId</code> bleibt davon getrennt. Gespeichert wird lokal im späteren
-              Backend-Format <code>prerequisites: [{ competencyId, minimumMastery }]</code>.
+              Hier definierst du fachlich begründete Abhängigkeiten. Die übergeordnete Kompetenz
+              bleibt davon getrennt. Änderungen werden im Backend gespeichert.
+            </v-alert>
+            <v-alert
+              v-if="prerequisiteSaveError"
+              type="error"
+              variant="tonal"
+              density="comfortable"
+              class="mb-3"
+            >
+              {{ prerequisiteSaveError }}
             </v-alert>
 
             <div v-if="isEditingPrerequisites" class="prerequisite-editor">
@@ -329,6 +337,7 @@ const panelStyles = {
 const activeSection = ref('overview')
 const isEditingPrerequisites = ref(false)
 const isSavingPrerequisites = ref(false)
+const prerequisiteSaveError = ref<string | null>(null)
 const prerequisiteDrafts = ref<EditablePrerequisite[]>([])
 
 const selectedCompetency = computed(() => props.selectedNode?.data as Competency | undefined)
@@ -500,6 +509,7 @@ async function savePrerequisites() {
   }
 
   isSavingPrerequisites.value = true
+  prerequisiteSaveError.value = null
 
   try {
     await props.saveCompetencyPrerequisites(
@@ -516,9 +526,14 @@ async function savePrerequisites() {
       )
     )
     isEditingPrerequisites.value = false
+    prerequisiteDrafts.value = toPrerequisiteDrafts(
+      selectedCompetency.value?.prerequisites ?? []
+    )
+  } catch {
+    prerequisiteSaveError.value =
+      'Die Änderungen konnten nicht gespeichert werden. Bitte erneut versuchen.'
   } finally {
     isSavingPrerequisites.value = false
-    prerequisiteDrafts.value = toPrerequisiteDrafts(selectedCompetency.value?.prerequisites ?? [])
   }
 }
 </script>

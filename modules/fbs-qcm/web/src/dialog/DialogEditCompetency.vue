@@ -12,12 +12,11 @@ const competencyId = ref<string | undefined>(undefined)
 
 /**
  * Steuert, ob beim Speichern der echte Backend-Call (competencyService)
- * ausgeführt wird. Der Kompetenzgraph arbeitet mit lokalen Mock-Competencies, die
- * im Backend nicht existieren – dort wird `persist=false` übergeben und die
- * angelegte/bearbeitete Kompetenz stattdessen über den Resolve-Wert des
- * `openDialog`-Promise (als `Competency`) nach oben gereicht.
+ * ausgeführt wird. Bei false wird die angelegte/bearbeitete Kompetenz über den
+ * Resolve-Wert des `openDialog`-Promise nach oben gereicht.
  */
 const persist = ref<boolean>(true)
+const allowDelete = ref(true)
 
 const competency = ref<Omit<Competency, 'id'>>({
   name: '',
@@ -141,8 +140,8 @@ const resolvePromise = ref<Function | undefined>(undefined)
 /**
  * @param editCompetency Zu bearbeitende Kompetenz, oder undefined für "neu erstellen".
  * @param options.persist Ob beim Speichern der echte Backend-Call ausgeführt wird
- * (default true). Auf false setzen, wenn die Kompetenz nur lokal (z.B. im
- * Kompetenzgraph) verwaltet wird und im Backend nicht existiert.
+ * (default true). Auf false setzen, wenn die Kompetenz nicht im Backend
+ * gespeichert werden soll.
  * @param options.competencies Vorhandene Kompetenzen für Parent-/Prerequisite-
  * Auswahl, wenn `persist=false` und daher nicht per Backend-Call geladen wird.
  * @param options.presetParentId Vorbelegter Parent für eine neue Kompetenz,
@@ -152,9 +151,16 @@ const resolvePromise = ref<Function | undefined>(undefined)
  */
 const openDialog = (
   editCompetency?: Competency,
-  options?: { persist?: boolean; competencies?: Competency[]; presetParentId?: string | null }
+  options?: {
+    persist?: boolean
+    competencies?: Competency[]
+    presetParentId?: string | null
+    courseIds?: string[]
+    allowDelete?: boolean
+  }
 ) => {
   persist.value = options?.persist ?? true
+  allowDelete.value = options?.allowDelete ?? true
 
   if (persist.value) {
     loadCompetencies()
@@ -172,6 +178,7 @@ const openDialog = (
     competency.value = {
       name: '',
       description: '',
+      courseIds: options?.courseIds,
       parentId: options?.presetParentId ?? null,
       prerequisites: []
     }
@@ -419,7 +426,7 @@ defineExpose({
 
       <v-card-actions class="justify-end">
         <v-btn
-          v-if="!isNew && persist"
+          v-if="!isNew && persist && allowDelete"
           color="red"
           variant="text"
           class="mr-auto"

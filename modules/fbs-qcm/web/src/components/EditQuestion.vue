@@ -21,9 +21,8 @@ const props = withDefaults(
     isNew: boolean
     /**
      * Steuert, ob beim Speichern der echte Backend-Call (questionService)
-     * ausgeführt wird. Der Kompetenzgraph arbeitet mit lokalen Mock-Aufgaben, die
-     * im Backend nicht existieren – dort wird `persist=false` übergeben und
-     * die bearbeitete Aufgabe stattdessen per `update`-Event nach oben gereicht.
+     * ausgeführt wird. Bei false wird die Aufgabe stattdessen per `update`-
+     * Event an den Aufrufer zurückgegeben.
      */
     persist?: boolean
     /**

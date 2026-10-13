@@ -75,8 +75,9 @@ Lernwirkung empirisch belegt worden wäre.
 - Speicherung der Session und einzelner Antwortversuche über Backend v2.
 - Konfigurierbare Sessionlänge, Abschlusskriterien und Auswahlstrategie.
 - Ein isoliertes Algorithmus-Labor für Simulationen und Experimente.
-- Ein lokal arbeitender Kompetenzgraph, dessen Daten nicht mit der API
-  synchronisiert werden.
+- Ein kursbezogener Kompetenzgraph, der Kompetenzen und zugeordnete Aufgaben
+  aus Backend v2 lädt. Änderungen an Kompetenzen, Aufgaben und Zuordnungen
+  werden über die API gespeichert.
 
 ### 2.2 Nicht im aktuellen Umfang
 
@@ -89,7 +90,8 @@ Lernwirkung empirisch belegt worden wäre.
   realer Antwortdaten.
 - Keine echte kognitive Diagnose mit statistisch identifizierten
   Q-Matrix-/CDM-Parametern.
-- Kein dauerhaft an die API angebundener Kompetenzgraph.
+- Kein produktionsreifes Authentifizierungs- und Berechtigungssystem für die
+  Backend-Änderungen aus dem Kompetenzgraphen.
 - Keine Garantie, dass ein Session-Abschluss bedeutet, dass eine Kompetenz
   beherrscht wird.
 
@@ -164,7 +166,10 @@ in Vue-Komponenten ausgeführt.
   StudySessions und Attempts werden dort gespeichert.
 - **Algorithmus-Labor:** eigener Pinia-Store und eigener Browser-
   `localStorage`-Schlüssel; keine produktiven Session-/Attempt-Endpunkte.
-- **Kompetenzgraph:** lokal arbeitende Demo-/Mockdaten; keine API-Synchronisation.
+- **Kompetenzgraph:** lädt kursbezogene Kompetenzen und zugeordnete Aufgaben
+  aus Backend v2. Änderungen an Kompetenzen und Aufgaben werden gespeichert;
+  Entfernen aus einem Kurs löst die Kurs- beziehungsweise Aufgabenverknüpfung,
+  statt die gemeinsam nutzbare Kompetenz oder Aufgabe global zu löschen.
 - **Ältere API-/Catalog-Strukturen:** im Repository noch vorhanden, aber nicht
   als Grundlage für neue v2-Funktionen zu verstehen.
 

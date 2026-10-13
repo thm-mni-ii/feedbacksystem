@@ -3,11 +3,11 @@ import type EditableQuestion from '@/model/Question'
 import type { Choice } from '@/model/questionTypes/Choice'
 import type FillInTheBlanks from '@/model/questionTypes/FillInTheBlanks'
 import type { Matching } from '@/model/questionTypes/Matching'
+import { getQuestionCompetencyIds } from '@/composables/qMatrix'
 
 /**
- * Der Kompetenzgraph arbeitet ausschließlich mit `Question` (Mock-/lokalem
- * Domänenmodell aus `model/types.ts`), während `DialogEditQuestion`/`EditQuestion`
- * das v2-Wire-Format `model/Question.ts` erwartet (questionType/questionConfiguration).
+ * Der Kompetenzgraph verwendet das Domänenmodell aus `model/types.ts`, während
+ * `DialogEditQuestion`/`EditQuestion` das API-Format `model/Question.ts` erwartet.
  * Beide Modelle halten `questionType`/`questionConfiguration` inzwischen 1:1 identisch,
  * diese Adapter-Funktionen übernehmen daher nur noch das Umformen der übrigen Felder
  * (competencyIds/competencyLinks etc.), ohne beide Modelle dauerhaft vermischen zu müssen.
@@ -17,7 +17,7 @@ export function toEditableQuestion(question: Question): EditableQuestion {
     id: question.id,
     text: question.text,
     title: question.title,
-    competencyIds: [...question.competencyIds],
+    competencyIds: getQuestionCompetencyIds(question),
     competencyLinks: question.competencyLinks?.map((link) => ({ ...link })),
     questionType: question.questionType,
     questionConfiguration: question.questionConfiguration,
@@ -30,15 +30,30 @@ export function fromEditableQuestion(
   edited: EditableQuestion,
   original: Question
 ): Question {
+  const competencyIds = [...new Set(edited.competencyIds ?? original.competencyIds)]
+  const existingLinks = new Map(
+    [...(edited.competencyLinks ?? original.competencyLinks ?? [])].map((link) => [
+      link.competencyId,
+      link
+    ])
+  )
+
   return {
     ...original,
     text: edited.text ?? original.text,
     title: edited.title ?? original.title,
-    competencyIds: [...(edited.competencyIds ?? original.competencyIds)],
-    competencyLinks: edited.competencyLinks?.map((link) => ({ ...link })) ?? original.competencyLinks,
+    competencyIds,
+    competencyLinks: competencyIds.map(
+      (competencyId) =>
+        existingLinks.get(competencyId) ?? {
+          competencyId,
+          relation: 'required' as const,
+          weight: 1
+        }
+    ),
     questionType: edited.questionType ?? original.questionType,
     questionConfiguration:
-      (edited.questionConfiguration as Choice | FillInTheBlanks | undefined) ??
+      (edited.questionConfiguration as Choice | FillInTheBlanks | Matching | undefined) ??
       original.questionConfiguration,
     difficulty: edited.difficulty ?? original.difficulty,
     excludeFromAlgorithm: edited.excludeFromAlgorithm ?? original.excludeFromAlgorithm
@@ -46,11 +61,9 @@ export function fromEditableQuestion(
 }
 
 /**
- * Baut aus einer im Dialog neu angelegten `EditableQuestion` (ohne Bezug zu
- * einer bestehenden `Question`) eine vollständige, lokale `Question` für den
- * Kompetenzgraph. Wird für den "Aufgabe hinzufügen"-Flow benötigt, da dort -
- * anders als beim Bearbeiten - keine bestehende Aufgabe zum Zusammenführen
- * existiert.
+ * Baut aus einer im Dialog neu angelegten `EditableQuestion` eine vollständige
+ * `Question` für den Create-Aufruf, bei dem keine bestehende Aufgabe zum
+ * Zusammenführen existiert.
  */
 export function fromNewEditableQuestion(edited: EditableQuestion): Question {
   return {
