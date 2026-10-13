@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, QueryList, ViewChildren } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { TitlebarService } from "../../../../service/titlebar.service";
@@ -7,8 +7,8 @@ import { CourseResultsService } from "../../../../service/course-results.service
 import { CourseResult } from "../../../../model/CourseResult";
 import { Task } from "../../../../model/Task";
 import { EvaluationUserResults } from "../../../../model/EvaluationUserResults";
-import { ChartDataSets, ChartOptions, ChartType } from "chart.js";
-import { Color, Label } from "ng2-charts";
+import { ChartDataset, ChartOptions, ChartType } from "chart.js";
+import { BaseChartDirective } from "ng2-charts";
 import { SubTaskStatistic } from "../../../../model/SubTaskStatistic";
 import { SubtaskStatisticService } from "../../../../service/subtask-statistic.service";
 
@@ -45,72 +45,57 @@ export class ResultsStatisticComponent implements OnInit {
   taskCounter;
   idStore;
 
+  @ViewChildren(BaseChartDirective) charts: QueryList<BaseChartDirective>;
+
   // Bar-chart Config
-  public barChartData: ChartDataSets[] = [
+  public barChartData: ChartDataset<"bar">[] = [
     {
       data: [],
       label: "Durchschnittliche Versuche zum Bestehen einer Aufgabe",
+      backgroundColor: "#405e9a",
     },
-    { data: [], label: "Durchschnittliche Versuche einer Aufgabe" },
+    {
+      data: [],
+      label: "Durchschnittliche Versuche einer Aufgabe",
+      backgroundColor: "#aab6fe",
+    },
   ];
-  public barChartLabels: Label[] = [];
-  public barChartOptions: ChartOptions & { annotation?: any } = {
+  public barChartLabels: string[] = [];
+  public barChartOptions: ChartOptions<"bar"> = {
     responsive: true,
     scales: {
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-          },
-        },
-      ],
-      xAxes: [
-        {
-          ticks: {},
-        },
-      ],
+      y: {
+        beginAtZero: true,
+      },
     },
   };
-
-  public barChartColors: Color[] = [
-    { backgroundColor: "#405e9a" },
-    { backgroundColor: "#aab6fe" },
-  ];
   public barChartLegend = true;
   public barChartType: ChartType = "bar";
   public barChartPlugins = [];
 
   // Line-chart Config
-  lineChartData: ChartDataSets[] = [{ data: [], label: "Bearbeitungsquote %" }];
-
-  lineChartLabels: Label[] = [];
-
-  lineChartOptions = {
-    responsive: true,
-    scales: {
-      yAxes: [
-        {
-          ticks: {
-            callback: function (value) {
-              return value + "%";
-            },
-          },
-        },
-      ],
-      xAxes: [
-        {
-          ticks: {},
-        },
-      ],
-    },
-  };
-
-  lineChartColors: Color[] = [
+  lineChartData: ChartDataset<"line">[] = [
     {
+      data: [],
+      label: "Bearbeitungsquote %",
       borderColor: "black",
       backgroundColor: "#405e9a",
+      fill: true,
     },
   ];
+
+  lineChartLabels: string[] = [];
+
+  lineChartOptions: ChartOptions<"line"> = {
+    responsive: true,
+    scales: {
+      y: {
+        ticks: {
+          callback: (value) => value + "%",
+        },
+      },
+    },
+  };
 
   lineChartLegend = true;
   lineChartPlugins = [];
@@ -143,7 +128,7 @@ export class ResultsStatisticComponent implements OnInit {
     if (this.checker === 1) {
       return;
     }
-    this.choosedIndex = e.active[0]._index;
+    this.choosedIndex = e.active[0].index;
     this.choosedTask = this.idStore[this.choosedIndex];
     this.tasks.subscribe((extractedTasks) => {
       extractedTasks.forEach((extractedTasks) => {
@@ -175,6 +160,7 @@ export class ResultsStatisticComponent implements OnInit {
           });
         }
       });
+      this.updateCharts();
     });
   }
 
@@ -229,7 +215,7 @@ export class ResultsStatisticComponent implements OnInit {
           });
         })
       )
-      .subscribe();
+      .subscribe(() => this.updateCharts());
 
     this.courseResultsStudent
       .pipe(
@@ -252,7 +238,7 @@ export class ResultsStatisticComponent implements OnInit {
           });
         })
       )
-      .subscribe();
+      .subscribe(() => this.updateCharts());
   }
 
   showRate() {
@@ -285,6 +271,11 @@ export class ResultsStatisticComponent implements OnInit {
           });
         })
       )
-      .subscribe();
+      .subscribe(() => this.updateCharts());
+  }
+
+  private updateCharts(): void {
+    // ng2-charts does not detect in-place changes of the data arrays
+    this.charts?.forEach((chart) => chart.update());
   }
 }

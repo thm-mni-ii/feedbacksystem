@@ -26,13 +26,14 @@
       <div class="chart-title">Table Checker</div>
       <canvas
         baseChart
-        [data]="pieChartDataLeft"
+        [datasets]="[
+          { data: pieChartDataLeft, backgroundColor: pieChartColors }
+        ]"
         [labels]="pieChartLabelsLeft"
-        [chartType]="pieChartTypeLeft"
+        [type]="pieChartTypeLeft"
         [options]="pieChartOptionsLeft"
         [plugins]="pieChartPluginsLeft"
         [legend]="pieChartLegendLeft"
-        [colors]="pieChartColors"
         (chartClick)="tableCheckerWrongTables($event)"
       >
       </canvas>
@@ -41,13 +42,14 @@
       <div class="chart-title">Attribut Checker</div>
       <canvas
         baseChart
-        [data]="pieChartDataRight"
+        [datasets]="[
+          { data: pieChartDataRight, backgroundColor: pieChartColors }
+        ]"
         [labels]="pieChartLabelsRight"
-        [chartType]="pieChartTypeRight"
+        [type]="pieChartTypeRight"
         [options]="pieChartOptionsRight"
         [plugins]="pieChartPluginsRight"
         [legend]="pieChartLegendRight"
-        [colors]="pieChartColors"
         (chartClick)="clickAttributeChart($event)"
       >
       </canvas>
@@ -59,13 +61,14 @@
       baseChart
       width="40"
       height="10"
-      [data]="pieChartDataCenter"
+      [datasets]="[
+        { data: pieChartDataCenter, backgroundColor: pieChartColors }
+      ]"
       [labels]="pieChartLabelsCenter"
-      [chartType]="pieChartTypeCenter"
+      [type]="pieChartTypeCenter"
       [options]="pieChartOptionsCenter"
       [plugins]="pieChartPluginsCenter"
       [legend]="pieChartLegendCenter"
-      [colors]="pieChartColors"
       (chartClick)="clickCenterChartTableChecker($event)"
     >
     </canvas>
@@ -76,13 +79,14 @@
       baseChart
       width="40"
       height="10"
-      [data]="pieChartDataCenter"
+      [datasets]="[
+        { data: pieChartDataCenter, backgroundColor: pieChartColors }
+      ]"
       [labels]="pieChartLabelsCenter"
-      [chartType]="pieChartTypeCenter"
+      [type]="pieChartTypeCenter"
       [options]="pieChartOptionsCenter"
       [plugins]="pieChartPluginsCenter"
       [legend]="pieChartLegendCenter"
-      [colors]="pieChartColors"
       (chartClick)="clickCenterChartAttributeChecker($event)"
     >
     </canvas>
