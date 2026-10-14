@@ -88,7 +88,11 @@ import { EvaluationResultsComponent } from "./page-components/course-detail/cour
 import { SpreadsheetComponent } from "./dialogs/spreadsheet-dialog/spreadsheet/spreadsheet.component";
 import { SpreadsheetDialogComponent } from "./dialogs/spreadsheet-dialog/spreadsheet-dialog.component";
 import { SubtaskResultsComponent } from "./page-components/subtask-results/subtask-results.component";
-import { NgChartsModule } from "ng2-charts";
+import {
+  BaseChartDirective,
+  provideCharts,
+  withDefaultRegisterables,
+} from "ng2-charts";
 import { ResultsStatisticComponent } from "./page-components/course-detail/course-results/results-statistic/results-statistic.component";
 import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.component";
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
@@ -302,7 +306,7 @@ export const httpInterceptorProviders = [
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
-    NgChartsModule,
+    BaseChartDirective,
     MatTableModule,
     MatSortModule,
     I18NextModule.forRoot(),
@@ -311,6 +315,7 @@ export const httpInterceptorProviders = [
     AngularEditorModule,
   ],
   providers: [
+    provideCharts(withDefaultRegisterables()),
     CookieService,
     TaskProviderService,
     httpInterceptorProviders,
