@@ -5,7 +5,7 @@
   {{ "dialog.checker.new.edit" | i18nextEager }}
 </div>
 <div class="newChecker">
-  <form [formGroup]="checkerForm">
+  <form mat-dialog-content [formGroup]="checkerForm">
     <mat-select
       class="pad"
       placeholder="{{ 'dialog.checker.new.checker-type' | i18nextEager }}"

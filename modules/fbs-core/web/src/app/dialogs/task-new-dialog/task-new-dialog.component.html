@@ -11,7 +11,10 @@
   {{ "dialog.task.new.title-edit-multiple" | i18nextEager }}
 </div>
 
-<div *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE">
+<div
+  mat-dialog-content
+  *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+>
   Ausgewählte Aufgaben:
   <span *ngFor="let task of data.tasks">
     <b>{{ task.name }}; </b>
@@ -43,7 +46,7 @@
 </div>
 
 <div class="newTask">
-  <form [formGroup]="taskForm">
+  <form mat-dialog-content [formGroup]="taskForm">
     <!-- Task name -->
     <mat-form-field
       *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
