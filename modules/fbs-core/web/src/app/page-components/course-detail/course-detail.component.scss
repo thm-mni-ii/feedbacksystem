@@ -14,7 +14,7 @@
   width: 100%;
   padding-left: 10px;
   margin-bottom: 10px;
-  .mat-flat-button {
+  .mat-mdc-unelevated-button {
     line-height: 30px;
     margin: 0 2.5px;
     height: 30px;
@@ -47,7 +47,7 @@
   alignment: inherit;
 }
 
-.mat-form-field {
+.mat-mdc-form-field {
   justify-content: center;
   padding: 0px;
   margin: 0px;
@@ -120,15 +120,17 @@
     cursor: pointer;
   }
 }
-.mat-progress-bar {
+.mat-mdc-progress-bar {
   height: 15px;
   border-radius: 5px;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
 :host ::ng-deep .mat-progress-bar-fill::after {
   background-color: $green;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
 ::ng-deep .mat-progress-bar-buffer {
   background: $red;
 }
@@ -146,6 +148,7 @@
 // }
 
 //animation none and color gray
+/* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
 ::ng-deep .mat-progress-bar-background {
   background: #cccccc;
   animation: none !important;
@@ -230,7 +233,7 @@
       background-color: ghostwhite;
     }
 
-    .mat-standard-chip {
+    .mat-mdc-standard-chip {
       height: auto !important;
     }
   }

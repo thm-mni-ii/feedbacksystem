@@ -8,7 +8,7 @@ import { Table } from "src/app/model/sql_playground/Table";
 import { Constraint } from "src/app/model/sql_playground/Constraint";
 import { TitlebarService } from "../../service/titlebar.service";
 import { AuthService } from "src/app/service/auth.service";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import * as SqlPlaygroundActions from "./state/sql-playground.actions";
 import * as fromSqlPlayground from "./state/sql-playground.selectors";
 import * as TemplateActions from "./db-control-panel/state/templates.actions";

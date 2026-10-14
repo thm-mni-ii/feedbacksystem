@@ -1,4 +1,5 @@
 <mat-card
+  appearance="outlined"
   [routerLink]="!isSelectable ? ['/courses', courseId, 'task', task.id] : null"
   (click)="isSelectable ? toggleSelection() : null"
   class="task-container"

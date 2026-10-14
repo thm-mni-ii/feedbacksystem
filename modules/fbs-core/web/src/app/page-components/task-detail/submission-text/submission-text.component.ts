@@ -12,7 +12,7 @@ import {
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
 import { MarkdownService } from "../../../service/markdown.service";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 import * as mammoth from "mammoth";
 
 export type SubmissionMode = "code" | "wysiwyg" | "plain" | "free";

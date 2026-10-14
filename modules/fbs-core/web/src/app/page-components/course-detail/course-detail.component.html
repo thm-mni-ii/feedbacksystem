@@ -208,13 +208,13 @@
       </div>
 
       <!-- Johannes approach for progres bar -->
-      <mat-card class="progress-card">
+      <mat-card appearance="outlined" class="progress-card">
         <mat-card-content>
           <div class="title" *ngIf="requirements">
             <h2>{{ "course.progress-title" | i18nextEager }}</h2>
             <!-- if coursePassed show badge -->
-            <mat-chip-list *ngIf="(requirements | async).length === 0">
-              <mat-chip class="badget-chip">
+            <mat-chip-listbox *ngIf="(requirements | async).length === 0">
+              <mat-chip-option class="badget-chip">
                 <mat-icon
                   matTooltip="{{
                     'course.progress-no-conditions' | i18nextEager
@@ -222,10 +222,10 @@
                 >
                   question_mark
                 </mat-icon>
-              </mat-chip>
-            </mat-chip-list>
-            <mat-chip-list *ngIf="(requirements | async).length > 0">
-              <mat-chip class="badget-chip">
+              </mat-chip-option>
+            </mat-chip-listbox>
+            <mat-chip-listbox *ngIf="(requirements | async).length > 0">
+              <mat-chip-option class="badget-chip">
                 <mat-icon
                   [ngClass]="{
                     'badget-icon-passed': coursePassed,
@@ -239,9 +239,9 @@
                 >
                   military_tech
                 </mat-icon>
-              </mat-chip>
+              </mat-chip-option>
 
-              <mat-chip class="badget-chip">
+              <mat-chip-option class="badget-chip">
                 <mat-icon
                   [ngClass]="{
                     'badget-icon-passed': calculatedBonusPoints > 0,
@@ -257,8 +257,8 @@
                 >
                   stars
                 </mat-icon>
-              </mat-chip>
-            </mat-chip-list>
+              </mat-chip-option>
+            </mat-chip-listbox>
           </div>
 
           <!-- little widgets -->

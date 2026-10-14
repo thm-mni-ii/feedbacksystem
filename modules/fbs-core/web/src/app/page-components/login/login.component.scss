@@ -148,7 +148,8 @@ button {
   align-self: end;
 }
 
-::ng-deep .mat-fab .mat-button-wrapper{
+/* TODO(mdc-migration): The following rule targets internal classes of button that may no longer apply for the MDC version. */
+::ng-deep .mat-mdc-fab .mat-button-wrapper{
   padding: 0 !important;
 }
 

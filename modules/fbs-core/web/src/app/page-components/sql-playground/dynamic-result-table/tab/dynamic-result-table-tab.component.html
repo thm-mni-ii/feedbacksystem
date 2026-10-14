@@ -7,7 +7,7 @@
     *ngIf="tab !== undefined && ($isQueryPending | async) === false"
   >
     <div *ngIf="tab.error === true">
-      <mat-card>
+      <mat-card appearance="outlined">
         <mat-card-header>
           <mat-card-title>
             <mat-icon class="error-icon">close</mat-icon>

@@ -7,7 +7,7 @@ import { TitlebarService } from "../../service/titlebar.service";
 import { Roles } from "../../model/Roles";
 import { AuthService } from "../../service/auth.service";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { GroupRegistrationService } from "../../service/group-registration.sevice";
 import { Group } from "../../model/Group";
 import { I18NextPipe } from "angular-i18next";

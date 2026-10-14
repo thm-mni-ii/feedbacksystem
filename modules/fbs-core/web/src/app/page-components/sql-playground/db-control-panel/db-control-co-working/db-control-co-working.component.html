@@ -1,5 +1,9 @@
 <div class="container">
-  <mat-card *ngIf="(currentDbType$ | async) === 'mongo'" class="mongo-warning">
+  <mat-card
+    appearance="outlined"
+    *ngIf="(currentDbType$ | async) === 'mongo'"
+    class="mongo-warning"
+  >
     <mat-card-content>
       <div style="display: flex; align-items: center; gap: 8px">
         <mat-icon style="color: #ff9800; width: 70px">warning</mat-icon>

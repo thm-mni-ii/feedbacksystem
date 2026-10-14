@@ -86,15 +86,15 @@
 
   <div class="section-box" *ngIf="taskProvider.supportedMediaTypes?.length">
     <h3>{{ "task-provider.dialog.field-media-types" | i18nextEager }}</h3>
-    <mat-chip-list aria-label="Media Types">
-      <mat-chip
+    <mat-chip-listbox aria-label="Media Types">
+      <mat-chip-option
         *ngFor="let mt of taskProvider.supportedMediaTypes"
         selected
         color="primary"
       >
         {{ mt }}
-      </mat-chip>
-    </mat-chip-list>
+      </mat-chip-option>
+    </mat-chip-listbox>
   </div>
 
   <div class="section-box" *ngIf="formattedSchema">

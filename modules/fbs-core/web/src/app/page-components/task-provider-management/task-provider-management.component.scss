@@ -43,14 +43,14 @@
 .task-provider-table {
   width: 100%;
 
-  th.mat-header-cell {
+  th.mat-mdc-header-cell {
     font-weight: 600;
     color: rgba(0, 0, 0, 0.75);
     background-color: #fafafa;
     border-bottom: 2px solid rgba(0, 0, 0, 0.1);
   }
 
-  td.mat-cell {
+  td.mat-mdc-cell {
     padding: 10px 12px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     vertical-align: middle;
