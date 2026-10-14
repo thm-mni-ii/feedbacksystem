@@ -16,13 +16,14 @@ import { MaterialComponentsModule } from "./modules/material-components/material
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
   HTTP_INTERCEPTORS,
-  HttpClientModule,
   HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
   HttpResponse,
+  provideHttpClient,
+  withInterceptorsFromDi,
 } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { JwtModule } from "@auth0/angular-jwt";
@@ -278,6 +279,8 @@ export const httpInterceptorProviders = [
     TaskProviderDialogComponent,
     TaskProviderDetailDialogComponent,
   ],
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -285,7 +288,6 @@ export const httpInterceptorProviders = [
     AppRoutingModule,
     MaterialComponentsModule,
     FormsModule,
-    HttpClientModule,
     ReactiveFormsModule,
     MarkdownModule.forRoot(),
     MatDatepickerModule,
@@ -331,9 +333,8 @@ export const httpInterceptorProviders = [
     },
     { provide: MAT_DATE_LOCALE, useValue: "de" },
     I18N_PROVIDERS,
+    provideHttpClient(withInterceptorsFromDi()),
   ],
-  bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}
 
