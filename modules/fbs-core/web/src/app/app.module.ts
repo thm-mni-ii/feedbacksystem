@@ -310,13 +310,6 @@ export const httpInterceptorProviders = [
     SqlPlaygroundModule,
     AngularEditorModule,
   ],
-  entryComponents: [
-    DataprivacyDialogComponent,
-    CreateGuestUserDialogComponent,
-    ImpressumDialogComponent,
-    TaskProviderDialogComponent,
-    TaskProviderDetailDialogComponent,
-  ],
   providers: [
     CookieService,
     TaskProviderService,

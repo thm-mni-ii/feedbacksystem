@@ -1,8 +1,6 @@
 import { Injectable } from "@angular/core";
 import {
   ActivatedRouteSnapshot,
-  CanActivate,
-  CanActivateChild,
   Router,
   RouterStateSnapshot,
 } from "@angular/router";
@@ -20,7 +18,7 @@ import { EmbeddingService } from "../service/embedding.service";
 @Injectable({
   providedIn: "root",
 })
-export class TermsOfUseGuard implements CanActivate, CanActivateChild {
+export class TermsOfUseGuard {
   private acceptedUserIds = new Set<number>();
 
   constructor(
