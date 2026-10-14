@@ -1,7 +1,10 @@
 .card {
+  padding: 16px;
+  box-sizing: content-box;
   margin: 8px 0;
   height: 30px;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;

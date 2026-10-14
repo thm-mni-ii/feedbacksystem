@@ -1,9 +1,11 @@
 @import "src/colors";
 
 .task-container {
+  padding: 16px;
   cursor: pointer;
   margin-top: 12px;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   .meta {
     > * {

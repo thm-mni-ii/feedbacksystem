@@ -18,20 +18,17 @@ body {
 }
 
 app-db-control-panel {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
     padding: 5px;
   }
-  /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
-  .mat-form-field-wrapper {
-    margin-bottom: -1.25em;
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
   }
 }
 
 app-sql-input-tabs {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 230px !important;
   }
 
@@ -53,20 +50,17 @@ app-db-scheme-table {
 }
 
 app-db-control-panel {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
     padding: 5px;
   }
-  /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
-  .mat-form-field-wrapper {
-    margin-bottom: -1.25em;
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
   }
 }
 
 app-sql-input-tabs {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 230px !important;
   }
 

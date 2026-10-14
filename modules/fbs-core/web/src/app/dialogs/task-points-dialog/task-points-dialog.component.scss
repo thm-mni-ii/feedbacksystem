@@ -55,8 +55,7 @@
 }
 
 /***** MAT TAB GROUP *****/
-/*TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.*/
-.mat-tab-label {
+.mat-mdc-tab {
   align-content: baseline;
 }
 
@@ -79,8 +78,7 @@
   margin-bottom: 1rem;
 }
 
-/*TODO(mdc-migration): The following rule targets internal classes of list that may no longer apply for the MDC version.*/
-.mat-list-item-content {
+.mdc-list-item__content {
   justify-content: space-between;
 }
 
@@ -130,9 +128,12 @@
 
 /***** TASKS *****/
 .card {
+  padding: 16px;
+  box-sizing: content-box;
   margin: 8px 0;
   height: 30px;
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
 .card:hover {

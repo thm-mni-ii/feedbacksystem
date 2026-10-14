@@ -125,14 +125,12 @@
   border-radius: 5px;
 }
 
-/* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
-:host ::ng-deep .mat-progress-bar-fill::after {
-  background-color: $green;
+:host ::ng-deep .mdc-linear-progress__bar-inner {
+  border-color: $green;
 }
 
-/* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
-::ng-deep .mat-progress-bar-buffer {
-  background: $red;
+:host ::ng-deep .mdc-linear-progress__buffer-bar {
+  background-color: $red;
 }
 
 // ::ng-deep .mat-progress-bar {
@@ -148,11 +146,12 @@
 // }
 
 //animation none and color gray
-/* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version.*/
-::ng-deep .mat-progress-bar-background {
-  background: #cccccc;
-  animation: none !important;
-  fill: #cccccc;
+:host ::ng-deep .mdc-linear-progress__buffer-dots {
+  display: none;
+}
+
+:host ::ng-deep .mdc-linear-progress__buffer {
+  background-color: #cccccc;
 }
 
 .flex-container {

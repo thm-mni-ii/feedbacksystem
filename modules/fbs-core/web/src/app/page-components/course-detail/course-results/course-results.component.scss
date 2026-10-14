@@ -83,6 +83,7 @@
 }
 
 .content-container {
+  padding: 16px;
   display: flex;
   flex-direction: column;
   margin-top: 20px;
@@ -212,8 +213,7 @@ hr {
   color: rgb(235, 235, 235);
 }
 
-/* TODO(mdc-migration): The following rule targets internal classes of menu that may no longer apply for the MDC version. */
-.mat-menu{
+.mat-mdc-menu-panel {
   border-radius: 5px;
   box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
 }

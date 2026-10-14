@@ -16,7 +16,6 @@
   grid-template-rows: 40px;
   margin-top: 5px;
   height: 40px;
-  /*TODO(mdc-migration): The following rule targets internal classes of paginator that may no longer apply for the MDC version.*/
   mat-paginator {
     background: transparent;
   }
@@ -73,7 +72,6 @@
   color: #f44336;
 }
 
-/*TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version.*/
 mat-card-title {
   display: flex;
   justify-content: flex-start;
@@ -90,6 +88,7 @@ mat-card-title {
 .info-card{
   //center the card
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
