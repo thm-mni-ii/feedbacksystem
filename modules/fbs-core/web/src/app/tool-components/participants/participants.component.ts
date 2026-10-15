@@ -18,6 +18,7 @@ import { AuthService } from "../../service/auth.service";
   selector: "app-participants",
   templateUrl: "./participants.component.html",
   styleUrls: ["./participants.component.scss"],
+  standalone: false,
 })
 export class ParticipantsComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;

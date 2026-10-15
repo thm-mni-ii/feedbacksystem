@@ -8,6 +8,7 @@ import * as fromSqlPlayground from "../../state/sql-playground.selectors";
   selector: "app-db-scheme-views",
   templateUrl: "./db-scheme-views.component.html",
   styleUrls: ["../db-scheme.component.scss"],
+  standalone: false,
 })
 export class DbSchemeViewsComponent {
   views$: Observable<View[]>;

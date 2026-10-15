@@ -20,6 +20,7 @@ import { PrismService } from "src/app/service/prism.service";
   selector: "app-code-editor",
   templateUrl: "./code-editor.component.html",
   styleUrls: ["./code-editor.component.scss"],
+  standalone: false,
 })
 export class CodeEditorComponent
   implements OnDestroy, AfterViewInit, OnChanges

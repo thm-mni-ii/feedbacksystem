@@ -8,6 +8,7 @@ import * as fromSqlPlayground from "../../state/sql-playground.selectors";
   selector: "app-db-scheme-triggers",
   templateUrl: "./db-scheme-triggers.component.html",
   styleUrls: ["../db-scheme.component.scss"],
+  standalone: false,
 })
 export class DbSchemeTriggersComponent {
   triggers$: Observable<Trigger[]>;

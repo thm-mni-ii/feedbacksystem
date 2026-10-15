@@ -14,6 +14,7 @@ import * as XLSX from "xlsx";
   selector: "app-spreadsheet",
   templateUrl: "./spreadsheet.component.html",
   styleUrls: ["./spreadsheet.component.scss"],
+  standalone: false,
 })
 export class SpreadsheetComponent implements OnInit {
   private grid;

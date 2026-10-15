@@ -6,6 +6,7 @@ import { TaskProvider } from "../../model/TaskProvider";
   selector: "app-task-provider-detail-dialog",
   templateUrl: "./task-provider-detail-dialog.component.html",
   styleUrls: ["./task-provider-detail-dialog.component.scss"],
+  standalone: false,
 })
 export class TaskProviderDetailDialogComponent implements OnInit {
   taskProvider: TaskProvider;

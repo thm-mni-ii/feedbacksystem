@@ -10,6 +10,7 @@ import { map } from "rxjs/operators";
   selector: "app-fbs-sci-check",
   templateUrl: "./fbs-sci-check.component.html",
   styleUrls: ["./fbs-sci-check.component.scss"],
+  standalone: false,
 })
 export class FbsSciCheckComponent implements OnInit {
   token: string;

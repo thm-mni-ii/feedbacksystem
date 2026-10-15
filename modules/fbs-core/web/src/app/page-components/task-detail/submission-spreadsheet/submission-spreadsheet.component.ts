@@ -13,6 +13,7 @@ import { Submission } from "../../../model/Submission";
   selector: "app-submission-spreadsheet",
   templateUrl: "./submission-spreadsheet.component.html",
   styleUrls: ["./submission-spreadsheet.component.scss"],
+  standalone: false,
 })
 export class SubmissionSpreadsheetComponent implements OnChanges {
   toSubmit = "";

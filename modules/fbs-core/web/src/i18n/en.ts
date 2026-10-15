@@ -252,6 +252,7 @@ export const englishTranslation = {
   "dialog.task.new.label-description": "Description",
   "dialog.task.new.label-deadline": "Deadline",
   "dialog.task.new.placeholder-deadline": "Deadline",
+  "dialog.task.new.label-deadline-time": "Time",
   "dialog.task.new.toggle-no-deadline": "No deadline",
   "dialog.task.new.label-mediatype": "Media type",
   "dialog.task.new.option-text": "Text",

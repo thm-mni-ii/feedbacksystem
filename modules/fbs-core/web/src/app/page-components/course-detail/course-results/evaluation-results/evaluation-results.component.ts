@@ -10,6 +10,7 @@ import { CourseResult } from "../../../../model/CourseResult";
   selector: "app-evaluation-results",
   templateUrl: "./evaluation-results.component.html",
   styleUrls: ["./evaluation-results.component.scss"],
+  standalone: false,
 })
 export class EvaluationResultsComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;

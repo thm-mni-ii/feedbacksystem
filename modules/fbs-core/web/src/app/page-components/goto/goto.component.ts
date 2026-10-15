@@ -7,6 +7,7 @@ import { AuthService } from "../../service/auth.service";
   selector: "app-login",
   templateUrl: "./goto.component.html",
   styleUrls: ["./goto.component.scss"],
+  standalone: false,
 })
 export class GoToComponent implements OnInit {
   constructor(

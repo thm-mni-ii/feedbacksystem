@@ -4,6 +4,7 @@ import { Component, EventEmitter, Output } from "@angular/core";
   selector: "app-submission-file",
   templateUrl: "./submission-file.component.html",
   styleUrls: ["./submission-file.component.scss"],
+  standalone: false,
 })
 export class SubmissionFileComponent {
   @Output() update: EventEmitter<any> = new EventEmitter<any>();

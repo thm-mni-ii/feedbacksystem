@@ -8,6 +8,7 @@ import { GroupInput } from "../../model/Group";
   selector: "app-new-group-dialog",
   templateUrl: "./new-group-dialog.component.html",
   styleUrls: ["./new-group-dialog.component.scss"],
+  standalone: false,
 })
 export class NewGroupDialogComponent {
   name = new UntypedFormControl("", [Validators.required]);

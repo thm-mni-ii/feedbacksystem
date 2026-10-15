@@ -11,7 +11,6 @@ import {
   UntypedFormGroup,
   Validators,
 } from "@angular/forms";
-import { MatDatepickerInputEvent } from "@angular/material/datepicker";
 import { SpreadsheetResponseMediaInformation, Task } from "src/app/model/Task";
 import { CourseService } from "../../service/course.service";
 import { TaskService } from "../../service/task.service";
@@ -36,6 +35,7 @@ const defualtVisiblity = "Studenten";
   selector: "app-task-new-dialog",
   templateUrl: "./task-new-dialog.component.html",
   styleUrls: ["./task-new-dialog.component.scss"],
+  standalone: false,
 })
 export class TaskNewDialogComponent implements OnInit {
   taskForm = new UntypedFormGroup({
@@ -43,6 +43,7 @@ export class TaskNewDialogComponent implements OnInit {
     isPrivate: new UntypedFormControl(defualtVisiblity),
     description: new UntypedFormControl(""),
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
+    deadlineTime: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
     requirementType: new UntypedFormControl(defaultrequirement),
     excelFile: new UntypedFormControl(""),
@@ -162,6 +163,12 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.mediaType = this.taskForm.get("mediaType").value;
     if (this.taskForm.get("expCheck").value) {
       this.task.deadline = null;
+    } else {
+      // date and time are edited in separate fields and combined here
+      const deadline = new Date(this.taskForm.get("deadline").value);
+      const time = new Date(this.taskForm.get("deadlineTime").value);
+      deadline.setHours(time.getHours(), time.getMinutes(), 0, 0);
+      this.task.deadline = deadline.toISOString();
     }
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.task.mediaInformation = {
@@ -192,11 +199,17 @@ export class TaskNewDialogComponent implements OnInit {
     //this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
     if (!this.task.deadline) {
       this.taskForm.controls["deadline"].setValue(this.getDefaultDeadline());
+      this.taskForm.controls["deadlineTime"].setValue(
+        this.getDefaultDeadline()
+      );
       this.task.deadline = this.getDefaultDeadline();
       this.taskForm.controls["expCheck"].setValue(true);
       this.datePickerDisabled = true;
     } else {
       this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
+      this.taskForm.controls["deadlineTime"].setValue(
+        new Date(this.task.deadline)
+      );
     }
 
     if (this.task.mediaType === "application/x-spreadsheet") {
@@ -320,10 +333,6 @@ export class TaskNewDialogComponent implements OnInit {
     } else {
       this.snackBar.open("Das Datum sollte in der Zukunft liegen.", "ok");
     }
-  }
-
-  addDate(event: MatDatepickerInputEvent<Date>) {
-    this.task.deadline = event.value.toISOString();
   }
 
   uploadExcel(event: Event) {

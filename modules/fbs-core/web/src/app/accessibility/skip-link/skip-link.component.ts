@@ -5,6 +5,7 @@ import { Router } from "@angular/router";
   selector: "app-skip-link",
   templateUrl: "./skip-link.component.html",
   styleUrls: ["./skip-link.component.scss"],
+  standalone: false,
 })
 export class SkipLinkComponent implements OnInit {
   @Input()

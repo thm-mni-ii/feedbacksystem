@@ -13,6 +13,7 @@ import { AuthService } from "src/app/service/auth.service";
   selector: "app-db-scheme-mongo-views",
   templateUrl: "./db-scheme-mongo-views.component.html",
   styleUrls: ["../../db-scheme.component.scss"],
+  standalone: false,
 })
 export class DbSchemeMongoViewsComponent implements OnInit, OnChanges {
   @Input() reloadTrigger: Subject<void>;

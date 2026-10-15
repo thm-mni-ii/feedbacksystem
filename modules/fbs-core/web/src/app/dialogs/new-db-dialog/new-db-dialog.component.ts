@@ -12,6 +12,7 @@ import { Store } from "@ngrx/store";
   selector: "app-new-db-dialog",
   templateUrl: "./new-db-dialog.component.html",
   styleUrls: ["./new-db-dialog.component.scss"],
+  standalone: false,
 })
 export class NewDbDialogComponent {
   name = new UntypedFormControl("", [Validators.required]);

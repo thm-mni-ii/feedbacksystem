@@ -20,6 +20,7 @@ import {
   selector: "app-configuration-list",
   templateUrl: "./configuration-list.component.html",
   styleUrls: ["./configuration-list.component.scss"],
+  standalone: false,
 })
 export class ConfigurationListComponent implements OnInit {
   configurations: Observable<CheckerConfig[]> = of();

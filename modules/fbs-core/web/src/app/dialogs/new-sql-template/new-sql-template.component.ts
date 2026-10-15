@@ -9,6 +9,7 @@ import { TemplateCategory } from "src/app/model/sql_playground/TemplateCategory"
   selector: "app-new-sql-template",
   templateUrl: "./new-sql-template.component.html",
   styleUrls: ["./new-sql-template.component.scss"],
+  standalone: false,
 })
 export class NewSqlTemplateComponent {
   templateName = new UntypedFormControl("", [Validators.required]);

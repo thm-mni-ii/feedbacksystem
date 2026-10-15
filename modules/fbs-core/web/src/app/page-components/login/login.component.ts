@@ -14,6 +14,7 @@ import { EmbeddingService } from "../../service/embedding.service";
   selector: "app-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.scss"],
+  standalone: false,
 })
 export class LoginComponent implements OnInit {
   username: string;

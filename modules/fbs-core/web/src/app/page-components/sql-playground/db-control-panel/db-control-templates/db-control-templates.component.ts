@@ -24,6 +24,7 @@ import { Roles } from "../../../../model/Roles";
   selector: "app-db-control-templates",
   templateUrl: "./db-control-templates.component.html",
   styleUrls: ["./db-control-templates.component.scss"],
+  standalone: false,
 })
 export class DbControlTemplatesComponent implements OnInit {
   @Output() submitStatement = new EventEmitter<string>();

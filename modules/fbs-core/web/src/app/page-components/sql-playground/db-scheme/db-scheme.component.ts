@@ -15,6 +15,7 @@ import { EventEmitter, Output } from "@angular/core";
   selector: "app-db-scheme",
   templateUrl: "./db-scheme.component.html",
   styleUrls: ["./db-scheme.component.scss"],
+  standalone: false,
 })
 export class DbSchemeComponent implements OnInit {
   @Input() title: string;

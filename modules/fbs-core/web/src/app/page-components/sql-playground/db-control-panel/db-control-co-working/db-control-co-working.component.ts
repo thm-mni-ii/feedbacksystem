@@ -24,6 +24,7 @@ import { closeAllTabs } from "../../sql-input-tabs/state/sql-input-tabs.actions"
   selector: "app-db-control-co-working",
   templateUrl: "./db-control-co-working.component.html",
   styleUrls: ["./db-control-co-working.component.scss"],
+  standalone: false,
 })
 export class DbControlCoWorkingComponent implements OnInit {
   databases$: Observable<Database[]>;

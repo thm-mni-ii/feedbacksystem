@@ -25,6 +25,7 @@ import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
   selector: "app-sql-checker-results",
   templateUrl: "./sql-checker-results.component.html",
   styleUrls: ["./sql-checker-results.component.scss"],
+  standalone: false,
 })
 export class SqlCheckerResultsComponent implements OnInit {
   constructor(

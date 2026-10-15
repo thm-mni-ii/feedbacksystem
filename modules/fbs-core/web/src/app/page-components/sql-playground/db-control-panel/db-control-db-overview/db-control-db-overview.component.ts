@@ -34,6 +34,7 @@ import {
   selector: "app-db-control-db-overview",
   templateUrl: "./db-control-db-overview.component.html",
   styleUrls: ["./db-control-db-overview.component.scss"],
+  standalone: false,
 })
 export class DbControlDbOverviewComponent implements OnInit {
   @Input() selectedMongoDbId: string | null = null;

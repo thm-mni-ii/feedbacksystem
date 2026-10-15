@@ -266,6 +266,7 @@ export const germanTranslation = {
   "dialog.task.new.label-description": "Beschreibung",
   "dialog.task.new.label-deadline": "Deadline",
   "dialog.task.new.placeholder-deadline": "Deadline",
+  "dialog.task.new.label-deadline-time": "Uhrzeit",
   "dialog.task.new.toggle-no-deadline": "Ohne Deadline",
   "dialog.task.new.label-mediatype": "Medientyp",
   "dialog.task.new.option-text": "Text",

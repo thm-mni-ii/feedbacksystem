@@ -18,6 +18,7 @@ export interface MathInputValue {
   selector: "app-math-input",
   templateUrl: "./math-input.component.html",
   styleUrls: ["./math-input.component.scss"],
+  standalone: false,
 })
 export class MathInputComponent implements OnChanges, AfterViewInit {
   @Input()

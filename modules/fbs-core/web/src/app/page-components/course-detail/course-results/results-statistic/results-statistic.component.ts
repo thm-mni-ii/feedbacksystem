@@ -16,6 +16,7 @@ import { SubtaskStatisticService } from "../../../../service/subtask-statistic.s
   selector: "app-results-statistic",
   templateUrl: "./results-statistic.component.html",
   styleUrls: ["./results-statistic.component.scss"],
+  standalone: false,
 })
 export class ResultsStatisticComponent implements OnInit {
   constructor(

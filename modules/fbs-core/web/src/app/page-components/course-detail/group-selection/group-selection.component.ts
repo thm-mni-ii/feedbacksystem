@@ -20,6 +20,7 @@ import { CourseService } from "../../../service/course.service";
   selector: "app-group-selection",
   templateUrl: "./group-selection.component.html",
   styleUrls: ["./group-selection.component.scss"],
+  standalone: false,
 })
 export class GroupSelectionComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;

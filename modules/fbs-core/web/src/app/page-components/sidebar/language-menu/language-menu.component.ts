@@ -10,6 +10,7 @@ import { MatMenu } from "@angular/material/menu";
   templateUrl: "./language-menu.component.html",
   styleUrls: ["./language-menu.component.scss"],
   exportAs: "languageMenu",
+  standalone: false,
 })
 export class LanguageMenuComponent {
   @ViewChild("menu", { static: true })

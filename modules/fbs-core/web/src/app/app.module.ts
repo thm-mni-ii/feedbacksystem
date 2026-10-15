@@ -32,7 +32,10 @@ import { DataprivacyDialogComponent } from "./dialogs/dataprivacy-dialog/datapri
 import { ImpressumDialogComponent } from "./dialogs/impressum-dialog/impressum-dialog.component";
 import { CookieService } from "ngx-cookie-service";
 import { MatDatepickerModule } from "@angular/material/datepicker";
-import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from "@angular/material/core";
+import {
+  MAT_DATE_LOCALE,
+  provideNativeDateAdapter,
+} from "@angular/material/core";
 import { MarkdownModule } from "ngx-markdown";
 import { NgxDropzoneModule } from "ngx-dropzone";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
@@ -72,11 +75,7 @@ import { NewCheckerDialogComponent } from "./dialogs/new-checker-dialog/new-chec
 import { ConfirmDialogComponent } from "./dialogs/confirm-dialog/confirm-dialog.component";
 import { TextConfirmDialogComponent } from "./dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "./dialogs/new-db-dialog/new-db-dialog.component";
-import {
-  NgxMatDatetimePickerModule,
-  NgxMatNativeDateModule,
-  NgxMatTimepickerModule,
-} from "@angular-material-components/datetime-picker";
+import { MatTimepickerModule } from "@angular/material/timepicker";
 import { InfoComponent } from "./tool-components/info/info.component";
 import { tap } from "rxjs/operators";
 import { AuthService } from "./service/auth.service";
@@ -305,9 +304,7 @@ export const httpInterceptorProviders = [
     MatSelectModule,
     MatFormFieldModule,
     MatSliderModule,
-    NgxMatDatetimePickerModule,
-    NgxMatTimepickerModule,
-    NgxMatNativeDateModule,
+    MatTimepickerModule,
     BaseChartDirective,
     MatTableModule,
     MatSortModule,
@@ -327,10 +324,7 @@ export const httpInterceptorProviders = [
       deps: [AuthService],
       multi: true,
     },
-    {
-      provide: MAT_DATE_FORMATS,
-      useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },
-    },
+    provideNativeDateAdapter(),
     { provide: MAT_DATE_LOCALE, useValue: "de" },
     I18N_PROVIDERS,
     provideHttpClient(withInterceptorsFromDi()),

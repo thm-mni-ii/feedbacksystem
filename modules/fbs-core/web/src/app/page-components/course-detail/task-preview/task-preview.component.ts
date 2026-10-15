@@ -6,6 +6,7 @@ import { UserTaskResult } from "../../../model/UserTaskResult";
   selector: "app-task-preview",
   templateUrl: "./task-preview.component.html",
   styleUrls: ["./task-preview.component.scss"],
+  standalone: false,
 })
 export class TaskPreviewComponent {
   @Input() courseId: number;

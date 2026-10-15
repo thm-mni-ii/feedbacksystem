@@ -23,6 +23,7 @@ import {
   selector: "app-search-courses",
   templateUrl: "./search-courses.component.html",
   styleUrls: ["./search-courses.component.scss"],
+  standalone: false,
 })
 export class SearchCoursesComponent implements OnInit {
   constructor(

@@ -22,6 +22,7 @@ import { MatButton } from "@angular/material/button";
   selector: "app-highlighted-input",
   templateUrl: "./highlighted-input.component.html",
   styleUrls: ["./highlighted-input.component.scss"],
+  standalone: false,
 })
 export class HighlightedInputComponent implements OnDestroy, AfterViewInit {
   @ViewChild("textArea") textArea!: ElementRef;

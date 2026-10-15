@@ -20,6 +20,7 @@ import { Subscription } from "rxjs";
   selector: "app-dynamic-result-table-tab",
   templateUrl: "./dynamic-result-table-tab.component.html",
   styleUrls: ["./dynamic-result-table-tab.component.scss"],
+  standalone: false,
 })
 export class DynamicResultTableTabComponent
   implements OnChanges, AfterViewInit

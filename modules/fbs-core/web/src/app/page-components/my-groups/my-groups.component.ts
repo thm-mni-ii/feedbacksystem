@@ -14,6 +14,7 @@ import {
   selector: "app-my-groups",
   templateUrl: "./my-groups.component.html",
   styleUrls: ["./my-groups.component.scss"],
+  standalone: false,
 })
 export class MyGroupsComponent implements OnInit {
   @Input() data: Group;

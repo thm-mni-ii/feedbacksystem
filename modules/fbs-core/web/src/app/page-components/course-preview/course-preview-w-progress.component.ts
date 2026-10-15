@@ -10,6 +10,7 @@ import { AuthService } from "src/app/service/auth.service";
   selector: "app-course-preview-w-progress",
   templateUrl: "./course-preview-w-progress.component.html",
   styleUrls: ["./course-preview.component.scss"],
+  standalone: false,
 })
 export class CoursePreviewWProgressComponent implements OnInit {
   @Input() data: Course;

@@ -4,6 +4,7 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
   selector: "app-dropzone",
   templateUrl: "./dropzone.component.html",
   styleUrls: ["./dropzone.component.scss"],
+  standalone: false,
 })
 export class DropzoneComponent {
   @Input() usage: String;

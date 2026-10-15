@@ -22,6 +22,7 @@ import { CheckerConfig } from "../../model/CheckerConfig";
   selector: "app-sql-checker",
   templateUrl: "./sql-checker.component.html",
   styleUrls: ["./sql-checker.component.scss"],
+  standalone: false,
 })
 export class SqlCheckerComponent implements OnInit {
   constructor(

@@ -14,6 +14,7 @@ import { SemesterService } from "../../service/semester.service";
   selector: "app-course-update-dialog",
   templateUrl: "./course-update-dialog.component.html",
   styleUrls: ["./course-update-dialog.component.scss"],
+  standalone: false,
 })
 export class CourseUpdateDialogComponent implements OnInit {
   name = new UntypedFormControl("", [Validators.required]);

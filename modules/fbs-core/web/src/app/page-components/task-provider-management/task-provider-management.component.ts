@@ -20,6 +20,7 @@ import {
   selector: "app-task-provider-management",
   templateUrl: "./task-provider-management.component.html",
   styleUrls: ["./task-provider-management.component.scss"],
+  standalone: false,
 })
 export class TaskProviderManagementComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;

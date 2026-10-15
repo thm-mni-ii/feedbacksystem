@@ -21,6 +21,7 @@ export type SubmissionMode = "code" | "wysiwyg" | "plain" | "free";
   selector: "app-submission-text",
   templateUrl: "./submission-text.component.html",
   styleUrls: ["./submission-text.component.scss"],
+  standalone: false,
 })
 export class SubmissionTextComponent implements OnInit, AfterViewInit {
   toSubmit = "";

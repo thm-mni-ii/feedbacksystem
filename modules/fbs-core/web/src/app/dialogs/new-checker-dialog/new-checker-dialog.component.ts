@@ -14,6 +14,7 @@ import { TaskProvider } from "../../model/TaskProvider";
   selector: "app-new-checker-dialog",
   templateUrl: "./new-checker-dialog.component.html",
   styleUrls: ["./new-checker-dialog.component.scss"],
+  standalone: false,
 })
 export class NewCheckerDialogComponent implements OnInit {
   fileCounter = 0;

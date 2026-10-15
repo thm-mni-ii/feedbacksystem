@@ -6,6 +6,7 @@ import { Submission } from "../../model/Submission";
   selector: "app-all-submissions",
   templateUrl: "./all-submissions.component.html",
   styleUrls: ["./all-submissions.component.scss"],
+  standalone: false,
 })
 export class AllSubmissionsComponent {
   constructor(

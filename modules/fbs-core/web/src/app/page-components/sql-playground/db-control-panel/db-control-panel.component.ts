@@ -16,6 +16,7 @@ import { selectDatabasesForCurrentType } from "src/app/page-components/sql-playg
   selector: "app-db-control-panel",
   templateUrl: "./db-control-panel.component.html",
   styleUrls: ["./db-control-panel.component.scss"],
+  standalone: false,
 })
 export class DbControlPanelComponent implements OnInit {
   @Input() activeDbId: number;

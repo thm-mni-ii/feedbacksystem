@@ -6,6 +6,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   selector: "app-db-uri-link-dialog",
   templateUrl: "./share-playground-link-dialog.component.html",
   styleUrls: ["./share-playground-link-dialog.component.scss"],
+  standalone: false,
 })
 export class SharePlaygroundLinkDialogComponent {
   constructor(

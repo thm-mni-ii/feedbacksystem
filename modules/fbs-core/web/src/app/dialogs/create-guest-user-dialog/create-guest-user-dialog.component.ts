@@ -13,6 +13,7 @@ import { User } from "../../model/User";
   selector: "app-create-guest-user-dialog",
   templateUrl: "create-guest-user-dialog.component.html",
   styleUrls: ["./create-guest-user-dialog.component.scss"],
+  standalone: false,
 })
 export class CreateGuestUserDialogComponent {
   constructor(

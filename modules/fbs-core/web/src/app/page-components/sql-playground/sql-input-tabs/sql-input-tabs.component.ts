@@ -37,6 +37,7 @@ import { CheckerService } from "src/app/service/checker.service";
   selector: "app-sql-input-tabs",
   templateUrl: "./sql-input-tabs.component.html",
   styleUrls: ["./sql-input-tabs.component.scss"],
+  standalone: false,
 })
 export class SqlInputTabsComponent
   implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy

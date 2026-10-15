@@ -13,6 +13,7 @@ import { CourseService } from "../../service/course.service";
   selector: "app-new-course",
   templateUrl: "./new-course.component.html",
   styleUrls: ["./new-course.component.scss"],
+  standalone: false,
 })
 export class NewCourseComponent implements OnInit {
   name = new UntypedFormControl("", [Validators.required]);

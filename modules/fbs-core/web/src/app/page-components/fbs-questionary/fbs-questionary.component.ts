@@ -10,6 +10,7 @@ import { map } from "rxjs/operators";
   selector: "app-fbs-questionary",
   templateUrl: "./fbs-questionary.component.html",
   styleUrls: ["./fbs-questionary.component.scss"],
+  standalone: false,
 })
 export class FbsQuestionaryComponent implements OnInit {
   token: string;

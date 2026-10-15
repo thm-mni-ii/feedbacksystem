@@ -14,6 +14,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   selector: "app-task-points-dialog",
   templateUrl: "./task-points-dialog.component.html",
   styleUrls: ["./task-points-dialog.component.scss"],
+  standalone: false,
 })
 export class TaskPointsDialogComponent implements OnInit {
   constructor(

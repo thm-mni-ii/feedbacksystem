@@ -11,6 +11,7 @@ import { MatTabGroup } from "@angular/material/tabs";
   selector: "app-dynamic-result-table",
   templateUrl: "./dynamic-result-table.component.html",
   styleUrls: ["./dynamic-result-table.component.scss"],
+  standalone: false,
 }) //, AfterViewInit
 export class DynamicResultTableComponent implements OnInit {
   @ViewChild(MatTabGroup) tabGroup: MatTabGroup;

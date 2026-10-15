@@ -12,6 +12,7 @@ import { LegalService } from "../../service/legal.service";
   selector: "app-impressum-dialog",
   templateUrl: "./impressum-dialog.component.html",
   styleUrls: ["./impressum-dialog.component.scss"],
+  standalone: false,
 })
 export class ImpressumDialogComponent implements OnInit {
   markdown: String;

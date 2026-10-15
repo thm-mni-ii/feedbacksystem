@@ -31,6 +31,7 @@ import {
   selector: "app-task-detail",
   templateUrl: "./task-detail.component.html",
   styleUrls: ["./task-detail.component.scss"],
+  standalone: false,
 })
 export class TaskDetailComponent implements OnInit {
   allTasks: Task[];

@@ -8,6 +8,7 @@ import { SubmissionService } from "../../service/submission.service";
   selector: "app-subtask-results",
   templateUrl: "./subtask-results.component.html",
   styleUrls: ["./subtask-results.component.scss"],
+  standalone: false,
 })
 export class SubtaskResultsComponent {
   dataSource = new MatTableDataSource<SubTaskResult>();

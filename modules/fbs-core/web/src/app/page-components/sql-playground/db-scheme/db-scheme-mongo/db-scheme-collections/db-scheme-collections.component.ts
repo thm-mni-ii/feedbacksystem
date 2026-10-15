@@ -15,6 +15,7 @@ import { AuthService } from "src/app/service/auth.service";
   selector: "app-db-scheme-collections",
   templateUrl: "db-scheme-collections.component.html",
   styleUrls: ["../../db-scheme.component.scss"],
+  standalone: false,
 })
 export class DbSchemeCollectionsComponent implements OnInit, OnChanges {
   @Input() reloadTrigger: Subject<void>;

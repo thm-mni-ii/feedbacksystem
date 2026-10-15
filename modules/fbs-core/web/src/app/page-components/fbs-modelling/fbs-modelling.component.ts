@@ -10,6 +10,7 @@ import { map } from "rxjs/operators";
   selector: "app-fbs-modelling",
   templateUrl: "./fbs-modelling.component.html",
   styleUrls: ["./fbs-modelling.component.scss"],
+  standalone: false,
 })
 export class FbsModellingComponent implements OnInit {
   token: string;

@@ -23,6 +23,7 @@ import "prismjs/components/prism-json";
   selector: "app-sql-playground-management",
   templateUrl: "./sql-playground.component.html",
   styleUrls: ["./sql-playground.component.scss"],
+  standalone: false,
 })
 export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {
   activeDb$: Observable<number>;

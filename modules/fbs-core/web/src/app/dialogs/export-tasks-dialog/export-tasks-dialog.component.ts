@@ -6,6 +6,7 @@ import { TaskService } from "src/app/service/task.service";
   selector: "app-export-tasks-dialog",
   templateUrl: "./export-tasks-dialog.component.html",
   styleUrls: ["./export-tasks-dialog.component.scss"],
+  standalone: false,
 })
 export class ExportTasksDialogComponent implements OnInit {
   tasks: any[] = [];

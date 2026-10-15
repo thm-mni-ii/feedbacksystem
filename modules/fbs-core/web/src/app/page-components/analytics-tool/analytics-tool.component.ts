@@ -9,6 +9,7 @@ import { map } from "rxjs/operators";
   selector: "app-analytics-tool",
   templateUrl: "./analytics-tool.component.html",
   styleUrls: ["./analytics-tool.component.scss"],
+  standalone: false,
 })
 export class AnalyticsToolComponent implements OnInit {
   safeUrl: Observable<SafeResourceUrl>;

@@ -10,6 +10,7 @@ import { map } from "rxjs/operators";
   selector: "app-fbs-kanban",
   templateUrl: "./fbs-kanban.component.html",
   styleUrls: ["./fbs-kanban.component.scss"],
+  standalone: false,
 })
 export class FbsKanbanComponent implements OnInit {
   token: string;

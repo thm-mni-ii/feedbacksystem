@@ -8,6 +8,7 @@ import * as fromSqlPlayground from "../../state/sql-playground.selectors";
   selector: "app-db-scheme-routines",
   templateUrl: "./db-scheme-routines.component.html",
   styleUrls: ["../db-scheme.component.scss"],
+  standalone: false,
 })
 export class DbSchemeRoutinesComponent {
   routines$: Observable<Routine[]>;

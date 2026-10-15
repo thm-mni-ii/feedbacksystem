@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
   selector: "app-spreadsheet-dialog",
   templateUrl: "./spreadsheet-dialog.component.html",
   styleUrls: ["./spreadsheet-dialog.component.scss"],
+  standalone: false,
 })
 export class SpreadsheetDialogComponent {
   private lastSelection: string[] = null;

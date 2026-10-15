@@ -10,6 +10,7 @@ import * as fromSqlPlayground from "../../state/sql-playground.selectors";
   selector: "app-db-scheme-tables",
   templateUrl: "./db-scheme-tables.component.html",
   styleUrls: ["../db-scheme.component.scss"],
+  standalone: false,
 })
 export class DbSchemeTablesComponent implements OnInit {
   @Output() submitStatement = new EventEmitter<string>();

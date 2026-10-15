@@ -11,6 +11,7 @@ import { IntegrationService } from "../../service/integration.service";
   selector: "app-goto-links-dialog",
   templateUrl: "./goto-links-dialog.component.html",
   styleUrls: ["./goto-links-dialog.component.scss"],
+  standalone: false,
 })
 export class GotoLinksDialogComponent {
   courseLink: string;

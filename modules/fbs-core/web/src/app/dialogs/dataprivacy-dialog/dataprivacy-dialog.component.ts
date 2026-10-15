@@ -12,6 +12,7 @@ import { LegalService } from "../../service/legal.service";
   selector: "app-dataprivacy-dialog",
   templateUrl: "./dataprivacy-dialog.component.html",
   styleUrls: ["./dataprivacy-dialog.component.scss"],
+  standalone: false,
 })
 export class DataprivacyDialogComponent implements OnInit {
   privacyChecked: boolean;

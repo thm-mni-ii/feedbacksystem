@@ -12,6 +12,7 @@ import { map } from "rxjs/operators";
   selector: "app-group-deregister-dialog",
   templateUrl: "./group-deregister-dialog.component.html",
   styleUrls: ["./group-deregister-dialog.component.scss"],
+  standalone: false,
 })
 export class GroupDeregisterDialogComponent implements OnInit {
   members$: Observable<Participant[]>;

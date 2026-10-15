@@ -19,6 +19,7 @@ export interface TaskProviderDialogData {
   selector: "app-task-provider-dialog",
   templateUrl: "./task-provider-dialog.component.html",
   styleUrls: ["./task-provider-dialog.component.scss"],
+  standalone: false,
 })
 export class TaskProviderDialogComponent implements OnInit {
   isUpdate = false;

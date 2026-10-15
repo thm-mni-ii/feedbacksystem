@@ -22,6 +22,7 @@ import { EvaluationUserResults } from "src/app/model/EvaluationUserResults";
   selector: "app-course-results",
   templateUrl: "./course-results.component.html",
   styleUrls: ["./course-results.component.scss"],
+  standalone: false,
 })
 export class CourseResultsComponent implements OnInit {
   constructor(
