@@ -1,6 +1,6 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, Inject, OnInit, DOCUMENT } from "@angular/core";
 import { Router } from "@angular/router";
-import { DOCUMENT } from "@angular/common";
+
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
 import { CookieService } from "ngx-cookie-service";
