@@ -10,139 +10,150 @@
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
-    <span *ngIf="role">
-      <span *ngIf="role === 'DOCENT'">{{ "role.docent" | i18nextEager }}</span>
-      <span *ngIf="role === 'TUTOR'">{{ "role.tutor" | i18nextEager }}</span>
-      <span *ngIf="role === 'STUDENT'">{{
-        "role.student" | i18nextEager
-      }}</span>
+    @if (role) {
+    <mat-icon role="img">account_circle</mat-icon>
+    } @if (role) {
+    <span>
+      @if (role === 'DOCENT') {
+      <span>{{ "role.docent" | i18nextEager }}</span>
+      } @if (role === 'TUTOR') {
+      <span>{{ "role.tutor" | i18nextEager }}</span>
+      } @if (role === 'STUDENT') {
+      <span>{{ "role.student" | i18nextEager }}</span>
+      }
     </span>
+    }
 
     <span class="spacer"></span>
 
     <!--<mat-menu #confMenu>
-      <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
-              (click)="openUrlInNewWindow(url)">Room {{i}}</button>
-    </mat-menu>-->
+    <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
+    (click)="openUrlInNewWindow(url)">Room {{i}}</button>
+  </mat-menu>-->
 
+    @if (canEdit()) {
     <button
       mat-icon-button
-      *ngIf="canEdit()"
       (click)="openExportDialog()"
       matTooltip="{{ 'course.task-export' | i18nextEager }}"
     >
       <mat-icon class="logout-icon">save_alt</mat-icon>
     </button>
-
+    } @if (isAuthorized()) {
     <button
       mat-icon-button
-      *ngIf="isAuthorized()"
       [routerLink]="['/', 'courses', courseID, 'results']"
       matTooltip="{{ 'course.score-overview' | i18nextEager }}"
     >
       <mat-icon>insights</mat-icon>
     </button>
+    } @if (isAuthorized(true)) {
     <button
       mat-icon-button
-      *ngIf="isAuthorized(true)"
       [routerLink]="['/', 'courses', courseID, 'participants']"
       matTooltip="{{ 'course.participants' | i18nextEager }}"
     >
       <mat-icon>groups</mat-icon>
     </button>
+    }
 
     <!--<button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>-->
+    @if ( isIntegrationEnabled('classroom') &&
+    externalClassroomService.isJoined() ) {
     <button
       mat-icon-button
       class="green"
-      *ngIf="
-        isIntegrationEnabled('classroom') && externalClassroomService.isJoined()
-      "
       (click)="joinClassroom()"
       matTooltip="{{ 'course.join-digital-exercise-room' | i18nextEager }}"
     >
       <mat-icon>meeting_room</mat-icon>
     </button>
+    } @if ( isIntegrationEnabled('classroom') &&
+    !externalClassroomService.isJoined() ) {
     <button
       mat-icon-button
-      *ngIf="
-        isIntegrationEnabled('classroom') &&
-        !externalClassroomService.isJoined()
-      "
       (click)="joinClassroom()"
       matTooltip="{{ 'course.join-digital-exercise-room' | i18nextEager }}"
     >
       <mat-icon>meeting_room</mat-icon>
     </button>
+    }
     <!--<button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>voice_chat</mat-icon></button>-->
+    @if (isIntegrationEnabled('feedbackApp')) {
     <button
       mat-icon-button
-      *ngIf="isIntegrationEnabled('feedbackApp')"
       (click)="goToFBA()"
       matTooltip="{{ 'course.switch-to-feedback-app' | i18nextEager }}"
     >
       <mat-icon>question_answer</mat-icon>
     </button>
+    } @if (isAuthorized()) {
     <button
       mat-icon-button
-      *ngIf="isAuthorized()"
       [routerLink]="['/', 'courses', courseID, 'sql-checker']"
       matTooltip="{{ 'course.view-sql-checker-results' | i18nextEager }}"
     >
       <mat-icon>check</mat-icon>
     </button>
-
+    } @if (isAuthorized()) {
     <button
       mat-icon-button
-      *ngIf="isAuthorized()"
       (click)="enableEditTasks()"
       matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
     >
-      <mat-icon *ngIf="!editTasks" class="icon-off">toggle_off</mat-icon>
-      <mat-icon *ngIf="editTasks" class="icon-on">toggle_on</mat-icon>
+      @if (!editTasks) {
+      <mat-icon class="icon-off">toggle_off</mat-icon>
+      } @if (editTasks) {
+      <mat-icon class="icon-on">toggle_on</mat-icon>
+      }
     </button>
-
+    } @if (isAuthorized() || role) {
     <button
       mat-icon-button
-      *ngIf="isAuthorized() || role"
       [matMenuTriggerFor]="settings"
       matTooltip="{{ 'course.settings' | i18nextEager }}"
     >
       <mat-icon>settings</mat-icon>
     </button>
+    }
     <mat-menu #settings="matMenu">
-      <button mat-menu-item *ngIf="isAuthorized()" (click)="updateCourse()">
+      @if (isAuthorized()) {
+      <button mat-menu-item (click)="updateCourse()">
         <mat-icon class="logout-icon">edit</mat-icon
         ><span>{{ "course.edit" | i18nextEager }}</span>
       </button>
-      <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints()">
+      } @if (isAuthorized()) {
+      <button mat-menu-item (click)="editPoints()">
         <mat-icon class="logout-icon">rule</mat-icon
         ><span>{{ "course.points" | i18nextEager }}</span>
       </button>
+      }
       <button mat-menu-item (click)="showGoLinks()">
         <mat-icon class="logout-icon">link</mat-icon
         ><span>{{ "course.show-course-shortlinks" | i18nextEager }}</span>
       </button>
+      @if (role) {
       <button
         mat-menu-item
         color="warn"
-        *ngIf="role"
         (click)="exitCourse()"
         matTooltip="{{ 'course.leave' | i18nextEager }}"
       >
         <mat-icon>exit_to_app</mat-icon>{{ "course.leave" | i18nextEager }}
       </button>
-      <button mat-menu-item *ngIf="isAuthorized()" (click)="deleteCourse()">
+      } @if (isAuthorized()) {
+      <button mat-menu-item (click)="deleteCourse()">
         <mat-icon class="logout-icon">delete</mat-icon
         ><span>{{ "course.delete" | i18nextEager }}</span>
       </button>
+      }
     </mat-menu>
   </app-menu-bar>
 
   <a id="page-content"></a>
 
-  <app-info class="info" *ngIf="!role">
+  @if (!role) {
+  <app-info class="info">
     <p class="mat-body">
       {{ "course.message.not-registered-user" | i18nextEager }}
     </p>
@@ -157,6 +168,7 @@
       </button>
     </div>
   </app-info>
+  }
 
   <!--  <markdown ngPreserveWhitespaces [data]="courseDetail.description"></markdown>-->
 
@@ -164,11 +176,12 @@
 
   <mat-tab-group>
     <mat-tab label="{{ 'course.tabs.tasks' | i18nextEager }}">
-      <div class="create-task" *ngIf="!editTasks">
+      @if (!editTasks) {
+      <div class="create-task">
+        @if (isAuthorized()) {
         <button
           mat-raised-button
           color="accent"
-          *ngIf="isAuthorized()"
           (click)="createTask()"
           matTooltip="{{ 'course.create-task' | i18nextEager }}"
         >
@@ -176,28 +189,33 @@
             "course.create-task" | i18nextEager
           }}
         </button>
+        }
       </div>
+      }
 
       <div class="select-all-container">
-        <section *ngIf="editTasks">
+        @if (editTasks) {
+        <section>
           <mat-checkbox
             [ngModel]="isAllSelected()"
             (ngModelChange)="changeAllSelections()"
           >
-            <span *ngIf="!isAllSelected()">{{
+            @if (!isAllSelected()) {
+            <span>{{
               "course.edit-multiple-tasks-select-all" | i18nextEager
             }}</span>
-            <span *ngIf="isAllSelected()">{{
+            } @if (isAllSelected()) {
+            <span>{{
               "course.edit-multiple-tasks-de-select-all" | i18nextEager
             }}</span>
+            }
           </mat-checkbox>
         </section>
-
+        } @if (editTasks) {
         <button
           mat-raised-button
           class="edit-multiple-tasks-btn"
           color="accent"
-          *ngIf="editTasks"
           (click)="updateMultipleTaskDetails(selectedTasks)"
           matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
         >
@@ -205,15 +223,18 @@
             "course.edit-multiple-tasks" | i18nextEager
           }}
         </button>
+        }
       </div>
 
       <!-- Johannes approach for progres bar -->
       <mat-card appearance="outlined" class="progress-card">
         <mat-card-content>
-          <div class="title" *ngIf="requirements">
+          @if (requirements) {
+          <div class="title">
             <h2>{{ "course.progress-title" | i18nextEager }}</h2>
             <!-- if coursePassed show badge -->
-            <mat-chip-listbox *ngIf="(requirements | async).length === 0">
+            @if ((requirements | async).length === 0) {
+            <mat-chip-listbox>
               <mat-chip-option class="badget-chip">
                 <mat-icon
                   matTooltip="{{
@@ -224,7 +245,8 @@
                 </mat-icon>
               </mat-chip-option>
             </mat-chip-listbox>
-            <mat-chip-listbox *ngIf="(requirements | async).length > 0">
+            } @if ((requirements | async).length > 0) {
+            <mat-chip-listbox>
               <mat-chip-option class="badget-chip">
                 <mat-icon
                   [ngClass]="{
@@ -240,7 +262,6 @@
                   military_tech
                 </mat-icon>
               </mat-chip-option>
-
               <mat-chip-option class="badget-chip">
                 <mat-icon
                   [ngClass]="{
@@ -259,7 +280,9 @@
                 </mat-icon>
               </mat-chip-option>
             </mat-chip-listbox>
+            }
           </div>
+          }
 
           <!-- little widgets -->
           <!-- Bearbeitete Pflichtaufgaben / Bearbeitetet Bonusaufgaben / Bearbeitete Übungsaufgaben -->
@@ -312,7 +335,8 @@
 
       <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
       <div class="task-list">
-        <div *ngFor="let task of tasks">
+        @for (task of tasks; track task) {
+        <div>
           <app-task-preview
             [courseId]="courseID"
             [task]="task"
@@ -323,6 +347,7 @@
           >
           </app-task-preview>
         </div>
+        }
       </div>
     </mat-tab>
     <mat-tab label="{{ 'course.tabs.groups' | i18nextEager }}">

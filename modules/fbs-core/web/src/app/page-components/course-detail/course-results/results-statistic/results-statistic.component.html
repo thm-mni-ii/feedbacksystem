@@ -1,15 +1,19 @@
-<div class="info" *ngIf="this.isTextVisible">
+@if (this.isTextVisible) {
+<div class="info">
   <h4>Aufgabe anklicken, um Unteraufgaben anzuzeigen</h4>
 </div>
-<div class="info" *ngIf="this.isMissingSubTextVisible">
+} @if (this.isMissingSubTextVisible) {
+<div class="info">
   <h4>Die Aufgabe besitzt keine Unteraufgaben</h4>
 </div>
-<div class="info" *ngIf="this.isButtonVisible">
+} @if (this.isButtonVisible) {
+<div class="info">
   <br />
   <button mat-button (click)="standardEvent()">
     Zurück zur Aufgabenübersicht
   </button>
 </div>
+}
 <div class="statistic-container">
   <div class="statistic">
     <canvas

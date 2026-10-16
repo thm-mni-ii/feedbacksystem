@@ -37,16 +37,13 @@
   </mat-list>
 
   <mat-tab-group>
-    <ng-container *ngIf="requirements | async; let list">
-      <mat-tab
-        label="{{ 'course.results.categories' | i18nextEager }}"
-        *ngIf="list.length > 0"
-      >
-        <app-evaluation-results
-          [requirements]="requirements"
-        ></app-evaluation-results>
-      </mat-tab>
-    </ng-container>
+    @if (requirements | async; as list) { @if (list.length > 0) {
+    <mat-tab label="{{ 'course.results.categories' | i18nextEager }}">
+      <app-evaluation-results
+        [requirements]="requirements"
+      ></app-evaluation-results>
+    </mat-tab>
+    } }
     <mat-tab label="{{ 'course.results.all-tasks' | i18nextEager }}">
       <mat-card appearance="outlined" class="content-container">
         <!--    <div class="card-options">-->
@@ -85,35 +82,33 @@
                 <h2>{{ "course.results.names" | i18nextEager }}</h2>
               </div>
             </div>
-            <div
-              class="name-container"
-              *ngFor="let result of displayedCourseResults | async"
-            >
-              <span class="state passed" *ngIf="result.passed"
+            @for (result of displayedCourseResults | async; track result) {
+            <div class="name-container">
+              @if (result.passed) {
+              <span class="state passed"
                 ><mat-icon>check_circle</mat-icon></span
               >
-              <span class="state failed" *ngIf="!result.passed"
-                ><mat-icon>cancel</mat-icon></span
-              >
+              } @if (!result.passed) {
+              <span class="state failed"><mat-icon>cancel</mat-icon></span>
+              }
               <span class="username"
                 >{{ result.user.surname }}, {{ result.user.prename }}</span
               >
             </div>
+            }
           </div>
           <div class="task-column">
             <div class="task-container header">
-              <span class="task-result" *ngFor="let task of tasks | async">
+              @for (task of tasks | async; track task) {
+              <span class="task-result">
                 <span class="title">{{ task.name }}</span>
               </span>
+              }
             </div>
-            <div
-              class="task-container"
-              *ngFor="let result of displayedCourseResults | async"
-            >
-              <span
-                class="task-result"
-                *ngFor="let taskResult of result.results"
-              >
+            @for (result of displayedCourseResults | async; track result) {
+            <div class="task-container">
+              @for (taskResult of result.results; track taskResult) {
+              <span class="task-result">
                 <span
                   class="task-result-backpane {{
                     taskResult.attempts === 0
@@ -127,8 +122,8 @@
                     result.user.prename
                   }} {{ taskResult.task.name }}"
                 >
+                  @if (taskResult.attempts !== 0) {
                   <span
-                    *ngIf="taskResult.attempts !== 0"
                     (click)="
                       showResult(
                         result.user.id,
@@ -138,10 +133,14 @@
                     "
                     >{{ taskResult.attempts }}</span
                   >
-                  <span *ngIf="taskResult.attempts === 0">-</span>
+                  } @if (taskResult.attempts === 0) {
+                  <span>-</span>
+                  }
                 </span>
               </span>
+              }
             </div>
+            }
           </div>
         </div>
       </mat-card>

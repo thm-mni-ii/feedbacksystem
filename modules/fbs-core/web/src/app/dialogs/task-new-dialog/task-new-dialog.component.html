@@ -1,29 +1,23 @@
-<div matDialogTitle *ngIf="updateCondition === allUpdateConditions.CREATE">
+@if (updateCondition === allUpdateConditions.CREATE) {
+<div matDialogTitle>
   {{ "dialog.task.new.title-create" | i18nextEager }}
 </div>
-<div matDialogTitle *ngIf="updateCondition === allUpdateConditions.UPDATE">
+} @if (updateCondition === allUpdateConditions.UPDATE) {
+<div matDialogTitle>
   {{ "dialog.task.new.title-edit" | i18nextEager }}
 </div>
-<div
-  matDialogTitle
-  *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
->
+} @if (updateCondition === allUpdateConditions.UPDATE_MULTIPLE) {
+<div matDialogTitle>
   {{ "dialog.task.new.title-edit-multiple" | i18nextEager }}
 </div>
-
-<div
-  mat-dialog-content
-  *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
->
-  Ausgewählte Aufgaben:
-  <span *ngFor="let task of data.tasks">
+} @if (updateCondition === allUpdateConditions.UPDATE_MULTIPLE) {
+<div mat-dialog-content>
+  Ausgewählte Aufgaben: @for (task of data.tasks; track task) {
+  <span>
     <b>{{ task.name }}; </b>
   </span>
-
-  <section
-    *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
-    class="checkboxes"
-  >
+  } @if (updateCondition === allUpdateConditions.UPDATE_MULTIPLE) {
+  <section class="checkboxes">
     <div>
       {{ "dialog.task.new.placeholder-deadline" | i18nextEager }}
       <mat-checkbox [(ngModel)]="selectedFormFields.datePicker"></mat-checkbox>
@@ -43,14 +37,15 @@
       <mat-checkbox [(ngModel)]="selectedFormFields.isPrivate"></mat-checkbox>
     </div>
   </section>
+  }
 </div>
+}
 
 <div class="newTask">
   <form mat-dialog-content [formGroup]="taskForm">
     <!-- Task name -->
-    <mat-form-field
-      *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
-    >
+    @if (updateCondition !== allUpdateConditions.UPDATE_MULTIPLE) {
+    <mat-form-field>
       <input
         type="text"
         placeholder="{{ 'dialog.task.new.placeholder-name' | i18nextEager }}"
@@ -58,10 +53,10 @@
         formControlName="name"
       />
     </mat-form-field>
+    }
     <!-- Task Description -->
-    <mat-form-field
-      *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
-    >
+    @if (updateCondition !== allUpdateConditions.UPDATE_MULTIPLE) {
+    <mat-form-field>
       <mat-label>{{
         "dialog.task.new.label-description" | i18nextEager
       }}</mat-label>
@@ -73,6 +68,7 @@
         formControlName="description"
       ></textarea>
     </mat-form-field>
+    }
 
     <!-- Task Deadline -->
     <!--      <mat-form-field class="col">-->
@@ -199,7 +195,8 @@
       </mat-select>
     </mat-form-field>
 
-    <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
+    @if (taskForm.value.mediaType === 'application/x-spreadsheet') {
+    <div>
       <mat-form-field class="col" (click)="fileInput.click()">
         <input
           matInput
@@ -294,14 +291,15 @@
         />
       </mat-form-field>
     </div>
+    }
     <br />
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
       {{ "dialog.task.new.button-cancel" | i18nextEager }}
     </button>
+    @if (updateCondition === allUpdateConditions.CREATE) {
     <button
-      *ngIf="updateCondition === allUpdateConditions.CREATE"
       mat-flat-button
       color="accent"
       [disabled]="!taskForm.valid"
@@ -309,8 +307,8 @@
     >
       {{ "dialog.task.new.button-create" | i18nextEager }}
     </button>
+    } @if (updateCondition === allUpdateConditions.UPDATE) {
     <button
-      *ngIf="updateCondition === allUpdateConditions.UPDATE"
       mat-flat-button
       color="accent"
       [disabled]="!taskForm.valid"
@@ -318,13 +316,14 @@
     >
       {{ "dialog.task.new.button-update" | i18nextEager }}
     </button>
+    } @if (updateCondition === allUpdateConditions.UPDATE_MULTIPLE) {
     <button
-      *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
       mat-flat-button
       color="accent"
       (click)="updateMultipleTaskDetails(data.tasks)"
     >
       Ausgewählte Aufgaben bearbeiten
     </button>
+    }
   </mat-dialog-actions>
 </div>

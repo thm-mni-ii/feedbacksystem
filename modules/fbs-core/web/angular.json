@@ -44,7 +44,6 @@
               "node_modules/@kolkov/angular-editor/themes/default.scss"
             ],
             "scripts": [
-              "node_modules/marked/marked.min.js",
               "node_modules/katex/dist/katex.min.js",
               "node_modules/katex/dist/contrib/auto-render.min.js"
             ],

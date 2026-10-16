@@ -1,9 +1,12 @@
-<div matDialogTitle *ngIf="!isUpdate">
+@if (!isUpdate) {
+<div matDialogTitle>
   {{ "dialog.checker.new.add" | i18nextEager }}
 </div>
-<div matDialogTitle *ngIf="isUpdate">
+} @if (isUpdate) {
+<div matDialogTitle>
   {{ "dialog.checker.new.edit" | i18nextEager }}
 </div>
+}
 <div class="newChecker">
   <form mat-dialog-content [formGroup]="checkerForm">
     <mat-select
@@ -13,36 +16,31 @@
       required
       (selectionChange)="defineForm(checkerForm.value)"
     >
-      <mat-optgroup label="Task Providers" *ngIf="taskProviders.length > 0">
-        <mat-option *ngFor="let tp of taskProviders" [value]="tp.id">
+      @if (taskProviders.length > 0) {
+      <mat-optgroup label="Task Providers">
+        @for (tp of taskProviders; track tp) {
+        <mat-option [value]="tp.id">
           {{ tp.displayName }} ({{ tp.id }})
         </mat-option>
+        }
       </mat-optgroup>
+      }
       <mat-optgroup label="Standard / Legacy Checker">
-        <mat-option *ngIf="!isRegisteredProvider('sql')" value="sql"
-          >Legacy SQL Runner</mat-option
-        >
-        <mat-option
-          *ngIf="!isRegisteredProvider('sql-runner')"
-          value="sql-runner"
-          >SQL Runner</mat-option
-        >
-        <mat-option
-          *ngIf="!isRegisteredProvider('sql-checker')"
-          value="sql-checker"
-          >SQL Checker</mat-option
-        >
-        <mat-option
-          *ngIf="!isRegisteredProvider('ai-supported-sql-analyser')"
-          value="ai-supported-sql-analyser"
+        @if (!isRegisteredProvider('sql')) {
+        <mat-option value="sql">Legacy SQL Runner</mat-option>
+        } @if (!isRegisteredProvider('sql-runner')) {
+        <mat-option value="sql-runner">SQL Runner</mat-option>
+        } @if (!isRegisteredProvider('sql-checker')) {
+        <mat-option value="sql-checker">SQL Checker</mat-option>
+        } @if (!isRegisteredProvider('ai-supported-sql-analyser')) {
+        <mat-option value="ai-supported-sql-analyser"
           >AI Supported SQL Analyser</mat-option
         >
-        <mat-option *ngIf="!isRegisteredProvider('bash')" value="bash"
-          >Bash</mat-option
-        >
-        <mat-option *ngIf="!isRegisteredProvider('excel')" value="excel"
-          >Excel</mat-option
-        >
+        } @if (!isRegisteredProvider('bash')) {
+        <mat-option value="bash">Bash</mat-option>
+        } @if (!isRegisteredProvider('excel')) {
+        <mat-option value="excel">Excel</mat-option>
+        }
       </mat-optgroup>
     </mat-select>
     <mat-form-field>
@@ -67,7 +65,8 @@
         [submissionFile]="secondaryFile"
       ></app-dropzone>
     </div>
-    <div *ngIf="choosedSQLChecker">
+    @if (choosedSQLChecker) {
+    <div>
       <div>
         <mat-checkbox
           formControlName="showHints"
@@ -76,7 +75,8 @@
           >{{ "dialog.checker.new.show-hints" | i18nextEager }}</mat-checkbox
         >
       </div>
-      <div *ngIf="showHintsConfig">
+      @if (showHintsConfig) {
+      <div>
         <h4>{{ "dialog.checker.new.hints-attempts" | i18nextEager }}</h4>
         <mat-icon
           matTooltip="{{ 'dialog.checker.new.hints-tooltip' | i18nextEager }}"
@@ -101,7 +101,8 @@
             }}</mat-checkbox
           >
         </div>
-        <div *ngIf="showExtendedHintsConfig">
+        @if (showExtendedHintsConfig) {
+        <div>
           <h4>
             {{ "dialog.checker.new.extended-hints-attempts" | i18nextEager }}
           </h4>
@@ -121,7 +122,9 @@
             />
           </mat-form-field>
         </div>
+        }
       </div>
+      }
       <div>
         <mat-checkbox
           formControlName="disableDistance"
@@ -133,13 +136,14 @@
         >
       </div>
     </div>
+    }
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
       {{ "dialog.checker.new.cancel" | i18nextEager }}
     </button>
+    @if (!isUpdate) {
     <button
-      *ngIf="!isUpdate"
       mat-flat-button
       color="accent"
       [disabled]="
@@ -154,8 +158,8 @@
     >
       {{ "dialog.checker.new.create" | i18nextEager }}
     </button>
+    } @if (isUpdate) {
     <button
-      *ngIf="isUpdate"
       mat-flat-button
       color="accent"
       [disabled]="!checkerForm.valid"
@@ -163,5 +167,6 @@
     >
       {{ "dialog.checker.new.update" | i18nextEager }}
     </button>
+    }
   </mat-dialog-actions>
 </div>

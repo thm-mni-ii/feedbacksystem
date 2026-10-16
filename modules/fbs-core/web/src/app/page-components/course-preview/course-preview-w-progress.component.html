@@ -1,6 +1,8 @@
 <mat-card appearance="outlined" class="card" (click)="goToCourse()">
   <app-unstyled-link href="">{{ data.name }}</app-unstyled-link>
-  <mat-icon class="invisible" *ngIf="!data.visible">visibility_off</mat-icon>
+  @if (!data.visible) {
+  <mat-icon class="invisible">visibility_off</mat-icon>
+  }
   <span
     [matTooltip]="
       '{{ \'course.progress.correct\' | i18nextEager }}: ' +

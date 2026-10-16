@@ -11,78 +11,82 @@
     <span class="spacer"></span>
 
     <!--<button mat-icon-button (click)="reRun()" [disabled]="this.lastSubmission == null" matTooltip="Erneut prüfen"><mat-icon>cached</mat-icon></button>-->
+    @if (canEdit()) {
     <button
       mat-icon-button
-      *ngIf="canEdit()"
       (click)="downloadTask()"
       matTooltip="{{ 'task.detail.tooltip.exportTask' | i18nextEager }}"
     >
       <mat-icon class="logout-icon">save_alt</mat-icon>
     </button>
+    } @if (canEdit() && checkersConfigurable()) {
     <button
       mat-icon-button
-      *ngIf="canEdit() && checkersConfigurable()"
       [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']"
       matTooltip="{{ 'task.detail.tooltip.configureCheck' | i18nextEager }}"
     >
       <mat-icon class="logout-icon">engineering</mat-icon>
     </button>
+    } @if (canEdit()) {
     <button
       mat-icon-button
-      *ngIf="canEdit()"
       [matMenuTriggerFor]="settings"
       matTooltip="{{ 'task.detail.tooltip.settings' | i18nextEager }}"
     >
       <mat-icon>settings</mat-icon>
     </button>
+    }
     <mat-menu #settings="matMenu">
-      <button mat-menu-item *ngIf="canEdit()" (click)="updateTask()">
+      @if (canEdit()) {
+      <button mat-menu-item (click)="updateTask()">
         <mat-icon class="logout-icon">edit</mat-icon
         ><span>{{ "task.detail.label.editTask" | i18nextEager }}</span>
       </button>
-      <button mat-menu-item *ngIf="canEdit()" (click)="deleteTask()">
+      } @if (canEdit()) {
+      <button mat-menu-item (click)="deleteTask()">
         <mat-icon class="logout-icon">delete</mat-icon
         ><span>{{ "task.detail.label.deleteTask" | i18nextEager }}</span>
       </button>
+      }
     </mat-menu>
   </app-menu-bar>
 
-  <mat-card appearance="outlined" class="details" *ngIf="ready">
+  @if (ready) {
+  <mat-card appearance="outlined" class="details">
     <div class="task-container">
       <span>{{ task?.name }}</span>
       <span class="meta">
-        <span *ngIf="deadlinePassed" class="tiny failed">{{
+        @if (deadlinePassed) {
+        <span class="tiny failed">{{
           "task.detail.deadlineReached" | i18nextEager
         }}</span>
-        <mat-icon class="material-icons" color="accent" *ngIf="task.deadline"
-          >access_time</mat-icon
-        >
+        } @if (task.deadline) {
+        <mat-icon class="material-icons" color="accent">access_time</mat-icon>
+        }
         <span class="tiny">{{
           task?.deadline | date: "dd.MM.yyyy HH:mm"
         }}</span>
-        <span class="state" *ngIf="taskResult.maxPoints !== 0"
+        @if (taskResult.maxPoints !== 0) {
+        <span class="state"
           >{{ taskResult.points }}/{{ taskResult.maxPoints }}
           {{ "task.detail.points" | i18nextEager }}</span
         >
-        <span class="state" *ngIf="taskResult.maxPoints === 0">
-          <span class="state passed" *ngIf="taskResult.passed"
-            ><mat-icon>check_circle</mat-icon></span
-          >
-          <span
-            class="state failed"
-            *ngIf="!taskResult.passed && taskResult.submission"
-            ><mat-icon>not_interested</mat-icon></span
-          >
-          <span
-            class="state not-done"
-            *ngIf="!taskResult.passed && !taskResult.submission"
-            ><mat-icon>error_outline</mat-icon></span
-          >
+        } @if (taskResult.maxPoints === 0) {
+        <span class="state">
+          @if (taskResult.passed) {
+          <span class="state passed"><mat-icon>check_circle</mat-icon></span>
+          } @if (!taskResult.passed && taskResult.submission) {
+          <span class="state failed"><mat-icon>not_interested</mat-icon></span>
+          } @if (!taskResult.passed && !taskResult.submission) {
+          <span class="state not-done"><mat-icon>error_outline</mat-icon></span>
+          }
         </span>
-        <span class="state" *ngIf="pending"
+        } @if (pending) {
+        <span class="state"
           ><mat-spinner [diameter]="24"></mat-spinner
           >{{ "task.detail.processing" | i18nextEager }}</span
         >
+        }
       </span>
     </div>
     <div class="description">
@@ -90,27 +94,27 @@
     </div>
     <mat-card-content>
       <div class="user-input">
+        @if (submissionTypeOfTask() === 'file') {
         <app-submission-file
-          *ngIf="submissionTypeOfTask() === 'file'"
           (update)="updateSubmissionContent($event)"
         ></app-submission-file>
+        } @if (submissionTypeOfTask() === 'text') {
         <app-submission-text
-          *ngIf="submissionTypeOfTask() === 'text'"
           mode="plain"
           (update)="updateSubmissionContent($event)"
         ></app-submission-text>
+        } @if (submissionTypeOfTask() === 'rich') {
         <app-submission-text
-          *ngIf="submissionTypeOfTask() === 'rich'"
           mode="wysiwyg"
           (update)="updateSubmissionContent($event)"
         ></app-submission-text>
+        } @if (submissionTypeOfTask() === 'code') {
         <app-submission-text
-          *ngIf="submissionTypeOfTask() === 'code'"
           mode="code"
           (update)="updateSubmissionContent($event)"
         ></app-submission-text>
+        } @if (submissionTypeOfTask() === 'spreadsheet') {
         <app-submission-spreadsheet
-          *ngIf="submissionTypeOfTask() === 'spreadsheet'"
           (update)="updateSubmissionContent($event)"
           [inputFields]="task?.mediaInformation.inputs || []"
           [outputFields]="task?.mediaInformation.outputs || []"
@@ -118,8 +122,8 @@
           [content]="latestResult?.extInfo || {}"
           [lastSubmission]="lastSubmission"
         ></app-submission-spreadsheet>
+        }
       </div>
-
       <mat-card-actions>
         <div class="center">
           <div class="center margin-left-right">
@@ -159,10 +163,11 @@
               {{ "task.detail.submit" | i18nextEager }}
             </button>
           </div>
-
-          <p *ngIf="!role" class="registration-error">
+          @if (!role) {
+          <p class="registration-error">
             {{ "course.message.not-registered-user" | i18nextEager }}
           </p>
+          }
           <div class="center margin-left-right">
             <button
               [disabled]="isLastTask()"
@@ -188,7 +193,8 @@
           </div>
         </div>
       </mat-card-actions>
-      <div *ngIf="showDetailedFeedbackBox" class="detailed-feedback">
+      @if (showDetailedFeedbackBox) {
+      <div class="detailed-feedback">
         <div class="detailed-feedback-text">
           {{ "task.detail.detailedFeedback.hint" | i18nextEager }}
         </div>
@@ -200,7 +206,8 @@
           {{ "task.detail.detailedFeedback.trigger" | i18nextEager }}
         </button>
       </div>
-      <div *ngIf="detailedFeedbackPending" class="detailed-feedback pending">
+      } @if (detailedFeedbackPending) {
+      <div class="detailed-feedback pending">
         <div class="detailed-feedback-status">
           <mat-spinner [diameter]="20"></mat-spinner>
           <span>
@@ -208,15 +215,17 @@
           </span>
         </div>
       </div>
+      } @if (submissions) {
       <app-results
-        *ngIf="submissions"
         [submissions]="submissions"
         [context]="{ uid: uid, cid: courseId, tid: task.id }"
         [isText]="task?.mediaType.startsWith('text/')"
       ></app-results>
+      }
       <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
     </mat-card-content>
   </mat-card>
+  }
   <!--  <div *ngFor="let submission of submissions | reverse">-->
   <!--    {{submission.id}}-->
   <!--    <mat-card *ngFor="let result of submission.results">-->

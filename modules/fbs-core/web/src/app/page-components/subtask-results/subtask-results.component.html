@@ -1,6 +1,6 @@
-<div *ngIf="display">
+@if (display) {
+<div>
   <h4>{{ "task.subtask-results.title" | i18nextEager }}</h4>
-
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>
@@ -8,22 +8,20 @@
       </th>
       <td mat-cell *matCellDef="let result">{{ result.name }}</td>
     </ng-container>
-
     <ng-container matColumnDef="maxPoints">
       <th mat-header-cell *matHeaderCellDef>
         {{ "task.subtask-results.max-points-label" | i18nextEager }}
       </th>
       <td mat-cell *matCellDef="let result">{{ result.maxPoints }}</td>
     </ng-container>
-
     <ng-container matColumnDef="points">
       <th mat-header-cell *matHeaderCellDef>
         {{ "task.subtask-results.achieved-points-label" | i18nextEager }}
       </th>
       <td mat-cell *matCellDef="let result">{{ result.points }}</td>
     </ng-container>
-
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns"></tr>
   </table>
 </div>
+}
