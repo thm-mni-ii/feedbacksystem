@@ -1,10 +1,11 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 
 @Component({
   selector: "app-spreadsheet-dialog",
   templateUrl: "./spreadsheet-dialog.component.html",
   styleUrls: ["./spreadsheet-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SpreadsheetDialogComponent {

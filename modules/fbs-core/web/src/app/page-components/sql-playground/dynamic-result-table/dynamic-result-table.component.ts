@@ -1,4 +1,9 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { ResultTab } from "src/app/model/ResultTab";
@@ -11,6 +16,7 @@ import { MatTabGroup } from "@angular/material/tabs";
   selector: "app-dynamic-result-table",
   templateUrl: "./dynamic-result-table.component.html",
   styleUrls: ["./dynamic-result-table.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 }) //, AfterViewInit
 export class DynamicResultTableComponent implements OnInit {

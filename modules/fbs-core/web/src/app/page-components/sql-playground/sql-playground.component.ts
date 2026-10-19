@@ -1,4 +1,9 @@
-import { AfterViewChecked, Component, OnInit } from "@angular/core";
+import {
+  AfterViewChecked,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Subject, BehaviorSubject, Observable } from "rxjs";
 import { Routine } from "src/app/model/sql_playground/Routine";
@@ -23,6 +28,7 @@ import "prismjs/components/prism-json";
   selector: "app-sql-playground-management",
   templateUrl: "./sql-playground.component.html",
   styleUrls: ["./sql-playground.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SqlPlaygroundComponent implements OnInit, AfterViewChecked {

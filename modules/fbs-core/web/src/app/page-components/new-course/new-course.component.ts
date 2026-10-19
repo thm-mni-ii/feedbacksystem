@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { UntypedFormControl, Validators } from "@angular/forms";
@@ -13,6 +13,7 @@ import { CourseService } from "../../service/course.service";
   selector: "app-new-course",
   templateUrl: "./new-course.component.html",
   styleUrls: ["./new-course.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NewCourseComponent implements OnInit {

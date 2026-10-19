@@ -192,7 +192,7 @@
       [disabled]="
         isCheckerEmpty ||
         (isSubmissionEmpty() | async) ||
-        hasDeadlinePassed(activeTab?.selectedTask) ||
+        hasDeadlinePassed($safeNavigationMigration(activeTab?.selectedTask)) ||
         isPending
       "
       mat-flat-button

@@ -4,6 +4,7 @@ import {
   OnChanges,
   OnInit,
   SimpleChanges,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { Subject } from "rxjs";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
@@ -13,6 +14,7 @@ import { AuthService } from "src/app/service/auth.service";
   selector: "app-db-scheme-mongo-views",
   templateUrl: "./db-scheme-mongo-views.component.html",
   styleUrls: ["../../db-scheme.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DbSchemeMongoViewsComponent implements OnInit, OnChanges {

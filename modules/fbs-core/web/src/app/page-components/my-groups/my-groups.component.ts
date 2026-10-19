@@ -1,4 +1,10 @@
-import { Component, Inject, Input, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  Input,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Observable, of } from "rxjs";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Group } from "../../model/Group";
@@ -14,6 +20,7 @@ import {
   selector: "app-my-groups",
   templateUrl: "./my-groups.component.html",
   styleUrls: ["./my-groups.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class MyGroupsComponent implements OnInit {

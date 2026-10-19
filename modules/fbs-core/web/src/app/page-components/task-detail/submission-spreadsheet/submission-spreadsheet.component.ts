@@ -5,6 +5,7 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { MathInputValue } from "../../../tool-components/math-input/math-input.component";
 import { Submission } from "../../../model/Submission";
@@ -13,6 +14,7 @@ import { Submission } from "../../../model/Submission";
   selector: "app-submission-spreadsheet",
   templateUrl: "./submission-spreadsheet.component.html",
   styleUrls: ["./submission-spreadsheet.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SubmissionSpreadsheetComponent implements OnChanges {

@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Roles } from "src/app/model/Roles";
@@ -16,6 +23,7 @@ import { selectDatabasesForCurrentType } from "src/app/page-components/sql-playg
   selector: "app-db-control-panel",
   templateUrl: "./db-control-panel.component.html",
   styleUrls: ["./db-control-panel.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DbControlPanelComponent implements OnInit {

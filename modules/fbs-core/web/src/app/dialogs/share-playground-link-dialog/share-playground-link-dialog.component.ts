@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
@@ -6,6 +6,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   selector: "app-db-uri-link-dialog",
   templateUrl: "./share-playground-link-dialog.component.html",
   styleUrls: ["./share-playground-link-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SharePlaygroundLinkDialogComponent {

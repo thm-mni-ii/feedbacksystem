@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { UntypedFormControl } from "@angular/forms";
 import { mergeMap, startWith } from "rxjs/operators";
 import { Observable, of } from "rxjs";
@@ -23,6 +28,7 @@ import {
   selector: "app-search-courses",
   templateUrl: "./search-courses.component.html",
   styleUrls: ["./search-courses.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SearchCoursesComponent implements OnInit {

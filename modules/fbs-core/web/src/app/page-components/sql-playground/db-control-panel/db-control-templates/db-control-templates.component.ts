@@ -1,4 +1,10 @@
-import { Component, EventEmitter, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
@@ -24,6 +30,7 @@ import { Roles } from "../../../../model/Roles";
   selector: "app-db-control-templates",
   templateUrl: "./db-control-templates.component.html",
   styleUrls: ["./db-control-templates.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DbControlTemplatesComponent implements OnInit {

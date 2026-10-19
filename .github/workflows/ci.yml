@@ -161,7 +161,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: modules/fbs-core/web
-        run: npm ci --legacy-peer-deps
+        run: npm ci --force 
 
       - name: Lint Web
         working-directory: modules/fbs-core/web

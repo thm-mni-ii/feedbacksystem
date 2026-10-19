@@ -7,6 +7,7 @@ import {
   OnChanges,
   Output,
   ViewChild,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 
 export interface MathInputValue {
@@ -18,6 +19,7 @@ export interface MathInputValue {
   selector: "app-math-input",
   templateUrl: "./math-input.component.html",
   styleUrls: ["./math-input.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class MathInputComponent implements OnChanges, AfterViewInit {

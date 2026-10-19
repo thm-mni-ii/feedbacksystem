@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { Task } from "../../../model/Task";
 import { UserTaskResult } from "../../../model/UserTaskResult";
@@ -25,6 +25,7 @@ import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
   selector: "app-sql-checker-results",
   templateUrl: "./sql-checker-results.component.html",
   styleUrls: ["./sql-checker-results.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SqlCheckerResultsComponent implements OnInit {

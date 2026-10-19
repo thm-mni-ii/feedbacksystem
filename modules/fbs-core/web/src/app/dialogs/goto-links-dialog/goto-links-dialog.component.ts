@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { GoToService } from "../../service/goto.service";
@@ -11,6 +11,7 @@ import { IntegrationService } from "../../service/integration.service";
   selector: "app-goto-links-dialog",
   templateUrl: "./goto-links-dialog.component.html",
   styleUrls: ["./goto-links-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class GotoLinksDialogComponent {

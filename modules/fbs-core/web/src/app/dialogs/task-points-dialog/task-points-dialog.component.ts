@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -14,6 +19,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   selector: "app-task-points-dialog",
   templateUrl: "./task-points-dialog.component.html",
   styleUrls: ["./task-points-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TaskPointsDialogComponent implements OnInit {

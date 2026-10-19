@@ -1,4 +1,9 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Observable } from "rxjs";
 import { EvaluationUserResults } from "../../../../model/EvaluationUserResults";
 import { ActivatedRoute } from "@angular/router";
@@ -10,6 +15,7 @@ import { CourseResult } from "../../../../model/CourseResult";
   selector: "app-evaluation-results",
   templateUrl: "./evaluation-results.component.html",
   styleUrls: ["./evaluation-results.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class EvaluationResultsComponent implements OnInit {

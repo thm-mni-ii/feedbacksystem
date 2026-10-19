@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { Submission } from "../../model/Submission";
 
@@ -6,6 +6,7 @@ import { Submission } from "../../model/Submission";
   selector: "app-all-submissions",
   templateUrl: "./all-submissions.component.html",
   styleUrls: ["./all-submissions.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AllSubmissionsComponent {

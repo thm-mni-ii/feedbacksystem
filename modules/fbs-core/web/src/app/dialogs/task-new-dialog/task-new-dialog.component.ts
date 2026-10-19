@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -35,6 +40,7 @@ const defualtVisiblity = "Studenten";
   selector: "app-task-new-dialog",
   templateUrl: "./task-new-dialog.component.html",
   styleUrls: ["./task-new-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TaskNewDialogComponent implements OnInit {

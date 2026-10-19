@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Database } from "../../../../model/sql_playground/Database";
@@ -24,6 +24,7 @@ import { closeAllTabs } from "../../sql-input-tabs/state/sql-input-tabs.actions"
   selector: "app-db-control-co-working",
   templateUrl: "./db-control-co-working.component.html",
   styleUrls: ["./db-control-co-working.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DbControlCoWorkingComponent implements OnInit {

@@ -10,6 +10,7 @@ import {
   Renderer2,
   ViewChild,
   SimpleChanges,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 import { Subscription } from "rxjs";
@@ -20,6 +21,7 @@ import { PrismService } from "src/app/service/prism.service";
   selector: "app-code-editor",
   templateUrl: "./code-editor.component.html",
   styleUrls: ["./code-editor.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class CodeEditorComponent

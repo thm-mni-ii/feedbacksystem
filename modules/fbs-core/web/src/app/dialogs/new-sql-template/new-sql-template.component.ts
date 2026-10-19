@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { NewDbDialogComponent } from "../new-db-dialog/new-db-dialog.component";
@@ -9,6 +9,7 @@ import { TemplateCategory } from "src/app/model/sql_playground/TemplateCategory"
   selector: "app-new-sql-template",
   templateUrl: "./new-sql-template.component.html",
   styleUrls: ["./new-sql-template.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NewSqlTemplateComponent {

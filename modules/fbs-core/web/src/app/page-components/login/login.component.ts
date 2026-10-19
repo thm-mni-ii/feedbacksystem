@@ -1,4 +1,10 @@
-import { Component, Inject, OnInit, DOCUMENT } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  DOCUMENT,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Router } from "@angular/router";
 
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -14,6 +20,7 @@ import { EmbeddingService } from "../../service/embedding.service";
   selector: "app-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class LoginComponent implements OnInit {

@@ -22,7 +22,13 @@
     } @if (canEdit() && checkersConfigurable()) {
     <button
       mat-icon-button
-      [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']"
+      [routerLink]="[
+        '/courses',
+        courseId,
+        'tasks',
+        $safeNavigationMigration(task?.id),
+        'configurations'
+      ]"
       matTooltip="{{ 'task.detail.tooltip.configureCheck' | i18nextEager }}"
     >
       <mat-icon class="logout-icon">engineering</mat-icon>
@@ -64,7 +70,7 @@
         <mat-icon class="material-icons" color="accent">access_time</mat-icon>
         }
         <span class="tiny">{{
-          task?.deadline | date: "dd.MM.yyyy HH:mm"
+          $safeNavigationMigration(task?.deadline) | date: "dd.MM.yyyy HH:mm"
         }}</span>
         @if (taskResult.maxPoints !== 0) {
         <span class="state"
@@ -90,7 +96,10 @@
       </span>
     </div>
     <div class="description">
-      <markdown [data]="task?.description" katex></markdown>
+      <markdown
+        [data]="$safeNavigationMigration(task?.description)"
+        katex
+      ></markdown>
     </div>
     <mat-card-content>
       <div class="user-input">

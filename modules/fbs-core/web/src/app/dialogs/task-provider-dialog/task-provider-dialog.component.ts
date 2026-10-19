@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import {
   AbstractControl,
   UntypedFormControl,
@@ -19,6 +24,7 @@ export interface TaskProviderDialogData {
   selector: "app-task-provider-dialog",
   templateUrl: "./task-provider-dialog.component.html",
   styleUrls: ["./task-provider-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TaskProviderDialogComponent implements OnInit {

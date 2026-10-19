@@ -1,4 +1,10 @@
-import { Component, Inject, OnInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
@@ -20,6 +26,7 @@ import {
   selector: "app-task-provider-management",
   templateUrl: "./task-provider-management.component.html",
   styleUrls: ["./task-provider-management.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TaskProviderManagementComponent implements OnInit {

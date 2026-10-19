@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
@@ -12,6 +12,7 @@ import { LegalService } from "../../service/legal.service";
   selector: "app-impressum-dialog",
   templateUrl: "./impressum-dialog.component.html",
   styleUrls: ["./impressum-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ImpressumDialogComponent implements OnInit {

@@ -1,4 +1,10 @@
-import { Component, OnInit, Input, Inject } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  Input,
+  Inject,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Observable, of } from "rxjs";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Course } from "../../model/Course";
@@ -19,6 +25,7 @@ import {
   selector: "app-my-courses",
   templateUrl: "./my-courses.component.html",
   styleUrls: ["./my-courses.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class MyCoursesComponent implements OnInit {

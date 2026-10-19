@@ -1,4 +1,10 @@
-import { Component, EventEmitter, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable, combineLatest } from "rxjs";
 import { map } from "rxjs/operators";
@@ -10,6 +16,7 @@ import * as fromSqlPlayground from "../../state/sql-playground.selectors";
   selector: "app-db-scheme-tables",
   templateUrl: "./db-scheme-tables.component.html",
   styleUrls: ["../db-scheme.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DbSchemeTablesComponent implements OnInit {

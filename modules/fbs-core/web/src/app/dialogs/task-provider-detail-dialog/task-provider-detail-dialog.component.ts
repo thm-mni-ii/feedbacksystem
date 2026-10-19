@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { TaskProvider } from "../../model/TaskProvider";
 
@@ -6,6 +11,7 @@ import { TaskProvider } from "../../model/TaskProvider";
   selector: "app-task-provider-detail-dialog",
   templateUrl: "./task-provider-detail-dialog.component.html",
   styleUrls: ["./task-provider-detail-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TaskProviderDetailDialogComponent implements OnInit {

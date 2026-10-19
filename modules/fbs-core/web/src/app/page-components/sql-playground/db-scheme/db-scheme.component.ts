@@ -1,4 +1,9 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable, Subject } from "rxjs";
 import { Table } from "src/app/model/sql_playground/Table";
@@ -15,6 +20,7 @@ import { EventEmitter, Output } from "@angular/core";
   selector: "app-db-scheme",
   templateUrl: "./db-scheme.component.html",
   styleUrls: ["./db-scheme.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DbSchemeComponent implements OnInit {

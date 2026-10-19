@@ -24,6 +24,7 @@ import {
   HttpResponse,
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr,
 } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { JwtModule } from "@auth0/angular-jwt";
@@ -36,7 +37,8 @@ import {
   MAT_DATE_LOCALE,
   provideNativeDateAdapter,
 } from "@angular/material/core";
-import { MarkdownModule } from "ngx-markdown";
+import { MarkdownComponent, provideMarkdown, SANITIZE } from "ngx-markdown";
+import DOMPurify from "dompurify";
 import { NgxDropzoneModule } from "ngx-dropzone";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
@@ -288,7 +290,7 @@ export const httpInterceptorProviders = [
     MaterialComponentsModule,
     FormsModule,
     ReactiveFormsModule,
-    MarkdownModule.forRoot(),
+    MarkdownComponent,
     MatDatepickerModule,
     MatTabsModule,
     JwtModule.forRoot({
@@ -314,6 +316,14 @@ export const httpInterceptorProviders = [
     AngularEditorModule,
   ],
   providers: [
+    provideMarkdown({
+      // DOMPurify instead of Angular's sanitizer: keeps the inline styles
+      // KaTeX needs for formula layout (e.g. superscripts)
+      sanitize: {
+        provide: SANITIZE,
+        useValue: (html: string) => DOMPurify.sanitize(html),
+      },
+    }),
     provideCharts(withDefaultRegisterables()),
     CookieService,
     TaskProviderService,
@@ -327,7 +337,7 @@ export const httpInterceptorProviders = [
     provideNativeDateAdapter(),
     { provide: MAT_DATE_LOCALE, useValue: "de" },
     I18N_PROVIDERS,
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
   ],
 })
 export class AppModule {}

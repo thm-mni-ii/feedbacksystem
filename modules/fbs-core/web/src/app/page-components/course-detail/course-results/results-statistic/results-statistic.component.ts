@@ -1,4 +1,10 @@
-import { Component, OnInit, QueryList, ViewChildren } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  QueryList,
+  ViewChildren,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { TitlebarService } from "../../../../service/titlebar.service";
@@ -16,6 +22,7 @@ import { SubtaskStatisticService } from "../../../../service/subtask-statistic.s
   selector: "app-results-statistic",
   templateUrl: "./results-statistic.component.html",
   styleUrls: ["./results-statistic.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ResultsStatisticComponent implements OnInit {

@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Observable, combineLatest } from "rxjs";
 import { GroupRegistrationService } from "../../service/group-registration.sevice";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
@@ -12,6 +17,7 @@ import { map } from "rxjs/operators";
   selector: "app-group-deregister-dialog",
   templateUrl: "./group-deregister-dialog.component.html",
   styleUrls: ["./group-deregister-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class GroupDeregisterDialogComponent implements OnInit {

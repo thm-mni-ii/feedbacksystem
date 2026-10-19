@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { AuthService } from "src/app/service/auth.service";
 import { TitlebarService } from "src/app/service/titlebar.service";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
@@ -10,6 +10,7 @@ import { map } from "rxjs/operators";
   selector: "app-fbs-kanban",
   templateUrl: "./fbs-kanban.component.html",
   styleUrls: ["./fbs-kanban.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class FbsKanbanComponent implements OnInit {

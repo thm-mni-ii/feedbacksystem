@@ -1,4 +1,9 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Course } from "../../model/Course";
 import { Router } from "@angular/router";
 import { TaskService } from "src/app/service/task.service";
@@ -10,6 +15,7 @@ import { AuthService } from "src/app/service/auth.service";
   selector: "app-course-preview-w-progress",
   templateUrl: "./course-preview-w-progress.component.html",
   styleUrls: ["./course-preview.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class CoursePreviewWProgressComponent implements OnInit {
