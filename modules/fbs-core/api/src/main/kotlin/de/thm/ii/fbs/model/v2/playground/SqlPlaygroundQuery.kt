@@ -4,7 +4,7 @@ package de.thm.ii.fbs.model.v2.playground
 
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResult
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResultConverter
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "sql_playground_query")

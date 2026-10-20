@@ -34,7 +34,7 @@ open class ResourceServerSecurityConfig(
     open fun webSecurityCustomizer(): WebSecurityCustomizer {
         return WebSecurityCustomizer { web ->
             web.httpFirewall(httpFirewall())
-            web.ignoring().antMatchers(
+            web.ignoring().requestMatchers(
                 "/api/v1/storage/**",
                 "/api/v1/results/**",
                 "/results/**"
@@ -49,7 +49,7 @@ open class ResourceServerSecurityConfig(
             .cors { }
             .authorizeHttpRequests { auth ->
                 auth
-                    .antMatchers(
+                    .requestMatchers(
                         "/actuator/health",
                         "/actuator/health/**",
                         "/health",
@@ -59,7 +59,7 @@ open class ResourceServerSecurityConfig(
                         "/api/v1/results/**",
                         "/api/v1/storage/**"
                     ).permitAll()
-                    .antMatchers("/api/**").authenticated()
+                    .requestMatchers("/api/**").authenticated()
                     .anyRequest().permitAll()
             }
             .oauth2ResourceServer { oauth2 ->

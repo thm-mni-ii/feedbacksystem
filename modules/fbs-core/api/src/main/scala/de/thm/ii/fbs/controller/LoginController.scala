@@ -7,8 +7,8 @@ import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 
-import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
-import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
+import jakarta.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
+import org.apereo.cas.client.boot.configuration.{CasClientConfigurer, EnableCasClient}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.web.bind.annotation._
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation._
 @EnableCasClient
 @RequestMapping(path = Array("/api/v1/login"))
 @deprecated("Authentication is delegated to fbs-identity-service", "2.0.0")
-class LoginController extends CasClientConfigurerAdapter {
+class LoginController extends CasClientConfigurer {
   @Autowired
   private implicit val userService: UserService = null
   @Autowired

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
 import java.nio.file.Path
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * UserController defines all routes for /users (insert, delete, update)

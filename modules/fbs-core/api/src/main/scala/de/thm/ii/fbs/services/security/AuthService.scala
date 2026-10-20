@@ -6,8 +6,8 @@ import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.util.{DB, ScalaObjectMapper}
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-import javax.xml.bind.DatatypeConverter
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
+import java.util.Base64
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -41,7 +41,7 @@ class AuthService {
     * JWT Token as Base64
     * @return base64 encoded JWT Secret
     */
-  def jwtSecretEncoding(): String = DatatypeConverter.printBase64Binary(jwtSecret.getBytes)
+  def jwtSecretEncoding(): String = Base64.getEncoder.encodeToString(jwtSecret.getBytes)
 
   /**
     * Generate a new token and append it to the response header.
@@ -149,7 +149,7 @@ class AuthService {
     decodedFromJwk match {
       case Some(id) => id
       case None =>
-        val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(jwtSecretEncoding())).parseClaimsJws(jwtToken).getBody
+        val claims: Claims = Jwts.parser().setSigningKey(Base64.getDecoder.decode(jwtSecretEncoding())).parseClaimsJws(jwtToken).getBody
         val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
 
         if (tokenDate != null && tokenDate * 1000L - new Date().getTime <= 0) {

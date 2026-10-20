@@ -2,8 +2,8 @@
 
 package de.thm.ii.fbs.model.v2.group
 
+import jakarta.persistence.*
 import java.io.Serializable
-import javax.persistence.*
 
 @Entity
 @Table(name = "user_group")

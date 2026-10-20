@@ -2,7 +2,7 @@
 
 package de.thm.ii.fbs.model.v2.group
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "`group`")

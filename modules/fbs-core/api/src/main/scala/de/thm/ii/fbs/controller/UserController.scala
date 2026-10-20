@@ -7,7 +7,7 @@ import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserServic
 import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType

@@ -15,7 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
 
 import java.io.File
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * TaskController implement routes for submitting task and receive results

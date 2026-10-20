@@ -4,7 +4,7 @@ package de.thm.ii.fbs.model.v2.playground
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import de.thm.ii.fbs.utils.v2.converters.JpaJsonNodeConverter
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "sql_entity")

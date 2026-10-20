@@ -16,7 +16,7 @@ import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 
 import java.util
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
 @RestController

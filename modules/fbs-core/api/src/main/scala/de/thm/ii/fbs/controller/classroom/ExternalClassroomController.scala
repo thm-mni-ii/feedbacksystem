@@ -6,7 +6,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, PostMapping, RequestBody, RequestMapping, ResponseBody, RestController}
 
 import java.net.URI
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * External classroom controller

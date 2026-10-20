@@ -5,7 +5,7 @@ package de.thm.ii.fbs.model.v2.playground
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.thm.ii.fbs.model.v2.group.Group
 import de.thm.ii.fbs.model.v2.security.User
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "sql_playground_database")

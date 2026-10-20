@@ -21,7 +21,7 @@ import java.nio.file.{Files, StandardOpenOption}
 import java.time.Instant
 import java.util
 import java.util.Optional
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 /**

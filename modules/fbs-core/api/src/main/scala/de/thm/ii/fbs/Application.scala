@@ -18,7 +18,7 @@ import java.nio.file.{Files, Paths}
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.{HttpsURLConnection, SSLContext, TrustManager, X509TrustManager}
-import javax.servlet.MultipartConfigElement
+import jakarta.servlet.MultipartConfigElement
 
 /**
   * Class dummy for spring boot.
