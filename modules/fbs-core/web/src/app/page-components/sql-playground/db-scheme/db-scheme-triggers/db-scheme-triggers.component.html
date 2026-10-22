@@ -1,8 +1,6 @@
 <p class="title" role="heading" aria-level="4" tabindex="0">Triggers</p>
-<mat-expansion-panel
-  *ngFor="let trigger of triggers$ | async; index as i"
-  attr.aria-label="Trigger {{ trigger.name }}"
->
+@for (trigger of triggers$ | async; track trigger; let i = $index) {
+<mat-expansion-panel attr.aria-label="Trigger {{ trigger.name }}">
   <mat-expansion-panel-header>
     <mat-panel-title>
       <span tabindex="0">{{ trigger.name }}</span>
@@ -28,3 +26,4 @@
     }}</pre>
   </div>
 </mat-expansion-panel>
+}

@@ -11,7 +11,8 @@
     {{ mode !== "plain" ? ("task.submission.heading" | i18nextEager) : "" }}
   </h3>
 
-  <div *ngIf="showModeSelector" class="mode-selector">
+  @if (showModeSelector) {
+  <div class="mode-selector">
     <mat-button-toggle-group
       [(value)]="currentMode"
       (change)="switchToMode($event.value)"
@@ -21,40 +22,30 @@
       <mat-button-toggle value="code">Code</mat-button-toggle>
     </mat-button-toggle-group>
   </div>
+  }
 
   <div class="action-buttons">
-    <ng-container *ngIf="showExtractMenu">
-      <mat-menu #extractionMenu="matMenu">
-        <button mat-menu-item (click)="onExtractOptionSelected('text')">
-          {{ "task.submission.textFromFileTextOnly" | i18nextEager }}
-        </button>
-        <button mat-menu-item (click)="onExtractOptionSelected('all')">
-          {{ "task.submission.textFromFileTextAndImages" | i18nextEager }}
-        </button>
-      </mat-menu>
-
-      <button mat-button color="primary" [matMenuTriggerFor]="extractionMenu">
-        {{ "task.submission.textFromFile" | i18nextEager }}
+    @if (showExtractMenu) {
+    <mat-menu #extractionMenu="matMenu">
+      <button mat-menu-item (click)="onExtractOptionSelected('text')">
+        {{ "task.submission.textFromFileTextOnly" | i18nextEager }}
       </button>
-    </ng-container>
-
-    <button
-      *ngIf="!showExtractMenu"
-      mat-button
-      color="primary"
-      (click)="uploadFile()"
-    >
+      <button mat-menu-item (click)="onExtractOptionSelected('all')">
+        {{ "task.submission.textFromFileTextAndImages" | i18nextEager }}
+      </button>
+    </mat-menu>
+    <button mat-button color="primary" [matMenuTriggerFor]="extractionMenu">
+      {{ "task.submission.textFromFile" | i18nextEager }}
+    </button>
+    } @if (!showExtractMenu) {
+    <button mat-button color="primary" (click)="uploadFile()">
       {{ "task.submission.codeFromFile" | i18nextEager }}
     </button>
-
-    <button
-      *ngIf="showToggleButton"
-      mat-button
-      color="accent"
-      (click)="toggleEditor()"
-    >
+    } @if (showToggleButton) {
+    <button mat-button color="accent" (click)="toggleEditor()">
       {{ isCodeFile ? "Wechsel zu Text-Editor" : "Wechsel zu Code-Editor" }}
     </button>
+    }
 
     <button mat-button (click)="downloadSubmission()">
       {{ "task.submission.downloadText" | i18nextEager }}
@@ -70,14 +61,15 @@
   [accept]="acceptedFileTypes"
 />
 
-<div *ngIf="processing" class="loading-overlay">
+@if (processing) {
+<div class="loading-overlay">
   <div class="loading-popup">
     <mat-spinner></mat-spinner>
     <p>{{ "task.submission.processingUpload" | i18nextEager }}</p>
   </div>
 </div>
-
-<div *ngIf="currentMode === 'plain' && !isCodeFile" class="editor-container">
+} @if (currentMode === 'plain' && !isCodeFile) {
+<div class="editor-container">
   <mat-form-field
     style="width: 100%"
     class="user-input-text"
@@ -93,8 +85,8 @@
     ></textarea>
   </mat-form-field>
 </div>
-
-<div *ngIf="currentMode === 'wysiwyg' && !isCodeFile" class="editor-container">
+} @if (currentMode === 'wysiwyg' && !isCodeFile) {
+<div class="editor-container">
   <angular-editor
     [config]="editorConfig"
     [(ngModel)]="toSubmit"
@@ -103,13 +95,13 @@
   >
   </angular-editor>
 </div>
-
+} @if (isCodeFile) {
 <app-code-editor
-  *ngIf="isCodeFile"
   [codeType]="getLanguageByFileType(fileType)"
   [(content)]="toSubmit"
   (update)="onCodeChange($event)"
 ></app-code-editor>
+}
 
 <ng-template #errorDialog let-data>
   <h2 mat-dialog-title>Fehler</h2>

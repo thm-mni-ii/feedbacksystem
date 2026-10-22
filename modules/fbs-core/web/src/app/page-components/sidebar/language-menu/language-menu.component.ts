@@ -1,4 +1,9 @@
-import { Component, Inject, ViewChild } from "@angular/core";
+import {
+  Component,
+  Inject,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { I18NEXT_SERVICE, ITranslationService } from "angular-i18next";
 import { MatMenu } from "@angular/material/menu";
 
@@ -10,6 +15,8 @@ import { MatMenu } from "@angular/material/menu";
   templateUrl: "./language-menu.component.html",
   styleUrls: ["./language-menu.component.scss"],
   exportAs: "languageMenu",
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class LanguageMenuComponent {
   @ViewChild("menu", { static: true })

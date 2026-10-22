@@ -5,6 +5,7 @@ import {
   ViewChild,
   SimpleChanges,
   OnChanges,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
@@ -20,6 +21,8 @@ import { Subscription } from "rxjs";
   selector: "app-dynamic-result-table-tab",
   templateUrl: "./dynamic-result-table-tab.component.html",
   styleUrls: ["./dynamic-result-table-tab.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class DynamicResultTableTabComponent
   implements OnChanges, AfterViewInit

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { GoToService } from "../../service/goto.service";
 import { AuthService } from "../../service/auth.service";
@@ -8,6 +8,8 @@ import { EmbeddingService } from "../../service/embedding.service";
   selector: "app-goto",
   templateUrl: "./goto.component.html",
   styleUrls: ["./goto.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class GoToComponent implements OnInit {
   constructor(

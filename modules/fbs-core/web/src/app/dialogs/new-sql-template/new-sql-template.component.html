@@ -1,8 +1,10 @@
 <div class="container">
   <!-- <div *ngIf="isUpdateDialog" matDialogTitle>Datenbank bearbeiten</div> -->
-  <div *ngIf="!isUpdateDialog" matDialogTitle>
+  @if (!isUpdateDialog) {
+  <div matDialogTitle>
     {{ "dialog.sql-template.new.create-edit-template" | i18nextEager }}
   </div>
+  }
   <mat-dialog-content style="max-height: 80%; overflow: auto">
     <mat-card-content class="content">
       <div class="templates">
@@ -19,16 +21,14 @@
             </div>
           </mat-list-item>
         </mat-list>
-        <mat-list
-          role="list"
-          class="template-list"
-          *ngFor="let category of templatesByCategory"
-        >
+        @for (category of templatesByCategory; track category) {
+        <mat-list role="list" class="template-list">
           <div mat-subheader>
             {{ category.category.name }}
           </div>
           <mat-divider></mat-divider>
-          <mat-list-item *ngFor="let template of category.templates">
+          @for (template of category.templates; track template) {
+          <mat-list-item>
             <div class="list-item">
               <span class="item-text">{{ template.name }}</span>
               <button mat-icon-button (click)="closeDialog()">
@@ -40,9 +40,11 @@
             </div>
             <mat-divider></mat-divider>
           </mat-list-item>
+          }
         </mat-list>
+        }
       </div>
-      <mat-card class="edit-area">
+      <mat-card appearance="outlined" class="edit-area">
         <mat-card-header>
           <mat-card-title>{{
             "dialog.sql-template.new.create-edit-template" | i18nextEager
@@ -62,9 +64,11 @@
               minlength="3"
               maxlength="100"
             />
-            <mat-error *ngIf="templateName.errors">{{
+            @if (templateName.errors) {
+            <mat-error>{{
               "dialog.sql-template.new.template-name-error" | i18nextEager
             }}</mat-error>
+            }
           </mat-form-field>
           <div class="category-grid">
             <mat-form-field class="select" appearance="fill">
@@ -73,12 +77,11 @@
               }}</mat-label>
               <mat-select [(value)]="selectedCategory">
                 <mat-option>-- None --</mat-option>
-                <mat-option
-                  *ngFor="let category of categories"
-                  [value]="category.id"
-                >
+                @for (category of categories; track category) {
+                <mat-option [value]="category.id">
                   {{ category.name }}
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
             <button mat-button>

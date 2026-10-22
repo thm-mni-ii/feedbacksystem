@@ -1,4 +1,9 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
 import { CheckResult } from "../../model/CheckResult";
@@ -10,6 +15,8 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   selector: "app-results",
   templateUrl: "./results.component.html",
   styleUrls: ["./results.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ResultsComponent implements OnInit {
   constructor(

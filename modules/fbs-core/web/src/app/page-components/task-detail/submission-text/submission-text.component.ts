@@ -8,6 +8,7 @@ import {
   ElementRef,
   AfterViewInit,
   TemplateRef,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import * as prism from "prismjs";
 import { ParsrService } from "../../../service/parsr.service";
@@ -21,6 +22,8 @@ export type SubmissionMode = "code" | "wysiwyg" | "plain" | "free";
   selector: "app-submission-text",
   templateUrl: "./submission-text.component.html",
   styleUrls: ["./submission-text.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SubmissionTextComponent implements OnInit, AfterViewInit {
   toSubmit = "";

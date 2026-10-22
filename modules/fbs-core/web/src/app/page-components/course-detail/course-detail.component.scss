@@ -14,7 +14,7 @@
   width: 100%;
   padding-left: 10px;
   margin-bottom: 10px;
-  .mat-flat-button {
+  .mat-mdc-unelevated-button {
     line-height: 30px;
     margin: 0 2.5px;
     height: 30px;
@@ -47,7 +47,7 @@
   alignment: inherit;
 }
 
-.mat-form-field {
+.mat-mdc-form-field {
   justify-content: center;
   padding: 0px;
   margin: 0px;
@@ -120,17 +120,17 @@
     cursor: pointer;
   }
 }
-.mat-progress-bar {
+.mat-mdc-progress-bar {
   height: 15px;
   border-radius: 5px;
 }
 
-:host ::ng-deep .mat-progress-bar-fill::after {
-  background-color: $green;
+:host ::ng-deep .mdc-linear-progress__bar-inner {
+  border-color: $green;
 }
 
-::ng-deep .mat-progress-bar-buffer {
-  background: $red;
+:host ::ng-deep .mdc-linear-progress__buffer-bar {
+  background-color: $red;
 }
 
 // ::ng-deep .mat-progress-bar {
@@ -146,10 +146,12 @@
 // }
 
 //animation none and color gray
-::ng-deep .mat-progress-bar-background {
-  background: #cccccc;
-  animation: none !important;
-  fill: #cccccc;
+:host ::ng-deep .mdc-linear-progress__buffer-dots {
+  display: none;
+}
+
+:host ::ng-deep .mdc-linear-progress__buffer {
+  background-color: #cccccc;
 }
 
 .flex-container {
@@ -230,7 +232,7 @@
       background-color: ghostwhite;
     }
 
-    .mat-standard-chip {
+    .mat-mdc-standard-chip {
       height: auto !important;
     }
   }

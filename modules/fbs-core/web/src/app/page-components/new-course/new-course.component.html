@@ -1,5 +1,5 @@
 <div class="container">
-  <mat-card class="card">
+  <mat-card appearance="outlined" class="card">
     <mat-card-content>
       <mat-form-field>
         <mat-label>{{
@@ -14,9 +14,11 @@
           minlength="3"
           maxlength="100"
         />
-        <mat-error *ngIf="name.errors">{{
+        @if (name.errors) {
+        <mat-error>{{
           "course.create.error.courseNameRequired" | i18nextEager
         }}</mat-error>
+        }
       </mat-form-field>
       <mat-form-field>
         <mat-label>{{
@@ -30,12 +32,15 @@
         />
       </mat-form-field>
       <mat-slide-toggle [(ngModel)]="isVisible"
-        ><p *ngIf="isVisible">
+        >@if (isVisible) {
+        <p>
           {{ "course.create.label.showCourse" | i18nextEager }}
         </p>
-        <p *ngIf="!isVisible">
+        } @if (!isVisible) {
+        <p>
           {{ "course.create.label.hideCourse" | i18nextEager }}
-        </p></mat-slide-toggle
+        </p>
+        }</mat-slide-toggle
       >
     </mat-card-content>
 

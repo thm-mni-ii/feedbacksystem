@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Course } from "../../model/Course";
 import { Router } from "@angular/router";
 
@@ -6,6 +6,8 @@ import { Router } from "@angular/router";
   selector: "app-course-preview",
   templateUrl: "./course-preview.component.html",
   styleUrls: ["./course-preview.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CoursePreviewComponent {
   @Input() data: Course;

@@ -1,4 +1,4 @@
-<mat-card class="content-container">
+<mat-card appearance="outlined" class="content-container">
   <!--    <div class="card-options">-->
   <!--      <div class="actions">-->
   <!--        <span class="lb">Download: </span>-->
@@ -26,10 +26,8 @@
           <span class="title">Kurs-Bonus</span>
         </div>
       </div>
-      <div
-        class="bonus-container"
-        *ngFor="let result of evaluationUserResults | async"
-      >
+      @for (result of evaluationUserResults | async; track result) {
+      <div class="bonus-container">
         <span
           class="category-result-backpane"
           matTooltipPosition="above"
@@ -37,14 +35,14 @@
             result.bonusPoints
           }}"
         >
-          <span class="category-bonus bonus" *ngIf="result.bonusPoints !== 0">{{
-            result.bonusPoints
-          }}</span>
-          <span class="category-bonus no-bonus" *ngIf="result.bonusPoints === 0"
-            >-</span
-          >
+          @if (result.bonusPoints !== 0) {
+          <span class="category-bonus bonus">{{ result.bonusPoints }}</span>
+          } @if (result.bonusPoints === 0) {
+          <span class="category-bonus no-bonus">-</span>
+          }
         </span>
       </div>
+      }
     </div>
     <div class="name-column">
       <div class="task-container header">
@@ -53,26 +51,23 @@
           <h2 class="title">Namen</h2>
         </div>
       </div>
-      <div
-        class="name-container"
-        *ngFor="let result of evaluationUserResults | async"
-      >
-        <span class="state passed" *ngIf="result.passed"
-          ><mat-icon>check_circle</mat-icon></span
-        >
-        <span class="state failed" *ngIf="!result.passed"
-          ><mat-icon>cancel</mat-icon></span
-        >&nbsp;
+      @for (result of evaluationUserResults | async; track result) {
+      <div class="name-container">
+        @if (result.passed) {
+        <span class="state passed"><mat-icon>check_circle</mat-icon></span>
+        } @if (!result.passed) {
+        <span class="state failed"><mat-icon>cancel</mat-icon></span>
+        }&nbsp;
         <span class="username"
           >{{ result.user.surname }}, {{ result.user.prename }}</span
         >
       </div>
+      }
     </div>
 
-    <div
-      class="task-column"
-      *ngFor="let requirement of requirements | async; index as i"
-    >
+    @for (requirement of requirements | async; track requirement; let i =
+    $index) {
+    <div class="task-column">
       <div class="task-container header">
         <div class="task-result">
           <span
@@ -83,23 +78,23 @@
           >
           <span class="title">Bonus</span>
           <!-- Not showing when showDetails is true -->
-          <ng-container *ngIf="opened === requirement.id">
-            <span class="category-tasks" *ngFor="let task of requirement.tasks">
-              <span class="title">{{ task.name }}</span>
-            </span>
-          </ng-container>
+          @if (opened === requirement.id) { @for (task of requirement.tasks;
+          track task) {
+          <span class="category-tasks">
+            <span class="title">{{ task.name }}</span>
+          </span>
+          } }
         </div>
       </div>
-      <div
-        class="task-container"
-        *ngFor="let userResult of evaluationUserResults | async"
-      >
-        <span class="state passed" *ngIf="userResult.results[i].passed"
-          ><mat-icon>check_circle</mat-icon></span
-        >
-        <span class="state failed" *ngIf="!userResult.results[i].passed"
+      @for (userResult of evaluationUserResults | async; track userResult) {
+      <div class="task-container">
+        @if (userResult.results[i].passed) {
+        <span class="state passed"><mat-icon>check_circle</mat-icon></span>
+        } @if (!userResult.results[i].passed) {
+        <span class="state failed"
           ><mat-icon class="close-icon">cancel</mat-icon></span
         >
+        }
         <span
           class="category-result-backpane"
           matTooltipPosition="above"
@@ -107,22 +102,19 @@
             userResult.user.prename
           }}, {{ userResult.results[i].bonusPoints }}"
         >
-          <span
-            class="category-bonus bonus"
-            *ngIf="userResult.results[i].bonusPoints !== 0"
-            >{{ userResult.results[i].bonusPoints }}</span
-          >
-          <span
-            class="category-bonus no-bonus"
-            *ngIf="userResult.results[i].bonusPoints === 0"
-            >-</span
-          >
+          @if (userResult.results[i].bonusPoints !== 0) {
+          <span class="category-bonus bonus">{{
+            userResult.results[i].bonusPoints
+          }}</span>
+          } @if (userResult.results[i].bonusPoints === 0) {
+          <span class="category-bonus no-bonus">-</span>
+          }
         </span>
-        <ng-container class="task-container" *ngIf="opened === requirement.id">
-          <ng-container
-            class="task-result"
-            *ngFor="let taskResult of userResult.results[i].container.tasks"
-          >
+        @if (opened === requirement.id) {
+        <ng-container class="task-container">
+          @for (taskResult of userResult.results[i].container.tasks; track
+          taskResult) {
+          <ng-container class="task-result">
             <span
               class="task-result-backpane {{
                 showPoints || taskResult.attempts === 0
@@ -136,15 +128,25 @@
                 userResult.user.prename
               }} {{ taskResult.attempts }}"
             >
-              <span *ngIf="taskResult.attempts !== 0">
-                <span *ngIf="showPoints">{{ taskResult.points }}</span>
-                <span *ngIf="!showPoints">{{ taskResult.attempts }}</span>
+              @if (taskResult.attempts !== 0) {
+              <span>
+                @if (showPoints) {
+                <span>{{ taskResult.points }}</span>
+                } @if (!showPoints) {
+                <span>{{ taskResult.attempts }}</span>
+                }
               </span>
-              <span *ngIf="taskResult.attempts === 0">-</span>
+              } @if (taskResult.attempts === 0) {
+              <span>-</span>
+              }
             </span>
           </ng-container>
+          }
         </ng-container>
+        }
       </div>
+      }
     </div>
+    }
   </div>
 </mat-card>

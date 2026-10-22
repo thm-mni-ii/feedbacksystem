@@ -29,12 +29,15 @@
           <mat-hint>{{
             "task-provider.dialog.hint-id" | i18nextEager
           }}</mat-hint>
-          <mat-error *ngIf="form.get('id')?.hasError('required')">
+          @if (form.get('id')?.hasError('required')) {
+          <mat-error>
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
-          <mat-error *ngIf="form.get('id')?.hasError('pattern')">
+          } @if (form.get('id')?.hasError('pattern')) {
+          <mat-error>
             {{ "task-provider.dialog.error-slug" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
 
         <!-- Display Name -->
@@ -47,9 +50,11 @@
             formControlName="displayName"
             placeholder="z.B. SQL Query Checker"
           />
-          <mat-error *ngIf="form.get('displayName')?.hasError('required')">
+          @if (form.get('displayName')?.hasError('required')) {
+          <mat-error>
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -63,9 +68,11 @@
             *</mat-label
           >
           <input matInput formControlName="version" placeholder="1.0.0" />
-          <mat-error *ngIf="form.get('version')?.hasError('required')">
+          @if (form.get('version')?.hasError('required')) {
+          <mat-error>
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
 
         <!-- Icon -->
@@ -81,9 +88,11 @@
           <mat-icon matSuffix>{{
             form.get("icon")?.value || "extension"
           }}</mat-icon>
-          <mat-error *ngIf="form.get('icon')?.hasError('required')">
+          @if (form.get('icon')?.hasError('required')) {
+          <mat-error>
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -121,16 +130,15 @@
             placeholder="http://host:port/evaluate"
           />
           <mat-hint>POST /evaluate Webhook</mat-hint>
-          <mat-error
-            *ngIf="form.get('evaluationEndpointUrl')?.hasError('required')"
-          >
+          @if (form.get('evaluationEndpointUrl')?.hasError('required')) {
+          <mat-error>
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
-          <mat-error
-            *ngIf="form.get('evaluationEndpointUrl')?.hasError('invalidUrl')"
-          >
+          } @if (form.get('evaluationEndpointUrl')?.hasError('invalidUrl')) {
+          <mat-error>
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
 
         <!-- Health URL -->
@@ -147,16 +155,15 @@
             placeholder="http://host:port/health"
           />
           <mat-hint>GET /health Probe</mat-hint>
-          <mat-error
-            *ngIf="form.get('healthEndpointUrl')?.hasError('required')"
-          >
+          @if (form.get('healthEndpointUrl')?.hasError('required')) {
+          <mat-error>
             {{ "task-provider.dialog.error-required" | i18nextEager }}
           </mat-error>
-          <mat-error
-            *ngIf="form.get('healthEndpointUrl')?.hasError('invalidUrl')"
-          >
+          } @if (form.get('healthEndpointUrl')?.hasError('invalidUrl')) {
+          <mat-error>
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
       </div>
     </div>
@@ -181,9 +188,11 @@
             formControlName="configUiUrl"
             placeholder="http://host:port/ui/config"
           />
-          <mat-error *ngIf="form.get('configUiUrl')?.hasError('invalidUrl')">
+          @if (form.get('configUiUrl')?.hasError('invalidUrl')) {
+          <mat-error>
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
 
         <!-- Solve UI URL -->
@@ -196,9 +205,11 @@
             formControlName="solveUiUrl"
             placeholder="http://host:port/ui/solve"
           />
-          <mat-error *ngIf="form.get('solveUiUrl')?.hasError('invalidUrl')">
+          @if (form.get('solveUiUrl')?.hasError('invalidUrl')) {
+          <mat-error>
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -213,9 +224,11 @@
             formControlName="resultUiUrl"
             placeholder="http://host:port/ui/result"
           />
-          <mat-error *ngIf="form.get('resultUiUrl')?.hasError('invalidUrl')">
+          @if (form.get('resultUiUrl')?.hasError('invalidUrl')) {
+          <mat-error>
             {{ "task-provider.dialog.error-url" | i18nextEager }}
           </mat-error>
+          }
         </mat-form-field>
       </div>
     </div>
@@ -290,11 +303,11 @@
           class="code-textarea"
           placeholder='{"type": "object", "properties": { ... }}'
         ></textarea>
-        <mat-error
-          *ngIf="form.get('configSchemaText')?.hasError('invalidJson')"
-        >
+        @if (form.get('configSchemaText')?.hasError('invalidJson')) {
+        <mat-error>
           {{ "task-provider.dialog.error-invalid-json" | i18nextEager }}
         </mat-error>
+        }
       </mat-form-field>
     </div>
   </form>

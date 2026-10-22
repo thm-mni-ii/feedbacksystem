@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
 import { SubTaskResult } from "../../model/SubTaskResult";
@@ -8,6 +8,8 @@ import { SubmissionService } from "../../service/submission.service";
   selector: "app-subtask-results",
   templateUrl: "./subtask-results.component.html",
   styleUrls: ["./subtask-results.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SubtaskResultsComponent {
   dataSource = new MatTableDataSource<SubTaskResult>();

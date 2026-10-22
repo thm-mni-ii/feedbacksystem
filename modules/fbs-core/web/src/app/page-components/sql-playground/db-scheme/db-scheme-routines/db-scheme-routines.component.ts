@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Routine } from "src/app/model/sql_playground/Routine";
@@ -8,6 +8,8 @@ import * as fromSqlPlayground from "../../state/sql-playground.selectors";
   selector: "app-db-scheme-routines",
   templateUrl: "./db-scheme-routines.component.html",
   styleUrls: ["../db-scheme.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class DbSchemeRoutinesComponent {
   routines$: Observable<Routine[]>;

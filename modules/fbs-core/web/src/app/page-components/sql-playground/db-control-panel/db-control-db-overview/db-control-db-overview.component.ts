@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { Database } from "../../../../model/sql_playground/Database";
@@ -34,6 +41,8 @@ import {
   selector: "app-db-control-db-overview",
   templateUrl: "./db-control-db-overview.component.html",
   styleUrls: ["./db-control-db-overview.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class DbControlDbOverviewComponent implements OnInit {
   @Input() selectedMongoDbId: string | null = null;

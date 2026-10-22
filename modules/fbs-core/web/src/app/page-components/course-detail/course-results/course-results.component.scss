@@ -83,6 +83,7 @@
 }
 
 .content-container {
+  padding: 16px;
   display: flex;
   flex-direction: column;
   margin-top: 20px;
@@ -212,12 +213,12 @@ hr {
   color: rgb(235, 235, 235);
 }
 
-.mat-menu{
+.mat-mdc-menu-panel {
   border-radius: 5px;
   box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
 }
 
-.mat-menu-item {
+.mat-mdc-menu-item {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -230,7 +231,7 @@ hr {
   font-size: small;
 }
 
-.mat-slide-toggle {
+.mat-mdc-slide-toggle {
   transform: scale(0.8);
   pointer-events: all;
 }

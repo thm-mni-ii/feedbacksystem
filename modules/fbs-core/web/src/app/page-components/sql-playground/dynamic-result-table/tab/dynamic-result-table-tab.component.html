@@ -1,13 +1,11 @@
 <div class="inputField">
-  <div class="spinner" *ngIf="$isQueryPending | async">
-    <mat-spinner [diameter]="100"></mat-spinner>&nbsp;
-  </div>
-  <div
-    class="container"
-    *ngIf="tab !== undefined && ($isQueryPending | async) === false"
-  >
-    <div *ngIf="tab.error === true">
-      <mat-card>
+  @if ($isQueryPending | async) {
+  <div class="spinner"><mat-spinner [diameter]="100"></mat-spinner>&nbsp;</div>
+  } @if (tab !== undefined && ($isQueryPending | async) === false) {
+  <div class="container">
+    @if (tab.error === true) {
+    <div>
+      <mat-card appearance="outlined">
         <mat-card-header>
           <mat-card-title>
             <mat-icon class="error-icon">close</mat-icon>
@@ -27,14 +25,12 @@
         </mat-card-content>
       </mat-card>
     </div>
-
-    <div *ngIf="tab.error === false && ($isQueryPending | async) === false">
+    } @if (tab.error === false && ($isQueryPending | async) === false) {
+    <div>
       <div class="table-container">
         <table mat-table [dataSource]="dataSource">
-          <ng-container
-            matColumnDef="{{ col }}"
-            *ngFor="let col of tab.displayedColumns; let index = index"
-          >
+          @for (col of tab.displayedColumns; track col; let index = $index) {
+          <ng-container matColumnDef="{{ col }}">
             <th mat-header-cell class="cells" *matHeaderCellDef>
               {{ col }}
             </th>
@@ -42,7 +38,7 @@
               {{ row[index] }}
             </td>
           </ng-container>
-
+          }
           <tr
             mat-header-row
             class="table-row"
@@ -65,5 +61,7 @@
         ></mat-paginator>
       </div>
     </div>
+    }
   </div>
+  }
 </div>

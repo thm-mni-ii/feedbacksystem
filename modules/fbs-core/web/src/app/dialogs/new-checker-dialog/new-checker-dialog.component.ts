@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -14,6 +19,8 @@ import { TaskProvider } from "../../model/TaskProvider";
   selector: "app-new-checker-dialog",
   templateUrl: "./new-checker-dialog.component.html",
   styleUrls: ["./new-checker-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class NewCheckerDialogComponent implements OnInit {
   fileCounter = 0;

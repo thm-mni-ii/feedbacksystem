@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { TaskService } from "src/app/service/task.service";
 
@@ -6,6 +11,8 @@ import { TaskService } from "src/app/service/task.service";
   selector: "app-export-tasks-dialog",
   templateUrl: "./export-tasks-dialog.component.html",
   styleUrls: ["./export-tasks-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ExportTasksDialogComponent implements OnInit {
   tasks: any[] = [];

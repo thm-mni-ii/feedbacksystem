@@ -22,19 +22,28 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets", { "glob": "**/*", "input": "node_modules/katex/dist", "output": "." }, {
-              "glob": "**/*",
-              "input": "node_modules/@kolkov/angular-editor/assets/icons",
-              "output": "assets/ae-icons/"
-            }],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/katex/dist",
+                "output": "."
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@kolkov/angular-editor/assets/icons",
+                "output": "assets/ae-icons/"
+              }
+            ],
             "styles": [
               "src/theme.scss",
               "src/styles.scss",
+              "node_modules/@fontsource/indie-flower/index.css",
               "node_modules/katex/dist/katex.min.css",
               "node_modules/@kolkov/angular-editor/themes/default.scss"
             ],
             "scripts": [
-              "node_modules/marked/marked.min.js",
               "node_modules/katex/dist/katex.min.js",
               "node_modules/katex/dist/contrib/auto-render.min.js"
             ],
@@ -45,7 +54,10 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "allowedCommonJsDependencies": ["chart.js", "file-saver"]
+            "allowedCommonJsDependencies": [
+              "chart.js",
+              "file-saver"
+            ]
           },
           "configurations": {
             "production": {
@@ -71,22 +83,22 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "web-gui:build"
+            "buildTarget": "web-gui:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "web-gui:build:production"
+              "buildTarget": "web-gui:build:production"
             },
             "development": {
-              "browserTarget": "web-gui:build:development",
-              "proxyConfig": "proxy.config.json"
+              "proxyConfig": "proxy.config.json",
+              "buildTarget": "web-gui:build:development"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "web-gui:build"
+            "buildTarget": "web-gui:build"
           }
         },
         "e2e": {
@@ -104,7 +116,10 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }
@@ -112,7 +127,35 @@
   },
   "schematics": {
     "@schematics/angular:component": {
-      "style": "scss"
+      "style": "scss",
+      "type": "component"
+    },
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
     }
   },
   "cli": {

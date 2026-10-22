@@ -152,16 +152,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Node.js 20
+      - name: Set up Node.js 24
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
           cache: 'npm'
           cache-dependency-path: 'modules/fbs-core/web/package-lock.json'
 
       - name: Install dependencies
         working-directory: modules/fbs-core/web
-        run: npm ci --legacy-peer-deps
+        run: npm ci --force 
 
       - name: Lint Web
         working-directory: modules/fbs-core/web

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { Task } from "../../../model/Task";
 import { UserTaskResult } from "../../../model/UserTaskResult";
@@ -17,7 +17,6 @@ import { GoToService } from "../../../service/goto.service";
 import { CheckerService } from "../../../service/checker.service";
 import { Roles } from "../../../model/Roles";
 import { ChartType, ChartOptions } from "chart.js";
-import { SingleDataSet, Label } from "ng2-charts";
 import { SqlCheckerService } from "../../../service/sql-checker.service";
 import { SumUp } from "../../../model/SumUp";
 import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
@@ -26,6 +25,8 @@ import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
   selector: "app-sql-checker-results",
   templateUrl: "./sql-checker-results.component.html",
   styleUrls: ["./sql-checker-results.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SqlCheckerResultsComponent implements OnInit {
   constructor(
@@ -46,17 +47,16 @@ export class SqlCheckerResultsComponent implements OnInit {
     private sqlcheckerService: SqlCheckerService
   ) {}
   // Chart generally
-  public pieChartColors: Array<any> = [
-    {
-      backgroundColor: ["#405e9a", "#aab6fe"],
-    },
-  ];
+  public pieChartColors = ["#405e9a", "#aab6fe"];
   // Left chart
   pieChartOptionsLeft: ChartOptions = {
     responsive: true,
   };
-  pieChartLabelsLeft: Label[] = [["Korrekte Tabellen"], ["Falsche Tabellen"]];
-  pieChartDataLeft: SingleDataSet = [];
+  pieChartLabelsLeft: string[][] = [
+    ["Korrekte Tabellen"],
+    ["Falsche Tabellen"],
+  ];
+  pieChartDataLeft: number[] = [];
   pieChartTypeLeft: ChartType = "pie";
   pieChartLegendLeft = true;
   pieChartPluginsLeft = [];
@@ -66,11 +66,11 @@ export class SqlCheckerResultsComponent implements OnInit {
   pieChartOptionsRight: ChartOptions = {
     responsive: true,
   };
-  pieChartLabelsRight: Label[] = [
+  pieChartLabelsRight: string[][] = [
     ["Korrekte Attribute"],
     ["Falsche Attribute"],
   ];
-  pieChartDataRight: SingleDataSet = [];
+  pieChartDataRight: number[] = [];
   pieChartTypeRight: ChartType = "pie";
   pieChartLegendRight = true;
   pieChartPluginsRight = [];
@@ -79,8 +79,8 @@ export class SqlCheckerResultsComponent implements OnInit {
     maintainAspectRatio: true,
     responsive: true,
   };
-  pieChartLabelsCenter: Label[];
-  pieChartDataCenter: SingleDataSet = [];
+  pieChartLabelsCenter: string[][];
+  pieChartDataCenter: number[] = [];
   pieChartTypeCenter: ChartType = "pie";
   pieChartLegendCenter = true;
   pieChartPluginsCenter = [];
@@ -191,7 +191,7 @@ export class SqlCheckerResultsComponent implements OnInit {
     );
   }
   private tableCheckerWrongTables(e: any) {
-    e = e.active[0]._index;
+    e = e.active[0].index;
     if (e === 0) {
       this.tableCheckerRightTables();
     } else {
@@ -227,7 +227,7 @@ export class SqlCheckerResultsComponent implements OnInit {
       );
   }
   private clickCenterChartTableChecker(e: any) {
-    e = e.active[0]._index;
+    e = e.active[0].index;
     if (this.showTableCheckerRightTables) {
       if (e === 0) {
         this.showPath = "Korrekte Tabellen ➔ korrekte Attribute";
@@ -256,7 +256,7 @@ export class SqlCheckerResultsComponent implements OnInit {
     }
   }
   private clickAttributeChart(e: any) {
-    e = e.active[0]._index;
+    e = e.active[0].index;
     if (e === 0) {
       this.attributeCheckerRightAttribute();
     } else {
@@ -296,7 +296,7 @@ export class SqlCheckerResultsComponent implements OnInit {
       );
   }
   private clickCenterChartAttributeChecker(e: any) {
-    e = e.active[0]._index;
+    e = e.active[0].index;
     if (e === 0) {
       this.showPath = "Korrekte Attribute ➔ korrekte Tabellen";
       this.showResult = true;

@@ -53,9 +53,11 @@
       </div>
     </div>
 
-    <div *ngIf="taskProvider.description" class="meta-description">
+    @if (taskProvider.description) {
+    <div class="meta-description">
       <p>{{ taskProvider.description }}</p>
     </div>
+    }
   </div>
 
   <div class="section-box">
@@ -69,38 +71,42 @@
         <span class="endpoint-name">Health:</span>
         <code>{{ taskProvider.healthEndpointUrl }}</code>
       </div>
-      <div class="endpoint-row" *ngIf="taskProvider.configUiUrl">
+      @if (taskProvider.configUiUrl) {
+      <div class="endpoint-row">
         <span class="endpoint-name">Config UI:</span>
         <code>{{ taskProvider.configUiUrl }}</code>
       </div>
-      <div class="endpoint-row" *ngIf="taskProvider.solveUiUrl">
+      } @if (taskProvider.solveUiUrl) {
+      <div class="endpoint-row">
         <span class="endpoint-name">Solve UI:</span>
         <code>{{ taskProvider.solveUiUrl }}</code>
       </div>
-      <div class="endpoint-row" *ngIf="taskProvider.resultUiUrl">
+      } @if (taskProvider.resultUiUrl) {
+      <div class="endpoint-row">
         <span class="endpoint-name">Result UI:</span>
         <code>{{ taskProvider.resultUiUrl }}</code>
       </div>
+      }
     </div>
   </div>
 
-  <div class="section-box" *ngIf="taskProvider.supportedMediaTypes?.length">
+  @if (taskProvider.supportedMediaTypes?.length) {
+  <div class="section-box">
     <h3>{{ "task-provider.dialog.field-media-types" | i18nextEager }}</h3>
-    <mat-chip-list aria-label="Media Types">
-      <mat-chip
-        *ngFor="let mt of taskProvider.supportedMediaTypes"
-        selected
-        color="primary"
-      >
+    <mat-chip-listbox aria-label="Media Types">
+      @for (mt of taskProvider.supportedMediaTypes; track mt) {
+      <mat-chip-option selected color="primary">
         {{ mt }}
-      </mat-chip>
-    </mat-chip-list>
+      </mat-chip-option>
+      }
+    </mat-chip-listbox>
   </div>
-
-  <div class="section-box" *ngIf="formattedSchema">
+  } @if (formattedSchema) {
+  <div class="section-box">
     <h3>{{ "task-provider.dialog.section-schema" | i18nextEager }}</h3>
     <pre class="schema-code"><code>{{ formattedSchema }}</code></pre>
   </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

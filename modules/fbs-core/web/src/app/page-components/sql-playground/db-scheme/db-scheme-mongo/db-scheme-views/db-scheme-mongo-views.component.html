@@ -1,6 +1,8 @@
 <div>
   <p class="title">Views</p>
-  <mat-card *ngFor="let view of views" class="non-clickable-view">
+  @for (view of views; track view) {
+  <mat-card appearance="outlined" class="non-clickable-view">
     {{ view.name }}
   </mat-card>
+  }
 </div>

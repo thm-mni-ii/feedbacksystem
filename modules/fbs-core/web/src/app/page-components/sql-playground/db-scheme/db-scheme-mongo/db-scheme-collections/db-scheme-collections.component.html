@@ -1,6 +1,7 @@
 <div>
   <p class="title">Collections</p>
-  <mat-expansion-panel *ngFor="let col of collections; index as i">
+  @for (col of collections; track col; let i = $index) {
+  <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
         {{ col.name }}
@@ -19,4 +20,5 @@
       </li>
     </ul>
   </mat-expansion-panel>
+  }
 </div>

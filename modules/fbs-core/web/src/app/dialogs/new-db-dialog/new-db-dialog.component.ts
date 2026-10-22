@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -12,6 +12,8 @@ import { Store } from "@ngrx/store";
   selector: "app-new-db-dialog",
   templateUrl: "./new-db-dialog.component.html",
   styleUrls: ["./new-db-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class NewDbDialogComponent {
   name = new UntypedFormControl("", [Validators.required]);
