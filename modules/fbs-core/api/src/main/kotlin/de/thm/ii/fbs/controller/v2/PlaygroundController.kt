@@ -777,7 +777,7 @@ class PlaygroundController(
         @PathVariable("groupId") groupId: Int
     ): SqlPlaygroundDatabase? {
         getGroup(groupId, currentToken.id)
-        return databaseRepository.findByShareWithGroup(groupId)
+        return databaseRepository.findByShareWithGroup_Id(groupId)
     }
 
     private fun getEntity(userId: Int, databaseId: Int, type: String): ArrayNode {

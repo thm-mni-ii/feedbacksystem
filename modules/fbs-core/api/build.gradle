@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "3.0.13"
+    id "org.springframework.boot" version "3.5.16"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.5.0"
     id "org.jetbrains.kotlin.jvm" version "1.9.23"
@@ -49,16 +49,16 @@ startScripts {
 dependencies {
     implementation 'org.apache.tika:tika-core:2.8.0'
     implementation 'org.apache.tika:tika-parsers:2.8.0'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.9.23'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     // jjwt 0.7 needs javax.xml.bind at runtime (no longer provided since Spring Boot 3)
     runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
     implementation group: 'io.minio', name: 'minio', version: '8.5.4'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
     compileOnly 'org.scala-lang:scala-library:2.13.10'
-    implementation 'mysql:mysql-connector-java:8.0.33'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
-    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.14.2'
+    implementation 'com.mysql:mysql-connector-j'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation('org.apereo.cas.client:cas-client-support-springboot:4.0.4')
     implementation('org.json:json:20230618')
@@ -68,16 +68,16 @@ dependencies {
     implementation group: 'org.ldaptive', name: 'ldaptive', version: '2.1.1'
     implementation 'org.apache.httpcomponents.client5:httpclient5'
     implementation 'com.udojava:EvalEx:2.7'
-    implementation 'org.mongodb:bson:4.10.2'
-    implementation 'org.mongodb:mongodb-driver-core:4.10.2'
-    implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
+    implementation 'org.mongodb:bson'
+    implementation 'org.mongodb:mongodb-driver-core'
+    implementation 'org.mongodb:mongodb-driver-sync'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'org.springframework.data:spring-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-    implementation 'io.projectreactor:reactor-core:3.5.6'
+    implementation 'io.projectreactor:reactor-core'
     implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     implementation project(':fbs-core.math-parser')
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
@@ -85,14 +85,13 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.23.0'
     implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.2'
     implementation group: 'org.hashids', name: 'hashids', version: '1.0.3'
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'io.projectreactor.netty:reactor-netty:1.1.13'
+    implementation 'io.projectreactor.netty:reactor-netty'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.20'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
