@@ -1,6 +1,6 @@
 <template>
   <div class="fbs-app-host-view">
-    <template v-if="appsStore.loading">
+    <template v-if="appsStore.loading && appsStore.apps.length === 0">
       <div class="d-flex flex-column align-center justify-center fill-height pt-16">
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
         <span class="mt-4 text-subtitle-1">Anwendungskatalog wird geladen...</span>
