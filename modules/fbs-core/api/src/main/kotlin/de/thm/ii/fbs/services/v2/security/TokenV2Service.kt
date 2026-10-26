@@ -50,7 +50,7 @@ class TokenV2Service(
             if (jwtDecoder != null) {
                 try {
                     val jwt = jwtDecoder.decode(token)
-                    val id = jwt.subject.toIntOrNull()
+                    val id = jwt.subject?.toIntOrNull()
                     val username = jwt.getClaimAsString("username") ?: ""
                     if (id != null) {
                         return LegacyToken(id, username)

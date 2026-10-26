@@ -1,3 +1,5 @@
+spring.http.converters.preferred-json-mapper: jackson2
+
 compile:
   production: true
 jwt:

@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "3.5.16"
+    id "org.springframework.boot" version "4.1.2"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.5.0"
     id "org.jetbrains.kotlin.jvm" version "2.2.21"
@@ -60,6 +60,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-restclient'
     implementation('org.json:json:20230618')
     implementation 'org.apache.poi:poi:5.2.3'
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
@@ -76,8 +77,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-jackson2'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
+    runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
     implementation 'io.projectreactor:reactor-core'
-    implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     implementation project(':fbs-core.math-parser')
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'

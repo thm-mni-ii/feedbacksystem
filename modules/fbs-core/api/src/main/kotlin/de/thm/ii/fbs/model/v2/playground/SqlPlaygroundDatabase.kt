@@ -21,6 +21,7 @@ class SqlPlaygroundDatabase(
     @Column(nullable = false)
     var active: Boolean = false,
     @OneToOne
+    @JoinColumn(name = "share_with_group_group_id")
     var shareWithGroup: Group? = null,
     @Column(nullable = false)
     @JsonIgnore

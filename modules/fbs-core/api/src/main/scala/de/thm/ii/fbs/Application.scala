@@ -5,11 +5,11 @@ import de.thm.ii.fbs.services.persistence.{DatabaseMigrationService, MinioServic
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.domain.EntityScan
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+import org.springframework.boot.persistence.autoconfigure.EntityScan
+import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.boot.web.servlet.MultipartConfigFactory
+import org.springframework.boot.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.event.EventListener
 import org.springframework.util.unit.DataSize
