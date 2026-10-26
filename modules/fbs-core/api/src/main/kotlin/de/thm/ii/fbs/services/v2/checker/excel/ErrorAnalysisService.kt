@@ -16,7 +16,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 class ErrorAnalysisService(
     private val workbook: XSSFWorkbook,
     private val graph: ReferenceGraph,
-    private val solution: Map<Cell, String?>, /* TODO maybe usa a kotlin set with indexing; */
+    private val solution: Map<Cell, String?>, // TODO maybe use a kotlin set with indexing;
     private val handleService: HandlerService<ErrorAnalysisContext, Unit>? = null
 ) {
     private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()

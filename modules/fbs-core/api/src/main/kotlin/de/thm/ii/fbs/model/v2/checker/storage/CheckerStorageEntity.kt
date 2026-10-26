@@ -1,4 +1,4 @@
-@file:Suppress("ktlint:no-wildcard-imports")
+@file:Suppress("ktlint:standard:no-wildcard-imports")
 
 package de.thm.ii.fbs.model.v2.checker.storage
 
