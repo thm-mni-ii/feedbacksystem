@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 
 /**
   * Check result of a single check

@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
+import tools.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SQLCheckerQuery}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, SQLCheckerService, TaskService}

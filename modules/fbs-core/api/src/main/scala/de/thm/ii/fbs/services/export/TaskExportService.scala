@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.`export`
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
 import de.thm.ii.fbs.model.task.Task
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CheckrunnerSubTask, storageFileName}
@@ -25,7 +25,7 @@ class TaskExportService {
   private val checkrunnerSubTaskService: CheckrunnerSubTaskService = null
   @Autowired
   private val storageService: StorageService = null
-  private val objectMapper: ObjectMapper = new ScalaObjectMapper()
+  private val objectMapper: ObjectMapper = ScalaObjectMapper()
 
   private val tmpDir: File = new File("/tmp")
 

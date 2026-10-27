@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import tools.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.model.task.Task
@@ -31,7 +31,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   private val excelCheckerServiceV2: ExcelCheckerServiceV2 = null
   @Autowired
   private val errorAnalysisSolutionService: ErrorAnalysisSolutionService = null
-  private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+  private val objectMapper: ObjectMapper = ScalaObjectMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build()
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**

@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.model.checker
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model.checker
 import de.thm.ii.fbs.model.checker.RunnerConfigurationFilesType.RunnerConfigurationFilesType
 

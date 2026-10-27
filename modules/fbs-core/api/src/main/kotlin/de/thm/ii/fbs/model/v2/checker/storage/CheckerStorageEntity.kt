@@ -2,9 +2,9 @@
 
 package de.thm.ii.fbs.model.v2.checker.storage
 
-import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.utils.v2.converters.JpaJsonNodeConverter
 import jakarta.persistence.*
+import tools.jackson.databind.JsonNode
 
 @Entity
 @Table(name = "checkrunner_storage")

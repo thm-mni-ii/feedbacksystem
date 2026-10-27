@@ -2,8 +2,6 @@
 
 package de.thm.ii.fbs.controller.v2
 
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.mongodb.MongoCommandException
 import com.mongodb.MongoException
 import de.thm.ii.fbs.model.v2.group.Group
@@ -27,6 +25,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.JsonNodeFactory
 import kotlin.jvm.optionals.getOrNull
 
 @RestController
@@ -788,7 +788,7 @@ class PlaygroundController(
 
     private fun createAllEntities(database: SqlPlaygroundDatabase) =
         listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
-            entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
+            entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory.instance)))
         }
 
     private fun getDatabase(userId: Int, databaseId: Int): SqlPlaygroundDatabase {

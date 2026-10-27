@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.utils.v2.converters
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraphEdge
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 
 object ReferenceGraphSerialisation {
     private val objectMapper = ObjectMapper()
@@ -27,10 +27,10 @@ object ReferenceGraphSerialisation {
         val outputFields = value.outputFields.map { c -> c.toMapKey() }
 
         jgen.writeStartObject()
-        jgen.writeObjectFieldStart(DATA_JSON_KEY)
-        jgen.writeObjectField(VERTEXES_JSON_KEY, vertexes)
-        jgen.writeObjectField(EDGES_JSON_KEY, edges)
-        jgen.writeObjectField(OUTPUT_FIELDS_JSON_KEY, outputFields)
+        jgen.writeObjectPropertyStart(DATA_JSON_KEY)
+        jgen.writePOJOProperty(VERTEXES_JSON_KEY, vertexes)
+        jgen.writePOJOProperty(EDGES_JSON_KEY, edges)
+        jgen.writePOJOProperty(OUTPUT_FIELDS_JSON_KEY, outputFields)
         jgen.writeEndObject()
         jgen.writeEndObject()
     }

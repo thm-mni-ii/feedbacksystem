@@ -1,8 +1,5 @@
 package de.thm.ii.fbs.services.v2.taskprovider
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.v2.taskprovider.CreateTaskProviderRequest
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderDTO
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderEntity
@@ -12,6 +9,9 @@ import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 
 @Service
 class TaskProviderService(

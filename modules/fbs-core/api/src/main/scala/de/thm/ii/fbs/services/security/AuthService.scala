@@ -173,7 +173,7 @@ class AuthService {
     */
   def createToken(user: User): String = {
     val privileges = crs.getCoursePrivileges(user.id)
-    val mapper = new ScalaObjectMapper
+    val mapper = ScalaObjectMapper()
 
     val courseRoles = privileges match {
       case m: Map[Int, CourseRole.Value] if m.isEmpty => "{}"

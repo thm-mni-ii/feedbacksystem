@@ -1,5 +1,5 @@
 package de.thm.ii.fbs.services.checker
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import tools.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerSubmission, User}
 import de.thm.ii.fbs.model.task.Task

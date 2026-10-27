@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
 import de.thm.ii.fbs.model.task.Task
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole}
@@ -31,7 +31,7 @@ class ExportController {
   @Autowired
   private val taskService: TaskService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
-  val objectMapper = new ScalaObjectMapper
+  val objectMapper = ScalaObjectMapper()
 
   @GetMapping(value = Array("/tasks/{taskId}/export"))
   @ResponseBody

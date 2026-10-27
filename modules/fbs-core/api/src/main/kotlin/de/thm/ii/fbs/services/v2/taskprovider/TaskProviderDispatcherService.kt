@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.services.v2.taskprovider
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.v2.taskprovider.EvaluationSubmissionContext
 import de.thm.ii.fbs.model.v2.taskprovider.EvaluationUserContext
 import de.thm.ii.fbs.model.v2.taskprovider.EvaluationWebhookRequest
@@ -14,6 +12,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 import java.util.concurrent.CompletableFuture
 
 @Service
