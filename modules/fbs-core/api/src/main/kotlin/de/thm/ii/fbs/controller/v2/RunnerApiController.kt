@@ -1,6 +1,7 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package de.thm.ii.fbs.controller.v2
 
-import com.fasterxml.jackson.databind.node.ArrayNode
 import de.thm.ii.fbs.model.v2.checker.RunnerMode
 import de.thm.ii.fbs.model.v2.checker.SqlPlaygroundRunnerResult
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundEntity
@@ -11,7 +12,8 @@ import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundQueryRepository
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.* // ktlint-disable no-wildcard-imports
+import org.springframework.web.bind.annotation.*
+import tools.jackson.databind.node.ArrayNode
 
 @RestController
 class RunnerApiController(

@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.springframework.context.annotation.{Bean, Configuration, Primary}
 
@@ -14,5 +14,5 @@ class JacksonConfiguration {
     */
   @Bean
   @Primary
-  def objectMapper(): ObjectMapper = new ScalaObjectMapper
+  def objectMapper(): JsonMapper = ScalaObjectMapper()
 }

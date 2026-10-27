@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.stereotype.Component
+import java.util.Base64
 import java.util.Date
-import javax.xml.bind.DatatypeConverter
 
 @Component
 class TokenV2Service(
@@ -50,7 +50,7 @@ class TokenV2Service(
             if (jwtDecoder != null) {
                 try {
                     val jwt = jwtDecoder.decode(token)
-                    val id = jwt.subject.toIntOrNull()
+                    val id = jwt.subject?.toIntOrNull()
                     val username = jwt.getClaimAsString("username") ?: ""
                     if (id != null) {
                         return LegacyToken(id, username)
@@ -68,5 +68,5 @@ class TokenV2Service(
         }
     }
 
-    fun jwtSecretEncoding(): String = DatatypeConverter.printBase64Binary(jwtSecret.toByteArray())
+    fun jwtSecretEncoding(): String = Base64.getEncoder().encodeToString(jwtSecret.toByteArray())
 }

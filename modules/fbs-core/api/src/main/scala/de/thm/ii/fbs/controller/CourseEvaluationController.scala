@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import tools.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, EvaluationContainer, GlobalRole}
 import de.thm.ii.fbs.services.evaluation.FormulaService
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
 
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * handle course evaluation

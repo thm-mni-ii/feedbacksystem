@@ -1,6 +1,5 @@
 package de.thm.ii.fbs.services.v2.checker.excel
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import de.thm.ii.fbs.model.v2.checker.excel.ErrorAnalysisSolution
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
 import de.thm.ii.fbs.services.v2.checker.storage.CheckerStorageService
@@ -8,6 +7,7 @@ import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetReferenceParser
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import tools.jackson.core.JacksonException
 
 @Service
 class ErrorAnalysisSolutionService(private val checkerStorageService: CheckerStorageService) {
@@ -27,7 +27,7 @@ class ErrorAnalysisSolutionService(private val checkerStorageService: CheckerSto
                 configurationId,
                 STORAGE_KEY
             ) { generateSolution(workbook) }
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             logger.error("Get Solution for Configuration Id '$configurationId' failed: ", e)
             return null
         }

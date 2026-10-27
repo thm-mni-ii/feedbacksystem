@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.evaluation
 import org.junit.runner.RunWith
 import org.junit.{Assert, Test}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
+import org.springframework.boot.restclient.autoconfigure.RestTemplateAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 import org.springframework.test.context.junit4.SpringRunner

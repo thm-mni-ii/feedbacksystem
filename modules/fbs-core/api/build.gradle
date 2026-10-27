@@ -1,11 +1,11 @@
 plugins {
-    id "org.springframework.boot" version "2.7.12"
+    id "org.springframework.boot" version "4.1.2"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.5.0"
-    id "org.jetbrains.kotlin.jvm" version "1.9.23"
-    id "org.jetbrains.kotlin.plugin.spring" version "1.9.23"
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.7.20"
-    id "org.jlleitschuh.gradle.ktlint" version "11.3.2"
+    id "org.jetbrains.kotlin.jvm" version "2.2.21"
+    id "org.jetbrains.kotlin.plugin.spring" version "2.2.21"
+    id "org.jetbrains.kotlin.plugin.jpa" version "2.2.21"
+    id "org.jlleitschuh.gradle.ktlint" version "14.2.0"
 }
 
 apply plugin: 'scala'
@@ -13,7 +13,9 @@ apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-mainClassName = 'de.thm.ii.fbs.Application'
+application {
+    mainClass = 'de.thm.ii.fbs.Application'
+}
 
 jar {
     enabled = true
@@ -47,49 +49,50 @@ startScripts {
 dependencies {
     implementation 'org.apache.tika:tika-core:2.8.0'
     implementation 'org.apache.tika:tika-parsers:2.8.0'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.9.23'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
+    // jjwt 0.7 needs javax.xml.bind at runtime (no longer provided since Spring Boot 3)
+    runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
     implementation group: 'io.minio', name: 'minio', version: '8.5.4'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
-    compileOnly 'org.scala-lang:scala-library:2.13.10'
-    implementation 'mysql:mysql-connector-java:8.0.33'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
-    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.14.2'
+    compileOnly 'org.scala-lang:scala-library:2.13.18'
+    implementation 'com.mysql:mysql-connector-j'
+    implementation 'tools.jackson.core:jackson-databind'
+    implementation 'tools.jackson.module:jackson-module-scala_2.13'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
+    implementation 'org.springframework.boot:spring-boot-starter-restclient'
     implementation('org.json:json:20230618')
     implementation 'org.apache.poi:poi:5.2.3'
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
     implementation 'org.apache.commons:commons-compress:1.27.1'
     implementation group: 'org.ldaptive', name: 'ldaptive', version: '2.1.1'
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+    implementation 'org.apache.httpcomponents.client5:httpclient5'
     implementation 'com.udojava:EvalEx:2.7'
-    implementation 'org.mongodb:bson:4.10.2'
-    implementation 'org.mongodb:mongodb-driver-core:4.10.2'
-    implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
-    implementation 'org.springframework.data:spring-data-bom:2021.2.5'
+    implementation 'org.mongodb:bson'
+    implementation 'org.mongodb:mongodb-driver-core'
+    implementation 'org.mongodb:mongodb-driver-sync'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'org.springframework.data:spring-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-    implementation 'io.projectreactor:reactor-core:3.5.6'
-    implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
+    runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
+    implementation 'io.projectreactor:reactor-core'
     implementation project(':fbs-core.math-parser')
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.23.0'
     implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.2'
     implementation group: 'org.hashids', name: 'hashids', version: '1.0.3'
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
+    implementation("tools.jackson.module:jackson-module-kotlin")
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'io.projectreactor.netty:reactor-netty:1.1.13'
+    implementation 'io.projectreactor.netty:reactor-netty'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.20'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
@@ -108,8 +111,8 @@ tasks.register('jacocoReport', JacocoReport) {
     executionData.setFrom files('build/jacoco/test.exec')
 
     reports {
-        xml.enabled true
-        html.enabled true
+        xml.required = true
+        html.required = true
     }
 }
 

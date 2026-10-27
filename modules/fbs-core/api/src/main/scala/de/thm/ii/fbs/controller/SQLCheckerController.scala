@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
+import tools.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SQLCheckerQuery}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, SQLCheckerService, TaskService}
@@ -8,7 +8,7 @@ import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, RequestMapping, RequestParam, ResponseBody, RestController}
 
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * Controller for SQL-Checker Mongodb Interface

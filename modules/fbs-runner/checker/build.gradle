@@ -9,8 +9,12 @@ apply plugin: 'jacoco'
 
 def vertxVersion = '3.9.1'
 
-mainClassName = "io.vertx.core.Launcher"
+def mainClassName = "io.vertx.core.Launcher"
 def mainVerticle = "scala:de.thm.ii.fbs.MainVerticle"
+
+application {
+    mainClass = mainClassName
+}
 
 repositories {
     mavenCentral()
@@ -64,7 +68,7 @@ tasks.register('jacocoReport', JacocoReport) {
     executionData.setFrom files('build/jacoco/test.exec')
 
     reports {
-        xml.enabled true
-        html.enabled true
+        xml.required = true
+        html.required = true
     }
 }

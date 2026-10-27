@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.persistence
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{CheckResult, Submission, User}
 import de.thm.ii.fbs.services.persistence.storage.StorageService

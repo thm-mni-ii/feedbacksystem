@@ -1,10 +1,10 @@
-@file:Suppress("ktlint:no-wildcard-imports")
+@file:Suppress("ktlint:standard:no-wildcard-imports")
 
 package de.thm.ii.fbs.model.v2.checker.storage
 
-import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.utils.v2.converters.JpaJsonNodeConverter
-import javax.persistence.*
+import jakarta.persistence.*
+import tools.jackson.databind.JsonNode
 
 @Entity
 @Table(name = "checkrunner_storage")

@@ -1,9 +1,7 @@
-@file:Suppress("ktlint:no-wildcard-imports")
+@file:Suppress("ktlint:standard:no-wildcard-imports")
 
 package de.thm.ii.fbs.controller.v2
 
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.mongodb.MongoCommandException
 import com.mongodb.MongoException
 import de.thm.ii.fbs.model.v2.group.Group
@@ -27,6 +25,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.JsonNodeFactory
 import kotlin.jvm.optionals.getOrNull
 
 @RestController
@@ -777,7 +777,7 @@ class PlaygroundController(
         @PathVariable("groupId") groupId: Int
     ): SqlPlaygroundDatabase? {
         getGroup(groupId, currentToken.id)
-        return databaseRepository.findByShareWithGroup(groupId)
+        return databaseRepository.findByShareWithGroup_Id(groupId)
     }
 
     private fun getEntity(userId: Int, databaseId: Int, type: String): ArrayNode {
@@ -788,7 +788,7 @@ class PlaygroundController(
 
     private fun createAllEntities(database: SqlPlaygroundDatabase) =
         listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
-            entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
+            entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory.instance)))
         }
 
     private fun getDatabase(userId: Int, databaseId: Int): SqlPlaygroundDatabase {

@@ -25,6 +25,11 @@ test {
 }
 
 compileKotlin.dependsOn generateGrammarSource
+compileTestKotlin.dependsOn generateTestGrammarSource
+
+tasks.matching { it.name.startsWith("runKtlint") }.configureEach {
+    dependsOn generateGrammarSource, generateTestGrammarSource
+}
 
 sourceSets {
     main.kotlin.srcDirs = ['build/generated-src/antlr/main', 'src/main/kotlin']
@@ -41,7 +46,7 @@ task jacocoReport(type: JacocoReport) {
     executionData.setFrom files('build/jacoco/test.exec')
 
     reports {
-        xml.enabled true
-        html.enabled true
+        xml.required = true
+        html.required = true
     }
 }
