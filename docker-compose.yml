@@ -106,18 +106,42 @@ services:
       start_period: 10s
       retries: 3
 
+  identity-signing-key-init:
+    image: eclipse-temurin:17-jdk
+    restart: "no"
+    volumes:
+      - identity-signing-key:/run/secrets
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        cd /run/secrets
+        if [ ! -e identity-signing-key.p12 ]; then
+          umask 077
+          rm -f signing-key.tmp.p12
+          keytool -genkeypair -noprompt -storetype PKCS12 \
+            -keystore signing-key.tmp.p12 -alias identity-signing \
+            -keyalg RSA -keysize 4096 -validity 3650 \
+            -dname "CN=FBS Local Development" \
+            -storepass changeit -keypass changeit
+          mv signing-key.tmp.p12 identity-signing-key.p12
+        fi
+        keytool -list -keystore identity-signing-key.p12 \
+          -alias identity-signing -storepass changeit >/dev/null
+
   identity-service:
     build:
       context: modules/fbs-identity-service/api
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
+      identity-signing-key-init:
+        condition: service_completed_successfully
       mysql1:
         condition: service_healthy
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - ./secrets/identity-signing-key.p12:/run/secrets/identity-signing-key.p12:ro
+      - identity-signing-key:/run/secrets:ro
     environment:
       - MYSQL_URI=jdbc:mysql://mysql1:3306
       - MYSQL_USER=root
@@ -458,6 +482,9 @@ services:
       interval: 10s
       start_period: 10s
       retries: 3
+
+volumes:
+  identity-signing-key:
 
 networks:
   classroom:
