@@ -9,6 +9,7 @@ import {
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { TaskProvider } from "../../model/TaskProvider";
+import { TaskProviderService } from "../../service/task-provider.service";
 
 export interface TaskProviderDialogData {
   isUpdate: boolean;
@@ -24,12 +25,16 @@ export class TaskProviderDialogComponent implements OnInit {
   isUpdate = false;
   taskProvider?: TaskProvider;
 
+  manifestUrlControl = new UntypedFormControl("");
+  isLoadingManifest = false;
+
   form: UntypedFormGroup;
 
   constructor(
     public dialogRef: MatDialogRef<TaskProviderDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: TaskProviderDialogData,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private taskProviderService: TaskProviderService
   ) {}
 
   ngOnInit(): void {
@@ -178,6 +183,103 @@ export class TaskProviderDialogComponent implements OnInit {
       .get("configSchemaText")
       ?.setValue(JSON.stringify(sampleSchema, null, 2));
     this.snackBar.open("Beispiel-Schema geladen", "OK", { duration: 2500 });
+  }
+
+  loadFromManifest(): void {
+    const url = this.manifestUrlControl.value?.trim();
+    if (!url) {
+      this.snackBar.open("Bitte geben Sie eine Manifest-URL an.", "OK", {
+        duration: 3000,
+      });
+      return;
+    }
+
+    this.isLoadingManifest = true;
+    this.taskProviderService.parseManifest(url).subscribe({
+      next: (manifest) => {
+        this.isLoadingManifest = false;
+        if (!this.isUpdate && manifest.id) {
+          this.form.get("id")?.setValue(manifest.id);
+        }
+        if (manifest.displayName) {
+          this.form.get("displayName")?.setValue(manifest.displayName);
+        }
+        if (manifest.description !== undefined) {
+          this.form.get("description")?.setValue(manifest.description || "");
+        }
+        if (manifest.icon) {
+          this.form.get("icon")?.setValue(manifest.icon);
+        }
+        if (manifest.version) {
+          this.form.get("version")?.setValue(manifest.version);
+        }
+        if (manifest.evaluationEndpointUrl) {
+          this.form
+            .get("evaluationEndpointUrl")
+            ?.setValue(manifest.evaluationEndpointUrl);
+        }
+        if (manifest.healthEndpointUrl) {
+          this.form
+            .get("healthEndpointUrl")
+            ?.setValue(manifest.healthEndpointUrl);
+        }
+        if (manifest.configUiUrl !== undefined) {
+          this.form.get("configUiUrl")?.setValue(manifest.configUiUrl || "");
+        }
+        if (manifest.solveUiUrl !== undefined) {
+          this.form.get("solveUiUrl")?.setValue(manifest.solveUiUrl || "");
+        }
+        if (manifest.resultUiUrl !== undefined) {
+          this.form.get("resultUiUrl")?.setValue(manifest.resultUiUrl || "");
+        }
+        if (manifest.supportedMediaTypes) {
+          this.form
+            .get("supportedMediaTypesText")
+            ?.setValue(manifest.supportedMediaTypes.join(", "));
+        }
+        if (manifest.hasSubtasks !== undefined) {
+          this.form.get("hasSubtasks")?.setValue(Boolean(manifest.hasSubtasks));
+        }
+        if (manifest.supportsStagedFeedback !== undefined) {
+          this.form
+            .get("supportsStagedFeedback")
+            ?.setValue(Boolean(manifest.supportsStagedFeedback));
+        }
+        if (manifest.configSchema) {
+          try {
+            const schemaStr =
+              typeof manifest.configSchema === "string"
+                ? manifest.configSchema
+                : JSON.stringify(manifest.configSchema, null, 2);
+            this.form.get("configSchemaText")?.setValue(schemaStr);
+          } catch {
+            // ignore
+          }
+        }
+        this.snackBar.open(
+          "Manifest erfolgreich geladen und übernommen.",
+          "OK",
+          {
+            duration: 3500,
+          }
+        );
+      },
+      error: (err) => {
+        this.isLoadingManifest = false;
+        console.error("Failed to parse manifest", err);
+        const msg =
+          err?.error?.message ||
+          err?.message ||
+          "Fehler beim Laden des Manifests";
+        this.snackBar.open(
+          `Manifest konnte nicht geladen werden: ${msg}`,
+          "OK",
+          {
+            duration: 5000,
+          }
+        );
+      },
+    });
   }
 
   onCancel(): void {

@@ -14,7 +14,7 @@ class AuthServerSettingsConfig(
     @Bean
     fun authorizationServerSettings(): AuthorizationServerSettings {
         val builder = AuthorizationServerSettings.builder()
-        val cleanIssuer = configuredIssuer.trim()
+        val cleanIssuer = configuredIssuer.trim().removeSuffix("/")
         if (cleanIssuer.isNotBlank()) {
             builder.issuer(cleanIssuer)
         }

@@ -65,4 +65,15 @@ export class TaskProviderService {
   deleteTaskProvider(id: string): Observable<void> {
     return this.http.delete<void>(`/api/v2/admin/providers/tasks/${id}`);
   }
+
+  /**
+   * Fetch and parse a remote TaskProvider manifest via backend parser
+   * @param manifestUrl The URL of the task provider manifest
+   */
+  parseManifest(manifestUrl: string): Observable<CreateTaskProviderRequest> {
+    return this.http.post<CreateTaskProviderRequest>(
+      "/api/v2/admin/providers/tasks/parse-manifest",
+      { manifestUrl }
+    );
+  }
 }

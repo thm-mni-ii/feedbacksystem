@@ -224,6 +224,11 @@ export const englishTranslation = {
   "dialog.checker.new.cancel": "Cancel",
   "dialog.checker.new.create": "Create",
   "dialog.checker.new.update": "Update",
+  "dialog.checker.new.open-config-ui": "Open Config UI",
+  "dialog.checker.new.show-embedded-config-ui": "Embed Config UI",
+  "dialog.checker.new.hide-embedded-config-ui": "Hide Config UI",
+  "dialog.checker.new.schema-info":
+    "This Task Provider expects a configuration according to its schema.",
   "dialog.db.new.create-database": "Create database",
   "dialog.db.new.database-name": "Database name",
   "dialog.db.new.database-name-error":
@@ -445,6 +450,11 @@ export const englishTranslation = {
   "task-provider.table.no-records": "No task providers found.",
   "task-provider.dialog.title-create": "Register New Task Provider",
   "task-provider.dialog.title-edit": "Edit Task Provider",
+  "task-provider.dialog.section-manifest": "Manifest Import",
+  "task-provider.dialog.hint-manifest":
+    "Provide the URL to the Task Provider manifest to automatically load metadata and endpoints.",
+  "task-provider.dialog.field-manifest-url": "Manifest URL (/manifest)",
+  "task-provider.dialog.btn-load-manifest": "Load Manifest",
   "task-provider.dialog.section-general": "General Information",
   "task-provider.dialog.field-id": "Unique ID",
   "task-provider.dialog.hint-id":
