@@ -6,13 +6,13 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
 
 @Configuration
-class AuthServerSettingsConfig(
-    @param:Value("\${security.oidc.issuer:}")
-    private val configuredIssuer: String = ""
-) {
+class AuthServerSettingsConfig {
 
     @Bean
-    fun authorizationServerSettings(): AuthorizationServerSettings {
+    fun authorizationServerSettings(
+        @Value("\${security.oidc.issuer:}")
+        configuredIssuer: String
+    ): AuthorizationServerSettings {
         val builder = AuthorizationServerSettings.builder()
         val cleanIssuer = configuredIssuer.trim().removeSuffix("/")
         if (cleanIssuer.isNotBlank()) {
