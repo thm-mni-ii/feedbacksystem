@@ -82,7 +82,7 @@ class RegisteredClientInitializer(
                     .accessTokenTimeToLive(Duration.ofMinutes(accessTokenTtlMinutes))
                     .authorizationCodeTimeToLive(Duration.ofMinutes(authorizationCodeTtlMinutes))
                     .refreshTokenTimeToLive(Duration.ofDays(30))
-                    .reuseRefreshTokens(true)
+                    .reuseRefreshTokens(false)
                     .build()
             )
 
