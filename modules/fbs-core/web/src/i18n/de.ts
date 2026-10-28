@@ -237,6 +237,11 @@ export const germanTranslation = {
   "dialog.checker.new.cancel": "Abbrechen",
   "dialog.checker.new.create": "Erstellen",
   "dialog.checker.new.update": "Update",
+  "dialog.checker.new.open-config-ui": "Konfigurations-UI öffnen",
+  "dialog.checker.new.show-embedded-config-ui": "Konfigurations-UI einbetten",
+  "dialog.checker.new.hide-embedded-config-ui": "Konfigurations-UI ausblenden",
+  "dialog.checker.new.schema-info":
+    "Dieser Task-Provider erwartet eine Konfiguration gemäß Schema.",
   "dialog.db.new.create-database": "Datenbank erstellen",
   "dialog.db.new.database-name": "Datenbankname",
   "dialog.db.new.database-name-error":
@@ -455,6 +460,11 @@ export const germanTranslation = {
   "task-provider.table.no-records": "Keine Task-Provider gefunden.",
   "task-provider.dialog.title-create": "Neuen Task-Provider registrieren",
   "task-provider.dialog.title-edit": "Task-Provider bearbeiten",
+  "task-provider.dialog.section-manifest": "Manifest-Import",
+  "task-provider.dialog.hint-manifest":
+    "Geben Sie die URL zum Manifest des Task-Providers an, um Metadaten und Endpunkte automatisch zu laden.",
+  "task-provider.dialog.field-manifest-url": "Manifest-URL (/manifest)",
+  "task-provider.dialog.btn-load-manifest": "Manifest laden",
   "task-provider.dialog.section-general": "Allgemeine Informationen",
   "task-provider.dialog.field-id": "Eindeutige ID",
   "task-provider.dialog.hint-id":
