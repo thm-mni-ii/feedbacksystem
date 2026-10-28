@@ -83,7 +83,7 @@ class TokenExchangeService(
         }
 
         val effectiveIssuer = if (configuredIssuer.isNotBlank()) {
-            configuredIssuer.trim()
+            configuredIssuer.trim().removeSuffix("/")
         } else {
             try {
                 ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()

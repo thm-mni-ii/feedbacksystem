@@ -66,3 +66,8 @@ data class UpdateTaskProviderRequest(
     @JsonProperty("isActive")
     val isActive: Boolean? = null
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ParseManifestRequest(
+    val manifestUrl: String
+)

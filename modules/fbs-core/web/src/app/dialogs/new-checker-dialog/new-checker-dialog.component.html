@@ -54,6 +54,65 @@
         required
       />
     </mat-form-field>
+
+    <!-- Task Provider Details & Config UI -->
+    <div *ngIf="selectedTaskProvider" class="task-provider-card">
+      <div class="tp-header">
+        <mat-icon color="primary">{{
+          selectedTaskProvider.icon || "extension"
+        }}</mat-icon>
+        <div class="tp-info">
+          <span class="tp-name">{{ selectedTaskProvider.displayName }}</span>
+          <span class="tp-version" *ngIf="selectedTaskProvider.version"
+            >v{{ selectedTaskProvider.version }}</span
+          >
+        </div>
+      </div>
+      <p class="tp-desc" *ngIf="selectedTaskProvider.description">
+        {{ selectedTaskProvider.description }}
+      </p>
+
+      <div class="tp-actions" *ngIf="selectedTaskProvider.configUiUrl">
+        <button
+          type="button"
+          mat-stroked-button
+          color="primary"
+          (click)="openConfigUiInNewTab()"
+        >
+          <mat-icon>open_in_new</mat-icon>&nbsp;{{
+            "dialog.checker.new.open-config-ui" | i18nextEager
+          }}
+        </button>
+        <button type="button" mat-stroked-button (click)="toggleConfigUi()">
+          <mat-icon>{{ showConfigUi ? "visibility_off" : "web" }}</mat-icon
+          >&nbsp;{{
+            (showConfigUi
+              ? "dialog.checker.new.hide-embedded-config-ui"
+              : "dialog.checker.new.show-embedded-config-ui"
+            ) | i18nextEager
+          }}
+        </button>
+      </div>
+
+      <div *ngIf="showConfigUi && safeConfigUiUrl" class="tp-iframe-container">
+        <iframe
+          [src]="safeConfigUiUrl"
+          class="tp-config-iframe"
+          title="Task Provider Configuration"
+        ></iframe>
+      </div>
+
+      <div
+        class="tp-schema-info"
+        *ngIf="
+          selectedTaskProvider.configSchema && !selectedTaskProvider.configUiUrl
+        "
+      >
+        <mat-icon class="info-icon">info</mat-icon>
+        <span>{{ "dialog.checker.new.schema-info" | i18nextEager }}</span>
+      </div>
+    </div>
+
     <div>
       <app-dropzone
         class="pad"
@@ -142,14 +201,7 @@
       *ngIf="!isUpdate"
       mat-flat-button
       color="accent"
-      [disabled]="
-        !checkerForm.valid ||
-        this.mainFile?.length <= 0 ||
-        !(
-          this.secondaryFile?.length > 0 ||
-          checkerForm.value.checkerType === 'bash'
-        )
-      "
+      [disabled]="!canCreateChecker()"
       (click)="createChecker(checkerForm.value)"
     >
       {{ "dialog.checker.new.create" | i18nextEager }}
