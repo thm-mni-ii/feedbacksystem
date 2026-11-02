@@ -10,7 +10,8 @@
 
 <mat-dialog-content class="dialog-content">
   <!-- Manifest Ingestion Section -->
-  <div class="form-section manifest-section" *ngIf="!isUpdate">
+  @if (!isUpdate) {
+  <div class="form-section manifest-section">
     <h3 class="section-heading">
       {{ "task-provider.dialog.section-manifest" | i18nextEager }}
     </h3>
@@ -43,6 +44,7 @@
       </button>
     </div>
   </div>
+  }
 
   <form [formGroup]="form" class="task-provider-form">
     <div class="form-section">
