@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { FeedbackAppService } from "./feedback-app.service";
+import { EmbeddingService } from "./embedding.service";
 
 @Injectable({
   providedIn: "root",
@@ -11,11 +12,18 @@ export class GoToService {
 
   constructor(
     private router: Router,
-    private feedbackAppService: FeedbackAppService
+    private feedbackAppService: FeedbackAppService,
+    private embeddingService: EmbeddingService
   ) {}
 
   buildLink(courseID: number, app: boolean = false) {
-    let link = `${window.location.origin}/go/${courseID}`;
+    const origin = this.embeddingService.isEmbedded
+      ? this.embeddingService.getHostOrigin()
+      : window.location.origin;
+    const prefix = this.embeddingService.isEmbedded
+      ? "/apps/course-management"
+      : "";
+    let link = `${origin}${prefix}/go/${courseID}`;
     if (app) {
       link += "/app";
     }

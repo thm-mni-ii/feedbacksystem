@@ -47,7 +47,7 @@ security:
     trusted-proxy-count: 0
     allow-list: ""
   oidc:
-    issuer: http://localhost:8080
+    issuer: ""
     client:
       id: fbs-test-client
       redirect-uri: http://127.0.0.1:4200/oauth2/callback

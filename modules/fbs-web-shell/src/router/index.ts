@@ -49,6 +49,17 @@ const routes: RouteRecordRaw[] = [
     component: OidcCallbackView
   },
   {
+    path: '/go/:id/:target?',
+    name: 'go-link',
+    redirect: (to) => {
+      const id = to.params.id
+      const target = to.params.target
+      return target
+        ? `/apps/course-management/go/${id}/${target}`
+        : `/apps/course-management/go/${id}`
+    }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }

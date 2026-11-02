@@ -9,15 +9,21 @@ import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderEntity
 import de.thm.ii.fbs.model.v2.taskprovider.UpdateTaskProviderRequest
 import de.thm.ii.fbs.services.v2.persistence.TaskProviderRepository
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
+import de.thm.ii.fbs.utils.v2.helpers.RestTemplateFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.RestTemplate
 
 @Service
 class TaskProviderService(
     private val taskProviderRepository: TaskProviderRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("\${services.masterRunner.insecure:true}")
+    private val insecure: Boolean = true
 ) {
+    private val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
     fun getAllActive(): List<TaskProviderDTO> {
         return taskProviderRepository.findAllByIsActiveTrue().map { toDto(it) }
@@ -99,6 +105,93 @@ class TaskProviderService(
         val entity = taskProviderRepository.findByIdOrNull(id) ?: throw NotFoundException()
         entity.isActive = false
         taskProviderRepository.save(entity)
+    }
+
+    fun parseManifestFromUrl(manifestUrl: String): CreateTaskProviderRequest {
+        val trimmedUrl = manifestUrl.trim()
+        val response = try {
+            restTemplate.getForEntity(trimmedUrl, String::class.java)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Could not fetch manifest from $trimmedUrl: ${e.message}", e)
+        }
+
+        if (!response.statusCode.is2xxSuccessful || response.body.isNullOrBlank()) {
+            throw IllegalArgumentException("Failed to fetch manifest: HTTP ${response.statusCode}")
+        }
+
+        val rootNode = try {
+            objectMapper.readTree(response.body)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Manifest response is not valid JSON: ${e.message}", e)
+        }
+
+        val id = rootNode.path("id").asText().takeIf { it.isNotBlank() }
+            ?: throw IllegalArgumentException("Manifest must contain a non-empty 'id'")
+        val displayName = rootNode.path("displayName").asText().takeIf { it.isNotBlank() }
+            ?: rootNode.path("name").asText().takeIf { it.isNotBlank() }
+            ?: id
+        val description = rootNode.path("description").asText().takeIf { it.isNotBlank() }
+        val icon = rootNode.path("icon").asText().takeIf { it.isNotBlank() } ?: "extension"
+        val version = rootNode.path("version").asText().takeIf { it.isNotBlank() } ?: "1.0.0"
+
+        val endpoints = rootNode.path("endpoints")
+        val evaluationUrl = endpoints.path("evaluationUrl").asText().takeIf { it.isNotBlank() }
+            ?: rootNode.path("evaluationEndpointUrl").asText().takeIf { it.isNotBlank() }
+            ?: ""
+        val healthUrl = endpoints.path("healthUrl").asText().takeIf { it.isNotBlank() }
+            ?: rootNode.path("healthEndpointUrl").asText().takeIf { it.isNotBlank() }
+            ?: ""
+        val configUiUrl = endpoints.path("configUiUrl").asText().takeIf { it.isNotBlank() }
+            ?: rootNode.path("configUiUrl").asText().takeIf { it.isNotBlank() }
+        val solveUiUrl = endpoints.path("solveUiUrl").asText().takeIf { it.isNotBlank() }
+            ?: rootNode.path("solveUiUrl").asText().takeIf { it.isNotBlank() }
+        val resultUiUrl = endpoints.path("resultUiUrl").asText().takeIf { it.isNotBlank() }
+            ?: rootNode.path("resultUiUrl").asText().takeIf { it.isNotBlank() }
+
+        val supportedMediaTypes = mutableListOf<String>()
+        val mediaTypesNode = rootNode.path("supportedMediaTypes")
+        if (mediaTypesNode.isArray) {
+            mediaTypesNode.forEach {
+                val mt = it.asText().trim()
+                if (mt.isNotBlank()) supportedMediaTypes.add(mt)
+            }
+        }
+
+        val capabilities = rootNode.path("capabilities")
+        val hasSubtasks = if (capabilities.has("hasSubtasks")) {
+            capabilities.path("hasSubtasks").asBoolean(false)
+        } else {
+            rootNode.path("hasSubtasks").asBoolean(false)
+        }
+        val supportsStagedFeedback = if (capabilities.has("supportsStagedFeedback")) {
+            capabilities.path("supportsStagedFeedback").asBoolean(false)
+        } else {
+            rootNode.path("supportsStagedFeedback").asBoolean(false)
+        }
+
+        val configSchemaNode = if (rootNode.has("configSchema") && !rootNode.path("configSchema").isNull) {
+            rootNode.path("configSchema")
+        } else {
+            null
+        }
+
+        return CreateTaskProviderRequest(
+            id = id,
+            displayName = displayName,
+            description = description,
+            icon = icon,
+            version = version,
+            evaluationEndpointUrl = evaluationUrl,
+            healthEndpointUrl = healthUrl,
+            configUiUrl = configUiUrl,
+            solveUiUrl = solveUiUrl,
+            resultUiUrl = resultUiUrl,
+            supportedMediaTypes = supportedMediaTypes,
+            hasSubtasks = hasSubtasks,
+            supportsStagedFeedback = supportsStagedFeedback,
+            configSchema = configSchemaNode,
+            isActive = true
+        )
     }
 
     private fun toDto(entity: TaskProviderEntity): TaskProviderDTO {

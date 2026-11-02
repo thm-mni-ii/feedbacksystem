@@ -138,4 +138,41 @@ describe('Router Navigation Guards', () => {
 
     expect(router.currentRoute.value.path).toBe('/apps/course-management')
   })
+
+  it('should automatically redirect unauthenticated user to login when visiting /go/:id', async () => {
+    const authStore = useAuthStore()
+    const loginSpy = vi.spyOn(authStore, 'login')
+
+    await router.push('/go/42')
+
+    expect(loginSpy).toHaveBeenCalledWith('/apps/course-management/go/42')
+  })
+
+  it('should redirect /go/:id to /apps/course-management/go/:id for authenticated user', async () => {
+    const authStore = useAuthStore()
+    const token = createFakeJwt({
+      sub: '2',
+      preferred_username: 'student',
+      global_role: 'USER'
+    })
+    authStore.setSession({ access_token: token, expired: false } as any)
+
+    await router.push('/go/42')
+
+    expect(router.currentRoute.value.path).toBe('/apps/course-management/go/42')
+  })
+
+  it('should redirect /go/:id/:target to /apps/course-management/go/:id/:target for authenticated user', async () => {
+    const authStore = useAuthStore()
+    const token = createFakeJwt({
+      sub: '2',
+      preferred_username: 'student',
+      global_role: 'USER'
+    })
+    authStore.setSession({ access_token: token, expired: false } as any)
+
+    await router.push('/go/42/app')
+
+    expect(router.currentRoute.value.path).toBe('/apps/course-management/go/42/app')
+  })
 })

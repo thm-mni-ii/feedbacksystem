@@ -9,6 +9,41 @@
 </h2>
 
 <mat-dialog-content class="dialog-content">
+  <!-- Manifest Ingestion Section -->
+  <div class="form-section manifest-section" *ngIf="!isUpdate">
+    <h3 class="section-heading">
+      {{ "task-provider.dialog.section-manifest" | i18nextEager }}
+    </h3>
+    <p class="section-subtext">
+      {{ "task-provider.dialog.hint-manifest" | i18nextEager }}
+    </p>
+    <div class="form-row manifest-row">
+      <mat-form-field appearance="outline" class="flex-item">
+        <mat-label>{{
+          "task-provider.dialog.field-manifest-url" | i18nextEager
+        }}</mat-label>
+        <input
+          matInput
+          [formControl]="manifestUrlControl"
+          placeholder="http://host:port/manifest"
+        />
+        <mat-hint>GET /manifest</mat-hint>
+      </mat-form-field>
+      <button
+        type="button"
+        mat-flat-button
+        color="accent"
+        class="manifest-btn"
+        [disabled]="isLoadingManifest || !manifestUrlControl.value"
+        (click)="loadFromManifest()"
+      >
+        <mat-icon>{{ isLoadingManifest ? "sync" : "cloud_download" }}</mat-icon
+        >&nbsp;
+        {{ "task-provider.dialog.btn-load-manifest" | i18nextEager }}
+      </button>
+    </div>
+  </div>
+
   <form [formGroup]="form" class="task-provider-form">
     <div class="form-section">
       <h3 class="section-heading">
