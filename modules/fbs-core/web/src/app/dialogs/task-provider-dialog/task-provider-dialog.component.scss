@@ -63,6 +63,7 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
+  margin-bottom: 8px;
 
   .flex-item {
     flex: 1 1 calc(50% - 8px);
