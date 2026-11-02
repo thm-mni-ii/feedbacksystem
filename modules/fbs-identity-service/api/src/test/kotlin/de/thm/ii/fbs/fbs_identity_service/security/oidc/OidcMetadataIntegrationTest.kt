@@ -2,6 +2,7 @@ package de.thm.ii.fbs.fbs_identity_service.security.oidc
 
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.hasItems
+import org.junit.jupiter.api.Nested
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -108,5 +109,36 @@ class OidcMetadataIntegrationTest {
                     doesNotExist()
                 }
             }
+    }
+
+    @Nested
+    @SpringBootTest(properties = ["security.oidc.issuer=https://feedback.mni.thm.de"])
+    @AutoConfigureMockMvc
+    inner class ConfiguredIssuerTest {
+        @Autowired
+        private lateinit var mockMvc: MockMvc
+
+        @Test
+        fun `openid configuration uses explicitly configured issuer`() {
+            mockMvc.get("/.well-known/openid-configuration")
+                .andExpect {
+                    status { isOk() }
+                    jsonPath("$.issuer") {
+                        value("https://feedback.mni.thm.de")
+                    }
+                    jsonPath("$.authorization_endpoint") {
+                        value("https://feedback.mni.thm.de/oauth2/authorize")
+                    }
+                    jsonPath("$.token_endpoint") {
+                        value("https://feedback.mni.thm.de/oauth2/token")
+                    }
+                    jsonPath("$.jwks_uri") {
+                        value("https://feedback.mni.thm.de/oauth2/jwks")
+                    }
+                    jsonPath("$.userinfo_endpoint") {
+                        value("https://feedback.mni.thm.de/userinfo")
+                    }
+                }
+        }
     }
 }

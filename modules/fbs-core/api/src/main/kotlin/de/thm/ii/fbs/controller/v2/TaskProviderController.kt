@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.controller.v2
 
 import de.thm.ii.fbs.model.v2.taskprovider.CreateTaskProviderRequest
+import de.thm.ii.fbs.model.v2.taskprovider.ParseManifestRequest
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderDTO
 import de.thm.ii.fbs.model.v2.taskprovider.UpdateTaskProviderRequest
 import de.thm.ii.fbs.services.v2.taskprovider.TaskProviderService
@@ -52,6 +53,12 @@ class TaskProviderController(
         @RequestBody request: UpdateTaskProviderRequest
     ): TaskProviderDTO {
         return taskProviderService.update(id, request)
+    }
+
+    @PostMapping("/api/v2/admin/providers/tasks/parse-manifest")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun parseManifest(@RequestBody request: ParseManifestRequest): CreateTaskProviderRequest {
+        return taskProviderService.parseManifestFromUrl(request.manifestUrl)
     }
 
     @DeleteMapping("/api/v2/admin/providers/tasks/{id}")

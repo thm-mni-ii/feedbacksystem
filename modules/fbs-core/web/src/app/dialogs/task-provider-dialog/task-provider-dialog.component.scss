@@ -74,6 +74,22 @@
   width: 100%;
 }
 
+.manifest-section {
+  margin-bottom: 16px;
+  background: rgba(64, 94, 154, 0.05);
+  border-color: rgba(64, 94, 154, 0.2);
+}
+
+.manifest-row {
+  align-items: center;
+
+  .manifest-btn {
+    height: 52px;
+    margin-bottom: 20px;
+    white-space: nowrap;
+  }
+}
+
 .toggles-row {
   display: flex;
   gap: 24px;

@@ -28,7 +28,7 @@ class TokenExchangeService(
     private val rsaKey: RSAKey,
 
     @param:Value("\${security.oidc.issuer:}")
-    private val configuredIssuer: String = "",
+    private val configuredIssuer: String,
 
     @param:Value("\${security.oidc.client.id:fbs-web-shell}")
     private val configuredClientIds: String,
@@ -83,7 +83,7 @@ class TokenExchangeService(
         }
 
         val effectiveIssuer = if (configuredIssuer.isNotBlank()) {
-            configuredIssuer.trim()
+            configuredIssuer.trim().removeSuffix("/")
         } else {
             try {
                 ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()

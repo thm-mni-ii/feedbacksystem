@@ -50,6 +50,13 @@ export class EmbeddingService {
     return this._isEmbedded;
   }
 
+  public getHostOrigin(): string {
+    if (this.hostOrigin && this.hostOrigin !== "*") {
+      return this.hostOrigin;
+    }
+    return typeof window !== "undefined" ? window.location.origin : "";
+  }
+
   public initHandshake(): void {
     if (!this._isEmbedded || typeof window === "undefined" || !window.parent) {
       return;

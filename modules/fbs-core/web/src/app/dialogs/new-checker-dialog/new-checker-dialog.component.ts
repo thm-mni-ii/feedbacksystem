@@ -1,4 +1,5 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, Inject, OnInit, OnDestroy } from "@angular/core";
+import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
 import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -15,7 +16,7 @@ import { TaskProvider } from "../../model/TaskProvider";
   templateUrl: "./new-checker-dialog.component.html",
   styleUrls: ["./new-checker-dialog.component.scss"],
 })
-export class NewCheckerDialogComponent implements OnInit {
+export class NewCheckerDialogComponent implements OnInit, OnDestroy {
   fileCounter = 0;
 
   checkerForm = new UntypedFormGroup({
@@ -54,11 +55,15 @@ export class NewCheckerDialogComponent implements OnInit {
   disableDistance;
 
   taskProviders: TaskProvider[] = [];
+  selectedTaskProvider: TaskProvider | null = null;
+  showConfigUi = false;
+  safeConfigUiUrl: SafeResourceUrl | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<NewCheckerDialogComponent>,
     private checkerService: CheckerService,
     private taskProviderService: TaskProviderService,
+    private sanitizer: DomSanitizer,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private snackBar: MatSnackBar
   ) {}
@@ -96,9 +101,12 @@ export class NewCheckerDialogComponent implements OnInit {
     this.showHintsEvent(this.checkerForm.value);
     this.showExtendedHintsEvent(this.checkerForm.value);
 
+    window.addEventListener("message", this.handlePostMessage);
+
     this.taskProviderService.getAllActiveTaskProviders().subscribe(
       (providers) => {
         this.taskProviders = providers || [];
+        this.defineForm(this.checkerForm.value);
       },
       (err) => {
         console.error("Could not load task providers for checker dialog", err);
@@ -339,8 +347,10 @@ export class NewCheckerDialogComponent implements OnInit {
         const customTp = this.taskProviders.find(
           (p) => p.id === value.checkerType
         );
+        this.selectedTaskProvider = customTp || null;
+        this.updateSafeConfigUiUrl();
         if (customTp) {
-          this.mainFileName = "Konfigurationsdatei (*)";
+          this.mainFileName = "Optionale Konfigurationsdatei (*)";
           this.secondaryFileName = "Optionale Hilfsdatei (*)";
         } else {
           this.mainFileName = "Not Implemented Checker Type";
@@ -350,6 +360,82 @@ export class NewCheckerDialogComponent implements OnInit {
       }
     }
   }
+
+  updateSafeConfigUiUrl(): void {
+    if (this.selectedTaskProvider?.configUiUrl) {
+      let url = this.selectedTaskProvider.configUiUrl;
+      const separator = url.includes("?") ? "&" : "?";
+      url = `${url}${separator}courseId=${this.courseId}&taskId=${this.taskId}`;
+      this.safeConfigUiUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    } else {
+      this.safeConfigUiUrl = null;
+    }
+  }
+
+  toggleConfigUi(): void {
+    this.showConfigUi = !this.showConfigUi;
+  }
+
+  openConfigUiInNewTab(): void {
+    if (!this.selectedTaskProvider?.configUiUrl) return;
+    let url = this.selectedTaskProvider.configUiUrl;
+    const separator = url.includes("?") ? "&" : "?";
+    url = `${url}${separator}courseId=${this.courseId}&taskId=${this.taskId}`;
+    window.open(url, "_blank");
+  }
+
+  canCreateChecker(): boolean {
+    if (!this.checkerForm.valid) return false;
+    const type = this.checkerForm.value.checkerType;
+    if (this.isRegisteredProvider(type)) {
+      return true;
+    }
+    if (!this.mainFile?.length) return false;
+    if (type === "bash") return true;
+    return (this.secondaryFile?.length || 0) > 0;
+  }
+
+  handlePostMessage = (event: MessageEvent): void => {
+    if (!event.data) return;
+    const data = event.data;
+    if (data.type === "FBS_TASK_CONFIG_RESPONSE") {
+      const payload = data.payload || data;
+      if (payload.filesToUpload && Array.isArray(payload.filesToUpload)) {
+        for (const f of payload.filesToUpload) {
+          try {
+            const byteChars = atob(f.contentBase64 || "");
+            const byteNums = new Array(byteChars.length);
+            for (let i = 0; i < byteChars.length; i++) {
+              byteNums[i] = byteChars.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNums);
+            const blob = new Blob([byteArray]);
+            const file = new File([blob], f.fileName || "config-file");
+            if (f.fileType === "PRIMARY") {
+              this.mainFile = [file];
+              this.mainFileChanged = true;
+            } else if (f.fileType === "SECONDARY") {
+              this.secondaryFile = [file];
+              this.secondaryFileChanged = true;
+            }
+          } catch (e) {
+            console.error(
+              "Failed to parse file from TaskProvider config response",
+              e
+            );
+          }
+        }
+      }
+      this.snackBar.open("Konfiguration aus Task-Provider übernommen.", "OK", {
+        duration: 3000,
+      });
+    }
+  };
+
+  ngOnDestroy(): void {
+    window.removeEventListener("message", this.handlePostMessage);
+  }
+
   showHintsEvent(value: any) {
     if (value.showHints === false) {
       this.showHintsConfig = false;

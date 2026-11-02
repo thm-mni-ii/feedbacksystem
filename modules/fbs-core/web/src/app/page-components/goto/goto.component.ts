@@ -2,9 +2,10 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { GoToService } from "../../service/goto.service";
 import { AuthService } from "../../service/auth.service";
+import { EmbeddingService } from "../../service/embedding.service";
 
 @Component({
-  selector: "app-login",
+  selector: "app-goto",
   templateUrl: "./goto.component.html",
   styleUrls: ["./goto.component.scss"],
 })
@@ -12,10 +13,11 @@ export class GoToComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private goToService: GoToService,
-    private authService: AuthService
+    private authService: AuthService,
+    private embeddingService: EmbeddingService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     const params = this.route.snapshot.paramMap;
     const courseID = Number.parseInt(params.get("id"), 10);
     const target = params.get("target");
@@ -27,8 +29,17 @@ export class GoToComponent implements OnInit {
 
     if (this.authService.isAuthenticated()) {
       this.goToService.goTo();
-    } else {
-      window.location.href = `https://cas.thm.de/cas/login?service=${window.location.origin}/api/v1/login/cas`;
+      return;
     }
+
+    if (this.embeddingService.isEmbedded) {
+      const tokenLoaded = await this.embeddingService.waitForToken(2500);
+      if (tokenLoaded && this.authService.isAuthenticated()) {
+        this.goToService.goTo();
+        return;
+      }
+    }
+
+    this.authService.login();
   }
 }

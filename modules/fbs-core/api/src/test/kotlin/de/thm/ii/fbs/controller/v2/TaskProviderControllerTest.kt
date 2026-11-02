@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.controller.v2
 
 import de.thm.ii.fbs.model.v2.taskprovider.CreateTaskProviderRequest
+import de.thm.ii.fbs.model.v2.taskprovider.ParseManifestRequest
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderDTO
 import de.thm.ii.fbs.model.v2.taskprovider.UpdateTaskProviderRequest
 import de.thm.ii.fbs.services.v2.taskprovider.TaskProviderService
@@ -158,6 +159,26 @@ class TaskProviderControllerTest {
 
         val updated = controller.updateTaskProvider("custom-checker", req)
         assertEquals("Updated Custom Checker", updated.displayName)
+    }
+
+    @Test
+    fun testParseManifest() {
+        val req = ParseManifestRequest(manifestUrl = "http://sql-checker:5000/manifest")
+        val createReq = CreateTaskProviderRequest(
+            id = "sql-checker",
+            displayName = "SQL Checker",
+            description = "Checks SQL",
+            icon = "code",
+            version = "1.0.0",
+            evaluationEndpointUrl = "http://sql-checker:5000/evaluate",
+            healthEndpointUrl = "http://sql-checker:5000/health"
+        )
+        `when`(service.parseManifestFromUrl("http://sql-checker:5000/manifest")).thenReturn(createReq)
+
+        val result = controller.parseManifest(req)
+        assertNotNull(result)
+        assertEquals("sql-checker", result.id)
+        assertEquals("SQL Checker", result.displayName)
     }
 
     @Test
