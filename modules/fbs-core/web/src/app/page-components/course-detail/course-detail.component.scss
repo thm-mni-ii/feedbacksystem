@@ -120,38 +120,80 @@
     cursor: pointer;
   }
 }
-.mat-mdc-progress-bar {
+.mat-mdc-progress-bar,
+mat-progress-bar,
+.mat-progress-bar {
   height: 15px;
   border-radius: 5px;
+  overflow: hidden;
+  --mat-progress-bar-track-height: 15px;
+  --mat-progress-bar-active-indicator-height: 15px;
+  --mat-progress-bar-track-shape: 5px;
+  --mat-progress-bar-active-indicator-color: #{$green};
+  --mat-progress-bar-track-color: #{$red};
 }
 
-:host ::ng-deep .mdc-linear-progress__bar-inner {
-  border-color: $green;
-}
+:host ::ng-deep {
+  .mat-mdc-progress-bar,
+  mat-progress-bar,
+  .mat-progress-bar {
+    height: 15px;
+    border-radius: 5px;
+    overflow: hidden;
+    --mat-progress-bar-track-height: 15px;
+    --mat-progress-bar-active-indicator-height: 15px;
+    --mat-progress-bar-track-shape: 5px;
+    --mat-progress-bar-active-indicator-color: #{$green};
+    --mat-progress-bar-track-color: #{$red};
+  }
 
-:host ::ng-deep .mdc-linear-progress__buffer-bar {
-  background-color: $red;
-}
+  // MDC-based Material (Angular 15+)
+  .mdc-linear-progress {
+    height: 15px;
+  }
 
-// ::ng-deep .mat-progress-bar {
-//   margin: auto;
-//   border-radius: 2px;
-//   height: 20px;
-// }
+  .mdc-linear-progress__bar {
+    height: 15px;
+  }
 
-// ::ng-deep .mat-progress-bar-background {
-//   background: #1e457c;
-//   animation: none !important;
-//   fill: #1e457c;
-// }
+  .mdc-linear-progress__bar-inner {
+    box-sizing: border-box;
+    height: 100%;
+    top: 0;
+    border-color: $green;
+    border-top-width: 15px;
+    background-color: $green;
+  }
 
-//animation none and color gray
-:host ::ng-deep .mdc-linear-progress__buffer-dots {
-  display: none;
-}
+  .mdc-linear-progress__buffer {
+    height: 15px;
+    border-radius: 5px;
+    background-color: #cccccc;
+  }
 
-:host ::ng-deep .mdc-linear-progress__buffer {
-  background-color: #cccccc;
+  .mdc-linear-progress__buffer-bar {
+    height: 100%;
+    background-color: $red;
+  }
+
+  .mdc-linear-progress__buffer-dots {
+    display: none;
+  }
+
+  // Legacy Material (Angular <= 14)
+  .mat-progress-bar-fill::after {
+    background-color: $green;
+  }
+
+  .mat-progress-bar-buffer {
+    background-color: $red;
+  }
+
+  .mat-progress-bar-background {
+    background-color: #cccccc;
+    animation: none !important;
+    fill: #cccccc;
+  }
 }
 
 .flex-container {
