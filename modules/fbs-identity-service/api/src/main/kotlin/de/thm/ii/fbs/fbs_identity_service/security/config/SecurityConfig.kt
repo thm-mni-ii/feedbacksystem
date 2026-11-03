@@ -258,7 +258,36 @@ class SecurityConfig(
             maxAge = 3600L
         }
 
+        val oidcDiscoveryCorsConfiguration = CorsConfiguration().apply {
+            allowedOriginPatterns = listOf("*")
+            allowedMethods = listOf("GET", "OPTIONS", "HEAD")
+            allowedHeaders = listOf("*")
+            allowCredentials = false
+            maxAge = 3600L
+        }
+
+        val oidcTokenCorsConfiguration = CorsConfiguration().apply {
+            allowedOriginPatterns = listOf("*")
+            allowedMethods = listOf("POST", "OPTIONS")
+            allowedHeaders = listOf("*")
+            allowCredentials = false
+            maxAge = 3600L
+        }
+
+        val oidcUserInfoCorsConfiguration = CorsConfiguration().apply {
+            allowedOriginPatterns = listOf("*")
+            allowedMethods = listOf("GET", "POST", "OPTIONS", "HEAD")
+            allowedHeaders = listOf("*")
+            allowCredentials = false
+            maxAge = 3600L
+        }
+
         val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/.well-known/**", oidcDiscoveryCorsConfiguration)
+        source.registerCorsConfiguration("/oauth2/jwks", oidcDiscoveryCorsConfiguration)
+        source.registerCorsConfiguration("/oauth2/token", oidcTokenCorsConfiguration)
+        source.registerCorsConfiguration("/oauth2/revoke", oidcTokenCorsConfiguration)
+        source.registerCorsConfiguration("/userinfo", oidcUserInfoCorsConfiguration)
         source.registerCorsConfiguration("/login/saml2/**", samlCorsConfiguration)
         source.registerCorsConfiguration("/saml2/**", samlCorsConfiguration)
         source.registerCorsConfiguration("/**", configuration)
