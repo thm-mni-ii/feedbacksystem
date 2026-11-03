@@ -1,5 +1,5 @@
 package de.thm.ii.fbs.services.checker
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import tools.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerSubmission, User}
 import de.thm.ii.fbs.model.task.Task
@@ -9,7 +9,7 @@ import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, SQLCheckerService, SubmissionService, TaskService, UserService}
 import de.thm.ii.fbs.services.security.TokenService
-import org.apache.http.client.utils.URIBuilder
+import org.apache.hc.core5.net.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 

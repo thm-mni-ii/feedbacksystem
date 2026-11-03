@@ -1,11 +1,11 @@
-@file:Suppress("ktlint:no-wildcard-imports")
+@file:Suppress("ktlint:standard:no-wildcard-imports")
 
 package de.thm.ii.fbs.model.v2.playground
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.thm.ii.fbs.model.v2.group.Group
 import de.thm.ii.fbs.model.v2.security.User
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "sql_playground_database")
@@ -21,6 +21,7 @@ class SqlPlaygroundDatabase(
     @Column(nullable = false)
     var active: Boolean = false,
     @OneToOne
+    @JoinColumn(name = "share_with_group_group_id")
     var shareWithGroup: Group? = null,
     @Column(nullable = false)
     @JsonIgnore

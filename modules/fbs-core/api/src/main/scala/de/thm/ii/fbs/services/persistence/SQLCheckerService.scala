@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.model.{SQLCheckerQuery, SQLCheckerSolution}
 import org.springframework.beans.factory.annotation.{Autowired, Qualifier}
 import org.springframework.data.domain.Sort

@@ -40,7 +40,10 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
         // TODO do the regex' work in any case?
         var formula: String = orgFormula.replace(cellStringsRegex, "")
         val cellRefs = mutableSetOf<Cell>()
-        formula = formula.replace(rangeRefsRegex) { mr -> getRangeCells(mr.value, cellRefs, sheet); "" }
+        formula = formula.replace(rangeRefsRegex) { mr ->
+            getRangeCells(mr.value, cellRefs, sheet)
+            ""
+        }
         cellRefs += cellRefsRegex.findAll(formula).map { mr -> refToCell(mr.value, sheet.sheetName) }.toMutableSet()
         return cellRefs
     }

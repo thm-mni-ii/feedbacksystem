@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.model.classroom
 
-import javax.xml.bind.annotation.XmlElement
-import javax.xml.bind.annotation.XmlRootElement
-import javax.xml.bind.annotation.XmlType
+import jakarta.xml.bind.annotation.XmlElement
+import jakarta.xml.bind.annotation.XmlRootElement
+import jakarta.xml.bind.annotation.XmlType
 
 /**
   * Response expected from JOIN Call to BBB API. Used to parse XML to Object using JAXB

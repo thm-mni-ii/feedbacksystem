@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.persistence
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.task.TaskResult
 import de.thm.ii.fbs.model.{AnalysisCourseResult, CourseResult}
 import de.thm.ii.fbs.services.persistence.storage.MinioStorageService

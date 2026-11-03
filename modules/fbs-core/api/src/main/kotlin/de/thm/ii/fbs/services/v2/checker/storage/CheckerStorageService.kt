@@ -1,24 +1,24 @@
 package de.thm.ii.fbs.services.v2.checker.storage
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
 import de.thm.ii.fbs.model.v2.checker.storage.CheckerStorageEntity
 import de.thm.ii.fbs.services.v2.persistence.CheckerStorageRepository
 import de.thm.ii.fbs.utils.v2.converters.ReferenceGraphDeserializer
 import de.thm.ii.fbs.utils.v2.converters.ReferenceGraphSerializer
 import org.springframework.stereotype.Service
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
 
 @Service
 class CheckerStorageService(val checkerStorageRepository: CheckerStorageRepository) {
-    val objectMapper = ObjectMapper()
-
-    init {
-        val module = SimpleModule()
-        module.addSerializer(ReferenceGraph::class.java, ReferenceGraphSerializer())
-        module.addDeserializer(ReferenceGraph::class.java, ReferenceGraphDeserializer())
-        objectMapper.registerModule(module)
-    }
+    val objectMapper: ObjectMapper = JsonMapper.builder()
+        .addModule(
+            SimpleModule()
+                .addSerializer(ReferenceGraph::class.java, ReferenceGraphSerializer())
+                .addDeserializer(ReferenceGraph::class.java, ReferenceGraphDeserializer())
+        )
+        .build()
 
     fun storeValue(configurationId: Int, storageKey: String, value: Any) {
         checkerStorageRepository.save(

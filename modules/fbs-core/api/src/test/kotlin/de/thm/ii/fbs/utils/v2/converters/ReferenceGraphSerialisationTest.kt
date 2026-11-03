@@ -1,21 +1,21 @@
 package de.thm.ii.fbs.utils.v2.converters
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
 import org.junit.Assert
 import org.junit.Test
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
 
 class ReferenceGraphSerialisationTest {
-    private val objectMapper = ObjectMapper()
-
-    init {
-        val module = SimpleModule()
-        module.addSerializer(ReferenceGraph::class.java, ReferenceGraphSerializer())
-        module.addDeserializer(ReferenceGraph::class.java, ReferenceGraphDeserializer())
-        objectMapper.registerModule(module)
-    }
+    private val objectMapper: ObjectMapper = JsonMapper.builder()
+        .addModule(
+            SimpleModule()
+                .addSerializer(ReferenceGraph::class.java, ReferenceGraphSerializer())
+                .addDeserializer(ReferenceGraph::class.java, ReferenceGraphDeserializer())
+        )
+        .build()
 
     private fun getResult(graph: ReferenceGraph): ReferenceGraph {
         val json = objectMapper.writeValueAsString(graph)

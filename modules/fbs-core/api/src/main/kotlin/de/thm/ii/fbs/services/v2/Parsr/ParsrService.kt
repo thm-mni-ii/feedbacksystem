@@ -1,4 +1,4 @@
-@file:Suppress("ktlint:no-wildcard-imports")
+@file:Suppress("ktlint:standard:no-wildcard-imports")
 
 package de.thm.ii.fbs.services.v2.Parsr
 
@@ -28,7 +28,8 @@ import java.util.concurrent.ConcurrentHashMap
 class ParsrService {
 
     enum class ParsrStatus {
-        ONGOING, FINISHED
+        ONGOING,
+        FINISHED
     }
 
     class ParsrStatusEntry(

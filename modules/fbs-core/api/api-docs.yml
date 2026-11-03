@@ -47,23 +47,6 @@ security:
   - JWT: [ ]
 
 paths:
-  /login/cas:
-    post:
-      security: [ ]
-      operationId: casLogin
-      tags:
-        - Login
-      summary: Login into system via the cas protocol
-      responses:
-        "200":
-          description: OK
-          headers:
-            Authorization:
-              description: Bearer
-              schema:
-                type: string
-        "401":
-          description: Unauthorized
   /login/ldap:
     post:
       security: [ ]

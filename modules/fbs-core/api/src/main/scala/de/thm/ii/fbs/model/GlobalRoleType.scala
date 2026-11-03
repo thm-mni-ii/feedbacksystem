@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.model
 
-import com.fasterxml.jackson.core.`type`.TypeReference
+import tools.jackson.core.`type`.TypeReference
 
 /**
   * The global role enum type wrapper

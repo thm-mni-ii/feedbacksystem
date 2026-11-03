@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import tools.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformationTasks, Submission}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.ScalaObjectMapper
@@ -13,7 +13,7 @@ import java.io.File
 class SpreadsheetFileService {
   @Autowired
   private val storageService: StorageService = null
-  private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+  private val objectMapper: ObjectMapper = ScalaObjectMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build()
 
   def getMediaInfo(cc: CheckrunnerConfiguration): ExcelMediaInformationTasks = {
     val content = this.storageService.getSecondaryFileContent(cc)

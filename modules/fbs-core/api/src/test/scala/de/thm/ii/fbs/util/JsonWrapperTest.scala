@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.util
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.assertj.core.api.Assertions
 import org.junit.Test

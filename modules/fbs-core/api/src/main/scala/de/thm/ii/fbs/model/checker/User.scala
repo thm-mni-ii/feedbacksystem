@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.model.checker
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import tools.jackson.databind.{JsonNode, ObjectMapper}
 
 case class User(id: Int, username: String) {
   /**

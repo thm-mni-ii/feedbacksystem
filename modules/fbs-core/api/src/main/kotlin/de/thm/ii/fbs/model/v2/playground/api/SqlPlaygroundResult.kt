@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.model.v2.playground.api
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ArrayNode
 
 data class SqlPlaygroundResult(
     @JsonProperty("error")

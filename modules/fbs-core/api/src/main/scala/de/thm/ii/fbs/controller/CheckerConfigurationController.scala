@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.task.Task
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
 import java.nio.file.Path
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * UserController defines all routes for /users (insert, delete, update)

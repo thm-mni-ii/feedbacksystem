@@ -1,6 +1,8 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package de.thm.ii.fbs.services.v2.checker
 
-import de.thm.ii.fbs.model.v2.checker.* // ktlint-disable no-wildcard-imports
+import de.thm.ii.fbs.model.v2.checker.*
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundDatabase
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundQuery
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundShare

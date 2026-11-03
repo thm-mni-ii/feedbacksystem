@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.model.checker
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 
 trait Submission {
   val id: Int

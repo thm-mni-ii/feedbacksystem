@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 import java.util.Date
-import javax.xml.bind.DatatypeConverter
+import java.util.Base64
 
 /**
   * Service for issuing and checking multi purpose jwt tokens
@@ -37,5 +37,5 @@ class TokenService {
     * JWT Token as Base64
     * @return base64 encoded JWT Secret
     */
-  def jwtSecretEncoding(): String = DatatypeConverter.printBase64Binary(jwtSecret.getBytes)
+  def jwtSecretEncoding(): String = Base64.getEncoder.encodeToString(jwtSecret.getBytes)
 }

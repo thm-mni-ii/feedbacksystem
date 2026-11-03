@@ -1,12 +1,12 @@
 package de.thm.ii.fbs.services.v2.checker
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.v2.checker.RunnerArguments
 import de.thm.ii.fbs.utils.v2.helpers.RestTemplateFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.ObjectMapper
 import java.nio.charset.StandardCharsets
 
 abstract class RemoteCheckerV2Service(

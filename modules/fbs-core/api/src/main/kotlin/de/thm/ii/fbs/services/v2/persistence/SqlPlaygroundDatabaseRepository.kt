@@ -8,5 +8,5 @@ interface SqlPlaygroundDatabaseRepository : JpaRepository<SqlPlaygroundDatabase,
     fun findByOwner_IdAndIdAndDeleted(ownerId: Int, id: Int, deleted: Boolean): SqlPlaygroundDatabase?
     fun findByOwner_IdAndActiveAndDeleted(ownerId: Int, active: Boolean, deleted: Boolean): SqlPlaygroundDatabase?
     fun findByIdAndDeleted(id: Int, deleted: Boolean): SqlPlaygroundDatabase?
-    fun findByShareWithGroup(shareWithGroup: Int): SqlPlaygroundDatabase?
+    fun findByShareWithGroup_Id(groupId: Int): SqlPlaygroundDatabase?
 }

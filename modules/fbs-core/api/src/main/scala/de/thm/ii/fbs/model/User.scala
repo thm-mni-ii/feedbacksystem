@@ -2,7 +2,7 @@ package de.thm.ii.fbs.model
 
 import java.security.Principal
 
-import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
+import tools.jackson.module.scala.JsonScalaEnumeration
 import org.json.JSONObject
 
 /**

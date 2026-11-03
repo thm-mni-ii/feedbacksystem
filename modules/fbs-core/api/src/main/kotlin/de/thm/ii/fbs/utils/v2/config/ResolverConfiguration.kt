@@ -11,7 +11,7 @@ class ResolverConfiguration(
     private val tokenService: TokenV2Service
 ) : WebMvcConfigurer {
     override fun addArgumentResolvers(
-        resolvers: MutableList<HandlerMethodArgumentResolver?>
+        resolvers: MutableList<HandlerMethodArgumentResolver>
     ) {
         resolvers.add(LegacyTokenResolver(tokenService))
     }

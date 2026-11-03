@@ -1,6 +1,5 @@
 package de.thm.ii.fbs.services.v2.taskprovider
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import de.thm.ii.fbs.model.v2.taskprovider.CreateTaskProviderRequest
 import de.thm.ii.fbs.model.v2.taskprovider.TaskProviderEntity
 import de.thm.ii.fbs.model.v2.taskprovider.UpdateTaskProviderRequest
@@ -12,6 +11,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Optional
 
 class TaskProviderServiceTest {

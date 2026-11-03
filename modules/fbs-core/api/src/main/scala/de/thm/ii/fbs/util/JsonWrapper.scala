@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.util
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 
 /**
   * Allow save retrivement of textrual attributes.
@@ -56,7 +56,7 @@ class JsonWrapper(jsonNode: JsonNode) {
 }
 
 /**
-  * Conversion object for com.fasterxml.jackson.databind.JsonNode
+  * Conversion object for tools.jackson.databind.JsonNode
   *
   * @author Andrej Sajenko
   */
