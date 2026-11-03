@@ -60,6 +60,24 @@ Change to the cloned directory
 cd feedbacksystem
 ```
 
+Create the signing key for the identity service (it is not part of the repository)
+```
+mkdir -p secrets
+keytool -genkeypair \
+  -alias identity-signing \
+  -keyalg RSA \
+  -keysize 4096 \
+  -storetype PKCS12 \
+  -keystore secrets/identity-signing-key.p12 \
+  -storepass changeit \
+  -keypass changeit \
+  -dname "CN=fbs-identity, OU=Feedbacksystem, O=THM, C=DE" \
+  -validity 3650
+```
+
+> **Note**  
+> If `docker compose up` is run before the key exists, Docker creates an empty directory at `secrets/identity-signing-key.p12` and the identity service fails to start. Remove it with `sudo rm -rf secrets` and create the key as shown above.
+
 Build all container an start them with `docker compose`
 ```
 docker compose up -d --build
