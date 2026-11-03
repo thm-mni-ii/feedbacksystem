@@ -1,5 +1,6 @@
 <div class="container">
-  <app-menu-bar *ngIf="role || isAuthorized()">
+  @if (role || isAuthorized()) {
+  <app-menu-bar>
     <button
       mat-icon-button
       [routerLink]="['/', 'courses', courseID]"
@@ -9,10 +10,13 @@
     </button>
     <span class="spacer"></span>
   </app-menu-bar>
+  }
 
   <div class="task-list">
-    <div *ngFor="let task of tasks">
+    @for (task of tasks; track task) {
+    <div>
       <mat-card
+        appearance="outlined"
         class="task-container"
         id="{{ task.id }}"
         [routerLink]="[
@@ -26,5 +30,6 @@
         <span>{{ task.name }}</span>
       </mat-card>
     </div>
+    }
   </div>
 </div>

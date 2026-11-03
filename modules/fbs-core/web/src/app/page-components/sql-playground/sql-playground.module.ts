@@ -67,6 +67,7 @@ import { GroupsEffects } from "./db-control-panel/state/groups.effects";
       maxAge: 25,
       logOnly: !isDevMode(),
       autoPause: true,
+      connectInZone: true,
     }),
     StoreModule.forFeature("sqlPlayground", sqlPlaygroundReducer),
     StoreModule.forFeature("sqlInputTabs", sqlInputTabsReducer),

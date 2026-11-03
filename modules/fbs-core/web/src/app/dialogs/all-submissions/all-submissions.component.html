@@ -1,11 +1,12 @@
 <mat-dialog-content>
+  @if (data?.submission) {
   <app-results
-    *ngIf="data?.submission"
     [displayTables]="true"
     [submissions]="data.submission"
     [context]="data.context"
     [isText]="data.isText"
   ></app-results>
+  }
 </mat-dialog-content>
 <mat-dialog-actions class="buttons">
   <button mat-flat-button color="warn" (click)="close()">

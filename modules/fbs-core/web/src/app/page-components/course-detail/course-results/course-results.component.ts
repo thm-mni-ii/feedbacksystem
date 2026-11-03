@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { TitlebarService } from "../../../service/titlebar.service";
@@ -22,6 +22,8 @@ import { EvaluationUserResults } from "src/app/model/EvaluationUserResults";
   selector: "app-course-results",
   templateUrl: "./course-results.component.html",
   styleUrls: ["./course-results.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CourseResultsComponent implements OnInit {
   constructor(

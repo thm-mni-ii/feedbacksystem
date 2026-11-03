@@ -21,9 +21,11 @@
       (optionSelected)="addParticipant($event.option.value)"
       [displayWith]="displayFn"
     >
-      <mat-option *ngFor="let user of searchedUser" [value]="user">
+      @for (user of searchedUser; track user) {
+      <mat-option [value]="user">
         {{ user.prename }} {{ user.surname }}
       </mat-option>
+      }
     </mat-autocomplete>
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { AuthService } from "src/app/service/auth.service";
 import { TitlebarService } from "src/app/service/titlebar.service";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
@@ -10,6 +10,8 @@ import { map } from "rxjs/operators";
   selector: "app-fbs-questionary",
   templateUrl: "./fbs-questionary.component.html",
   styleUrls: ["./fbs-questionary.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class FbsQuestionaryComponent implements OnInit {
   token: string;

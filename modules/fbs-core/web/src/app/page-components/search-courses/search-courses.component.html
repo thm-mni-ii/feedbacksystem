@@ -8,9 +8,9 @@
       <mat-icon>arrow_back</mat-icon>
     </button>
     <span class="spacer"></span>
+    @if (isAdmin()) {
     <button
       mat-button
-      *ngIf="isAdmin()"
       routerLink="/admin/task-providers"
       color="primary"
       matTooltip="{{ 'task-provider.management.title' | i18nextEager }}"
@@ -19,6 +19,7 @@
         "task-provider.management.button" | i18nextEager
       }}
     </button>
+    }
   </app-menu-bar>
 
   <mat-form-field class="search" appearance="outline">
@@ -33,10 +34,10 @@
   </mat-form-field>
 
   <div class="create-course">
+    @if (isAuthorized()) {
     <button
       mat-raised-button
       color="accent"
-      *ngIf="isAuthorized()"
       (click)="createCourse()"
       matTooltip="{{ 'course.search.tooltip.createCourse' | i18nextEager }}"
     >
@@ -44,14 +45,14 @@
         "course.search.label.createCourse" | i18nextEager
       }}
     </button>
+    }
   </div>
 
-  <app-course-preview
-    *ngFor="let course of filteredCourses | async"
-    [data]="course"
-  ></app-course-preview>
-
-  <span class="noElements" *ngIf="(courses | async)?.length === 0">{{
+  @for (course of filteredCourses | async; track course) {
+  <app-course-preview [data]="course"></app-course-preview>
+  } @if ((courses | async)?.length === 0) {
+  <span class="noElements">{{
     "course.search.error.noCourses" | i18nextEager
   }}</span>
+  }
 </div>

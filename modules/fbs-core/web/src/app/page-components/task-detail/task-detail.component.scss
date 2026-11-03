@@ -63,6 +63,11 @@ mat-radio-button {
 
 .details {
   margin-top: 50px;
+  padding: 16px;
+
+  mat-card-content {
+    padding: 0;
+  }
 }
 
 .task-container {

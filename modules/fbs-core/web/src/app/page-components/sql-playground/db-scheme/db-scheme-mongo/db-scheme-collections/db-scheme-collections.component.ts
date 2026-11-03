@@ -6,6 +6,7 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { Subject } from "rxjs";
 import { MongoPlaygroundService } from "src/app/service/mongo-playground.service";
@@ -15,6 +16,8 @@ import { AuthService } from "src/app/service/auth.service";
   selector: "app-db-scheme-collections",
   templateUrl: "db-scheme-collections.component.html",
   styleUrls: ["../../db-scheme.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class DbSchemeCollectionsComponent implements OnInit, OnChanges {
   @Input() reloadTrigger: Subject<void>;

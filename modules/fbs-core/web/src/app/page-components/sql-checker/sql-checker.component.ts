@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { TaskService } from "../../service/task.service";
 import { AuthService } from "../../service/auth.service";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -22,6 +22,8 @@ import { CheckerConfig } from "../../model/CheckerConfig";
   selector: "app-sql-checker",
   templateUrl: "./sql-checker.component.html",
   styleUrls: ["./sql-checker.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SqlCheckerComponent implements OnInit {
   constructor(

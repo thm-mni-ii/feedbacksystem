@@ -1,93 +1,106 @@
 <div class="container">
-  <app-menu-bar *ngIf="role || isAuthorized()">
+  @if (role || isAuthorized()) {
+  <app-menu-bar>
+    @if (showRight) {
     <button
-      *ngIf="showRight"
       mat-icon-button
       [routerLink]="['/', 'courses', courseID, 'sql-checker']"
       matTooltip="Zurück zum Kurs"
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <span class="spacer" *ngIf="showRight">SQL-Checker</span>
-    <span class="spacer" *ngIf="!showRight"
+    } @if (showRight) {
+    <span class="spacer">SQL-Checker</span>
+    } @if (!showRight) {
+    <span class="spacer"
       ><button mat-button (click)="standardEvent()">
         Zurück zur Übersicht
       </button></span
     >
+    }
   </app-menu-bar>
-  <div
-    class="table-title"
-    *ngIf="!showRight && !showCenterAttributeChecker && !showCenterTableChecker"
-  >
+  } @if (!showRight && !showCenterAttributeChecker && !showCenterTableChecker) {
+  <div class="table-title">
     {{ showPath }}
   </div>
+  }
   <div class="chart-box">
-    <div class="chart-left" *ngIf="showLeft">
+    @if (showLeft) {
+    <div class="chart-left">
       <div class="chart-title">Table Checker</div>
       <canvas
         baseChart
-        [data]="pieChartDataLeft"
+        [datasets]="[
+          { data: pieChartDataLeft, backgroundColor: pieChartColors }
+        ]"
         [labels]="pieChartLabelsLeft"
-        [chartType]="pieChartTypeLeft"
+        [type]="pieChartTypeLeft"
         [options]="pieChartOptionsLeft"
         [plugins]="pieChartPluginsLeft"
         [legend]="pieChartLegendLeft"
-        [colors]="pieChartColors"
         (chartClick)="tableCheckerWrongTables($event)"
       >
       </canvas>
     </div>
-    <div class="chart-right" *ngIf="showRight">
+    } @if (showRight) {
+    <div class="chart-right">
       <div class="chart-title">Attribut Checker</div>
       <canvas
         baseChart
-        [data]="pieChartDataRight"
+        [datasets]="[
+          { data: pieChartDataRight, backgroundColor: pieChartColors }
+        ]"
         [labels]="pieChartLabelsRight"
-        [chartType]="pieChartTypeRight"
+        [type]="pieChartTypeRight"
         [options]="pieChartOptionsRight"
         [plugins]="pieChartPluginsRight"
         [legend]="pieChartLegendRight"
-        [colors]="pieChartColors"
         (chartClick)="clickAttributeChart($event)"
       >
       </canvas>
     </div>
+    }
   </div>
-  <div class="chart-center" *ngIf="showCenterTableChecker">
+  @if (showCenterTableChecker) {
+  <div class="chart-center">
     <div class="chart-title">{{ showPath }}</div>
     <canvas
       baseChart
       width="40"
       height="10"
-      [data]="pieChartDataCenter"
+      [datasets]="[
+        { data: pieChartDataCenter, backgroundColor: pieChartColors }
+      ]"
       [labels]="pieChartLabelsCenter"
-      [chartType]="pieChartTypeCenter"
+      [type]="pieChartTypeCenter"
       [options]="pieChartOptionsCenter"
       [plugins]="pieChartPluginsCenter"
       [legend]="pieChartLegendCenter"
-      [colors]="pieChartColors"
       (chartClick)="clickCenterChartTableChecker($event)"
     >
     </canvas>
   </div>
-  <div class="chart-center" *ngIf="showCenterAttributeChecker">
+  } @if (showCenterAttributeChecker) {
+  <div class="chart-center">
     <div class="chart-title">{{ showPath }}</div>
     <canvas
       baseChart
       width="40"
       height="10"
-      [data]="pieChartDataCenter"
+      [datasets]="[
+        { data: pieChartDataCenter, backgroundColor: pieChartColors }
+      ]"
       [labels]="pieChartLabelsCenter"
-      [chartType]="pieChartTypeCenter"
+      [type]="pieChartTypeCenter"
       [options]="pieChartOptionsCenter"
       [plugins]="pieChartPluginsCenter"
       [legend]="pieChartLegendCenter"
-      [colors]="pieChartColors"
       (chartClick)="clickCenterChartAttributeChecker($event)"
     >
     </canvas>
   </div>
-  <div class="result-table" *ngIf="showResult">
+  } @if (showResult) {
+  <div class="result-table">
     <table mat-table [dataSource]="resultTable" class="mat-elevation-z8">
       <ng-container matColumnDef="userID">
         <th mat-header-cell *matHeaderCellDef>userID</th>
@@ -104,4 +117,5 @@
       ></tr>
     </table>
   </div>
+  }
 </div>

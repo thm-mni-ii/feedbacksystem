@@ -1,4 +1,10 @@
-import { Component, OnInit, Input, ChangeDetectorRef } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  Input,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TitlebarService } from "../../service/titlebar.service";
 import { MatDialog } from "@angular/material/dialog";
@@ -31,6 +37,8 @@ import { Integration } from "../../model/Integration";
   selector: "app-course-detail",
   templateUrl: "./course-detail.component.html",
   styleUrls: ["./course-detail.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CourseDetailComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;

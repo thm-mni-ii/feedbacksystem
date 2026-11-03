@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import {
   AbstractControl,
   UntypedFormControl,
@@ -13,6 +13,8 @@ import { User } from "../../model/User";
   selector: "app-create-guest-user-dialog",
   templateUrl: "create-guest-user-dialog.component.html",
   styleUrls: ["./create-guest-user-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CreateGuestUserDialogComponent {
   constructor(

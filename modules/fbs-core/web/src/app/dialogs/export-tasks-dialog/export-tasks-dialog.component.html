@@ -13,16 +13,18 @@
   </button>
 </mat-menu>
 
-<div class="content">
+<div mat-dialog-content class="content">
+  @for (task of tasks; track task) {
   <mat-card
+    appearance="outlined"
     [ngClass]="{
       selected: task.selected
     }"
     class="task"
-    *ngFor="let task of tasks"
     (click)="select(task.index)"
     >{{ task.name }}</mat-card
   >
+  }
 </div>
 
 <mat-dialog-actions class="actions">

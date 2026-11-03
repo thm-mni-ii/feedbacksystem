@@ -11,9 +11,11 @@
   margin-top: 16px;
 }
 .task-container {
+  padding: 16px;
   cursor: pointer;
   margin-top: 12px;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   .meta {
     > * {

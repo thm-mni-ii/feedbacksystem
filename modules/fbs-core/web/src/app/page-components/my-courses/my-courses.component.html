@@ -25,16 +25,17 @@
     </div>
   </div>
 
+  @for (course of filteredCourses | async; track course) {
   <app-course-preview-w-progress
-    *ngFor="let course of filteredCourses | async"
     [data]="course"
   ></app-course-preview-w-progress>
-
-  <span class="noElements" *ngIf="(courses | async)?.length === 0">
+  } @if ((courses | async)?.length === 0) {
+  <span class="noElements">
     {{ "course.enrol.do" | i18nextEager
     }}<a routerLink="/courses/search">{{
       "course.enrol.name" | i18nextEager
     }}</a
     >{{ "course.enrol.see" | i18nextEager }}
   </span>
+  }
 </div>

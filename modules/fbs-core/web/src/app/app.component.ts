@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { AuthService } from "./service/auth.service";
 import { EmbeddingService } from "./service/embedding.service";
 
@@ -9,6 +9,8 @@ import { EmbeddingService } from "./service/embedding.service";
   selector: "app-root",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class AppComponent implements OnInit {
   constructor(

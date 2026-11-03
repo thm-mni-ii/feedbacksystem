@@ -1,40 +1,44 @@
 <div class="container">
-  <app-menu-bar *ngIf="role || isAuthorized()">
-    <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
+  @if (role || isAuthorized()) {
+  <app-menu-bar>
+    @if (role) {
+    <mat-icon role="img">account_circle</mat-icon>
+    }
     <span>
-      <span *ngIf="role === 'DOCENT'">{{ "role.docent" | i18nextEager }}</span>
-      <span *ngIf="role === 'TUTOR'">{{ "role.tutor" | i18nextEager }}</span>
-      <span *ngIf="role === 'STUDENT'">{{
-        "role.student" | i18nextEager
-      }}</span>
+      @if (role === 'DOCENT') {
+      <span>{{ "role.docent" | i18nextEager }}</span>
+      } @if (role === 'TUTOR') {
+      <span>{{ "role.tutor" | i18nextEager }}</span>
+      } @if (role === 'STUDENT') {
+      <span>{{ "role.student" | i18nextEager }}</span>
+      }
     </span>
-
     <span class="spacer"></span>
-
+    @if (isAuthorized() || role) {
     <button
       mat-icon-button
-      *ngIf="isAuthorized() || role"
       [matMenuTriggerFor]="settings"
       matTooltip="{{ 'course.settings' | i18nextEager }}"
     >
       <mat-icon>settings</mat-icon>
     </button>
+    }
     <mat-menu #settings="matMenu">
-      <button mat-menu-item *ngIf="role" (click)="updateGroup()">
+      @if (role) {
+      <button mat-menu-item (click)="updateGroup()">
         <mat-icon>title</mat-icon>
         {{ "dialog.group.new.edit-group-name" | i18nextEager }}
       </button>
-      <button mat-menu-item color="warn" *ngIf="role" (click)="exitGroup()">
+      } @if (role) {
+      <button mat-menu-item color="warn" (click)="exitGroup()">
         <mat-icon>exit_to_app</mat-icon>{{ "group.deregister" | i18nextEager }}
       </button>
+      }
     </mat-menu>
   </app-menu-bar>
-  <button
-    mat-icon-button
-    class="kanban-button"
-    *ngIf="kanbanUrl !== null"
-    (click)="navigateToKanban()"
-  >
+  } @if (kanbanUrl !== null) {
+  <button mat-icon-button class="kanban-button" (click)="navigateToKanban()">
     <mat-icon>view_kanban</mat-icon>
   </button>
+  }
 </div>

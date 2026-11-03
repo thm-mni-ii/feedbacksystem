@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { Observable, of } from "rxjs";
 import { CheckerService } from "../../service/checker.service";
@@ -20,6 +20,8 @@ import {
   selector: "app-configuration-list",
   templateUrl: "./configuration-list.component.html",
   styleUrls: ["./configuration-list.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ConfigurationListComponent implements OnInit {
   configurations: Observable<CheckerConfig[]> = of();

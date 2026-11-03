@@ -1,4 +1,10 @@
-import { Component, Inject, OnInit, OnDestroy } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
 import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
@@ -15,6 +21,8 @@ import { TaskProvider } from "../../model/TaskProvider";
   selector: "app-new-checker-dialog",
   templateUrl: "./new-checker-dialog.component.html",
   styleUrls: ["./new-checker-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class NewCheckerDialogComponent implements OnInit, OnDestroy {
   fileCounter = 0;

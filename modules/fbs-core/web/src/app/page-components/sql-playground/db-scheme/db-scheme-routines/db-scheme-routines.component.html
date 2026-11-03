@@ -1,7 +1,7 @@
 <p class="title" role="heading" aria-level="4" tabindex="0">Routines</p>
+@for (routine of routines$ | async; track routine; let i = $index) {
 <mat-expansion-panel
   class="routine"
-  *ngFor="let routine of routines$ | async; index as i"
   attr.aria-label="Routine {{ routine.name }}"
 >
   <mat-expansion-panel-header>
@@ -14,28 +14,26 @@
     <span>{{ routine.type }}</span>
   </p>
   <br />
-
   <span class="header">
     <b>Parameter:</b>
-    <i *ngIf="routine.parameters === undefined || routine.parameters === ''">
-      (None)
-    </i>
+    @if (routine.parameters === undefined || routine.parameters === '') {
+    <i> (None) </i>
+    }
   </span>
   <br />
-
-  <div *ngIf="routine.parameters !== undefined && routine.parameters !== ''">
-    <span
-      class="routine-definition"
-      *ngFor="let param of routine.parameters.split(',')"
-      attr.aria-label="Parameter: {{ param }}"
-    >
+  @if (routine.parameters !== undefined && routine.parameters !== '') {
+  <div>
+    @for (param of routine.parameters.split(','); track param) {
+    <span class="routine-definition" attr.aria-label="Parameter: {{ param }}">
       {{ param }} <br />
     </span>
+    }
     <br />
   </div>
-
+  }
   <p class="header"><b>Definition:</b></p>
   <pre class="routine-definition overflow" aria-label="Routinedefinition">{{
     routine.definition
   }}</pre>
 </mat-expansion-panel>
+}

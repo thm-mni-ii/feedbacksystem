@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Observable, of } from "rxjs";
 
 import { GroupService } from "../../service/group.service";
@@ -20,6 +20,8 @@ import { IntegrationService } from "../../service/integration.service";
   selector: "app-group-detail",
   templateUrl: "./group-detail.component.html",
   styleUrls: ["./group-detail.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class GroupDetailComponent implements OnInit {
   constructor(

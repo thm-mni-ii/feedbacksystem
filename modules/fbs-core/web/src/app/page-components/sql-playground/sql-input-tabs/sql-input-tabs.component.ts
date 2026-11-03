@@ -9,6 +9,7 @@ import {
   OnDestroy,
   Output,
   ViewChild,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -37,6 +38,8 @@ import { CheckerService } from "src/app/service/checker.service";
   selector: "app-sql-input-tabs",
   templateUrl: "./sql-input-tabs.component.html",
   styleUrls: ["./sql-input-tabs.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SqlInputTabsComponent
   implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy

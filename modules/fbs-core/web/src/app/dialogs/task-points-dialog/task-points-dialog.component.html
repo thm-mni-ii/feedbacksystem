@@ -13,8 +13,10 @@
         {{ "dialog.task.points.label.allTasksCheckbox" | i18nextEager }}
       </mat-checkbox>
       <div class="scroll-box">
-        <div class="task-item" *ngFor="let task of tasks">
+        @for (task of tasks; track task) {
+        <div class="task-item">
           <mat-card
+            appearance="outlined"
             class="card"
             [ngClass]="getClass(task)"
             (click)="select(task)"
@@ -22,6 +24,7 @@
             <span>{{ task.name }}</span>
           </mat-card>
         </div>
+        }
       </div>
     </div>
 
@@ -30,7 +33,8 @@
         (selectedIndexChange)="changeIndex($event)"
         [selectedIndex]="index"
       >
-        <mat-tab *ngFor="let element of allRequirements; let i = index">
+        @for (element of allRequirements; track element; let i = $index) {
+        <mat-tab>
           <ng-template mat-tab-label>
             {{ "dialog.task.points.label.category" | i18nextEager }}
             {{ i + 1 }} &nbsp;
@@ -86,6 +90,7 @@
             </mat-list-item>
           </mat-list>
         </mat-tab>
+        }
         <mat-tab disabled>
           <ng-template mat-tab-label class="create-course">
             <button

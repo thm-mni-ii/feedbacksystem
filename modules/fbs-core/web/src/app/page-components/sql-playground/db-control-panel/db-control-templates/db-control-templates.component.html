@@ -13,17 +13,15 @@
         }}
         --
       </mat-option>
-      <mat-optgroup
-        *ngFor="let category of categories$ | async"
-        [label]="category.name"
-      >
-        <mat-option
-          *ngFor="let template of templates$ | async"
-          [value]="template.id"
-        >
+      @for (category of categories$ | async; track category) {
+      <mat-optgroup [label]="category.name">
+        @for (template of templates$ | async; track template) {
+        <mat-option [value]="template.id">
           {{ template.name }}
         </mat-option>
+        }
       </mat-optgroup>
+      }
     </mat-select>
   </mat-form-field>
   <button
@@ -36,12 +34,9 @@
       "sql-playground.db-control-panel.templates.insert-button" | i18nextEager
     }}
   </button>
-  <button
-    *ngIf="isAdmin"
-    mat-raised-button
-    class="orange-btn"
-    (click)="editTemplates()"
-  >
+  @if (isAdmin) {
+  <button mat-raised-button class="orange-btn" (click)="editTemplates()">
     {{ "sql-playground.db-control-panel.templates.edit-button" | i18nextEager }}
   </button>
+  }
 </div>

@@ -14,7 +14,8 @@
     </small>
   </div>
   <div class="flex-container">
-    <div *ngFor="let inputField of inputFields; index as i">
+    @for (inputField of inputFields; track inputField; let i = $index) {
+    <div>
       <b class="math-task-label">{{ inputField[0] }}</b>
       <div class="math-task-container">
         <app-math-input
@@ -32,5 +33,6 @@
         </form>
       </div>
     </div>
+    }
   </div>
 </div>

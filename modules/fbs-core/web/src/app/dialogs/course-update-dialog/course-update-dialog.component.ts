@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -14,6 +19,8 @@ import { SemesterService } from "../../service/semester.service";
   selector: "app-course-update-dialog",
   templateUrl: "./course-update-dialog.component.html",
   styleUrls: ["./course-update-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CourseUpdateDialogComponent implements OnInit {
   name = new UntypedFormControl("", [Validators.required]);

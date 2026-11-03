@@ -74,12 +74,15 @@
         [(ngModel)]="pwRepeat"
         name="passRepeat"
       />
-      <mat-error *ngIf="passwordMatcher.hasError('required')">{{
+      @if (passwordMatcher.hasError('required')) {
+      <mat-error>{{
         "dialog.user.guest.create.password-repeat-error" | i18nextEager
       }}</mat-error>
-      <mat-error *ngIf="passwordMatcher.hasError('notMatch')">{{
+      } @if (passwordMatcher.hasError('notMatch')) {
+      <mat-error>{{
         "dialog.user.guest.create.password-repeat-mismatch-error" | i18nextEager
       }}</mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field>

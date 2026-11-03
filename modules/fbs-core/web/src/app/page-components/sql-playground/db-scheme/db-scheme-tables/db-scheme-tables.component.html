@@ -1,9 +1,7 @@
 <div>
   <p class="title" role="heading" aria-level="4" tabindex="0">Tables</p>
-  <mat-expansion-panel
-    *ngFor="let table of updatedTables$ | async; index as i"
-    attr.aria-label="Tabelle {{ table.name }}"
-  >
+  @for (table of updatedTables$ | async; track table; let i = $index) {
+  <mat-expansion-panel attr.aria-label="Tabelle {{ table.name }}">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <span tabindex="0">{{ table.name }}</span>
@@ -26,7 +24,8 @@
       class="attribute-list"
       attr.aria-label="Tabellenspalten von {{ table.name }}"
     >
-      <li *ngFor="let column of table.columns; index as j">
+      @for (column of table.columns; track column; let j = $index) {
+      <li>
         <span class="attribute">
           <span
             [ngClass]="{ 'primary-key': column.isPrimaryKey }"
@@ -42,25 +41,25 @@
             }}</i>
           </span>
         </span>
-        <span
-          class="attribute info"
-          *ngIf="column.isNullable === false"
-          aria-label="Nicht null"
-        >
+        @if (column.isNullable === false) {
+        <span class="attribute info" aria-label="Nicht null">
           {{ "sql-playground.db-schema.tables.label.not-null" | i18nextEager }}
         </span>
+        }
       </li>
-
-      <li *ngIf="table.constraints !== undefined">
+      } @if (table.constraints !== undefined) {
+      <li>
         <span class="constraints"
           ><b aria-label="Constraints">{{
             "sql-playground.db-schema.tables.label.constraints" | i18nextEager
           }}</b></span
         >
       </li>
-      <div *ngIf="table.constraints !== undefined">
+      } @if (table.constraints !== undefined) {
+      <div>
+        @for (constraint of table.constraints.constraints; track constraint; let
+        k = $index) {
         <li
-          *ngFor="let constraint of table.constraints.constraints; index as k"
           attr.aria-label="Constraint: {{ constraint.name }}, Typ: {{
             constraint.type
           }}, Spalte: {{ constraint.columnName }}{{
@@ -77,15 +76,20 @@
               }}: {{ constraint.name }}
             </span>
             <span> {{ constraint.type }} on {{ constraint.columnName }} </span>
-            <span *ngIf="constraint.checkClause !== null">
+            @if (constraint.checkClause !== null) {
+            <span>
               {{
                 "sql-playground.db-schema.tables.label.constraint-clause"
                   | i18nextEager
               }}: {{ constraint.checkClause }}
             </span>
+            }
           </span>
         </li>
+        }
       </div>
+      }
     </ul>
   </mat-expansion-panel>
+  }
 </div>

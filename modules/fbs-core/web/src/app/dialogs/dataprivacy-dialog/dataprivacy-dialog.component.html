@@ -5,28 +5,24 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="dialog-actions">
-  <mat-checkbox *ngIf="!onlyForShow" [(ngModel)]="privacyChecked"
+  @if (!onlyForShow) {
+  <mat-checkbox [(ngModel)]="privacyChecked"
     >{{ "dialog.privacy.label.agreeWithPrivacyPolicy" | i18nextEager }}
   </mat-checkbox>
+  }
   <div class="action-buttons">
-    <button *ngIf="!onlyForShow" mat-flat-button color="warn" (click)="abort()">
+    @if (!onlyForShow) {
+    <button mat-flat-button color="warn" (click)="abort()">
       {{ "dialog.privacy.label.cancel" | i18nextEager }}
     </button>
-    <button
-      *ngIf="!onlyForShow"
-      mat-flat-button
-      color="accent"
-      (click)="login()"
-    >
+    } @if (!onlyForShow) {
+    <button mat-flat-button color="accent" (click)="login()">
       {{ "dialog.privacy.label.login" | i18nextEager }}
     </button>
-    <button
-      *ngIf="onlyForShow"
-      mat-flat-button
-      color="accent"
-      (click)="abort()"
-    >
+    } @if (onlyForShow) {
+    <button mat-flat-button color="accent" (click)="abort()">
       {{ "dialog.privacy.label.close" | i18nextEager }}
     </button>
+    }
   </div>
 </mat-dialog-actions>

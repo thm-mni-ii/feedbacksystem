@@ -1,10 +1,13 @@
 <div class="container">
-  <div *ngIf="isUpdateDialog" matDialogTitle>
+  @if (isUpdateDialog) {
+  <div matDialogTitle>
     {{ "dialog.group.new.edit-group" | i18nextEager }}
   </div>
-  <div *ngIf="!isUpdateDialog" matDialogTitle>
+  } @if (!isUpdateDialog) {
+  <div matDialogTitle>
     {{ "dialog.group.new.create-group" | i18nextEager }}
   </div>
+  }
   <mat-dialog-content style="max-height: 100%; overflow: hidden">
     <mat-card-content>
       <mat-form-field>
@@ -20,12 +23,15 @@
           minlength="1"
           maxlength="100"
         />
-        <mat-error *ngIf="name.errors">
+        @if (name.errors) {
+        <mat-error>
           {{ "dialog.group.new.group-name-error" | i18nextEager }}
         </mat-error>
+        }
       </mat-form-field>
 
-      <mat-form-field *ngIf="!student">
+      @if (!student) {
+      <mat-form-field>
         <mat-label>{{
           "dialog.group.new.group-membership" | i18nextEager
         }}</mat-label>
@@ -37,19 +43,25 @@
           required
           min="1"
         />
-        <mat-error *ngIf="membership.errors">
+        @if (membership.errors) {
+        <mat-error>
           {{ "dialog.group.new.group-membership-error" | i18nextEager }}
         </mat-error>
+        }
       </mat-form-field>
-
-      <mat-slide-toggle *ngIf="!student" [(ngModel)]="isVisible"
-        ><p *ngIf="isVisible">
+      } @if (!student) {
+      <mat-slide-toggle [(ngModel)]="isVisible"
+        >@if (isVisible) {
+        <p>
           {{ "dialog.group.new.showGroup" | i18nextEager }}
         </p>
-        <p *ngIf="!isVisible">
+        } @if (!isVisible) {
+        <p>
           {{ "dialog.group.new.hideGroup" | i18nextEager }}
-        </p></mat-slide-toggle
+        </p>
+        }</mat-slide-toggle
       >
+      }
     </mat-card-content>
   </mat-dialog-content>
   <mat-dialog-actions class="actions">
@@ -62,12 +74,13 @@
       (click)="createGroup()"
       [disabled]="!isInputValid()"
     >
-      <span class="spinner" *ngIf="pending">
+      @if (pending) {
+      <span class="spinner">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!pending">{{
-        "dialog.group.new.create" | i18nextEager
-      }}</span>
+      } @if (!pending) {
+      <span>{{ "dialog.group.new.create" | i18nextEager }}</span>
+      }
     </button>
   </mat-dialog-actions>
 </div>

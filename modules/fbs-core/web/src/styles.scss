@@ -3,9 +3,8 @@
 @import "~@fontsource/roboto/300.css";
 @import "~@fontsource/roboto/400.css";
 @import "~@fontsource/roboto/500.css";
-@import "~@fontsource/indie-flower/index.css";
-@import "~@fontsource/material-icons";
-@import "~prismjs/themes/prism";
+@import "~@fontsource/material-icons/index.css";
+@import "~prismjs/themes/prism.css";
 
 
 html,
@@ -19,18 +18,17 @@ body {
 }
 
 app-db-control-panel {
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
     padding: 5px;
   }
-
-  .mat-form-field-wrapper {
-    margin-bottom: -1.25em;
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
   }
 }
 
 app-sql-input-tabs {
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 230px !important;
   }
 
@@ -52,18 +50,17 @@ app-db-scheme-table {
 }
 
 app-db-control-panel {
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
     padding: 5px;
   }
-
-  .mat-form-field-wrapper {
-    margin-bottom: -1.25em;
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
   }
 }
 
 app-sql-input-tabs {
-  .mat-tab-label {
+  .mat-mdc-tab {
     min-width: 230px !important;
   }
 

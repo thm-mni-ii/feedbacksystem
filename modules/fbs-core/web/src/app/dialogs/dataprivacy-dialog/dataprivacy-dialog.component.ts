@@ -1,4 +1,9 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
@@ -12,6 +17,8 @@ import { LegalService } from "../../service/legal.service";
   selector: "app-dataprivacy-dialog",
   templateUrl: "./dataprivacy-dialog.component.html",
   styleUrls: ["./dataprivacy-dialog.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class DataprivacyDialogComponent implements OnInit {
   privacyChecked: boolean;

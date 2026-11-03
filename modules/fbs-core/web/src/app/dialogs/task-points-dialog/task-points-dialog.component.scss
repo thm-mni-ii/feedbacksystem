@@ -1,4 +1,4 @@
-.mat-dialog-content {
+.mat-mdc-dialog-content {
   overflow: visible;
 }
 
@@ -55,7 +55,7 @@
 }
 
 /***** MAT TAB GROUP *****/
-.mat-tab-label {
+.mat-mdc-tab {
   align-content: baseline;
 }
 
@@ -71,14 +71,14 @@
   padding: 2rem 0;
 }
 
-.mat-input-element {
+.mat-mdc-input-element {
   width: 90%;
 }
-.mat-list-item {
+.mat-mdc-list-item {
   margin-bottom: 1rem;
 }
 
-.mat-list-item-content {
+.mdc-list-item__content {
   justify-content: space-between;
 }
 
@@ -128,9 +128,12 @@
 
 /***** TASKS *****/
 .card {
+  padding: 16px;
+  box-sizing: content-box;
   margin: 8px 0;
   height: 30px;
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
 .card:hover {

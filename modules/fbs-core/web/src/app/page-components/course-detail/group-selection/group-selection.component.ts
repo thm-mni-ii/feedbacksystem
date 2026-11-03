@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { AuthService } from "../../../service/auth.service";
 import { forkJoin, Observable } from "rxjs";
@@ -20,6 +27,8 @@ import { CourseService } from "../../../service/course.service";
   selector: "app-group-selection",
   templateUrl: "./group-selection.component.html",
   styleUrls: ["./group-selection.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class GroupSelectionComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;

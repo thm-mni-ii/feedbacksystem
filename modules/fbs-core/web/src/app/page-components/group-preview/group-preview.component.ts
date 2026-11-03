@@ -1,4 +1,9 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Group } from "../../model/Group";
 import { Course } from "../../model/Course";
 import { CourseService } from "../../service/course.service";
@@ -8,6 +13,8 @@ import { Router } from "@angular/router";
   selector: "app-group-preview",
   templateUrl: "./group-preview.component.html",
   styleUrls: ["./group-preview.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class GroupPreviewComponent implements OnInit {
   @Input() data: Group;

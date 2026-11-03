@@ -1,4 +1,9 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { CourseRegistrationService } from "../../service/course-registration.service";
 import { Participant } from "../../model/Participant";
 import { User } from "../../model/User";
@@ -18,6 +23,8 @@ import { AuthService } from "../../service/auth.service";
   selector: "app-participants",
   templateUrl: "./participants.component.html",
   styleUrls: ["./participants.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ParticipantsComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;

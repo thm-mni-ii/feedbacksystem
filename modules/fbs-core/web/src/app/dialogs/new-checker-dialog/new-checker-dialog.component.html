@@ -1,11 +1,14 @@
-<div matDialogTitle *ngIf="!isUpdate">
+@if (!isUpdate) {
+<div matDialogTitle>
   {{ "dialog.checker.new.add" | i18nextEager }}
 </div>
-<div matDialogTitle *ngIf="isUpdate">
+} @if (isUpdate) {
+<div matDialogTitle>
   {{ "dialog.checker.new.edit" | i18nextEager }}
 </div>
+}
 <div class="newChecker">
-  <form [formGroup]="checkerForm">
+  <form mat-dialog-content [formGroup]="checkerForm">
     <mat-select
       class="pad"
       placeholder="{{ 'dialog.checker.new.checker-type' | i18nextEager }}"
@@ -13,36 +16,31 @@
       required
       (selectionChange)="defineForm(checkerForm.value)"
     >
-      <mat-optgroup label="Task Providers" *ngIf="taskProviders.length > 0">
-        <mat-option *ngFor="let tp of taskProviders" [value]="tp.id">
+      @if (taskProviders.length > 0) {
+      <mat-optgroup label="Task Providers">
+        @for (tp of taskProviders; track tp) {
+        <mat-option [value]="tp.id">
           {{ tp.displayName }} ({{ tp.id }})
         </mat-option>
+        }
       </mat-optgroup>
+      }
       <mat-optgroup label="Standard / Legacy Checker">
-        <mat-option *ngIf="!isRegisteredProvider('sql')" value="sql"
-          >Legacy SQL Runner</mat-option
-        >
-        <mat-option
-          *ngIf="!isRegisteredProvider('sql-runner')"
-          value="sql-runner"
-          >SQL Runner</mat-option
-        >
-        <mat-option
-          *ngIf="!isRegisteredProvider('sql-checker')"
-          value="sql-checker"
-          >SQL Checker</mat-option
-        >
-        <mat-option
-          *ngIf="!isRegisteredProvider('ai-supported-sql-analyser')"
-          value="ai-supported-sql-analyser"
+        @if (!isRegisteredProvider('sql')) {
+        <mat-option value="sql">Legacy SQL Runner</mat-option>
+        } @if (!isRegisteredProvider('sql-runner')) {
+        <mat-option value="sql-runner">SQL Runner</mat-option>
+        } @if (!isRegisteredProvider('sql-checker')) {
+        <mat-option value="sql-checker">SQL Checker</mat-option>
+        } @if (!isRegisteredProvider('ai-supported-sql-analyser')) {
+        <mat-option value="ai-supported-sql-analyser"
           >AI Supported SQL Analyser</mat-option
         >
-        <mat-option *ngIf="!isRegisteredProvider('bash')" value="bash"
-          >Bash</mat-option
-        >
-        <mat-option *ngIf="!isRegisteredProvider('excel')" value="excel"
-          >Excel</mat-option
-        >
+        } @if (!isRegisteredProvider('bash')) {
+        <mat-option value="bash">Bash</mat-option>
+        } @if (!isRegisteredProvider('excel')) {
+        <mat-option value="excel">Excel</mat-option>
+        }
       </mat-optgroup>
     </mat-select>
     <mat-form-field>
@@ -56,23 +54,25 @@
     </mat-form-field>
 
     <!-- Task Provider Details & Config UI -->
-    <div *ngIf="selectedTaskProvider" class="task-provider-card">
+    @if (selectedTaskProvider) {
+    <div class="task-provider-card">
       <div class="tp-header">
         <mat-icon color="primary">{{
           selectedTaskProvider.icon || "extension"
         }}</mat-icon>
         <div class="tp-info">
           <span class="tp-name">{{ selectedTaskProvider.displayName }}</span>
-          <span class="tp-version" *ngIf="selectedTaskProvider.version"
-            >v{{ selectedTaskProvider.version }}</span
-          >
+          @if (selectedTaskProvider.version) {
+          <span class="tp-version">v{{ selectedTaskProvider.version }}</span>
+          }
         </div>
       </div>
-      <p class="tp-desc" *ngIf="selectedTaskProvider.description">
+      @if (selectedTaskProvider.description) {
+      <p class="tp-desc">
         {{ selectedTaskProvider.description }}
       </p>
-
-      <div class="tp-actions" *ngIf="selectedTaskProvider.configUiUrl">
+      } @if (selectedTaskProvider.configUiUrl) {
+      <div class="tp-actions">
         <button
           type="button"
           mat-stroked-button
@@ -93,25 +93,23 @@
           }}
         </button>
       </div>
-
-      <div *ngIf="showConfigUi && safeConfigUiUrl" class="tp-iframe-container">
+      } @if (showConfigUi && safeConfigUiUrl) {
+      <div class="tp-iframe-container">
         <iframe
           [src]="safeConfigUiUrl"
           class="tp-config-iframe"
           title="Task Provider Configuration"
         ></iframe>
       </div>
-
-      <div
-        class="tp-schema-info"
-        *ngIf="
-          selectedTaskProvider.configSchema && !selectedTaskProvider.configUiUrl
-        "
-      >
+      } @if ( selectedTaskProvider.configSchema &&
+      !selectedTaskProvider.configUiUrl ) {
+      <div class="tp-schema-info">
         <mat-icon class="info-icon">info</mat-icon>
         <span>{{ "dialog.checker.new.schema-info" | i18nextEager }}</span>
       </div>
+      }
     </div>
+    }
 
     <div>
       <app-dropzone
@@ -126,7 +124,8 @@
         [submissionFile]="secondaryFile"
       ></app-dropzone>
     </div>
-    <div *ngIf="choosedSQLChecker">
+    @if (choosedSQLChecker) {
+    <div>
       <div>
         <mat-checkbox
           formControlName="showHints"
@@ -135,7 +134,8 @@
           >{{ "dialog.checker.new.show-hints" | i18nextEager }}</mat-checkbox
         >
       </div>
-      <div *ngIf="showHintsConfig">
+      @if (showHintsConfig) {
+      <div>
         <h4>{{ "dialog.checker.new.hints-attempts" | i18nextEager }}</h4>
         <mat-icon
           matTooltip="{{ 'dialog.checker.new.hints-tooltip' | i18nextEager }}"
@@ -160,7 +160,8 @@
             }}</mat-checkbox
           >
         </div>
-        <div *ngIf="showExtendedHintsConfig">
+        @if (showExtendedHintsConfig) {
+        <div>
           <h4>
             {{ "dialog.checker.new.extended-hints-attempts" | i18nextEager }}
           </h4>
@@ -180,7 +181,9 @@
             />
           </mat-form-field>
         </div>
+        }
       </div>
+      }
       <div>
         <mat-checkbox
           formControlName="disableDistance"
@@ -192,13 +195,14 @@
         >
       </div>
     </div>
+    }
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
       {{ "dialog.checker.new.cancel" | i18nextEager }}
     </button>
+    @if (!isUpdate) {
     <button
-      *ngIf="!isUpdate"
       mat-flat-button
       color="accent"
       [disabled]="!canCreateChecker()"
@@ -206,8 +210,8 @@
     >
       {{ "dialog.checker.new.create" | i18nextEager }}
     </button>
+    } @if (isUpdate) {
     <button
-      *ngIf="isUpdate"
       mat-flat-button
       color="accent"
       [disabled]="!checkerForm.valid"
@@ -215,5 +219,6 @@
     >
       {{ "dialog.checker.new.update" | i18nextEager }}
     </button>
+    }
   </mat-dialog-actions>
 </div>

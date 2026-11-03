@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { TitlebarService } from "../../service/titlebar.service";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
 import { IntegrationService } from "../../service/integration.service";
@@ -9,6 +9,8 @@ import { map } from "rxjs/operators";
   selector: "app-analytics-tool",
   templateUrl: "./analytics-tool.component.html",
   styleUrls: ["./analytics-tool.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class AnalyticsToolComponent implements OnInit {
   safeUrl: Observable<SafeResourceUrl>;

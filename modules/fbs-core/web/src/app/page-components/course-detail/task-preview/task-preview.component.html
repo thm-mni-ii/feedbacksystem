@@ -1,4 +1,5 @@
 <mat-card
+  appearance="outlined"
   [routerLink]="!isSelectable ? ['/courses', courseId, 'task', task.id] : null"
   (click)="isSelectable ? toggleSelection() : null"
   class="task-container"
@@ -6,34 +7,38 @@
   tabindex="-1"
 >
   <div class="task-title">
-    <section *ngIf="isSelectable" (click)="$event.stopPropagation()">
+    @if (isSelectable) {
+    <section (click)="$event.stopPropagation()">
       <mat-checkbox
         [ngModel]="isSelected"
         (ngModelChange)="toggleSelection()"
       ></mat-checkbox>
     </section>
-
-    <span *ngIf="task.requirementType === 'mandatory'">
+    } @if (task.requirementType === 'mandatory') {
+    <span>
       <mat-icon
         class="mandatory"
         matTooltip="{{ 'task.tooltip.mandatory' | i18nextEager }}"
         >priority_high</mat-icon
       >
     </span>
-    <span *ngIf="task.requirementType === 'optional'">
+    } @if (task.requirementType === 'optional') {
+    <span>
       <mat-icon
         class="bonus"
         matTooltip="{{ 'task.tooltip.bonus' | i18nextEager }}"
         >star</mat-icon
       >
     </span>
-    <span *ngIf="task.requirementType === 'practice'">
+    } @if (task.requirementType === 'practice') {
+    <span>
       <mat-icon
         class="practice"
         matTooltip="{{ 'task.tooltip.practice' | i18nextEager }}"
         >school</mat-icon
       >
     </span>
+    }
     <app-unstyled-link
       [href]="
         !isSelectable ? ['/courses', courseId, 'task', task.id].join('/') : null
@@ -42,30 +47,26 @@
     >
   </div>
   <span class="meta">
-    <mat-icon class="visibility" *ngIf="task.isPrivate"
-      >visibility_off</mat-icon
-    >
-    <mat-icon class="material-icons" color="accent" *ngIf="task.deadline"
-      >access_time</mat-icon
-    >
+    @if (task.isPrivate) {
+    <mat-icon class="visibility">visibility_off</mat-icon>
+    } @if (task.deadline) {
+    <mat-icon class="material-icons" color="accent">access_time</mat-icon>
+    }
     <span class="tiny">{{ task.deadline | date: "dd.MM.yyyy HH:mm" }}</span>
-    <span class="state" *ngIf="taskResult.maxPoints !== 0"
+    @if (taskResult.maxPoints !== 0) {
+    <span class="state"
       >{{ taskResult.points }}/{{ taskResult.maxPoints }}</span
     >
-    <span class="state" *ngIf="taskResult.maxPoints === 0">
-      <span class="state passed" *ngIf="taskResult.passed"
-        ><mat-icon>check_circle</mat-icon></span
-      >
-      <span
-        class="state failed"
-        *ngIf="!taskResult.passed && taskResult.submission"
-        ><mat-icon>not_interested</mat-icon></span
-      >
-      <span
-        class="state not-done"
-        *ngIf="!taskResult.passed && !taskResult.submission"
-        ><mat-icon>error_outline</mat-icon></span
-      >
+    } @if (taskResult.maxPoints === 0) {
+    <span class="state">
+      @if (taskResult.passed) {
+      <span class="state passed"><mat-icon>check_circle</mat-icon></span>
+      } @if (!taskResult.passed && taskResult.submission) {
+      <span class="state failed"><mat-icon>not_interested</mat-icon></span>
+      } @if (!taskResult.passed && !taskResult.submission) {
+      <span class="state not-done"><mat-icon>error_outline</mat-icon></span>
+      }
     </span>
+    }
   </span>
 </mat-card>

@@ -1,10 +1,13 @@
 <div class="container">
-  <div *ngIf="isUpdateDialog" matDialogTitle>
+  @if (isUpdateDialog) {
+  <div matDialogTitle>
     {{ "course.update.title.edit" | i18nextEager }}
   </div>
-  <div *ngIf="!isUpdateDialog" matDialogTitle>
+  } @if (!isUpdateDialog) {
+  <div matDialogTitle>
     {{ "course.update.title.create" | i18nextEager }}
   </div>
+  }
   <mat-dialog-content style="max-height: 100%; overflow: hidden">
     <mat-card-content>
       <mat-form-field>
@@ -20,9 +23,11 @@
           minlength="3"
           maxlength="100"
         />
-        <mat-error *ngIf="name.errors">{{
+        @if (name.errors) {
+        <mat-error>{{
           "course.update.error.courseName" | i18nextEager
         }}</mat-error>
+        }
       </mat-form-field>
       <mat-form-field>
         <mat-label>{{
@@ -44,21 +49,23 @@
           <mat-option [value]="0">{{
             "course.update.label.noSemester" | i18nextEager
           }}</mat-option>
-          <mat-option
-            *ngFor="let semester of semesterList"
-            [value]="semester.id"
-          >
+          @for (semester of semesterList; track semester) {
+          <mat-option [value]="semester.id">
             {{ semester.name }}
           </mat-option>
+          }
         </mat-select>
       </mat-form-field>
       <mat-slide-toggle [(ngModel)]="isVisible"
-        ><p *ngIf="isVisible">
+        >@if (isVisible) {
+        <p>
           {{ "course.update.label.displayCourse" | i18nextEager }}
         </p>
-        <p *ngIf="!isVisible">
+        } @if (!isVisible) {
+        <p>
           {{ "course.update.label.hideCourse" | i18nextEager }}
-        </p></mat-slide-toggle
+        </p>
+        }</mat-slide-toggle
       >
     </mat-card-content>
   </mat-dialog-content>

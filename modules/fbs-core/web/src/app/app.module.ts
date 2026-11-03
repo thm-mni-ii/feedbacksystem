@@ -16,13 +16,15 @@ import { MaterialComponentsModule } from "./modules/material-components/material
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
   HTTP_INTERCEPTORS,
-  HttpClientModule,
   HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
   HttpResponse,
+  provideHttpClient,
+  withInterceptorsFromDi,
+  withXhr,
 } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { JwtModule } from "@auth0/angular-jwt";
@@ -31,8 +33,12 @@ import { DataprivacyDialogComponent } from "./dialogs/dataprivacy-dialog/datapri
 import { ImpressumDialogComponent } from "./dialogs/impressum-dialog/impressum-dialog.component";
 import { CookieService } from "ngx-cookie-service";
 import { MatDatepickerModule } from "@angular/material/datepicker";
-import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from "@angular/material/core";
-import { MarkdownModule } from "ngx-markdown";
+import {
+  MAT_DATE_LOCALE,
+  provideNativeDateAdapter,
+} from "@angular/material/core";
+import { MarkdownComponent, provideMarkdown, SANITIZE } from "ngx-markdown";
+import DOMPurify from "dompurify";
 import { NgxDropzoneModule } from "ngx-dropzone";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
@@ -71,11 +77,7 @@ import { NewCheckerDialogComponent } from "./dialogs/new-checker-dialog/new-chec
 import { ConfirmDialogComponent } from "./dialogs/confirm-dialog/confirm-dialog.component";
 import { TextConfirmDialogComponent } from "./dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "./dialogs/new-db-dialog/new-db-dialog.component";
-import {
-  NgxMatDatetimePickerModule,
-  NgxMatNativeDateModule,
-  NgxMatTimepickerModule,
-} from "@angular-material-components/datetime-picker";
+import { MatTimepickerModule } from "@angular/material/timepicker";
 import { InfoComponent } from "./tool-components/info/info.component";
 import { tap } from "rxjs/operators";
 import { AuthService } from "./service/auth.service";
@@ -88,7 +90,11 @@ import { EvaluationResultsComponent } from "./page-components/course-detail/cour
 import { SpreadsheetComponent } from "./dialogs/spreadsheet-dialog/spreadsheet/spreadsheet.component";
 import { SpreadsheetDialogComponent } from "./dialogs/spreadsheet-dialog/spreadsheet-dialog.component";
 import { SubtaskResultsComponent } from "./page-components/subtask-results/subtask-results.component";
-import { ChartsModule } from "ng2-charts";
+import {
+  BaseChartDirective,
+  provideCharts,
+  withDefaultRegisterables,
+} from "ng2-charts";
 import { ResultsStatisticComponent } from "./page-components/course-detail/course-results/results-statistic/results-statistic.component";
 import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.component";
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
@@ -274,6 +280,8 @@ export const httpInterceptorProviders = [
     TaskProviderDialogComponent,
     TaskProviderDetailDialogComponent,
   ],
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -281,9 +289,8 @@ export const httpInterceptorProviders = [
     AppRoutingModule,
     MaterialComponentsModule,
     FormsModule,
-    HttpClientModule,
     ReactiveFormsModule,
-    MarkdownModule.forRoot(),
+    MarkdownComponent,
     MatDatepickerModule,
     MatTabsModule,
     JwtModule.forRoot({
@@ -299,10 +306,8 @@ export const httpInterceptorProviders = [
     MatSelectModule,
     MatFormFieldModule,
     MatSliderModule,
-    NgxMatDatetimePickerModule,
-    NgxMatTimepickerModule,
-    NgxMatNativeDateModule,
-    ChartsModule,
+    MatTimepickerModule,
+    BaseChartDirective,
     MatTableModule,
     MatSortModule,
     I18NextModule.forRoot(),
@@ -310,14 +315,16 @@ export const httpInterceptorProviders = [
     SqlPlaygroundModule,
     AngularEditorModule,
   ],
-  entryComponents: [
-    DataprivacyDialogComponent,
-    CreateGuestUserDialogComponent,
-    ImpressumDialogComponent,
-    TaskProviderDialogComponent,
-    TaskProviderDetailDialogComponent,
-  ],
   providers: [
+    provideMarkdown({
+      // DOMPurify instead of Angular's sanitizer: keeps the inline styles
+      // KaTeX needs for formula layout (e.g. superscripts)
+      sanitize: {
+        provide: SANITIZE,
+        useValue: (html: string) => DOMPurify.sanitize(html),
+      },
+    }),
+    provideCharts(withDefaultRegisterables()),
     CookieService,
     TaskProviderService,
     httpInterceptorProviders,
@@ -327,15 +334,11 @@ export const httpInterceptorProviders = [
       deps: [AuthService],
       multi: true,
     },
-    {
-      provide: MAT_DATE_FORMATS,
-      useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },
-    },
+    provideNativeDateAdapter(),
     { provide: MAT_DATE_LOCALE, useValue: "de" },
     I18N_PROVIDERS,
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
   ],
-  bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}
 
