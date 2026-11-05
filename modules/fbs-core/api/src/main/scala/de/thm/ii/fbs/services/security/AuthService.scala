@@ -1,14 +1,11 @@
 package de.thm.ii.fbs.services.security
 
-import java.util.Date
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
-import de.thm.ii.fbs.util.{DB, ScalaObjectMapper}
-import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
+import de.thm.ii.fbs.model.{GlobalRole, User}
+import de.thm.ii.fbs.services.persistence.UserService
+import de.thm.ii.fbs.util.DB
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
-import java.util.Base64
-import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.http.HttpHeaders
@@ -25,23 +22,9 @@ class AuthService {
   @Autowired
   private val userService: UserService = null
   @Autowired
-  private val crs: CourseRegistrationService = null
-  @Autowired
   private implicit val jdbc: JdbcTemplate = null
   @Autowired(required = false)
   private val jwtDecoder: JwtDecoder = null
-
-  @Value("${jwt.secret:8Dsupersecurekeydf0}")
-  private val jwtSecret: String = null
-
-  @Value("${jwt.expiration.time:43200}")
-  private val jwtExpirationTime: String = null
-
-  /**
-    * JWT Token as Base64
-    * @return base64 encoded JWT Secret
-    */
-  def jwtSecretEncoding(): String = Base64.getEncoder.encodeToString(jwtSecret.getBytes)
 
   /**
     * Generate a new token and append it to the response header.
@@ -148,46 +131,7 @@ class AuthService {
 
     decodedFromJwk match {
       case Some(id) => id
-      case None =>
-        val claims: Claims = Jwts.parser().setSigningKey(Base64.getDecoder.decode(jwtSecretEncoding())).parseClaimsJws(jwtToken).getBody
-        val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
-
-        if (tokenDate != null && tokenDate * 1000L - new Date().getTime <= 0) {
-          throw new RuntimeException("Expired Token")
-        } else {
-          val idObj = claims.get("id")
-          if (idObj != null) {
-            idObj.asInstanceOf[Int]
-          } else {
-            claims.getSubject.toInt
-          }
-        }
+      case None => throw new UnauthorizedException
     }
-  }
-
-  /**
-    * Generate a new token from the users information
-    *
-    * @param user User
-    * @return new token
-    */
-  def createToken(user: User): String = {
-    val privileges = crs.getCoursePrivileges(user.id)
-    val mapper = ScalaObjectMapper()
-
-    val courseRoles = privileges match {
-      case m: Map[Int, CourseRole.Value] if m.isEmpty => "{}"
-      case _ => mapper.writeValueAsString(privileges.map((f: (Int, CourseRole.Value)) => (f._1, f._2.toString)))
-    }
-
-    Jwts.builder.setSubject("client_authentication")
-      .claim("id", user.id)
-      .claim("username", user.username)
-      .claim("globalRole", user.globalRole.toString)
-      .claim("courseRoles", courseRoles)
-      .setIssuedAt(new Date())
-      .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
-      .signWith(SignatureAlgorithm.HS256, jwtSecretEncoding())
-      .compact
   }
 }
