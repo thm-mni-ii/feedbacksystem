@@ -4,6 +4,7 @@ import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/layouts/force'
 import type { Competency, CompetencyPrerequisite, Question } from '@/model/types'
 import { competencyGraphPalette } from '@/plugins/vuetify'
+import { getCourseById } from '@/composables/course.mock'
 import { getQuestionCompetencyIds } from '@/composables/qMatrix'
 
 interface Course {
@@ -28,9 +29,25 @@ export interface CompetencyGraphEdgeData {
 }
 
 // Layout Constants
-const BASE_R = 30
-const STEP_R = 30
-const Q_OFFSET = 30
+// Ziel-Kantenlängen der Force-Simulation. Hierarchiekanten sind bewusst
+// länger, damit die Namensschilder unter den Kompetenzknoten lesbar bleiben.
+// Ziel-Kantenlängen der Force-Simulation. Hierarchiekanten sind bewusst
+// länger, damit die Namensschilder unter den Kompetenzknoten lesbar bleiben;
+// die unbeschrifteten Aufgabenknoten bleiben dagegen kompakt, damit sie die
+// Gesamtausdehnung des Graphen nicht aufblähen.
+const COMPETENCY_EDGE_DISTANCE = 120
+// Kanten zwischen Haupt- und Unterkompetenzen etwas länger, damit sich die
+// Hierarchieebenen deutlicher voneinander absetzen.
+const SUBCOMPETENCY_EDGE_DISTANCE = 170
+const QUESTION_EDGE_DISTANCE = 30
+// Mindestabstand (Kollisionsradius) zwischen Kompetenzknoten, damit sich auch
+// unverbundene Knoten benachbarter Teilbäume nicht zu nahe kommen.
+const COMPETENCY_COLLIDE_RADIUS = 70
+const QUESTION_COLLIDE_RADIUS = 10
+// Radien des radialen Ausgangslayouts, abgestimmt auf die Kantenlängen.
+const BASE_R = COMPETENCY_EDGE_DISTANCE
+const STEP_R = SUBCOMPETENCY_EDGE_DISTANCE
+const Q_OFFSET = QUESTION_EDGE_DISTANCE
 
 function cloneCompetency(competency: Competency): Competency {
   return {
@@ -130,9 +147,9 @@ export function useCompetencyGraph(
 
   const nodeIcon = (type?: string) => {
     if (type === 'course') return 'mdi-school'
-    if (type?.startsWith('competency-root')) return 'mdi-brain'
-    if (type?.startsWith('competency-sub')) return 'mdi-puzzle'
-    return 'mdi-help-circle'
+    if (type?.startsWith('competency-root')) return 'mdi-layers-outline'
+    if (type?.startsWith('competency-sub')) return 'mdi-layers-triple-outline'
+    return 'mdi-file-document-outline'
   }
 
   // ─── Graph Nodes ──────────────────────────────────────────────────────
@@ -310,25 +327,48 @@ export function useCompetencyGraph(
       onBeforeInitialDisplay: async () => {
         return new Promise((resolve) => setTimeout(resolve, 400))
       },
+      // Beim Laden den gesamten Graphen einpassen. Die Beschriftungen behalten
+      // ihre Bildschirmgröße (kein scalingObjects) und bleiben dadurch auch in
+      // der Gesamtübersicht lesbar.
       autoPanAndZoomOnLoad: 'fit-content',
       fitContentMargin: '2%',
       layoutHandler: new ForceLayout({
         positionFixedByDrag: false,
         positionFixedByClickWithAltKey: true,
         createSimulation: (d3, nodes, edges) => {
+          const questionIds = new Set(questions.value.map((question) => question.id))
+          const courseId = course.value.id
+          const resolveId = (endpoint: string | ForceNodeDatum): string =>
+            typeof endpoint === 'object' ? endpoint.id : endpoint
+          const edgeDistance = (edge: ForceEdgeDatum): number => {
+            if (questionIds.has(resolveId(edge.target))) return QUESTION_EDGE_DISTANCE
+            // Kurs → Hauptkompetenz
+            if (resolveId(edge.source) === courseId) return COMPETENCY_EDGE_DISTANCE
+            // Hauptkompetenz → Unterkompetenz (und tiefere Ebenen)
+            return SUBCOMPETENCY_EDGE_DISTANCE
+          }
           const forceLink = d3.forceLink<ForceNodeDatum, ForceEdgeDatum>(edges).id((d: any) => d.id)
           const simulation = d3
             .forceSimulation(nodes)
-            .force('edge', forceLink.distance(40).strength(0.5))
-            .force('charge', d3.forceManyBody().strength(-800))
+            .force('edge', forceLink.distance(edgeDistance).strength(0.5))
+            .force('charge', d3.forceManyBody().strength(-600))
             .force(
               'collide',
-              d3.forceCollide().radius((d: any) => d.radius + 15)
+              d3
+                .forceCollide()
+                .radius((d: any) =>
+                  d.radius >= 10 ? COMPETENCY_COLLIDE_RADIUS : QUESTION_COLLIDE_RADIUS
+                )
+                .strength(0.9)
             )
             .force('center', d3.forceCenter().strength(0.05))
             .alphaMin(0.001)
 
-          simulation.tick(50)
+          // Die Simulation vor der ersten Anzeige vollständig auskonvergieren:
+          // `fit-content` passt den Graphen beim Anzeigen ein; würde die
+          // Simulation danach weiterlaufen, wüchse der Graph aus dem Rahmen.
+          simulation.tick(300)
+          simulation.stop()
           return simulation
         }
       })
@@ -386,7 +426,14 @@ export function useCompetencyGraph(
     newQuestions: Question[]
   ) => {
     const previousSelection = selectedNodeId.value
-    course.value = { id: courseId, name: `Kurs ${courseId}`, description: '' }
+    // Kursname aus der fest hinterlegten Kursliste; "Kurs {id}" nur als
+    // Fallback, falls die Kurs-ID dort nicht bekannt ist.
+    const courseInformation = getCourseById(courseId)
+    course.value = {
+      id: courseId,
+      name: courseInformation?.name ?? `Kurs ${courseId}`,
+      description: courseInformation?.description ?? ''
+    }
     competencies.value = newCompetencies.map(cloneCompetency)
     questions.value = newQuestions.map(cloneQuestion)
     const availableNodeIds = new Set([

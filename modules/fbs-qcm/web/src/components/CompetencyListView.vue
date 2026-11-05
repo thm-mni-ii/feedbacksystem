@@ -13,7 +13,7 @@
       />
     </v-list>
     <div v-else class="d-flex flex-column align-center justify-center pa-8 text-medium-emphasis">
-      <v-icon size="40" class="mb-2">mdi-brain</v-icon>
+      <v-icon size="40" class="mb-2">mdi-layers-outline</v-icon>
       <span>Noch keine Kompetenzen vorhanden.</span>
     </div>
   </div>

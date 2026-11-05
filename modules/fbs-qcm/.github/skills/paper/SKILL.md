@@ -19,6 +19,7 @@ und verwandte Verfahren zu nutzen, um passende Fragen für den Lernenden auszuw�
 - Achte darauf, dass alle Änderungen im Einklang mit den formalen und inhaltlichen Anforderungen der Bachelorarbeit stehen.
 - Stelle sicher, dass alle Quellen korrekt zitiert und alle verwendeten Materialien ordnungsgemäß referenziert werden.
 - Falls du irgendwelche behauptungen aufstellst, gib mir die entsprechenden Quellen oder Belege an.
+- Direkt unter einer Kapitelüberschrift (\chapter) darf nie einfach Fließtext stehen; jedes Kapitel beginnt immer direkt mit einer Section (\section). Einleitender Text gehört in eine eigene Section (z. B. "Evaluationsdesign" oder "Überblick").
 
 # quellen und literatur
 
@@ -191,4 +192,52 @@ number={4},
 pages={475--511},
 year={2015},
 publisher={Sage Publications Sage CA: Los Angeles, CA}
+}
+
+@misc{siepermannDatenbanksystemeFolien,
+author={Siepermann, Markus},
+title={Datenbanksysteme: Vorlesungsfolien},
+howpublished={Vorlesungsfolien, Technische Hochschule Mittelhessen},
+note={Bereitgestellte PDF-Fassung, ohne Datumsangabe}
+}
+
+@article{brier1950verification,
+title={Verification of forecasts expressed in terms of probability},
+author={Brier, Glenn W},
+journal={Monthly Weather Review},
+volume={78},
+number={1},
+pages={1--3},
+year={1950}
+}
+
+@article{pelanek2015metrics,
+title={Metrics for evaluation of student models},
+author={Pel{\'a}nek, Radek},
+journal={Journal of Educational Data Mining},
+volume={7},
+number={2},
+pages={1--19},
+year={2015}
+}
+
+@article{pelanek2017bayesian,
+title={Bayesian knowledge tracing, logistic models, and beyond: an overview of learner modeling techniques},
+author={Pel{\'a}nek, Radek},
+journal={User Modeling and User-Adapted Interaction},
+volume={27},
+number={3},
+pages={313--350},
+year={2017},
+publisher={Springer}
+}
+
+@article{vanlehn1994applications,
+title={Applications of simulated students: An exploration},
+author={VanLehn, Kurt and Ohlsson, Stellan and Nason, Rod},
+journal={Journal of Artificial Intelligence in Education},
+volume={5},
+number={2},
+pages={135--175},
+year={1994}
 }

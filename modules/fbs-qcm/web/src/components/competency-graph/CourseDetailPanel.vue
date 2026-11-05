@@ -11,7 +11,7 @@
       elevation="0"
       rounded="lg"
     >
-      <v-icon size="40" color="var(--sg-accent)" class="mb-3">mdi-brain</v-icon>
+      <v-icon size="40" color="var(--sg-accent)" class="mb-3">mdi-layers-outline</v-icon>
       <p class="text-body-1 font-weight-bold mb-1">Noch keine Kompetenzen angelegt</p>
       <p class="text-body-2 text-medium-emphasis mb-4">
         Lege deine erste Kompetenz an, um Aufgaben daran zuordnen zu können und den

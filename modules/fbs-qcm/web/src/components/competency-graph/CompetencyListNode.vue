@@ -45,7 +45,7 @@
       @click="onSelect(question.id)"
     >
       <template #prepend>
-        <v-icon size="16">mdi-help-circle</v-icon>
+        <v-icon size="16">mdi-file-document-outline</v-icon>
       </template>
       <v-list-item-title class="text-truncate">{{ question.title || question.text }}</v-list-item-title>
     </v-list-item>

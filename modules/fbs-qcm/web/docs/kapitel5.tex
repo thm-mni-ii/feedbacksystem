@@ -1,0 +1,481 @@
+% Benötigt in der Präambel: \usepackage{pgfplots}
+% und \pgfplotsset{compat=1.18}.
+% Diese Datei und kapitel5-ergebnisse.tex in denselben Ordner legen.
+% Beim Einbinden aus einem Unterordner den folgenden Eingabepfad anpassen.
+\input{kapitel5-ergebnisse}
+
+\chapter{Evaluation und Ergebnisse}
+\label{chap:evaluation}
+
+\section{Evaluationsdesign und Vorgehen}
+\label{sec:evaluationsdesign}
+
+Die leitende Fragestellung der Arbeit lautet, wie eine Lernplattform bisherige
+Aufgabenbearbeitungen und Aufgaben-Kompetenz-Zuordnungen nutzen kann, um
+individuelle Kompetenzstände zu schätzen und daraus nachvollziehbar passende
+Folgeaufgaben auszuwählen. Die Evaluation untersucht diesen Zusammenhang anhand
+simulierter Lernverläufe über bis zu fünf aufeinanderfolgende Sitzungen. Sie
+betrachtet die Antwortvorhersagen des Lernstandsmodells, die Ausrichtung der
+Auswahl auf noch nicht beherrschte Kompetenzen und die Kompetenzabdeckung.
+Ergänzend wird der geschätzte Kompetenzstand mit dem bekannten simulierten
+Zustand verglichen.
+
+Die Untersuchung unterscheidet damit die Nutzung von Antworten für die
+Lernstands\-schätzung von der Nutzung dieser Schätzung für die Aufgabenauswahl.
+Eine gute Antwortvorhersage belegt nicht automatisch eine passende Auswahl.
+Ebenso bedeutet eine häufige Auswahl noch nicht beherrschter Kompetenzen
+nicht automatisch einen höheren Lernerfolg. Die Nachvollziehbarkeit wird an
+einem konkreten Ablauf erläutert; ob reale Lernende die Auswahlgründe verstehen,
+wird nicht durch eine Nutzerstudie untersucht.
+
+Simulationen ermöglichen die kontrollierte Untersuchung von Verfahren für
+intelligente Tutorsysteme \cite{vanlehn1994applications}. Hier sind insbesondere
+die verborgenen Kompetenzzustände bekannt, die der Auswahlalgorithmus selbst
+nicht beobachten kann. Die Ergebnisse gelten jedoch nur für die festgelegten
+Annahmen und ersetzen keine Untersuchung mit realen Studierenden.
+
+\subsection{Annahmen zur Simulation}
+
+Für jede Kompetenz besitzt der simulierte Lernende einen binären Zustand:
+beherrscht oder noch nicht beherrscht. Antworten und Lernübergänge werden
+nach einem BKT-basierten Modell erzeugt \cite{corbett1994knowledge}.
+Bei beherrschter Kompetenz kann ein Flüchtigkeitsfehler auftreten; bei
+noch nicht beherrschter Kompetenz ist eine richtige Antwort durch Raten
+möglich. Erst nach der Antwort kann eine noch nicht beherrschte Kompetenz
+mit der angegebenen Lernrate in den beherrschten Zustand übergehen.
+Vergessen, zeitliche Pausenwirkungen und aufgabenspezifische Erinnerung
+werden nicht modelliert. Die verborgenen Kompetenzzustände entwickeln
+sich unabhängig voneinander.
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \begin{tabular}{lcccc}
+    \hline
+    Situation & Anfangskenntnis & Lernrate & Raten & Flüchtigkeitsfehler \\
+    \hline
+    Vorwissen niedrig & 0{,}10 & 0{,}18 & 0{,}20 & 0{,}10 \\
+    Vorwissen gemischt & 0{,}35 & 0{,}18 & 0{,}20 & 0{,}10 \\
+    Vorwissen hoch & 0{,}85 & 0{,}18 & 0{,}20 & 0{,}10 \\
+    Abweichendes Lernverhalten & 0{,}35 & 0{,}05 & 0{,}30 & 0{,}20 \\
+    \hline
+  \end{tabular}
+  \caption{Wahrscheinlichkeiten der vier simulierten Lernsituationen.
+    Die Anfangskenntnis bestimmt den Zustand vor der ersten Sitzung.}
+  \label{tab:szenarien}
+\end{table}
+
+Die Modellparameter des Algorithmus bleiben in allen Situationen gleich:
+Anfangsschätzung $0{,}35$, Lernrate $0{,}18$, Ratewahrscheinlichkeit
+$0{,}20$ und Flüchtigkeitsfehler $0{,}10$. Insbesondere wird das Modell
+nicht an die Situation mit abweichendem Lernverhalten angepasst.
+Die adaptiven Verfahren berücksichtigen hinterlegte Voraussetzungen bei
+der Auswahl einer neuen Zielkompetenz. Diese Voraussetzungen beeinflussen
+jedoch nicht den simulierten Antwort- oder Lernprozess.
+
+\subsection{Der Beispielbestand der Plattform}
+
+Die Untersuchung verwendet den Beispielbestand der Plattform. Seine
+fachliche Grundlage bilden ausgewählte Inhalte der Vorlesungsfolien zum
+Modul \emph{Datenbanksysteme} von Prof.\ Dr.\ habil.\ Markus Siepermann
+an der Technischen Hochschule Mittelhessen
+\cite{siepermannDatenbanksystemeFolien}. Die Kompetenzen und Aufgaben
+wurden mit GPT-5 erstellt und vom Verfasser auf inhaltliche Plausibilität
+durchgesehen. Sie dienen als vorläufige Entwicklungs- und Testdaten,
+nicht als abschließend validierter Fragenkatalog.
+
+Der Bestand enthält 48 Kompetenzen und 147 Aufgaben. Die fünf Aufgabentypen
+sind Einfachauswahl, Mehrfachauswahl, Matrixaufgaben, Zuordnungsaufgaben und
+Lückentextaufgaben. Für die Simulation werden nur Aufgaben mit genau einer
+erforderlichen Kompetenz berücksichtigt, die nicht von der Auswahl
+ausgeschlossen sind. Dadurch verbleiben 146 Aufgaben zu 39 Kompetenzen.
+Die Zuordnung bestimmt, welcher verborgene Kompetenzzustand für die
+Antworterzeugung verwendet und welche Schätzung nach der Antwort aktualisiert
+wird. Die Simulation untersucht somit den binären Ein-Kompetenz-Fall,
+nicht die vollständige Bewertung aller Aufgabenformate.
+
+Die Aufgabeninhalte und ihre Schwierigkeit verändern die simulierte
+Antwortwahrscheinlichkeit nicht. Schwierigkeit wird zwar von den adaptiven
+Verfahren zur Auswahl einer Aufgabe herangezogen, ihre didaktische Wirkung
+kann mit diesem Antwortmodell aber nicht geprüft werden. Eine in der
+Simulation richtige Antwort bedeutet daher nicht, dass der konkrete
+Aufgabentext von einer realen Person gelöst wurde.
+
+\subsection{Antwortwahrscheinlichkeit und Lernstandsschätzung}
+
+Der Algorithmus beobachtet nicht den verborgenen Kompetenzzustand, sondern
+nur die simulierte Antwort. Aus der geschätzten Beherrschungswahrscheinlichkeit
+$p$ berechnet er die Wahrscheinlichkeit einer richtigen Antwort als
+$p(1-s)+(1-p)g$, wobei $s$ die Flüchtigkeitsfehler- und $g$ die
+Ratewahrscheinlichkeit bezeichnet. Vor der ersten Sitzung ergibt sich:
+\[
+  0{,}35\cdot0{,}90+0{,}65\cdot0{,}20=0{,}445.
+\]
+Die Anfangsvorhersage beträgt damit $44{,}5\%$. Sie ist weder eine
+erreichte Punktzahl noch die Beherrschungswahrscheinlichkeit selbst.
+Nach einer Antwort aktualisiert der Algorithmus die Kompetenzschätzung
+mit dem BKT-Posterior und dem anschließenden Lernübergang.
+
+Ein simulierter Lernender beantwortet eine Aufgabe bei beherrschter
+Kompetenz mit Wahrscheinlichkeit $0{,}90$ und sonst mit Wahrscheinlichkeit
+$0{,}20$ richtig. Im abweichenden Szenario betragen diese Werte $0{,}80$
+beziehungsweise $0{,}30$. Der Algorithmus verwendet dort weiterhin seine
+unveränderten Modellannahmen.
+
+\subsection{Verglichene Auswahlverfahren}
+
+\begin{description}
+  \item[Zufällige Auswahl:] Gleichverteilte Auswahl einer innerhalb der
+    Sitzung noch nicht gestellten, geeigneten Aufgabe. Lernstand,
+    Aufgabenschwierigkeit und Voraussetzungen bestimmen diese Wahl nicht.
+  \item[Bewertungen und Lernstand:] Die Wahl einer neuen Zielkompetenz
+    gewichtet wenige bisherige Bewertungen und einen niedrigen geschätzten
+    Lernstand stärker. Anschließend wird eine Aufgabe für diese Kompetenz
+    anhand der implementierten Schwierigkeits- und Utility-Heuristiken
+    ausgewählt.
+  \item[Informationsgewinn:] Die Wahl einer neuen Zielkompetenz richtet
+    sich nach dem höchsten erwarteten Informationsgewinn einer weiteren
+    binären Antwort. Die anschließende Aufgabenwahl verwendet dieselben
+    Heuristiken wie das andere adaptive Verfahren.
+\end{description}
+
+Die adaptiven Verfahren behalten die bestehende Fokusphase bei:
+Eine ausgewählte Kompetenz kann bis zu drei Aufgaben hintereinander
+behandelt werden, sofern sie weiter Evidenz benötigt und geeignete
+Aufgaben verfügbar sind. Die Kompetenzstrategie wird deshalb nicht vor
+jeder Aufgabe unabhängig neu ausgeführt. Alle drei Verfahren verwenden
+dasselbe Lernstandsmodell und dieselben Einstellungen für Aufgabenlimit
+und Evidenzkriterium. Der Vergleich betrifft die vollständigen
+Auswahlverfahren, nicht die isolierte Wirkung eines einzelnen Faktors.
+
+\subsection{Umfang und Kennzahlen der Auswertung}
+
+Für jede Kombination aus vier Situationen und drei Verfahren werden
+100 Lernverläufe mit den Seeds 1 bis 100 berechnet. Jeder der insgesamt
+1\,200 Lernverläufe umfasst bis zu fünf Sitzungen mit jeweils höchstens
+30 Aufgaben. Damit werden nicht nur die ersten Antworten, sondern auch
+die Auswahl auf Grundlage bereits aufgebauter Evidenz untersucht.
+Die Zahl von fünf Sitzungen ist ein festgelegter Versuchsrahmen,
+keine empirisch begründete optimale Trainingsdauer.
+Das Auswertungsskript berechnet zusätzlich einen synthetischen
+Kontrollbestand mit zehn Kompetenzen und je acht Aufgaben.
+Die in diesem Kapitel berichteten Tabellen, Abbildungen und
+Sitzungszahlen beziehen sich ausschließlich auf den Plattformbestand.
+
+Zwischen den Sitzungen werden der simulierte Kompetenzzustand, die
+geschätzten Beherrschungswahrscheinlichkeiten und die Bewertungszahlen
+unverändert fortgeführt. Auch die Zufallsquellen laufen weiter. Neu
+beginnen nur sitzungsbezogene Angaben wie Aufgabenhistorie, Fokusphase
+und Ausschlüsse. Aufgaben dürfen in einer späteren Sitzung erneut
+vorkommen, innerhalb einer Sitzung jedoch nicht. Die erneute Bearbeitung
+verwendet dasselbe probabilistische Kompetenzmodell; das Erinnern einer
+bereits gesehenen Lösung wird nicht simuliert.
+
+Diese direkte Zustandsfortführung ist eine kontrollierte
+Simulationsannahme. Sie ist keine vollständige Nachbildung des
+Anwendungsstarts mit erneutem Einlesen und gegebenenfalls zeitlicher
+Abschwächung historischer Antworten. Zwischen den Sitzungen wird kein
+zusätzlicher Lernübergang allein durch den Sitzungswechsel ausgeführt.
+Erfüllt der gesamte geeignete Kompetenzbestand beim nächsten
+Sitzungsstart bereits das Evidenzkriterium, endet der Lernverlauf.
+Ein Sitzungsende mangels noch auswählbarer Aufgaben kann dagegen durch
+eine neue Sitzung mit erneut freigegebenen Aufgaben fortgesetzt werden.
+
+Die Zufallsquellen für Auswahl und simulierte Lernende sind getrennt.
+Bei gleichem Seed beginnen die Verfahren mit denselben verborgenen
+Zuständen und denselben kompetenzbezogenen Zufallsfolgen. Da sie andere
+Kompetenzen auswählen, entwickeln sich die Lernverläufe anschließend
+unterschiedlich.
+
+Die Vorhersagegüte wird mit Brier-Wert und Log-Loss bewertet
+\cite{brier1950verification,pelanek2015metrics}. Für jede Antwort wird die
+Vorhersage vor ihrer Verarbeitung gespeichert. Als Referenz wird die
+feste Anfangsvorhersage von $44{,}5\%$ auf denselben Antworten ausgewertet.
+Kleinere Werte bedeuten bessere Vorhersagen. Da die Verfahren
+unterschiedliche Aufgaben auswählen, sind ihre Antwortvorhersagewerte
+kein Vergleich auf identischen Antworten.
+
+Für die Auswahl wird der Anteil der Aufgaben erfasst, deren Zielkompetenz
+zum Auswahlzeitpunkt tatsächlich noch nicht beherrscht war. Die
+Kompetenzabdeckung bezeichnet den Anteil der 39 Kompetenzen, die in der
+jeweiligen Sitzung mindestens einmal vorkamen. Ergänzend wird die
+Genauigkeit des gesamten geschätzten Kompetenzprofils mit dem mittleren
+quadratischen Abstand zwischen geschätzter Beherrschungswahrscheinlichkeit
+und binärem simuliertem Zustand bewertet.
+
+Zunächst wird jede Kennzahl pro Sitzung berechnet; anschließend werden
+Mittelwert und Stichprobenstandardabweichung über die Lernverläufe
+zusammengefasst. Die bis zu fünf Sitzungen einer Person gelten nicht als
+unabhängige Wiederholungen. Bei vorzeitig beendeten Lernverläufen enthalten
+spätere Sitzungswerte nur die noch aktiven Verläufe. Abweichende Fallzahlen
+werden daher als Index $n$ ausgewiesen; ein Strich bedeutet, dass keine
+Sitzung mehr stattfand. Die abschließende Gesamtauswertung verwendet
+dagegen den letzten Zustand jedes der 100 Lernverläufe einer Kombination,
+auch wenn dieser bereits vor der fünften Sitzung erreicht wurde.
+
+\section{Beispiel: Aktualisierung der Lernstandsschätzung}
+\label{sec:exemplarischer-ablauf}
+
+Das Beispiel zeigt die ersten fünf Aufgaben des Lernverlaufs mit Seed 1,
+gemischtem Vorwissen und Auswahl nach erwartetem Informationsgewinn.
+Es erläutert die Verarbeitung einer Antwort, nicht die allgemeine
+Überlegenheit eines Verfahrens.
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \begin{tabular}{rp{6cm}cc}
+    \hline
+    Aufgabe & Zielkompetenz & Antwortvorhersage & Antwort \\
+    \hline
+    1 & Daten, Information und Wissen & 45\% & falsch \\
+    2 & Datenhierarchie & 45\% & falsch \\
+    3 & Datentypen und Datenkategorien & 45\% & richtig \\
+    4 & Datentypen und Datenkategorien & 73\% & falsch \\
+    5 & Eigenschaften von Information & 45\% & richtig \\
+    \hline
+  \end{tabular}
+  \caption{Erste fünf Aufgaben der ersten Sitzung. Die Antwortvorhersage
+    wird jeweils vor Verarbeitung der angezeigten Antwort bestimmt.}
+  \label{tab:beispiel-sitzung}
+\end{table}
+
+Bei Aufgabe 3 beherrschte der simulierte Lernende die Kompetenz noch
+nicht, antwortete jedoch richtig. Der Algorithmus kennt diesen Zustand
+nicht und erhöht aufgrund der Antwort seine Beherrschungsschätzung von
+$0{,}35$ auf rund $0{,}76$. Daraus ergibt sich vor Aufgabe 4 eine
+Antwortvorhersage von rund $73\%$. Die folgende falsche Antwort ist kein
+Widerspruch, weil die Vorhersage eine Wahrscheinlichkeit und keine
+Gewissheit ausdrückt. Eine richtige Antwort liefert Evidenz, beweist aber
+nicht die Beherrschung einer Kompetenz.
+
+Die Aufgaben-Kompetenz-Zuordnung stellt dabei die Verbindung zwischen
+Antwort und Schätzung her: Die beiden Aufgaben zu Datentypen verändern
+die Schätzung derselben Kompetenz, nicht pauschal die Schätzungen aller
+Kompetenzen. Bei Aufgabe 4 wird die bereits ausgewählte Kompetenz
+innerhalb der Fokusphase erneut behandelt. Der Auswahlgrund ist hier
+also nicht zwingend eine neue globale Maximierung des Informationsgewinns,
+sondern die Kombination aus Kompetenzstrategie und Fokusregel.
+
+In späteren Sitzungen werden die erreichten Kompetenzschätzungen und
+Bewertungszahlen weiterverwendet. Die Auswahl beginnt dann nicht erneut
+bei identischen Anfangswerten. Das Beispiel macht den Datenfluss von
+Aufgabe über Kompetenzzuordnung und Antwort zu Schätzung und Folgeaufgabe
+nachvollziehbar. Es ist jedoch weder ein Nutzertest der Verständlichkeit
+noch ein Beleg für die fachliche Qualität jedes Aufgabentextes.
+
+\section{Vorhersage der Antworten}
+\label{sec:evaluation-lernstand}
+
+Die Tabellen zeigen die Vorhersagewerte getrennt nach Situation,
+Auswahlverfahren und Sitzungsnummer. Je Zelle stehen Mittelwert und
+Standardabweichung des Lernstandsmodells. In Klammern folgt der Mittelwert
+der festen Anfangsvorhersage auf denselben Antworten. Die Sitzungsnummer
+kennzeichnet den Verlauf derselben simulierten Lernenden; sie bezeichnet
+keine fünf unabhängig neu gestarteten Gruppen.
+
+\begin{table}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\EvaluationBrierTable}
+  \caption{Brier-Wert der Antwortvorhersagen über bis zu fünf Sitzungen.
+    In Klammern: feste Vorhersage von $44{,}5\%$. Ein Index $n$ weist auf
+    eine von 100 abweichende Fallzahl hin.}
+  \label{tab:brier}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\EvaluationLogLossTable}
+  \caption{Log-Loss der Antwortvorhersagen. Darstellung und Referenz
+    entsprechen Tabelle~\ref{tab:brier}.}
+  \label{tab:logloss}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \EvaluationBrierPlot
+  \caption{Verlauf des Brier-Werts nach Situation. Die Kurven beziehen
+    sich auf die jeweils noch aktiven Lernverläufe und auf unterschiedliche
+    ausgewählte Antworten; sie zeigen keinen Lernerfolgsvergleich.}
+  \label{fig:brier}
+\end{figure}
+
+In der ersten Sitzung liegen die Vorhersagewerte aller Verfahren in
+allen Situationen unter denen der festen Anfangsvorhersage. Dies
+bestätigt, dass die Aktualisierung anhand der bisherigen Antworten in
+diesem Kaltstartvergleich nützliche Informationen für die Antwortvorhersage
+liefert. Daraus folgt jedoch nicht, dass die adaptive Auswahl besser als
+Zufall ist: Auch die Zufallsauswahl verwendet dasselbe aktualisierte
+Lernstandsmodell.
+
+In späteren Sitzungen muss zusätzlich berücksichtigt werden, welche
+Aufgaben die Verfahren noch stellen. Eine Auswahl kann sich auf
+unsichere oder noch nicht beherrschte Kompetenzen konzentrieren und
+damit andere Antwortfolgen erhalten als ein breit auswählendes
+Verfahren. Ein niedrigerer Vorhersagefehler auf diesen unterschiedlichen
+Antworten ist deshalb kein isolierter Qualitätsnachweis der
+Auswahlstrategie. Insbesondere ist nicht vorauszusetzen, dass die
+aktualisierte Schätzung in jeder späteren Situation besser als die feste
+Referenz bleibt; dies wird für jede Sitzung gesondert ausgewiesen.
+
+Dies zeigt sich im Szenario mit abweichendem Lernverhalten besonders
+deutlich: In der fünften Sitzung beträgt der Brier-Wert bei der
+Gewichtung nach Bewertungen und Lernstand $0{,}2454$ gegenüber $0{,}2443$
+für die feste Referenz. Beim Informationsgewinnverfahren stehen
+$0{,}2447$ dem Referenzwert $0{,}2404$ gegenüber. Eine fortgeführte
+Historie gleicht unpassende Modellannahmen somit nicht automatisch aus.
+
+\section{Auswahlverhalten und Kompetenzabdeckung}
+\label{sec:evaluation-auswahl}
+
+Für die Frage nach passenden Folgeaufgaben wird untersucht, ob die
+Auswahl auf tatsächlich noch nicht beherrschte Kompetenzen fällt.
+Tabelle~\ref{tab:selection-need} berichtet deren Anteil an den Aufgaben
+einer Sitzung. Die Mittelwerte und Standardabweichungen sind in Prozent
+beziehungsweise Prozentpunkten angegeben.
+
+\begin{table}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\EvaluationNeedTable}
+  \caption{Anteil der Aufgaben mit noch nicht beherrschter Zielkompetenz
+    zum Auswahlzeitpunkt. Ein größerer Wert zeigt häufigere Auswahl
+    bestehenden simulierten Lernbedarfs, nicht unmittelbar mehr Lernen.}
+  \label{tab:selection-need}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \EvaluationNeedPlot
+  \caption{Ausrichtung auf noch nicht beherrschte Kompetenzen im
+    Sitzungsverlauf. Spätere Werte umfassen nur noch aktive Lernverläufe.}
+  \label{fig:selection-need}
+\end{figure}
+
+Bei gemischtem Vorwissen ist der Unterschied in der ersten Sitzung
+noch gering: $61{,}1\%$ der zufällig ausgewählten Aufgaben betreffen
+noch nicht beherrschte Kompetenzen, gegenüber $61{,}5\%$ bei der
+Gewichtung nach Bewertungen und Lernstand und $58{,}9\%$ beim
+Informationsgewinnverfahren. In der fünften Sitzung beträgt dieser
+Anteil dagegen $34{,}4\%$ bei Zufall, $60{,}7\%$ bei der gewichteten
+Auswahl und $62{,}3\%$ beim Informationsgewinnverfahren. Alle drei
+Vergleichsgruppen umfassen hier weiterhin 100 Lernverläufe.
+Der Abstand zur Zufallsauswahl beträgt damit $26{,}4$ beziehungsweise
+$28{,}0$ Prozentpunkte. Die Verfahren weisen mit fortgeführter Evidenz
+ein deutlich unterschiedliches Auswahlverhalten auf.
+
+Auch bei niedrigem Vorwissen fallen in der fünften Sitzung bei den
+adaptiven Verfahren häufiger Aufgaben auf noch nicht beherrschte
+Kompetenzen: $67{,}9\%$ und $64{,}7\%$ gegenüber $46{,}7\%$ bei Zufall.
+Im abweichenden Szenario sind es $79{,}2\%$ und $81{,}5\%$ gegenüber
+$54{,}8\%$. Ein hoher Anteil zeigt dabei die Konzentration auf
+verbleibenden Bedarf, nicht dessen erfolgreiche Beseitigung. Gerade
+bei langsamen Lernübergängen können Kompetenzen trotz wiederholter
+Bearbeitung noch nicht beherrscht sein. Die Kennzahl hängt folglich
+auch vom durch die bisherige Auswahl entstandenen Kompetenzzustand ab.
+
+Die Kompetenzabdeckung beschreibt dagegen, wie viele unterschiedliche
+Kompetenzen in einer Sitzung behandelt werden. Ein hoher Anteil von
+Aufgaben zu noch nicht beherrschten Kompetenzen kann mit einer geringen
+Abdeckung einhergehen, wenn wiederholt dieselben Lücken bearbeitet werden.
+Diese Kennzahlen beantworten daher verschiedene Fragen und dürfen nicht
+als austauschbare Qualitätsmaße interpretiert werden.
+
+\begin{figure}[htbp]
+  \centering
+  \EvaluationCoveragePlot
+  \caption{Anteil der innerhalb einer Sitzung mindestens einmal
+    behandelten Kompetenzen. Bezugsgröße sind die 39 geeigneten Kompetenzen.}
+  \label{fig:coverage}
+\end{figure}
+
+Für die Gesamtbetrachtung fasst Tabelle~\ref{tab:trajectory-endpoints}
+alle 100 Lernverläufe pro Kombination zusammen. Berichtet werden die
+mittlere Gesamtzahl bearbeiteter Aufgaben, die kumulierte
+Kompetenzabdeckung in Prozent und der Brier-Wert des Kompetenzprofils am
+jeweiligen Ende des Lernverlaufs. Der Profilwert bewertet alle 39
+Kompetenzen, einschließlich nicht bearbeiteter Kompetenzen. Er ist nicht
+mit dem Brier-Wert der Antwortvorhersage gleichzusetzen.
+
+\begin{table}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\EvaluationEndpointTable}
+  \caption{Gesamtbetrachtung bis einschließlich der fünften Sitzung.
+    Pro Kombination gehen alle 100 Lernverläufe ein; bei früherem Ende
+    wird deren letzter Zustand verwendet. Abdeckung in Prozent.
+    Weniger Aufgaben bedeuten nicht automatisch mehr Effizienz, da das
+    Evidenzkriterium keine nachgewiesene Kompetenzbeherrschung verlangt.}
+  \label{tab:trajectory-endpoints}
+\end{table}
+
+Beim abschließenden Kompetenzprofil erreicht das Informationsgewinnverfahren
+in den drei Situationen mit passenden Antwort- und Lernparametern
+niedrigere Fehlerwerte als die Zufallsauswahl: $0{,}1364$ statt $0{,}1461$
+bei niedrigem, $0{,}1039$ statt $0{,}1189$ bei gemischtem und $0{,}0216$
+statt $0{,}0615$ bei hohem Vorwissen. Für die Gewichtung nach Bewertungen
+und Lernstand gilt dieser Vorteil bei gemischtem und hohem, nicht aber
+bei niedrigem Vorwissen. Im abweichenden Szenario sind dagegen beide
+adaptiven Verfahren ungenauer als Zufall: $0{,}2387$ beziehungsweise
+$0{,}2215$ gegenüber $0{,}1756$. Es handelt sich um deskriptive
+Mittelwertvergleiche, nicht um nachgewiesene statistische Signifikanz.
+
+Bei hohem Vorwissen bearbeiten die adaptiven Verfahren über den
+gesamten Lernverlauf im Mittel rund 111 Aufgaben gegenüber 150 bei
+Zufall und erreichen dabei eine kumulierte Abdeckung von $100\%$.
+Die Zufallsauswahl erreicht $95{,}7\%$. Die geringere Aufgabenanzahl
+darf jedoch nicht allein als effizienterer Abschluss interpretiert
+werden: Sitzungen können auch enden, weil unter den bestehenden
+Auswahlregeln keine weitere geeignete Aufgabe verfügbar ist.
+
+Insgesamt wurden im Plattformbestand \EvaluationSessions{} Sitzungen mit
+\EvaluationAnswers{} Antworten ausgeführt. Davon endeten
+\EvaluationEvidenceEnds{} Sitzungen wegen des Evidenzkriteriums und
+\EvaluationNoQuestionEnds{} mangels einer weiteren auswählbaren Aufgabe.
+Die übrigen Sitzungen erreichten das Aufgabenlimit. Innerhalb einer
+Sitzung sind Wiederholungen durch den Ausschluss bereits bearbeiteter
+Aufgaben verhindert. Zwischen Sitzungen sind sie ausdrücklich zugelassen.
+Gemessen wird die Zahl bearbeiteter Aufgaben, nicht die reale
+Bearbeitungszeit.
+
+\subsection{Zentrale Erkenntnisse und Grenzen}
+\label{subsec:zentrale-erkenntnisse}
+
+Die Evaluation beantwortet die Leitfrage auf der Ebene des implementierten
+Datenflusses: Antworten werden über die Aufgaben-Kompetenz-Zuordnung einer
+Kompetenz zugeordnet, ihre Schätzung wird aktualisiert und beeinflusst
+zusammen mit Bewertungszahlen, Fokusphase und Auswahlstrategie die
+Folgeaufgaben. Der mehrsitzige Versuchsaufbau untersucht diesen Ablauf
+nicht nur im Kaltstart, sondern auch mit fortgeführter Evidenz.
+
+Das zentrale positive Ergebnis liegt in der gezielteren Ausrichtung
+späterer Folgeaufgaben auf noch nicht beherrschte Kompetenzen. Bei
+gemischtem Vorwissen steigt der Abstand zur Zufallsauswahl in der
+fünften Sitzung auf rund 26 bis 28 Prozentpunkte. Zusätzlich erreicht
+das Informationsgewinnverfahren am Ende der mehrsitzigen Untersuchung
+in allen drei Situationen mit passenden Antwort- und Lernparametern
+ein genaueres Gesamtprofil als die Zufallsauswahl. Die Evaluation
+zeigt damit einen konkreten Nutzen der implementierten adaptiven
+Auswahl unter diesen Simulationsbedingungen, ohne eine allgemeine
+Überlegenheit zu behaupten. Die schlechteren Profilwerte im
+abweichenden Szenario verdeutlichen zugleich die Grenzen der
+gewählten Modellannahmen.
+
+Die Beurteilung des Nutzens muss dabei zwischen Antwortvorhersage,
+Ausrichtung der Auswahl und Genauigkeit des Gesamtprofils unterscheiden.
+Die Auswahl noch nicht beherrschter Kompetenzen ist ein Hinweis auf
+gezielte Bearbeitung vorhandener Lücken. Sie ist aber kein Nachweis, dass
+die ausgewählten Aufgaben einen größeren Lernzuwachs verursachen.
+Der Vergleich des gesamten Kompetenzprofils berücksichtigt auch die
+Breite der erhobenen Evidenz. Keines dieser Maße allein beantwortet
+sämtliche Aspekte einer passenden Folgeaufgabe.
+
+Die wissenschaftliche Aussage bleibt auf das simulierte Modell
+beschränkt. Die Antworten wurden mit einem BKT-basierten Prozess erzeugt,
+während die Plattform ebenfalls ein BKT-basiertes Modell zur Schätzung
+verwendet. Der Bestand ist vorläufig, die Schwierigkeit wirkt nicht auf
+Antworten oder Lernen, und wiederholte Aufgaben erzeugen keine besondere
+Erinnerungswirkung. Die Fortführung der Zustände bildet zudem keine
+zeitliche Abschwächung historischer Evidenz ab. Schließlich bedeutet ein
+Ende wegen ausreichender Diagnoseevidenz nicht zwingend, dass sämtliche
+Kompetenzen beherrscht werden. Aussagen über tatsächlichen Lernerfolg,
+die Verständlichkeit der Auswahlgründe oder die Überlegenheit in realen
+Lehrveranstaltungen erfordern deshalb weitere Untersuchungen.

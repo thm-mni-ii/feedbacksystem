@@ -109,9 +109,37 @@ absenden.
 
 ## Reproduzierbarer Auswahlvergleich
 
-`npm run evaluate` führt 800 synthetische Sessions aus: vier festgelegte
-Lerner-Szenarien, 100 Seeds und zwei Auswahlstrategien. Dies nutzt weder API noch
-Browser-Speicher und verändert keine Lernhistorie.
+`npm run evaluate` führt 2.400 synthetische Lernverläufe mit jeweils bis zu
+fünf aufeinanderfolgenden Sessions aus: zwei Aufgabenbestände,
+vier festgelegte Lerner-Szenarien, 100 Seeds und drei Auswahlstrategien
+(zufällige Auswahl als Vergleich sowie die beiden adaptiven Strategien). Dies
+nutzt weder API noch Browser-Speicher und verändert keine Lernhistorie.
+
+Der Bericht fasst Brier-Wert und Log-Loss für die Vorhersagen auf den jeweils
+gestellten Aufgaben zusammen und stellt sie einer festen Ausgangsschätzung
+gegenüber. Zusätzlich wird ausgewiesen, welcher Anteil der ausgewählten
+Kompetenzen der simulierte Lernende zum Auswahlzeitpunkt noch nicht beherrschte.
+Kompetenzzustände, Schätzungen, Bewertungszahlen und Zufallsquellen werden
+zwischen den Sessions fortgeführt. Aufgaben dürfen in späteren Sessions erneut
+vorkommen, innerhalb einer Session nicht. Nur sitzungsbezogene Historie,
+Fokusphase und Ausschlüsse beginnen neu; historisches Replay und zeitlicher
+Verfall werden nicht simuliert. Pro Session gilt weiterhin das Limit von
+30 Aufgaben. Erfüllt der gesamte geeignete Bestand beim nächsten Start bereits
+das Evidenzkriterium, endet der Lernverlauf. Das bedeutet nicht zwingend,
+dass alle Kompetenzen beherrscht werden.
+
+Die Auswertung enthält getrennte Zusammenfassungen und gepaarte Differenzen
+pro Sitzungsnummer sowie Kompetenzzustände vor und nach jeder Session.
+Spätere Sitzungswerte beziehen sich nur auf noch aktive Verläufe; Fallzahlen
+stehen im Export. Der Endvergleich in der LaTeX-Ausgabe verwendet dagegen alle
+Lernverläufe mit ihrem jeweils letzten Zustand. Die Genauigkeit des gesamten
+Kompetenzprofils wird über alle geeigneten Kompetenzen bewertet, einschließlich
+nicht ausgewählter Kompetenzen.
+
+Die Kompetenzabdeckung bleibt eine beschreibende Zusatzgröße. Da die Verfahren
+unterschiedliche Aufgaben auswählen und die Antworten synthetisch erzeugt
+werden, ist der Vergleich kein Nachweis eines kausalen Effekts oder eines
+Lernzuwachses.
 
 Optional alle Konfigurationen, Kennzahlen und Antwortsequenzen als JSON
 exportieren (Zielordner muss existieren; vorhandene Dateien werden nicht
@@ -122,6 +150,15 @@ $env:QCM_EVALUATION_OUTPUT = Join-Path $env:TEMP 'qcm-evaluation.json'
 npm run evaluate
 Remove-Item Env:\QCM_EVALUATION_OUTPUT
 ```
+
+Optional erzeugt `QCM_EVALUATION_LATEX` beim gleichen Lauf direkt Tabellen und
+PGFPlots-Diagramme für Kapitel 5, beispielsweise mit einem noch nicht existierenden
+Ausgabepfad im temporären Verzeichnis. Vorhandene Dateien werden nicht überschrieben.
+Die Neufassung liegt in [kapitel5.tex](./docs/kapitel5.tex), die berechneten
+Tabellen und Diagramme in [kapitel5-ergebnisse.tex](./docs/kapitel5-ergebnisse.tex).
+Für Overleaf beide Dateien übernehmen und den `\input`-Pfad an die Ordnerstruktur
+der Arbeit anpassen; in der Präambel `pgfplots` mit Kompatibilitätsstand 1.18 laden.
+Die Literaturverweise verwenden die bereits in der Arbeit vorhandenen BibTeX-Schlüssel.
 
 Experimentaufbau, tatsächlich gemessene Ergebnisse und Einschränkungen stehen
 in [der Algorithmus-Spezifikation](./docs/adaptive-algorithm-specification.md).

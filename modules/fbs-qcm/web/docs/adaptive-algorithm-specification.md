@@ -249,10 +249,57 @@ Ein gespeicherter Antwortversuch kann zusätzlich den Zustand nach der Antwort
 enthalten. Dieser Snapshot dient der Wiederherstellung bei getrennten
 Attempt-/Session-Speicheraufrufen und ersetzt nicht die Vorhersage vor der Antwort.
 
-### Ausgeführter synthetischer Vergleich (Experiment v1)
+### Mehrsitziger Auswahlvergleich (Experiment v6)
 
 Der ausführbare Versuchsaufbau liegt in `evaluation/selectionBenchmark.ts`;
-`npm run evaluate` führt ihn aus. Es ist ein eigener technischer
+`npm run evaluate` führt ihn aus. Pro Aufgabenbestand beginnen 1.200 Lernverläufe
+(vier Szenarien, drei Strategien, 100 Seeds). Jeder Verlauf umfasst bis zu fünf
+Sessions mit jeweils höchstens 30 Aufgaben. Neben dem synthetischen Kontrollpool
+wird der Plattformbestand mit 146 geeigneten Aufgaben zu 39 Kompetenzen ausgewertet.
+Die Zufallsauswahl dient als nicht-adaptive Kontrollbedingung.
+
+Zwischen den Sessions bleiben verborgene Kompetenzzustände, BKT-Schätzungen,
+Bewertungszahlen und Zufallsquellen erhalten. Aufgabenhistorie, Fokusphase,
+Recent-Items und Ausschlüsse werden neu begonnen. Aufgabenwiederholungen sind
+innerhalb einer Session ausgeschlossen und zwischen Sessions zugelassen.
+Aufgabenspezifische Erinnerung, Vergessen, historisches Replay und zeitlicher
+Verfall werden nicht simuliert. Dies ist eine direkte Zustandsfortführung,
+keine vollständige Nachbildung der historischen Evidenzverarbeitung der Anwendung.
+Der produktive Auswahlalgorithmus und seine Parameter bleiben unverändert.
+
+Der nächste Sitzungsstart prüft das Evidenzkriterium über den vollständigen
+geeigneten Bestand. Ist es erfüllt, endet der Verlauf. Ein früheres Ende wegen
+fehlender noch auswählbarer Aufgaben verhindert dagegen nicht die Freigabe der
+Aufgaben in einer weiteren Session. Evidenzabschluss verlangt die konfigurierte
+Mindestzahl an Beobachtungen und geringe Entropie, nicht zwingend hohe Beherrschung.
+
+Ergebnisse und gepaarte Differenzen werden pro Sitzungsnummer mit Fallzahlen
+berichtet. Spätere Sessions umfassen nur noch aktive Verläufe. Die fünf Sessions
+werden nicht als fünf unabhängige Stichproben interpretiert. Der Endvergleich
+des LaTeX-Exports berücksichtigt alle ursprünglichen Verläufe und verwendet bei
+früherem Abschluss den letzten Zustand.
+
+Die Kennzahlen unterscheiden Antwortvorhersage (Brier/Log-Loss samt fester
+Referenz auf denselben Antworten), Ausrichtung auf noch nicht beherrschte
+Kompetenzen, Abdeckung und Genauigkeit des gesamten Kompetenzprofils.
+Letztere berechnet den Brier-Wert der Beherrschungswahrscheinlichkeit gegen den
+binären Zustand über alle geeigneten Kompetenzen, auch ohne Beobachtungen.
+Ein Vergleich des Profilfehlers vor und nach einer Session verwendet dabei
+unterschiedliche, durch Lernübergänge veränderliche Zielzustände; er ist kein
+isoliertes Maß des diagnostischen Informationsgewinns.
+
+`QCM_EVALUATION_OUTPUT` exportiert den vollständigen JSON-Bericht,
+`QCM_EVALUATION_LATEX` die daraus erzeugten Tabellen und Diagramme.
+Beide Ziele dürfen noch nicht existieren. Kapiteltext und Ergebnisdarstellungen
+liegen in `docs/kapitel5.tex` und `docs/kapitel5-ergebnisse.tex`.
+Die Einschränkungen des historischen Versuchs unten (synthetische Antworten,
+kein Effekt der Schwierigkeit auf Antworten, kein Nachweis realen Lernerfolgs)
+gelten weiterhin.
+
+### Ausgeführter synthetischer Vergleich (Experiment v1)
+
+Dieser Abschnitt dokumentiert den früheren Stand v1, nicht die heute durch
+`npm run evaluate` ausgeführte Konfiguration. Es war ein eigener technischer
 Simulationsaufbau, keine Literaturbehauptung und keine empirische Studie.
 Der simulierte Lerner besitzt je Kompetenz einen binären latenten Zustand:
 Antworten entstehen aus Raten/Flüchtigkeitsfehlern, anschließend kann eine

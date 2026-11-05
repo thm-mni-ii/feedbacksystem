@@ -47,7 +47,7 @@
         <div class="info-block mb-4">
           <div class="d-flex align-center justify-space-between mb-2">
             <div class="info-block-label mb-0">
-              <v-icon size="16" color="var(--sg-accent)">mdi-brain</v-icon>
+              <v-icon size="16" color="var(--sg-accent)">mdi-layers-outline</v-icon>
               <span>Kompetenzen dieser Aufgabe</span>
             </div>
           </div>

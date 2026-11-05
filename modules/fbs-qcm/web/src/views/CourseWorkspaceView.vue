@@ -28,7 +28,7 @@ const tabs = computed(() => {
     { title: 'Kompetenzen', icon: 'mdi-graph-outline', to: { name: 'courseCompetencies' } }
   ]
   const adminTabs = [
-    { title: 'Aufgaben', icon: 'mdi-help-circle-outline', to: { name: 'courseQuestions' } },
+    { title: 'Aufgaben', icon: 'mdi-file-document-outline', to: { name: 'courseQuestions' } },
     { title: 'Einstellungen', icon: 'mdi-tune', to: { name: 'courseSettings' } }
   ]
   return isAdmin.value ? [...baseTabs, ...adminTabs] : baseTabs
