@@ -21,10 +21,8 @@ function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
       const signingKey = key?.getPublicKey();
       callback(null, signingKey);
     });
-  } else if (process.env.JWT_SECRET) {
-    callback(null, process.env.JWT_SECRET);
   } else {
-    callback(new Error("No kid in token header and no JWT_SECRET set"));
+    callback(new Error("No kid in token header"));
   }
 }
 
@@ -43,24 +41,9 @@ export const authenticateToken = (
   jwt.verify(
     token,
     getKey,
-    { algorithms: ["RS256", "HS256"] },
+    { algorithms: ["RS256"] },
     (err: any, user: any) => {
       if (err) {
-        if (process.env.JWT_SECRET) {
-          jwt.verify(
-            token,
-            process.env.JWT_SECRET as string,
-            (legacyErr: any, legacyUser: any) => {
-              if (legacyErr) {
-                console.log("JWT verification failed:", err);
-                return res.sendStatus(403);
-              }
-              (req as any).user = legacyUser;
-              next();
-            }
-          );
-          return;
-        }
         console.log("JWT verification failed:", err);
         return res.sendStatus(403);
       }
