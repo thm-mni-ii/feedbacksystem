@@ -22,7 +22,6 @@ DEBUG = os.environ["DASH_DEBUG_MODE"]
 
 SESSION_TYPE = "redis"
 URL_BASE_PATH = os.getenv("URL_BASE_PATH")
-SECRET_KEY = os.getenv("JWT_SECRET")
 FBS_BASE_URL = os.getenv("FBS_BASE_URL")
 FBS_TLS_NO_VERIFY = os.getenv("FBS_TLS_NO_VERIFY") == "true"
 JWKS_URL = os.getenv("OIDC_JWK_SET_URI", "http://identity-service:8080/oauth2/jwks")
@@ -33,21 +32,16 @@ jwks_client = PyJWKClient(JWKS_URL)
 
 def verify_token(token: str):
     """
-    Verifies the JWT token using JWKS (RS256) or legacy secret key (HS256).
+    Verifies the JWT token using JWKS (RS256).
     """
-    try:
-        signing_key = jwks_client.get_signing_key_from_jwt(token)
-        return jwt.decode(
-            token,
-            signing_key.key,
-            algorithms=["RS256"],
-            issuer=OIDC_ISSUER,
-            options={"verify_aud": False},
-        )
-    except Exception:
-        if SECRET_KEY:
-            return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        raise
+    signing_key = jwks_client.get_signing_key_from_jwt(token)
+    return jwt.decode(
+        token,
+        signing_key.key,
+        algorithms=["RS256"],
+        issuer=OIDC_ISSUER,
+        options={"verify_aud": False},
+    )
 
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, "./assets/style.css"]
