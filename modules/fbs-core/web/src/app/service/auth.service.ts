@@ -212,14 +212,6 @@ export class AuthService {
   }
 
   /**
-   * Use the cas authentication method
-   */
-  public casLogin(): Observable<JWTToken> {
-    this.login();
-    return of(null);
-  }
-
-  /**
    * Use the ldap authentication method of the server to login via user name and password
    */
   public ldapLogin(username: string, password: string): Observable<JWTToken> {

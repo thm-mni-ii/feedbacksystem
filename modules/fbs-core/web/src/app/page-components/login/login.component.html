@@ -8,18 +8,6 @@
       <mat-card-header class="login_title">
         <mat-card-title>{{ "login.login" | i18nextEager }}</mat-card-title>
       </mat-card-header>
-
-      <mat-card-actions class="login-buttons">
-        <button class="cas" (click)="casLogin()" mat-flat-button color="accent">
-          {{ "login.loginWithCas" | i18nextEager }}
-        </button>
-      </mat-card-actions>
-
-      <div class="divider-block">
-        <mat-divider class="divider"></mat-divider>
-        <div>{{ "login.or" | i18nextEager }}</div>
-      </div>
-
       <mat-accordion class="local-login-accordion">
         <mat-expansion-panel [expanded]="false">
           <mat-expansion-panel-header>
