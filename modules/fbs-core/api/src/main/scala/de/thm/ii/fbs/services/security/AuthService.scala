@@ -26,15 +26,6 @@ class AuthService {
   @Autowired(required = false)
   private val jwtDecoder: JwtDecoder = null
 
-  /**
-    * Generate a new token and append it to the response header.
-    * @param user The user
-    * @param res The response
-    */
-  def renewAuthentication(user: User, res: HttpServletResponse): Unit = {
-    // Deprecated for OIDC PKCE flow
-  }
-
   private def getOrProvisionUser(jwt: Jwt): Option[User] = {
     val uidOpt = Try(jwt.getSubject.toInt).toOption
       .orElse(Option(jwt.getClaim[Object]("id")).flatMap(x => Try(x.toString.toInt).toOption))
