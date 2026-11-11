@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.config
 
-import de.thm.ii.fbs.security.v2.AntiBruteForceInterceptor
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation._
 
@@ -12,8 +10,6 @@ import org.springframework.web.servlet.config.annotation._
 @Configuration
 class WebConfig extends WebMvcConfigurer {
   private val ALL = "*"
-  @Autowired
-  private val antiBruteForceInterceptor: AntiBruteForceInterceptor = null
 
   /**
     * Add CORS Settings for every request.
@@ -28,10 +24,5 @@ class WebConfig extends WebMvcConfigurer {
       .exposedHeaders("Authorization", "Date")
 
     super.addCorsMappings(registry)
-  }
-
-  override def addInterceptors(registry: InterceptorRegistry): Unit = {
-    super.addInterceptors(registry)
-    registry.addInterceptor(antiBruteForceInterceptor)
   }
 }
