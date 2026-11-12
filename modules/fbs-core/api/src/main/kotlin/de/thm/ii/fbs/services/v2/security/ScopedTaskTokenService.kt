@@ -11,8 +11,7 @@ import java.util.Date
 
 @Service
 class ScopedTaskTokenService(
-    @Value("\${jwt.secret:8Dsupersecurekeydf0}")
-    private val jwtSecret: String,
+    private val jwtSecretProvider: JwtSecretProvider,
     @Value("\${services.self.url:\${server.host:https://feedback.thm.de/course-management}}")
     private val issuer: String
 ) {
@@ -52,7 +51,7 @@ class ScopedTaskTokenService(
 
         return Jwts.builder()
             .setClaims(claimsBuilder)
-            .signWith(SignatureAlgorithm.HS256, jwtSecret.toByteArray(StandardCharsets.UTF_8))
+            .signWith(SignatureAlgorithm.HS256, jwtSecretProvider.secret)
             .compact()
     }
 
@@ -83,7 +82,7 @@ class ScopedTaskTokenService(
 
         return Jwts.builder()
             .setClaims(claims)
-            .signWith(SignatureAlgorithm.HS256, jwtSecret.toByteArray(StandardCharsets.UTF_8))
+            .signWith(SignatureAlgorithm.HS256, jwtSecretProvider.secret)
             .compact()
     }
 
@@ -93,7 +92,7 @@ class ScopedTaskTokenService(
     fun validateCallbackToken(token: String, expectedSubmissionId: Int, expectedCheckerConfigId: Int): Boolean {
         return try {
             val claims = Jwts.parser()
-                .setSigningKey(jwtSecret.toByteArray(StandardCharsets.UTF_8))
+                .setSigningKey(jwtSecretProvider.secret)
                 .parseClaimsJws(token.replace("Bearer ", "").trim())
                 .body
 
@@ -132,7 +131,7 @@ class ScopedTaskTokenService(
     fun parseToken(token: String): Claims? {
         return try {
             Jwts.parser()
-                .setSigningKey(jwtSecret.toByteArray(StandardCharsets.UTF_8))
+                .setSigningKey(jwtSecretProvider.secret)
                 .parseClaimsJws(token.replace("Bearer ", "").trim())
                 .body
         } catch (e: Exception) {

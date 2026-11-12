@@ -1,7 +1,8 @@
 compile:
   production: true
 jwt:
-  secret: ${JWT_SECRET:8Dsupersecurekeydf0}
+  secret: ${JWT_SECRET:}
+  secret-file: ${JWT_SECRET_FILE:/usr/local/fbs-core.api/conf/jwt-secret}
 logging:
   level:
     root: INFO

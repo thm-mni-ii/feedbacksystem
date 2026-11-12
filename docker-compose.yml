@@ -58,7 +58,6 @@ services:
       - MYSQL_URI=jdbc:mysql://mysql1:3306
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
-      - JWT_SECRET=8Dsupersecurekeydf0
       - CLASSROOM_URL=http://digital-classroom:8085
       - CLASSROOM_SECRET=8Dsupersecurekeydf0
       - CLASSROOM_TLS_INSECURE=true
