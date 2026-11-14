@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.v2.security
 
+import io.jsonwebtoken.security.Keys
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -9,6 +10,7 @@ import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermissions
 import java.security.SecureRandom
 import java.util.Base64
+import javax.crypto.SecretKey
 
 /**
  * Provides the secret for signing and verifying internal HS256 tokens.
@@ -25,6 +27,7 @@ class JwtSecretProvider(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     val secret: ByteArray = loadSecret()
+    val key: SecretKey = Keys.hmacShaKeyFor(secret)
 
     private fun loadSecret(): ByteArray {
         val path = Path.of(secretFile)

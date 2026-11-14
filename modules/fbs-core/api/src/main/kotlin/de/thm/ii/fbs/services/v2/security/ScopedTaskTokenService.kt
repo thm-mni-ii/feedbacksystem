@@ -2,7 +2,6 @@ package de.thm.ii.fbs.services.v2.security
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.nio.charset.StandardCharsets
@@ -33,25 +32,24 @@ class ScopedTaskTokenService(
         val expiry = Date(now.time + validityMinutes * 60 * 1000)
         val pseudonym = generatePseudonym(userId, courseId)
 
-        val claimsBuilder = Jwts.claims()
-            .setIssuer(issuer)
-            .setSubject(userId.toString())
-            .setIssuedAt(now)
-            .setExpiration(expiry)
+        val builder = Jwts.builder()
+            .issuer(issuer)
+            .subject(userId.toString())
+            .issuedAt(now)
+            .expiration(expiry)
+            .claim("pseudonym", pseudonym)
+            .claim("username", username)
+            .claim("cid", courseId)
+            .claim("tid", taskId)
+            .claim("course_role", courseRole)
+            .claim("scope", scope)
 
-        claimsBuilder["pseudonym"] = pseudonym
-        claimsBuilder["username"] = username
-        claimsBuilder["cid"] = courseId
-        claimsBuilder["tid"] = taskId
         if (submissionId != null) {
-            claimsBuilder["sid"] = submissionId
+            builder.claim("sid", submissionId)
         }
-        claimsBuilder["course_role"] = courseRole
-        claimsBuilder["scope"] = scope
 
-        return Jwts.builder()
-            .setClaims(claimsBuilder)
-            .signWith(SignatureAlgorithm.HS256, jwtSecretProvider.secret)
+        return builder
+            .signWith(jwtSecretProvider.key, Jwts.SIG.HS256)
             .compact()
     }
 
@@ -68,21 +66,19 @@ class ScopedTaskTokenService(
         val now = Date()
         val expiry = Date(now.time + validityMinutes * 60 * 1000)
 
-        val claims = Jwts.claims()
-            .setIssuer(issuer)
-            .setSubject("fbs:evaluator")
-            .setIssuedAt(now)
-            .setExpiration(expiry)
+        val builder = Jwts.builder()
+            .issuer(issuer)
+            .subject("fbs:evaluator")
+            .issuedAt(now)
+            .expiration(expiry)
+            .claim("sid", submissionId)
+            .claim("ccid", checkerConfigId)
+            .claim("tid", taskId)
+            .claim("cid", courseId)
+            .claim("scope", "fbs:task:evaluate")
 
-        claims["sid"] = submissionId
-        claims["ccid"] = checkerConfigId
-        claims["tid"] = taskId
-        claims["cid"] = courseId
-        claims["scope"] = "fbs:task:evaluate"
-
-        return Jwts.builder()
-            .setClaims(claims)
-            .signWith(SignatureAlgorithm.HS256, jwtSecretProvider.secret)
+        return builder
+            .signWith(jwtSecretProvider.key, Jwts.SIG.HS256)
             .compact()
     }
 
@@ -92,9 +88,10 @@ class ScopedTaskTokenService(
     fun validateCallbackToken(token: String, expectedSubmissionId: Int, expectedCheckerConfigId: Int): Boolean {
         return try {
             val claims = Jwts.parser()
-                .setSigningKey(jwtSecretProvider.secret)
-                .parseClaimsJws(token.replace("Bearer ", "").trim())
-                .body
+                .verifyWith(jwtSecretProvider.key)
+                .build()
+                .parseSignedClaims(token.replace("Bearer ", "").trim())
+                .payload
 
             val sid = claims["sid"]?.toString()?.toIntOrNull()
             val ccid = claims["ccid"]?.toString()?.toIntOrNull()
@@ -131,9 +128,10 @@ class ScopedTaskTokenService(
     fun parseToken(token: String): Claims? {
         return try {
             Jwts.parser()
-                .setSigningKey(jwtSecretProvider.secret)
-                .parseClaimsJws(token.replace("Bearer ", "").trim())
-                .body
+                .verifyWith(jwtSecretProvider.key)
+                .build()
+                .parseSignedClaims(token.replace("Bearer ", "").trim())
+                .payload
         } catch (e: Exception) {
             null
         }
