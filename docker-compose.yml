@@ -344,7 +344,6 @@ services:
       identity-service:
         condition: service_healthy
     environment:
-      - JWT_SECRET=8Dsupersecurekeydf0
       - OIDC_ISSUER=http://localhost:8080
       - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
       - SERVER_SESSION_SECRET=sessiosecret
@@ -391,7 +390,6 @@ services:
     networks:
       - fbs
     environment:
-      - JWT_SECRET=8Dsupersecurekeydf0
       - OIDC_ISSUER=http://localhost:8080
       - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
