@@ -83,6 +83,9 @@ Build all container an start them with `docker compose`
 docker compose up -d --build
 ```
 
+> **Note**  
+> On the first start, the core generates its own secret for internal tokens and saves it to `conf/fbs-core.api/jwt-secret`. Do not delete this file while the core is running, otherwise running evaluations fail. Alternatively, set `JWT_SECRET` (at least 32 characters) or point `JWT_SECRET_FILE` to another file.
+
 The System can now be accessed at `https://localhost`.
 
 #### Frontend
