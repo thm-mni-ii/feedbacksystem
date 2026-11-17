@@ -104,13 +104,6 @@ export class LoginComponent implements OnInit {
   /**
    * Redirect to OIDC login
    */
-  casLogin() {
-    this.auth.login();
-  }
-
-  /**
-   * Redirect to OIDC login
-   */
   oidcLogin() {
     this.auth.login();
   }
