@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { AuthService } from './service/auth.service';
 
 @Component({
@@ -7,10 +7,7 @@ import { AuthService } from './service/auth.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
+  // inject AuthService at startup so the theme and the token bridge are set up early
   constructor(private authService: AuthService) {}
-
-  ngOnInit(): void {
-    this.authService.startTokenAutoRefresh();
-  }
 }

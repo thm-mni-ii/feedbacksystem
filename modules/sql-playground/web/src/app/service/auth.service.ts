@@ -1,8 +1,7 @@
 import { Inject, Injectable } from "@angular/core";
-import { HttpClient, HttpResponse } from "@angular/common/http";
+import { HttpResponse } from "@angular/common/http";
 import { JwtHelperService } from "@auth0/angular-jwt";
-import { Observable, BehaviorSubject, of, throwError } from "rxjs";
-import { mergeMap, map } from "rxjs/operators";
+import { Observable, BehaviorSubject } from "rxjs";
 import { I18NEXT_SERVICE, ITranslationService } from "angular-i18next";
 import { JWTToken } from "../model/JWTToken";
 
@@ -19,7 +18,6 @@ export class AuthService {
   public readonly tokenReceived$: Observable<boolean> = this.tokenReceivedSubject.asObservable();
 
   constructor(
-    private http: HttpClient,
     private jwtHelper: JwtHelperService,
     @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
   ) {
@@ -155,46 +153,6 @@ export class AuthService {
   }
 
   /**
-   * Use the cas authentication method
-   */
-  public casLogin(): Observable<JWTToken> {
-    return throwError("Not implemented yet!"); // TODO: impl cas login
-  }
-
-  /**
-   * Use the ldap authentication method of the server to login via user name and password
-   * @param username The username of a user
-   * @param password The password of a user
-   * @return Successful observable JWTToken, only if the token is valid.
-   */
-  public ldapLogin(username: string, password: string): Observable<JWTToken> {
-    return this.login(username, password, "/api/v1/login/ldap");
-  }
-
-  /**
-   * Use the local authentication method of the server to login via user name and password
-   * @param username The username of a user
-   * @param password The password of a user
-   * @return Successful observable JWTToken, only if the token is valid.
-   */
-  public localLogin(username: string, password: string): Observable<JWTToken> {
-    return this.login(username, password, "/api/v1/login/local");
-  }
-
-  /**
-   * Use the unified local and ldap authentication method of the server to login via username and password
-   * @param username The username of a user
-   * @param password The password of a user
-   * @return Successful observable JWTToken, only if the token is valid.
-   */
-  public unifiedLogin(
-    username: string,
-    password: string
-  ): Observable<JWTToken> {
-    return this.login(username, password, "/api/v1/login/unified");
-  }
-
-  /**
    * Renews token taken from the http response.
    * @param response The http response.
    */
@@ -203,35 +161,6 @@ export class AuthService {
     if (token && !this.jwtHelper.isTokenExpired(token)) {
       this.storeToken(token);
     }
-  }
-
-  private login(
-    username: string,
-    password: string,
-    uri: string
-  ): Observable<JWTToken> {
-    return this.http
-      .post<any>(
-        uri,
-        { username: username, password: password },
-        { observe: "response" }
-      )
-      .pipe(
-        map((res) => {
-          const token = this.extractTokenFromHeader(res);
-          this.storeToken(token);
-          return token;
-        }),
-        mergeMap((token) => {
-          const decodedToken = this.decodeToken();
-          if (!decodedToken) {
-            return throwError("Decoding the token failed");
-          } else if (this.jwtHelper.isTokenExpired(token)) {
-            return throwError("Token expired");
-          }
-          return of(decodedToken);
-        })
-      );
   }
 
   private decodeToken(): JWTToken | null {
@@ -253,20 +182,5 @@ export class AuthService {
   public storeToken(token: string): void {
     localStorage.setItem(TOKEN_ID, token);
     this.tokenReceivedSubject.next(true);
-  }
-
-  public requestNewToken(): Observable<void> {
-    return this.http.get("/api/v1/login/token", {}).pipe(map(() => null));
-  }
-
-  public startTokenAutoRefresh() {
-    setInterval(() => {
-      if (this.isAuthenticated()) {
-        const token = this.getToken();
-        if (Math.floor(new Date().getTime() / 1000) + 90 >= token.exp) {
-          this.requestNewToken().subscribe(() => {});
-        }
-      }
-    }, 60000);
   }
 }
