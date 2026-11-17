@@ -58,7 +58,6 @@ services:
       - MYSQL_URI=jdbc:mysql://mysql1:3306
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
-      - JWT_SECRET=8Dsupersecurekeydf0
       - CLASSROOM_URL=http://digital-classroom:8085
       - CLASSROOM_SECRET=8Dsupersecurekeydf0
       - CLASSROOM_TLS_INSECURE=true
@@ -345,7 +344,6 @@ services:
       identity-service:
         condition: service_healthy
     environment:
-      - JWT_SECRET=8Dsupersecurekeydf0
       - OIDC_ISSUER=http://localhost:8080
       - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
       - SERVER_SESSION_SECRET=sessiosecret
@@ -392,7 +390,6 @@ services:
     networks:
       - fbs
     environment:
-      - JWT_SECRET=8Dsupersecurekeydf0
       - OIDC_ISSUER=http://localhost:8080
       - OIDC_JWK_SET_URI=http://identity-service:8080/oauth2/jwks
       - MONGODB_URL=mongodb://mongodb_qcm:27017/

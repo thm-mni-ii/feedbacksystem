@@ -11,6 +11,7 @@ dist/
 node_modules/
 zk-single-kafka-single/
 secrets/*.p12
+conf/fbs-core.api/jwt-secret
 
 submissioncheck.iml
 .classpath

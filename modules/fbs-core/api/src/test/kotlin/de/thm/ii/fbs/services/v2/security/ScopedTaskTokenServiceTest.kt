@@ -8,7 +8,10 @@ import org.junit.Test
 
 class ScopedTaskTokenServiceTest {
     private val service = ScopedTaskTokenService(
-        jwtSecret = "verysecretjwtkeyforunitandintegrationtesting12345",
+        jwtSecretProvider = JwtSecretProvider(
+            configuredSecret = "verysecretjwtkeyforunitandintegrationtesting12345",
+            secretFile = "unused"
+        ),
         issuer = "https://feedback.thm.de/course-management"
     )
 

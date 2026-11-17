@@ -9,8 +9,6 @@ info:
     name: CC BY-NC-SA 4.0
     url: https://creativecommons.org/licenses/by-nc-sa/4.0/
 tags:
-  - name: Login
-    description: Login api
   - name: User
     description: The user api
   - name: Course
@@ -47,66 +45,6 @@ security:
   - JWT: [ ]
 
 paths:
-  /login/ldap:
-    post:
-      security: [ ]
-      operationId: ldapLogin
-      tags:
-        - Login
-      summary: Login into system via username and password
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        "200":
-          description: OK
-          headers:
-            Authorization:
-              description: Bearer
-              schema:
-                type: string
-        "401":
-          description: Unauthorized
-  /login/local:
-    post:
-      security: [ ]
-      operationId: localLogin
-      tags:
-        - Login
-      summary: Login into system via username and password
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        "200":
-          description: OK
-          headers:
-            Authorization:
-              description: Bearer
-              schema:
-                type: string
-        "401":
-          description: Unauthorized
   /users:
     get:
       operationId: getUsers

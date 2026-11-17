@@ -182,11 +182,7 @@ export class AuthInterceptor implements HttpInterceptor {
           }
         },
         (error) => {
-          if (
-            error instanceof HttpErrorResponse &&
-            error.status === 401 &&
-            !req.url.includes("/api/v1/login")
-          ) {
+          if (error instanceof HttpErrorResponse && error.status === 401) {
             const embeddingService = this.injector.get(EmbeddingService, null);
             if (embeddingService && embeddingService.isEmbedded) {
               embeddingService.requestAuthToken();

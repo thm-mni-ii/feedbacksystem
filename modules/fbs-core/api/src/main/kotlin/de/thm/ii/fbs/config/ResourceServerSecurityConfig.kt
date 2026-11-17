@@ -54,7 +54,6 @@ open class ResourceServerSecurityConfig(
                         "/actuator/health/**",
                         "/health",
                         "/api/v1/legal/**",
-                        "/api/v1/login/**",
                         "/results/**",
                         "/api/v1/results/**",
                         "/api/v1/storage/**"
