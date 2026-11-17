@@ -35,24 +35,6 @@ button {
   width: 100%;
 }
 
-.divider-block {
-  display: flex;
-  justify-content: center;
-  .divider {
-    margin-top: 15px;
-  }
-  div {
-    width: 30px;
-    height: 30px;
-    background-color: $cPrimary;
-    color: #fff;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 30px;
-    z-index: 1;
-  }
-}
-
 .login-inputs {
   display: flex;
   flex-direction: column;
@@ -71,9 +53,6 @@ button {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  .cas {
-    background-color: green;
-  }
 }
 .login_title {
   justify-content: center;
@@ -112,16 +91,6 @@ button {
       font-size: 16px;
     }
   }
-}
-
-#cas-login {
-  align-self: center;
-  color: blue;
-  text-decoration: underline;
-}
-
-#cas-login:hover {
-  cursor: pointer;
 }
 
 .github-link {
