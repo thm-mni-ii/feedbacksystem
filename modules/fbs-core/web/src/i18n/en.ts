@@ -1,8 +1,5 @@
 export const englishTranslation = {
   "login.login": "Login",
-  "login.localLogin": "Local Login",
-  "login.username": "Username",
-  "login.password": "Password",
   "login.discoverMore": "Discover more!",
   "role.docent": "Lecturer",
   "role.tutor": "Tutor",

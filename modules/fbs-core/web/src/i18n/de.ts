@@ -1,8 +1,5 @@
 export const germanTranslation = {
   "login.login": "Anmelden",
-  "login.localLogin": "Lokale Anmeldung",
-  "login.username": "Nutzername",
-  "login.password": "Passwort",
   "login.discoverMore": "Entdecke mehr!",
   "role.docent": "Dozent/in",
   "role.tutor": "Tutor/in",

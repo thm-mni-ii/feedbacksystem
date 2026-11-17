@@ -2,8 +2,8 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { OAuthService } from "angular-oauth2-oidc";
-import { BehaviorSubject, Observable, of, throwError } from "rxjs";
-import { catchError, map, mergeMap, tap } from "rxjs/operators";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { catchError, tap } from "rxjs/operators";
 import { JWTToken } from "../model/JWTToken";
 import { authCodeFlowConfig } from "../auth.config";
 
@@ -212,30 +212,6 @@ export class AuthService {
   }
 
   /**
-   * Use the ldap authentication method of the server to login via user name and password
-   */
-  public ldapLogin(username: string, password: string): Observable<JWTToken> {
-    return this.loginLegacy(username, password, "/api/v1/login/ldap");
-  }
-
-  /**
-   * Use the local authentication method of the server to login via user name and password
-   */
-  public localLogin(username: string, password: string): Observable<JWTToken> {
-    return this.loginLegacy(username, password, "/api/v1/login/local");
-  }
-
-  /**
-   * Use the unified local and ldap authentication method of the server to login via username and password
-   */
-  public unifiedLogin(
-    username: string,
-    password: string
-  ): Observable<JWTToken> {
-    return this.loginLegacy(username, password, "/api/v1/login/unified");
-  }
-
-  /**
    * Renews token taken from the http response.
    * @param response The http response.
    */
@@ -249,39 +225,6 @@ export class AuthService {
     if (token && !this.isTokenExpired(token)) {
       this.storeToken(token, false);
     }
-  }
-
-  private loginLegacy(
-    username: string,
-    password: string,
-    uri: string
-  ): Observable<JWTToken> {
-    return this.http
-      .post<any>(
-        uri,
-        { username: username, password: password },
-        { observe: "response" }
-      )
-      .pipe(
-        map((res) => {
-          const syncedServerTime = this.syncServerTime(res);
-          const token = this.extractTokenFromHeader(res);
-          if (token && !syncedServerTime) {
-            this.syncServerTimeFromToken(token);
-          }
-          return token;
-        }),
-        mergeMap((token) => {
-          const decodedToken = this.jwtHelper.decodeToken(token);
-          if (!decodedToken) {
-            return throwError("Decoding the token failed");
-          } else if (this.isTokenExpired(token)) {
-            return throwError("Token expired");
-          }
-          this.storeToken(token, false);
-          return of(this.getToken());
-        })
-      );
   }
 
   private extractTokenFromHeader(response: HttpResponse<any>): string {
@@ -301,10 +244,6 @@ export class AuthService {
     if (syncFromToken) {
       this.syncServerTimeFromToken(token);
     }
-  }
-
-  public requestNewToken(): Observable<void> {
-    return this.http.get("/api/v1/login/token", {}).pipe(map(() => null));
   }
 
   public startTokenAutoRefresh() {

@@ -7,7 +7,6 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
 import { CookieService } from "ngx-cookie-service";
 import { GoToService } from "../../service/goto.service";
@@ -24,14 +23,10 @@ import { EmbeddingService } from "../../service/embedding.service";
   standalone: false,
 })
 export class LoginComponent implements OnInit {
-  username: string;
-  password: string;
-
   constructor(
     private router: Router,
     private auth: AuthService,
     @Inject(DOCUMENT) private document: Document,
-    private snackbar: MatSnackBar,
     private cookieService: CookieService,
     private goToService: GoToService,
     private embeddingService: EmbeddingService
@@ -70,24 +65,6 @@ export class LoginComponent implements OnInit {
     ) {
       this.auth.login();
     }
-  }
-
-  /**
-   * Login user locally into the system
-   */
-  localLogin() {
-    this.auth.unifiedLogin(this.username, this.password).subscribe(
-      () => {
-        this.navigateAfterAuthentication();
-      },
-      () => {
-        this.snackbar.open(
-          "Prüfen Sie Ihren Benutzernamen und Ihr Passwort.",
-          "OK",
-          { duration: 3000 }
-        );
-      }
-    );
   }
 
   /**
