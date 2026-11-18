@@ -4,6 +4,7 @@
     "paths": {
       "src/*": ["./src/*"]
     },
+    "esModuleInterop": true,
     "strict": false,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
