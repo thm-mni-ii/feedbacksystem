@@ -12,13 +12,12 @@
   overflow: hidden;
   display: grid;
   align-items: center;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr auto 1fr;
   grid-template-rows: 40px;
-  margin-top: 5px;
-  height: 40px;
 
   mat-paginator {
     background: transparent;
+    --mat-paginator-container-size: 40px;
   }
 
   button {
@@ -54,8 +53,7 @@
   overflow-x: auto;
 
   table {
-    width: 90%;
-    margin: 10px;
+    margin: 0;
   }
 }
 

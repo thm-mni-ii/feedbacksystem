@@ -27,9 +27,13 @@ onMounted(async () => {
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
   height: 100%;
   font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+/* scroll only when needed (Vuetify's default "scroll" always shows a scrollbar) */
+html {
+  overflow-y: auto;
 }
 
 #app {
