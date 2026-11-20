@@ -53,7 +53,7 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "allowedCommonJsDependencies": ["chart.js", "file-saver"],
+            "allowedCommonJsDependencies": ["chart.js", "file-saver", "mammoth", "prismjs"],
             "browser": "src/main.ts",
             "stylePreprocessorOptions": {
               "includePaths": ["."]
