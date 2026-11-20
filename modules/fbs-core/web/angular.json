@@ -81,7 +81,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "buildTarget": "web-gui:build"
+            "buildTarget": "web-gui:build",
+            "servePath": "/course-management/"
           },
           "configurations": {
             "production": {
