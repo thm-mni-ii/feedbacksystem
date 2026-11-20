@@ -18,7 +18,7 @@ FROM caddy:2-alpine
 RUN rm -rf /usr/share/caddy/*
 
 # Copy Angular build output
-COPY --from=builder /app/dist/web /usr/share/caddy
+COPY --from=builder /app/dist/web/browser /usr/share/caddy
 
 # Copy custom Caddyfile (SPA routing + API proxy)
 COPY Caddyfile /etc/caddy/Caddyfile
